@@ -6,7 +6,7 @@
     Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
 
     Aiding App™ is licensed under the Elastic License 2.0. For more details,
-    see <http
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -29,7 +29,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    <http
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
@@ -38,7 +38,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceMan
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -163,10 +162,12 @@ test('Only service request types managed by user team are available in type sele
         ->mountTableAction('create')
         ->assertFormFieldExists('type_id', 'mountedTableActionForm', function (Select $select) use ($managedType) {
             $options = $select->getOptions();
+
             return array_key_exists($managedType->getKey(), $options);
         })
         ->assertFormFieldExists('type_id', 'mountedTableActionForm', function (Select $select) use ($unmanagedType) {
             $options = $select->getOptions();
+
             return ! array_key_exists($unmanagedType->getKey(), $options);
         })
         ->assertSuccessful();
@@ -191,6 +192,7 @@ test('Super admin can see all service request types', function () {
         ->mountTableAction('create')
         ->assertFormFieldExists('type_id', 'mountedTableActionForm', function (Select $select) use ($type1, $type2) {
             $options = $select->getOptions();
+
             return array_key_exists($type1->getKey(), $options) && array_key_exists($type2->getKey(), $options);
         })
         ->assertSuccessful();
