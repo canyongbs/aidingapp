@@ -46,13 +46,13 @@ class UserChat extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-oval-left-ellipsis';
 
-    protected static ?string $navigationLabel = 'Chat';
+    protected static ?string $navigationLabel = 'Live Chat';
 
-    protected static ?string $title = 'Chat';
+    protected static ?string $title = 'Live Chat';
 
-    protected static ?string $slug = 'chat';
+    protected static ?string $slug = 'live-chat';
 
-    protected static ?string $navigationGroup = 'Staff Engagement';
+    protected static ?string $navigationGroup = 'Engagement';
 
     protected static ?int $navigationSort = 10;
 
