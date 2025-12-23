@@ -161,7 +161,7 @@ class ServiceRequestsRelationManager extends RelationManager
                     ->schema(fn (Get $get): array => $this->getDynamicFields($get('type_id')))
                     ->statePath('dynamic_fields')
                     ->key('dynamicTypeFields')
-                    ->visible(fn (Get $get): bool => filled($get('type_id')) && ! empty($this->getDynamicFields($get('type_id')))),
+                    ->visible(fn (Get $get, ?Model $record): bool => ! $record && filled($get('type_id')) && ! empty($this->getDynamicFields($get('type_id')))),
             ]);
     }
 
