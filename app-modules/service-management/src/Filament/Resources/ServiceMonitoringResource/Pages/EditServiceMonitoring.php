@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Concerns\EditPageRedirection;
+use App\Features\ServiceMonitoringNotificationFeature;
 use App\Rules\ValidUrl;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -48,6 +49,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Str;
@@ -82,7 +84,7 @@ class EditServiceMonitoring extends EditRecord
                     ->options(ServiceMonitoringFrequency::class)
                     ->enum(ServiceMonitoringFrequency::class)
                     ->required(),
-                Section::make('Notification Group')
+                Section::make('Notification Settings')
                     ->schema([
                         Select::make('team')
                             ->relationship('teams', 'name')
@@ -96,6 +98,14 @@ class EditServiceMonitoring extends EditRecord
                             ->multiple()
                             ->preload()
                             ->searchable(),
+                        Toggle::make('is_notified_via_database')
+                            ->label('In Product notifications')
+                            ->visible(fn (): bool => ServiceMonitoringNotificationFeature::active())
+                            ->default(false),
+                        Toggle::make('is_notified_via_email')
+                            ->label('Email Notifications')
+                            ->visible(fn (): bool => ServiceMonitoringNotificationFeature::active())
+                            ->default(false),
                     ])
                     ->columns(2),
             ]);

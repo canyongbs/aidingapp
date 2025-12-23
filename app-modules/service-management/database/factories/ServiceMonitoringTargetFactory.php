@@ -57,6 +57,8 @@ class ServiceMonitoringTargetFactory extends Factory
             'description' => $this->faker->paragraph(),
             'domain' => $this->faker->url(),
             'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
+            'is_notified_via_database' => $this->faker->boolean(),
+            'is_notified_via_email' => $this->faker->boolean(),
         ];
     }
 }
