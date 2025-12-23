@@ -153,8 +153,7 @@ it('sends notifications based on configured channels', function (
         Notification::assertSentTo(
             $user,
             ServiceMonitoringNotification::class,
-            fn (ServiceMonitoringNotification $notification) =>
-                $notification->channel === $expectedChannel
+            fn (ServiceMonitoringNotification $notification) => $notification->channel === $expectedChannel
         );
     }
 
@@ -164,25 +163,25 @@ it('sends notifications based on configured channels', function (
         'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
     ]);
 })
-->with([
-    'both channels' => [
-        true,
-        true,
-        'both',
-    ],
-    'database only' => [
-        false,
-        true,
-        DatabaseChannel::class,
-    ],
-    'email only' => [
-        true,
-        false,
-        MailChannel::class,
-    ],
-    'no channels' => [
-        false,
-        false,
-        null,
-    ],
-]);
+    ->with([
+        'both channels' => [
+            true,
+            true,
+            'both',
+        ],
+        'database only' => [
+            false,
+            true,
+            DatabaseChannel::class,
+        ],
+        'email only' => [
+            true,
+            false,
+            MailChannel::class,
+        ],
+        'no channels' => [
+            false,
+            false,
+            null,
+        ],
+    ]);
