@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusRes
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ServiceRequestStatusOrderingFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Notifications\Notification;
@@ -59,7 +60,9 @@ class ListServiceRequestStatuses extends ListRecords
 
     public function table(Table $table): Table
     {
-        return $table
+        // TODO ServiceRequestStatusOrderingFeature: When we are removing the ServiceRequestStatusOrderingFeature feature flag, remove the conditional logic
+        // and chain ->defaultSort('sort')->reorderable('sort', ...) directly to the columns() method
+        $table = $table
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('name')
@@ -80,7 +83,20 @@ class ListServiceRequestStatuses extends ListRecords
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-            ])
+            ]);
+
+        if (ServiceRequestStatusOrderingFeature::active()) {
+            $table = $table
+                ->defaultSort('sort')
+                ->reorderable('sort', function () {
+                    $trashedFilterValue = $this->getTableFilterState('trashed');
+                    $filterValue = $trashedFilterValue['value'] ?? null;
+
+                    return is_null($filterValue);
+                });
+        }
+
+        return $table
             ->actions([
                 ViewAction::make(),
                 EditAction::make(),

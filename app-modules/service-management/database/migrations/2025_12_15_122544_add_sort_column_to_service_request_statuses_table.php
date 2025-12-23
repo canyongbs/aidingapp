@@ -34,36 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use CanyonGBS\Common\Enums\Color;
-use Worksome\RequestFactories\RequestFactory;
-
-class EditServiceRequestStatusRequestFactory extends RequestFactory
-{
-    private int $maxOrder;
-
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'classification' => fake()->randomElement(SystemServiceRequestClassification::cases()),
-            'name' => fake()->name(),
-            'color' => fake()->randomElement(Color::cases()),
-            'sort' => $this->getNewOrder(),
-        ];
+        Schema::table('service_request_statuses', function (Blueprint $table) {
+            $table->integer('sort')->default(0);
+            $table->index('sort');
+        });
     }
 
-    public function getNewOrder(): int
+    public function down(): void
     {
-        return $this->maxOrder = $this->getMaxOrder() + 1;
+        Schema::table('service_request_statuses', function (Blueprint $table) {
+            $table->dropIndex(['sort']);
+            $table->dropColumn('sort');
+        });
     }
-
-    public function getMaxOrder(): int
-    {
-        $maxOrder = ServiceRequestStatus::max('sort');
-
-        return $this->maxOrder ??= is_numeric($maxOrder) ? (int) $maxOrder : 0;
-    }
-}
+};

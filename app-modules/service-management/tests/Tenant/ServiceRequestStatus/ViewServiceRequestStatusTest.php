@@ -61,6 +61,8 @@ test('The correct details are displayed on the ViewServiceRequestStatus page', f
                 $serviceRequestStatus->name,
                 'Color',
                 $serviceRequestStatus->color->getLabel(),
+                'Sort Order',
+                $serviceRequestStatus->sort,
             ]
         );
 });

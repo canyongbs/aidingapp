@@ -39,9 +39,11 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestStatusFactory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Observers\ServiceRequestStatusObserver;
 use App\Models\BaseModel;
 use CanyonGBS\Common\Enums\Color;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -50,6 +52,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 /**
  * @mixin IdeHelperServiceRequestStatus
  */
+#[ObservedBy([ServiceRequestStatusObserver::class])]
 class ServiceRequestStatus extends BaseModel implements Auditable
 {
     use SoftDeletes;
@@ -63,6 +66,7 @@ class ServiceRequestStatus extends BaseModel implements Auditable
         'name',
         'color',
         'is_system_protected',
+        'sort',
     ];
 
     public function serviceRequests(): HasMany
@@ -79,6 +83,7 @@ class ServiceRequestStatus extends BaseModel implements Auditable
             'classification' => SystemServiceRequestClassification::class,
             'color' => Color::class,
             'is_system_protected' => 'boolean',
+            'sort' => 'integer',
         ];
     }
 

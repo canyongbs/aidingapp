@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusRes
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ServiceRequestStatusOrderingFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -74,6 +75,10 @@ class ViewServiceRequestStatus extends ViewRecord
                             ->label('Color')
                             ->badge()
                             ->color(fn (ServiceRequestStatus $serviceRequestStatus) => $serviceRequestStatus->color->value),
+                        TextEntry::make('sort')
+                            ->label('Sort Order')
+                            ->numeric()
+                            ->visible(ServiceRequestStatusOrderingFeature::active()),
                     ])
                     ->columns(),
             ]);

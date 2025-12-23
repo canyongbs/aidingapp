@@ -46,6 +46,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Concerns\EditPageRedirection;
+use App\Features\ServiceRequestStatusOrderingFeature;
 use Filament\Actions;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
@@ -89,11 +90,24 @@ class EditServiceRequest extends EditRecord
                             ->relationship('status', 'name')
                             ->label('Status')
                             ->allowHtml()
+                            // TODO ServiceRequestStatusOrderingFeature: When we are removing the ServiceRequestStatusOrderingFeature feature flag, replace with:
+                            // ->options(fn (ServiceRequest $record) => ServiceRequestStatus::withTrashed()
+                            //     ->whereKey($record->status_id)
+                            //     ->orWhereNull('deleted_at')
+                            //     ->orderBy('sort')
+                            //     ->get(['id', 'name', 'classification', 'color'])
+                            //     ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
+                            //     ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [
+                            //         $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
+                            //     ])))
                             ->options(fn (ServiceRequest $record) => ServiceRequestStatus::withTrashed()
                                 ->whereKey($record->status_id)
                                 ->orWhereNull('deleted_at')
-                                ->orderBy('classification')
-                                ->orderBy('name')
+                                ->when(
+                                    ServiceRequestStatusOrderingFeature::active(),
+                                    fn ($query) => $query->orderBy('sort'),
+                                    fn ($query) => $query->orderBy('classification')->orderBy('name')
+                                )
                                 ->get(['id', 'name', 'classification', 'color'])
                                 ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
                                 ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [

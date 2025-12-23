@@ -34,36 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use CanyonGBS\Common\Enums\Color;
-use Worksome\RequestFactories\RequestFactory;
-
-class EditServiceRequestStatusRequestFactory extends RequestFactory
-{
-    private int $maxOrder;
-
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'classification' => fake()->randomElement(SystemServiceRequestClassification::cases()),
-            'name' => fake()->name(),
-            'color' => fake()->randomElement(Color::cases()),
-            'sort' => $this->getNewOrder(),
-        ];
+        DB::transaction(function () {
+            DB::statement('
+                UPDATE service_request_statuses 
+                SET sort = subquery.row_num,
+                    updated_at = NOW()
+                FROM (
+                    SELECT id, ROW_NUMBER() OVER (ORDER BY created_at, id) as row_num
+                    FROM service_request_statuses
+                ) as subquery
+                WHERE service_request_statuses.id = subquery.id
+            ');
+        });
     }
 
-    public function getNewOrder(): int
+    public function down(): void
     {
-        return $this->maxOrder = $this->getMaxOrder() + 1;
+        DB::table('service_request_statuses')
+            ->update(['sort' => 0]);
     }
-
-    public function getMaxOrder(): int
-    {
-        $maxOrder = ServiceRequestStatus::max('sort');
-
-        return $this->maxOrder ??= is_numeric($maxOrder) ? (int) $maxOrder : 0;
-    }
-}
+};

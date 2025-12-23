@@ -35,12 +35,14 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages\EditServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestStatusRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use CanyonGBS\Common\Enums\Color;
 use Illuminate\Validation\Rules\Enum;
 
 use function Pest\Laravel\actingAs;
@@ -96,7 +98,7 @@ test('EditServiceRequestStatus requires valid data', function ($data, $errors) {
         ->call('save')
         ->assertHasFormErrors($errors);
 
-    assertDatabaseHas(ServiceRequestStatus::class, $serviceRequestStatus->toArray());
+    assertDatabaseHas(ServiceRequestStatus::class, $serviceRequestStatus->fresh()->toArray());
 })->with(
     [
         'name missing' => [EditServiceRequestStatusRequestFactory::new()->state(['name' => null]), ['name' => 'required']],
@@ -196,42 +198,60 @@ test('EditServiceRequestStatus is gated with proper feature access control', fun
     assertEquals($request['name'], $serviceRequestStatus->fresh()->name);
 });
 
-test('EditServiceRequestStatus is gated with proper system protection access control', function () {
+test('EditServiceRequestStatus allows modifying sort on system protected rows but blocks other columns', function (array $data, bool $shouldSucceed) {
     /** @var ServiceRequestStatus $serviceRequestStatus */
     $serviceRequestStatus = ServiceRequestStatus::factory()
         ->systemProtected()
-        ->create();
+        ->state([
+            'classification' => SystemServiceRequestClassification::Open,
+            'color' => Color::Blue,
+        ])
+        ->create()
+        ->refresh();
 
-    asSuperAdmin()
-        ->get(
-            ServiceRequestStatusResource::getUrl('edit', [
-                'record' => $serviceRequestStatus,
-            ])
-        )->assertForbidden();
+    asSuperAdmin();
 
-    livewire(EditServiceRequestStatus::class, [
-        'record' => $serviceRequestStatus->getRouteKey(),
-    ])
-        ->assertForbidden();
+    if ($shouldSucceed) {
+        $originalValues = $serviceRequestStatus->only(['name', 'classification', 'color']);
 
+        $serviceRequestStatus->update($data);
+
+        $serviceRequestStatus->refresh();
+
+        // Verify sort was updated if provided
+        if (isset($data['sort'])) {
+            assertEquals($data['sort'], $serviceRequestStatus->sort);
+        }
+
+        // Verify protected columns were not modified
+        assertEquals($originalValues['name'], $serviceRequestStatus->name);
+        assertEquals($originalValues['classification'], $serviceRequestStatus->classification);
+        assertEquals($originalValues['color'], $serviceRequestStatus->color);
+    } else {
+        expect(fn () => $serviceRequestStatus->update($data))
+            ->toThrow(Exception::class, 'Cannot modify system protected row columns');
+    }
+})->with([
+    'modify sort only' => [['sort' => 5], true],
+    'modify name' => [['name' => 'New Name'], false],
+    'modify color' => [['color' => Color::Red], false],
+    'modify classification' => [['classification' => SystemServiceRequestClassification::InProgress], false],
+    'modify sort and name' => [['sort' => 5, 'name' => 'New Name'], false],
+]);
+
+test('EditServiceRequestStatus allows modifying all columns on non-system protected rows', function () {
     $serviceRequestStatus = ServiceRequestStatus::factory()
         ->create();
 
-    asSuperAdmin()
-        ->get(
-            ServiceRequestStatusResource::getUrl('edit', [
-                'record' => $serviceRequestStatus,
-            ])
-        )->assertSuccessful();
+    asSuperAdmin();
 
     $request = collect(EditServiceRequestStatusRequestFactory::new()->create());
 
-    livewire(EditServiceRequestStatus::class, [
-        'record' => $serviceRequestStatus->getRouteKey(),
-    ])
-        ->fillForm($request->toArray())
-        ->call('save')
-        ->assertHasNoFormErrors();
+    $serviceRequestStatus->update($request->toArray());
 
-    assertEquals($request['name'], $serviceRequestStatus->fresh()->name);
+    $serviceRequestStatus->refresh();
+
+    assertEquals($request['name'], $serviceRequestStatus->name);
+    assertEquals($request['classification'], $serviceRequestStatus->classification);
+    assertEquals($request['color'], $serviceRequestStatus->color);
 });
