@@ -62,8 +62,8 @@ class ConfidentialTaskScope implements Scope
                         })
                         ->orWhereHas('project', function (Builder $query) {
                             $query->whereHas('managerUsers', function (Builder $query) {
-                                    $query->where('user_id', auth()->id());
-                                })
+                                $query->where('user_id', auth()->id());
+                            })
                                 ->orWhereHas('managerTeams', function (Builder $query) {
                                     $query->whereHas('users', function (Builder $query) {
                                         $query->where('users.id', auth()->id());
