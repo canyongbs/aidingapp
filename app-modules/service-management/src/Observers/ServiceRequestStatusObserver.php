@@ -51,27 +51,4 @@ class ServiceRequestStatusObserver
             );
         }
     }
-
-    public function deleted(ServiceRequestStatus $serviceRequestStatus): void
-    {
-        if (ServiceRequestStatusOrderingFeature::active()) {
-            $this->reorderAllItems();
-        }
-    }
-
-    protected function reorderAllItems(): void
-    {
-        DB::transaction(function () {
-            $statuses = ServiceRequestStatus::orderBy('sort')->pluck('id')->toArray();
-
-            if (! empty($statuses)) {
-                $caseStatements = collect($statuses)
-                    ->map(fn (string $id, int $index) => "WHEN id = '{$id}' THEN " . ($index + 1))
-                    ->join(' ');
-
-                ServiceRequestStatus::whereIn('id', $statuses)
-                    ->update(['sort' => DB::raw("(CASE {$caseStatements} END)")]);
-            }
-        });
-    }
 }
