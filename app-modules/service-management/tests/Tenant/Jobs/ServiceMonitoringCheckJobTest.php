@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringCheckJob;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
@@ -124,3 +126,63 @@ it('handles unresolvable host errors gracefully', function ($frequency) {
             fn () => ServiceMonitoringFrequency::TwentyFourHours,
         ]
     );
+
+it('sends notifications based on configured channels', function (
+    bool $emailEnabled,
+    bool $databaseEnabled,
+    ?string $expectedChannel
+) {
+    Http::fake(fn () => Http::response('Test', 500));
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached($user)
+        ->create([
+            'frequency' => ServiceMonitoringFrequency::OneHour,
+            'is_notified_via_email' => $emailEnabled,
+            'is_notified_via_database' => $databaseEnabled,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    if ($expectedChannel === null) {
+        Notification::assertNothingSent();
+    } else {
+        Notification::assertSentTo(
+            $user,
+            ServiceMonitoringNotification::class,
+            fn (ServiceMonitoringNotification $notification) =>
+                $notification->channel === $expectedChannel
+        );
+    }
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 500,
+        'succeeded' => false,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+    ]);
+})
+->with([
+    'both channels' => [
+        true,
+        true,
+        'both',
+    ],
+    'database only' => [
+        false,
+        true,
+        DatabaseChannel::class,
+    ],
+    'email only' => [
+        true,
+        false,
+        MailChannel::class,
+    ],
+    'no channels' => [
+        false,
+        false,
+        null,
+    ],
+]);
