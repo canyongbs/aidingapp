@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\Project\Models\Project;
 use AidingApp\Task\Models\Scopes\ConfidentialTaskScope;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
@@ -168,4 +169,144 @@ test('super admin users can access all confidential tasks', function () {
     expect($tasks->pluck('id'))
         ->toContain(...$publicTasks->pluck('id'))
         ->toContain(...$privateTasks->pluck('id'));
+});
+
+test('users can access confidential tasks if they are a project manager user', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+    $project->managerUsers()->attach($user);
+
+    $accessibleConfidentialTasks = Task::factory()
+        ->hasAttached($project, [], 'confidentialAccessProjects')
+        ->count(10)
+        ->create([
+            'is_confidential' => true,
+        ]);
+
+    $privateTasks = Task::factory()->count(10)->create([
+        'is_confidential' => true,
+    ]);
+
+    $publicTasks = Task::factory()->count(10)->create([
+        'is_confidential' => false,
+    ]);
+
+    $tasks = Task::query()->get();
+
+    expect($tasks)->toHaveCount(20);
+
+    expect($tasks->pluck('id'))
+        ->toContain(...$publicTasks->pluck('id'))
+        ->toContain(...$accessibleConfidentialTasks->pluck('id'));
+
+    expect($tasks->pluck('id'))->not->toContain(...$privateTasks->pluck('id'));
+});
+
+test('users can access confidential tasks if their team is a project manager team', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $team = Team::factory()->create();
+    $user->team()->associate($team)->save();
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+    $project->managerTeams()->attach($team);
+
+    $accessibleConfidentialTasks = Task::factory()
+        ->hasAttached($project, [], 'confidentialAccessProjects')
+        ->count(10)
+        ->create([
+            'is_confidential' => true,
+        ]);
+
+    $privateTasks = Task::factory()->count(10)->create([
+        'is_confidential' => true,
+    ]);
+
+    $publicTasks = Task::factory()->count(10)->create([
+        'is_confidential' => false,
+    ]);
+
+    $tasks = Task::query()->get();
+
+    expect($tasks)->toHaveCount(20);
+
+    expect($tasks->pluck('id'))
+        ->toContain(...$publicTasks->pluck('id'))
+        ->toContain(...$accessibleConfidentialTasks->pluck('id'));
+
+    expect($tasks->pluck('id'))->not->toContain(...$privateTasks->pluck('id'));
+});
+
+test('users can access confidential tasks if they are a project auditor user', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+    $project->auditorUsers()->attach($user);
+
+    $accessibleConfidentialTasks = Task::factory()
+        ->hasAttached($project, [], 'confidentialAccessProjects')
+        ->count(10)
+        ->create([
+            'is_confidential' => true,
+        ]);
+
+    $privateTasks = Task::factory()->count(10)->create([
+        'is_confidential' => true,
+    ]);
+
+    $publicTasks = Task::factory()->count(10)->create([
+        'is_confidential' => false,
+    ]);
+
+    $tasks = Task::query()->get();
+
+    expect($tasks)->toHaveCount(20);
+
+    expect($tasks->pluck('id'))
+        ->toContain(...$publicTasks->pluck('id'))
+        ->toContain(...$accessibleConfidentialTasks->pluck('id'));
+
+    expect($tasks->pluck('id'))->not->toContain(...$privateTasks->pluck('id'));
+});
+
+test('users can access confidential tasks if their team is a project auditor team', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $team = Team::factory()->create();
+    $user->team()->associate($team)->save();
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+    $project->auditorTeams()->attach($team);
+
+    $accessibleConfidentialTasks = Task::factory()
+        ->hasAttached($project, [], 'confidentialAccessProjects')
+        ->count(10)
+        ->create([
+            'is_confidential' => true,
+        ]);
+
+    $privateTasks = Task::factory()->count(10)->create([
+        'is_confidential' => true,
+    ]);
+
+    $publicTasks = Task::factory()->count(10)->create([
+        'is_confidential' => false,
+    ]);
+
+    $tasks = Task::query()->get();
+
+    expect($tasks)->toHaveCount(20);
+
+    expect($tasks->pluck('id'))
+        ->toContain(...$publicTasks->pluck('id'))
+        ->toContain(...$accessibleConfidentialTasks->pluck('id'));
+
+    expect($tasks->pluck('id'))->not->toContain(...$privateTasks->pluck('id'));
 });
