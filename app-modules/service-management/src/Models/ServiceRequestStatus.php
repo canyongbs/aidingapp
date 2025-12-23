@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Observers\ServiceRequestStatusObserver;
 use App\Models\BaseModel;
 use CanyonGBS\Common\Enums\Color;
 use DateTimeInterface;
-use Exception;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;

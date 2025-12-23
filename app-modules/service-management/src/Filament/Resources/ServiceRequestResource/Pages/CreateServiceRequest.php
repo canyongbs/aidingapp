@@ -99,10 +99,10 @@ class CreateServiceRequest extends CreateRecord
                     //         $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
                     //     ])))
                     ->options(fn () => ServiceRequestStatus::when(
-                            ServiceRequestStatusOrderingFeature::active(),
-                            fn ($query) => $query->orderBy('sort'),
-                            fn ($query) => $query->orderBy('classification')->orderBy('name')
-                        )
+                        ServiceRequestStatusOrderingFeature::active(),
+                        fn ($query) => $query->orderBy('sort'),
+                        fn ($query) => $query->orderBy('classification')->orderBy('name')
+                    )
                         ->get(['id', 'name', 'classification', 'color'])
                         ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
                         ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [

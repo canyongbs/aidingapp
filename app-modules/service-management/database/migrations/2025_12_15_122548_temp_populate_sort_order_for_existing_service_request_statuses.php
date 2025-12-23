@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,16 +34,14 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-return new class() extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
-            DB::statement("
+            DB::statement('
                 UPDATE service_request_statuses 
                 SET sort = subquery.row_num,
                     updated_at = NOW()
@@ -52,7 +50,7 @@ return new class() extends Migration
                     FROM service_request_statuses
                 ) as subquery
                 WHERE service_request_statuses.id = subquery.id
-            ");
+            ');
         });
     }
 
