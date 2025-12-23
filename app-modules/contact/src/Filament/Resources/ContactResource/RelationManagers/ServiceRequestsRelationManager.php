@@ -36,11 +36,28 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
+use AidingApp\Division\Models\Division;
+use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
+use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
+use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ViewServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Filament\Tables\Columns\IdColumn;
+use Filament\Forms\Components\Component;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Infolists\Infolist;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Actions\CreateAction;
@@ -50,6 +67,10 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ServiceRequestsRelationManager extends RelationManager
 {
@@ -57,7 +78,91 @@ class ServiceRequestsRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return (resolve(CreateServiceRequest::class))->form($form);
+        return $form
+            ->schema([
+                Select::make('division_id')
+                    ->relationship('division', 'name')
+                    ->label('Division')
+                    ->required()
+                    ->exists((new Division())->getTable(), 'id')
+                    ->visible(fn (): bool => Division::count() > 1)
+                    ->saveRelationshipsWhenHidden()
+                    ->default(
+                        fn () => Division::count() === 1 ? (auth()->user()->team?->division?->getKey()
+                                    ?? Division::query()
+                                        ->first()
+                                        ?->getKey()) : null
+                    ),
+                Select::make('status_id')
+                    ->relationship('status', 'name')
+                    ->label('Status')
+                    ->allowHtml()
+                    ->options(fn () => ServiceRequestStatus::query()
+                        ->orderBy('classification')
+                        ->orderBy('name')
+                        ->get(['id', 'name', 'classification', 'color'])
+                        ->groupBy(fn (ServiceRequestStatus $status): string => $status->classification->getlabel())
+                        ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [
+                            $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
+                        ])))
+                    ->required()
+                    ->exists((new ServiceRequestStatus())->getTable(), 'id'),
+                Grid::make()
+                    ->schema([
+                        Select::make('type_id')
+                            ->options(ServiceRequestType::when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
+                                $query->whereHas('managers', function (Builder $query): void {
+                                    $query->where('teams.id', auth()->user()->team?->getKey());
+                                });
+                            })
+                                ->pluck('name', 'id'))
+                            ->rule(new ManagedServiceRequestType())
+                            ->afterStateUpdated(function (Set $set, Select $component) {
+                                $set('priority_id', null);
+                                $component
+                                    ->getContainer()
+                                    ->getParentComponent()
+                                    ->getContainer()
+                                    ->getComponent('dynamicTypeFields')
+                                    ?->getChildComponentContainer()
+                                    ->fill();
+                            })
+                            ->label('Type')
+                            ->required()
+                            ->live()
+                            ->exists(ServiceRequestType::class, 'id'),
+                        Select::make('priority_id')
+                            ->relationship(
+                                name: 'priority',
+                                titleAttribute: 'name',
+                                modifyQueryUsing: fn (Get $get, Builder $query) => $query->where('type_id', $get('type_id'))->orderBy('order'),
+                            )
+                            ->label('Priority')
+                            ->required()
+                            ->exists(ServiceRequestPriority::class, 'id')
+                            ->visible(fn (Get $get): bool => filled($get('type_id'))),
+                    ]),
+                TextInput::make('title')
+                    ->required()
+                    ->string()
+                    ->maxLength(255)
+                    ->columnSpanFull(),
+                Textarea::make('close_details')
+                    ->label('Description')
+                    ->nullable()
+                    ->string()
+                    ->columnSpan(1),
+                Textarea::make('res_details')
+                    ->label('Internal Details')
+                    ->nullable()
+                    ->string()
+                    ->columnSpan(1),
+                Section::make('Additional Information')
+                    ->schema(fn (Get $get): array => $this->getDynamicFields($get('type_id')))
+                    ->statePath('dynamic_fields')
+                    ->key('dynamicTypeFields')
+                    ->visible(fn (Get $get, ?Model $record): bool => ! $record && filled($get('type_id')) && ! empty($this->getDynamicFields($get('type_id')))),
+            ]);
     }
 
     public function infolist(Infolist $infolist): Infolist
@@ -114,7 +219,8 @@ class ServiceRequestsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->modalHeading('Create new service request'),
+                    ->modalHeading('Create new service request')
+                    ->using(fn (array $data): Model => $this->handleRecordCreation($data)),
             ])
             ->actions([
                 ViewAction::make(),
@@ -127,5 +233,104 @@ class ServiceRequestsRelationManager extends RelationManager
             ])
             ->bulkActions([])
             ->defaultSort('created_at', 'desc');
+    }
+
+    /**
+     * @return array<Component>
+     */
+    protected function getDynamicFields(?string $typeId): array
+    {
+        if (! $typeId) {
+            return [];
+        }
+
+        $type = ServiceRequestType::with('form.fields', 'form.steps.fields')->find($typeId);
+
+        if (! $type || ! $type->form) {
+            return [];
+        }
+
+        return app(GenerateServiceRequestFilamentFormSchema::class)($type->form);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function handleRecordCreation(array $data): Model
+    {
+        return DB::transaction(function () use ($data) {
+            $dynamicFields = $data['dynamic_fields'] ?? [];
+            $typeId = $data['type_id'];
+            unset($data['dynamic_fields']);
+            $data['respondent_id'] = $this->getOwnerRecord()->getKey();
+
+            $serviceRequestDataObject = ServiceRequestDataObject::fromData($data);
+            $serviceRequest = app(CreateServiceRequestAction::class)->execute($serviceRequestDataObject);
+
+            $this->saveDynamicFormFields($serviceRequest, $typeId, $dynamicFields);
+
+            return $serviceRequest;
+        });
+    }
+
+    /**
+     * @param  array<string, mixed>  $dynamicFields
+     */
+    protected function saveDynamicFormFields(ServiceRequest $serviceRequest, string $typeId, array $dynamicFields): void
+    {
+        if (empty($dynamicFields)) {
+            return;
+        }
+
+        $type = ServiceRequestType::with('form.fields', 'form.steps.fields')->find($typeId);
+
+        if (! $type || ! $type->form) {
+            return;
+        }
+
+        $form = $type->form;
+
+        $submission = $form->submissions()->make([
+            'submitted_at' => now(),
+        ]);
+
+        $submission->author()->associate(auth()->user());
+        $submission->priority()->associate($serviceRequest->priority);
+        $submission->save();
+
+        /** @var Collection<string, ServiceRequestFormField> $allFields */
+        $allFields = collect();
+
+        /** @var Collection<int, ServiceRequestFormField> $fields */
+        $fields = $form->fields;
+        $fields->each(function (ServiceRequestFormField $field) use (&$allFields) {
+            $allFields->put($field->id, $field);
+        });
+
+        if ($form->steps->isNotEmpty()) {
+            /** @var Collection<int, ServiceRequestFormStep> $steps */
+            $steps = $form->steps;
+            $steps->each(function (ServiceRequestFormStep $step) use (&$allFields) {
+                /** @var Collection<int, ServiceRequestFormField> $stepFields */
+                $stepFields = $step->fields;
+                $stepFields->each(function (ServiceRequestFormField $field) use (&$allFields) {
+                    $allFields->put($field->id, $field);
+                });
+            });
+        }
+
+        foreach ($dynamicFields as $fieldKey => $response) {
+            $field = $allFields->get($fieldKey);
+
+            if ($field && filled($response)) {
+                $submission->fields()->attach($field->id, [
+                    'id' => Str::orderedUuid(),
+                    'response' => $response,
+                ]);
+            }
+        }
+
+        $serviceRequest->serviceRequestFormSubmission()->associate($submission);
+        $serviceRequest->save();
     }
 }
