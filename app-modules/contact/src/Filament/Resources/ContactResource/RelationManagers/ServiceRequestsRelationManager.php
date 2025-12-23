@@ -219,7 +219,8 @@ class ServiceRequestsRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->modalHeading('Create new service request'),
+                    ->modalHeading('Create new service request')
+                    ->using(fn (array $data): Model => $this->handleRecordCreation($data)),
             ])
             ->actions([
                 ViewAction::make(),
