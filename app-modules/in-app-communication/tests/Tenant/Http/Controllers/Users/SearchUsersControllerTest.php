@@ -48,10 +48,10 @@ beforeEach(function () {
 });
 
 it('returns users matching the search query by name', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->licensed(LicenseType::cases())->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
 
-    $matchingUser = User::factory()->create(['name' => 'John Doe']);
-    $nonMatchingUser = User::factory()->create(['name' => 'Jane Smith']);
+    User::factory()->create(['name' => 'John Doe', 'email' => 'johndoe@example.com']);
+    User::factory()->create(['name' => 'Jane Smith', 'email' => 'janesmith@example.com']);
 
     actingAs($user)
         ->getJson(route('in-app-communication.users.search', ['query' => 'John']))
@@ -61,9 +61,9 @@ it('returns users matching the search query by name', function () {
 });
 
 it('searches users case insensitively by name', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->licensed(LicenseType::cases())->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
 
-    User::factory()->create(['name' => 'John Doe']);
+    User::factory()->create(['name' => 'John Doe', 'email' => 'johndoe@example.com']);
 
     actingAs($user)
         ->getJson(route('in-app-communication.users.search', ['query' => 'john']))
@@ -73,9 +73,9 @@ it('searches users case insensitively by name', function () {
 });
 
 it('searches users case insensitively by email', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->licensed(LicenseType::cases())->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
 
-    User::factory()->create(['email' => 'John.Doe@Example.com']);
+    User::factory()->create(['name' => 'Target User', 'email' => 'John.Doe@Example.com']);
 
     actingAs($user)
         ->getJson(route('in-app-communication.users.search', ['query' => 'john.doe@example']))
@@ -85,10 +85,10 @@ it('searches users case insensitively by email', function () {
 });
 
 it('returns users matching the search query by email', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->licensed(LicenseType::cases())->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
 
-    $matchingUser = User::factory()->create(['email' => 'john@example.com']);
-    $nonMatchingUser = User::factory()->create(['email' => 'jane@example.com']);
+    $matchingUser = User::factory()->create(['name' => 'Matching User', 'email' => 'john@example.com']);
+    $nonMatchingUser = User::factory()->create(['name' => 'Non Matching User', 'email' => 'jane@example.com']);
 
     actingAs($user)
         ->getJson(route('in-app-communication.users.search', ['query' => 'john@']))
@@ -98,8 +98,8 @@ it('returns users matching the search query by email', function () {
 });
 
 it('excludes the current user from search results', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create(['name' => 'Current User']);
-    $otherUser = User::factory()->create(['name' => 'Other User']);
+    $user = User::factory()->licensed(LicenseType::cases())->create(['name' => 'Current User', 'email' => 'current@example.com']);
+    $otherUser = User::factory()->create(['name' => 'Other User', 'email' => 'other@example.com']);
 
     actingAs($user)
         ->getJson(route('in-app-communication.users.search', ['query' => 'User']))
