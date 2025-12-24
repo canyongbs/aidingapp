@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 use AidingApp\Task\Models\Task;
+use App\Features\ProjectTaskConfidentialityFeature;
 use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\HasLicense;
@@ -74,8 +75,14 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                     ->schema([
                         Checkbox::make('is_confidential')
                             ->label('Confidential')
-                            ->live()
-                            ->columnSpanFull(),
+                            ->live(),
+                        Select::make('confidential_task_projects')
+                            ->relationship('confidentialAccessProjects', 'name')
+                            ->preload()
+                            ->label('Projects')
+                            ->multiple()
+                            ->exists('projects', 'id')
+                            ->visible(fn (Get $get) => ProjectTaskConfidentialityFeature::active() && $get('is_confidential')),
                         Select::make('confidential_task_users')
                             ->relationship('confidentialAccessUsers', 'name')
                             ->preload()
