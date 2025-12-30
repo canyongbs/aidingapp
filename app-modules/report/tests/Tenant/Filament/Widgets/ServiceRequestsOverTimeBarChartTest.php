@@ -129,19 +129,19 @@ it('returns correct data when no date filters are applied', function () {
     ServiceRequest::factory()->count(2)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'created_at' => now()->subMonths(2)->startOfMonth()->addDays(5),
+        'created_at' => now()->startOfMonth()->subMonths(2)->addDays(5),
     ])->create();
 
     ServiceRequest::factory()->count(3)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'created_at' => now()->subMonths(4)->startOfMonth()->addDays(10),
+        'created_at' => now()->startOfMonth()->subMonths(4)->addDays(10),
     ])->create();
 
     ServiceRequest::factory()->count(1)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'created_at' => now()->subMonths(6)->startOfMonth()->addDays(15),
+        'created_at' => now()->startOfMonth()->subMonths(6)->addDays(15),
     ])->create();
 
     ServiceRequest::factory()->count(10)->state([
@@ -164,9 +164,8 @@ it('returns correct data when no date filters are applied', function () {
     $counts = $data['datasets'][0]['data'];
 
     expect($labels)->toHaveCount(12)
-        ->and($counts)->toHaveCount(12);
-
-    expect($labels)->each->toMatch('/^[A-Z][a-z]{2} \d{4}$/');
+        ->and($counts)->toHaveCount(12)
+        ->and($labels)->each->toMatch('/^[A-Z][a-z]{2} \d{4}$/');
 
     $month2Ago = now()->subMonths(2)->format('M Y');
     $month4Ago = now()->subMonths(4)->format('M Y');
