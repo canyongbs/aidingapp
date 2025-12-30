@@ -101,7 +101,7 @@ class ServiceRequestsOverTimeBarChart extends BarChartReportWidget
             ->when(
                 $startDate && $endDate,
                 fn ($query) => $query->whereBetween('created_at', [$startDate, $endDate]),
-                fn ($query) => $query->where('created_at', '>', now()->subYear())
+                fn ($query) => $query->where('created_at', '>=', now()->subMonthsNoOverflow(11)->startOfMonth())
             )
             ->groupBy('month')
             ->orderBy('month')
@@ -115,8 +115,8 @@ class ServiceRequestsOverTimeBarChart extends BarChartReportWidget
 
         foreach ($monthRange as $monthOffset) {
             $month = ($startDate && $endDate)
-                ? $startDate->copy()->addMonths($monthOffset)
-                : Carbon::now()->subMonths($monthOffset);
+                ? $startDate->copy()->addMonthsNoOverflow($monthOffset)
+                : Carbon::now()->startOfMonth()->subMonthsNoOverflow($monthOffset);
 
             $serviceRequestTotalPerMonthArray[$month->format('M Y')] = $serviceRequestTotalPerMonthData[$month->startOfMonth()->toDateTimeString()] ?? 0;
         }
