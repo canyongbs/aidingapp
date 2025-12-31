@@ -34,36 +34,26 @@
 </COPYRIGHT>
 */
 
-use App\Features\AiResolutionFeature;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_requests', function (Blueprint $table) {
-                $table->unsignedTinyInteger('ai_resolution_confidence_score')->nullable();
-                $table->boolean('is_ai_resolution_attempted')->default(false);
-                $table->boolean('is_ai_resolution_successful')->nullable();
-            });
-
-            AiResolutionFeature::activate();
+        Schema::table('service_requests', function (Blueprint $table) {
+            $table->unsignedTinyInteger('ai_resolution_confidence_score')->nullable();
+            $table->boolean('is_ai_resolution_attempted')->default(false);
+            $table->boolean('is_ai_resolution_successful')->nullable();
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            AiResolutionFeature::deactivate();
-
-            Schema::table('service_requests', function (Blueprint $table) {
-                $table->dropColumn('ai_resolution_confidence_score');
-                $table->dropColumn('is_ai_resolution_attempted');
-                $table->dropColumn('is_ai_resolution_successful');
-            });
+        Schema::table('service_requests', function (Blueprint $table) {
+            $table->dropColumn('ai_resolution_confidence_score');
+            $table->dropColumn('is_ai_resolution_attempted');
+            $table->dropColumn('is_ai_resolution_successful');
         });
     }
 };
