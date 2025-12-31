@@ -167,9 +167,9 @@ it('returns correct data when no date filters are applied', function () {
         ->and($counts)->toHaveCount(12)
         ->and($labels)->each->toMatch('/^[A-Z][a-z]{2} \d{4}$/');
 
-    $month2Ago = now()->subMonths(2)->format('M Y');
-    $month4Ago = now()->subMonths(4)->format('M Y');
-    $month6Ago = now()->subMonths(6)->format('M Y');
+    $month2Ago = now()->subMonthsNoOverflow(2)->format('M Y');
+    $month4Ago = now()->subMonthsNoOverflow(4)->format('M Y');
+    $month6Ago = now()->subMonthsNoOverflow(6)->format('M Y');
 
     $month2Index = array_search($month2Ago, $labels);
     $month4Index = array_search($month4Ago, $labels);
