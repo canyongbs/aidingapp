@@ -37,7 +37,6 @@
 namespace AidingApp\Ai\Filament\Pages;
 
 use AidingApp\Ai\Settings\AiResolutionSettings;
-use App\Features\AiResolutionFeature;
 use App\Filament\Clusters\GlobalArtificialIntelligence;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -60,10 +59,6 @@ class ManageAiResolutionSettings extends SettingsPage
 
     public static function canAccess(): bool
     {
-        if (! AiResolutionFeature::active()) {
-            return false;
-        }
-
         /** @var User $user */
         $user = auth()->user();
 

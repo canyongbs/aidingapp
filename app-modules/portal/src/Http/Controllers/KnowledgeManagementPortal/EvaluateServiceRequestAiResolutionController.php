@@ -43,7 +43,6 @@ use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use AidingApp\Portal\Actions\GenerateAiResolutionPrompt;
 use AidingApp\Portal\DataTransferObjects\AiResolutionEvaluation;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\AiResolutionFeature;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -57,12 +56,6 @@ class EvaluateServiceRequestAiResolutionController extends Controller
         $contact = auth('contact')->user();
 
         abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
-
-        if (! AiResolutionFeature::active()) {
-            return response()->json([
-                'is_ai_resolution_available' => false,
-            ]);
-        }
 
         $settings = app(AiResolutionSettings::class);
 
