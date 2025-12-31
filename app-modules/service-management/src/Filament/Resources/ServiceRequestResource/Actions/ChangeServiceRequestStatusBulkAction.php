@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Features\ServiceRequestStatusOrderingFeature;
 use App\Support\BulkProcessingMachine;
 use Closure;
 use Filament\Forms\Components\Select;
@@ -59,9 +58,7 @@ class ChangeServiceRequestStatusBulkAction
                 Select::make('statusId')
                     ->label('New status')
                     ->options(
-                        ServiceRequestStatusOrderingFeature::active()
-                            ? ServiceRequestStatus::query()->orderBy('sort')->pluck('name', 'id')
-                            : ServiceRequestStatus::query()->pluck('name', 'id')
+                        ServiceRequestStatus::query()->orderBy('sort')->pluck('name', 'id')
                     )
                     ->exists(ServiceRequestStatus::class, 'id')
                     ->required(),
