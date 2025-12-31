@@ -37,14 +37,13 @@
 namespace AidingApp\ServiceManagement\Observers;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Features\ServiceRequestStatusOrderingFeature;
 use Illuminate\Support\Facades\DB;
 
 class ServiceRequestStatusObserver
 {
     public function creating(ServiceRequestStatus $serviceRequestStatus): void
     {
-        if (ServiceRequestStatusOrderingFeature::active() && ! isset($serviceRequestStatus->sort)) {
+        if (! isset($serviceRequestStatus->sort)) {
             $serviceRequestStatus->setAttribute(
                 'sort',
                 DB::raw('(SELECT COALESCE(MAX(service_request_statuses.sort), 0) + 1 FROM service_request_statuses)')
