@@ -3,7 +3,7 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
 
     Aiding App™ is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
@@ -41,7 +41,6 @@ use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
-use App\Features\ServiceMonitoringNotificationFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -113,12 +112,6 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
                 $users = $team->users()->get();
                 $recipients = $recipients->merge($users)->unique('id');
             });
-
-            if (! ServiceMonitoringNotificationFeature::active()) {
-                Notification::send($recipients, new ServiceMonitoringNotification($history, MailChannel::class));
-
-                return;
-            }
 
             $channel = match (true) {
                 $this->serviceMonitoringTarget->is_notified_via_email && $this->serviceMonitoringTarget->is_notified_via_database => 'both',
