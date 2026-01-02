@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\ServiceMonitoringNotificationFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\Section;
@@ -85,14 +84,12 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->visible($this->getRecord()->users()->count()),
                                 IconEntry::make('is_notified_via_database')
                                     ->label('In Product notifications')
-                                    ->visible(fn (): bool => ServiceMonitoringNotificationFeature::active())
                                     ->boolean(),
                                 IconEntry::make('is_notified_via_email')
                                     ->label('Email Notifications')
-                                    ->visible(fn (): bool => ServiceMonitoringNotificationFeature::active())
                                     ->boolean(),
                             ])
-                            ->visible(fn (): bool => ! ServiceMonitoringNotificationFeature::active() ? ($this->getRecord()->teams()->count() || $this->getRecord()->users()->count()) : true)
+                            ->visible(fn (): bool => $this->getRecord()->teams()->count() || $this->getRecord()->users()->count())
                             ->columns(),
                     ])
                     ->columns(),

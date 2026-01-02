@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResour
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
-use App\Features\ServiceMonitoringNotificationFeature;
 use App\Rules\ValidUrl;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -92,11 +91,9 @@ class CreateServiceMonitoring extends CreateRecord
                             ->searchable(),
                         Toggle::make('is_notified_via_database')
                             ->label('In Product notifications')
-                            ->visible(fn (): bool => ServiceMonitoringNotificationFeature::active())
                             ->default(false),
                         Toggle::make('is_notified_via_email')
                             ->label('Email Notifications')
-                            ->visible(fn (): bool => ServiceMonitoringNotificationFeature::active())
                             ->default(false),
                     ])
                     ->columns(2),
