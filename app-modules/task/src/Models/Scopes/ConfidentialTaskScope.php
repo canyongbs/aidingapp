@@ -3,7 +3,7 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
 
     Aiding App™ is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
@@ -36,6 +36,7 @@
 
 namespace AidingApp\Task\Models\Scopes;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -59,6 +60,28 @@ class ConfidentialTaskScope implements Scope
                         })
                         ->orWhereHas('confidentialAccessUsers', function (Builder $query) {
                             $query->where('user_id', auth()->id());
+                        })
+                        ->orWhereHas('confidentialAccessProjects', function (Builder $query) {
+                            $query->where(function (Builder $query) {
+                                $query->where('created_by_type', User::class)
+                                    ->where('created_by_id', auth()->id());
+                            })
+                                ->orWhereHas('managerUsers', function (Builder $query) {
+                                    $query->where('user_id', auth()->id());
+                                })
+                                ->orWhereHas('managerTeams', function (Builder $query) {
+                                    $query->whereHas('users', function (Builder $query) {
+                                        $query->where('users.id', auth()->id());
+                                    });
+                                })
+                                ->orWhereHas('auditorUsers', function (Builder $query) {
+                                    $query->where('user_id', auth()->id());
+                                })
+                                ->orWhereHas('auditorTeams', function (Builder $query) {
+                                    $query->whereHas('users', function (Builder $query) {
+                                        $query->where('users.id', auth()->id());
+                                    });
+                                });
                         });
                 });
         });

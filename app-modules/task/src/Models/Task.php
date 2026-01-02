@@ -3,7 +3,7 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2025, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
 
     Aiding App™ is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
@@ -165,6 +165,16 @@ class Task extends BaseModel implements Auditable
     {
         return $this->belongsToMany(Team::class, 'confidential_task_teams')
             ->using(ConfidentialTaskTeam::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<Project, $this, covariant ConfidentialTasksProjects>
+     */
+    public function confidentialAccessProjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'confidential_task_projects')
+            ->using(ConfidentialTasksProjects::class)
             ->withTimestamps();
     }
 }
