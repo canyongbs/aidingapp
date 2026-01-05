@@ -171,6 +171,39 @@ test('super admin users can access all confidential tasks', function () {
         ->toContain(...$privateTasks->pluck('id'));
 });
 
+test('users can access confidential tasks if they are the creator of the project', function () {
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+    $project->createdBy()->attach($user);
+
+    $accessibleConfidentialTasks = Task::factory()
+        ->hasAttached($project, [], 'confidentialAccessProjects')
+        ->count(5)
+        ->create([
+            'is_confidential' => true,
+        ]);
+
+    $privateTasks = Task::factory()->count(5)->create([
+        'is_confidential' => true,
+    ]);
+
+    $publicTasks = Task::factory()->count(5)->create([
+        'is_confidential' => false,
+    ]);
+
+    $tasks = Task::query()->get();
+
+    expect($tasks)->toHaveCount(10);
+    expect($tasks->pluck('id'))
+        ->toContain(...$publicTasks->pluck('id'))
+        ->toContain(...$accessibleConfidentialTasks->pluck('id'));
+    expect($tasks->pluck('id'))->not->toContain(...$privateTasks->pluck('id'));
+});
+
+
 test('users can access confidential tasks if they are a project manager user', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 
