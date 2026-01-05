@@ -203,7 +203,6 @@ test('users can access confidential tasks if they are the creator of the project
     expect($tasks->pluck('id'))->not->toContain(...$privateTasks->pluck('id'));
 });
 
-
 test('users can access confidential tasks if they are a project manager user', function () {
     $user = User::factory()->licensed(LicenseType::cases())->create();
 

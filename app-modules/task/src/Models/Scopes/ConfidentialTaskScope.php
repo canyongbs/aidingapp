@@ -36,7 +36,6 @@
 
 namespace AidingApp\Task\Models\Scopes;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -63,8 +62,8 @@ class ConfidentialTaskScope implements Scope
                         })
                         ->orWhereHas('confidentialAccessProjects', function (Builder $query) {
                             $query->whereHas('createdBy', function (Builder $query) {
-                            $query->where('created_by_id', auth()->id());
-                        })
+                                $query->where('created_by_id', auth()->id());
+                            })
                                 ->orWhereHas('managerUsers', function (Builder $query) {
                                     $query->where('user_id', auth()->id());
                                 })
