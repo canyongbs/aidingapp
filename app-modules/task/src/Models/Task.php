@@ -167,4 +167,14 @@ class Task extends BaseModel implements Auditable
             ->using(ConfidentialTaskTeam::class)
             ->withTimestamps();
     }
+
+    /**
+     * @return BelongsToMany<Project, $this, covariant ConfidentialTasksProjects>
+     */
+    public function confidentialAccessProjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'confidential_task_projects')
+            ->using(ConfidentialTasksProjects::class)
+            ->withTimestamps();
+    }
 }
