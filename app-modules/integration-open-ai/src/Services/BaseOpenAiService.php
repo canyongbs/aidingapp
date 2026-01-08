@@ -48,6 +48,7 @@ use AidingApp\Ai\Support\StreamingChunks\Finish;
 use AidingApp\Ai\Support\StreamingChunks\Image;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
+use AidingApp\Ai\Support\StreamingChunks\ToolCall;
 use AidingApp\IntegrationOpenAi\Models\OpenAiVectorStore;
 use AidingApp\IntegrationOpenAi\Prism\ValueObjects\Messages\DeveloperMessage;
 use AidingApp\IntegrationOpenAi\Services\BaseOpenAiService\Concerns\InteractsWithVectorStores;
@@ -234,9 +235,10 @@ abstract class BaseOpenAiService implements AiService
      *
      * @param array<AiFile> $files
      * @param array<string, mixed> $options
+     * @param array<\Prism\Prism\Tool> $tools
      * @param ?array<Message> $messages
      */
-    public function streamRaw(?string $prompt = null, ?string $content = null, array $files = [], array $options = [], ?array $messages = null, bool $hasImageGeneration = false): Closure
+    public function streamRaw(?string $prompt = null, ?string $content = null, array $files = [], array $options = [], array $tools = [], ?array $messages = null, bool $hasImageGeneration = false): Closure
     {
         $aiSettings = app(AiSettings::class);
 
@@ -277,6 +279,12 @@ abstract class BaseOpenAiService implements AiService
             $request
                 ->withMaxTokens(null)
                 ->usingTemperature($this->hasTemperature() ? $aiSettings->temperature : null);
+
+            if (filled($tools)) {
+                $request
+                    ->withTools($tools)
+                    ->withMaxSteps(5);
+            }
 
             if ($hasImageGeneration) {
                 return function () use ($request): Generator {
@@ -343,6 +351,17 @@ abstract class BaseOpenAiService implements AiService
                             yield new Meta(
                                 messageId: $chunk->meta->id,
                                 nextRequestOptions: ['previous_response_id' => $chunk->meta->id],
+                            );
+
+                            continue;
+                        }
+
+                        if ($chunk->chunkType === ChunkType::ToolCall) {
+                            yield new ToolCall(
+                                id: $chunk->toolCall?->id ?? '',
+                                name: $chunk->toolCall?->name ?? '',
+                                arguments: $chunk->toolCall?->arguments ?? [],
+                                result: $chunk->toolCall?->result ?? null,
                             );
 
                             continue;

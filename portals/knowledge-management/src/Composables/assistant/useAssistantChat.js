@@ -46,6 +46,7 @@ export function useAssistantChat() {
     const isSending = ref(false);
     const wordQueue = ref([]);
     const isTyping = ref(false);
+    const activeWidget = ref(null);
 
     const isAssistantResponding = computed(() => {
         return messages.value.some((m) => m.author === 'assistant' && !m.isComplete);
@@ -104,13 +105,16 @@ export function useAssistantChat() {
         }
     };
 
-    const sendMessage = async (content) => {
+    const sendMessage = async (content, internalContent = null) => {
         if (!content || !content.trim() || isSending.value || isAssistantResponding.value) return;
         isSending.value = true;
 
         addUserMessage(content);
 
         const payload = { content, thread_id: threadId.value };
+        if (internalContent) {
+            payload.internal_content = internalContent;
+        }
 
         try {
             const response = await axios.post(assistantSendMessageUrl, payload);
@@ -127,11 +131,44 @@ export function useAssistantChat() {
 
     const connection = useAssistantConnection(websocketsConfig, getToken);
 
+    const handleActionRequest = (actionType, params) => {
+        activeWidget.value = { type: actionType, params };
+    };
+
     const connectToThread = async (id) => {
         if (!id) return;
-        await connection.connect(id, (chunk, is_complete, err) => {
-            updateAssistantMessage(chunk, is_complete, err);
-        });
+        await connection.connect(
+            id,
+            (chunk, is_complete, err) => {
+                updateAssistantMessage(chunk, is_complete, err);
+            },
+            handleActionRequest
+        );
+    };
+
+    const handleWidgetSubmit = async (submitData) => {
+        const { type, field_id, type_id, value, display_text } = submitData;
+
+        const internalContent = { type };
+        if (field_id) internalContent.field_id = field_id;
+        if (type_id) internalContent.type_id = type_id;
+        if (value !== undefined) internalContent.value = value;
+
+        await sendMessage(display_text || 'Submitted', internalContent);
+        activeWidget.value = null;
+    };
+
+    const handleWidgetCancel = async () => {
+        const widget = activeWidget.value;
+        if (!widget) return;
+
+        const internalContent = { type: 'widget_cancelled' };
+        if (widget.params?.field_id) {
+            internalContent.field_id = widget.params.field_id;
+        }
+
+        await sendMessage('Cancelled', internalContent);
+        activeWidget.value = null;
     };
 
     watch(threadId, async (newId) => {
@@ -149,5 +186,8 @@ export function useAssistantChat() {
         isSending,
         isAssistantResponding,
         sendMessage,
+        activeWidget,
+        handleWidgetSubmit,
+        handleWidgetCancel,
     };
 }

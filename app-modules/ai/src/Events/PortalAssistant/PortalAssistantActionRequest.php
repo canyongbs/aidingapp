@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -15,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -31,42 +33,53 @@
 
 </COPYRIGHT>
 */
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
 
-export const useAssistantStore = defineStore('assistant', () => {
-    const assistantSendMessageUrl = ref(null);
-    const websocketsConfig = ref(null);
-    const apiUrl = ref(null);
+namespace AidingApp\Ai\Events\PortalAssistant;
 
-    async function setAssistantSendMessageUrl(url) {
-        assistantSendMessageUrl.value = url;
+use AidingApp\Ai\Models\PortalAssistantThread;
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Foundation\Events\Dispatchable;
+
+class PortalAssistantActionRequest implements ShouldBroadcastNow
+{
+    use Dispatchable;
+    use InteractsWithSockets;
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    public function __construct(
+        public PortalAssistantThread $thread,
+        public string $actionType,
+        public array $params = [],
+    ) {}
+
+    public function broadcastAs(): string
+    {
+        return 'portal-assistant-action.requested';
     }
 
-    async function setWebsocketsConfig(config) {
-        websocketsConfig.value = config;
+    /**
+     * @return array<string, mixed>
+     */
+    public function broadcastWith(): array
+    {
+        return [
+            'action_type' => $this->actionType,
+            'params' => $this->params,
+        ];
     }
 
-    async function setApiUrl(url) {
-        apiUrl.value = url;
-    }
+    /**
+     * @return array<int, Channel>
+     */
+    public function broadcastOn(): array
+    {
+        $channelName = "portal-assistant-thread-{$this->thread->getKey()}";
 
-    async function getAssistantSendMessageUrl() {
-        return assistantSendMessageUrl.value;
+        return [new PrivateChannel($channelName)];
     }
-
-    async function getWebsocketsConfig() {
-        return websocketsConfig.value;
-    }
-
-    return {
-        assistantSendMessageUrl,
-        getAssistantSendMessageUrl,
-        setAssistantSendMessageUrl,
-        websocketsConfig,
-        getWebsocketsConfig,
-        setWebsocketsConfig,
-        apiUrl,
-        setApiUrl,
-    };
-});
+}

@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -15,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -31,42 +33,15 @@
 
 </COPYRIGHT>
 */
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
 
-export const useAssistantStore = defineStore('assistant', () => {
-    const assistantSendMessageUrl = ref(null);
-    const websocketsConfig = ref(null);
-    const apiUrl = ref(null);
+namespace App\Features;
 
-    async function setAssistantSendMessageUrl(url) {
-        assistantSendMessageUrl.value = url;
+use App\Support\AbstractFeatureFlag;
+
+class PortalAssistantServiceRequestFeature extends AbstractFeatureFlag
+{
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
     }
-
-    async function setWebsocketsConfig(config) {
-        websocketsConfig.value = config;
-    }
-
-    async function setApiUrl(url) {
-        apiUrl.value = url;
-    }
-
-    async function getAssistantSendMessageUrl() {
-        return assistantSendMessageUrl.value;
-    }
-
-    async function getWebsocketsConfig() {
-        return websocketsConfig.value;
-    }
-
-    return {
-        assistantSendMessageUrl,
-        getAssistantSendMessageUrl,
-        setAssistantSendMessageUrl,
-        websocketsConfig,
-        getWebsocketsConfig,
-        setWebsocketsConfig,
-        apiUrl,
-        setApiUrl,
-    };
-});
+}

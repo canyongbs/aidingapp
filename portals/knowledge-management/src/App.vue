@@ -166,7 +166,9 @@
 
                 const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
-                const { setAssistantSendMessageUrl, setWebsocketsConfig } = useAssistantStore();
+                const { setAssistantSendMessageUrl, setWebsocketsConfig, setApiUrl } = useAssistantStore();
+
+                setApiUrl(props.apiUrl);
 
                 portalPrimaryColor.value = response.data.primary_color;
 
@@ -319,7 +321,9 @@
 
         const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
-        const { setAssistantSendMessageUrl, setWebsocketsConfig } = useAssistantStore();
+        const { setAssistantSendMessageUrl, setWebsocketsConfig, setApiUrl } = useAssistantStore();
+
+        setApiUrl(props.apiUrl);
 
         if (authentication.value.isRequested) {
             const data = {

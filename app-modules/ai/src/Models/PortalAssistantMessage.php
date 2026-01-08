@@ -54,6 +54,7 @@ class PortalAssistantMessage extends BaseModel
     public $fillable = [
         'message_id',
         'content',
+        'internal_content',
         'context',
         'request',
         'next_request_options',
@@ -64,6 +65,7 @@ class PortalAssistantMessage extends BaseModel
     ];
 
     protected $casts = [
+        'internal_content' => 'array',
         'next_request_options' => 'array',
         'request' => 'encrypted:array',
         'is_assistant' => 'boolean',

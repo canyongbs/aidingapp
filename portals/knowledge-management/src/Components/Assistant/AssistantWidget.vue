@@ -1,4 +1,4 @@
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -30,43 +30,44 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
+-->
+<script setup>
+    import { computed } from 'vue';
+    import TypeSelectorWidget from './Widgets/TypeSelectorWidget.vue';
+    import FieldInputWidget from './Widgets/FieldInputWidget.vue';
 
-export const useAssistantStore = defineStore('assistant', () => {
-    const assistantSendMessageUrl = ref(null);
-    const websocketsConfig = ref(null);
-    const apiUrl = ref(null);
+    const props = defineProps({
+        actionType: {
+            type: String,
+            required: true,
+        },
+        params: {
+            type: Object,
+            required: true,
+        },
+    });
 
-    async function setAssistantSendMessageUrl(url) {
-        assistantSendMessageUrl.value = url;
-    }
+    const emit = defineEmits(['submit', 'cancel']);
 
-    async function setWebsocketsConfig(config) {
-        websocketsConfig.value = config;
-    }
+    const widgetComponent = computed(() => {
+        switch (props.actionType) {
+            case 'select_service_request_type':
+                return TypeSelectorWidget;
+            case 'render_field_input':
+                return FieldInputWidget;
+            default:
+                return null;
+        }
+    });
+</script>
 
-    async function setApiUrl(url) {
-        apiUrl.value = url;
-    }
-
-    async function getAssistantSendMessageUrl() {
-        return assistantSendMessageUrl.value;
-    }
-
-    async function getWebsocketsConfig() {
-        return websocketsConfig.value;
-    }
-
-    return {
-        assistantSendMessageUrl,
-        getAssistantSendMessageUrl,
-        setAssistantSendMessageUrl,
-        websocketsConfig,
-        getWebsocketsConfig,
-        setWebsocketsConfig,
-        apiUrl,
-        setApiUrl,
-    };
-});
+<template>
+    <div v-if="widgetComponent" class="px-4 pb-4">
+        <component
+            :is="widgetComponent"
+            :params="params"
+            @submit="emit('submit', $event)"
+            @cancel="emit('cancel')"
+        />
+    </div>
+</template>

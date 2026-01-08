@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -15,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -31,42 +33,28 @@
 
 </COPYRIGHT>
 */
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
 
-export const useAssistantStore = defineStore('assistant', () => {
-    const assistantSendMessageUrl = ref(null);
-    const websocketsConfig = ref(null);
-    const apiUrl = ref(null);
+namespace AidingApp\Ai\Validators;
 
-    async function setAssistantSendMessageUrl(url) {
-        assistantSendMessageUrl.value = url;
+readonly class InternalContentValidationResult
+{
+    public function __construct(
+        public bool $valid,
+        public array $errors = [],
+    ) {}
+
+    public static function success(): self
+    {
+        return new self(valid: true);
     }
 
-    async function setWebsocketsConfig(config) {
-        websocketsConfig.value = config;
+    public static function failure(array $errors): self
+    {
+        return new self(valid: false, errors: $errors);
     }
 
-    async function setApiUrl(url) {
-        apiUrl.value = url;
+    public function failed(): bool
+    {
+        return ! $this->valid;
     }
-
-    async function getAssistantSendMessageUrl() {
-        return assistantSendMessageUrl.value;
-    }
-
-    async function getWebsocketsConfig() {
-        return websocketsConfig.value;
-    }
-
-    return {
-        assistantSendMessageUrl,
-        getAssistantSendMessageUrl,
-        setAssistantSendMessageUrl,
-        websocketsConfig,
-        getWebsocketsConfig,
-        setWebsocketsConfig,
-        apiUrl,
-        setApiUrl,
-    };
-});
+}

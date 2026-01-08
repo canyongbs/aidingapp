@@ -50,6 +50,8 @@ class SendMessageController
         $data = $request->validate([
             'content' => ['required', 'string', 'max:25000'],
             'thread_id' => ['nullable', 'uuid'],
+            'internal_content' => ['nullable', 'array'],
+            'internal_content.type' => ['required_with:internal_content', 'string'],
         ]);
 
         $author = auth('contact')->user();
@@ -75,6 +77,7 @@ class SendMessageController
                 ),
                 'ip' => request()->ip(),
             ],
+            internalContent: $data['internal_content'] ?? null,
         ));
 
         return response()->json([

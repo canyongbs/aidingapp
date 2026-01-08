@@ -35,6 +35,7 @@
     import { computed } from 'vue';
     import { useAssistantChat } from '../../Composables/assistant/useAssistantChat.js';
     import { useAuthStore } from '../../Stores/auth.js';
+    import AssistantWidget from './AssistantWidget.vue';
     import ChatHeader from './ChatHeader.vue';
     import ChatInput from './ChatInput.vue';
     import ChatMessages from './ChatMessages.vue';
@@ -45,7 +46,15 @@
 
     const emit = defineEmits(['close']);
 
-    const { messages, isSending, isAssistantResponding, sendMessage } = useAssistantChat();
+    const {
+        messages,
+        isSending,
+        isAssistantResponding,
+        sendMessage,
+        activeWidget,
+        handleWidgetSubmit,
+        handleWidgetCancel,
+    } = useAssistantChat();
 
     const authStore = useAuthStore();
     const welcomeMessage = computed(() => {
@@ -70,7 +79,15 @@
 
             <ChatMessages :messages="messages" :welcome-message="welcomeMessage" :is-open="props.isOpen" />
 
-            <ChatInput :disabled="isSending || isAssistantResponding" @send="sendMessage" />
+            <AssistantWidget
+                v-if="activeWidget"
+                :action-type="activeWidget.type"
+                :params="activeWidget.params"
+                @submit="handleWidgetSubmit"
+                @cancel="handleWidgetCancel"
+            />
+
+            <ChatInput :disabled="isSending || isAssistantResponding || !!activeWidget" @send="sendMessage" />
         </div>
     </Transition>
 </template>

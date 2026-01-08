@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -15,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -31,42 +33,33 @@
 
 </COPYRIGHT>
 */
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
 
-export const useAssistantStore = defineStore('assistant', () => {
-    const assistantSendMessageUrl = ref(null);
-    const websocketsConfig = ref(null);
-    const apiUrl = ref(null);
+use App\Features\PortalAssistantServiceRequestFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-    async function setAssistantSendMessageUrl(url) {
-        assistantSendMessageUrl.value = url;
+return new class () extends Migration {
+    public function up(): void
+    {
+        DB::transaction(function () {
+            Schema::table('portal_assistant_messages', function (Blueprint $table) {
+                $table->jsonb('internal_content')->nullable()->after('content');
+            });
+
+            PortalAssistantServiceRequestFeature::activate();
+        });
     }
 
-    async function setWebsocketsConfig(config) {
-        websocketsConfig.value = config;
-    }
+    public function down(): void
+    {
+        DB::transaction(function () {
+            PortalAssistantServiceRequestFeature::deactivate();
 
-    async function setApiUrl(url) {
-        apiUrl.value = url;
+            Schema::table('portal_assistant_messages', function (Blueprint $table) {
+                $table->dropColumn('internal_content');
+            });
+        });
     }
-
-    async function getAssistantSendMessageUrl() {
-        return assistantSendMessageUrl.value;
-    }
-
-    async function getWebsocketsConfig() {
-        return websocketsConfig.value;
-    }
-
-    return {
-        assistantSendMessageUrl,
-        getAssistantSendMessageUrl,
-        setAssistantSendMessageUrl,
-        websocketsConfig,
-        getWebsocketsConfig,
-        setWebsocketsConfig,
-        apiUrl,
-        setApiUrl,
-    };
-});
+};
