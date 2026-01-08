@@ -32,8 +32,8 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ref, computed } from 'vue';
     import axios from 'axios';
+    import { computed, ref } from 'vue';
     import { consumer } from '../../../../Services/Consumer.js';
     import { useAssistantStore } from '../../../../Stores/assistant.js';
 
@@ -180,12 +180,7 @@
             class="flex flex-col items-center justify-center w-full h-24 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer hover:bg-gray-50"
         >
             <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                <svg
-                    class="w-8 h-8 mb-2 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
+                <svg class="w-8 h-8 mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path
                         stroke-linecap="round"
                         stroke-linejoin="round"
@@ -193,9 +188,7 @@
                         d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                     />
                 </svg>
-                <p class="text-xs text-gray-500">
-                    <span class="font-semibold">Click to upload</span> or drag and drop
-                </p>
+                <p class="text-xs text-gray-500"><span class="font-semibold">Click to upload</span> or drag and drop</p>
                 <p class="text-xs text-gray-400">Max {{ maxSizeMB }}MB per file</p>
             </div>
             <input
@@ -239,12 +232,7 @@
                         stroke="currentColor"
                         viewBox="0 0 24 24"
                     >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="M5 13l4 4L19 7"
-                        />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
 
                     <svg

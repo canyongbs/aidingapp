@@ -33,8 +33,8 @@
 -->
 <script setup>
     import { computed } from 'vue';
-    import TypeSelectorWidget from './Widgets/TypeSelectorWidget.vue';
     import FieldInputWidget from './Widgets/FieldInputWidget.vue';
+    import TypeSelectorWidget from './Widgets/TypeSelectorWidget.vue';
 
     const props = defineProps({
         actionType: {
@@ -63,11 +63,6 @@
 
 <template>
     <div v-if="widgetComponent" class="px-4 pb-4">
-        <component
-            :is="widgetComponent"
-            :params="params"
-            @submit="emit('submit', $event)"
-            @cancel="emit('cancel')"
-        />
+        <component :is="widgetComponent" :params="params" @submit="emit('submit', $event)" @cancel="emit('cancel')" />
     </div>
 </template>

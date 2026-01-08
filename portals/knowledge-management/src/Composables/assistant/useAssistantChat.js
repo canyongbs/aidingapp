@@ -142,7 +142,7 @@ export function useAssistantChat() {
             (chunk, is_complete, err) => {
                 updateAssistantMessage(chunk, is_complete, err);
             },
-            handleActionRequest
+            handleActionRequest,
         );
     };
 

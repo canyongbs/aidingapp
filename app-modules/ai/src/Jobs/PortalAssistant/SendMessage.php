@@ -41,7 +41,6 @@ use AidingApp\Ai\Models\PortalAssistantMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use AidingApp\Ai\Settings\AiResolutionSettings;
-use App\Features\PortalAssistantServiceRequestFeature;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
 use AidingApp\Ai\Support\StreamingChunks\ToolCall;
@@ -53,11 +52,13 @@ use AidingApp\Ai\Tools\PortalAssistant\SuggestServiceRequestTypeTool;
 use AidingApp\Ai\Validators\InternalContentValidator;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
+use App\Features\PortalAssistantServiceRequestFeature;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Prism\Prism\Tool;
 use Throwable;
 
 class SendMessage implements ShouldQueue
@@ -304,7 +305,7 @@ EOT;
     }
 
     /**
-     * @return array<int, \Prism\Prism\Tool>
+     * @return array<int, Tool>
      */
     protected function buildTools(): array
     {

@@ -33,12 +33,12 @@
 -->
 <script setup>
     import { computed } from 'vue';
-    import SelectInput from './Inputs/SelectInput.vue';
-    import RadioInput from './Inputs/RadioInput.vue';
-    import DateInput from './Inputs/DateInput.vue';
-    import PhoneInput from './Inputs/PhoneInput.vue';
     import AddressInput from './Inputs/AddressInput.vue';
+    import DateInput from './Inputs/DateInput.vue';
     import FileUploadInput from './Inputs/FileUploadInput.vue';
+    import PhoneInput from './Inputs/PhoneInput.vue';
+    import RadioInput from './Inputs/RadioInput.vue';
+    import SelectInput from './Inputs/SelectInput.vue';
 
     const props = defineProps({
         params: {
@@ -102,9 +102,7 @@
                 @cancel="emit('cancel')"
             />
 
-            <div v-else class="text-sm text-gray-500">
-                Unsupported field type: {{ fieldConfig.type }}
-            </div>
+            <div v-else class="text-sm text-gray-500">Unsupported field type: {{ fieldConfig.type }}</div>
         </div>
     </div>
 </template>

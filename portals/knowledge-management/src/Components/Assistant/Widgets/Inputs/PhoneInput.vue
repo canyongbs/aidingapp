@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ref, computed } from 'vue';
+    import { computed, ref } from 'vue';
 
     const props = defineProps({
         fieldId: {
@@ -101,7 +101,7 @@
                 number: phoneNumber.value,
                 formatted: formattedPhone.value,
             },
-            formattedPhone.value
+            formattedPhone.value,
         );
     };
 </script>

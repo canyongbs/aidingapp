@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ref, computed } from 'vue';
+    import { computed, ref } from 'vue';
     import TypeCategory from './TypeCategory.vue';
 
     const props = defineProps({
@@ -65,7 +65,7 @@
                 const matchingTypes = (category.types || []).filter(
                     (type) =>
                         type.name.toLowerCase().includes(query) ||
-                        (type.description && type.description.toLowerCase().includes(query))
+                        (type.description && type.description.toLowerCase().includes(query)),
                 );
 
                 const filteredChildren = filterCategories(category.children || [], query);

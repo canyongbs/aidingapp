@@ -38,7 +38,6 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\Ai\Models\PortalAssistantThread;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use Prism\Prism\Tool;
 
@@ -140,6 +139,7 @@ class SuggestServiceRequestTypeTool extends Tool
             }
 
             $nameWords = explode(' ', $nameLower);
+
             foreach ($nameWords as $word) {
                 if (strlen($word) > 3 && str_contains($queryLower, $word)) {
                     $score += 5;

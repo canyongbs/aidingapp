@@ -39,6 +39,7 @@ namespace AidingApp\Ai\Services\Contracts;
 use AidingApp\Ai\Models\AiMessage;
 use AidingApp\Ai\Models\Contracts\AiFile;
 use Closure;
+use Prism\Prism\Tool;
 
 interface AiService
 {
@@ -62,7 +63,7 @@ interface AiService
      *
      * @param array<AiFile> $files
      * @param array<string, mixed> $options
-     * @param array<\Prism\Prism\Tool> $tools
+     * @param array<Tool> $tools
      */
     public function streamRaw(string $prompt, string $content, array $files = [], array $options = [], array $tools = []): Closure;
 

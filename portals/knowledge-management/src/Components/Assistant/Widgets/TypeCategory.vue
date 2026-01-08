@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ref, computed } from 'vue';
+    import { computed, ref } from 'vue';
 
     const props = defineProps({
         category: {
@@ -50,7 +50,7 @@
     const isExpanded = ref(false);
 
     const hasContent = computed(() => {
-        return (props.category.types?.length > 0) || (props.category.children?.length > 0);
+        return props.category.types?.length > 0 || props.category.children?.length > 0;
     });
 
     const toggle = () => {

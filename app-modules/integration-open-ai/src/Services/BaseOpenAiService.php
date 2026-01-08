@@ -67,6 +67,7 @@ use Prism\Prism\Enums\ChunkType;
 use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Exceptions\PrismRateLimitedException;
 use Prism\Prism\Prism;
+use Prism\Prism\Tool;
 use Prism\Prism\ValueObjects\Messages\AssistantMessage;
 use Prism\Prism\ValueObjects\Messages\UserMessage;
 use Throwable;
@@ -235,7 +236,7 @@ abstract class BaseOpenAiService implements AiService
      *
      * @param array<AiFile> $files
      * @param array<string, mixed> $options
-     * @param array<\Prism\Prism\Tool> $tools
+     * @param array<Tool> $tools
      * @param ?array<Message> $messages
      */
     public function streamRaw(?string $prompt = null, ?string $content = null, array $files = [], array $options = [], array $tools = [], ?array $messages = null, bool $hasImageGeneration = false): Closure
