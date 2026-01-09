@@ -1,533 +1,585 @@
-# Portal Assistant Service Request Integration
+# Portal Assistant Service Request - Stateful Draft Implementation
 
-## Overview
+## Problem Statement
 
-Enable conversational service request submission through the Portal Assistant. AI collects form data via chat (simple fields) or UI widgets (complex fields), then submits in a single call.
+The current implementation is stateless - all 5 tools require the AI to remember and pass IDs, and data is only persisted at final submission. This causes:
+- AI forgets which fields are filled
+- IDs and workflow state are lost
+- Validation errors require re-collecting all data
+- Too much responsibility on LLM memory
 
----
+## Solution: is_draft Field on ServiceRequest
 
-## Architecture
-
-**Stateless:** AI maintains all state in conversation context. No backend drafts.
-
-**5 Tools:** `suggest_service_request_type`, `get_service_request_form`, `request_field_input`, `evaluate_ai_resolution`, `submit_service_request`
-
-**Field Collection Strategy:**
-
-- Conversational: text, textarea, number, email, checkbox (yes/no)
-- UI Widget: select, radio, address, phone, date, file
-
-**Message Content Model:**
-
-- `content`: Presentational text shown in chat
-- `internal_content`: Structured data sent to LLM (validated server-side before adding to context)
+Add an `is_draft` boolean field to ServiceRequest with a global scope that excludes drafts by default. The draft is linked to the `PortalAssistantThread` and all tools operate on the active draft implicitly - no ID passing required.
 
 ---
 
-## Key Files & Integration Points
+## Workflow Summary
 
-### Message Handling
-
-| Component       | Location                                                                        |
-| --------------- | ------------------------------------------------------------------------------- |
-| Message Model   | `app-modules/ai/src/Models/PortalAssistantMessage.php`                          |
-| Thread Model    | `app-modules/ai/src/Models/PortalAssistantThread.php`                           |
-| Send Controller | `app-modules/ai/src/Http/Controllers/PortalAssistant/SendMessageController.php` |
-| Send Job        | `app-modules/ai/src/Jobs/PortalAssistant/SendMessage.php`                       |
-| Message Event   | `app-modules/ai/src/Events/PortalAssistant/PortalAssistantMessageChunk.php`     |
-| Channel Auth    | `routes/channels.php:54-56`                                                     |
-
-**Current flow:** Controller validates `content` → dispatches `SendMessage` job → job builds context, calls `streamRaw()` → broadcasts chunks to `portal-assistant-thread-{threadId}` channel.
-
-**Required changes:**
-
-- Add `internal_content` (json, nullable) column to `portal_assistant_messages`
-- Validate `internal_content` in SendMessage job before adding to context
-- Use `internal_content` instead of `content` when building AI context if present
-
-### Service Requests
-
-| Component                | Location                                                                                                |
-| ------------------------ | ------------------------------------------------------------------------------------------------------- |
-| ServiceRequest Model     | `app-modules/service-management/src/Models/ServiceRequest.php`                                          |
-| ServiceRequestType Model | `app-modules/service-management/src/Models/ServiceRequestType.php`                                      |
-| Form Model               | `app-modules/service-management/src/Models/ServiceRequestForm.php`                                      |
-| Form Field Model         | `app-modules/service-management/src/Models/ServiceRequestFormField.php`                                 |
-| Get Form Controller      | `app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/GetServiceRequestFormController.php` |
-| Store Controller         | `app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/StoreServiceRequestController.php`   |
-| Schema Generator         | `app-modules/form/src/Actions/GenerateFormKitSchema.php`                                                |
-
-**Existing fields on ServiceRequest:** `is_ai_resolution_attempted`, `is_ai_resolution_successful`, `ai_resolution_confidence_score` (1-100)
-
-**Existing settings:** `AiResolutionSettings` (`app-modules/ai/src/Settings/AiResolutionSettings.php`) has `is_enabled` and `confidence_threshold` (default 70)
-
-### AI Service
-
-| Component             | Location                                                             |
-| --------------------- | -------------------------------------------------------------------- |
-| AI Service Contract   | `app-modules/ai/src/Services/Contracts/AiService.php`                |
-| OpenAI Implementation | `app-modules/integration-open-ai/src/Services/BaseOpenAiService.php` |
-| Streaming Chunks      | `app-modules/ai/src/Support/StreamingChunks/`                        |
-
-**Key methods:** `streamRaw()` returns closure yielding `Text` and `Meta` chunks. Context passed via `prompt` param. Currently uses `withProviderOptions(['tools' => [...]])` for file_search/image_generation.
-
-### Frontend (Portal)
-
-| Component     | Location                                                                                                    |
-| ------------- | ----------------------------------------------------------------------------------------------------------- |
-| Portal Config | `app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/KnowledgeManagementPortalController.php` |
-| Echo Config   | Returned in `websockets_config` from portal controller                                                      |
-| API Routes    | `app-modules/ai/routes/api.php`                                                                             |
+1. User expresses intent ("I want to submit a ticket", "I want to speak to a human", "I want to submit a service request")
+2. AI calls `fetch_service_request_types` → creates draft, returns available types
+3. AI calls `show_type_selector` with optional suggestion → UI widget appears
+4. User selects type → backend updates draft, creates form submission
+5. AI collects **title** and **description** via natural language (calling `update_title`, `update_description`)
+6. AI calls `get_draft_status` to retrieve form structure for the selected type
+7. AI collects form fields:
+   - Text fields: conversationally via `update_form_field`
+   - Complex fields (select, date, address, phone, file): via `show_field_input` → UI widget
+8. AI calls `submit_service_request` → validates required fields
+9. AI asks exactly 3 clarifying questions, saving each via `save_clarifying_question`
+10. AI attempts resolution via `submit_ai_resolution` with confidence score
+11. If confidence meets threshold: present to user, record response via `record_resolution_response`
+12. If below threshold or user declines: call `finalize_service_request`
 
 ---
 
-## User Experience Flow
-
-### 1. Intent Recognition & Type Selection
-
-- User expresses need (e.g., "I need password reset")
-- Assistant analyzes intent (knowledge base question vs. service request)
-- Calls `suggest_service_request_type(user_query)`
-- Tool emits action to render type selector widget with AI suggestion + full category tree
-- User selects type → type_id stored in conversation context
-- **Cancellation:** User cancels widget → returns to general assistance
-
-### 2. Form Schema Retrieval
-
-- Assistant calls `get_service_request_form(type_id)`
-- Receives field metadata: field_id, type, label, validation, config
-- Plans collection strategy for each field
-
-### 3. Field Collection
-
-**Conversational collection:**
-
-- Text/Textarea/Number/Email: Ask naturally, user responds in chat
-- Checkbox (Yes/No): "Do you agree to terms?" → accept variations (yes/sure/nope/yep)
-- Assistant stores responses in context using field_id as key
-
-**UI widget collection:**
-
-- Select/Radio/Address/Phone/Date/File: Call `request_field_input(field_id)`
-- Tool emits action to render appropriate widget
-- User fills → submits → frontend sends message with `internal_content`
-- `internal_content` contains structured data: `{type: 'field_response', field_id: 'uuid', value: {...}}`
-- `content` contains display text: "✓ Address: 123 Main St, LA, CA 90001"
-
-**Multi-value extraction:**
-
-- "I need password reset ASAP, high priority" → extract both title and priority
-- Store both, avoid re-asking
-
-### 4. Context Switching
-
-- **User asks unrelated question:** Answer it, maintain collected data, guide back to request
-- **User says "cancel":** Forget all collected data, return to general assistance
-- **User starts different request:** Ask if they want to cancel current, then proceed accordingly
-- Assistant must distinguish between field response vs. new question vs. context switch
-
-### 5. Clarifying Questions
-
-- Triggered after all required fields are collected
-- Assistant generates exactly 3 questions (fixed count, not configurable)
-- Questions must be specific to the request type AND the data already collected
-- **Good examples:** "What operating system are you using?", "When did this issue first occur?", "Have you tried restarting the application?"
-- **Bad examples:** "Is there anything else?", "Can you provide more details?", "What else should we know?"
-- Ask one question at a time, wait for response before next
-- Store as array: `[{question: "What OS?", answer: "Windows 11"}, ...]`
-- If user says "skip", "no more questions", or similar → proceed to AI resolution with whatever answers collected
-- Questions and answers are stored as ServiceRequestUpdate records on submission
-
-### 6. AI Resolution Attempt
-
-- Only runs if `AiResolutionSettings::is_enabled` is true
-- Call `evaluate_ai_resolution(type_id, form_data, questions_answers)`
-- Tool uses AI to analyze the request and generate a potential resolution
-- AI self-rates its confidence in the resolution (0-100)
-- Tool returns: `{resolvable: bool, confidence_score: int, proposed_answer: string, threshold: int}`
-- **If `confidence_score >= threshold`:**
-    - Present the proposed solution to user
-    - Ask explicitly: "Did this resolve your issue?"
-    - If user says yes → record `ai_resolution: {confidence_score, proposed_answer, user_accepted: true}`, may skip submission or still create record for tracking
-    - If user says no → record `ai_resolution: {confidence_score, proposed_answer, user_accepted: false}`, proceed to submission
-- **If `confidence_score < threshold` or AI resolution disabled:**
-    - Skip resolution attempt entirely
-    - Proceed directly to submission confirmation
-- Resolution attempt data (if any) included in final submission payload for analytics
-
-### 7. Submission
-
-- Summarize all collected data for user review
-- Ask explicit confirmation: "Should I submit this request?"
-- User confirms → call `submit_service_request(payload)`
-- Return request number on success
-- **Validation errors:** Re-collect only invalid fields, resubmit
-
----
-
-## Tool Specifications
-
-### 1. suggest_service_request_type
-
-**Prism:** `withStringParameter('user_query', '...')`
-**Input:** `user_query: string`
-**Output:** Emits `PortalAssistantActionRequest` event, returns acknowledgment string
-**Data source:** `ServiceRequestType::with('category')` tree structure
-
-### 2. get_service_request_form
-
-**Prism:** `withStringParameter('type_id', '...')`
-**Input:** `type_id: string`
-**Output:** JSON string with `{type_id, type_name, category_path, fields: [{field_id, name, label, type, required, validation, options?, config?}]}`
-**Data source:** Adapt `GetServiceRequestFormController` logic, transform FormKit schema to simplified format
-
-### 3. request_field_input
-
-**Prism:** `withStringParameter('field_id', '...')`
-**Input:** `field_id: string`
-**Output:** If simple type → `{needs_ui: false}`. If complex → emits `PortalAssistantActionRequest`, returns acknowledgment
-
-### 4. evaluate_ai_resolution
-
-**Prism:** `withStringParameter('type_id')`, `withObjectParameter('form_data', ...)`, `withArrayParameter('questions_answers', ...)`
-**Input:** `type_id`, `form_data`, `questions_answers`
-**Output:** JSON `{resolvable: bool, confidence_score: int (0-100), proposed_answer: string, threshold: int}`
-**Logic:** AI self-rates confidence. Threshold from `AiResolutionSettings::confidence_threshold`. Skip if `AiResolutionSettings::is_enabled` is false.
-
-### 5. submit_service_request
-
-**Prism:** `withStringParameter('type_id')`, `withObjectParameter('form_data')`, `withArrayParameter('questions_answers')`, `withObjectParameter('ai_resolution', ..., required: [])`, `withArrayParameter('file_references', ..., required: [])`
-
-**Input payload structure:**
-
-- `type_id`: Service request type UUID
-- `form_data`: Object keyed by field_id → value (simple values or complex objects like address)
-- `questions_answers`: Array of `{question: string, answer: string}`
-- `ai_resolution`: Optional `{confidence_score: int, proposed_answer: string, user_accepted: bool}`
-- `file_references`: Optional array of `{path: string, name: string, size: int}`
-
-**Output:** JSON `{success: bool, request_number: string, request_id: string, errors?: array, attached_files?: array}`
-
-**Implementation:**
-
-- Reuse `StoreServiceRequestController` logic
-- Map field_id → field name (Main.title, CustomStep.uuid, etc.)
-- Create ServiceRequest, ServiceRequestFormSubmission records
-- Store questions as ServiceRequestUpdate records (plain text, not encrypted)
-- Handle AI resolution data if provided
-- Move files from temp to permanent storage
-- Assign to team member
-- Return errors array if validation fails (assistant re-collects invalid fields only)
-
----
-
-## Prism Tool Integration
-
-**Reference:** https://prismphp.com/core-concepts/tools-function-calling.html
-
-### Tool Class Pattern
-
-**Location:** Create `app-modules/ai/src/Tools/PortalAssistant/` directory
-
-Each tool extends `Prism\Prism\Tool` and implements `__invoke()`:
-
-- Constructor calls fluent methods: `->as('name')->for('description')->withStringParameter(...)->using($this)`
-- `__invoke()` receives validated parameters, must return string (JSON-encoded for structured data)
-- Use `Tool::make(ClassName::class)` for dependency injection
-
-### Parameter Types
-
-| Prism Method                                             | Use For                                |
-| -------------------------------------------------------- | -------------------------------------- |
-| `withStringParameter(name, description)`                 | `user_query`, `type_id`, `field_id`    |
-| `withObjectParameter(name, desc, schemas[], required[])` | `form_data`, `ai_resolution`           |
-| `withArrayParameter(name, desc, itemSchema)`             | `questions_answers`, `file_references` |
-| `withNumberParameter(name, description)`                 | confidence scores                      |
-| `withBooleanParameter(name, description)`                | flags                                  |
-
-For nested objects, use `Prism\Prism\Schema\StringSchema`, `NumberSchema`, `BooleanSchema`, `ObjectSchema`, `ArraySchema`.
-
-### Streaming with Tools
-
-**Critical:** Must call `->withMaxSteps(n)` where n ≥ 2 to enable tool usage.
-
-Modify `BaseOpenAiService::streamRaw()` to:
-
-1. Accept optional `array $tools` parameter
-2. Pass tools via `->withTools($tools)` (not `withProviderOptions`)
-3. Set `->withMaxSteps(5)` (allow multiple tool calls per conversation turn)
-4. Handle `ChunkType::ToolCall` in stream processing—emit new `ToolCall` chunk type
-5. Tool results flow back automatically via Prism's step execution
-
-### Tool Output Patterns
-
-**Read-only tools** (get_service_request_form, evaluate_ai_resolution): Return JSON string directly.
-
-**Action-emitting tools** (suggest_service_request_type, request_field_input):
-
-1. Broadcast `PortalAssistantActionRequest` event
-2. Return acknowledgment string for AI context (e.g., "Type selector displayed to user")
-
-**Write tools** (submit_service_request): Return JSON with success/error details.
-
-### Error Handling
-
-Prism returns error messages to AI by default (no exceptions). For critical failures, use `->withoutErrorHandling()` on specific tools or catch in `__invoke()` and return structured error JSON.
-
-### SendMessage Job Changes
-
-Update `SendMessage` job to:
-
-1. Instantiate tool classes: `$tools = [Tool::make(GetServiceRequestFormTool::class), ...]`
-2. Pass to modified `streamRaw()`: `->streamRaw(..., tools: $tools)`
-3. Add new `ToolCall` chunk type to handle tool execution feedback
-4. Tools requiring thread context receive it via constructor injection
-
----
-
-## internal_content Validation
-
-**Location:** Create `app-modules/ai/src/Validators/InternalContentValidator.php`
-
-**Message format:**
-
-- `content`: Presentational text shown in chat (e.g., "✓ Address: 123 Main St, LA, CA 90001")
-- `internal_content`: Structured data for LLM context
-
-**internal_content types:**
-
-`field_response`:
-
-```
-{type: 'field_response', field_id: 'uuid', value: {line1: '123 Main St', city: 'LA', state: 'CA', postal: '90001'}}
+## Database Changes
+
+### Migration: Add columns to `service_requests`
+
+```php
+$table->boolean('is_draft')->default(false)->index();
+$table->foreignUuid('portal_assistant_thread_id')->nullable()->unique();
+$table->string('workflow_phase')->nullable();
+$table->json('clarifying_questions')->default('[]');
+$table->json('ai_resolution')->nullable();
 ```
 
-Validate: field_id exists in current form context, value matches field schema
+### Global Scope: ExcludeDraftServiceRequests
 
-`type_selection`:
+Add to ServiceRequest model's `booted()`:
 
-```
-{type: 'type_selection', type_id: 'uuid'}
-```
-
-Validate: type_id exists and is submittable
-
-`widget_cancelled`:
-
-```
-{type: 'widget_cancelled', field_id: 'uuid'}
+```php
+static::addGlobalScope('excludeDrafts', function (Builder $builder) {
+    $builder->where('is_draft', false);
+});
 ```
 
-No validation needed—just signals user cancelled widget
-
-`widget_error`:
-
+When working with drafts in the portal assistant, use:
+```php
+ServiceRequest::withoutGlobalScope('excludeDrafts')
+    ->where('portal_assistant_thread_id', $thread->id)
+    ->first();
 ```
-{type: 'widget_error', field_id: 'uuid', error: 'Failed to load component'}
+
+When finalizing a draft:
+```php
+$draft->is_draft = false;
+$draft->workflow_phase = null;
+$draft->save();
 ```
-
-No validation needed—signals widget render failure
-
-**Integration:** Call validator in `SendMessage` job before adding to context. Return 422 with field-specific errors if invalid. On success, store message with both `content` and `internal_content`. When building AI context, use `internal_content` if present.
 
 ---
 
-## Action Request Event
+## Workflow Phases (stored on ServiceRequest)
 
-**Create:** `app-modules/ai/src/Events/PortalAssistant/PortalAssistantActionRequest.php`
+1. `type_selection` - Draft created, waiting for type selection
+2. `data_collection` - Type selected, collecting title/description/fields
+3. `submitted` - Required fields collected, validated, moved to enrichment
+4. `clarifying_questions` - Collecting exactly 3 Q&A pairs
+5. `resolution` - Attempting AI resolution
 
-**Pattern:** Follow `PortalAssistantMessageChunk` structure. Broadcast to same channel. Include `action_type` and `params`.
-
-**Action types:**
-
-- `select_service_request_type`: params include `suggestion`, `types_tree`
-- `render_field_input`: params include `field_id`, `block_definition`
-
----
-
-## Frontend Components
-
-**Location:** Create in portal's Vue components directory
-
-**Required widgets:**
-
-- TypeSelectorWidget: Shows AI suggestion highlighted + full category tree for browsing
-- SelectBlock, RadioBlock: Render options from `blockDefinition.options`
-- AddressBlock: Line1, Line2, City, State, Postal fields
-- PhoneBlock: Country code + number with formatting
-- DateBlock: Date picker (respect min/max from validation config)
-- FileUploadBlock: Multi-file with progress, success/error states per file
-
-**Shared interface:**
-
-- Props: `fieldId`, `blockDefinition` (includes label, required, validation, options, config)
-- Events: `submit(value, displayText)`, `cancel()`
-- Must validate locally before submit
-- Show loading state during server submission
-
-**On submit:**
-
-- POST to `/api/ai/portal-assistant/messages` with `content` (display text) and `internal_content` (structured data)
-- Wait for server response before showing confirmation in chat
-- Handle 422 errors: show inline error, allow correction and retry
-- Handle network errors: show retry button
-
-**On cancel:**
-
-- Send message with `internal_content: {type: 'widget_cancelled', field_id: '...'}`
-- Assistant acknowledges and continues conversation
-
-**Event listener:**
-
-- Subscribe to `PortalAssistantActionRequest` on `portal-assistant-thread-{threadId}` channel
-- On `select_service_request_type`: render TypeSelectorWidget with params
-- On `render_field_input`: render appropriate block component based on `blockDefinition.type`
+When finalized, `is_draft` is set to `false` and `workflow_phase` is cleared. The status is set to the default "New" (Open) status.
 
 ---
 
-## System Prompt Additions
+## Model Relationships
 
-Add to SendMessage job context building when service request tools are available:
+### PortalAssistantThread
 
-**Identity & Purpose:**
+Add relationship to draft ServiceRequest:
 
-- "You help users submit service requests conversationally"
-- "Store all data in your conversation context until submission"
-- "Be flexible—users can change their mind anytime"
+```php
+public function draft(): HasOne
+{
+    return $this->hasOne(ServiceRequest::class, 'portal_assistant_thread_id')
+        ->withoutGlobalScope('excludeDrafts');
+}
+```
 
-**State Management:**
+### ServiceRequest
 
-- Track collected data using field_id as keys
-- When you have all required data, proceed to clarifying questions
-- If user cancels, forget all collected data immediately
-- If unsure about a previously collected value, ask user to confirm
-- Before submission, verify all required fields present—prompt for any missing
+Add relationship back to thread:
 
-**Tool Usage:**
-
-- For simple fields (text, number, email, yes/no): collect conversationally
-- For complex fields (select, radio, address, phone, date, file): call `request_field_input(field_id)`
-- You'll receive field responses as messages with structured `internal_content`
-
-**Field Collection Behavior:**
-
-- Start with required fields first
-- For yes/no questions: ask naturally, accept variations (yes/sure/nope/yep/nah)
-- If user provides multiple values at once, extract all applicable values
-- Never make up or assume values—always ask if unclear
-- Handle corrections naturally: "Actually, change the priority to high" → update stored value
-
-**Clarifying Questions:**
-
-- After collecting all required fields, you MUST generate exactly 3 clarifying questions
-- Questions must be specific to BOTH the request type AND the data already collected
-- Good: "What operating system are you using?", "When did this first occur?", "Have you tried restarting?"
-- Bad: "Is there anything else?", "Can you provide more details?", "What else should we know?"
-- Ask one question at a time, wait for answer before asking next
-- Store each Q&A pair as you go
-- If user says "skip" or "no more questions", stop asking and proceed with whatever answers collected
-- These questions help both AI resolution and human agents understand the issue
-
-**AI Resolution:**
-
-- After clarifying questions, call `evaluate_ai_resolution` if enabled
-- Present solution only if confidence meets threshold
-- Always ask "Did this resolve your issue?" and wait for explicit yes/no
-- Record the outcome regardless of user's answer
-- If user declines or confidence too low, proceed to submission—don't abandon the request
-
-**Context Awareness:**
-
-- When waiting for field input, try to interpret response as field value first
-- If user is clearly asking an unrelated question, answer it and maintain collected data
-- Guide user back to request after answering tangential questions
-- Distinguish between: field response, new question, correction, cancellation
-
-**Submission:**
-
-- Summarize all collected data before asking for confirmation
-- Ask explicit confirmation: "Should I submit this request?"
-- If validation fails, explain errors and re-collect only invalid fields
-- Provide request number after successful submission
+```php
+public function portalAssistantThread(): BelongsTo
+{
+    return $this->belongsTo(PortalAssistantThread::class);
+}
+```
 
 ---
 
-## File Upload Handling
+## Tool Definitions
 
-- Files upload to temp storage during conversation
-- Widget shows clear success/failure per file with retry option
-- Failed uploads excluded from payload (not silent)
-- Submission tool moves successful files to permanent storage
-- Response includes list of actually attached files
+All tools receive `PortalAssistantThread` in constructor. Draft is resolved via `$this->thread->draft`.
+
+### 1. `fetch_service_request_types`
+
+**When called:** User expresses intent to create a service request (e.g., "I want to submit a ticket", "I want to speak to a human", "I need help with something")
+
+**Parameters:** none
+
+**Behavior:**
+- Creates draft ServiceRequest if none exists for thread
+- Draft has: is_draft=true, workflow_phase=type_selection, respondent=thread author
+- Returns available types tree
+
+**Returns:**
+```json
+{
+  "types_tree": [...],
+  "draft_created": true,
+  "workflow_phase": "type_selection"
+}
+```
+
+### 2. `show_type_selector`
+
+**When called:** After fetching types, to display selection UI
+
+**Parameters:**
+- `suggested_type_id` (string, optional) - AI's best match based on conversation. If AI cannot confidently suggest a type, omit this parameter.
+
+**Behavior:**
+- Emits `PortalAssistantActionRequest` with action `select_service_request_type`
+- UI shows types with suggestion highlighted/preselected (if provided)
+- User can still choose any type regardless of suggestion
+
+**Returns:** `"Type selector displayed. Wait for user selection."`
+
+**Frontend handling:**
+- When widget appears: **hide the main chat input** to avoid confusion about which field to use
+- Show small "Cancel" or "Send message instead" button below widget to return to chat input
+- User selects type → sends message with `internal_content: { type: 'type_selection', type_id: '...' }`
+- User cancels → sends `internal_content: { type: 'widget_cancelled', widget_type: 'type_selector' }`, restores chat input
+- Backend processes and updates draft: sets type, gets default priority, creates form submission, sets phase to `data_collection`
+
+### 3. `get_draft_status`
+
+**When called:**
+- After type selection to retrieve the form structure for the selected type
+- When resuming a conversation to restore context
+- At any point to check what fields are filled/missing
+
+**Parameters:** none
+
+**Behavior:**
+- Returns current draft state including form fields for the **current type only**
+- Form fields that belonged to a previous type are not returned (but remain stored internally)
+
+**Returns:**
+```json
+{
+  "has_draft": true,
+  "workflow_phase": "data_collection",
+  "type_id": "uuid",
+  "type_name": "Technical Support",
+  "priority_id": "uuid",
+  "priority_name": "Normal",
+  "priorities": [{"id": "...", "name": "High"}, ...],
+  "title": "Password reset needed",
+  "description": null,
+  "form_fields": [
+    {
+      "field_id": "uuid",
+      "label": "Operating System",
+      "type": "select",
+      "required": true,
+      "value": null,
+      "filled": false,
+      "options": [...]
+    }
+  ],
+  "missing_required": ["description", "field_uuid_1"],
+  "clarifying_questions": {"completed": 0, "required": 3},
+  "can_submit": false
+}
+```
+
+### 4. `update_title`
+
+**When called:** When AI collects title conversationally. Can be called multiple times if user rephrases.
+
+**Parameters:**
+- `title` (string, required)
+
+**Returns:**
+```json
+{
+  "success": true,
+  "title": "Password reset needed"
+}
+```
+
+### 5. `update_description`
+
+**When called:** When AI collects description conversationally. Can be called multiple times if user rephrases.
+
+**Parameters:**
+- `description` (string, required)
+
+**Returns:**
+```json
+{
+  "success": true,
+  "description": "I cannot log in to my account..."
+}
+```
+
+### 6. `update_form_field`
+
+**When called:** When AI collects a text-based custom field conversationally. Can be called multiple times to update the value.
+
+**Parameters:**
+- `field_id` (string, required)
+- `value` (string, required)
+
+**Behavior:**
+- Validates field exists for current type
+- Saves to ServiceRequestFormSubmission field pivot
+- Returns error if field doesn't belong to current type
+
+**Returns:**
+```json
+{
+  "success": true,
+  "field_id": "uuid",
+  "label": "Additional Notes"
+}
+```
+
+### 7. `update_priority`
+
+**When called:** When AI collects or changes priority
+
+**Parameters:**
+- `priority_id` (string, required)
+
+**Returns:**
+```json
+{
+  "success": true,
+  "priority_name": "High"
+}
+```
+
+### 8. `show_field_input`
+
+**When called:** For complex fields that require structured input (select, radio, date, phone, address, file uploads). The AI must NOT attempt to collect these via chat.
+
+**Parameters:**
+- `field_id` (string, required)
+
+**Behavior:**
+- Validates field exists for current type
+- Emits `PortalAssistantActionRequest` with action `render_field_input`
+- UI renders appropriate input component above the chat
+
+**Returns:** `"Input displayed for [Field Label]. Wait for user to complete it."`
+
+**Frontend handling:**
+- When widget appears: **hide the main chat input** to avoid confusion about which field to use
+- Show small "Cancel" or "Send message instead" button below widget to return to chat input
+- User fills and submits → sends message with `internal_content: { type: 'field_response', field_id: '...', value: {...} }`
+- User cancels → sends `internal_content: { type: 'widget_cancelled', field_id: '...' }`, restores chat input
+- Backend saves value directly to form submission field pivot - value does NOT return to AI as free text
+- File uploads saved via existing media collection mechanism
+
+### 9. `submit_service_request`
+
+**When called:** After all required fields are filled (title, description, and all required custom fields)
+
+**Parameters:** none
+
+**Behavior:**
+- Validates all required fields present
+- If valid: sets phase to `clarifying_questions`
+- If invalid: returns specific errors so AI can continue collecting missing fields
+
+**Returns (success):**
+```json
+{
+  "success": true,
+  "workflow_phase": "clarifying_questions",
+  "clarifying_questions_required": 3,
+  "instruction": "Ask the user 3 clarifying questions specific to their request. Questions should help understand the issue better."
+}
+```
+
+**Returns (validation failure):**
+```json
+{
+  "success": false,
+  "errors": {
+    "description": "Description is required",
+    "field_uuid": "This field is required"
+  },
+  "missing_required": ["description", "field_uuid"]
+}
+```
+
+### 10. `save_clarifying_question`
+
+**When called:** After user answers each clarifying question. Must be called exactly 3 times.
+
+**Parameters:**
+- `question` (string, required) - The question asked
+- `answer` (string, required) - User's response
+
+**Behavior:**
+- Appends to `clarifying_questions` JSON array on ServiceRequest
+- When 3 complete: sets phase to `resolution`
+
+**Returns:**
+```json
+{
+  "success": true,
+  "completed": 2,
+  "remaining": 1
+}
+```
+
+Or when all 3 complete:
+```json
+{
+  "success": true,
+  "completed": 3,
+  "remaining": 0,
+  "workflow_phase": "resolution",
+  "ai_resolution_enabled": true,
+  "instruction": "Attempt to resolve the request using available knowledge. If confident, call submit_ai_resolution with your confidence score and proposed answer."
+}
+```
+
+### 11. `submit_ai_resolution`
+
+**When called:** After clarifying questions, when AI has a potential resolution
+
+**Parameters:**
+- `confidence_score` (integer 0-100, required) - AI's self-rated confidence that this resolution will help
+- `proposed_answer` (string, required) - The resolution text
+
+**Behavior:**
+- Stores resolution data in `ai_resolution` JSON column
+- Compares against configured threshold from AiResolutionSettings
+- Returns whether AI should present the resolution to user
+
+**Returns (meets threshold):**
+```json
+{
+  "threshold": 70,
+  "confidence_score": 85,
+  "meets_threshold": true,
+  "instruction": "Present your resolution to the user and ask if it solved their problem. Wait for explicit yes/no response."
+}
+```
+
+**Returns (below threshold):**
+```json
+{
+  "threshold": 70,
+  "confidence_score": 45,
+  "meets_threshold": false,
+  "instruction": "Confidence too low. Do not show resolution to user. Call finalize_service_request to submit for human review."
+}
+```
+
+### 12. `record_resolution_response`
+
+**When called:** After user responds to a presented resolution (only called if confidence met threshold)
+
+**Parameters:**
+- `accepted` (boolean, required) - Whether user said the resolution solved their problem
+
+**Behavior:**
+- Updates `ai_resolution.user_accepted`
+- Sets `is_ai_resolution_attempted` = true
+- Sets `is_ai_resolution_successful` = accepted
+- Finalizes the service request internally
+- If accepted: marks as resolved/closed (still creates complete record)
+- If rejected: submits for human handling
+
+**Returns:**
+```json
+{
+  "success": true,
+  "request_number": "SR-2024-001234",
+  "resolution_accepted": true,
+  "status": "resolved"
+}
+```
+
+### 13. `finalize_service_request`
+
+**When called:** When resolution is skipped, below threshold, or user declined the resolution
+
+**Parameters:** none
+
+**Behavior:**
+1. Creates ServiceRequestUpdate records for each clarifying Q&A
+2. If AI resolution was attempted: stores resolution data, creates update records
+3. Assigns to team member based on type's assignment strategy
+4. Sets `is_draft` to false, sets status to Open/New
+5. Clears `workflow_phase`
+6. Generates `service_request_number`
+
+**Returns:**
+```json
+{
+  "success": true,
+  "request_number": "SR-2024-001234",
+  "message": "Service request submitted. A team member will review your request."
+}
+```
 
 ---
 
-## Error Handling
+## Internal Content Processing
 
-**Validation errors (422):**
+When `SendMessage` job receives a message with `internal_content`, process based on type before adding to AI context:
 
-- Return `{message, errors, field_id}` from server
-- Frontend shows error inline, allows retry
-- Do not add message to conversation context on validation failure
+### `type_selection`
+```json
+{"type": "type_selection", "type_id": "uuid"}
+```
+- Validate type exists and has form
+- If type is changing and form submission exists for old type:
+  - Keep existing ServiceRequestFormSubmission (field values preserved internally)
+  - Create new ServiceRequestFormSubmission for new type
+  - Link new submission to draft
+- If no form submission exists:
+  - Create ServiceRequestFormSubmission for selected type
+- Set default priority for new type
+- Set `workflow_phase` to `data_collection`
+- Note: If user switches back to previous type, old form submission data could be restored
 
-**Tool errors:**
+### `field_response`
+```json
+{"type": "field_response", "field_id": "uuid", "value": {...}}
+```
+- Validate field belongs to current type's form
+- Save via ProcessServiceRequestSubmissionField action
+- For files: use existing media collection handling
+- Value is stored directly - does not pass through AI as free text
 
-- Return `{error: true, message, recoverable: bool, suggestion?}` from tool
-- AI explains issue in natural language
-- Offer alternatives: retry, skip if optional, cancel request
-- Never leave conversation in broken state
+### `widget_cancelled`
+```json
+{"type": "widget_cancelled", "widget_type": "type_selector" | "field_input", "field_id?": "uuid"}
+```
+- No data change
+- Restores chat input
+- AI should acknowledge and continue conversation
 
-**Widget failures:**
+---
 
-- If widget fails to render, frontend sends error in `internal_content`
-- Assistant falls back to conversational collection where possible
-- For fields that require UI (file upload), explain the issue and suggest retry
+## Frontend Widget Behavior
 
-**Context drift:**
+When any widget (type selector, field input) is active:
 
-- AI prompts for any data it's uncertain about before submission
-- Long conversations may lose context—AI should verify critical fields before final submission
+1. **Hide main chat input** - Replace the text input area with the widget
+2. **Show escape option** - Below the widget, show a small link/button: "Cancel" or "Send message instead"
+3. **On widget submit** - Send message with `internal_content`, restore chat input
+4. **On cancel/escape** - Send cancellation `internal_content`, restore chat input, AI acknowledges and continues
 
-**Submission failures:**
+This prevents user confusion about which input field to use while still allowing the user to cancel, pivot, or clarify at any time.
 
-- Return specific field errors from `submit_service_request`
-- AI re-collects only the invalid fields
-- Resubmit with corrected data
+### Frontend Files to Update
+- `portals/knowledge-management/src/Components/Assistant/ChatInput.vue` - Add widget visibility toggle
+- `portals/knowledge-management/src/Components/Assistant/AssistantWidget.vue` - Add cancel button, emit cancel event
+- `portals/knowledge-management/src/Composables/assistant/useAssistantChat.js` - Handle widget state and cancellation
+
+---
+
+## Files to Modify
+
+### Models
+- `app-modules/service-management/src/Models/ServiceRequest.php`
+  - Add global scope for excluding drafts (`where('is_draft', false)`)
+  - Add `is_draft`, `portal_assistant_thread_id`, `workflow_phase`, `clarifying_questions`, `ai_resolution` to fillable/casts
+  - Add `portalAssistantThread()` relationship
+  - Add helper method: `isDraft()`
+
+- `app-modules/ai/src/Models/PortalAssistantThread.php`
+  - Add `draft()` relationship
+
+### Migration
+- Create migration adding columns to service_requests table (`is_draft`, `portal_assistant_thread_id`, `workflow_phase`, `clarifying_questions`, `ai_resolution`)
+
+### Tools (replace existing in `app-modules/ai/src/Tools/PortalAssistant/`)
+Delete existing tools and create:
+- `FetchServiceRequestTypesTool.php`
+- `ShowTypeSelectorTool.php`
+- `GetDraftStatusTool.php`
+- `UpdateTitleTool.php`
+- `UpdateDescriptionTool.php`
+- `UpdateFormFieldTool.php`
+- `UpdatePriorityTool.php`
+- `ShowFieldInputTool.php`
+- `SubmitServiceRequestTool.php`
+- `SaveClarifyingQuestionTool.php`
+- `SubmitAiResolutionTool.php`
+- `RecordResolutionResponseTool.php`
+- `FinalizeServiceRequestTool.php`
+
+### Jobs
+- `app-modules/ai/src/Jobs/PortalAssistant/SendMessage.php`
+  - Update `buildTools()` to instantiate new tools
+  - Add `processInternalContent()` method for type_selection and field_response handling
+  - Pass thread to all tools that need it
+
+### Validators
+- `app-modules/ai/src/Validators/InternalContentValidator.php`
+  - Update validation for new internal_content types
 
 ---
 
 ## Implementation Order
 
-1. **Foundation:**
-    - Migration: `internal_content` column on `portal_assistant_messages`
-    - `InternalContentValidator` class
-    - Update `SendMessage` job to validate/use `internal_content`
-    - Modify `BaseOpenAiService::streamRaw()` to accept `$tools` array and set `withMaxSteps()`
-    - Add `ToolCall` streaming chunk type
+### Phase 1: Database & Model Foundation
+1. Create migration: add `is_draft`, `portal_assistant_thread_id`, `workflow_phase`, `clarifying_questions`, `ai_resolution` columns to service_requests
+2. Update `ServiceRequest` model: add global scope for excluding drafts, add new column casts, add relationships
+3. Update `PortalAssistantThread` model: add `draft()` relationship
+4. Run migration
 
-2. **Tools** (in `app-modules/ai/src/Tools/PortalAssistant/`):
-    - `GetServiceRequestFormTool` (read-only, test Prism integration)
-    - `SuggestServiceRequestTypeTool` (first action-emitting tool)
-    - `RequestFieldInputTool`
-    - `EvaluateAiResolutionTool`
-    - `SubmitServiceRequestTool` (most complex, write operation)
+### Phase 2: Core Draft Tools
+5. Create `FetchServiceRequestTypesTool` - creates draft, returns types
+6. Create `ShowTypeSelectorTool` - emits UI action
+7. Create `GetDraftStatusTool` - returns comprehensive draft state including form structure
+8. Update `SendMessage` job to process `type_selection` internal_content
 
-3. **Frontend:**
-    - `PortalAssistantActionRequest` event listener
-    - TypeSelectorWidget
-    - Field input components (AddressBlock, PhoneBlock, DateBlock, SelectBlock, RadioBlock)
-    - FileUploadBlock
+### Phase 3: Data Collection Tools
+9. Create `UpdateTitleTool`
+10. Create `UpdateDescriptionTool`
+11. Create `UpdatePriorityTool`
+12. Create `UpdateFormFieldTool`
+13. Create `ShowFieldInputTool`
+14. Update `SendMessage` job to process `field_response` internal_content
 
-4. **Integration:**
-    - System prompt additions for tool usage
-    - End-to-end flow testing
-    - Error handling verification
+### Phase 4: Submission & Enrichment Tools
+15. Create `SubmitServiceRequestTool` - validates, changes phase
+16. Create `SaveClarifyingQuestionTool`
+17. Create `SubmitAiResolutionTool`
+18. Create `RecordResolutionResponseTool`
+19. Create `FinalizeServiceRequestTool`
+
+### Phase 5: Cleanup
+20. Delete old tools
+21. Update `buildTools()` in SendMessage job
 
 ---
 
-## Open Questions
+## Key Behaviors to Verify
 
-1. Field response timeout before assuming context switch?
-2. Authorization: per-tool or centralized? (Recommend per-tool)
-3. Context window limits for long conversations?
-4. Yes/no and select parsing flexibility—what variations to accept?
+- Draft is created when user expresses intent to submit a service request
+- Type selector shows AI suggestion highlighted but user can choose any type
+- Title and description are collected before requesting form structure
+- Form fields returned only for current type (previous type's fields stored but not shown)
+- Text fields collected conversationally, complex fields via UI widgets
+- Widget hides chat input but shows cancel option
+- Field values from UI go directly to draft, not back through AI
+- Validation errors list specific missing fields
+- Exactly 3 clarifying questions are collected
+- Resolution only shown to user if confidence meets threshold
+- Service request is always created/saved regardless of resolution outcome
+- Draft persists across page refreshes until finalized
