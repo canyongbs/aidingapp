@@ -93,6 +93,6 @@ class RequestFieldInputTool extends Tool
             ]
         ));
 
-        return "Field input widget displayed for \"{$field->label}\". Wait for user to submit their response.";
+        return "Tell the user: I've shown you an input for \"{$field->label}\". Please provide the requested information.";
     }
 }

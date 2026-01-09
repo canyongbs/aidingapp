@@ -150,8 +150,8 @@ export function useAssistantChat() {
         const { type, field_id, type_id, value, display_text } = submitData;
 
         const internalContent = { type };
-        if (field_id) internalContent.field_id = field_id;
-        if (type_id) internalContent.type_id = type_id;
+        if (field_id !== undefined) internalContent.field_id = field_id;
+        if (type_id !== undefined) internalContent.type_id = type_id;
         if (value !== undefined) internalContent.value = value;
 
         await sendMessage(display_text || 'Submitted', internalContent);

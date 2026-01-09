@@ -45,10 +45,11 @@
     const emit = defineEmits(['submit', 'cancel']);
 
     const searchQuery = ref('');
-    const showBrowse = ref(false);
-
     const suggestion = computed(() => props.params.suggestion);
     const typesTree = computed(() => props.params.types_tree || []);
+    
+    // Auto-expand browse section if there's no suggestion
+    const showBrowse = ref(!props.params.suggestion);
 
     const filteredTree = computed(() => {
         if (!searchQuery.value.trim()) {
@@ -116,6 +117,7 @@
             <!-- Browse Other Options -->
             <div v-if="typesTree.length > 0">
                 <button
+                    v-if="suggestion"
                     @click="showBrowse = !showBrowse"
                     class="text-xs text-gray-600 hover:text-gray-900 flex items-center gap-1"
                 >
@@ -135,7 +137,7 @@
                     {{ showBrowse ? 'Hide other options' : 'Browse other options' }}
                 </button>
 
-                <div v-if="showBrowse" class="mt-2 space-y-2">
+                <div v-if="showBrowse" class="space-y-2" :class="{ 'mt-2': suggestion }">
                     <!-- Search -->
                     <input
                         v-model="searchQuery"
@@ -147,8 +149,8 @@
                     <!-- Category Tree -->
                     <div class="max-h-48 overflow-y-auto space-y-1">
                         <TypeCategory
-                            v-for="category in filteredTree"
-                            :key="category.category_id"
+                            v-for="(category, index) in filteredTree"
+                            :key="category.category_id || `uncategorized-${index}`"
                             :category="category"
                             @select="selectType"
                         />

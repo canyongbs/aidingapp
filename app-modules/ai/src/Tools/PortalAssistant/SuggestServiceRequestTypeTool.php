@@ -38,6 +38,7 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\Ai\Models\PortalAssistantThread;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use Prism\Prism\Tool;
 
@@ -75,7 +76,12 @@ class SuggestServiceRequestTypeTool extends Tool
             ]
         ));
 
-        return 'Type selector displayed to user. Wait for their selection before proceeding.';
+        // Return a message that tells the AI what to say to the user
+        if ($suggestion) {
+            return "Tell the user: I've shown you a selection interface with my recommendation. Please select the type that best matches your request.";
+        } else {
+            return "Tell the user: I've shown you a list of available service request types. Please select the one that best matches your request.";
+        }
     }
 
     /**
@@ -88,7 +94,28 @@ class SuggestServiceRequestTypeTool extends Tool
             ->orderBy('sort')
             ->get();
 
-        return $categories->map(fn ($category) => $this->formatCategory($category))->all();
+        // Also get types that don't belong to any category
+        $uncategorizedTypes = ServiceRequestType::whereHas('form')
+            ->whereDoesntHave('category')
+            ->get();
+
+        $tree = $categories->map(fn ($category) => $this->formatCategory($category))->all();
+
+        // If there are uncategorized types, add them as a pseudo-category
+        if ($uncategorizedTypes->isNotEmpty()) {
+            $tree[] = [
+                'category_id' => null,
+                'name' => 'Other',
+                'children' => [],
+                'types' => $uncategorizedTypes->map(fn ($type) => [
+                    'type_id' => $type->getKey(),
+                    'name' => $type->name,
+                    'description' => $type->description,
+                ])->all(),
+            ];
+        }
+
+        return $tree;
     }
 
     /**

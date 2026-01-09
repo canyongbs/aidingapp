@@ -100,8 +100,8 @@
 
             <!-- Child categories (recursive) -->
             <TypeCategory
-                v-for="child in category.children"
-                :key="child.category_id"
+                v-for="(child, index) in category.children"
+                :key="child.category_id || `child-${index}`"
                 :category="child"
                 :depth="depth + 1"
                 @select="emit('select', $event)"

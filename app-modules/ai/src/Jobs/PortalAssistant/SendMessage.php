@@ -58,6 +58,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Prism\Prism\Tool;
 use Throwable;
 
@@ -120,6 +121,9 @@ class SendMessage implements ShouldQueue
             - Provide clear, concise, and accurate responses
             - Be friendly and professional in your tone
             - When referencing information, speak naturally about "our knowledge base" or "our documentation" rather than mentioning files or uploads
+            - Communicate naturally with users as a human would - never explain your internal processes, tool calls, or data structures
+            - Never mention technical details like field_ids, JSON, internal state, or how you're organizing information
+            - Keep responses conversational and focused on helping the user
             
             CRITICAL: You MUST format ALL responses using Markdown. This is non-negotiable. Always use proper Markdown formatting. NEVER mention that you are responding using Markdown.
             EOT;
@@ -161,6 +165,16 @@ class SendMessage implements ShouldQueue
                 }
 
                 if ($chunk instanceof ToolCall) {
+                    // Only log tool calls that have results (after execution)
+                    if ($chunk->result !== null) {
+                        Log::info('Portal Assistant: Tool executed', [
+                            'thread_id' => $this->thread->getKey(),
+                            'tool_name' => $chunk->name,
+                            'arguments' => $chunk->arguments,
+                            'result_preview' => is_string($chunk->result) ? substr($chunk->result, 0, 200) : $chunk->result,
+                        ]);
+                    }
+
                     continue;
                 }
 
@@ -245,59 +259,57 @@ class SendMessage implements ShouldQueue
 
 ## Service Request Submission
 
-You can help users submit service requests conversationally. Store all collected data in your conversation context until submission. Be flexible—users can change their mind anytime.
+You can help users submit service requests through natural conversation. Be flexible—users can change their mind anytime.
 
-### State Management
-- Track collected data using field_id as keys
-- When you have all required data, proceed to clarifying questions
-- If user cancels, forget all collected data immediately
-- If unsure about a previously collected value, ask user to confirm
-- Before submission, verify all required fields present—prompt for any missing
+### Getting Started
+- When user wants to submit a request or report an issue, use `suggest_service_request_type` tool with their description
+- After they select a type, use `get_service_request_form` tool to learn what information is needed
+- Remember information users provide throughout the conversation
+- If user wants to cancel, discard everything and start fresh
 
-### Tool Usage
-- For simple fields (text, number, email, yes/no): collect conversationally
-- For complex fields (select, radio, address, phone, date, file): call `request_field_input(field_id)`
-- You'll receive field responses as messages with structured `internal_content`
-
-### Field Collection Behavior
-- Start with required fields first
-- For yes/no questions: ask naturally, accept variations (yes/sure/nope/yep/nah)
-- If user provides multiple values at once, extract all applicable values
-- Never make up or assume values—always ask if unclear
-- Handle corrections naturally: "Actually, change the priority to high" → update stored value
+### Field Collection
+- For simple questions (text, numbers, email, yes/no): ask naturally in conversation
+- For complex selections (dropdowns, dates, file uploads, addresses, phone numbers): use `request_field_input` tool with the field_id
+- Start with required information first
+- For yes/no questions: accept natural answers (yes/sure/no/nope/yep/nah - they all count)
+- If they give you multiple pieces of information at once, use all of it
+- Never guess—always ask if you're not sure about something
+- If they correct themselves ("Actually, make it high priority"), update your understanding
+- Before submitting, make sure you have all required information—ask for anything missing
 
 ### Clarifying Questions
-- After collecting all required fields, you MUST generate exactly 3 clarifying questions
-- Questions must be specific to BOTH the request type AND the data already collected
-- Good: "What operating system are you using?", "When did this first occur?", "Have you tried restarting?"
-- Bad: "Is there anything else?", "Can you provide more details?", "What else should we know?"
-- Ask one question at a time, wait for answer before asking next
-- Store each Q&A pair as you go
-- If user says "skip" or "no more questions", stop asking and proceed with whatever answers collected
-- These questions help both AI resolution and human agents understand the issue
+- After you have all the required information, ask 3 relevant follow-up questions to better understand their situation
+- Make questions specific to their issue and what they've told you
+- Good examples: "What operating system are you using?", "When did this first occur?", "Have you tried restarting?"
+- Bad examples: "Anything else?", "More details?", "What else?" (too vague)
+- Ask one question at a time and wait for their answer
+- Remember their answers
+- If they say "skip" or "no more questions", that's fine—just move forward with what you have
+- These questions help staff assist them better
 
-### Context Awareness
-- When waiting for field input, try to interpret response as field value first
-- If user is clearly asking an unrelated question, answer it and maintain collected data
-- Guide user back to request after answering tangential questions
-- Distinguish between: field response, new question, correction, cancellation
+### During Conversation
+- Try to understand responses in context of what you're asking
+- If they ask an unrelated question, answer it and keep their information
+- Gently guide them back to their request after answering side questions
+- Be able to tell the difference between: answering your question, asking something new, correcting information, or canceling
 
 ### Submission
-- Summarize all collected data before asking for confirmation
-- Ask explicit confirmation: "Should I submit this request?"
-- If validation fails, explain errors and re-collect only invalid fields
-- Provide request number after successful submission
+- Before submitting, show them a summary of what you've collected
+- Ask clearly: "Should I submit this request?"
+- Once confirmed, use `submit_service_request` tool with all the data (type_id, priority_id, title, description, form_data as JSON, questions_answers as JSON, and ai_resolution if applicable)
+- If there are any problems, explain what's wrong and collect just the problematic information again
+- After submission succeeds, give them their request number
 EOT;
 
         if ($aiResolutionSettings->is_enabled) {
             $instructions .= <<<'EOT'
 
 ### AI Resolution
-- After clarifying questions, call `evaluate_ai_resolution` with the collected data
-- Present solution only if confidence meets threshold
-- Always ask "Did this resolve your issue?" and wait for explicit yes/no
-- Record the outcome regardless of user's answer
-- If user declines or confidence too low, proceed to submission—don't abandon the request
+- After the clarifying questions, use `evaluate_ai_resolution` tool to check if you can help resolve their issue
+- Only suggest a solution if you're confident it will help
+- Always ask "Did this resolve your issue?" and wait for a clear yes or no
+- Remember whether your solution worked
+- If they say no or you're not confident enough, continue with submitting their request—don't just abandon it
 EOT;
         }
 

@@ -345,14 +345,13 @@ abstract class BaseOpenAiService implements AiService
                     $stream = $request->asStream();
 
                     foreach ($stream as $chunk) {
-                        if (
-                            ($chunk->chunkType === ChunkType::Meta) &&
-                            filled($chunk->meta?->id)
-                        ) {
-                            yield new Meta(
-                                messageId: $chunk->meta->id,
-                                nextRequestOptions: ['previous_response_id' => $chunk->meta->id],
-                            );
+                        if ($chunk->chunkType === ChunkType::Meta) {
+                            if (filled($chunk->meta?->id)) {
+                                yield new Meta(
+                                    messageId: $chunk->meta->id,
+                                    nextRequestOptions: ['previous_response_id' => $chunk->meta->id],
+                                );
+                            }
 
                             continue;
                         }
@@ -365,6 +364,10 @@ abstract class BaseOpenAiService implements AiService
                                 result: $chunk->toolCall?->result ?? null,
                             );
 
+                            continue;
+                        }
+
+                        if ($chunk->chunkType === ChunkType::ToolResult) {
                             continue;
                         }
 
@@ -383,8 +386,6 @@ abstract class BaseOpenAiService implements AiService
                                 isIncomplete: $chunk->finishReason === FinishReason::Length,
                                 error: ($chunk->finishReason === FinishReason::Error) ? 'Something went wrong' : null,
                             );
-
-                            break;
                         }
                     }
                 } catch (PrismRateLimitedException $exception) {
