@@ -39,7 +39,7 @@ Add an `is_draft` boolean field to ServiceRequest with a global scope that exclu
 
 ```php
 $table->boolean('is_draft')->default(false)->index();
-$table->foreignUuid('portal_assistant_thread_id')->nullable()->unique();
+$table->foreignUuid('portal_assistant_thread_id')->nullable()->index();
 $table->string('workflow_phase')->nullable();
 $table->json('clarifying_questions')->default('[]');
 $table->json('ai_resolution')->nullable();
@@ -87,12 +87,22 @@ When finalized, `is_draft` is set to `false` and `workflow_phase` is cleared. Th
 
 ### PortalAssistantThread
 
-Add relationship to draft ServiceRequest:
+Add relationships to ServiceRequest (hasMany for creating, hasOne ofMany for getting latest draft):
 
 ```php
-public function draft(): HasOne
+public function serviceRequests(): HasMany
+{
+    return $this->hasMany(ServiceRequest::class, 'portal_assistant_thread_id')
+        ->withoutGlobalScope('excludeDrafts');
+}
+
+public function draftServiceRequest(): HasOne
 {
     return $this->hasOne(ServiceRequest::class, 'portal_assistant_thread_id')
+        ->ofMany(
+            ['created_at' => 'max'],
+            fn ($query) => $query->where('is_draft', true)
+        )
         ->withoutGlobalScope('excludeDrafts');
 }
 ```
@@ -112,7 +122,7 @@ public function portalAssistantThread(): BelongsTo
 
 ## Tool Definitions
 
-All tools receive `PortalAssistantThread` in constructor. Draft is resolved via `$this->thread->draft`.
+All tools receive `PortalAssistantThread` in constructor. Draft is resolved via `$this->thread->draftServiceRequest`.
 
 ### 1. `fetch_service_request_types`
 

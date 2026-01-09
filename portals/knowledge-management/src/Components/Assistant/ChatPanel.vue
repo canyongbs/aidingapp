@@ -79,15 +79,17 @@
 
             <ChatMessages :messages="messages" :welcome-message="welcomeMessage" :is-open="props.isOpen" />
 
-            <AssistantWidget
-                v-if="activeWidget"
-                :action-type="activeWidget.type"
-                :params="activeWidget.params"
-                @submit="handleWidgetSubmit"
-                @cancel="handleWidgetCancel"
-            />
-
-            <ChatInput :disabled="isSending || isAssistantResponding || !!activeWidget" @send="sendMessage" />
+            <template v-if="activeWidget">
+                <AssistantWidget
+                    :action-type="activeWidget.type"
+                    :params="activeWidget.params"
+                    @submit="handleWidgetSubmit"
+                    @cancel="handleWidgetCancel"
+                />
+            </template>
+            <template v-else>
+                <ChatInput :disabled="isSending || isAssistantResponding" @send="sendMessage" />
+            </template>
         </div>
     </Transition>
 </template>

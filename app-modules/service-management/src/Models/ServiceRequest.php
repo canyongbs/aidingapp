@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
+use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
@@ -101,6 +102,11 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'ai_resolution_confidence_score',
         'is_ai_resolution_attempted',
         'is_ai_resolution_successful',
+        'is_draft',
+        'portal_assistant_thread_id',
+        'workflow_phase',
+        'clarifying_questions',
+        'ai_resolution',
     ];
 
     protected $casts = [
@@ -111,6 +117,9 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'ai_resolution_confidence_score' => 'integer',
         'is_ai_resolution_attempted' => 'boolean',
         'is_ai_resolution_successful' => 'boolean',
+        'is_draft' => 'boolean',
+        'clarifying_questions' => 'array',
+        'ai_resolution' => 'array',
     ];
 
     public function registerMediaCollections(): void
@@ -273,6 +282,19 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<PortalAssistantThread, $this>
+     */
+    public function portalAssistantThread(): BelongsTo
+    {
+        return $this->belongsTo(PortalAssistantThread::class);
+    }
+
+    public function isDraft(): bool
+    {
+        return $this->is_draft === true;
+    }
+
     public function scopeOpen(Builder $query): void
     {
         $query->whereIn(
@@ -414,6 +436,10 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
             if (! $user->hasLicense(Contact::getLicenseType())) {
                 $builder->whereRaw('1 = 0');
             }
+        });
+
+        static::addGlobalScope('excludeDrafts', function (Builder $builder) {
+            $builder->where('is_draft', false);
         });
     }
 

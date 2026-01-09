@@ -44,12 +44,26 @@ use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
 use AidingApp\Ai\Support\StreamingChunks\ToolCall;
-use AidingApp\Ai\Tools\PortalAssistant\EvaluateAiResolutionTool;
-use AidingApp\Ai\Tools\PortalAssistant\GetServiceRequestFormTool;
-use AidingApp\Ai\Tools\PortalAssistant\RequestFieldInputTool;
+use AidingApp\Ai\Tools\PortalAssistant\FetchServiceRequestTypesTool;
+use AidingApp\Ai\Tools\PortalAssistant\FinalizeServiceRequestTool;
+use AidingApp\Ai\Tools\PortalAssistant\GetDraftStatusTool;
+use AidingApp\Ai\Tools\PortalAssistant\RecordResolutionResponseTool;
+use AidingApp\Ai\Tools\PortalAssistant\SaveClarifyingQuestionTool;
+use AidingApp\Ai\Tools\PortalAssistant\ShowFieldInputTool;
+use AidingApp\Ai\Tools\PortalAssistant\ShowTypeSelectorTool;
+use AidingApp\Ai\Tools\PortalAssistant\SubmitAiResolutionTool;
 use AidingApp\Ai\Tools\PortalAssistant\SubmitServiceRequestTool;
-use AidingApp\Ai\Tools\PortalAssistant\SuggestServiceRequestTypeTool;
+use AidingApp\Ai\Tools\PortalAssistant\UpdateDescriptionTool;
+use AidingApp\Ai\Tools\PortalAssistant\UpdateFormFieldTool;
+use AidingApp\Ai\Tools\PortalAssistant\UpdatePriorityTool;
+use AidingApp\Ai\Tools\PortalAssistant\UpdateTitleTool;
 use AidingApp\Ai\Validators\InternalContentValidator;
+use AidingApp\Portal\Actions\GenerateServiceRequestForm;
+use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use App\Features\PortalAssistantServiceRequestFeature;
@@ -98,6 +112,8 @@ class SendMessage implements ShouldQueue
 
                 return;
             }
+
+            $this->processInternalContent();
         }
 
         $message = new PortalAssistantMessage();
@@ -230,21 +246,14 @@ class SendMessage implements ShouldQueue
         }
 
         return match ($this->internalContent['type'] ?? null) {
-            InternalContentValidator::TYPE_FIELD_RESPONSE => sprintf(
-                '[System: User submitted form field data] %s',
-                json_encode($this->internalContent, JSON_THROW_ON_ERROR)
-            ),
-            InternalContentValidator::TYPE_TYPE_SELECTION => sprintf(
-                '[System: User selected service request type_id: %s]',
-                $this->internalContent['type_id'] ?? 'unknown'
-            ),
+            InternalContentValidator::TYPE_FIELD_RESPONSE => '[System: User completed the form field input. The value has been saved to the draft. Call get_draft_status to see current state.]',
+            InternalContentValidator::TYPE_TYPE_SELECTION => '[System: User selected a service request type. The draft has been updated with the selected type and a default priority. Call get_draft_status to retrieve the form structure for this type, then collect title and description.]',
             InternalContentValidator::TYPE_WIDGET_CANCELLED => sprintf(
-                '[System: User cancelled widget for field_id: %s]',
-                $this->internalContent['field_id'] ?? 'unknown'
+                '[System: User cancelled the %s widget. Continue the conversation normally.]',
+                $this->internalContent['widget_type'] ?? 'input'
             ),
             InternalContentValidator::TYPE_WIDGET_ERROR => sprintf(
-                '[System: Widget error for field_id: %s - %s]',
-                $this->internalContent['field_id'] ?? 'unknown',
+                '[System: Widget error occurred: %s. Ask the user to try again or collect the information conversationally if possible.]',
                 $this->internalContent['error'] ?? 'unknown error'
             ),
             default => $this->content,
@@ -259,59 +268,61 @@ class SendMessage implements ShouldQueue
 
 ## Service Request Submission
 
-You can help users submit service requests through natural conversation. Be flexible—users can change their mind anytime.
+You can help users submit service requests through natural conversation. The draft state is automatically saved—you don't need to track IDs or remember what's been collected. Be flexible—users can change their mind anytime.
 
 ### Getting Started
-- When user wants to submit a request or report an issue, use `suggest_service_request_type` tool with their description
-- After they select a type, use `get_service_request_form` tool to learn what information is needed
-- Remember information users provide throughout the conversation
-- If user wants to cancel, discard everything and start fresh
+- When user wants to submit a request, report an issue, or speak to a human, use `fetch_service_request_types` to get available types and create a draft
+- Then use `show_type_selector` to display the type selection UI (optionally with a suggested type_id based on their description)
+- After they select a type, use `get_draft_status` to see the form structure and what's been collected
 
-### Field Collection
-- For simple questions (text, numbers, email, yes/no): ask naturally in conversation
-- For complex selections (dropdowns, dates, file uploads, addresses, phone numbers): use `request_field_input` tool with the field_id
-- Start with required information first
-- For yes/no questions: accept natural answers (yes/sure/no/nope/yep/nah - they all count)
-- If they give you multiple pieces of information at once, use all of it
-- Never guess—always ask if you're not sure about something
-- If they correct themselves ("Actually, make it high priority"), update your understanding
-- Before submitting, make sure you have all required information—ask for anything missing
-
-### Clarifying Questions
-- After you have all the required information, ask 3 relevant follow-up questions to better understand their situation
-- Make questions specific to their issue and what they've told you
-- Good examples: "What operating system are you using?", "When did this first occur?", "Have you tried restarting?"
-- Bad examples: "Anything else?", "More details?", "What else?" (too vague)
-- Ask one question at a time and wait for their answer
-- Remember their answers
-- If they say "skip" or "no more questions", that's fine—just move forward with what you have
-- These questions help staff assist them better
+### Collecting Information (Data Collection Phase)
+- First collect **title** (brief summary) and **description** (detailed explanation) using `update_title` and `update_description`
+- Then use `get_draft_status` to see what custom form fields need to be collected
+- For simple text fields (text_input, text_area, number, email, checkbox): collect conversationally and save with `update_form_field`
+- For complex fields (select, radio, date, phone, address, file uploads): use `show_field_input` to display the UI widget
+- Use `update_priority` if the user wants to change priority
+- Check `get_draft_status` anytime to see what's filled and what's missing
 
 ### During Conversation
-- Try to understand responses in context of what you're asking
-- If they ask an unrelated question, answer it and keep their information
-- Gently guide them back to their request after answering side questions
-- Be able to tell the difference between: answering your question, asking something new, correcting information, or canceling
+- If they give you multiple pieces of information at once, save all of it
+- If they correct themselves, update with the new value
+- If they ask unrelated questions, answer them—the draft is saved automatically
+- Never guess—always ask if unsure
 
 ### Submission
-- Before submitting, show them a summary of what you've collected
-- Ask clearly: "Should I submit this request?"
-- Once confirmed, use `submit_service_request` tool with all the data (type_id, priority_id, title, description, form_data as JSON, questions_answers as JSON, and ai_resolution if applicable)
-- If there are any problems, explain what's wrong and collect just the problematic information again
-- After submission succeeds, give them their request number
+- When all required fields are filled, use `submit_service_request` to validate and move to clarifying questions
+- If validation fails, it will tell you what's missing—collect those and try again
+
+### Clarifying Questions
+- After successful submission validation, ask exactly 3 clarifying questions
+- Make questions specific to their issue: "What operating system are you using?", "When did this first occur?"
+- Save each Q&A with `save_clarifying_question` after the user answers
+- Ask one at a time, wait for answer, then save
 EOT;
 
         if ($aiResolutionSettings->is_enabled) {
             $instructions .= <<<'EOT'
 
 ### AI Resolution
-- After the clarifying questions, use `evaluate_ai_resolution` tool to check if you can help resolve their issue
-- Only suggest a solution if you're confident it will help
-- Always ask "Did this resolve your issue?" and wait for a clear yes or no
-- Remember whether your solution worked
-- If they say no or you're not confident enough, continue with submitting their request—don't just abandon it
+- After 3 clarifying questions, try to resolve the issue using `submit_ai_resolution` with your confidence score (0-100) and proposed answer
+- If confidence meets threshold: present your solution and ask "Did this solve your problem?"
+- Use `record_resolution_response` to record their yes/no answer and finalize
+- If confidence is below threshold: use `finalize_service_request` to submit for human review
+EOT;
+        } else {
+            $instructions .= <<<'EOT'
+
+### Finalization
+- After 3 clarifying questions, use `finalize_service_request` to submit for human review
 EOT;
         }
+
+        $instructions .= <<<'EOT'
+
+### After Finalization
+- Give the user their request number from the response
+- Let them know a team member will review their request
+EOT;
 
         return $instructions;
     }
@@ -325,12 +336,158 @@ EOT;
             return [];
         }
 
-        return [
-            new GetServiceRequestFormTool(),
-            new SuggestServiceRequestTypeTool($this->thread),
-            new RequestFieldInputTool($this->thread),
-            new EvaluateAiResolutionTool(),
+        $aiResolutionSettings = app(AiResolutionSettings::class);
+
+        $tools = [
+            new FetchServiceRequestTypesTool($this->thread),
+            new ShowTypeSelectorTool($this->thread),
+            new GetDraftStatusTool($this->thread),
+            new UpdateTitleTool($this->thread),
+            new UpdateDescriptionTool($this->thread),
+            new UpdatePriorityTool($this->thread),
+            new UpdateFormFieldTool($this->thread),
+            new ShowFieldInputTool($this->thread),
             new SubmitServiceRequestTool($this->thread),
+            new SaveClarifyingQuestionTool($this->thread),
+            new FinalizeServiceRequestTool($this->thread),
         ];
+
+        if ($aiResolutionSettings->is_enabled) {
+            $tools[] = new SubmitAiResolutionTool($this->thread);
+            $tools[] = new RecordResolutionResponseTool($this->thread);
+        }
+
+        return $tools;
+    }
+
+    protected function processInternalContent(): void
+    {
+        if ($this->internalContent === null) {
+            return;
+        }
+
+        match ($this->internalContent['type'] ?? null) {
+            InternalContentValidator::TYPE_TYPE_SELECTION => $this->processTypeSelection(),
+            InternalContentValidator::TYPE_FIELD_RESPONSE => $this->processFieldResponse(),
+            default => null,
+        };
+    }
+
+    protected function processTypeSelection(): void
+    {
+        $typeId = $this->internalContent['type_id'] ?? null;
+
+        if (! $typeId) {
+            return;
+        }
+
+        $type = ServiceRequestType::whereHas('form')->find($typeId);
+
+        if (! $type) {
+            return;
+        }
+
+        $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
+            ->where('portal_assistant_thread_id', $this->thread->getKey())
+            ->where('is_draft', true)
+            ->latest()
+            ->first();
+
+        if (! $draft) {
+            return;
+        }
+
+        $defaultPriority = $type->priorities()->orderByDesc('order')->first();
+
+        if ($defaultPriority) {
+            $draft->priority()->associate($defaultPriority);
+        }
+
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
+        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
+
+        $submission = $form->submissions()->make([
+            'submitted_at' => null,
+        ]);
+
+        if ($defaultPriority) {
+            $submission->priority()->associate($defaultPriority);
+        }
+
+        $submission->save();
+
+        $draft->serviceRequestFormSubmission()->associate($submission);
+        $draft->workflow_phase = 'data_collection';
+        $draft->save();
+    }
+
+    protected function processFieldResponse(): void
+    {
+        $fieldId = $this->internalContent['field_id'] ?? null;
+        $value = $this->internalContent['value'] ?? null;
+
+        if (! $fieldId || $value === null) {
+            return;
+        }
+
+        $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
+            ->where('portal_assistant_thread_id', $this->thread->getKey())
+            ->where('is_draft', true)
+            ->with(['priority.type', 'serviceRequestFormSubmission'])
+            ->latest()
+            ->first();
+
+        if (! $draft || ! $draft->serviceRequestFormSubmission) {
+            return;
+        }
+
+        $type = $draft->priority?->type;
+
+        if (! $type) {
+            return;
+        }
+
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
+        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
+
+        $field = null;
+
+        foreach ($form->steps as $step) {
+            foreach ($step->fields as $f) {
+                if ($f->getKey() === $fieldId) {
+                    $field = $f;
+
+                    break 2;
+                }
+            }
+        }
+
+        if (! $field) {
+            return;
+        }
+
+        $submission = $draft->serviceRequestFormSubmission;
+        $existingField = $submission->fields()->where('service_request_form_field_id', $fieldId)->first();
+
+        if ($existingField) {
+            $submission->fields()->updateExistingPivot($fieldId, [
+                'response' => $value,
+            ]);
+        } else {
+            $fields = collect();
+
+            foreach ($form->steps as $step) {
+                foreach ($step->fields as $f) {
+                    $fields->put($f->getKey(), $f->type);
+                }
+            }
+
+            app(ProcessServiceRequestSubmissionField::class)->execute(
+                $submission,
+                $fieldId,
+                $value,
+                $fields->all(),
+            );
+        }
     }
 }

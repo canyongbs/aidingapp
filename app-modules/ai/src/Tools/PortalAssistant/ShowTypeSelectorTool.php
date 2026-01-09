@@ -42,20 +42,29 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use Prism\Prism\Tool;
 
-class SuggestServiceRequestTypeTool extends Tool
+class ShowTypeSelectorTool extends Tool
 {
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
         $this
-            ->as('suggest_service_request_type')
-            ->for('Analyzes the user query and displays a service request type selector. Call this when the user wants to submit a service request or report an issue.')
-            ->withStringParameter('user_query', 'The user message describing their need or issue')
+            ->as('show_type_selector')
+            ->for('Displays a UI widget for the user to select a service request type. Call this after fetching types.')
+            ->withStringParameter('suggested_type_id', 'Optional: The UUID of the type to suggest/highlight based on conversation context')
             ->using($this);
     }
 
-    public function __invoke(string $user_query): string
+    public function __invoke(?string $suggested_type_id = null): string
     {
+        $draft = $this->thread->draftServiceRequest;
+
+        if (! $draft) {
+            return json_encode([
+                'error' => true,
+                'message' => 'No draft exists. Call fetch_service_request_types first.',
+            ]);
+        }
+
         $typesTree = $this->buildTypesTree();
 
         if (empty($typesTree)) {
@@ -65,7 +74,19 @@ class SuggestServiceRequestTypeTool extends Tool
             ]);
         }
 
-        $suggestion = $this->findBestMatch($user_query, $typesTree);
+        $suggestion = null;
+
+        if ($suggested_type_id) {
+            $type = ServiceRequestType::whereHas('form')->find($suggested_type_id);
+
+            if ($type) {
+                $suggestion = [
+                    'type_id' => $type->getKey(),
+                    'name' => $type->name,
+                    'description' => $type->description,
+                ];
+            }
+        }
 
         event(new PortalAssistantActionRequest(
             $this->thread,
@@ -76,12 +97,7 @@ class SuggestServiceRequestTypeTool extends Tool
             ]
         ));
 
-        // Return a message that tells the AI what to say to the user
-        if ($suggestion) {
-            return "Tell the user: I've shown you a selection interface with my recommendation. Please select the type that best matches your request.";
-        } else {
-            return "Tell the user: I've shown you a list of available service request types. Please select the one that best matches your request.";
-        }
+        return 'Type selector displayed. Wait for user selection.';
     }
 
     /**
@@ -94,14 +110,12 @@ class SuggestServiceRequestTypeTool extends Tool
             ->orderBy('sort')
             ->get();
 
-        // Also get types that don't belong to any category
         $uncategorizedTypes = ServiceRequestType::whereHas('form')
             ->whereDoesntHave('category')
             ->get();
 
         $tree = $categories->map(fn ($category) => $this->formatCategory($category))->all();
 
-        // If there are uncategorized types, add them as a pseudo-category
         if ($uncategorizedTypes->isNotEmpty()) {
             $tree[] = [
                 'category_id' => null,
@@ -141,70 +155,5 @@ class SuggestServiceRequestTypeTool extends Tool
             'children' => $children,
             'types' => $types,
         ];
-    }
-
-    /**
-     * @param array<int, array<string, mixed>> $typesTree
-     *
-     * @return array<string, mixed>|null
-     */
-    protected function findBestMatch(string $query, array $typesTree): ?array
-    {
-        $queryLower = strtolower($query);
-        $allTypes = $this->flattenTypes($typesTree);
-
-        $bestMatch = null;
-        $bestScore = 0;
-
-        foreach ($allTypes as $type) {
-            $score = 0;
-            $nameLower = strtolower($type['name']);
-            $descLower = strtolower($type['description'] ?? '');
-
-            if (str_contains($queryLower, $nameLower) || str_contains($nameLower, $queryLower)) {
-                $score += 10;
-            }
-
-            $nameWords = explode(' ', $nameLower);
-
-            foreach ($nameWords as $word) {
-                if (strlen($word) > 3 && str_contains($queryLower, $word)) {
-                    $score += 5;
-                }
-            }
-
-            if ($descLower && str_contains($queryLower, $descLower)) {
-                $score += 3;
-            }
-
-            if ($score > $bestScore) {
-                $bestScore = $score;
-                $bestMatch = $type;
-            }
-        }
-
-        return $bestMatch;
-    }
-
-    /**
-     * @param array<int, array<string, mixed>> $categories
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    protected function flattenTypes(array $categories): array
-    {
-        $types = [];
-
-        foreach ($categories as $category) {
-            foreach ($category['types'] ?? [] as $type) {
-                $types[] = $type;
-            }
-
-            if (! empty($category['children'])) {
-                $types = array_merge($types, $this->flattenTypes($category['children']));
-            }
-        }
-
-        return $types;
     }
 }

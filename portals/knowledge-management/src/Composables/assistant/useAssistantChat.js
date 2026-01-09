@@ -162,7 +162,16 @@ export function useAssistantChat() {
         const widget = activeWidget.value;
         if (!widget) return;
 
-        const internalContent = { type: 'widget_cancelled' };
+        const widgetTypeMap = {
+            select_service_request_type: 'type_selector',
+            render_field_input: 'field_input',
+        };
+
+        const internalContent = {
+            type: 'widget_cancelled',
+            widget_type: widgetTypeMap[widget.type] || widget.type,
+        };
+
         if (widget.params?.field_id) {
             internalContent.field_id = widget.params.field_id;
         }

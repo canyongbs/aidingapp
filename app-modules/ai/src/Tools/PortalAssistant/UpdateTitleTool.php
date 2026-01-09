@@ -36,63 +36,38 @@
 
 namespace AidingApp\Ai\Tools\PortalAssistant;
 
-use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\Ai\Models\PortalAssistantThread;
-use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use Prism\Prism\Tool;
 
-class RequestFieldInputTool extends Tool
+class UpdateTitleTool extends Tool
 {
-    protected const CONVERSATIONAL_TYPES = [
-        'text_input',
-        'text_area',
-        'number',
-        'email',
-        'checkbox',
-    ];
-
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
         $this
-            ->as('request_field_input')
-            ->for('Displays a UI widget for collecting complex field input like selects, dates, file uploads, etc. For simple text fields, collect the value conversationally instead.')
-            ->withStringParameter('field_id', 'The UUID of the form field to display')
+            ->as('update_title')
+            ->for('Updates the title of the service request draft. Call this when the user provides a title or summary of their issue.')
+            ->withStringParameter('title', 'The title for the service request')
             ->using($this);
     }
 
-    public function __invoke(string $field_id): string
+    public function __invoke(string $title): string
     {
-        $field = ServiceRequestFormField::find($field_id);
+        $draft = $this->thread->draftServiceRequest;
 
-        if (! $field) {
+        if (! $draft) {
             return json_encode([
-                'error' => true,
-                'message' => 'Field not found.',
+                'success' => false,
+                'error' => 'No draft exists. Call fetch_service_request_types first.',
             ]);
         }
 
-        if (in_array($field->type, self::CONVERSATIONAL_TYPES, true)) {
-            return json_encode([
-                'needs_ui' => false,
-                'message' => "This field type ({$field->type}) can be collected conversationally. Ask the user for: {$field->label}",
-            ]);
-        }
+        $draft->title = $title;
+        $draft->save();
 
-        event(new PortalAssistantActionRequest(
-            $this->thread,
-            'render_field_input',
-            [
-                'field_id' => $field->getKey(),
-                'field_config' => [
-                    'label' => $field->label,
-                    'type' => $field->type,
-                    'required' => (bool) $field->is_required,
-                    'config' => $field->config,
-                ],
-            ]
-        ));
-
-        return "Tell the user: I've shown you an input for \"{$field->label}\". Please provide the requested information.";
+        return json_encode([
+            'success' => true,
+            'title' => $title,
+        ]);
     }
 }

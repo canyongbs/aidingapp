@@ -38,29 +38,33 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
+use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use Illuminate\Support\Str;
 use Prism\Prism\Tool;
 
-class SubmitServiceRequestTool extends Tool
+class UpdateFormFieldTool extends Tool
 {
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
         $this
-            ->as('submit_service_request')
-            ->for('Validates and submits the service request for enrichment. Call this after all required fields are filled.')
+            ->as('update_form_field')
+            ->for('Updates a text-based custom form field value. Use this for simple text fields, text areas, numbers, and emails. For complex fields like selects, dates, or file uploads, use show_field_input instead.')
+            ->withStringParameter('field_id', 'The UUID of the form field')
+            ->withStringParameter('value', 'The value to set for the field')
             ->using($this);
     }
 
-    public function __invoke(): string
+    public function __invoke(string $field_id, string $value): string
     {
         $draft = $this->thread->draftServiceRequest;
 
         if (! $draft) {
             return json_encode([
                 'success' => false,
-                'errors' => ['draft' => 'No draft exists. Call fetch_service_request_types first.'],
+                'error' => 'No draft exists. Call fetch_service_request_types first.',
             ]);
         }
 
@@ -71,72 +75,68 @@ class SubmitServiceRequestTool extends Tool
         if (! $type) {
             return json_encode([
                 'success' => false,
-                'errors' => ['type' => 'No type selected. User must select a type first.'],
+                'error' => 'No type selected. User must select a type first.',
             ]);
-        }
-
-        $errors = $this->validate($draft, $type);
-
-        if (! empty($errors)) {
-            return json_encode([
-                'success' => false,
-                'errors' => $errors,
-                'missing_required' => array_keys($errors),
-            ]);
-        }
-
-        $draft->workflow_phase = 'clarifying_questions';
-        $draft->save();
-
-        return json_encode([
-            'success' => true,
-            'workflow_phase' => 'clarifying_questions',
-            'clarifying_questions_required' => 3,
-            'instruction' => 'Ask the user 3 clarifying questions specific to their request. Questions should help understand the issue better.',
-        ]);
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    protected function validate(ServiceRequest $draft, mixed $type): array
-    {
-        $errors = [];
-
-        if (empty($draft->title)) {
-            $errors['title'] = 'Title is required.';
-        }
-
-        if (empty($draft->close_details)) {
-            $errors['description'] = 'Description is required.';
         }
 
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
         $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
 
-        $submission = $draft->serviceRequestFormSubmission;
-        $filledFieldIds = [];
-
-        if ($submission) {
-            $filledFieldIds = $submission->fields()
-                ->get()
-                ->filter(fn ($field) => $field->pivot->response !== null && $field->pivot->response !== '')
-                ->pluck('id')
-                ->all();
-        }
+        $field = null;
 
         foreach ($form->steps as $step) {
-            if ($step->label === 'Main' || $step->label === 'Questions') {
-                continue;
-            }
+            foreach ($step->fields as $f) {
+                if ($f->getKey() === $field_id) {
+                    $field = $f;
 
-            foreach ($step->fields as $field) {
-                if ($field->is_required && ! in_array($field->getKey(), $filledFieldIds)) {
-                    $errors[$field->getKey()] = "{$field->label} is required.";
+                    break 2;
                 }
             }
         }
 
-        return $errors;
+        if (! $field) {
+            return json_encode([
+                'success' => false,
+                'error' => 'Field not found for this service request type.',
+            ]);
+        }
+
+        $submission = $draft->serviceRequestFormSubmission;
+
+        if (! $submission) {
+            return json_encode([
+                'success' => false,
+                'error' => 'Form submission not created. Please select a type first.',
+            ]);
+        }
+
+        $existingField = $submission->fields()->where('service_request_form_field_id', $field_id)->first();
+
+        if ($existingField) {
+            $submission->fields()->updateExistingPivot($field_id, [
+                'response' => $value,
+            ]);
+        } else {
+            $fields = collect();
+
+            foreach ($form->steps as $step) {
+                foreach ($step->fields as $f) {
+                    $fields->put($f->getKey(), $f->type);
+                }
+            }
+
+            app(ProcessServiceRequestSubmissionField::class)->execute(
+                $submission,
+                $field_id,
+                $value,
+                $fields->all(),
+            );
+        }
+
+        return json_encode([
+            'success' => true,
+            'field_id' => $field_id,
+            'label' => $field->label,
+        ]);
     }
 }
