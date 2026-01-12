@@ -82,17 +82,4 @@ class PortalAssistantThread extends BaseModel
         return $this->hasMany(ServiceRequest::class, 'portal_assistant_thread_id')
             ->withoutGlobalScope('excludeDrafts');
     }
-
-    /**
-     * @return HasOne<ServiceRequest, $this>
-     */
-    public function draftServiceRequest(): HasOne
-    {
-        return $this->hasOne(ServiceRequest::class, 'portal_assistant_thread_id')
-            ->ofMany(
-                ['created_at' => 'max'],
-                fn ($query) => $query->where('is_draft', true)
-            )
-            ->withoutGlobalScope('excludeDrafts');
-    }
 }

@@ -52,6 +52,11 @@ class SendMessageController
             'thread_id' => ['nullable', 'uuid'],
             'internal_content' => ['nullable', 'array'],
             'internal_content.type' => ['required_with:internal_content', 'string'],
+            'internal_content.type_id' => ['nullable', 'uuid'],
+            'internal_content.field_id' => ['nullable', 'uuid'],
+            'internal_content.value' => ['nullable'],
+            'internal_content.widget_type' => ['nullable', 'string'],
+            'internal_content.error' => ['nullable', 'string'],
         ]);
 
         $author = auth('contact')->user();

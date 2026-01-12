@@ -84,7 +84,7 @@ class PortalAssistantTestDataSeeder extends Seeder
         $this->command->info('Clearing existing service request data...');
 
         // Disable foreign key checks temporarily
-        \DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \DB::statement("SET session_replication_role = 'replica';");
 
         // Clear in order of dependencies
         ServiceRequest::withoutGlobalScopes()->forceDelete();
@@ -96,7 +96,7 @@ class PortalAssistantTestDataSeeder extends Seeder
         ServiceRequestType::query()->forceDelete();
         ServiceRequestTypeCategory::query()->forceDelete();
 
-        \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        \DB::statement("SET session_replication_role = 'origin';");
 
         $this->command->info('Existing data cleared.');
     }
@@ -145,7 +145,6 @@ class PortalAssistantTestDataSeeder extends Seeder
         return ServiceRequestTypeCategory::create([
             'id' => Str::uuid()->toString(),
             'name' => $name,
-            'icon' => $icon,
             'sort' => $sort,
             'parent_id' => $parentId,
         ]);

@@ -69,6 +69,10 @@ class ServiceRequestObserver
 
     public function created(ServiceRequest $serviceRequest): void
     {
+        if (! $serviceRequest->priority) {
+            return;
+        }
+
         $customerEmailTemplate = $this->fetchTemplate(
             $serviceRequest->priority->type,
             ServiceRequestEmailTemplateType::Created,
@@ -144,7 +148,13 @@ class ServiceRequestObserver
 
     public function saved(ServiceRequest $serviceRequest): void
     {
-        CreateServiceRequestHistory::dispatch($serviceRequest, $serviceRequest->getChanges(), $serviceRequest->getOriginal());
+        if (! $serviceRequest->is_draft) {
+            CreateServiceRequestHistory::dispatch($serviceRequest, $serviceRequest->getChanges(), $serviceRequest->getOriginal());
+        }
+
+        if (! $serviceRequest->priority) {
+            return;
+        }
 
         $customerEmailTemplate = $this->fetchTemplate(
             $serviceRequest->priority->type,
@@ -187,6 +197,10 @@ class ServiceRequestObserver
 
     public function updated(ServiceRequest $serviceRequest): void
     {
+        if (! $serviceRequest->priority) {
+            return;
+        }
+
         if ($serviceRequest->wasChanged('status_id')) {
             if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Closed) {
                 $managerEmailTemplate = $this->fetchTemplate(

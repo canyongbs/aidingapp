@@ -38,22 +38,25 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
 use Prism\Prism\Tool;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 
 class UpdateDescriptionTool extends Tool
 {
+    use FindsDraftServiceRequest;
+
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
         $this
             ->as('update_description')
-            ->for('Updates the description of the service request draft. Call this when the user provides details about their issue.')
+            ->for('Updates the description of the service request draft. IMPORTANT: You MUST ask the user for the description before calling this tool. Do NOT use information from earlier in the conversation - only use what the user provides in their current response. Once the user provides the description, save it immediately without asking for confirmation.')
             ->withStringParameter('description', 'The detailed description of the service request')
             ->using($this);
     }
 
     public function __invoke(string $description): string
     {
-        $draft = $this->thread->draftServiceRequest;
+        $draft = $this->findDraft();
 
         if (! $draft) {
             return json_encode([
@@ -68,6 +71,7 @@ class UpdateDescriptionTool extends Tool
         return json_encode([
             'success' => true,
             'description' => $description,
+            'instruction' => 'Description saved successfully.',
         ]);
     }
 }

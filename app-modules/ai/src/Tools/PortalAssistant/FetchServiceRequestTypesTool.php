@@ -56,7 +56,12 @@ class FetchServiceRequestTypesTool extends Tool
 
     public function __invoke(): string
     {
-        $draft = $this->thread->draftServiceRequest;
+        $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
+            ->where('portal_assistant_thread_id', $this->thread->getKey())
+            ->where('is_draft', true)
+            ->latest('created_at')
+            ->first();
+
         $draftCreated = false;
 
         if (! $draft) {
@@ -89,13 +94,14 @@ class FetchServiceRequestTypesTool extends Tool
             'is_draft' => true,
             'workflow_phase' => 'type_selection',
             'clarifying_questions' => [],
+            'portal_assistant_thread_id' => $this->thread->getKey(),
         ];
 
         if ($contact instanceof Contact) {
             $attributes['respondent_id'] = $contact->getKey();
         }
 
-        return $this->thread->serviceRequests()->create($attributes);
+        return ServiceRequest::create($attributes);
     }
 
     /**

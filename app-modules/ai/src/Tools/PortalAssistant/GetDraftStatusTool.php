@@ -38,6 +38,7 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiResolutionSettings;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -46,6 +47,7 @@ use Prism\Prism\Tool;
 
 class GetDraftStatusTool extends Tool
 {
+    use FindsDraftServiceRequest;
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
@@ -57,7 +59,7 @@ class GetDraftStatusTool extends Tool
 
     public function __invoke(): string
     {
-        $draft = $this->thread->draftServiceRequest;
+        $draft = $this->findDraft();
 
         if (! $draft) {
             return json_encode([
@@ -244,22 +246,39 @@ class GetDraftStatusTool extends Tool
             return 'All required fields are filled. Call submit_service_request to validate and proceed to clarifying questions.';
         }
 
-        $missingLabels = [];
+        // Return instruction for ONLY the FIRST missing field
+        $firstMissing = $missing[0];
 
-        if (in_array('title', $missing)) {
-            $missingLabels[] = 'title';
+        if ($firstMissing === 'title') {
+            return 'Ask the user: "What would you like to title this request?" Then STOP and wait for their response. Do NOT call update_title until they provide the title in their next message.';
         }
 
-        if (in_array('description', $missing)) {
-            $missingLabels[] = 'description';
+        if ($firstMissing === 'description') {
+            return 'Ask the user: "Please describe the issue in detail." Then STOP and wait for their response. Do NOT call update_description until they provide the description in their next message.';
         }
 
+        // It's a form field
         foreach ($result['form_fields'] ?? [] as $field) {
-            if (in_array($field['field_id'], $missing)) {
-                $missingLabels[] = $field['label'];
+            if ($field['field_id'] === $firstMissing) {
+                // Check if it's a complex field that needs a widget
+                if (in_array($field['type'], ['select', 'radio', 'checkbox', 'checkboxes', 'date', 'file_upload'])) {
+                    return sprintf(
+                        'Call show_field_input with field_id "%s" to display the %s input for "%s". Then STOP and wait for the user to complete the input.',
+                        $field['field_id'],
+                        $field['type'],
+                        $field['label']
+                    );
+                }
+
+                // Simple text field
+                return sprintf(
+                    'Ask the user: "%s%s" Then STOP and wait for their response. Do NOT call update_form_field until they provide the value in their next message.',
+                    $field['label'],
+                    $field['required'] ? '' : ' (optional)',
+                );
             }
         }
 
-        return 'Collect missing required fields: ' . implode(', ', $missingLabels) . '. Use update_title, update_description, update_form_field for text fields, or show_field_input for complex fields.';
+        return 'Call get_draft_status to check what information is still needed.';
     }
 }

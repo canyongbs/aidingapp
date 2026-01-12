@@ -43,15 +43,18 @@ use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceR
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use Illuminate\Support\Str;
 use Prism\Prism\Tool;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 
 class UpdateFormFieldTool extends Tool
 {
+    use FindsDraftServiceRequest;
+
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
         $this
             ->as('update_form_field')
-            ->for('Updates a text-based custom form field value. Use this for simple text fields, text areas, numbers, and emails. For complex fields like selects, dates, or file uploads, use show_field_input instead.')
+            ->for('Updates a text-based custom form field value. Use this for simple text fields, text areas, numbers, and emails. For complex fields like selects, dates, or file uploads, use show_field_input instead. IMPORTANT: You MUST ask the user for this field value before calling this tool. Do NOT use information from earlier in the conversation - only use what the user provides in their current response. Once the user provides the value, save it immediately without asking for confirmation.')
             ->withStringParameter('field_id', 'The UUID of the form field')
             ->withStringParameter('value', 'The value to set for the field')
             ->using($this);
@@ -59,7 +62,7 @@ class UpdateFormFieldTool extends Tool
 
     public function __invoke(string $field_id, string $value): string
     {
-        $draft = $this->thread->draftServiceRequest;
+        $draft = $this->findDraft();
 
         if (! $draft) {
             return json_encode([
@@ -137,6 +140,7 @@ class UpdateFormFieldTool extends Tool
             'success' => true,
             'field_id' => $field_id,
             'label' => $field->label,
+            'instruction' => 'Field value saved successfully.',
         ]);
     }
 }

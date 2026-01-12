@@ -44,11 +44,23 @@ class ServiceRequestHistoryObserver
 {
     public function created(ServiceRequestHistory $serviceRequestHistory): void
     {
-        TimelineableRecordCreated::dispatch($serviceRequestHistory->serviceRequest, $serviceRequestHistory);
+        $serviceRequest = $serviceRequestHistory->serviceRequest;
+        
+        if (! $serviceRequest) {
+            return;
+        }
+        
+        TimelineableRecordCreated::dispatch($serviceRequest, $serviceRequestHistory);
     }
 
     public function deleted(ServiceRequestHistory $serviceRequestHistory): void
     {
-        TimelineableRecordDeleted::dispatch($serviceRequestHistory->serviceRequest, $serviceRequestHistory);
+        $serviceRequest = $serviceRequestHistory->serviceRequest;
+        
+        if (! $serviceRequest) {
+            return;
+        }
+        
+        TimelineableRecordDeleted::dispatch($serviceRequest, $serviceRequestHistory);
     }
 }

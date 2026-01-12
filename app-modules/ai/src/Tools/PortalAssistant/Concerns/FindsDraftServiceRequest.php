@@ -1,4 +1,6 @@
-{{--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
@@ -15,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -30,18 +32,20 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
---}}
-@props(['content', 'submission'])
+*/
 
-@php
-    use AidingApp\Form\Actions\ResolveBlockRegistry;
-    use AidingApp\Form\Actions\InjectSubmissionStateIntoTipTapContent;
+namespace AidingApp\Ai\Tools\PortalAssistant\Concerns;
 
-    $blocks = app(ResolveBlockRegistry::class)($submission->submissible);
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
-    $content['content'] = app(InjectSubmissionStateIntoTipTapContent::class)($submission, $content['content'] ?? [§], $blocks);
-@endphp
-
-<div class="prose max-w-none dark:prose-invert">
-    {!! tiptap_converter()->blocks($blocks)->asHTML($content) !!}
-</div>
+trait FindsDraftServiceRequest
+{
+    protected function findDraft(): ?ServiceRequest
+    {
+        return ServiceRequest::withoutGlobalScope('excludeDrafts')
+            ->where('portal_assistant_thread_id', $this->thread->getKey())
+            ->where('is_draft', true)
+            ->latest('created_at')
+            ->first();
+    }
+}

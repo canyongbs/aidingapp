@@ -41,22 +41,25 @@ use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use Prism\Prism\Tool;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 
 class ShowFieldInputTool extends Tool
 {
+    use FindsDraftServiceRequest;
+
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
         $this
             ->as('show_field_input')
-            ->for('Displays a UI widget for complex form fields like selects, radio buttons, dates, phone numbers, addresses, or file uploads. Do NOT use this for simple text fields.')
+            ->for('Displays a UI widget for complex form fields like selects, radio buttons, dates, phone numbers, addresses, or file uploads. Do NOT use this for simple text fields. The system will automatically prompt the user.')
             ->withStringParameter('field_id', 'The UUID of the form field to display')
             ->using($this);
     }
 
     public function __invoke(string $field_id): string
     {
-        $draft = $this->thread->draftServiceRequest;
+        $draft = $this->findDraft();
 
         if (! $draft) {
             return json_encode([
@@ -112,6 +115,6 @@ class ShowFieldInputTool extends Tool
             ]
         ));
 
-        return "Input displayed for \"{$field->label}\". Wait for user to complete it.";
+        return 'Widget displayed to user.';
     }
 }

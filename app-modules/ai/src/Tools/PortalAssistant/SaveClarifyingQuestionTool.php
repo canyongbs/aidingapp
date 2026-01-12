@@ -39,9 +39,12 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiResolutionSettings;
 use Prism\Prism\Tool;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 
 class SaveClarifyingQuestionTool extends Tool
 {
+    use FindsDraftServiceRequest;
+
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
@@ -55,7 +58,7 @@ class SaveClarifyingQuestionTool extends Tool
 
     public function __invoke(string $question, string $answer): string
     {
-        $draft = $this->thread->draftServiceRequest;
+        $draft = $this->findDraft();
 
         if (! $draft) {
             return json_encode([

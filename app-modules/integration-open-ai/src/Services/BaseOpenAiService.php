@@ -284,7 +284,7 @@ abstract class BaseOpenAiService implements AiService
             if (filled($tools)) {
                 $request
                     ->withTools($tools)
-                    ->withMaxSteps(5);
+                    ->withMaxSteps(10);
             }
 
             if ($hasImageGeneration) {
@@ -319,6 +319,7 @@ abstract class BaseOpenAiService implements AiService
                         yield new Finish(
                             isIncomplete: $response->finishReason === FinishReason::Length,
                             error: ($response->finishReason === FinishReason::Error) ? 'Something went wrong' : null,
+                            finishReason: $response->finishReason,
                         );
                     } catch (PrismRateLimitedException $exception) {
                         foreach ($exception->rateLimits as $rateLimit) {
@@ -357,12 +358,23 @@ abstract class BaseOpenAiService implements AiService
                         }
 
                         if ($chunk->chunkType === ChunkType::ToolCall) {
-                            yield new ToolCall(
-                                id: $chunk->toolCall?->id ?? '',
-                                name: $chunk->toolCall?->name ?? '',
-                                arguments: $chunk->toolCall?->arguments ?? [],
-                                result: $chunk->toolCall?->result ?? null,
-                            );
+                            Log::info('BaseOpenAiService: ToolCall chunk received', [
+                                'tool_calls_count' => count($chunk->toolCalls),
+                                'tool_calls' => collect($chunk->toolCalls)->map(fn ($tc) => [
+                                    'id' => $tc->id,
+                                    'name' => $tc->name,
+                                    'arguments_count' => count($tc->arguments()),
+                                ])->toArray(),
+                            ]);
+                            
+                            foreach ($chunk->toolCalls as $toolCall) {
+                                yield new ToolCall(
+                                    id: $toolCall->id,
+                                    name: $toolCall->name,
+                                    arguments: $toolCall->arguments(),
+                                    result: null,
+                                );
+                            }
 
                             continue;
                         }
@@ -385,6 +397,7 @@ abstract class BaseOpenAiService implements AiService
                             yield new Finish(
                                 isIncomplete: $chunk->finishReason === FinishReason::Length,
                                 error: ($chunk->finishReason === FinishReason::Error) ? 'Something went wrong' : null,
+                                finishReason: $chunk->finishReason,
                             );
                         }
                     }

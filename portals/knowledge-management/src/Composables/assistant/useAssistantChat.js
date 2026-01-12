@@ -67,6 +67,11 @@ export function useAssistantChat() {
             if (messages.value[messageIndex]?.shouldComplete) {
                 messages.value[messageIndex].isComplete = true;
                 delete messages.value[messageIndex].shouldComplete;
+                // Show pending widget if any
+                if (messages.value[messageIndex].pendingWidget) {
+                    activeWidget.value = messages.value[messageIndex].pendingWidget;
+                    delete messages.value[messageIndex].pendingWidget;
+                }
             }
             return;
         }
@@ -100,6 +105,11 @@ export function useAssistantChat() {
 
         if (isComplete && wordQueue.value.length === 0 && !isTyping.value) {
             messages.value[messageIndex].isComplete = true;
+            // Show pending widget if any
+            if (messages.value[messageIndex].pendingWidget) {
+                activeWidget.value = messages.value[messageIndex].pendingWidget;
+                delete messages.value[messageIndex].pendingWidget;
+            }
         } else if (isComplete) {
             messages.value[messageIndex].shouldComplete = true;
         }
@@ -132,7 +142,15 @@ export function useAssistantChat() {
     const connection = useAssistantConnection(websocketsConfig, getToken);
 
     const handleActionRequest = (actionType, params) => {
-        activeWidget.value = { type: actionType, params };
+        // Don't show widget until assistant response is complete
+        const messageIndex = messages.value.findIndex((m) => m.author === 'assistant' && !m.isComplete);
+        if (messageIndex !== -1) {
+            // Store the widget to show after response completes
+            messages.value[messageIndex].pendingWidget = { type: actionType, params };
+        } else {
+            // Response already complete, show immediately
+            activeWidget.value = { type: actionType, params };
+        }
     };
 
     const connectToThread = async (id) => {

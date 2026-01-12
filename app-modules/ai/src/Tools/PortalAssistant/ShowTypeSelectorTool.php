@@ -38,6 +38,7 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\Ai\Models\PortalAssistantThread;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use Prism\Prism\Tool;
@@ -49,14 +50,18 @@ class ShowTypeSelectorTool extends Tool
     ) {
         $this
             ->as('show_type_selector')
-            ->for('Displays a UI widget for the user to select a service request type. Call this after fetching types.')
+            ->for('Displays a UI widget for the user to select a service request type. Call this after fetching types. The system will automatically ask the user to make a selection.')
             ->withStringParameter('suggested_type_id', 'Optional: The UUID of the type to suggest/highlight based on conversation context')
             ->using($this);
     }
 
     public function __invoke(?string $suggested_type_id = null): string
     {
-        $draft = $this->thread->draftServiceRequest;
+        $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
+            ->where('portal_assistant_thread_id', $this->thread->getKey())
+            ->where('is_draft', true)
+            ->latest('created_at')
+            ->first();
 
         if (! $draft) {
             return json_encode([
@@ -97,7 +102,7 @@ class ShowTypeSelectorTool extends Tool
             ]
         ));
 
-        return 'Type selector displayed. Wait for user selection.';
+        return 'Widget displayed to user.';
     }
 
     /**

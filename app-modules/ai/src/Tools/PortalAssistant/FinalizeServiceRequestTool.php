@@ -46,9 +46,12 @@ use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
 use Prism\Prism\Tool;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 
 class FinalizeServiceRequestTool extends Tool
 {
+    use FindsDraftServiceRequest;
+
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
@@ -60,7 +63,7 @@ class FinalizeServiceRequestTool extends Tool
 
     public function __invoke(): string
     {
-        $draft = $this->thread->draftServiceRequest;
+        $draft = $this->findDraft();
 
         if (! $draft) {
             return json_encode([
@@ -109,7 +112,11 @@ class FinalizeServiceRequestTool extends Tool
             $draft->status_updated_at = CarbonImmutable::now();
         }
 
-        $draft->service_request_number = app(ServiceRequestNumberGenerator::class)->generate();
+        // Only generate number if it doesn't exist (prevents observer error on retry)
+        if (! $draft->service_request_number) {
+            $draft->service_request_number = app(ServiceRequestNumberGenerator::class)->generate();
+        }
+        
         $draft->is_draft = false;
         $draft->workflow_phase = null;
         $draft->save();
