@@ -38,19 +38,21 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiResolutionSettings;
-use Prism\Prism\Tool;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\SubmitsServiceRequest;
+use Prism\Prism\Tool;
 
 class SaveClarifyingQuestionTool extends Tool
 {
     use FindsDraftServiceRequest;
+    use SubmitsServiceRequest;
 
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
         $this
             ->as('save_clarifying_question')
-            ->for('Saves a clarifying question and the user\'s answer. Must be called exactly 3 times during the clarifying_questions phase.')
+            ->for('Saves a clarifying question and the user\'s answer. Must be called exactly 3 times during the clarifying_questions phase. Each question should build on previously collected information to become more specific and relevant.')
             ->withStringParameter('question', 'The question that was asked')
             ->withStringParameter('answer', 'The user\'s response')
             ->using($this);
@@ -110,9 +112,16 @@ class SaveClarifyingQuestionTool extends Tool
             $result['ai_resolution_enabled'] = $aiResolutionSettings->is_enabled;
 
             if ($aiResolutionSettings->is_enabled) {
-                $result['instruction'] = 'Attempt to resolve the request using available knowledge. Call submit_ai_resolution with your confidence score and proposed answer.';
+                $draft->workflow_phase = 'resolution';
+                $draft->save();
+                
+                $result['instruction'] = 'Now call check_ai_resolution_validity with your confidence score and proposed answer. DO NOT show the resolution to the user until the tool tells you to.';
             } else {
-                $result['instruction'] = 'Call finalize_service_request to submit for human review.';
+                // AI resolution disabled - auto-submit for human review
+                $requestNumber = $this->submitServiceRequest($draft, false);
+                
+                $result['request_number'] = $requestNumber;
+                $result['instruction'] = "AI resolution is disabled. Service request has been automatically submitted for human review. Tell the user their request number is {$requestNumber} and a team member will review it.";
             }
         }
 

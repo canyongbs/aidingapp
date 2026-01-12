@@ -34,9 +34,8 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Tools\PortalAssistant;
+namespace AidingApp\Ai\Tools\PortalAssistant\Concerns;
 
-use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -45,67 +44,40 @@ use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceR
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Str;
-use Prism\Prism\Tool;
-use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 
-class FinalizeServiceRequestTool extends Tool
+trait SubmitsServiceRequest
 {
-    use FindsDraftServiceRequest;
-
-    public function __construct(
-        protected PortalAssistantThread $thread,
-    ) {
-        $this
-            ->as('finalize_service_request')
-            ->for('Finalizes and submits the service request for human review. Call this when resolution confidence is below threshold, resolution is skipped, or user declined the resolution.')
-            ->using($this);
-    }
-
-    public function __invoke(): string
-    {
-        $draft = $this->findDraft();
-
-        if (! $draft) {
-            return json_encode([
-                'success' => false,
-                'error' => 'No draft exists.',
-            ]);
-        }
-
-        $allowedPhases = ['clarifying_questions', 'resolution'];
-
-        if (! in_array($draft->workflow_phase, $allowedPhases)) {
-            return json_encode([
-                'success' => false,
-                'error' => 'Cannot finalize in current phase: ' . $draft->workflow_phase,
-            ]);
-        }
-
-        $this->finalize($draft);
-
-        return json_encode([
-            'success' => true,
-            'request_number' => $draft->service_request_number,
-            'message' => 'Service request submitted. A team member will review your request.',
-            'instruction' => "Tell the user their service request has been submitted. Provide the request number ({$draft->service_request_number}) and let them know a team member will review their request.",
-        ]);
-    }
-
-    protected function finalize(ServiceRequest $draft): void
+    /**
+     * Submit service request for human review or close if AI resolution accepted
+     *
+     * @param ServiceRequest $draft
+     * @param bool $resolutionAccepted Whether user accepted the AI resolution
+     * @return string The generated service request number
+     */
+    protected function submitServiceRequest(ServiceRequest $draft, bool $resolutionAccepted = false): string
     {
         $this->createClarifyingQuestionUpdates($draft);
 
         if ($draft->ai_resolution && ! empty($draft->ai_resolution['proposed_answer'])) {
-            $this->createResolutionUpdates($draft);
-            $draft->is_ai_resolution_attempted = true;
-            $draft->is_ai_resolution_successful = false;
+            $this->createResolutionUpdates($draft, $resolutionAccepted);
         }
 
-        $status = ServiceRequestStatus::query()
-            ->where('classification', SystemServiceRequestClassification::Open)
-            ->where('name', 'New')
-            ->where('is_system_protected', true)
-            ->first();
+        // Determine status based on resolution outcome
+        if ($resolutionAccepted) {
+            // Resolution accepted - close the ticket
+            $status = ServiceRequestStatus::query()
+                ->where('classification', SystemServiceRequestClassification::Closed)
+                ->where('name', 'Resolved')
+                ->where('is_system_protected', true)
+                ->first();
+        } else {
+            // Resolution rejected or not attempted - open for human review
+            $status = ServiceRequestStatus::query()
+                ->where('classification', SystemServiceRequestClassification::Open)
+                ->where('name', 'New')
+                ->where('is_system_protected', true)
+                ->first();
+        }
 
         if ($status) {
             $draft->status()->associate($status);
@@ -116,12 +88,17 @@ class FinalizeServiceRequestTool extends Tool
         if (! $draft->service_request_number) {
             $draft->service_request_number = app(ServiceRequestNumberGenerator::class)->generate();
         }
-        
+
         $draft->is_draft = false;
         $draft->workflow_phase = null;
         $draft->save();
 
-        $this->assignServiceRequest($draft);
+        // Only assign to team if resolution was not accepted (needs human review)
+        if (! $resolutionAccepted) {
+            $this->assignServiceRequest($draft);
+        }
+
+        return $draft->service_request_number;
     }
 
     protected function createClarifyingQuestionUpdates(ServiceRequest $draft): void
@@ -161,7 +138,7 @@ class FinalizeServiceRequestTool extends Tool
         }
     }
 
-    protected function createResolutionUpdates(ServiceRequest $draft): void
+    protected function createResolutionUpdates(ServiceRequest $draft, bool $wasAccepted): void
     {
         $aiResolution = $draft->ai_resolution ?? [];
 
@@ -171,17 +148,24 @@ class FinalizeServiceRequestTool extends Tool
 
         $confidenceScore = $aiResolution['confidence_score'] ?? 0;
         $threshold = $aiResolution['threshold'] ?? 70;
+        $meetsThreshold = $aiResolution['meets_threshold'] ?? false;
 
-        if ($confidenceScore < $threshold) {
+        // Determine the reason based on what happened
+        if (! $meetsThreshold) {
             $reason = "Confidence ({$confidenceScore}%) below threshold ({$threshold}%)";
+            $internal = true; // Not shown to user
+        } elseif ($wasAccepted) {
+            $reason = 'Resolution presented and accepted by user';
+            $internal = false; // User saw and accepted this
         } else {
-            $reason = 'Resolution not presented to user';
+            $reason = 'Resolution presented but rejected by user';
+            $internal = false; // User saw but rejected this
         }
 
         $resolutionUpdate = $draft->serviceRequestUpdates()->createQuietly([
             'id' => (string) Str::orderedUuid(),
-            'update' => "AI Resolution Attempt (Not Shown - {$reason})\n\nConfidence: {$confidenceScore}%\n\n{$aiResolution['proposed_answer']}",
-            'internal' => true,
+            'update' => "AI Resolution Attempt ({$reason})\n\nConfidence: {$confidenceScore}%\n\n{$aiResolution['proposed_answer']}",
+            'internal' => $internal,
             'created_by_id' => $draft->getKey(),
             'created_by_type' => $draft->getMorphClass(),
         ]);

@@ -193,7 +193,7 @@ class GetDraftStatusTool extends Tool
         $hasCustomFields = ! empty($formFields);
         $missing = [];
 
-        // UNIFIED flow: fields (if any) → description → title → priority
+        // CORRECT flow: fields (if any) → description → title → priority
 
         // 1. Custom form fields first (if they exist)
         if ($hasCustomFields) {
@@ -267,10 +267,10 @@ class GetDraftStatusTool extends Tool
         $aiResolutionSettings = app(AiResolutionSettings::class);
 
         if ($aiResolutionSettings->is_enabled) {
-            return 'Attempt to resolve using submit_ai_resolution with your confidence score and proposed answer.';
+            return 'Call check_ai_resolution_validity with your confidence score and proposed answer. DO NOT show the resolution to the user until the tool tells you to.';
         }
 
-        return 'Call finalize_service_request to submit for human review.';
+        return 'Call submit_service_request to submit for human review.';
     }
 
     /**
@@ -282,23 +282,34 @@ class GetDraftStatusTool extends Tool
         $optionalFields = $result['optional_fields'] ?? [];
 
         if (empty($missing)) {
+            // All required fields filled - automatically transition to clarifying questions
+            $draft = $this->findDraft();
+            if ($draft && $draft->workflow_phase === 'data_collection') {
+                $draft->workflow_phase = 'clarifying_questions';
+                $draft->save();
+
+                return 'All required information has been collected. Now ask the first of 3 clarifying questions to better understand the user\'s issue. Make the question specific to their situation based on the information provided.';
+            }
+
             // Check if there are optional fields that might be worth collecting
             if (! empty($optionalFields)) {
                 $optionalSummary = implode(', ', array_map(fn ($f) => $f['label'], $optionalFields));
                 return sprintf(
-                    'All required fields are filled. There are %d optional field(s) available: %s. Based on the conversation context, decide if any would be helpful to collect. If yes, ask for ONE optional field using the same pattern as required fields (show_field_input for complex types, direct question for text). If no optional fields seem relevant, call submit_service_request to validate and proceed.',
+                    'All required fields are filled. There are %d optional field(s) available: %s. Based on the conversation context, decide if any would be helpful to collect. If yes, ask for ONE optional field. If no optional fields seem relevant, call get_draft_status again to transition to questions.',
                     count($optionalFields),
                     $optionalSummary
                 );
             }
 
-            return 'All required fields are filled. Call submit_service_request to validate and proceed to clarifying questions.';
+            return 'All required fields are filled. Call get_draft_status again to transition to clarifying questions.';
         }
 
         $hasCustomFields = ! empty($result['form_fields'] ?? []);
 
         // Return instruction for ONLY the FIRST missing field
         $firstMissing = $missing[0];
+
+        // CORRECT ORDER: fields (if any) → description → title → priority
 
         // Handle custom form fields first (if they exist and are missing)
         if ($hasCustomFields && $firstMissing !== 'title' && $firstMissing !== 'description' && $firstMissing !== 'priority') {

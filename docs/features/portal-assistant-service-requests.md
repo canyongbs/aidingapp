@@ -1,1031 +1,325 @@
-# Portal Assistant Service Request Submission
+# Portal Assistant Service Request Submission - Technical Specification
 
 ## Overview
 
-The Portal Assistant provides an AI-powered conversational interface for users to submit service requests. The assistant guides users through the entire submission process, collecting required information, asking clarifying questions, and optionally attempting to resolve issues automatically.
+The Portal Assistant Service Request feature enables authenticated portal users to submit service requests through an AI-powered conversational interface. The system guides users through information collection, asks clarifying questions, and optionally attempts automated resolution before routing to appropriate team members.
 
 ## Architecture
 
-### Key Components
-
-- **SendMessage Job** (`app-modules/ai/src/Jobs/PortalAssistant/SendMessage.php`): Main orchestration job that handles AI streaming and tool access control
-- **Portal Assistant Tools** (`app-modules/ai/src/Tools/PortalAssistant/`): 13 specialized tools for different phases of the workflow
-- **Service Request Drafts**: Multiple draft service request records can exist per thread, with the thread tracking which one is currently active
-- **Current Draft Tracking**: The `PortalAssistantThread` model has a `current_service_request_draft_id` field that points to the active draft
-- **Widget Interaction Controllers**: Dedicated controllers handle widget interactions (type selection, priority selection, form field updates) and dispatch SendMessage with Developer messages for context
-
-### Draft Lifecycle
-
-Drafts are created and managed based on service request type selection:
-
-1. **No Draft Initially**: When a user starts a conversation, no draft exists yet
-2. **Type Selection Creates Draft**: When user selects a type, a new draft is created for that specific type
-3. **Type Switching**: If the user changes their mind and selects a different type:
-   - A new draft is created for the new type
-   - The old draft remains in the system (not deleted)
-   - Tools reset to data_collection phase (progress doesn't carry over between types)
-   - `current_service_request_draft_id` on the thread is updated to point to the new draft
-4. **Returning to Previous Type**: If user switches back to a previously selected type:
-   - The system finds the existing draft for that type
-   - Switches `current_service_request_draft_id` back to that draft
-   - Previously collected information (title, description, fields) is restored
-   - User can continue where they left off with that type
-
-This design allows users to explore multiple service request types without losing work, while ensuring type-specific form fields and data don't mix.
-
-### Workflow Phases
-
-The submission process follows a strict sequential workflow:
-
-1. **data_collection** - Collects all required information in the following order:
-   - Custom form fields (if the type has any)
-   - Description (detailed explanation)
-   - Title (AI suggests based on all collected information, user can accept/modify)
-   - Priority (urgency level)
-   - Phase starts after type selection
-2. **clarifying_questions** - AI asks 3 clarifying questions to better understand the issue
-3. **resolution** - AI attempts resolution (if enabled) or submits for human review
-
-## Progressive Tool Unlocking
-
-The system implements a "one-way gate" approach to prevent the AI from overwhelming users:
-
-- Tools unlock progressively as prerequisites are met
-- Once unlocked, tools remain available (users can edit previous fields)
-- Users cannot skip ahead to future steps
-- This prevents "decision fatigue" where the AI tries to fill all fields at once
-
-### Data Collection Phase Unlocking
-
-The unlocking sequence follows a consistent flow regardless of whether the service request type has custom form fields:
-
-```
-Type Selected
-    ↓
-update_form_field, show_field_input for REQUIRED custom fields (unlocked if type has custom fields)
-    ↓ (after all required custom fields filled)
-AI evaluates OPTIONAL custom fields - asks for relevant ones based on context
-    ↓ (after optional fields handled, or immediately if no custom fields)
-update_description (unlocked) - User explains issue/request in detail
-    ↓ (after description saved - REQUIRED field)
-update_title (unlocked) - AI suggests title based on description + form fields, user confirms/edits
-    ↓ (after title saved)
-show_priority_selector (unlocked)
-    ↓ (after priority selected)
-submit_service_request (advances to next phase)
-```
-
-**Field Collection Order:**
-1. **Custom form fields** (if the type has any) - Structured data specific to the request type
-   - **Required fields** are collected first and must be completed
-   - **Optional fields** are then considered based on relevance to the user's request
-   - The AI uses judgment to decide which optional fields would be helpful
-2. **Description** (always required) - Detailed explanation of the issue or request
-3. **Title** (always required) - AI suggests based on all information collected so far
-4. **Priority** (always required) - User selects urgency level
-
-**Why This Order?**
-
-1. **Structured Data First**: If the type has custom fields, collect them first to provide context for the description
-2. **Optional Field Intelligence**: After required fields, AI evaluates optional fields contextually. Example: For a password reset, "Last successful login date" is useful; "Department phone extension" is not
-3. **Description Before Title**: Users explain their issue fully before being asked to summarize it with a title
-4. **Title Before Priority**: AI can suggest a title with confidence when it has all the context (form fields + description)
-5. **Priority Last**: Priority doesn't affect the description or title content - it's purely about urgency and routing
-
-### Type Switching Behavior
-
-Users can change their mind about which type of service request they want to submit:
-
-**Switching to a New Type:**
-- User selects a different type than they're currently working on
-- System creates a new draft for the new type
-- Old draft is preserved (not deleted) in the database
-- Progress resets - tools return to data_collection phase
-- Thread's `current_service_request_draft_id` updates to the new draft
-- User starts fresh with the new type's form fields
-
-**Switching Back to a Previous Type:**
-- User selects a type they've already started
-- System finds the existing draft for that type
-- Thread's `current_service_request_draft_id` switches back to the old draft
-- Previously filled information is restored (title, description, form fields)
-- User can continue where they left off
-
-**Why This Design:**
-- Prevents mixing data from different service request types
-- Each type may have completely different form fields
-- Allows users to explore options without losing work
-- Keeps separate contexts for separate request types
-
-## Available Tools
-
-### Always Available Tools
-
-These tools are accessible throughout the entire workflow:
-
-#### Fetch Service Request Types
-Retrieves all available service request types organized by category. Does NOT create a draft - drafts are only created when the user actually selects a type. Returns a hierarchical tree structure of categories and their associated types, along with whether a draft currently exists and its workflow phase. The AI typically follows this by showing the type selector to the user.
-
-#### Show Type Selector
-Displays a UI widget that allows the user to select which type of service request they want to submit. The AI can optionally suggest a specific type based on the conversation context, which will be highlighted in the interface. This emits an event that the frontend listens for to render the appropriate selection interface.
-
-#### Get Draft Status
-Returns comprehensive information about the current state of the service request draft. This includes what's been filled in (title, description, form fields), what's still missing (required vs optional), the current workflow phase, available priorities, the structure of any custom form fields, and instructions for what should happen next. The AI uses this frequently to understand what information still needs to be collected.
-
-The response includes:
-- `missing_required`: Array of required field IDs that are not yet filled
-- `optional_fields`: Array of optional field objects (field_id, label, type, step) that could be collected
-- `instruction`: Context-specific guidance on what to do next, including whether to consider optional fields
-
-### Data Collection Phase Tools
-
-These tools unlock progressively as the user provides information:
-
-#### Update Description
-Saves detailed information about the issue or request. This field is REQUIRED and cannot be skipped. The AI asks the user to describe their issue or request in detail. This always comes after custom form fields (if any exist and are relevant) but before the title.
-
-Saves immediately without confirmation. Saves to the `close_details` database column.
-
-**When Available**: After all required custom fields are filled and relevant optional fields are handled (if type has custom fields), OR immediately after type selection (if type has no custom fields)
-
-#### Show Field Input
-Displays a specialized UI widget for custom form fields that require user selection or complex input rather than free text. This includes selects, radio buttons, checkboxes, date pickers, phone number inputs, address fields, and file uploads. The system automatically prompts the user with the appropriate interface and handles the input. Emits an event with the field configuration that the frontend renders.
-
-**Handles Both**: Required and optional fields - AI decides when to use based on field relevance
-
-**When Available**: Immediately after type selection (if type has custom fields)
-
-#### Update Form Field
-Updates the value of simple text-based custom form fields like text inputs, text areas, numbers, and email addresses. Each service request type may have different custom fields defined, and this tool handles the straightforward ones. The AI must ask the user for each field value individually and save immediately. For complex fields like dropdowns or date pickers, the AI should use Show Field Input instead.
-
-**Handles Both**: Required and optional fields - AI decides when to use based on field relevance
-
-**When Available**: Immediately after type selection (if type has custom fields)
-
-#### Show Priority Selector
-Displays a UI widget that allows the user to select the priority level for their service request. Each service request type has its own set of available priorities (typically High, Medium, Low, but can vary). The system automatically prompts the user with a selector showing the available priority options, and the user's selection is submitted to a dedicated backend endpoint that updates the draft and provides context to the AI via a Developer message.
-
-**When Available**: After title is saved
-
-#### Update Title
-Saves the title for the service request. When title is needed, the AI suggests a concise, descriptive title based on all collected information so far (form fields and description) and asks the user to confirm or edit it. Once the user provides/confirms the title, the AI saves it immediately without asking for additional confirmation.
-
-**When Available**: After description is saved
-
-#### Submit Service Request
-Validates that all required information has been collected and advances the workflow to the clarifying questions phase. This is always callable, but if validation fails, it returns detailed information about what's still missing. Once validation passes, the draft transitions to the next phase where the AI will ask clarifying questions.
-
-**When Available**: Always available in data_collection phase (validation will catch errors)
-
-### Clarifying Questions Phase Tools
-
-#### Save Clarifying Question
-Records both the question the AI asked and the user's answer as a pair. This must be called exactly three times during the clarifying questions phase. Each call increments the counter, and once all three questions are answered, the workflow automatically advances to the resolution phase. The questions and answers are stored and later become part of the finalized service request record for staff reference.
-
-**Requirement**: Must be called exactly 3 times during this phase
-
-#### Finalize Service Request
-Submits the service request directly for human review, bypassing any AI resolution attempt. This is used when the AI has low confidence, when AI resolution is disabled, or when the user declines the AI's proposed resolution. Creates service request update records from the clarifying questions, generates a service request number, sets the status to "New", marks the draft as finalized, and assigns the request to an appropriate team member based on the type's assignment rules.
-
-**When Available**: During clarifying_questions or resolution phase
-
-### Resolution Phase Tools
-
-These tools are only available if AI resolution is enabled in system settings:
-
-#### Submit AI Resolution
-The AI uses this to propose a solution with a confidence score from 0-100. The system compares the confidence score against a configurable threshold. If the score meets or exceeds the threshold, the AI is instructed to present the resolution to the user. If below threshold, the AI is told not to present it and to finalize the request for human review instead. The resolution text and confidence score are stored for analytics and staff review.
-
-**Note**: Confidence threshold is configurable in AiResolutionSettings
-
-#### Record Resolution Response
-After presenting a resolution to the user, the AI calls this with whether the user accepted it (said it solved their problem) or declined it (said it didn't help). If accepted, the service request is marked as resolved with a "Closed" status. If declined, it's set to "New" status for staff follow-up. In both cases, service request update records are created documenting the resolution attempt and outcome, a service request number is generated, and the request is finalized and assigned appropriately.
-
-**Side Effects**: Creates detailed service request updates, changes status based on acceptance, generates service request number, finalizes draft, and assigns to team member
-
-## Example Conversation Flow
-
-### Scenario: Student Cannot Access Portal
-
-```
-User: "I can't log into the student portal"
-
-AI: [calls Fetch Service Request Types]
-    Passes: Nothing
-    Returns: A hierarchical tree of all available service request types organized by categories 
-             (e.g., Technical Support > Password Reset, Account Issues > Access Problems)
-             Returns that no draft exists yet (has_draft: false)
-             Includes instruction to call Show Type Selector next
-    
-AI: [calls Show Type Selector]
-    Passes: A suggested type ID for "Password Reset" based on keywords in user's message
-    Returns: Confirmation that the widget was displayed
-             The UI now shows the type selector with "Password Reset" highlighted as a suggestion
-    
-User: [selects "Password Reset" type via UI]
-    System creates a new draft for "Password Reset" type in "data_collection" phase
-    Sets thread's current_service_request_draft_id to point to this new draft
-    Creates form submission record and associates default priority
-    
-AI: [calls Get Draft Status]
-    Passes: Nothing
-    Returns: Full state showing the "Password Reset" type has one required custom field: "Student ID"
-             Returns instruction: "Ask the user: 'Student ID' Then STOP..."
-    
-AI: "Student ID"
-
-User: "A12345678"
-
-AI: [calls Update Form Field]
-    Passes: The field ID (UUID of the Student ID field) and value "A12345678"
-    Returns: Success confirmation with field ID and the field's human-readable label "Student ID"
-             Includes instruction that field was saved successfully
-             
-AI: [calls Get Draft Status]
-    Passes: Nothing
-    Returns: All required custom fields are now filled
-             Returns instruction: "Ask the user to describe the issue in detail"
-    
-AI: "Please describe the issue you're experiencing. What happens when you try to log in?"
-
-User: "When I try to log in with my username and password, I get an error message saying invalid credentials. I'm sure my password is correct."
-
-AI: [calls Update Description]
-    Passes: The description text explaining the error
-    Returns: Success confirmation that description was saved to close_details field
-             Includes instruction: "Suggest a concise, descriptive title and ask user to confirm or edit it"
-    
-AI: "Based on your issue, I suggest the title: 'Cannot Access Student Portal'
-
-Would you like to use this title, or would you prefer to change it?"
-
-User: "That's perfect!"
-
-AI: [calls Update Title]
-    Passes: The confirmed title "Cannot Access Student Portal"
-    Returns: Success confirmation that title was saved
-             Includes instruction: "Call show_priority_selector to display the priority options"
-    
-AI: [calls Show Priority Selector]
-    Passes: Nothing (gets priority options from draft's type)
-    Returns: Confirmation that the priority selector widget was displayed
-             UI shows available priorities: High, Medium, Low (specific to Password Reset type)
-             
-User: [selects "Medium" priority via UI]
-    Frontend calls dedicated priority selection endpoint with priority_id and user-facing message
-    Controller updates draft's priority field
-    Controller dispatches SendMessage with both user message ("Medium Priority") and Developer message providing context
-    
-AI: [calls Submit Service Request]
-    Passes: Nothing
-    Returns: Validation passed - all required fields are filled
-             Draft workflow_phase advanced to "clarifying_questions"
-             Returns instruction: "Ask the user 3 clarifying questions specific to their request"
-    
-AI: "When did you last successfully log in to the portal?"
-
-User: "About two weeks ago"
-
-AI: [calls Save Clarifying Question]
-    Passes: Question "When did you last successfully log in to the portal?" 
-            Answer "About two weeks ago"
-    Returns: Success with counters showing 1 completed, 2 remaining
-             Instruction to continue asking questions
-    
-AI: "Have you recently changed your password or had it reset?"
-
-User: "No, I haven't changed anything"
-
-AI: [calls Save Clarifying Question]
-    Passes: Question "Have you recently changed your password or had it reset?"
-            Answer "No, I haven't changed anything"
-    Returns: Success with counters showing 2 completed, 1 remaining
-             Instruction to continue asking questions
-    
-AI: "Are you able to access any other campus systems with the same credentials?"
-
-User: "Yes, I can check my email just fine"
-
-AI: [calls Save Clarifying Question]
-    Passes: Question "Are you able to access any other campus systems with the same credentials?"
-            Answer "Yes, I can check my email just fine"
-    Returns: Success with counters showing 3 completed, 0 remaining
-             Draft workflow_phase automatically advanced to "resolution"
-             Returns that AI resolution is enabled
-             Returns instruction: "Attempt to resolve using submit_ai_resolution with your confidence score and proposed answer"
-    
-AI: [calls Submit AI Resolution]
-    Passes: Confidence score of 75 (out of 100)
-            Proposed answer text explaining the browser cache solution
-    Returns: Confidence score 75 meets the threshold of 70
-             Returns instruction: "Present your resolution to the user and ask if it solved their problem"
-    
-AI: "Based on your situation, I believe the issue may be with your browser cache. Try clearing your browser's cache and cookies, then attempt to log in again using Chrome or Firefox. If you're using saved passwords, try typing your password manually instead.
-
-Does this resolve your issue?"
-
-User: "Yes! That worked, thank you!"
-
-AI: [calls Record Resolution Response]
-    Passes: Boolean true (user accepted the resolution)
-    Returns: Success with generated request number "SR-2026-00123"
-             Resolution was accepted so status set to "Closed" (resolved)
-             Draft marked as finalized (is_draft = false)
-             Request assigned to appropriate team member
-             Returns instruction: "Tell the user their issue has been marked as resolved. Provide the request number..."
-    
-AI: "Great! Your issue has been marked as resolved. Your request number is SR-2026-00123 for your records. If you experience any other issues, feel free to reach out again."
-```
-
-### Tool Call Timeline for Above Conversation
-
-```
-1. Fetch Service Request Types
-   → Returns hierarchical tree of all available types organized by category
-
-2. Show Type Selector
-   → Suggests "Password Reset" type and displays selection UI to user
-
-3. [User selects type via UI - no tool call]
-
-4. Get Draft Status
-   → Checks current state and discovers "Student ID" custom field is required
-
-5. Update Form Field
-   → Saves "A12345678" to the Student ID field
-
-6. Get Draft Status
-   → Checks current state and discovers all custom fields filled, description is next
-
-7. Update Description
-   → Saves the description explaining the login error
-
-8. [AI suggests title in response text - no tool call]
-
-9. Update Title
-   → Saves user's confirmed title "Cannot Access Student Portal"
-
-10. Show Priority Selector
-    → Displays priority selector widget with High, Medium, Low options
-
-11. [User selects "Medium" priority via UI - no tool call]
-
-12. Submit Service Request
-    → Validates all required data and advances to clarifying questions phase
-
-13. Save Clarifying Question
-    → Records question about last successful login and user's answer (1 of 3)
-
-14. Save Clarifying Question
-    → Records question about password changes and user's answer (2 of 3)
-
-15. Save Clarifying Question
-    → Records question about other systems and user's answer (3 of 3)
-    → Automatically advances to resolution phase
-
-16. Submit AI Resolution
-    → Proposes browser cache solution with 75% confidence
-    → Confidence exceeds threshold, instructed to present to user
-
-17. Record Resolution Response
-    → User accepted the resolution
-    → Marks request as resolved with status "Closed"
-    → Generates request number SR-2026-00123
-```
-
-### Scenario: General Question (No Custom Form Fields)
-
-This example demonstrates the workflow when a service request type has **NO** custom form fields. The flow is the same as types with custom fields, just skipping the form field step:
-
-```
-User: "I need help understanding the financial aid process"
-
-AI: [calls Fetch Service Request Types]
-    Passes: Nothing
-    Returns: Hierarchical tree of all available service request types
-             Returns that no draft exists yet (has_draft: false)
-             Includes instruction to call Show Type Selector next
-    
-AI: [calls Show Type Selector]
-    Passes: A suggested type ID for "General Question" based on keywords in user's message
-    Returns: Confirmation that the widget was displayed
-             The UI now shows the type selector with "General Question" highlighted as a suggestion
-    
-User: [selects "General Question" type via UI]
-    System creates a new draft for "General Question" type in "data_collection" phase
-    Sets thread's current_service_request_draft_id to point to this new draft
-    Creates form submission record (with no custom fields) and associates default priority
-    
-AI: [calls Get Draft Status]
-    Passes: Nothing
-    Returns: Full state showing the "General Question" type has NO custom fields
-             Returns instruction: "Please describe your issue or request in detail"
-    
-AI: "Please describe your question about financial aid. What specifically do you need help with?"
-
-User: "I'm a transfer student starting in the fall and I'm confused about the deadlines and what documents I need to submit. I haven't filled out my FAFSA yet and I'm not sure if the process is different for transfer students."
-
-AI: [calls Update Description]
-    Passes: The detailed description of the user's question
-    Returns: Success confirmation that description was saved to close_details field
-             Includes instruction: "Suggest a concise, descriptive title and ask user to confirm or edit it"
-    
-AI: "Based on your question, I suggest the title: 'Financial aid process guidance for transfer student'
-
-Would you like to use this title, or would you prefer something different?"
-
-User: "That's perfect"
-
-AI: [calls Update Title]
-    Passes: The confirmed title "Financial aid process guidance for transfer student"
-    Returns: Success confirmation that title was saved
-             Includes instruction: "Call show_priority_selector to display the priority options"
-    
-AI: [calls Show Priority Selector]
-    Passes: Nothing (gets priority options from draft's type)
-    Returns: Confirmation that the priority selector widget was displayed
-             UI shows available priorities: High, Medium, Low
-             
-User: [selects "Medium" priority via UI]
-    Frontend calls dedicated priority selection endpoint with priority_id and user-facing message
-    Controller updates draft's priority field
-    Controller dispatches SendMessage with both user message ("Medium Priority") and Developer message providing context
-    
-AI: [calls Submit Service Request]
-    Passes: Nothing
-    Returns: Validation passed - all required fields are filled (description, priority, title)
-             No custom form fields to validate
-             Draft workflow_phase advanced to "clarifying_questions"
-             Returns instruction: "Ask the user 3 clarifying questions specific to their request"
-    
-AI: "To help me provide the best guidance, let me ask a few clarifying questions. 
-
-First, have you already been admitted to the university as a transfer student?"
-
-User: "Yes, I've been admitted for fall 2024"
-
-AI: [calls Save Clarifying Question]
-    Passes: Question "Have you already been admitted to the university as a transfer student?" 
-            Answer "Yes, I've been admitted for fall 2024"
-    Returns: Success with counters showing 1 completed, 2 remaining
-             Instruction to continue asking questions
-    
-AI: "Great! Second question: What's your expected start date - when does the fall semester begin?"
-
-User: "August 25th"
-
-AI: [calls Save Clarifying Question]
-    Passes: Question "What's your expected start date - when does the fall semester begin?"
-            Answer "August 25th"
-    Returns: Success with counters showing 2 completed, 1 remaining
-             Instruction to continue asking questions
-    
-AI: "And finally: Do you have any specific questions about the FAFSA itself, or are you mainly looking for information about deadlines and required documents?"
-
-User: "Mainly deadlines and what documents I need"
-
-AI: [calls Save Clarifying Question]
-    Passes: Question about FAFSA vs deadlines/documents
-            Answer "Mainly deadlines and what documents I need"
-    Returns: Success with counters showing 3 completed, 0 remaining
-             Draft workflow_phase automatically advanced to "resolution"
-             Returns that AI resolution is enabled
-             Returns instruction: "Attempt to resolve using submit_ai_resolution with your confidence score and proposed answer"
-    
-AI: [calls Submit AI Resolution]
-    Passes: Confidence score of 85 (out of 100)
-            Proposed answer explaining the financial aid process for transfer students
-    Returns: Confidence score 85 meets the threshold of 70
-             Returns instruction: "Present your resolution to the user and ask if it solved their problem"
-    
-AI: "I can help explain the financial aid process for transfer students starting in Fall 2024!
-
-**Key Deadlines:**
-- Priority FAFSA deadline: June 1, 2024 (though applications accepted on rolling basis after)
-- Recommended submission: As soon as possible to maximize aid eligibility
-- Aid packages typically sent 2-3 weeks after FAFSA submission
-
-**Required Documents for Transfer Students:**
-1. FAFSA completion at studentaid.gov (you'll need your FSA ID)
-2. List our school code (001234) on your FAFSA
-3. Official transcripts from previous institution(s)
-4. Transfer Student Financial Aid Form (available in your student portal)
-
-**Timeline for August 25th Start:**
-- Submit FAFSA by mid-June to ensure aid package is ready before fall billing
-- Check your student portal weekly for any additional document requests
-- Financial aid packages are typically finalized 4-6 weeks before semester start
-
-Does this answer your question, or do you need to speak with our financial aid office directly?"
-
-User: "This is perfect! That's exactly what I needed to know. Thank you!"
-
-AI: [calls Record Resolution Response]
-    Passes: Boolean true (user accepted the resolution)
-    Returns: Success with generated request number "SR-2026-00456"
-             Resolution was accepted so status set to "Closed" (resolved)
-             Draft marked as finalized (is_draft = false)
-             Request assigned to appropriate team member
-             Returns instruction: "Tell the user their question has been answered. Provide the request number..."
-    
-AI: "Wonderful! I'm glad I could help. Your request has been saved as SR-2026-00456 for our records. If you have any other questions as you go through the financial aid process, feel free to reach out again. Good luck!"
-```
-
-### Tool Call Timeline for General Question (No Custom Fields)
-
-```
-1. Fetch Service Request Types
-   → Returns hierarchical tree of all available types organized by category
-
-2. Show Type Selector
-   → Suggests "General Question" type and displays selection UI to user
-
-3. [User selects type via UI - no tool call]
-   → System detects type has NO custom form fields, unlocks description tool only
-
-4. Get Draft Status
-   → Checks current state and discovers no custom fields exist
-   → Returns instruction: "Please describe your issue or request in detail"
-
-5. Update Description
-   → Saves detailed explanation about financial aid process
-   → Description collected first (no form fields for this type)
-
-6. [AI suggests title in response text - no tool call]
-   → AI has description context to suggest an appropriate title
-
-7. Update Title
-   → Saves user's confirmed title "Financial aid process guidance for transfer student"
-   → Title collected after description
-
-8. Show Priority Selector
-   → Displays priority selector widget with High, Medium, Low options
-
-9. [User selects "Medium" priority via UI - no tool call]
-   → Priority collected last
-
-10. Submit Service Request
-    → Validates all required data (description, title, priority)
-    → No custom form fields to validate
-    → Advances to clarifying questions phase
-
-11. Save Clarifying Question
-    → Records question about admission status (1 of 3)
-
-12. Save Clarifying Question
-    → Records question about start date (2 of 3)
-
-13. Save Clarifying Question
-    → Records question about specific needs (3 of 3)
-    → Automatically advances to resolution phase
-
-14. Submit AI Resolution
-    → Proposes comprehensive financial aid guidance with 85% confidence
-    → Confidence exceeds threshold, instructed to present to user
-
-15. Record Resolution Response
-    → User accepted the resolution
-    → Marks request as resolved with status "Closed"
-    → Generates request number SR-2026-00456
-```
-
-## Technical Implementation Details
-
-## Widget Interaction Architecture
-
-The system uses dedicated controllers and Developer messages to handle widget interactions (type selection, priority selection, form field updates). This architecture prevents the AI from accidentally leaking internal system messages to users while providing essential context.
-
-### How Widget Interactions Work
-
-1. **User Interacts with Widget**: User clicks a button in a UI widget (e.g., selects "High Priority")
-2. **Frontend Adds Message**: The frontend immediately adds a user message to the chat showing what they selected
-3. **Dedicated Controller Called**: Frontend calls a specific endpoint (not the general SendMessage endpoint)
-4. **Controller Updates Database**: Controller performs the necessary database updates synchronously
-5. **Controller Dispatches SendMessage**: Controller dispatches SendMessage job with:
-   - `content`: The user-facing message shown in chat (e.g., "High Priority")
-   - `internalContent`: A Developer message providing context to the AI (never shown to user)
-
-### Developer Messages
-
-Developer messages are a special message type in the OpenAI API that provide instructions and context to the AI without appearing as part of the user's conversation. They are inserted into the message stream just before the user's message.
-
-**Message Flow Example**:
-```
-Previous conversation history...
-[DeveloperMessage: "User selected priority 'High' for their service request. The draft has been updated. Use get_draft_status to determine what information to collect next."]
-[UserMessage: "High Priority"]
-```
-
-**What the AI sees**:
-- The system context explaining its role and behavior
-- The full conversation history
-- A Developer message explaining what the user just did (internal context)
-- The user's simple message (what they see in chat)
-
-**What the user sees**:
-- Just their message "High Priority" in the chat
-- The AI's helpful response
-
-### Why Developer Messages vs. Internal Content
-
-**Previous Approach (Internal Content)**:
-- Replaced the user's actual message with internal context
-- Risk: AI might reference or leak system details in responses
-- Example: AI says "I see you selected priority via metadata.priority_id=3"
-
-**Current Approach (Developer Messages)**:
-- User message remains authentic and matches what they see in chat
-- Developer message provides context separately
-- AI understands what happened but treats the user message as the visible conversation
-- No risk of leaking implementation details
-
-### Dedicated Widget Controllers
-
-Three specialized controllers handle widget interactions:
-
-#### SelectServiceRequestTypeController
-- **Endpoint**: `POST /service-request/select-type`
-- **Payload**: `{ type_id, thread_id, message }`
-- **Actions**:
-  - Creates new draft or switches to existing draft for the selected type
-  - Sets up form submission if type has custom fields
-  - Updates thread's current_service_request_draft_id pointer
-- **Developer Message**: Includes type name and explains draft was updated
-
-#### SelectServiceRequestPriorityController
-- **Endpoint**: `POST /service-request/select-priority`
-- **Payload**: `{ priority_id, thread_id, message }`
-- **Actions**:
-  - Validates priority belongs to current draft's type
-  - Updates draft's priority field
-- **Developer Message**: Includes priority name and confirms update
-
-#### UpdateServiceRequestFormFieldController
-- **Endpoint**: `POST /service-request/update-field`
-- **Payload**: `{ field_id, value, thread_id, message }`
-- **Actions**:
-  - Validates field belongs to current draft's form
-  - Creates or updates field response with provided value
-- **Developer Message**: Includes field label and intelligent description of what was entered (handles 10+ field types with smart formatting/truncation)
-
-### Message Database Storage
-
-The `PortalAssistantMessage` model has two content fields:
-- `content`: User-facing message shown in chat (always populated)
-- `internal_content`: Developer message sent to AI (nullable, only set for widget interactions)
-
-### Conversation History Management
-
-Azure OpenAI automatically maintains conversation history server-side using the `previous_response_id` mechanism. The SendMessage job only needs to send the current messages:
-
+### Core Components
+
+**SendMessage Job** (`app-modules/ai/src/Jobs/PortalAssistant/SendMessage.php`)
+- Orchestrates AI streaming responses
+- Controls tool availability based on workflow phase
+- Manages progressive disclosure of data collection tools
+
+**Portal Assistant Tools** (`app-modules/ai/src/Tools/PortalAssistant/`)
+- 13 specialized tools for type selection, data collection, enrichment, and submission
+- Phase-gated availability prevents workflow bypass
+- No ID passing required - draft state managed automatically
+
+**Service Request Drafts**
+- Multiple drafts can exist per thread (one per service request type)
+- Thread tracks active draft via `current_service_request_draft_id`
+- Global scope excludes drafts from standard queries (`is_draft = false`)
+- Drafts persist across sessions until finalized
+
+**Widget Controllers**
+- Dedicated HTTP controllers handle widget interactions (type/priority selection, form fields)
+- Dispatch SendMessage with Developer messages providing state context
+- Separate from tool calls to maintain clean AI conversation flow
+
+### Database Schema
+
+**service_requests table additions:**
 ```php
-// Azure OpenAI handles conversation history via previous_response_id
-// We only need to send the current messages (Developer message + User message)
-$messages = [
-    ...(filled($this->internalContent) ? [new DeveloperMessage($this->internalContent)] : []),
-    new UserMessage($this->content),
-];
+$table->boolean('is_draft')->default(false)->index();
+$table->foreignUuid('portal_assistant_thread_id')->nullable()->index();
+$table->string('workflow_phase')->nullable();
+$table->json('clarifying_questions')->default('[]');
+$table->json('ai_resolution')->nullable();
 ```
 
-**How It Works:**
-1. Each AI response includes a `response_id` (e.g., `resp_abc123`)
-2. This ID is stored in `next_request_options` on the assistant message record
-3. Next request includes `previous_response_id` in the options
-4. Azure OpenAI retrieves the full conversation history associated with that ID
-5. New messages (Developer + User) are appended to that history
-6. API returns a new `response_id` for the next request
-
-**Benefits:**
-- Minimal payload size - only send 1-2 new messages per request
-- No database queries to fetch conversation history
-- No need to map/transform previous messages
-- Azure handles all history management automatically
-- Developer messages work seamlessly with this mechanism
-
-## AI Instruction Architecture
-
-The system uses a three-tier approach to guide the AI's behavior, with each tier serving a distinct purpose:
-
-### 1. System Context (SendMessage Job)
-
-**Location**: `SendMessage.php` - `$context` variable in the main execution flow
-
-**Purpose**: Provides global, unchanging rules that apply to ALL interactions regardless of workflow state
-
-**What Belongs Here**:
-- Core identity and role ("You are a helpful AI assistant...")
-- Universal behavioral rules (markdown formatting, conversational tone, one question at a time)
-- General guidelines that never change (knowledge base usage, professional tone)
-- Feature-level instructions for service request submission workflow
-
-**Examples**:
-- "You MUST format ALL responses using Markdown"
-- "Ask ONLY ONE question per message"
-- "Never mention technical details like field_ids or JSON"
-- "When user wants to submit a request, use `fetch_service_request_types`"
-
-**Key Characteristic**: These instructions are static and included in EVERY request. They establish the AI's personality and fundamental operating principles.
-
-### 2. Tool Descriptions (Tool Constructor)
-
-**Location**: Each tool's `__construct()` method using `->for()` 
-
-**Purpose**: Explains WHEN to use the tool and HOW to use it, but not what to do AFTER
-
-**What Belongs Here**:
-- Clear description of the tool's purpose
-- When this tool should be called
-- What parameters it needs and what they mean
-- Behavioral constraints specific to this action (e.g., "ask user first", "don't use conversation history")
-- What type of data to pass
-
-**Examples**:
-- "Retrieves available service request types. Call this when the user wants to submit a service request"
-- "Updates the title of the service request draft. IMPORTANT: You MUST ask the user for the title before calling this tool"
-- "Displays a UI widget for complex form fields like selects, radio buttons, dates..."
-
-**Key Characteristic**: Tool descriptions help the AI decide WHETHER to call a tool and HOW to prepare the parameters. They do NOT guide what to do after calling it.
-
-### 3. Tool Response Instructions (Tool Return Value)
-
-**Location**: The JSON response returned by each tool's `__invoke()` method, specifically in an `instruction` field
-
-**Purpose**: Provides CONTEXT-SPECIFIC, DYNAMIC guidance for the immediate next action based on current state
-
-**What Belongs Here**:
-- What to do next after this tool executes
-- State-specific next steps that depend on the data
-- Exact questions to ask the user
-- Specific tool to call next with required parameters
-- Conditional logic outcomes ("if this, do that")
-
-**Examples**:
-- "Ask the user: 'What would you like to title this request?' Then STOP and wait for their response"
-- "Call show_field_input with field_id 'abc-123' to display the date input for 'Incident Date'"
-- "All required fields are filled. Call submit_service_request to validate and proceed"
-- "Confidence too low. Do not show resolution to user. Call finalize_service_request to submit for human review"
-- "Present your resolution to the user and ask if it solved their problem"
-
-**Key Characteristic**: These instructions are DYNAMIC and STATE-AWARE. They change based on what data exists, what's missing, what phase the workflow is in, and what the user has provided.
-
-## How the AI Decides What to Do Next
-
-The AI makes decisions using a hierarchical evaluation process:
-
-### Step 1: System Context Awareness
-The AI always has access to the global rules from SendMessage. These provide the foundation:
-- "I should ask one question at a time"
-- "I should use tools to help with service requests"
-- "I should be conversational and not technical"
-
-### Step 2: Tool Selection
-When the user provides input, the AI evaluates available tool descriptions to determine which action to take:
-- User says "I need help with my password" → Tool description says "Call this when user wants to submit a request" → Calls Fetch Service Request Types
-- User provides "My student portal login isn't working" → Tool description says "ask user for title before calling" → Asks for title first
-- User provides "Cannot access portal" → Tool description says "save immediately without confirmation" → Calls Update Title
-
-### Step 3: Response Instruction Following
-After calling a tool, the AI reads the `instruction` field in the response to determine the immediate next action:
-- Get Draft Status returns: "Ask the user: 'Student ID' Then STOP..." → AI asks only that question
-- Submit Service Request returns: "Ask clarifying question 1 of 3..." → AI asks first clarifying question
-- Submit AI Resolution returns: "Present your resolution and ask if it solved their problem" → AI presents resolution
-
-### Step 4: State-Aware Decision Making
-The Get Draft Status tool acts as the "traffic controller" by providing precise, context-aware instructions:
-
-```
-User provides title → Update Title called → AI calls Get Draft Status
-    → Returns: "Ask for description"
-    → AI asks for description
-
-User provides description → Update Description called → AI calls Get Draft Status
-    → Returns: "Ask the user: 'Student ID'"
-    → AI asks for Student ID
-
-User provides Student ID → Update Form Field called → AI calls Get Draft Status
-    → Returns: "All required fields filled. Call submit_service_request"
-    → AI calls Submit Service Request
-
-Submit Service Request succeeds
-    → Returns: "Ask clarifying question 1 of 3"
-    → AI asks first question
+**Global Scope:**
+```php
+// Excludes drafts from standard queries
+Builder::where('is_draft', false)
 ```
 
-## Design Principles
+## Workflow Phases
 
-### Why This Architecture?
+Service requests progress through sequential phases:
 
-1. **Separation of Concerns**
-   - System context = personality and universal rules
-   - Tool descriptions = selection criteria
-   - Tool responses = dynamic next steps
+1. **type_selection** - Draft created, awaiting type selection
+2. **data_collection** - Type selected, collecting required information
+3. **clarifying_questions** - Required data validated, collecting 3 contextual questions
+4. **resolution** - Questions complete, evaluating and presenting AI resolution (if enabled)
 
-2. **Maintainability**
-   - Global behavior changes happen in one place (SendMessage)
-   - Tool-specific logic stays with the tool
-   - State-dependent decisions are made by the tool that has access to that state
+When submitted (finalized), `is_draft = false`, `workflow_phase = null`, and `service_request_number` is generated. Status set to "Closed" if resolution accepted, "New" if rejected or resolution disabled/below threshold.
 
-3. **Flexibility**
-   - Same tool can give different instructions based on current state
-   - Get Draft Status can provide 20+ different instructions depending on what's filled
-   - New tools can be added without modifying system context
+## Progressive Tool Disclosure
 
-4. **Predictability**
-   - AI doesn't guess what to do next - tools tell it explicitly
-   - Reduces hallucination and off-script behavior
-   - Forces linear progression through workflow
+Tools unlock sequentially as prerequisites are met, preventing users from being overwhelmed by simultaneous choices while maintaining flexibility to edit previous responses.
 
-5. **Intelligent Optional Field Handling**
-   - Required fields are enforced through validation
-   - Optional fields are exposed with context but not mandatory
-   - AI uses judgment to determine relevance based on user's request
-   - Prevents overwhelming users with unnecessary questions
+### Data Collection Phase
 
-### Optional Field Collection Strategy
+**Collection Order:** Custom form fields (if present) → Description → Title → Priority
 
-The system differentiates between required and optional form fields:
+**Tool Availability:**
+- `update_form_field`, `show_field_input`: If service request type defines custom fields
+- `update_description`: After required form fields filled (or immediately if no custom fields)
+- `update_title`: After description provided
+- `show_priority_selector`: After title provided
 
-**Required Fields**:
-- Must be collected before proceeding to description
-- Included in `missing_required` array from Get Draft Status
-- AI is instructed to ask for each one sequentially
+**Phase Transition:** When all required fields are filled, `get_draft_status` automatically transitions draft to `clarifying_questions` phase and instructs AI to begin asking questions.
 
-**Optional Fields**:
-- Exposed in `optional_fields` array after required fields are complete
-- AI receives list with field metadata: `field_id`, `label`, `type`, `step`
-- AI decides whether to collect based on contextual relevance
+### Clarifying Questions Phase
 
-**Decision Criteria for Optional Fields**:
-1. **Relevance to Issue**: Would this information help resolve the user's specific request?
-2. **User Context**: Has the user already mentioned related information in conversation?
-3. **Field Purpose**: Does the field label/type suggest it's valuable for this scenario?
+**Tool Availability:**
+- `save_clarifying_question`: Always available, accepts exactly 3 question/answer pairs
 
-**Examples of Good Judgment**:
-- Password reset request → Ask for "Last successful login date" (helpful) ✅
-- Password reset request → Skip "Department phone extension" (not relevant) ❌
-- Hardware request → Ask for "Current device model" (helpful) ✅
-- Hardware request → Skip "Favorite color" (not relevant) ❌
+**Requirements:**
+- Exactly 3 questions must be asked and saved
+- Questions must be specific to user's situation, drawing from collected data
+- Each question/answer saved immediately after user responds
 
-**Implementation**:
+**Phase Transition:** 
+- After 3rd question saved, draft transitions to `resolution` phase (if AI resolution enabled)
+- If AI resolution disabled, service request automatically submitted for human review after 3rd question
+
+### Resolution Phase
+
+**Tool Availability (if AI resolution enabled):**
+- `check_ai_resolution_validity`: Available immediately after 3 questions saved
+- `record_resolution_response`: Available only after confidence meets threshold and resolution presented
+
+**Tool Availability (if AI resolution disabled):**
+- Phase skipped, proceeds directly to submission
+
+**Process (AI Resolution Enabled):**
+
+1. AI calls `check_ai_resolution_validity` with confidence score (0-100) and proposed resolution
+2. Tool compares score against configured threshold and stores `meets_threshold` boolean
+
+**If confidence below threshold:**
+- AI does NOT show resolution to user
+- Tool automatically submits service request for human review
+- Sets `is_ai_resolution_attempted = true`, `is_ai_resolution_successful = false`
+- Stores resolution attempt as internal update (not visible to user)
+- Generates `service_request_number` and sets `is_draft = false`
+- Returns request number to AI
+
+**If confidence meets threshold:**
+- Tool instructs AI to present resolution to user
+- AI shows resolution and asks if it solved their problem
+- User responds yes/no
+- AI calls `record_resolution_response` with boolean
+
+**If user says resolution was helpful:**
+- Sets `is_ai_resolution_attempted = true`, `is_ai_resolution_successful = true`
+- Sets status to "Closed" (resolved without human intervention)
+- Generates `service_request_number` and sets `is_draft = false`
+- Creates update records for questions and resolution
+- Returns request number to AI
+
+**If user says resolution was not helpful:**
+- Sets `is_ai_resolution_attempted = true`, `is_ai_resolution_successful = false`
+- Sets status to "New" (open for human review)
+- Generates `service_request_number` and sets `is_draft = false`
+- Creates update records for questions and resolution
+- Assigns to team member
+- Returns request number to AI
+
+**Process (AI Resolution Disabled):**
+- After 3rd question saved, service request automatically submitted for human review
+- Sets status to "New", generates request number
+- Creates update records for questions
+- Assigns to team member
+
+## Tool Reference
+
+### Type Selection Tools
+
+**fetch_service_request_types**
+- Creates draft if none exists for thread
+- Returns hierarchical tree of available service request types
+- Sets `workflow_phase = 'type_selection'`
+
+**show_type_selector**
+- Emits `PortalAssistantActionRequest` event with type tree and optional suggestion
+- Frontend displays widget, hides main chat input
+- User selection processed via dedicated controller
+
+### Data Collection Tools
+
+**get_draft_status**
+- Returns complete draft state including form structure, filled fields, missing requirements
+- Provides phase-specific instructions
+- Auto-transitions to `clarifying_questions` when all required data filled
+
+**update_title**, **update_description**
+- Saves conversational text input to draft
+- Description stored in `close_details` field
+
+**update_form_field**
+- Saves simple text field responses to `ServiceRequestFormSubmission`
+- For text-based custom fields only
+
+**show_field_input**
+- Displays widget for complex field types (select, date, file, etc.)
+- Frontend hides chat input while widget active
+- Response saved directly via controller, not returned to AI
+
+**show_priority_selector**
+- Displays priority selection widget after title provided
+- User selection updates draft via dedicated controller
+
+### Enrichment Tools
+
+**save_clarifying_question**
+- Appends question/answer pair to `clarifying_questions` JSON array
+- Automatically transitions to `resolution` after 3rd question
+- Returns remaining count and next instruction
+
+### Resolution Tools
+
+**check_ai_resolution_validity**
+- Accepts confidence score (0-100) and proposed resolution text
+- Compares score against configured threshold
+- Stores result in `ai_resolution` JSON with `meets_threshold` boolean
+
+**If confidence below threshold:**
+- Automatically submits service request without showing resolution to user
+- Sets `is_ai_resolution_attempted = true`, `is_ai_resolution_successful = false`
+- Creates update records for questions and resolution attempt (internal)
+- Assigns to team member, generates request number
+- Sets `is_draft = false`, status to "New"
+- Returns request number and success message
+
+**If confidence meets threshold:**
+- Instructs AI to present resolution to user and wait for response
+- Does NOT submit yet - waits for user feedback
+
+**record_resolution_response**
+- Records user's acceptance/rejection of presented resolution
+- Sets `is_ai_resolution_attempted = true`
+- Sets `is_ai_resolution_successful` based on user response
+
+**If user accepted resolution:**
+- Creates update records for questions and resolution
+- Sets status to "Closed" (resolved without human intervention)
+- Generates `service_request_number` and sets `is_draft = false`
+- Does NOT assign to team (no human review needed)
+- Returns request number
+
+**If user rejected resolution:**
+- Creates update records for questions and resolution attempt
+- Sets status to "New" (open for human review)
+- Generates `service_request_number` and sets `is_draft = false`
+- Assigns to team member via type's assignment strategy
+- Returns request number
+
+## Type Switching Behavior
+
+Users may change service request type during data collection:
+
+**Switching to Different Type:**
+- New draft created for selected type
+- Old draft retained (not deleted)
+- `current_service_request_draft_id` updated to new draft
+- Workflow resets to `data_collection` phase
+
+**Switching to Previously Selected Type:**
+- Existing draft for that type restored
+- `current_service_request_draft_id` updated to previous draft
+- Previously collected data (title, description, fields) restored
+- User continues from last state for that type
+
+This design allows exploration of multiple request types without data loss while maintaining type-specific form field integrity.
+
+## Frontend Widget Integration
+
+Widgets temporarily replace chat input to focus user attention:
+
+**Widget Display:**
+1. Main chat input hidden
+2. Widget rendered with available options
+3. "Cancel" link displayed below widget
+
+**Widget Interaction:**
+- Selection: Sends `internal_content` message via dedicated controller
+- Cancellation: Sends cancellation `internal_content`, restores chat input
+- AI acknowledges and continues conversation
+
+**Implementation:**
+- `portals/knowledge-management/src/Components/Assistant/ChatInput.vue`
+- `portals/knowledge-management/src/Components/Assistant/AssistantWidget.vue`
+- `portals/knowledge-management/src/Composables/assistant/useAssistantChat.js`
+
+## Internal Content Processing
+
+Widget interactions and user selections processed via `internal_content`:
+
+**type_selection:**
+```json
+{"type": "type_selection", "type_id": "uuid"}
 ```
-After required fields complete:
-    Get Draft Status returns:
-        "All required fields are filled. There are 3 optional field(s) available: 
-         Last Login Date, Phone Extension, Office Location. 
-         Based on the conversation context, decide if any would be helpful to collect..."
+Validates type, creates/updates draft and form submission, sets default priority, advances to `data_collection`.
 
-    AI evaluates each field:
-        - Last Login Date: Relevant to password troubleshooting → Ask
-        - Phone Extension: Not needed for password issue → Skip
-        - Office Location: Not needed for password issue → Skip
-    
-    AI collects relevant optional field(s), then calls submit_service_request
+**priority_selection:**
+```json
+{"type": "priority_selection", "priority_id": "uuid"}
 ```
+Validates priority belongs to current type, updates draft.
 
-This approach balances thoroughness with user experience - collecting helpful optional information without creating questionnaire fatigue.
-
-### Common Pitfalls to Avoid
-
-**❌ DON'T put state-dependent instructions in system context**
+**field_response:**
+```json
+{"type": "field_response", "field_id": "uuid", "value": {...}}
 ```
-Bad: "After collecting title, ask for description"
-Why: This is state-dependent logic that belongs in tool responses
+Validates field belongs to current type's form, saves via `ProcessServiceRequestSubmissionField` action.
+
+**widget_cancelled:**
+```json
+{"type": "widget_cancelled", "widget_type": "...", "field_id": "..."}
 ```
+No data change, restores chat input, AI acknowledges.
 
-**❌ DON'T put "what to do after" in tool descriptions**
-```
-Bad: "Updates title. After calling this, ask for description."
-Why: What comes after depends on current state, not the tool itself
-```
+## AI Instructions
 
-**❌ DON'T put general behavioral rules in tool responses**
-```
-Bad: Tool returns "Ask one question at a time"
-Why: This is a universal rule that belongs in system context
-```
+The AI receives phase-specific instructions emphasizing:
 
-**✅ DO use Get Draft Status as the orchestrator**
-```
-Good: After EVERY save operation, call Get Draft Status to get next instruction
-Why: It has access to full draft state and can provide precise guidance
-```
+**Data Collection:**
+- Ask ONE question at a time
+- Call `get_draft_status` after each save to determine next step
+- Never combine multiple questions
+- Auto-transition occurs when all required fields filled
 
-**✅ DO make tool responses specific and actionable**
-```
-Good: "Ask the user: 'What operating system are you using?' Then STOP"
-Why: Tells AI exactly what to say and do, no ambiguity
-```
+**Clarifying Questions:**
+- Ask ONE question at a time
+- Call `get_draft_status` after each save to determine next step
+- Never combine multiple questions
+- After 3rd question, phase automatically transitions to resolution (if enabled) or submits for human review
 
-**✅ DO use tool descriptions to prevent misuse**
-```
-Good: "IMPORTANT: You MUST ask the user for the title before calling this tool"
-Why: Prevents AI from auto-filling or making assumptions
-```
+**Resolution:**
+- Call `check_ai_resolution_validity` first with confidence and proposed answer
+- If confidence below threshold: tool auto-submits request, AI informs user
+- If confidence meets threshold: AI presents resolution and waits for user response
+- Call `record_resolution_response` with user's yes/no answer
+- Tool handles submission automatically based on user response
 
-### Tool Loop Message Optimization
+## Implementation Notes
 
-To avoid duplicate messages and reduce token usage during tool execution loops, the system uses a custom approach:
+**Automatic Submission:**
+Both resolution tools (`check_ai_resolution_validity` and `record_resolution_response`) handle the final submission internally. There is no separate `submit_service_request` tool in the resolution phase. This ensures:
+- Service requests are always submitted after resolution attempt
+- Data integrity (resolution metrics always captured)
+- Simplified AI interaction model
 
-**Standard Flow**: The AI sends the full conversation history on each request to maintain context.
+**Tool Naming:**
+Previous iterations included separate validation and submission tools. Current design uses automatic phase transitions and resolution tools that handle submission internally, eliminating redundant steps.
 
-**Tool Loop Flow**: When the AI calls tools, the custom handler sends only the two new messages needed for the next iteration:
-- The assistant's message containing the tool calls (with text content stripped to avoid duplication)
-- The tool result message containing the outputs
+**Validation:**
+When all required fields are filled, `get_draft_status` automatically advances the workflow phase. This eliminates redundant validation calls and simplifies the AI interaction model.
 
-This optimization significantly reduces token usage during multi-tool workflows while maintaining the correct context for Azure OpenAI. The implementation uses reflection to temporarily swap the messages array before making the API call, then restores it afterwards.
-
-### Draft Fetching and Tracking
-
-The system uses a pointer-based approach to track which draft is currently active:
-
-**Thread Tracking**: The `PortalAssistantThread` model has a `current_service_request_draft_id` field that points to the currently active draft.
-
-**FindsDraftServiceRequest Trait**: All tools that work with drafts use this trait, which implements:
-```
-protected function findDraft(): ?ServiceRequest
-{
-    if ($this->thread->current_service_request_draft_id) {
-        return ServiceRequest::find($this->thread->current_service_request_draft_id);
-    }
-    return null;
-}
-```
-
-**Type Selection Logic**: When a user selects a type:
-1. Check if a draft already exists for that type (by looking for drafts with matching priority.type_id)
-2. If exists: Update thread's `current_service_request_draft_id` to point to that draft
-3. If not: Create new draft and set thread's pointer to it
-
-This enables type switching while preserving work and maintaining clean separation between different draft attempts.
-
-### Service Request Number Protection
-
-The system's observer pattern prevents any changes to the `service_request_number` field after initial creation. To support retry scenarios where finalization tools may be called multiple times, both the Finalize Service Request and Record Resolution Response tools check if the number already exists before generating a new one. This prevents observer errors while allowing safe retries.
-
-### Database Field Naming
-
-An important implementation detail: the description text is stored in the `close_details` database column, not a `description` column. This affects the conditional tool unlocking logic:
-- **For types WITH custom form fields**: The system checks `$draft->close_details` to determine if description has been provided before unlocking submit_service_request
-- **For types WITHOUT custom form fields**: The system checks `$draft->close_details` to determine if description has been provided before unlocking the priority selector
-
-### AI Behavior Guidelines
-
-Tool descriptions include explicit instructions to prevent common AI issues:
-
-1. **No Conversation History**: Tools explicitly forbid using information from earlier in the conversation
-2. **No Confirmation Loops**: Tools instruct the AI to save immediately without asking for confirmation
-3. **No Bold Formatting**: System prompts avoid bold markdown to prevent the AI from mimicking that style
-4. **Ask One Question**: Progressive unlocking forces sequential question asking
-
-### Event-Driven UI Updates
-
-Tools that need to display UI widgets emit events rather than returning HTML. For example, when showing the type selector, the tool emits a `PortalAssistantActionRequest` event with the action name and relevant data. The frontend listens for these events via WebSocket or polling and renders the appropriate React/Vue components in the chat interface.
-
-## Configuration
-
-### AI Resolution Settings
-
-The system checks `AiResolutionSettings` to determine AI resolution behavior:
-- `is_enabled`: Whether the AI should attempt to resolve requests automatically
-- `confidence_threshold`: Minimum confidence score (0-100) required to present a resolution to the user
-
-### Service Request Assignment
-
-After finalization, the service request is automatically assigned to a team member based on the type's configured assignment rules. Each service request type can have an assignment strategy that determines which staff member receives the request.
-
-## Troubleshooting
-
-### Issue: AI Asking Same Question Repeatedly
-
-**Cause**: Tool not unlocking due to field check failure
-
-**Solution**: Verify field names in conditional checks (e.g., `close_details` not `description`)
-
-### Issue: Service Request Number Update Error
-
-**Cause**: Attempting to change the `service_request_number` field after it has been set triggers an observer error.
-
-**Solution**: The finalization tools now check if the number exists before generating a new one, allowing safe retries.
-
-### Issue: AI Auto-Filling Fields from History
-
-**Cause**: The AI uses information from earlier in the conversation instead of asking the user directly.
-
-**Solution**: Tool descriptions explicitly forbid using conversation history and require asking the user for each piece of information.
-
-### Issue: AI Asking "Should I set X to Y?"
-
-**Cause**: The AI interprets tool instructions as requiring explicit confirmation before saving.
-
-**Solution**: Tool descriptions now instruct the AI to "save immediately without asking for confirmation" rather than requesting user approval.
-
-## Future Enhancements
-
-Potential improvements to consider:
-
-1. **Dynamic Question Count**: Allow configurable number of clarifying questions based on service request type
-2. **Multi-Language Support**: Translate UI widgets and system prompts
-3. **Attachment Handling**: Better support for file uploads during conversation
-4. **Resume Draft**: Allow users to continue incomplete drafts from previous sessions
-5. **AI Training**: Collect successful resolutions to improve future confidence scores
-6. **Analytics**: Track resolution success rates by request type and AI confidence levels
+**Field Order Flexibility:**
+While the collection order is fields → description → title → priority, the system validates all required fields are present regardless of order. This accommodates edge cases where AI collects information out of sequence.

@@ -37,20 +37,14 @@
 namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use Carbon\CarbonImmutable;
-use Illuminate\Support\Str;
-use Prism\Prism\Tool;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\SubmitsServiceRequest;
+use Prism\Prism\Tool;
 
 class RecordResolutionResponseTool extends Tool
 {
     use FindsDraftServiceRequest;
+    use SubmitsServiceRequest;
 
     public function __construct(
         protected PortalAssistantThread $thread,
@@ -85,133 +79,20 @@ class RecordResolutionResponseTool extends Tool
         $draft->ai_resolution = $aiResolution;
         $draft->is_ai_resolution_attempted = true;
         $draft->is_ai_resolution_successful = $accepted;
+        $draft->save();
 
-        $this->finalize($draft, $accepted);
+        $requestNumber = $this->submitServiceRequest($draft, $accepted);
 
         $instruction = $accepted
-            ? "Tell the user their issue has been marked as resolved. Provide the request number ({$draft->service_request_number}) for their records."
-            : "Tell the user their request has been submitted for human review. Provide the request number ({$draft->service_request_number}) and let them know a team member will follow up.";
+            ? "Tell the user their issue has been marked as resolved. Provide the request number ({$requestNumber}) for their records."
+            : "Tell the user their request has been submitted for human review. Provide the request number ({$requestNumber}) and let them know a team member will follow up.";
 
         return json_encode([
             'success' => true,
-            'request_number' => $draft->service_request_number,
+            'request_number' => $requestNumber,
             'resolution_accepted' => $accepted,
             'status' => $accepted ? 'resolved' : 'open',
             'instruction' => $instruction,
         ]);
-    }
-
-    protected function finalize(ServiceRequest $draft, bool $resolved): void
-    {
-        $this->createClarifyingQuestionUpdates($draft);
-        $this->createResolutionUpdates($draft);
-
-        if ($resolved) {
-            $status = ServiceRequestStatus::query()
-                ->where('classification', SystemServiceRequestClassification::Closed)
-                ->first();
-        } else {
-            $status = ServiceRequestStatus::query()
-                ->where('classification', SystemServiceRequestClassification::Open)
-                ->where('name', 'New')
-                ->where('is_system_protected', true)
-                ->first();
-        }
-
-        if ($status) {
-            $draft->status()->associate($status);
-            $draft->status_updated_at = CarbonImmutable::now();
-        }
-
-        // Only generate number if it doesn't exist (prevents observer error on retry)
-        if (! $draft->service_request_number) {
-            $draft->service_request_number = app(ServiceRequestNumberGenerator::class)->generate();
-        }
-        
-        $draft->is_draft = false;
-        $draft->workflow_phase = null;
-        $draft->save();
-
-        $this->assignServiceRequest($draft);
-    }
-
-    protected function createClarifyingQuestionUpdates(ServiceRequest $draft): void
-    {
-        $clarifyingQuestions = $draft->clarifying_questions ?? [];
-        $contact = $draft->respondent;
-
-        foreach ($clarifyingQuestions as $qa) {
-            $question = $qa['question'] ?? '';
-            $answer = $qa['answer'] ?? '';
-
-            if (empty($question) || empty($answer)) {
-                continue;
-            }
-
-            $questionUpdate = $draft->serviceRequestUpdates()->createQuietly([
-                'id' => (string) Str::orderedUuid(),
-                'update' => $question,
-                'internal' => false,
-                'created_by_id' => $draft->getKey(),
-                'created_by_type' => $draft->getMorphClass(),
-            ]);
-
-            TimelineableRecordCreated::dispatch($draft, $questionUpdate);
-
-            if ($contact instanceof Contact) {
-                $answerUpdate = $draft->serviceRequestUpdates()->createQuietly([
-                    'id' => (string) Str::orderedUuid(),
-                    'update' => $answer,
-                    'internal' => false,
-                    'created_by_id' => $contact->getKey(),
-                    'created_by_type' => $contact->getMorphClass(),
-                ]);
-
-                TimelineableRecordCreated::dispatch($draft, $answerUpdate);
-            }
-        }
-    }
-
-    protected function createResolutionUpdates(ServiceRequest $draft): void
-    {
-        $aiResolution = $draft->ai_resolution ?? [];
-
-        if (empty($aiResolution['proposed_answer'])) {
-            return;
-        }
-
-        $resolutionUpdate = $draft->serviceRequestUpdates()->createQuietly([
-            'id' => (string) Str::orderedUuid(),
-            'update' => "AI Resolution Attempt (Confidence: {$aiResolution['confidence_score']}%)\n\n{$aiResolution['proposed_answer']}",
-            'internal' => true,
-            'created_by_id' => $draft->getKey(),
-            'created_by_type' => $draft->getMorphClass(),
-        ]);
-
-        TimelineableRecordCreated::dispatch($draft, $resolutionUpdate);
-
-        $accepted = $aiResolution['user_accepted'] ?? false;
-        $outcomeUpdate = $draft->serviceRequestUpdates()->createQuietly([
-            'id' => (string) Str::orderedUuid(),
-            'update' => $accepted
-                ? 'User confirmed the AI resolution solved their problem.'
-                : 'User indicated the AI resolution did not solve their problem.',
-            'internal' => true,
-            'created_by_id' => $draft->getKey(),
-            'created_by_type' => $draft->getMorphClass(),
-        ]);
-
-        TimelineableRecordCreated::dispatch($draft, $outcomeUpdate);
-    }
-
-    protected function assignServiceRequest(ServiceRequest $draft): void
-    {
-        $draft->load('priority.type');
-
-        $assignmentClass = $draft->priority?->type?->assignment_type?->getAssignerClass();
-
-        if ($assignmentClass) {
-            $assignmentClass->execute($draft);
-        }
     }
 }

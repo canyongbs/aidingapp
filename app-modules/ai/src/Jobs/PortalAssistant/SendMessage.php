@@ -45,16 +45,14 @@ use AidingApp\Ai\Support\StreamingChunks\Finish;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
 use AidingApp\Ai\Support\StreamingChunks\ToolCall;
+use AidingApp\Ai\Tools\PortalAssistant\CheckAiResolutionValidityTool;
 use AidingApp\Ai\Tools\PortalAssistant\FetchServiceRequestTypesTool;
-use AidingApp\Ai\Tools\PortalAssistant\FinalizeServiceRequestTool;
 use AidingApp\Ai\Tools\PortalAssistant\GetDraftStatusTool;
 use AidingApp\Ai\Tools\PortalAssistant\RecordResolutionResponseTool;
 use AidingApp\Ai\Tools\PortalAssistant\SaveClarifyingQuestionTool;
 use AidingApp\Ai\Tools\PortalAssistant\ShowFieldInputTool;
 use AidingApp\Ai\Tools\PortalAssistant\ShowPrioritySelectorTool;
 use AidingApp\Ai\Tools\PortalAssistant\ShowTypeSelectorTool;
-use AidingApp\Ai\Tools\PortalAssistant\SubmitAiResolutionTool;
-use AidingApp\Ai\Tools\PortalAssistant\SubmitServiceRequestTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateDescriptionTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateFormFieldTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateTitleTool;
@@ -269,20 +267,29 @@ CRITICAL RULES:
 3. After asking for information, STOP and wait for the user's response
 4. When user provides information, save it with the appropriate tool, then call `get_draft_status` to see what to ask next
 
-Collection Order:
-- After type selection, the system will tell you to call `get_draft_status`
+Collection Order (MUST follow this order):
+1. **Custom form fields** (if the type has any) - Required fields first, then optionally collect helpful optional fields
+2. **Description** - Ask for detailed description of the issue
+3. **Title** - Suggest a title based on all information collected, user can accept/modify
+4. **Priority** - Call `show_priority_selector` to display priority widget (directly after title is confirmed)
+
+After type selection:
+- Call `get_draft_status` to see what to collect
 - `get_draft_status` will return an instruction telling you exactly what to ask for
 - Ask the user that ONE question, then STOP
 - When user responds, save their answer with the appropriate update tool
 - Then call `get_draft_status` again to get the next instruction
 - Response style: Just ask ONE question. Nothing else. Do NOT use bold formatting for questions.
 
+Auto-transition to Clarifying Questions:
+- When all required fields (fields/description/title/priority) are filled, `get_draft_status` will automatically transition to `clarifying_questions` phase
+- You will receive instruction to start asking the first clarifying question
+- No separate submission tool needed
+
 Optional Fields:
 - After all REQUIRED fields are collected, `get_draft_status` may indicate optional fields are available
 - Use your judgment: ask for optional fields ONLY if they would be genuinely helpful for resolving the user's issue
-- Example: For a password reset, "Last successful login date" might be useful, but "Favorite color" would not be
 - You can collect 0, 1, or multiple optional fields - whatever makes sense for the context
-- When done with optional fields, call `submit_service_request` to proceed
 
 ### During Conversation
 - After saving, call `get_draft_status` to see what to ask next
@@ -290,40 +297,58 @@ Optional Fields:
 - Never guess—always ask if unsure
 - Keep responses SHORT: "Got it." then get_draft_status will tell you the next question
 
-### Submission
-- When all required fields are filled, use `submit_service_request` to validate
-- If validation fails, ask for the missing field briefly: "I need the [field name]."
-
 ### Clarifying Questions
-- After successful submission validation, ask exactly 3 clarifying questions
-- Ask ONE question at a time, wait for answer, then save with `save_clarifying_question`
-- Make questions specific and brief: "What operating system are you using?"
-- Don't explain that these are "clarifying questions" - just ask them naturally
+CRITICAL: Must ask EXACTLY 3 clarifying questions. Each question MUST draw from the information already collected to become more specific and relevant to the user's issue.
+
+Rules:
+- After successful data collection, ask exactly 3 clarifying questions ONE AT A TIME
+- Each question should build on previously submitted answers (title, description, form fields, and previous Q&A)
+- Make questions highly specific to their particular situation - NOT generic questions
+- Examples:
+  * BAD (generic): "What operating system are you using?"
+  * GOOD (specific): "You mentioned the login error started yesterday - did anything change on your device before that?"
+  * BAD (generic): "When did this start?"
+  * GOOD (specific): "Is the 'Access Denied' error happening on all files or just specific ones?"
+- After asking each question, wait for answer, then save with `save_clarifying_question`
+- After 3rd question is saved, the system automatically handles next steps
 EOT;
 
         if ($aiResolutionSettings->is_enabled) {
             $instructions .= <<<'EOT'
 
 ### AI Resolution
-- After 3 clarifying questions, try to resolve the issue using `submit_ai_resolution`
-- Present your solution clearly but concisely
-- Ask: "Did this solve your problem?"
-- Use `record_resolution_response` to record their answer
-- If confidence is below threshold: use `finalize_service_request` to submit for human review
+CRITICAL: Do NOT show any resolution to the user until `check_ai_resolution_validity` tells you to.
+
+Process:
+1. After 3rd question saved, call `check_ai_resolution_validity` with your confidence score (0-100) and proposed resolution
+2. The tool checks if your confidence meets the configured threshold
+
+**If confidence below threshold:**
+- Tool automatically submits request for human review (no user interaction)
+- Tool returns request number
+- Tell user their request has been submitted and provide request number
+
+**If confidence meets threshold:**
+- Tool instructs you to present resolution to user
+- Show the resolution and ask: "Did this solve your problem?"
+- Wait for explicit yes/no response
+- Call `record_resolution_response` with their answer
+- Tool automatically submits request and returns request number
+- If accepted: Tell user issue is resolved, provide request number
+- If rejected: Tell user request submitted for human review, provide request number
 EOT;
         } else {
             $instructions .= <<<'EOT'
 
-### Finalization
-- After 3 clarifying questions, use `finalize_service_request` to submit for human review
+### Automatic Submission
+- AI resolution is disabled
+- After 3rd clarifying question is saved, request automatically submitted for human review
+- Tool returns request number - provide it to user
 EOT;
         }
 
         $instructions .= <<<'EOT'
 
-### After Finalization
-- Give the user their request number
-- Brief confirmation: "Your request [number] has been submitted. Our team will review it shortly."
 
 REMEMBER: Speed and brevity are CRITICAL during service request submission. One question at a time. No explanations of the process.
 EOT;
@@ -377,10 +402,9 @@ EOT;
 
     /**
      * Add tools for data collection phase - progressively expose based on what's filled
-     * The flow is UNIFIED regardless of whether the type has custom form fields:
-     * fields (if any) → description → title → priority
+     * The flow is: fields (if any) → description → title → priority
      *
-     * Users can always go back and edit previous fields, but can't skip ahead
+     * When all required fields are filled, GetDraftStatusTool will instruct AI to advance to clarifying_questions
      */
     protected function addDataCollectionTools(array &$tools, ServiceRequest $draft): void
     {
@@ -400,8 +424,6 @@ EOT;
         }
 
         // Step 3: After description filled, title becomes available
-        // AI will suggest title in response text, user confirms/edits, then AI calls update_title
-        // Note: description is stored in close_details field
         if ($draft->close_details) {
             $tools[] = new UpdateTitleTool($this->thread);
         }
@@ -411,8 +433,8 @@ EOT;
             $tools[] = new ShowPrioritySelectorTool($this->thread);
         }
 
-        // Always allow submission attempt (validation will catch missing fields)
-        $tools[] = new SubmitServiceRequestTool($this->thread);
+        // Auto-advance: When all required fields filled, AI calls get_draft_status which detects completion
+        // and instructs AI to transition to clarifying_questions phase
     }
 
     /**
@@ -489,7 +511,8 @@ EOT;
     protected function addClarifyingTools(array &$tools): void
     {
         $tools[] = new SaveClarifyingQuestionTool($this->thread);
-        $tools[] = new FinalizeServiceRequestTool($this->thread);
+        
+        // No other tools - SaveClarifyingQuestionTool handles auto-submission if resolution disabled
     }
 
     /**
@@ -497,12 +520,29 @@ EOT;
      */
     protected function addResolutionTools(array &$tools, $aiResolutionSettings): void
     {
-        if ($aiResolutionSettings->is_enabled) {
-            $tools[] = new SubmitAiResolutionTool($this->thread);
-            $tools[] = new RecordResolutionResponseTool($this->thread);
+        $draft = null;
+        if ($this->thread->current_service_request_draft_id) {
+            $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
+                ->where('id', $this->thread->current_service_request_draft_id)
+                ->where('is_draft', true)
+                ->first();
         }
 
-        $tools[] = new FinalizeServiceRequestTool($this->thread);
+        if ($aiResolutionSettings->is_enabled) {
+            // CheckAiResolutionValidityTool is only available after 3 questions are saved
+            $clarifyingQuestions = $draft?->clarifying_questions ?? [];
+            if (count($clarifyingQuestions) === 3) {
+                $tools[] = new CheckAiResolutionValidityTool($this->thread);
+            }
+
+            // RecordResolutionResponseTool is only available after AI checks validity and meets threshold
+            $aiResolution = $draft?->ai_resolution ?? [];
+            if (isset($aiResolution['meets_threshold']) && $aiResolution['meets_threshold']) {
+                $tools[] = new RecordResolutionResponseTool($this->thread);
+            }
+        }
+
+        // No SubmitServiceRequestTool - resolution tools handle submission internally
     }
 }
 

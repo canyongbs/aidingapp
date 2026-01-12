@@ -38,21 +38,23 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiResolutionSettings;
-use Prism\Prism\Tool;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\SubmitsServiceRequest;
+use Prism\Prism\Tool;
 
-class SubmitAiResolutionTool extends Tool
+class CheckAiResolutionValidityTool extends Tool
 {
     use FindsDraftServiceRequest;
+    use SubmitsServiceRequest;
 
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
         $this
-            ->as('submit_ai_resolution')
-            ->for('Submits an AI resolution attempt with a confidence score. Call this after clarifying questions when you have a potential solution.')
+            ->as('check_ai_resolution_validity')
+            ->for('Checks if an AI resolution meets the confidence threshold. Call this after clarifying questions when you have a potential solution. DO NOT show the resolution to the user until this tool returns meets_threshold: true.')
             ->withNumberParameter('confidence_score', 'Your confidence score from 0-100 that this resolution will help the user')
-            ->withStringParameter('proposed_answer', 'The resolution text to present to the user')
+            ->withStringParameter('proposed_answer', 'The resolution text (do not show to user yet)')
             ->using($this);
     }
 
@@ -78,31 +80,39 @@ class SubmitAiResolutionTool extends Tool
         $threshold = $aiResolutionSettings->confidence_threshold;
 
         $confidenceScore = max(0, min(100, $confidence_score));
+        $meetsThreshold = $confidenceScore >= $threshold;
 
         $draft->ai_resolution = [
             'confidence_score' => $confidenceScore,
             'proposed_answer' => $proposed_answer,
             'threshold' => $threshold,
+            'meets_threshold' => $meetsThreshold,
         ];
         $draft->ai_resolution_confidence_score = $confidenceScore;
         $draft->save();
-
-        $meetsThreshold = $confidenceScore >= $threshold;
 
         if ($meetsThreshold) {
             return json_encode([
                 'threshold' => $threshold,
                 'confidence_score' => $confidenceScore,
                 'meets_threshold' => true,
-                'instruction' => 'Present your resolution to the user and ask if it solved their problem. Wait for explicit yes/no response.',
+                'instruction' => 'NOW present your resolution to the user and ask if it solved their problem. Wait for explicit yes/no response. Then call record_resolution_response.',
             ]);
         }
+
+        // Confidence below threshold - auto-submit without showing resolution to user
+        $draft->is_ai_resolution_attempted = true;
+        $draft->is_ai_resolution_successful = false;
+        $draft->save();
+
+        $requestNumber = $this->submitServiceRequest($draft, false);
 
         return json_encode([
             'threshold' => $threshold,
             'confidence_score' => $confidenceScore,
             'meets_threshold' => false,
-            'instruction' => 'Confidence too low. Do not show resolution to user. Call finalize_service_request to submit for human review.',
+            'request_number' => $requestNumber,
+            'instruction' => "Confidence too low. Resolution was NOT shown to user. Service request has been automatically submitted for human review. Tell the user their request number is {$requestNumber} and a team member will review it.",
         ]);
     }
 }
