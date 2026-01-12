@@ -37,6 +37,7 @@
 namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -45,6 +46,8 @@ use Prism\Prism\Tool;
 
 class FetchServiceRequestTypesTool extends Tool
 {
+    use FindsDraftServiceRequest;
+
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
@@ -56,18 +59,7 @@ class FetchServiceRequestTypesTool extends Tool
 
     public function __invoke(): string
     {
-        $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
-            ->where('portal_assistant_thread_id', $this->thread->getKey())
-            ->where('is_draft', true)
-            ->latest('created_at')
-            ->first();
-
-        $draftCreated = false;
-
-        if (! $draft) {
-            $draft = $this->createDraft();
-            $draftCreated = true;
-        }
+        $draft = $this->findDraft();
 
         $typesTree = $this->buildTypesTree();
 
@@ -80,28 +72,10 @@ class FetchServiceRequestTypesTool extends Tool
 
         return json_encode([
             'types_tree' => $typesTree,
-            'draft_created' => $draftCreated,
-            'workflow_phase' => $draft->workflow_phase,
+            'has_draft' => $draft !== null,
+            'workflow_phase' => $draft?->workflow_phase,
             'instruction' => 'Call show_type_selector to display the type selection UI. You can pass a suggested_type_id if you can infer the best type from the conversation.',
         ]);
-    }
-
-    protected function createDraft(): ServiceRequest
-    {
-        $contact = $this->thread->author;
-
-        $attributes = [
-            'is_draft' => true,
-            'workflow_phase' => 'type_selection',
-            'clarifying_questions' => [],
-            'portal_assistant_thread_id' => $this->thread->getKey(),
-        ];
-
-        if ($contact instanceof Contact) {
-            $attributes['respondent_id'] = $contact->getKey();
-        }
-
-        return ServiceRequest::create($attributes);
     }
 
     /**

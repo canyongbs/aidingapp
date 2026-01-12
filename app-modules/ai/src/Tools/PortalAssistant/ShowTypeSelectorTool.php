@@ -38,6 +38,7 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\Ai\Models\PortalAssistantThread;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
@@ -45,6 +46,8 @@ use Prism\Prism\Tool;
 
 class ShowTypeSelectorTool extends Tool
 {
+    use FindsDraftServiceRequest;
+
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
@@ -57,18 +60,7 @@ class ShowTypeSelectorTool extends Tool
 
     public function __invoke(?string $suggested_type_id = null): string
     {
-        $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
-            ->where('portal_assistant_thread_id', $this->thread->getKey())
-            ->where('is_draft', true)
-            ->latest('created_at')
-            ->first();
-
-        if (! $draft) {
-            return json_encode([
-                'error' => true,
-                'message' => 'No draft exists. Call fetch_service_request_types first.',
-            ]);
-        }
+        $draft = $this->findDraft();
 
         $typesTree = $this->buildTypesTree();
 

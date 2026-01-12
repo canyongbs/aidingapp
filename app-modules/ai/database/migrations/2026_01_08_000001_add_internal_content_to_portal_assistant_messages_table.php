@@ -45,7 +45,15 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::table('portal_assistant_messages', function (Blueprint $table) {
-                $table->jsonb('internal_content')->nullable()->after('content');
+                $table->text('internal_content')->nullable()->after('content');
+            });
+
+            Schema::table('portal_assistant_threads', function (Blueprint $table) {
+                $table->foreignUuid('current_service_request_draft_id')
+                    ->nullable()
+                    ->after('author_id')
+                    ->constrained('service_requests')
+                    ->nullOnDelete();
             });
 
             PortalAssistantServiceRequestFeature::activate();
@@ -56,6 +64,10 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             PortalAssistantServiceRequestFeature::deactivate();
+
+            Schema::table('portal_assistant_threads', function (Blueprint $table) {
+                $table->dropConstrainedForeignId('current_service_request_draft_id');
+            });
 
             Schema::table('portal_assistant_messages', function (Blueprint $table) {
                 $table->dropColumn('internal_content');

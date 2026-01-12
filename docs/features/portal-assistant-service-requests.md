@@ -10,16 +10,35 @@ The Portal Assistant provides an AI-powered conversational interface for users t
 
 - **SendMessage Job** (`app-modules/ai/src/Jobs/PortalAssistant/SendMessage.php`): Main orchestration job that handles AI streaming and tool access control
 - **Portal Assistant Tools** (`app-modules/ai/src/Tools/PortalAssistant/`): 13 specialized tools for different phases of the workflow
-- **Service Request Draft**: A draft service request record that persists state throughout the conversation
+- **Service Request Drafts**: Multiple draft service request records can exist per thread, with the thread tracking which one is currently active
+- **Current Draft Tracking**: The `PortalAssistantThread` model has a `current_service_request_draft_id` field that points to the active draft
+
+### Draft Lifecycle
+
+Drafts are created and managed based on service request type selection:
+
+1. **No Draft Initially**: When a user starts a conversation, no draft exists yet
+2. **Type Selection Creates Draft**: When user selects a type, a new draft is created for that specific type
+3. **Type Switching**: If the user changes their mind and selects a different type:
+   - A new draft is created for the new type
+   - The old draft remains in the system (not deleted)
+   - Tools reset to data_collection phase (progress doesn't carry over between types)
+   - `current_service_request_draft_id` on the thread is updated to point to the new draft
+4. **Returning to Previous Type**: If user switches back to a previously selected type:
+   - The system finds the existing draft for that type
+   - Switches `current_service_request_draft_id` back to that draft
+   - Previously collected information (title, description, fields) is restored
+   - User can continue where they left off with that type
+
+This design allows users to explore multiple service request types without losing work, while ensuring type-specific form fields and data don't mix.
 
 ### Workflow Phases
 
 The submission process follows a strict sequential workflow:
 
-1. **type_selection** - User selects the type of service request
-2. **data_collection** - User provides title, description, and form field values
-3. **clarifying_questions** - AI asks 3 clarifying questions to better understand the issue
-4. **resolution** - AI attempts resolution (if enabled) or submits for human review
+1. **data_collection** - User provides title, description, and form field values (phase starts after type selection)
+2. **clarifying_questions** - AI asks 3 clarifying questions to better understand the issue
+3. **resolution** - AI attempts resolution (if enabled) or submits for human review
 
 ## Progressive Tool Unlocking
 
@@ -44,6 +63,31 @@ update_priority, update_form_field, show_field_input (unlocked)
 submit_service_request (advances to next phase)
 ```
 
+### Type Switching Behavior
+
+Users can change their mind about which type of service request they want to submit:
+
+**Switching to a New Type:**
+- User selects a different type than they're currently working on
+- System creates a new draft for the new type
+- Old draft is preserved (not deleted) in the database
+- Progress resets - tools return to data_collection phase
+- Thread's `current_service_request_draft_id` updates to the new draft
+- User starts fresh with the new type's form fields
+
+**Switching Back to a Previous Type:**
+- User selects a type they've already started
+- System finds the existing draft for that type
+- Thread's `current_service_request_draft_id` switches back to the old draft
+- Previously filled information is restored (title, description, form fields)
+- User can continue where they left off
+
+**Why This Design:**
+- Prevents mixing data from different service request types
+- Each type may have completely different form fields
+- Allows users to explore options without losing work
+- Keeps separate contexts for separate request types
+
 ## Available Tools
 
 ### Always Available Tools
@@ -51,7 +95,7 @@ submit_service_request (advances to next phase)
 These tools are accessible throughout the entire workflow:
 
 #### Fetch Service Request Types
-Retrieves all available service request types organized by category and creates a draft if one doesn't exist. Returns a hierarchical tree structure of categories and their associated types, along with the current workflow phase. The AI typically follows this by showing the type selector to the user.
+Retrieves all available service request types organized by category. Does NOT create a draft - drafts are only created when the user actually selects a type. Returns a hierarchical tree structure of categories and their associated types, along with whether a draft currently exists and its workflow phase. The AI typically follows this by showing the type selector to the user.
 
 #### Show Type Selector
 Displays a UI widget that allows the user to select which type of service request they want to submit. The AI can optionally suggest a specific type based on the conversation context, which will be highlighted in the interface. This emits an event that the frontend listens for to render the appropriate selection interface.
@@ -130,7 +174,7 @@ AI: [calls Fetch Service Request Types]
     Passes: Nothing
     Returns: A hierarchical tree of all available service request types organized by categories 
              (e.g., Technical Support > Password Reset, Account Issues > Access Problems)
-             Also returns that a draft was created in "type_selection" phase
+             Returns that no draft exists yet (has_draft: false)
              Includes instruction to call Show Type Selector next
     
 AI: [calls Show Type Selector]
@@ -139,7 +183,9 @@ AI: [calls Show Type Selector]
              The UI now shows the type selector with "Password Reset" highlighted as a suggestion
     
 User: [selects "Password Reset" type via UI]
-    System automatically saves the type selection and transitions draft to "data_collection" phase
+    System creates a new draft for "Password Reset" type in "data_collection" phase
+    Sets thread's current_service_request_draft_id to point to this new draft
+    Creates form submission record and associates default priority
     
 AI: "What would you like to title this request?"
     
@@ -470,6 +516,30 @@ To avoid duplicate messages and reduce token usage during tool execution loops, 
 - The tool result message containing the outputs
 
 This optimization significantly reduces token usage during multi-tool workflows while maintaining the correct context for Azure OpenAI. The implementation uses reflection to temporarily swap the messages array before making the API call, then restores it afterwards.
+
+### Draft Fetching and Tracking
+
+The system uses a pointer-based approach to track which draft is currently active:
+
+**Thread Tracking**: The `PortalAssistantThread` model has a `current_service_request_draft_id` field that points to the currently active draft.
+
+**FindsDraftServiceRequest Trait**: All tools that work with drafts use this trait, which implements:
+```
+protected function findDraft(): ?ServiceRequest
+{
+    if ($this->thread->current_service_request_draft_id) {
+        return ServiceRequest::find($this->thread->current_service_request_draft_id);
+    }
+    return null;
+}
+```
+
+**Type Selection Logic**: When a user selects a type:
+1. Check if a draft already exists for that type (by looking for drafts with matching priority.type_id)
+2. If exists: Update thread's `current_service_request_draft_id` to point to that draft
+3. If not: Create new draft and set thread's pointer to it
+
+This enables type switching while preserving work and maintaining clean separation between different draft attempts.
 
 ### Service Request Number Protection
 

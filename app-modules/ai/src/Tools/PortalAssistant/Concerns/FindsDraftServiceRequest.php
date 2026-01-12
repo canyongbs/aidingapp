@@ -42,10 +42,14 @@ trait FindsDraftServiceRequest
 {
     protected function findDraft(): ?ServiceRequest
     {
-        return ServiceRequest::withoutGlobalScope('excludeDrafts')
-            ->where('portal_assistant_thread_id', $this->thread->getKey())
-            ->where('is_draft', true)
-            ->latest('created_at')
-            ->first();
+        // Use the thread's current_service_request_draft_id if set
+        if ($this->thread->current_service_request_draft_id) {
+            return ServiceRequest::withoutGlobalScope('excludeDrafts')
+                ->where('id', $this->thread->current_service_request_draft_id)
+                ->where('is_draft', true)
+                ->first();
+        }
+
+        return null;
     }
 }

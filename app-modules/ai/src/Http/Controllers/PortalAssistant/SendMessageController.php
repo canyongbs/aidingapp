@@ -50,13 +50,13 @@ class SendMessageController
         $data = $request->validate([
             'content' => ['required', 'string', 'max:25000'],
             'thread_id' => ['nullable', 'uuid'],
-            'internal_content' => ['nullable', 'array'],
-            'internal_content.type' => ['required_with:internal_content', 'string'],
-            'internal_content.type_id' => ['nullable', 'uuid'],
-            'internal_content.field_id' => ['nullable', 'uuid'],
-            'internal_content.value' => ['nullable'],
-            'internal_content.widget_type' => ['nullable', 'string'],
-            'internal_content.error' => ['nullable', 'string'],
+            'metadata' => ['nullable', 'array'],
+            'metadata.type' => ['required_with:metadata', 'string'],
+            'metadata.type_id' => ['nullable', 'uuid'],
+            'metadata.field_id' => ['nullable', 'uuid'],
+            'metadata.value' => ['nullable'],
+            'metadata.widget_type' => ['nullable', 'string'],
+            'metadata.error' => ['nullable', 'string'],
         ]);
 
         $author = auth('contact')->user();
@@ -76,13 +76,13 @@ class SendMessageController
             $thread,
             $data['content'],
             request: [
-                'headers' => Arr::only(
+                'headers' => Arr::Only(
                     request()->headers->all(),
                     ['host', 'sec-ch-ua', 'user-agent', 'sec-ch-ua-platform', 'origin', 'referer', 'accept-language'],
                 ),
                 'ip' => request()->ip(),
             ],
-            internalContent: $data['internal_content'] ?? null,
+            metadata: $data['metadata'] ?? null,
         ));
 
         return response()->json([

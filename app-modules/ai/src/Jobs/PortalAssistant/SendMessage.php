@@ -88,20 +88,20 @@ class SendMessage implements ShouldQueue
 
     /**
      * @param array<string, mixed> $request
-     * @param array<string, mixed>|null $internalContent
+     * @param array<string, mixed>|null $metadata
      */
     public function __construct(
         protected PortalAssistantThread $thread,
         protected string $content,
         protected array $request = [],
-        protected ?array $internalContent = null,
+        protected ?array $metadata = null,
     ) {}
 
     public function handle(): void
     {
-        if ($this->internalContent !== null) {
+        if ($this->metadata !== null) {
             $validator = app(InternalContentValidator::class);
-            $validationResult = $validator->validate($this->internalContent);
+            $validationResult = $validator->validate($this->metadata);
 
             if ($validationResult->failed()) {
                 event(new PortalAssistantMessageChunk(
@@ -114,14 +114,16 @@ class SendMessage implements ShouldQueue
                 return;
             }
 
-            $this->processInternalContent();
+            $this->processMetadata();
         }
+
+        $aiContent = $this->buildAiContent();
 
         $message = new PortalAssistantMessage();
         $message->thread()->associate($this->thread);
         $message->author()->associate($this->thread->author);
         $message->content = $this->content;
-        $message->internal_content = $this->internalContent;
+        $message->internal_content = $aiContent !== $this->content ? $aiContent : null;
         $message->request = $this->request;
         $message->is_assistant = false;
         $message->save();
@@ -249,20 +251,20 @@ class SendMessage implements ShouldQueue
 
     protected function buildAiContent(): string
     {
-        if ($this->internalContent === null) {
+        if ($this->metadata === null) {
             return $this->content;
         }
 
-        return match ($this->internalContent['type'] ?? null) {
+        return match ($this->metadata['type'] ?? null) {
             InternalContentValidator::TYPE_FIELD_RESPONSE => '[System: User completed the form field input. The value has been saved to the draft. Call get_draft_status to see current state.]',
             InternalContentValidator::TYPE_TYPE_SELECTION => '[System: User selected a service request type. The draft has been updated with the selected type and a default priority. Call get_draft_status to see what to collect next.]',
             InternalContentValidator::TYPE_WIDGET_CANCELLED => sprintf(
                 '[System: User cancelled the %s widget. Continue the conversation normally.]',
-                $this->internalContent['widget_type'] ?? 'input'
+                $this->metadata['widget_type'] ?? 'input'
             ),
             InternalContentValidator::TYPE_WIDGET_ERROR => sprintf(
                 '[System: Widget error occurred: %s. Ask the user to try again or collect the information conversationally if possible.]',
-                $this->internalContent['error'] ?? 'unknown error'
+                $this->metadata['error'] ?? 'unknown error'
             ),
             default => $this->content,
         };
@@ -358,12 +360,14 @@ EOT;
 
         $aiResolutionSettings = app(AiResolutionSettings::class);
 
-        // Get current draft to determine which tools to expose
-        $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
-            ->where('portal_assistant_thread_id', $this->thread->getKey())
-            ->where('is_draft', true)
-            ->latest()
-            ->first();
+        // Get current draft from thread's pointer
+        $draft = null;
+        if ($this->thread->current_service_request_draft_id) {
+            $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
+                ->where('id', $this->thread->current_service_request_draft_id)
+                ->where('is_draft', true)
+                ->first();
+        }
 
         // Always available tools - users can restart or get status at any time
         $tools = [
@@ -437,13 +441,13 @@ EOT;
         $tools[] = new FinalizeServiceRequestTool($this->thread);
     }
 
-    protected function processInternalContent(): void
+    protected function processMetadata(): void
     {
-        if ($this->internalContent === null) {
+        if ($this->metadata === null) {
             return;
         }
 
-        match ($this->internalContent['type'] ?? null) {
+        match ($this->metadata['type'] ?? null) {
             InternalContentValidator::TYPE_TYPE_SELECTION => $this->processTypeSelection(),
             InternalContentValidator::TYPE_FIELD_RESPONSE => $this->processFieldResponse(),
             default => null,
@@ -452,7 +456,7 @@ EOT;
 
     protected function processTypeSelection(): void
     {
-        $typeId = $this->internalContent['type_id'] ?? null;
+        $typeId = $this->metadata['type_id'] ?? null;
 
         if (! $typeId) {
             return;
@@ -464,15 +468,38 @@ EOT;
             return;
         }
 
-        $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
+        // Check if a draft already exists for this type (user switching back)
+        $existingDraft = ServiceRequest::withoutGlobalScope('excludeDrafts')
             ->where('portal_assistant_thread_id', $this->thread->getKey())
             ->where('is_draft', true)
-            ->latest()
+            ->whereHas('priority', function ($query) use ($typeId) {
+                $query->where('type_id', $typeId);
+            })
             ->first();
 
-        if (! $draft) {
+        // If draft exists for this type, switch to it
+        if ($existingDraft) {
+            $this->thread->current_service_request_draft_id = $existingDraft->getKey();
+            $this->thread->save();
+
             return;
         }
+
+        // Create new draft for this type
+        $contact = $this->thread->author;
+
+        $attributes = [
+            'is_draft' => true,
+            'workflow_phase' => 'data_collection',
+            'clarifying_questions' => [],
+            'portal_assistant_thread_id' => $this->thread->getKey(),
+        ];
+
+        if ($contact instanceof Contact) {
+            $attributes['respondent_id'] = $contact->getKey();
+        }
+
+        $draft = ServiceRequest::create($attributes);
 
         $defaultPriority = $type->priorities()->orderByDesc('order')->first();
 
@@ -494,14 +521,17 @@ EOT;
         $submission->save();
 
         $draft->serviceRequestFormSubmission()->associate($submission);
-        $draft->workflow_phase = 'data_collection';
         $draft->save();
+
+        // Set as current draft on thread
+        $this->thread->current_service_request_draft_id = $draft->getKey();
+        $this->thread->save();
     }
 
     protected function processFieldResponse(): void
     {
-        $fieldId = $this->internalContent['field_id'] ?? null;
-        $value = $this->internalContent['value'] ?? null;
+        $fieldId = $this->metadata['field_id'] ?? null;
+        $value = $this->metadata['value'] ?? null;
 
         if (! $fieldId || $value === null) {
             return;
