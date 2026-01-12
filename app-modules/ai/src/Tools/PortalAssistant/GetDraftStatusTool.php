@@ -234,7 +234,6 @@ class GetDraftStatusTool extends Tool
                     'field_id' => $field['field_id'],
                     'label' => $field['label'],
                     'type' => $field['type'],
-                    'step' => $field['step'],
                 ];
             }
         }
