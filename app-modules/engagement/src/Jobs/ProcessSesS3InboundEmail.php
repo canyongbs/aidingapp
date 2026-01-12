@@ -259,19 +259,19 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                                 'last_name' => $lastName,
                                 'full_name' => $fullName,
                             ]);
-                        
-                        if(ContactChangesFeature::active()){
+
+                        if (ContactChangesFeature::active()) {
                             $type = ContactType::query()
-                            ->where('classification', SystemContactClassification::New)
-                            ->firstOrFail();
+                                ->where('classification', SystemContactClassification::New)
+                                ->firstOrFail();
 
                             $contact->type()->associate($type);
-                        }else{
+                        } else {
                             $status = ContactStatus::query()
                                 ->where('classification', SystemContactClassification::New)
                                 ->firstOrFail();
 
-                                $contact->status()->associate($status);
+                            $contact->status()->associate($status);
 
                             $source = ContactSource::query()
                                 ->where('name', 'Service Request Email Auto Creation')
@@ -287,7 +287,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                             $contact->source()->associate($source);
                             $contact->status()->associate($status);
                         }
-                        
 
                         $contact->organization()->associate($organization);
 
