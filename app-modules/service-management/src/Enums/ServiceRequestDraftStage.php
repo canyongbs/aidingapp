@@ -55,7 +55,6 @@ enum ServiceRequestDraftStage: string
         
         $requiredFields = [
             'priority_id',
-            'service_request_type_id',
             'title',
             'close_details',
             'respondent_id',
