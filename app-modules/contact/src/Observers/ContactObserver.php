@@ -55,10 +55,10 @@ class ContactObserver
             if ($user instanceof User && ! $contact->createdBy && $contactSource?->name !== 'Portal Generated') { /** @phpstan-ignore-line */
                 $contact->createdBy()->associate($user);
             }
-        }
-
-        if ($user instanceof User && ! $contact->createdBy) {
-            $contact->createdBy()->associate($user);
+        }else{
+            if ($user instanceof User && ! $contact->createdBy) {
+                $contact->createdBy()->associate($user);
+            }
         }
     }
 
