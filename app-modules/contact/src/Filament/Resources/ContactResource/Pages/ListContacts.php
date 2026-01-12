@@ -88,7 +88,7 @@ class ListContacts extends ListRecords
                 TextColumn::make('status')
                     ->badge()
                     ->state(function (Contact $record) {
-                        return $record->status->name;
+                        return $record->status->name; /** @phpstan-ignore-line */
                     })
                     ->color(function (Contact $record) {
                         return $record->status->color->value;

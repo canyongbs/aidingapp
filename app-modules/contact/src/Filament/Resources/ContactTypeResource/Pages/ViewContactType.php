@@ -37,7 +37,9 @@
 namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactTypeResource;
+use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\ContactType;
+use App\Features\ContactChangesFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
@@ -61,7 +63,13 @@ class ViewContactType extends ViewRecord
                         TextEntry::make('color')
                             ->label('Color')
                             ->badge()
-                            ->color(fn (ContactType $contactType) => $contactType->color->value),
+                            ->color(fn (ContactType $contactType) => $contactType->color->value)
+                            ->visible(ContactChangesFeature::active()),
+                        TextEntry::make('color')
+                            ->label('Color')
+                            ->badge()
+                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value)
+                            ->hidden(ContactChangesFeature::active()),
                     ])
                     ->columns(),
             ]);

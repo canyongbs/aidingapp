@@ -37,7 +37,9 @@
 namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactTypeResource;
+use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\ContactType;
+use App\Features\ContactChangesFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
@@ -68,7 +70,13 @@ class ListContactTypes extends ListRecords
                 TextColumn::make('color')
                     ->label('Color')
                     ->badge()
-                    ->color(fn (ContactType $contactType) => $contactType->color->value),
+                    ->color(fn (ContactType $contactType) => $contactType->color->value)
+                    ->visible(ContactChangesFeature::active()),
+                TextColumn::make('color')
+                    ->label('Color')
+                    ->badge()
+                    ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value)
+                    ->hidden(ContactChangesFeature::active()),
                 TextColumn::make('contacts_count')
                     ->label('# of Contacts')
                     ->counts('contacts')

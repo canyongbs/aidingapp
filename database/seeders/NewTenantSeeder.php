@@ -37,7 +37,6 @@
 namespace Database\Seeders;
 
 use AidingApp\Authorization\Models\Role;
-use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
 use AidingApp\Contact\Database\Seeders\ContactTypeSeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationIndustrySeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationTypeSeeder;
@@ -68,7 +67,6 @@ class NewTenantSeeder extends Seeder
             ServiceRequestStatusSeeder::class,
             ServiceRequestTypeSeeder::class,
             ContactTypeSeeder::class,
-            ContactSourceSeeder::class,
             KnowledgeBaseCategorySeeder::class,
             KnowledgeBaseQualitySeeder::class,
             KnowledgeBaseStatusSeeder::class,

@@ -34,11 +34,13 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Filament\Resources\ContactSourceResource;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\CreateContactType;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Tests\Tenant\ContactSource\RequestFactories\CreateContactSourceRequestFactory;
+use AidingApp\Contact\Models\ContactType;
+use AidingApp\Contact\Tests\Tenant\ContactStatus\RequestFactories\CreateContactTypeRequestFactory;
 use App\Models\User;
+use Illuminate\Validation\Rules\Enum;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -47,52 +49,54 @@ use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Tests\asSuperAdmin;
 
-test('A successful action on the CreateContactSource page', function () {
+test('A successful action on the CreateContactStatus page', function () {
     asSuperAdmin()
         ->get(
-            ContactSourceResource::getUrl('create')
+            ContactTypeResource::getUrl('create')
         )
         ->assertSuccessful();
 
-    $request = CreateContactSourceRequestFactory::new()->create();
+    $request = CreateContactTypeRequestFactory::new()->create();
 
-    livewire(ContactSourceResource\Pages\CreateContactSource::class)
+    livewire(CreateContactType::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasNoFormErrors();
 
-    assertCount(1, ContactSource::all());
+    assertCount(1, ContactType::all());
 
-    assertDatabaseHas(ContactSource::class, $request);
+    assertDatabaseHas(ContactType::class, $request);
 });
 
-test('CreateContactSource requires valid data', function (CreateContactSourceRequestFactory $data, array $errors) {
+test('CreateContactType requires valid data', function (CreateContactTypeRequestFactory $data, array $errors) {
     asSuperAdmin();
 
-    livewire(ContactSourceResource\Pages\CreateContactSource::class)
-        ->fillForm(CreateContactSourceRequestFactory::new($data)->create())
+    livewire(CreateContactType::class)
+        ->fillForm(CreateContactTypeRequestFactory::new($data)->create())
         ->call('create')
         ->assertHasFormErrors($errors);
 
-    assertEmpty(ContactSource::all());
+    assertEmpty(ContactType::all());
 })->with(
     [
-        'name missing' => [fn () => CreateContactSourceRequestFactory::new()->without('name'), ['name' => 'required']],
-        'name not a string' => [fn () => CreateContactSourceRequestFactory::new()->state(['name' => 1]), ['name' => 'string']],
+        'name missing' => [fn () => CreateContactTypeRequestFactory::new()->without('name'), ['name' => 'required']],
+        'name not a string' => [fn () => CreateContactTypeRequestFactory::new()->state(['name' => 1]), ['name' => 'string']],
+        'color missing' => [fn () => CreateContactTypeRequestFactory::new()->state(['color' => null]), ['color' => 'required']],
+        'color not within enum' => [fn () => CreateContactTypeRequestFactory::new()->state(['color' => 'not-a-color']), ['color' => Enum::class]],
     ]
 );
 
 // Permission Tests
 
-test('CreateContactSource is gated with proper access control', function () {
+test('CreateContactType is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
     actingAs($user)
         ->get(
-            ContactSourceResource::getUrl('create')
+            ContactTypeResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(ContactSourceResource\Pages\CreateContactSource::class)
+    livewire(CreateContactType::class)
         ->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
@@ -100,17 +104,17 @@ test('CreateContactSource is gated with proper access control', function () {
 
     actingAs($user)
         ->get(
-            ContactSourceResource::getUrl('create')
+            ContactTypeResource::getUrl('create')
         )->assertSuccessful();
 
-    $request = collect(CreateContactSourceRequestFactory::new()->create());
+    $request = collect(CreateContactTypeRequestFactory::new()->create());
 
-    livewire(ContactSourceResource\Pages\CreateContactSource::class)
+    livewire(CreateContactType::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
 
-    assertCount(1, ContactSource::all());
+    assertCount(1, ContactType::all());
 
-    assertDatabaseHas(ContactSource::class, $request->toArray());
+    assertDatabaseHas(ContactType::class, $request->toArray());
 });

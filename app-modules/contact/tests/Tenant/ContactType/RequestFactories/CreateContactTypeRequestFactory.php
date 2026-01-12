@@ -34,16 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Tests\Tenant\ContactSource\RequestFactories;
+namespace AidingApp\Contact\Tests\Tenant\ContactStatus\RequestFactories;
 
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
+use AidingApp\Contact\Enums\SystemContactClassification;
 use Worksome\RequestFactories\RequestFactory;
 
-class CreateContactSourceRequestFactory extends RequestFactory
+class CreateContactTypeRequestFactory extends RequestFactory
 {
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word(),
+            'classification' => fake()->randomElement(SystemContactClassification::cases()),
+            'name' => fake()->name(),
+            'color' => fake()->randomElement(ContactTypeColorOptions::cases()),
         ];
     }
 }

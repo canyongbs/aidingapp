@@ -40,20 +40,30 @@ use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\CreateContact
 use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\EditContactType;
 use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\ListContactTypes;
 use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\ViewContactType;
+use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\ContactType;
+use App\Features\ContactChangesFeature;
 use App\Filament\Clusters\ContactManagement;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 
 class ContactTypeResource extends Resource
 {
-    protected static ?string $model = ContactType::class;
-
     protected static ?string $navigationLabel = 'Types';
 
     protected static ?int $navigationSort = 1;
 
     protected static ?string $cluster = ContactManagement::class;
+
+    public static function getModel(): string
+    {
+        return ContactChangesFeature::active() ? ContactType::class : ContactStatus::class;
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return ContactChangesFeature::active() ? 'Types' : 'Statuses';
+    }
 
     public static function form(Form $form): Form
     {

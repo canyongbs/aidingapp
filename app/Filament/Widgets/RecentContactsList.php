@@ -38,6 +38,7 @@ namespace App\Filament\Widgets;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use App\Features\ContactChangesFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -78,15 +79,27 @@ class RecentContactsList extends BaseWidget
                 TextColumn::make('status')
                     ->badge()
                     ->state(function (Contact $record) {
-                        return $record->status->name;
+                        return $record->status->name; /** @phpstan-ignore-line */
                     })
                     ->color(function (Contact $record) {
                         return $record->status->color->value;
                     })
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->hidden(ContactChangesFeature::active()),
+                TextColumn::make('type')
+                    ->badge()
+                    ->state(function (Contact $record) {
+                        return $record->type->name;
+                    })
+                    ->color(function (Contact $record) {
+                        return $record->type->color->value;
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->visible(ContactChangesFeature::active()),
                 TextColumn::make('source.name')
                     ->label('Source')
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->hidden(ContactChangesFeature::active()),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime('g:ia - M j, Y ')

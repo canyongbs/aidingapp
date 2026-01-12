@@ -34,39 +34,52 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Models;
+namespace AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use App\Models\BaseModel;
-use DateTimeInterface;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-/**
- * @mixin IdeHelperContactSource
- */
-class ContactSource extends BaseModel implements Auditable
+class ListContactSources extends ListRecords
 {
-    use HasUuids;
-    use SoftDeletes;
-    use AuditableTrait;
+    protected static string $resource = ContactSourceResource::class;
 
-    protected $fillable = [
-        'name',
-    ];
-
-    /**
-     * @return HasMany<Contact, $this>
-     */
-    public function contacts(): HasMany
+    public function table(Table $table): Table
     {
-        return $this->hasMany(Contact::class, 'source_id');
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('contacts_count')
+                    ->label('# of Contacts')
+                    ->counts('contacts')
+                    ->sortable(),
+            ])
+            ->actions([
+                ViewAction::make(),
+                EditAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
     }
 
-    protected function serializeDate(DateTimeInterface $date): string
+    protected function getHeaderActions(): array
     {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+        return [
+            Actions\CreateAction::make(),
+        ];
     }
 }

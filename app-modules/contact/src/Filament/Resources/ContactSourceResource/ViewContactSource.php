@@ -34,53 +34,36 @@
 </COPYRIGHT>
 */
 
+namespace AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
+
 use AidingApp\Contact\Filament\Resources\ContactSourceResource;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactSource;
-use App\Models\User;
+use Filament\Actions;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
-use function Pest\Laravel\actingAs;
-use function Tests\asSuperAdmin;
+class ViewContactSource extends ViewRecord
+{
+    protected static string $resource = ContactSourceResource::class;
 
-test('The correct details are displayed on the ViewContactSource page', function () {
-    $contactSource = ContactSource::factory()->create();
+    public function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Name'),
+                    ])
+                    ->columns(),
+            ]);
+    }
 
-    asSuperAdmin()
-        ->get(
-            ContactSourceResource::getUrl('view', [
-                'record' => $contactSource,
-            ])
-        )
-        ->assertSuccessful()
-        ->assertSeeTextInOrder(
-            [
-                'Name',
-                $contactSource->name,
-            ]
-        );
-});
-
-// Permission Tests
-
-test('ViewContactSource is gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
-
-    $contactSource = ContactSource::factory()->create();
-
-    actingAs($user)
-        ->get(
-            ContactSourceResource::getUrl('view', [
-                'record' => $contactSource,
-            ])
-        )->assertForbidden();
-
-    $user->givePermissionTo('settings.view-any');
-    $user->givePermissionTo('settings.*.view');
-
-    actingAs($user)
-        ->get(
-            ContactSourceResource::getUrl('view', [
-                'record' => $contactSource,
-            ])
-        )->assertSuccessful();
-});
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\EditAction::make(),
+        ];
+    }
+}
