@@ -38,7 +38,7 @@ namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\ContactStatusFactory;
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
 use App\Models\BaseModel;
 use DateTimeInterface;
@@ -66,7 +66,7 @@ class ContactStatus extends BaseModel implements Auditable
 
     protected $casts = [
         'classification' => SystemContactClassification::class,
-        'color' => ContactStatusColorOptions::class,
+        'color' => ContactTypeColorOptions::class,
     ];
 
     /**

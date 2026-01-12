@@ -34,23 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\CreateRecord;
 
-class EditContactStatus extends EditRecord
+class CreateContactType extends CreateRecord
 {
-    use EditPageRedirection;
-
-    protected static string $resource = ContactStatusResource::class;
+    protected static string $resource = ContactTypeResource::class;
 
     public function form(Form $form): Form
     {
@@ -69,17 +65,9 @@ class EditContactStatus extends EditRecord
                 Select::make('color')
                     ->label('Color')
                     ->searchable()
-                    ->options(ContactStatusColorOptions::class)
+                    ->options(ContactTypeColorOptions::class)
                     ->required()
-                    ->enum(ContactStatusColorOptions::class),
+                    ->enum(ContactTypeColorOptions::class),
             ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
-        ];
     }
 }

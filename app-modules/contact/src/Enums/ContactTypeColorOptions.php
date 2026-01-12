@@ -34,21 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Database\Seeders;
+namespace AidingApp\Contact\Enums;
 
-use AidingApp\Contact\Models\ContactSource;
-use Illuminate\Database\Seeder;
+use Filament\Support\Contracts\HasLabel;
 
-class ContactSourceSeeder extends Seeder
+enum ContactTypeColorOptions: string implements HasLabel
 {
-    public function run(): void
+    case Success = 'success';
+
+    case Danger = 'danger';
+
+    case Warning = 'warning';
+
+    case Info = 'info';
+
+    case Primary = 'primary';
+
+    case Gray = 'gray';
+
+    public function getLabel(): string
     {
-        ContactSource::factory()
-            ->createMany(
-                [
-                    ['name' => 'Aiding App'],
-                    ['name' => 'Import'],
-                ]
-            );
+        return $this->value;
     }
 }

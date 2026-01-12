@@ -111,6 +111,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'email_bounce',
         'status_id',
         'source_id',
+        'type_id',
         'phone',
         'address',
         'address_2',
@@ -186,6 +187,14 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public function status(): BelongsTo
     {
         return $this->belongsTo(ContactStatus::class);
+    }
+
+    /**
+     * @return BelongsTo<ContactType, $this>
+     */
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(ContactType::class);
     }
 
     /**

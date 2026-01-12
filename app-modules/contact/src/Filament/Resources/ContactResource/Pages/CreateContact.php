@@ -40,8 +40,12 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use App\Features\JobTitleFeature;
+use App\Features\ContactChangesFeature;
+use App\Models\Scopes\HasLicense;
+use App\Models\User;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -153,7 +157,17 @@ class CreateContact extends CreateRecord
                         ->exists(
                             table: (new ContactStatus())->getTable(),
                             column: (new ContactStatus())->getKeyName()
-                        ),
+                        )
+                        ->hidden(ContactChangesFeature::active()),
+                    Select::make('type_id')
+                        ->label('Type')
+                        ->required()
+                        ->relationship('type', 'name')
+                        ->exists(
+                            table: (new ContactType())->getTable(),
+                            column: (new ContactType())->getKeyName()
+                        )
+                        ->visible(ContactChangesFeature::active()),
                     Select::make('source_id')
                         ->label('Source')
                         ->required()
@@ -161,7 +175,8 @@ class CreateContact extends CreateRecord
                         ->exists(
                             table: (new ContactSource())->getTable(),
                             column: (new ContactSource())->getKeyName()
-                        ),
+                        )
+                        ->hidden(ContactChangesFeature::active()),
                     Select::make('organization_id')
                         ->label('Organization')
                         ->relationship('organization', 'name')

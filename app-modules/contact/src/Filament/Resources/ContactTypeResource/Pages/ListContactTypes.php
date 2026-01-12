@@ -34,37 +34,61 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
-use AidingApp\Contact\Filament\Resources\ContactSourceResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Pages\EditRecord;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource;
+use AidingApp\Contact\Models\ContactType;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Actions\BulkActionGroup;
+use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class EditContactSource extends EditRecord
+class ListContactTypes extends ListRecords
 {
-    use EditPageRedirection;
+    protected static string $resource = ContactTypeResource::class;
 
-    protected static string $resource = ContactSourceResource::class;
-
-    public function form(Form $form): Form
+    public function table(Table $table): Table
     {
-        return $form
-            ->schema([
-                TextInput::make('name')
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name')
                     ->label('Name')
-                    ->required()
-                    ->string(),
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('classification')
+                    ->label('Classification')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('color')
+                    ->label('Color')
+                    ->badge()
+                    ->color(fn (ContactType $contactType) => $contactType->color->value),
+                TextColumn::make('contacts_count')
+                    ->label('# of Contacts')
+                    ->counts('contacts')
+                    ->sortable(),
+            ])
+            ->actions([
+                ViewAction::make(),
+                EditAction::make(),
+            ])
+            ->bulkActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            CreateAction::make(),
         ];
     }
 }

@@ -36,7 +36,7 @@
 
 namespace AidingApp\Contact\Tests\Tenant\ContactStatus\RequestFactories;
 
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
 use Worksome\RequestFactories\RequestFactory;
 
@@ -47,7 +47,7 @@ class EditContactStatusRequestFactory extends RequestFactory
         return [
             'classification' => fake()->randomElement(SystemContactClassification::cases()),
             'name' => fake()->name(),
-            'color' => fake()->randomElement(ContactStatusColorOptions::cases()),
+            'color' => fake()->randomElement(ContactTypeColorOptions::cases()),
         ];
     }
 }

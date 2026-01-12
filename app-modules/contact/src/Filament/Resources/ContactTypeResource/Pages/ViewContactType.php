@@ -34,47 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources;
+namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
-use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\CreateContactStatus;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\EditContactStatus;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ListContactStatuses;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ViewContactStatus;
-use AidingApp\Contact\Models\ContactStatus;
-use App\Filament\Clusters\ContactManagement;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource;
+use AidingApp\Contact\Models\ContactType;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
-class ContactStatusResource extends Resource
+class ViewContactType extends ViewRecord
 {
-    protected static ?string $model = ContactStatus::class;
+    protected static string $resource = ContactTypeResource::class;
 
-    protected static ?string $navigationLabel = 'Statuses';
-
-    protected static ?int $navigationSort = 1;
-
-    protected static ?string $cluster = ContactManagement::class;
-
-    public static function form(Form $form): Form
+    public function infolist(Infolist $infolist): Infolist
     {
-        return $form
+        return $infolist
             ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Name'),
+                        TextEntry::make('classification')
+                            ->label('Classification'),
+                        TextEntry::make('color')
+                            ->label('Color')
+                            ->badge()
+                            ->color(fn (ContactType $contactType) => $contactType->color->value),
+                    ])
+                    ->columns(),
             ]);
     }
 
-    public static function getRelations(): array
+    protected function getHeaderActions(): array
     {
         return [
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListContactStatuses::route('/'),
-            'create' => CreateContactStatus::route('/create'),
-            'view' => ViewContactStatus::route('/{record}'),
-            'edit' => EditContactStatus::route('/{record}/edit'),
+            EditAction::make(),
         ];
     }
 }

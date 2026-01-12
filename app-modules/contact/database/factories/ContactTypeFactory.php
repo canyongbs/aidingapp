@@ -34,38 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources;
+namespace AidingApp\Contact\Database\Factories;
 
-use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\CreateContactSource;
-use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\EditContactSource;
-use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ListContactSources;
-use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ViewContactSource;
-use AidingApp\Contact\Models\ContactSource;
-use App\Filament\Clusters\ContactManagement;
-use Filament\Resources\Resource;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
+use AidingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Models\ContactType;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ContactSourceResource extends Resource
+/**
+ * @extends Factory<ContactType>
+ */
+class ContactTypeFactory extends Factory
 {
-    protected static ?string $model = ContactSource::class;
-
-    protected static ?string $navigationLabel = 'Sources';
-
-    protected static ?int $navigationSort = 2;
-
-    protected static ?string $cluster = ContactManagement::class;
-
-    public static function getRelations(): array
-    {
-        return [];
-    }
-
-    public static function getPages(): array
+    public function definition(): array
     {
         return [
-            'index' => ListContactSources::route('/'),
-            'create' => CreateContactSource::route('/create'),
-            'view' => ViewContactSource::route('/{record}'),
-            'edit' => EditContactSource::route('/{record}/edit'),
+            'classification' => $this->faker->randomElement(SystemContactClassification::cases()),
+            'name' => $this->faker->word,
+            'color' => $this->faker->randomElement(ContactTypeColorOptions::cases()),
         ];
     }
 }

@@ -34,16 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
-use AidingApp\Contact\Filament\Resources\ContactSourceResource;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
+use AidingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
-use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\EditRecord;
 
-class CreateContactSource extends CreateRecord
+class EditContactType extends EditRecord
 {
-    protected static string $resource = ContactSourceResource::class;
+    use EditPageRedirection;
+
+    protected static string $resource = ContactTypeResource::class;
 
     public function form(Form $form): Form
     {
@@ -53,6 +61,26 @@ class CreateContactSource extends CreateRecord
                     ->label('Name')
                     ->required()
                     ->string(),
+                Select::make('classification')
+                    ->label('Classification')
+                    ->searchable()
+                    ->options(SystemContactClassification::class)
+                    ->required()
+                    ->enum(SystemContactClassification::class),
+                Select::make('color')
+                    ->label('Color')
+                    ->searchable()
+                    ->options(ContactTypeColorOptions::class)
+                    ->required()
+                    ->enum(ContactTypeColorOptions::class),
             ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            ViewAction::make(),
+            DeleteAction::make(),
+        ];
     }
 }
