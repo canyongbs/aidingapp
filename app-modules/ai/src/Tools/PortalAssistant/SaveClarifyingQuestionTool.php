@@ -97,7 +97,7 @@ class SaveClarifyingQuestionTool extends Tool
                 'update' => $question,
                 'update_type' => ServiceRequestUpdateType::ClarifyingQuestion,
                 'internal' => false,
-                'created_by_type' => ServiceRequest::getMorphClassStatic(),
+                'created_by_type' => $draft->getMorphClass(),
                 'created_by_id' => $draft->getKey(),
             ],
             [

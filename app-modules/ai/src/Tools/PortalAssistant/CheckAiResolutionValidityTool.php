@@ -94,7 +94,7 @@ class CheckAiResolutionValidityTool extends Tool
             'update' => "Based on the information you've provided, here is a potential solution:\n\n{$proposed_answer}\n\nDid this resolve your issue?",
             'update_type' => ServiceRequestUpdateType::AiResolutionProposed,
             'internal' => false,
-            'created_by_type' => ServiceRequest::getMorphClassStatic(),
+            'created_by_type' => $draft->getMorphClass(),
             'created_by_id' => $draft->getKey(),
         ]);
 
