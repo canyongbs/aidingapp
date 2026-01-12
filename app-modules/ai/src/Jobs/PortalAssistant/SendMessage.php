@@ -306,7 +306,7 @@ CRITICAL RULES:
 Collection Order (MUST follow this order):
 1. **Custom form fields** (if the type has any) - Required fields first, then optionally collect helpful optional fields
 2. **Description** - Ask for detailed description of the issue
-3. **Title** - Suggest a title based on all information collected, user can accept/modify
+3. **Title** - Explain that you need a brief title for their service request, then suggest one based on collected info and ask them to confirm/modify. Example: "I need a brief title for your service request. How about: [suggested title]?"
 
 IMPORTANT: Priority is selected WITH the type at the beginning, not collected separately afterward.
 

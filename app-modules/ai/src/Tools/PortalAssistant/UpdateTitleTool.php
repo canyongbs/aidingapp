@@ -49,7 +49,7 @@ class UpdateTitleTool extends Tool
     ) {
         $this
             ->as('update_title')
-            ->for('Saves the title for the service request. When title is missing: suggest a concise title based on the description and form fields (if any), then ask the user to confirm or edit it. This comes after the description is provided. Once they provide/confirm the title, save it immediately without asking for additional confirmation.')
+            ->for('Saves the title for the service request. IMPORTANT: Before calling this, explain to the user that you need a brief title for their service request, then suggest a concise title based on the description and form fields. Example: "I need a brief title for your service request. How about: [title]?" Wait for their confirmation/modification, then save it immediately.')
             ->withStringParameter('title', 'The title for the service request')
             ->using($this);
     }

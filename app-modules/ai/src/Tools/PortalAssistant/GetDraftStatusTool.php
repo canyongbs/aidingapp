@@ -331,7 +331,7 @@ class GetDraftStatusTool extends Tool
         }
 
         if ($firstMissing === 'title') {
-            return 'Suggest a concise, descriptive title based on the information collected. Present the suggestion to the user and ask them to confirm or edit it. Then STOP and wait for their response. When they provide/confirm the title, call update_title.';
+            return 'IMPORTANT: Explain that you need a brief title for their service request, then suggest a concise title based on collected information. Example: "I need a brief title for your service request. How about: [suggested title]?" or "For your service request title, I suggest: [suggested title]. Does that work, or would you like to change it?" Then STOP and wait. When they confirm/provide title, call update_title.';
         }
 
         return 'Call get_draft_status to check what information is still needed.';
