@@ -115,15 +115,15 @@ export function useAssistantChat() {
         }
     };
 
-    const sendMessage = async (content, internalContent = null) => {
+    const sendMessage = async (content, metadata = null) => {
         if (!content || !content.trim() || isSending.value || isAssistantResponding.value) return;
         isSending.value = true;
 
         addUserMessage(content);
 
         const payload = { content, thread_id: threadId.value };
-        if (internalContent) {
-            payload.internal_content = internalContent;
+        if (metadata) {
+            payload.metadata = metadata;
         }
 
         try {
@@ -165,14 +165,15 @@ export function useAssistantChat() {
     };
 
     const handleWidgetSubmit = async (submitData) => {
-        const { type, field_id, type_id, value, display_text } = submitData;
+        const { type, field_id, type_id, priority_id, value, display_text } = submitData;
 
-        const internalContent = { type };
-        if (field_id !== undefined) internalContent.field_id = field_id;
-        if (type_id !== undefined) internalContent.type_id = type_id;
-        if (value !== undefined) internalContent.value = value;
+        const metadata = { type };
+        if (field_id !== undefined) metadata.field_id = field_id;
+        if (type_id !== undefined) metadata.type_id = type_id;
+        if (priority_id !== undefined) metadata.priority_id = priority_id;
+        if (value !== undefined) metadata.value = value;
 
-        await sendMessage(display_text || 'Submitted', internalContent);
+        await sendMessage(display_text || 'Submitted', metadata);
         activeWidget.value = null;
     };
 
@@ -182,6 +183,7 @@ export function useAssistantChat() {
 
         const widgetTypeMap = {
             select_service_request_type: 'type_selector',
+            select_priority: 'priority_selector',
             render_field_input: 'field_input',
         };
 

@@ -34,6 +34,7 @@
 <script setup>
     import { computed } from 'vue';
     import FieldInputWidget from './Widgets/FieldInputWidget.vue';
+    import PrioritySelectorWidget from './Widgets/PrioritySelectorWidget.vue';
     import TypeSelectorWidget from './Widgets/TypeSelectorWidget.vue';
 
     const props = defineProps({
@@ -53,6 +54,8 @@
         switch (props.actionType) {
             case 'select_service_request_type':
                 return TypeSelectorWidget;
+            case 'select_priority':
+                return PrioritySelectorWidget;
             case 'render_field_input':
                 return FieldInputWidget;
             default:
