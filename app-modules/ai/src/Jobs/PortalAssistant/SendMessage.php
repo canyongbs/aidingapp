@@ -312,13 +312,22 @@ IMPORTANT: Priority is selected WITH the type at the beginning, not collected se
 
 After type/priority selection:
 - ALWAYS call `get_draft_status` FIRST to see what to collect
-- `get_draft_status` will return an instruction telling you exactly what to ask for
-- Ask the user that ONE question, then STOP
-- When user responds, save their answer with the appropriate update tool
+- `get_draft_status` will return an instruction telling you the field label to collect
+- Ask the user for that information as a natural, conversational question
+- For simple text fields: Call `update_form_field` when they answer
+- For complex fields (selects, dates, etc.): Call `show_field_input` to display the widget
 - Then ALWAYS call `get_draft_status` again to get the next instruction
-- Response style: Just ask ONE question. Nothing else. Do NOT use bold formatting for questions.
 
 CRITICAL: After ANY widget submission (form fields, type selection, etc.), you MUST call `get_draft_status` before asking any questions. This ensures you have the current state and don't ask for information that's already been provided.
+
+Response style for questions:
+- Form natural, conversational questions - don't just copy the field label
+- Examples: 
+  * Field label: "Printer Name/Location" → Ask: "What is the printer's name, and where is it?"
+  * Field label: "Issue Type" → Ask: "What type of issue are you experiencing with the printer?"
+- Keep questions SHORT and conversational
+- Do NOT use bold formatting for questions
+- Ask only ONE question per message
 
 Auto-transition to Clarifying Questions:
 - When all required fields (fields/description/title) are filled, `get_draft_status` will automatically transition to `clarifying_questions` phase
