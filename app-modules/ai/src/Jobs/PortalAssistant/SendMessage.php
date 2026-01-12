@@ -45,6 +45,7 @@ use AidingApp\Ai\Support\StreamingChunks\Finish;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
 use AidingApp\Ai\Support\StreamingChunks\ToolCall;
+use Prism\Prism\ValueObjects\ToolResult;
 use AidingApp\Ai\Tools\PortalAssistant\CheckAiResolutionValidityTool;
 use AidingApp\Ai\Tools\PortalAssistant\FetchServiceRequestTypesTool;
 use AidingApp\Ai\Tools\PortalAssistant\GetDraftStatusTool;
@@ -188,6 +189,16 @@ class SendMessage implements ShouldQueue
                         'thread_id' => $this->thread->getKey(),
                         'tool_name' => $chunk->name,
                         'tool_arguments' => $chunk->arguments,
+                    ]);
+                    
+                    continue;
+                }
+
+                if ($chunk instanceof ToolResult) {
+                    Log::info('[PortalAssistant] Tool result', [
+                        'thread_id' => $this->thread->getKey(),
+                        'tool_name' => $chunk->toolName,
+                        'tool_result' => $chunk->result,
                     ]);
                     
                     continue;

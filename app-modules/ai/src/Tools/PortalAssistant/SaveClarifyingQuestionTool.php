@@ -43,6 +43,7 @@ use AidingApp\Ai\Tools\PortalAssistant\Concerns\SubmitsServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Illuminate\Support\Str;
 use Prism\Prism\Tool;
 
 class SaveClarifyingQuestionTool extends Tool
@@ -94,7 +95,13 @@ class SaveClarifyingQuestionTool extends Tool
 
         $respondent = $draft->respondent;
 
+        $updateUuids = collect([
+            (string) Str::orderedUuid(),
+            (string) Str::orderedUuid(),
+        ]);
+
         $draft->serviceRequestUpdates()->createQuietly([
+            'id' => $updateUuids->shift(),
             'update' => $question,
             'update_type' => ServiceRequestUpdateType::ClarifyingQuestion,
             'internal' => false,
@@ -103,6 +110,7 @@ class SaveClarifyingQuestionTool extends Tool
         ]);
 
         $draft->serviceRequestUpdates()->createQuietly([
+            'id' => $updateUuids->shift(),
             'update' => $answer,
             'update_type' => ServiceRequestUpdateType::ClarifyingAnswer,
             'internal' => false,
@@ -125,11 +133,11 @@ class SaveClarifyingQuestionTool extends Tool
             $result['ai_resolution_enabled'] = $aiResolutionSettings->is_enabled;
 
             if ($aiResolutionSettings->is_enabled) {
-                $result['instruction'] = 'Now call check_ai_resolution_validity with your confidence score and proposed answer. DO NOT show the resolution to the user until the tool tells you to.';
+                $result['instruction'] = 'All 3 clarifying questions complete. You are now in the resolution stage. Call get_draft_status to refresh your context, then call check_ai_resolution_validity with your confidence score and proposed answer. DO NOT show the resolution to the user until the tool tells you to.';
             } else {
                 // AI resolution disabled - auto-submit for human review
                 $requestNumber = $this->submitServiceRequest($draft, false);
-                
+
                 $result['request_number'] = $requestNumber;
                 $result['instruction'] = "AI resolution is disabled. Service request has been automatically submitted for human review. Tell the user their request number is {$requestNumber} and a team member will review it.";
             }

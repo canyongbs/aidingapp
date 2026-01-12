@@ -78,14 +78,14 @@ class RecordResolutionResponseTool extends Tool
             ]);
         }
 
-        $contact = $this->thread->contact;
+        $author = $this->thread->author;
 
         $draft->serviceRequestUpdates()->createQuietly([
             'update' => $accepted ? 'Yes, this resolved my issue.' : 'No, this did not resolve my issue.',
             'update_type' => ServiceRequestUpdateType::AiResolutionResponse,
             'internal' => false,
-            'created_by_type' => $contact->getMorphClass(),
-            'created_by_id' => $contact->getKey(),
+            'created_by_type' => $author->getMorphClass(),
+            'created_by_id' => $author->getKey(),
         ]);
 
         $draft->is_ai_resolution_attempted = true;
