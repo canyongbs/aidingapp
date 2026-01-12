@@ -42,6 +42,7 @@ use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\Organization;
 use App\Concerns\EditPageRedirection;
+use App\Features\JobTitleFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Radio;
@@ -111,6 +112,10 @@ class EditContact extends EditRecord
                             ->label('Preferred Name')
                             ->string()
                             ->maxLength(255),
+                        TextInput::make('job_title')
+                            ->maxLength(255)
+                            ->visible(fn (): bool => JobTitleFeature::active())
+                            ->string(),
                     ])
                     ->columns(2),
                 Section::make('Contact Information')

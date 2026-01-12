@@ -119,6 +119,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'state',
         'postal',
         'created_by_id',
+        'job_title',
     ];
 
     protected $casts = [

@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\Organization;
+use App\Features\JobTitleFeature;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -99,6 +100,10 @@ class CreateContact extends CreateRecord
                         ->string(),
                     TextInput::make('preferred')
                         ->label('Preferred Name')
+                        ->string(),
+                    TextInput::make('job_title')
+                        ->maxLength(255)
+                        ->visible(fn (): bool => JobTitleFeature::active())
                         ->string(),
                 ])->columns(2),
 
