@@ -76,26 +76,6 @@ class Stream extends BaseStream
             'tool_choice' => $request->providerOptions('tool_choice'),
         ]));
 
-        // Log each request to a separate JSON file for easy debugging
-        $timestamp = now()->format('Y-m-d_His');
-        $uuid = \Illuminate\Support\Str::orderedUuid();
-        $filename = storage_path("logs/azure-requests/{$timestamp}_{$uuid}.json");
-        
-        // Ensure directory exists
-        if (!file_exists(dirname($filename))) {
-            mkdir(dirname($filename), 0755, true);
-        }
-        
-        // Write request body to file with pretty print
-        file_put_contents($filename, json_encode($requestBody, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
-        
-        Log::info('[AzureOpenAI Stream] Request logged', [
-            'log_file' => $filename,
-            'message_count' => count($request->messages()),
-            'has_previous_response_id' => $previousResponseId !== null,
-            'tool_count' => count($mergedTools),
-        ]);
-
         try {
             return $this
                 ->client
@@ -106,8 +86,6 @@ class Stream extends BaseStream
                 'status' => $e->response->status(),
                 'body' => $e->response->body(),
                 'json' => $e->response->json(),
-                'request_body' => $requestBody,
-                'log_file' => $filename,
             ]);
             
             throw $e;

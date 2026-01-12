@@ -160,12 +160,6 @@ class SendMessage implements ShouldQueue
 
             $nextRequestOptions = $this->thread->messages()->where('is_assistant', true)->latest()->value('next_request_options') ?? [];
 
-            Log::info('Portal Assistant: Preparing request', [
-                'thread_id' => $this->thread->getKey(),
-                'has_next_request_options' => !empty($nextRequestOptions),
-                'next_request_options' => $nextRequestOptions,
-            ]);
-
             $stream = $aiService->streamRaw(
                 prompt: $context,
                 content: $aiContent,
@@ -183,61 +177,19 @@ class SendMessage implements ShouldQueue
             $chunkBuffer = [];
             $chunkCount = 0;
 
-            Log::info('Portal Assistant: Starting stream processing', [
-                'thread_id' => $this->thread->getKey(),
-                'tools_count' => count($tools),
-            ]);
-
             foreach ($stream() as $chunk) {
                 if ($chunk instanceof Meta) {
                     $response->message_id = $chunk->messageId;
                     $response->next_request_options = $chunk->nextRequestOptions;
 
-                    Log::info('Portal Assistant: Meta chunk received', [
-                        'thread_id' => $this->thread->getKey(),
-                        'message_id' => $chunk->messageId,
-                        'next_request_options' => $chunk->nextRequestOptions,
-                    ]);
-
                     continue;
                 }
 
                 if ($chunk instanceof ToolCall) {
-                    // Log tool call BEFORE execution
-                    if ($chunk->result === null) {
-                        Log::info('Portal Assistant: Tool call initiated', [
-                            'thread_id' => $this->thread->getKey(),
-                            'tool_name' => $chunk->name,
-                            'tool_id' => $chunk->id,
-                            'arguments' => $chunk->arguments,
-                        ]);
-                    } else {
-                        // Log tool call AFTER execution
-                        Log::info('Portal Assistant: Tool call completed', [
-                            'thread_id' => $this->thread->getKey(),
-                            'tool_name' => $chunk->name,
-                            'tool_id' => $chunk->id,
-                            'arguments' => $chunk->arguments,
-                            'result' => is_string($chunk->result) ? $chunk->result : json_encode($chunk->result),
-                            'result_length' => is_string($chunk->result) ? strlen($chunk->result) : strlen(json_encode($chunk->result)),
-                        ]);
-                    }
-
                     continue;
                 }
 
                 if ($chunk instanceof Finish) {
-                    // Stream has finished - log all details
-                    Log::info('Portal Assistant: Finish chunk received', [
-                        'thread_id' => $this->thread->getKey(),
-                        'finishReason' => $chunk->finishReason?->name,
-                        'isIncomplete' => $chunk->isIncomplete,
-                        'error' => $chunk->error,
-                        'rateLimitResetsAt' => $chunk->rateLimitResetsAt?->toIso8601String(),
-                        'response_content_length' => strlen($response->content),
-                        'chunks_in_buffer' => count($chunkBuffer),
-                    ]);
-
                     if ($chunk->error) {
                         Log::error('Portal Assistant: Stream finished with error', [
                             'thread_id' => $this->thread->getKey(),
@@ -266,11 +218,6 @@ class SendMessage implements ShouldQueue
                     }
                 }
             }
-
-            Log::info('Portal Assistant: Stream processing completed', [
-                'thread_id' => $this->thread->getKey(),
-                'total_content_length' => strlen($response->content),
-            ]);
 
             if (! empty($chunkBuffer)) {
                 event(new PortalAssistantMessageChunk(
@@ -431,13 +378,6 @@ EOT;
         if ($draft) {
             $phase = $draft->workflow_phase;
 
-            Log::info('Portal Assistant: Building phase-specific tools', [
-                'thread_id' => $this->thread->getKey(),
-                'workflow_phase' => $phase,
-                'has_title' => (bool) $draft->title,
-                'has_description' => (bool) $draft->close_details,
-            ]);
-
             match ($phase) {
                 'data_collection' => $this->addDataCollectionTools($tools, $draft),
                 'clarifying_questions' => $this->addClarifyingTools($tools),
@@ -445,12 +385,6 @@ EOT;
                 default => null,
             };
         }
-
-        Log::info('Portal Assistant: Tools built', [
-            'thread_id' => $this->thread->getKey(),
-            'tool_count' => count($tools),
-            'tool_names' => array_map(fn($tool) => $tool->name(), $tools),
-        ]);
 
         return $tools;
     }
