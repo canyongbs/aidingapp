@@ -73,37 +73,36 @@ class KnowledgeManagementPortalRegisterController extends Controller
                 'sms_opt_out' => $data['sms_opt_out'],
             ]);
 
-        if(ContactChangesFeature::active()){
-          $type = ContactType::query()
-            ->where('classification', SystemContactClassification::New)
-            ->first();
+        if (ContactChangesFeature::active()) {
+            $type = ContactType::query()
+                ->where('classification', SystemContactClassification::New)
+                ->first();
 
-          if ($type) {
-              $contact->type()->associate($type);
-          }
-        }else{
-          $status = ContactStatus::query()
-            ->where('classification', SystemContactClassification::New)
-            ->first();
+            if ($type) {
+                $contact->type()->associate($type);
+            }
+        } else {
+            $status = ContactStatus::query()
+                ->where('classification', SystemContactClassification::New)
+                ->first();
 
             if ($status) {
-              $contact->status()->associate($status);
+                $contact->status()->associate($status);
             }
 
             $source = ContactSource::query()
-              ->where('name', 'Portal Generated')
-              ->first();
+                ->where('name', 'Portal Generated')
+                ->first();
 
-          if (! $source) {
-            $source = ContactSource::query()
-                ->create([
-                    'name' => 'Portal Generated',
-                ]);
-          }
+            if (! $source) {
+                $source = ContactSource::query()
+                    ->create([
+                        'name' => 'Portal Generated',
+                    ]);
+            }
 
-          $contact->source()->associate($source);
+            $contact->source()->associate($source);
         }
-        
 
         $contact->save();
 
