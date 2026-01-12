@@ -70,7 +70,7 @@ class SelectServiceRequestTypeController
         $existingDraft = ServiceRequest::withoutGlobalScope('excludeDrafts')
             ->where('portal_assistant_thread_id', $thread->getKey())
             ->where('is_draft', true)
-            ->whereHas('priority', function ($query) use ($type) {
+            ->whereHas('serviceRequestFormSubmission.form', function ($query) use ($type) {
                 $query->where('type_id', $type->getKey());
             })
             ->first();
@@ -83,8 +83,6 @@ class SelectServiceRequestTypeController
             // Create new draft for this type
             $attributes = [
                 'is_draft' => true,
-                'workflow_phase' => 'data_collection',
-                'clarifying_questions' => [],
                 'portal_assistant_thread_id' => $thread->getKey(),
             ];
 
@@ -94,22 +92,12 @@ class SelectServiceRequestTypeController
 
             $draft = ServiceRequest::create($attributes);
 
-            $defaultPriority = $type->priorities()->orderByDesc('order')->first();
-
-            if ($defaultPriority) {
-                $draft->priority()->associate($defaultPriority);
-            }
-
             $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
             $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
 
             $submission = $form->submissions()->make([
                 'submitted_at' => null,
             ]);
-
-            if ($defaultPriority) {
-                $submission->priority()->associate($defaultPriority);
-            }
 
             $submission->save();
 

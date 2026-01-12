@@ -39,6 +39,8 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\SubmitsServiceRequest;
+use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use Prism\Prism\Tool;
 
 class RecordResolutionResponseTool extends Tool
@@ -67,16 +69,25 @@ class RecordResolutionResponseTool extends Tool
             ]);
         }
 
-        if ($draft->workflow_phase !== 'resolution') {
+        $draftStage = ServiceRequestDraftStage::fromServiceRequest($draft);
+
+        if ($draftStage !== ServiceRequestDraftStage::Resolution) {
             return json_encode([
                 'success' => false,
-                'error' => 'Not in resolution phase. Current phase: ' . $draft->workflow_phase,
+                'error' => 'Not in resolution stage. Current stage: ' . $draftStage?->value,
             ]);
         }
 
-        $aiResolution = $draft->ai_resolution ?? [];
-        $aiResolution['user_accepted'] = $accepted;
-        $draft->ai_resolution = $aiResolution;
+        $contact = $this->thread->contact;
+
+        $draft->serviceRequestUpdates()->create([
+            'update' => $accepted ? 'Yes, this resolved my issue.' : 'No, this did not resolve my issue.',
+            'update_type' => ServiceRequestUpdateType::AiResolutionResponse,
+            'internal' => false,
+            'created_by_type' => $contact->getMorphClass(),
+            'created_by_id' => $contact->getKey(),
+        ]);
+
         $draft->is_ai_resolution_attempted = true;
         $draft->is_ai_resolution_successful = $accepted;
         $draft->save();

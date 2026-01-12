@@ -37,6 +37,7 @@
 namespace AidingApp\Ai\Tools\PortalAssistant\Concerns;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -56,9 +57,11 @@ trait SubmitsServiceRequest
      */
     protected function submitServiceRequest(ServiceRequest $draft, bool $resolutionAccepted = false): string
     {
-        $this->createClarifyingQuestionUpdates($draft);
+        $hasAiResolution = $draft->serviceRequestUpdates()
+            ->where('update_type', ServiceRequestUpdateType::AiResolutionProposed)
+            ->exists();
 
-        if ($draft->ai_resolution && ! empty($draft->ai_resolution['proposed_answer'])) {
+        if ($hasAiResolution) {
             $this->createResolutionUpdates($draft, $resolutionAccepted);
         }
 
@@ -90,7 +93,6 @@ trait SubmitsServiceRequest
         }
 
         $draft->is_draft = false;
-        $draft->workflow_phase = null;
         $draft->save();
 
         // Only assign to team if resolution was not accepted (needs human review)
@@ -101,71 +103,42 @@ trait SubmitsServiceRequest
         return $draft->service_request_number;
     }
 
-    protected function createClarifyingQuestionUpdates(ServiceRequest $draft): void
-    {
-        $clarifyingQuestions = $draft->clarifying_questions ?? [];
-        $contact = $draft->respondent;
-
-        foreach ($clarifyingQuestions as $qa) {
-            $question = $qa['question'] ?? '';
-            $answer = $qa['answer'] ?? '';
-
-            if (empty($question) || empty($answer)) {
-                continue;
-            }
-
-            $questionUpdate = $draft->serviceRequestUpdates()->createQuietly([
-                'id' => (string) Str::orderedUuid(),
-                'update' => $question,
-                'internal' => false,
-                'created_by_id' => $draft->getKey(),
-                'created_by_type' => $draft->getMorphClass(),
-            ]);
-
-            TimelineableRecordCreated::dispatch($draft, $questionUpdate);
-
-            if ($contact instanceof Contact) {
-                $answerUpdate = $draft->serviceRequestUpdates()->createQuietly([
-                    'id' => (string) Str::orderedUuid(),
-                    'update' => $answer,
-                    'internal' => false,
-                    'created_by_id' => $contact->getKey(),
-                    'created_by_type' => $contact->getMorphClass(),
-                ]);
-
-                TimelineableRecordCreated::dispatch($draft, $answerUpdate);
-            }
-        }
-    }
-
     protected function createResolutionUpdates(ServiceRequest $draft, bool $wasAccepted): void
     {
-        $aiResolution = $draft->ai_resolution ?? [];
+        $aiResolutionUpdate = $draft->serviceRequestUpdates()
+            ->where('update_type', ServiceRequestUpdateType::AiResolutionProposed)
+            ->first();
 
-        if (empty($aiResolution['proposed_answer'])) {
+        if (! $aiResolutionUpdate) {
             return;
         }
 
-        $confidenceScore = $aiResolution['confidence_score'] ?? 0;
-        $threshold = $aiResolution['threshold'] ?? 70;
-        $meetsThreshold = $aiResolution['meets_threshold'] ?? false;
+        $confidenceScore = $draft->ai_resolution_confidence_score ?? 0;
+        $aiResolutionSettings = app(\AidingApp\Ai\Settings\AiResolutionSettings::class);
+        $threshold = $aiResolutionSettings->confidence_threshold;
+        $meetsThreshold = $confidenceScore >= $threshold;
 
-        // Determine the reason based on what happened
-        if (! $meetsThreshold) {
-            $reason = "Confidence ({$confidenceScore}%) below threshold ({$threshold}%)";
-            $internal = true; // Not shown to user
-        } elseif ($wasAccepted) {
-            $reason = 'Resolution presented and accepted by user';
-            $internal = false; // User saw and accepted this
-        } else {
-            $reason = 'Resolution presented but rejected by user';
-            $internal = false; // User saw but rejected this
+        // Only create internal summary if resolution was rejected or not shown
+        if ($wasAccepted) {
+            return;
+        }
+
+        // Extract the proposed answer from the update (remove wrapper text)
+        $updateText = $aiResolutionUpdate->update;
+        $proposedAnswer = $updateText;
+        
+        // If it contains the wrapper text, extract just the answer
+        if (str_contains($updateText, "Did this resolve your issue?")) {
+            preg_match('/here is a potential solution:\n\n(.*?)\n\nDid this resolve your issue\?/s', $updateText, $matches);
+            if (isset($matches[1])) {
+                $proposedAnswer = $matches[1];
+            }
         }
 
         $resolutionUpdate = $draft->serviceRequestUpdates()->createQuietly([
             'id' => (string) Str::orderedUuid(),
-            'update' => "AI Resolution Attempt ({$reason})\n\nConfidence: {$confidenceScore}%\n\n{$aiResolution['proposed_answer']}",
-            'internal' => $internal,
+            'update' => "AI Resolution Attempt (Confidence: {$confidenceScore}%)\n\nProposed Answer:\n{$proposedAnswer}\n\nUser indicated this did not resolve their issue.",
+            'internal' => true,
             'created_by_id' => $draft->getKey(),
             'created_by_type' => $draft->getMorphClass(),
         ]);

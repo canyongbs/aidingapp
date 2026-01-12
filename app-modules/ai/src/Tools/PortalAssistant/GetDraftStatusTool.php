@@ -41,6 +41,8 @@ use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use Prism\Prism\Tool;
@@ -69,20 +71,22 @@ class GetDraftStatusTool extends Tool
 
         $draft->load(['priority', 'priority.type', 'serviceRequestFormSubmission']);
 
+        $draftStage = ServiceRequestDraftStage::fromServiceRequest($draft);
+
         $result = [
             'has_draft' => true,
-            'workflow_phase' => $draft->workflow_phase,
+            'draft_stage' => $draftStage?->value,
             'title' => $draft->title,
             'description' => $draft->close_details,
         ];
 
-        $type = $draft->priority?->type;
+        $type = $draft->serviceRequestFormSubmission?->form?->type;
 
         if ($type) {
             $result['type_id'] = $type->getKey();
             $result['type_name'] = $type->name;
-            $result['priority_id'] = $draft->priority->getKey();
-            $result['priority_name'] = $draft->priority->name;
+            $result['priority_id'] = $draft->priority?->getKey();
+            $result['priority_name'] = $draft->priority?->name;
 
             $result['priorities'] = $type->priorities()
                 ->orderByDesc('order')
@@ -107,13 +111,16 @@ class GetDraftStatusTool extends Tool
             $result['can_submit'] = false;
         }
 
-        $clarifyingQuestions = $draft->clarifying_questions ?? [];
+        $clarifyingQuestionsCount = $draft->serviceRequestUpdates()
+            ->where('update_type', ServiceRequestUpdateType::ClarifyingQuestion)
+            ->count();
+
         $result['clarifying_questions'] = [
-            'completed' => count($clarifyingQuestions),
+            'completed' => $clarifyingQuestionsCount,
             'required' => 3,
         ];
 
-        $result['instruction'] = $this->getPhaseInstruction($draft, $result);
+        $result['instruction'] = $this->getStageInstruction($draftStage, $result);
 
         return json_encode($result);
     }
@@ -248,17 +255,20 @@ class GetDraftStatusTool extends Tool
     /**
      * @param array<string, mixed> $result
      */
-    protected function getPhaseInstruction(ServiceRequest $draft, array $result): string
+    protected function getStageInstruction(?ServiceRequestDraftStage $draftStage, array $result): string
     {
-        return match ($draft->workflow_phase) {
-            'type_selection' => 'User needs to select a type. Use show_type_selector to display the type selection UI.',
-            'data_collection' => $this->getDataCollectionInstruction($result),
-            'clarifying_questions' => sprintf(
+        if (! $draftStage) {
+            return 'Draft stage could not be determined.';
+        }
+
+        return match ($draftStage) {
+            ServiceRequestDraftStage::TypeSelection => 'User needs to select a type. Use show_type_selector to display the type selection UI.',
+            ServiceRequestDraftStage::DataCollection => $this->getDataCollectionInstruction($result),
+            ServiceRequestDraftStage::ClarifyingQuestions => sprintf(
                 'Ask clarifying question %d of 3. After user answers, save with save_clarifying_question.',
                 ($result['clarifying_questions']['completed'] ?? 0) + 1
             ),
-            'resolution' => $this->getResolutionInstruction(),
-            default => 'Check the workflow_phase and proceed accordingly.',
+            ServiceRequestDraftStage::Resolution => $this->getResolutionInstruction(),
         };
     }
 
@@ -282,26 +292,8 @@ class GetDraftStatusTool extends Tool
         $optionalFields = $result['optional_fields'] ?? [];
 
         if (empty($missing)) {
-            // All required fields filled - automatically transition to clarifying questions
-            $draft = $this->findDraft();
-            if ($draft && $draft->workflow_phase === 'data_collection') {
-                $draft->workflow_phase = 'clarifying_questions';
-                $draft->save();
-
-                return 'All required information has been collected. Now ask the first of 3 clarifying questions to better understand the user\'s issue. Make the question specific to their situation based on the information provided.';
-            }
-
-            // Check if there are optional fields that might be worth collecting
-            if (! empty($optionalFields)) {
-                $optionalSummary = implode(', ', array_map(fn ($f) => $f['label'], $optionalFields));
-                return sprintf(
-                    'All required fields are filled. There are %d optional field(s) available: %s. Based on the conversation context, decide if any would be helpful to collect. If yes, ask for ONE optional field. If no optional fields seem relevant, call get_draft_status again to transition to questions.',
-                    count($optionalFields),
-                    $optionalSummary
-                );
-            }
-
-            return 'All required fields are filled. Call get_draft_status again to transition to clarifying questions.';
+            // All required fields filled - stage will automatically be 'clarifying_questions'
+            return 'All required information has been collected. Now ask the first of 3 clarifying questions to better understand the user\'s issue. Make the question specific to their situation based on the information provided.';
         }
 
         $hasCustomFields = ! empty($result['form_fields'] ?? []);

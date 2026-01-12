@@ -40,6 +40,9 @@ use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\SubmitsServiceRequest;
+use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Prism\Prism\Tool;
 
 class CheckAiResolutionValidityTool extends Tool
@@ -69,10 +72,12 @@ class CheckAiResolutionValidityTool extends Tool
             ]);
         }
 
-        if ($draft->workflow_phase !== 'resolution') {
+        $draftStage = ServiceRequestDraftStage::fromServiceRequest($draft);
+
+        if ($draftStage !== ServiceRequestDraftStage::Resolution) {
             return json_encode([
                 'success' => false,
-                'error' => 'Not in resolution phase. Current phase: ' . $draft->workflow_phase,
+                'error' => 'Not in resolution stage. Current stage: ' . $draftStage?->value,
             ]);
         }
 
@@ -82,14 +87,16 @@ class CheckAiResolutionValidityTool extends Tool
         $confidenceScore = max(0, min(100, $confidence_score));
         $meetsThreshold = $confidenceScore >= $threshold;
 
-        $draft->ai_resolution = [
-            'confidence_score' => $confidenceScore,
-            'proposed_answer' => $proposed_answer,
-            'threshold' => $threshold,
-            'meets_threshold' => $meetsThreshold,
-        ];
         $draft->ai_resolution_confidence_score = $confidenceScore;
         $draft->save();
+
+        $draft->serviceRequestUpdates()->create([
+            'update' => "Based on the information you've provided, here is a potential solution:\n\n{$proposed_answer}\n\nDid this resolve your issue?",
+            'update_type' => ServiceRequestUpdateType::AiResolutionProposed,
+            'internal' => false,
+            'created_by_type' => ServiceRequest::getMorphClassStatic(),
+            'created_by_id' => $draft->getKey(),
+        ]);
 
         if ($meetsThreshold) {
             return json_encode([

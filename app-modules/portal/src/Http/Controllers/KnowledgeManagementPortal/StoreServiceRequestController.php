@@ -42,6 +42,7 @@ use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -245,6 +246,7 @@ class StoreServiceRequestController extends Controller
             $questionUpdate = $serviceRequest->serviceRequestUpdates()->createQuietly([
                 'id' => $updateUuids->shift(),
                 'update' => decrypt($encryptedQuestion),
+                'update_type' => ServiceRequestUpdateType::ClarifyingQuestion,
                 'internal' => false,
                 'created_by_id' => $serviceRequest->getKey(),
                 'created_by_type' => $serviceRequest->getMorphClass(),
@@ -255,6 +257,7 @@ class StoreServiceRequestController extends Controller
             $answerUpdate = $serviceRequest->serviceRequestUpdates()->createQuietly([
                 'id' => $updateUuids->shift(),
                 'update' => $answer,
+                'update_type' => ServiceRequestUpdateType::ClarifyingAnswer,
                 'internal' => false,
                 'created_by_id' => $contact->getKey(),
                 'created_by_type' => $contact->getMorphClass(),
@@ -314,6 +317,7 @@ class StoreServiceRequestController extends Controller
         $aiAnswerUpdate = $serviceRequest->serviceRequestUpdates()->createQuietly([
             'id' => $updateUuids->shift(),
             'update' => "Based on the information you've provided, here is a potential solution:\n\n{$aiProposedAnswer}\n\nDid this resolve your issue?",
+            'update_type' => ServiceRequestUpdateType::AiResolutionProposed,
             'internal' => false,
             'created_by_id' => $serviceRequest->getKey(),
             'created_by_type' => $serviceRequest->getMorphClass(),
@@ -335,6 +339,7 @@ class StoreServiceRequestController extends Controller
         $userConfirmationUpdate = $serviceRequest->serviceRequestUpdates()->createQuietly([
             'id' => $updateUuids->shift(),
             'update' => 'Yes, this resolved my issue.',
+            'update_type' => ServiceRequestUpdateType::AiResolutionResponse,
             'internal' => false,
             'created_by_id' => $contact->getKey(),
             'created_by_type' => $contact->getMorphClass(),
@@ -367,6 +372,7 @@ class StoreServiceRequestController extends Controller
         $userDeclineUpdate = $serviceRequest->serviceRequestUpdates()->createQuietly([
             'id' => $updateUuids->shift(),
             'update' => 'No, this did not resolve my issue.',
+            'update_type' => ServiceRequestUpdateType::AiResolutionResponse,
             'internal' => false,
             'created_by_id' => $contact->getKey(),
             'created_by_type' => $contact->getMorphClass(),

@@ -42,6 +42,8 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
@@ -104,9 +106,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'is_ai_resolution_successful',
         'is_draft',
         'portal_assistant_thread_id',
-        'workflow_phase',
-        'clarifying_questions',
-        'ai_resolution',
     ];
 
     protected $casts = [
@@ -118,8 +117,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'is_ai_resolution_attempted' => 'boolean',
         'is_ai_resolution_successful' => 'boolean',
         'is_draft' => 'boolean',
-        'clarifying_questions' => 'array',
-        'ai_resolution' => 'array',
     ];
 
     public function registerMediaCollections(): void

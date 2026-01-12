@@ -40,6 +40,9 @@ use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\SubmitsServiceRequest;
+use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Prism\Prism\Tool;
 
 class SaveClarifyingQuestionTool extends Tool
@@ -52,7 +55,7 @@ class SaveClarifyingQuestionTool extends Tool
     ) {
         $this
             ->as('save_clarifying_question')
-            ->for('Saves a clarifying question and the user\'s answer. Must be called exactly 3 times during the clarifying_questions phase. Each question should build on previously collected information to become more specific and relevant.')
+            ->for('Saves a clarifying question and the user\'s answer. Must be called exactly 3 times during the clarifying_questions stage. Each question should build on previously collected information to become more specific and relevant.')
             ->withStringParameter('question', 'The question that was asked')
             ->withStringParameter('answer', 'The user\'s response')
             ->using($this);
@@ -69,36 +72,45 @@ class SaveClarifyingQuestionTool extends Tool
             ]);
         }
 
-        if ($draft->workflow_phase !== 'clarifying_questions') {
+        $draftStage = ServiceRequestDraftStage::fromServiceRequest($draft);
+
+        if ($draftStage !== ServiceRequestDraftStage::ClarifyingQuestions) {
             return json_encode([
                 'success' => false,
-                'error' => 'Not in clarifying_questions phase. Current phase: ' . $draft->workflow_phase,
+                'error' => 'Not in clarifying_questions stage. Current stage: ' . $draftStage->value,
             ]);
         }
 
-        $clarifyingQuestions = $draft->clarifying_questions ?? [];
+        $clarifyingQuestionsCount = $draft->serviceRequestUpdates()
+            ->where('update_type', ServiceRequestUpdateType::ClarifyingQuestion)
+            ->count();
 
-        if (count($clarifyingQuestions) >= 3) {
+        if ($clarifyingQuestionsCount >= 3) {
             return json_encode([
                 'success' => false,
-                'error' => 'Already have 3 clarifying questions. Move to resolution phase.',
+                'error' => 'Already have 3 clarifying questions. Move to resolution stage.',
             ]);
         }
 
-        $clarifyingQuestions[] = [
-            'question' => $question,
-            'answer' => $answer,
-        ];
+        $draft->serviceRequestUpdates()->createMany([
+            [
+                'update' => $question,
+                'update_type' => ServiceRequestUpdateType::ClarifyingQuestion,
+                'internal' => false,
+                'created_by_type' => ServiceRequest::getMorphClassStatic(),
+                'created_by_id' => $draft->getKey(),
+            ],
+            [
+                'update' => $answer,
+                'update_type' => ServiceRequestUpdateType::ClarifyingAnswer,
+                'internal' => false,
+                'created_by_type' => $contact->getMorphClass(),
+                'created_by_id' => $contact->getKey(),
+            ],
+        ]);
 
-        $draft->clarifying_questions = $clarifyingQuestions;
-        $completed = count($clarifyingQuestions);
+        $completed = $clarifyingQuestionsCount + 1;
         $remaining = 3 - $completed;
-
-        if ($remaining === 0) {
-            $draft->workflow_phase = 'resolution';
-        }
-
-        $draft->save();
 
         $result = [
             'success' => true,
@@ -108,13 +120,10 @@ class SaveClarifyingQuestionTool extends Tool
 
         if ($remaining === 0) {
             $aiResolutionSettings = app(AiResolutionSettings::class);
-            $result['workflow_phase'] = 'resolution';
+            $result['draft_stage'] = ServiceRequestDraftStage::Resolution->value;
             $result['ai_resolution_enabled'] = $aiResolutionSettings->is_enabled;
 
             if ($aiResolutionSettings->is_enabled) {
-                $draft->workflow_phase = 'resolution';
-                $draft->save();
-                
                 $result['instruction'] = 'Now call check_ai_resolution_validity with your confidence score and proposed answer. DO NOT show the resolution to the user until the tool tells you to.';
             } else {
                 // AI resolution disabled - auto-submit for human review

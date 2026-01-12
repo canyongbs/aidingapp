@@ -65,9 +65,9 @@ class ShowPrioritySelectorTool extends Tool
             ]);
         }
 
-        $draft->load('priority.type');
+        $draft->load('serviceRequestFormSubmission.form.type');
 
-        $type = $draft->priority?->type;
+        $type = $draft->serviceRequestFormSubmission?->form?->type;
 
         if (! $type) {
             return json_encode([
@@ -93,12 +93,16 @@ class ShowPrioritySelectorTool extends Tool
             ]);
         }
 
+        // Get default priority to preselect in the UI (highest order)
+        $defaultPriorityId = $priorities[0]['priority_id'] ?? null;
+
         event(new PortalAssistantActionRequest(
             $this->thread,
             'select_priority',
             [
                 'priorities' => $priorities,
                 'current_priority_id' => $draft->priority?->getKey(),
+                'default_priority_id' => $defaultPriorityId,
             ]
         ));
 

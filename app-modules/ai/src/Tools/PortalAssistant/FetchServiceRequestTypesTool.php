@@ -73,7 +73,6 @@ class FetchServiceRequestTypesTool extends Tool
         return json_encode([
             'types_tree' => $typesTree,
             'has_draft' => $draft !== null,
-            'workflow_phase' => $draft?->workflow_phase,
             'instruction' => 'IMPORTANT: Carefully analyze the types_tree below to find the best match for the user\'s request. Each type has a type_id, name, and description. If you find a type whose name and description clearly matches what the user described, extract that type_id and pass it as suggested_type_id when calling show_type_selector. If no clear match exists, call show_type_selector without suggested_type_id.',
         ]);
     }

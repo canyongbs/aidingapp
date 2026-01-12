@@ -59,6 +59,8 @@ use AidingApp\Ai\Tools\PortalAssistant\UpdateTitleTool;
 use AidingApp\IntegrationOpenAi\Prism\ValueObjects\Messages\DeveloperMessage;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -387,12 +389,12 @@ EOT;
         // Users can always edit previously unlocked fields (go back)
         // but cannot access future steps until prerequisites are met (no skipping ahead)
         if ($draft) {
-            $phase = $draft->workflow_phase;
+            $draftStage = ServiceRequestDraftStage::fromServiceRequest($draft);
 
-            match ($phase) {
-                'data_collection' => $this->addDataCollectionTools($tools, $draft),
-                'clarifying_questions' => $this->addClarifyingTools($tools),
-                'resolution' => $this->addResolutionTools($tools, $aiResolutionSettings),
+            match ($draftStage) {
+                ServiceRequestDraftStage::DataCollection => $this->addDataCollectionTools($tools, $draft),
+                ServiceRequestDraftStage::ClarifyingQuestions => $this->addClarifyingTools($tools),
+                ServiceRequestDraftStage::Resolution => $this->addResolutionTools($tools, $aiResolutionSettings),
                 default => null,
             };
         }
@@ -401,14 +403,14 @@ EOT;
     }
 
     /**
-     * Add tools for data collection phase - progressively expose based on what's filled
+     * Add tools for data collection stage - progressively expose based on what's filled
      * The flow is: fields (if any) → description → title → priority
      *
      * When all required fields are filled, GetDraftStatusTool will instruct AI to advance to clarifying_questions
      */
     protected function addDataCollectionTools(array &$tools, ServiceRequest $draft): void
     {
-        $draft->load(['priority', 'priority.type']);
+        $draft->load(['serviceRequestFormSubmission.form.type']);
 
         $hasCustomFields = $this->typeHasCustomFields($draft);
 
@@ -434,7 +436,7 @@ EOT;
         }
 
         // Auto-advance: When all required fields filled, AI calls get_draft_status which detects completion
-        // and instructs AI to transition to clarifying_questions phase
+        // and instructs AI to transition to clarifying_questions stage
     }
 
     /**
@@ -442,12 +444,14 @@ EOT;
      */
     protected function typeHasCustomFields(ServiceRequest $draft): bool
     {
-        if (! $draft->priority?->type) {
+        $type = $draft->serviceRequestFormSubmission?->form?->type;
+
+        if (! $type) {
             return false;
         }
 
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-        $form = app(GenerateServiceRequestForm::class)->execute($draft->priority->type, $uploadsMediaCollection);
+        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
 
         foreach ($form->steps as $step) {
             if ($step->label === 'Main' || $step->label === 'Questions') {
@@ -467,12 +471,14 @@ EOT;
      */
     protected function allRequiredFormFieldsFilled(ServiceRequest $draft): bool
     {
-        if (! $draft->priority?->type) {
+        $type = $draft->serviceRequestFormSubmission?->form?->type;
+
+        if (! $type) {
             return false;
         }
 
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-        $form = app(GenerateServiceRequestForm::class)->execute($draft->priority->type, $uploadsMediaCollection);
+        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
 
         $submission = $draft->serviceRequestFormSubmission;
         $filledFields = [];
@@ -528,17 +534,26 @@ EOT;
                 ->first();
         }
 
-        if ($aiResolutionSettings->is_enabled) {
+        if ($aiResolutionSettings->is_enabled && $draft) {
             // CheckAiResolutionValidityTool is only available after 3 questions are saved
-            $clarifyingQuestions = $draft?->clarifying_questions ?? [];
-            if (count($clarifyingQuestions) === 3) {
+            $clarifyingQuestionsCount = $draft->serviceRequestUpdates()
+                ->where('update_type', ServiceRequestUpdateType::ClarifyingQuestion)
+                ->count();
+
+            if ($clarifyingQuestionsCount === 3) {
                 $tools[] = new CheckAiResolutionValidityTool($this->thread);
             }
 
-            // RecordResolutionResponseTool is only available after AI checks validity and meets threshold
-            $aiResolution = $draft?->ai_resolution ?? [];
-            if (isset($aiResolution['meets_threshold']) && $aiResolution['meets_threshold']) {
-                $tools[] = new RecordResolutionResponseTool($this->thread);
+            // RecordResolutionResponseTool is only available after AI proposes resolution with sufficient confidence
+            $hasAiResolutionProposed = $draft->serviceRequestUpdates()
+                ->where('update_type', ServiceRequestUpdateType::AiResolutionProposed)
+                ->exists();
+
+            if ($hasAiResolutionProposed && $draft->ai_resolution_confidence_score) {
+                $threshold = $aiResolutionSettings->confidence_threshold;
+                if ($draft->ai_resolution_confidence_score >= $threshold) {
+                    $tools[] = new RecordResolutionResponseTool($this->thread);
+                }
             }
         }
 

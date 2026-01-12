@@ -10,12 +10,12 @@ The Portal Assistant Service Request feature enables authenticated portal users 
 
 **SendMessage Job** (`app-modules/ai/src/Jobs/PortalAssistant/SendMessage.php`)
 - Orchestrates AI streaming responses
-- Controls tool availability based on workflow phase
+- Controls tool availability based on draft stage
 - Manages progressive disclosure of data collection tools
 
 **Portal Assistant Tools** (`app-modules/ai/src/Tools/PortalAssistant/`)
 - 13 specialized tools for type selection, data collection, enrichment, and submission
-- Phase-gated availability prevents workflow bypass
+- Stage-gated availability prevents workflow bypass
 - No ID passing required - draft state managed automatically
 
 **Service Request Drafts**
@@ -29,36 +29,22 @@ The Portal Assistant Service Request feature enables authenticated portal users 
 - Dispatch SendMessage with Developer messages providing state context
 - Separate from tool calls to maintain clean AI conversation flow
 
-### Database Schema
+## Draft Stages
 
-**service_requests table additions:**
-```php
-$table->boolean('is_draft')->default(false)->index();
-$table->foreignUuid('portal_assistant_thread_id')->nullable()->index();
-```
+Service requests progress through sequential stages. The stage is **derived from the current state** of the draft:
 
-**service_request_updates table additions:**
-```php
-$table->string('update_type')->nullable()->index();
-// Values: 'clarifying_question', 'clarifying_answer', 'ai_resolution_proposed', 'ai_resolution_response', null (regular)
-```
-
-**Global Scope:**
-```php
-// Excludes drafts from standard queries
-Builder::where('is_draft', false)
-```
-
-## Workflow Phases
-
-Service requests progress through sequential phases. The phase is **derived from the current state** of the draft:
-
-1. **type_selection** - No priority selected yet (`priority_id = null`)
-2. **data_collection** - Priority selected, but required fields still missing
-3. **clarifying_questions** - All required fields filled, fewer than 3 clarifying questions asked
+1. **type_selection** - Type has been selected (draft exists) but priority not yet assigned (`priority_id = null`)
+2. **data_collection** - Priority assigned, collecting required fields (title, description, form fields)
+3. **clarifying_questions** - All required fields filled, collecting 3 clarifying question/answer pairs
 4. **resolution** - 3 clarifying questions completed, evaluating and presenting AI resolution (if enabled)
 
-Phase determination logic:
+**Draft Creation:** The draft is created when the user selects a service request type via the `show_type_selector` widget. Before type selection, no draft exists.
+
+**Data Collection Order:** fields (if any) → description → title → **priority** (last step before clarifying questions)
+
+The draft starts in `type_selection` stage (priority not assigned). Once priority is selected, the stage becomes `data_collection` if there are still missing required fields, or `clarifying_questions` if all fields are complete.
+
+Stage determination logic:
 ```php
 if (!$draft->priority_id) return 'type_selection';
 if (hasMissingRequiredFields($draft)) return 'data_collection';
@@ -72,7 +58,7 @@ When submitted (finalized), `is_draft = false` and `service_request_number` is g
 
 Tools unlock sequentially as prerequisites are met, preventing users from being overwhelmed by simultaneous choices while maintaining flexibility to edit previous responses.
 
-### Data Collection Phase
+### Data Collection Stage
 
 **Collection Order:** Custom form fields (if present) → Description → Title → Priority
 
@@ -82,9 +68,9 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 - `update_title`: After description provided
 - `show_priority_selector`: After title provided
 
-**Phase Transition:** When all required fields are filled, `get_draft_status` detects the phase is now `clarifying_questions` (derived from state) and instructs AI to begin asking questions.
+**Phase Transition:** When priority is selected and all required fields are filled, `get_draft_status` detects the stage is now `clarifying_questions` (derived from state) and instructs AI to begin asking questions.
 
-### Clarifying Questions Phase
+### Clarifying Questions Stage
 
 **Tool Availability:**
 - `save_clarifying_question`: Always available, accepts exactly 3 question/answer pairs
@@ -325,10 +311,10 @@ Both resolution tools (`check_ai_resolution_validity` and `record_resolution_res
 - Simplified AI interaction model
 
 **Tool Naming:**
-Previous iterations included separate validation and submission tools. Current design uses automatic phase transitions and resolution tools that handle submission internally, eliminating redundant steps.
+Previous iterations included separate validation and submission tools. Current design uses automatic stage transitions and resolution tools that handle submission internally, eliminating redundant steps.
 
 **Validation:**
-When all required fields are filled, `get_draft_status` automatically advances the workflow phase. This eliminates redundant validation calls and simplifies the AI interaction model.
+When all required fields are filled, `get_draft_status` automatically advances to the next draft stage. This eliminates redundant validation calls and simplifies the AI interaction model.
 
 **Field Order Flexibility:**
 While the collection order is fields → description → title → priority, the system validates all required fields are present regardless of order. This accommodates edge cases where AI collects information out of sequence.
