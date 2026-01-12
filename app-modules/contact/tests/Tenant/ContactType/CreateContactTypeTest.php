@@ -38,7 +38,7 @@ use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\CreateContactType;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Tests\Tenant\ContactStatus\RequestFactories\CreateContactTypeRequestFactory;
+use AidingApp\Contact\Tests\Tenant\ContactType\RequestFactories\CreateContactTypeRequestFactory;
 use App\Models\User;
 use Illuminate\Validation\Rules\Enum;
 
@@ -49,7 +49,7 @@ use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Tests\asSuperAdmin;
 
-test('A successful action on the CreateContactStatus page', function () {
+test('A successful action on the CreateContactType page', function () {
     asSuperAdmin()
         ->get(
             ContactTypeResource::getUrl('create')
