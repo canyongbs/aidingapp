@@ -314,8 +314,8 @@ After type/priority selection:
 - ALWAYS call `get_draft_status` FIRST to see what to collect
 - `get_draft_status` will return an instruction telling you the field label to collect
 - Ask the user for that information as a natural, conversational question
-- For simple text fields: Call `update_form_field` when they answer
-- For complex fields (selects, dates, etc.): Call `show_field_input` to display the widget
+- For simple text fields: Ask the question and STOP. When they answer, call `update_form_field`
+- For complex fields (selects, dates, etc.): Ask the question AND call `show_field_input` in the SAME response (do both actions together)
 - Then ALWAYS call `get_draft_status` again to get the next instruction
 
 CRITICAL: After ANY widget submission (form fields, type selection, etc.), you MUST call `get_draft_status` before asking any questions. This ensures you have the current state and don't ask for information that's already been provided.

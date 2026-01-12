@@ -54,7 +54,7 @@ class ShowFieldInputTool extends Tool
     ) {
         $this
             ->as('show_field_input')
-            ->for('Displays a UI widget for complex form fields like selects, radio buttons, dates, phone numbers, addresses, or file uploads. Do NOT use this for simple text fields. IMPORTANT: Before calling this tool, ask the user a natural question about what information you need. The widget will then display for them to make their selection.')
+            ->for('Displays a UI widget for complex form fields like selects, radio buttons, dates, phone numbers, addresses, or file uploads. Do NOT use this for simple text fields. IMPORTANT: In the SAME response where you call this tool, also ask the user a natural question about what information you need. Do both together - ask the question AND call this tool in a single response.')
             ->withStringParameter('field_id', 'The UUID of the form field to display')
             ->using($this);
     }
