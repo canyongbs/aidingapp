@@ -31,22 +31,18 @@ The Portal Assistant Service Request feature enables authenticated portal users 
 
 ## Draft Stages
 
-Service requests progress through sequential stages. The stage is **derived from the current state** of the draft:
+Service request drafts progress through sequential stages. The stage is **derived from the current state** of the draft:
 
-1. **type_selection** - Type has been selected (draft exists) but priority not yet assigned (`priority_id = null`)
-2. **data_collection** - Priority assigned, collecting required fields (title, description, form fields)
-3. **clarifying_questions** - All required fields filled, collecting 3 clarifying question/answer pairs
-4. **resolution** - 3 clarifying questions completed, evaluating and presenting AI resolution (if enabled)
+1. **data_collection** - Draft exists, collecting required fields (form fields, description, title, priority)
+2. **clarifying_questions** - All required fields filled, collecting 3 clarifying question/answer pairs
+3. **resolution** - 3 clarifying questions completed, evaluating and presenting AI resolution (if enabled)
 
-**Draft Creation:** The draft is created when the user selects a service request type via the `show_type_selector` widget. Before type selection, no draft exists.
+**Note:** Type selection happens BEFORE the draft is created. The user interacts with the `show_type_selector` widget, which creates the draft. Once the draft exists, it's always in `data_collection` stage or beyond.
 
 **Data Collection Order:** fields (if any) → description → title → **priority** (last step before clarifying questions)
 
-The draft starts in `type_selection` stage (priority not assigned). Once priority is selected, the stage becomes `data_collection` if there are still missing required fields, or `clarifying_questions` if all fields are complete.
-
 Stage determination logic:
 ```php
-if (!$draft->priority_id) return 'type_selection';
 if (hasMissingRequiredFields($draft)) return 'data_collection';
 if (clarifyingQuestionsCount($draft) < 3) return 'clarifying_questions';
 return 'resolution';
@@ -259,7 +255,7 @@ Widget interactions and user selections processed via `internal_content`:
 ```json
 {"type": "type_selection", "type_id": "uuid"}
 ```
-Validates type, creates/updates draft and form submission, sets default priority, advances to `data_collection`.
+Validates type, creates draft and form submission. Draft stage becomes `data_collection`.
 
 **priority_selection:**
 ```json
@@ -568,8 +564,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 **User:** "I can't log into the student portal, it keeps saying my password is wrong"
 
 **AI calls `fetch_service_request_types`**
-- Creates draft (phase: type_selection - no priority yet)
-- Returns tree of available service request types
+- Returns tree of available service request types (no draft yet)
 - AI analyzes: user mentioned "password" → identifies "Password Reset" type
 
 **AI calls `show_type_selector`**

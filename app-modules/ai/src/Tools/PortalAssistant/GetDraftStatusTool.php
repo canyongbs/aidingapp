@@ -80,7 +80,7 @@ class GetDraftStatusTool extends Tool
             'description' => $draft->close_details,
         ];
 
-        $type = $draft->serviceRequestFormSubmission?->form?->type;
+        $type = $draft->serviceRequestFormSubmission?->submissible?->type;
 
         if ($type) {
             $result['type_id'] = $type->getKey();
@@ -262,7 +262,6 @@ class GetDraftStatusTool extends Tool
         }
 
         return match ($draftStage) {
-            ServiceRequestDraftStage::TypeSelection => 'User needs to select a type. Use show_type_selector to display the type selection UI.',
             ServiceRequestDraftStage::DataCollection => $this->getDataCollectionInstruction($result),
             ServiceRequestDraftStage::ClarifyingQuestions => sprintf(
                 'Ask clarifying question %d of 3. After user answers, save with save_clarifying_question.',
@@ -310,7 +309,7 @@ class GetDraftStatusTool extends Tool
                     // Check if it's a complex field that needs a widget
                     if (in_array($field['type'], ['select', 'radio', 'checkbox', 'checkboxes', 'date', 'file_upload'])) {
                         return sprintf(
-                            'Call show_field_input with field_id "%s" to display the %s input for "%s". Then STOP and wait for the user to complete the input.',
+                            'IMPORTANT: Call show_field_input with field_id "%s" to display the %s widget for "%s". DO NOT ask the user as a text question. MUST use show_field_input tool. Then STOP and wait for the user to interact with the widget.',
                             $field['field_id'],
                             $field['type'],
                             $field['label']

@@ -395,7 +395,6 @@ EOT;
                 ServiceRequestDraftStage::DataCollection => $this->addDataCollectionTools($tools, $draft),
                 ServiceRequestDraftStage::ClarifyingQuestions => $this->addClarifyingTools($tools),
                 ServiceRequestDraftStage::Resolution => $this->addResolutionTools($tools, $aiResolutionSettings),
-                default => null,
             };
         }
 
@@ -410,7 +409,7 @@ EOT;
      */
     protected function addDataCollectionTools(array &$tools, ServiceRequest $draft): void
     {
-        $draft->load(['serviceRequestFormSubmission.form.type']);
+        $draft->load(['serviceRequestFormSubmission.submissible.type']);
 
         $hasCustomFields = $this->typeHasCustomFields($draft);
 
@@ -444,7 +443,7 @@ EOT;
      */
     protected function typeHasCustomFields(ServiceRequest $draft): bool
     {
-        $type = $draft->serviceRequestFormSubmission?->form?->type;
+        $type = $draft->serviceRequestFormSubmission?->submissible?->type;
 
         if (! $type) {
             return false;
@@ -471,7 +470,7 @@ EOT;
      */
     protected function allRequiredFormFieldsFilled(ServiceRequest $draft): bool
     {
-        $type = $draft->serviceRequestFormSubmission?->form?->type;
+        $type = $draft->serviceRequestFormSubmission?->submissible?->type;
 
         if (! $type) {
             return false;

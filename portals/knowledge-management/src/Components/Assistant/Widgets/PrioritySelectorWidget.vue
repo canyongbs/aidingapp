@@ -50,7 +50,7 @@
         emit('submit', {
             type: 'priority_selection',
             priority_id: priority.priority_id,
-            display_text: `Selected priority: ${priority.name}`,
+            display_text: priority.name,
         });
     };
 </script>

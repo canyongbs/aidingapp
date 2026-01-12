@@ -65,9 +65,9 @@ class ShowPrioritySelectorTool extends Tool
             ]);
         }
 
-        $draft->load('serviceRequestFormSubmission.form.type');
+        $draft->load('serviceRequestFormSubmission.submissible.type');
 
-        $type = $draft->serviceRequestFormSubmission?->form?->type;
+        $type = $draft->serviceRequestFormSubmission?->submissible?->type;
 
         if (! $type) {
             return json_encode([

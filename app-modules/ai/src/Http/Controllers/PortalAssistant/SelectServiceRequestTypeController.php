@@ -70,8 +70,8 @@ class SelectServiceRequestTypeController
         $existingDraft = ServiceRequest::withoutGlobalScope('excludeDrafts')
             ->where('portal_assistant_thread_id', $thread->getKey())
             ->where('is_draft', true)
-            ->whereHas('serviceRequestFormSubmission.form', function ($query) use ($type) {
-                $query->where('type_id', $type->getKey());
+            ->whereHas('serviceRequestFormSubmission.submissible', function ($query) use ($type) {
+                $query->where('service_request_type_id', $type->getKey());
             })
             ->first();
 

@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 enum ServiceRequestDraftStage: string
 {
-    case TypeSelection = 'type_selection';
     case DataCollection = 'data_collection';
     case ClarifyingQuestions = 'clarifying_questions';
     case Resolution = 'resolution';
@@ -51,12 +50,9 @@ enum ServiceRequestDraftStage: string
             return null;
         }
 
-        // Type selection: Draft created but no priority assigned yet
-        // User must select priority using show_priority_selector tool
-        if (! $serviceRequest->priority_id) {
-            return self::TypeSelection;
-        }
-
+        // Once draft exists, we're always in data collection or beyond
+        // Type selection happens BEFORE draft creation (via show_type_selector widget)
+        
         $requiredFields = [
             'priority_id',
             'service_request_type_id',

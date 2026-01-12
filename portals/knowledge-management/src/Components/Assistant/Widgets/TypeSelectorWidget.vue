@@ -47,7 +47,7 @@
     const searchQuery = ref('');
     const suggestion = computed(() => props.params.suggestion);
     const typesTree = computed(() => props.params.types_tree || []);
-    
+
     // Auto-expand browse section if there's no suggestion
     const showBrowse = ref(!props.params.suggestion);
 
@@ -88,7 +88,7 @@
         emit('submit', {
             type: 'type_selection',
             type_id: type.type_id,
-            display_text: `Selected: ${type.name}`,
+            display_text: type.name,
         });
     };
 </script>
