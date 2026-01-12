@@ -92,6 +92,8 @@ class SaveClarifyingQuestionTool extends Tool
             ]);
         }
 
+        $respondent = $draft->respondent;
+
         $draft->serviceRequestUpdates()->createMany([
             [
                 'update' => $question,
@@ -104,8 +106,8 @@ class SaveClarifyingQuestionTool extends Tool
                 'update' => $answer,
                 'update_type' => ServiceRequestUpdateType::ClarifyingAnswer,
                 'internal' => false,
-                'created_by_type' => $contact->getMorphClass(),
-                'created_by_id' => $contact->getKey(),
+                'created_by_type' => $respondent->getMorphClass(),
+                'created_by_id' => $respondent->getKey(),
             ],
         ]);
 
