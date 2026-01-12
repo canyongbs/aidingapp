@@ -77,6 +77,32 @@ class PortalAssistantTestDataSeeder extends Seeder
     {
         $this->clearExistingData();
         $this->createTestData();
+        $this->populateStepContent();
+    }
+
+    protected function populateStepContent(): void
+    {
+        $this->command->info('Populating step content fields...');
+
+        $steps = ServiceRequestFormStep::with(['fields'])->get();
+
+        foreach ($steps as $step) {
+            $fieldsData = [];
+
+            foreach ($step->fields as $field) {
+                $fieldsData[$field->id] = [
+                    'label' => $field->label,
+                    'type' => $field->type,
+                    'required' => (bool) $field->is_required,
+                    'config' => $field->config ?? [],
+                ];
+            }
+
+            $content = $this->generateStepContent($fieldsData);
+            $step->update(['content' => $content]);
+        }
+
+        $this->command->info('Step content populated successfully.');
     }
 
     protected function clearExistingData(): void
@@ -221,6 +247,37 @@ class PortalAssistantTestDataSeeder extends Seeder
             'label' => $label,
             'sort' => $sort,
         ]);
+    }
+
+    protected function generateStepContent(array $fieldsData): array
+    {
+        $blocks = [];
+
+        foreach ($fieldsData as $fieldId => $fieldData) {
+            $blockData = [
+                'label' => $fieldData['label'],
+                'isRequired' => $fieldData['required'],
+            ];
+
+            // Add config if present (options, placeholder, etc.)
+            if (! empty($fieldData['config'])) {
+                $blockData = array_merge($blockData, $fieldData['config']);
+            }
+
+            $blocks[] = [
+                'type' => 'tiptapBlock',
+                'attrs' => [
+                    'type' => $fieldData['type'],
+                    'data' => $blockData,
+                    'id' => $fieldId,
+                ],
+            ];
+        }
+
+        return [
+            'type' => 'doc',
+            'content' => $blocks,
+        ];
     }
 
     protected function createField(

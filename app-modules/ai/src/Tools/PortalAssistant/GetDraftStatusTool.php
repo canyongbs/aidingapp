@@ -93,6 +93,7 @@ class GetDraftStatusTool extends Tool
 
             $result['form_fields'] = $this->getFormFields($draft, $type);
             $result['missing_required'] = $this->getMissingRequired($draft, $result['form_fields']);
+            $result['optional_fields'] = $this->getOptionalFields($result['form_fields']);
             $result['can_submit'] = empty($result['missing_required']);
         } else {
             $result['type_id'] = null;
@@ -102,6 +103,7 @@ class GetDraftStatusTool extends Tool
             $result['priorities'] = [];
             $result['form_fields'] = [];
             $result['missing_required'] = ['type'];
+            $result['optional_fields'] = [];
             $result['can_submit'] = false;
         }
 
@@ -221,6 +223,29 @@ class GetDraftStatusTool extends Tool
     }
 
     /**
+     * @param array<int, array<string, mixed>> $formFields
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getOptionalFields(array $formFields): array
+    {
+        $optional = [];
+
+        foreach ($formFields as $field) {
+            if (! $field['required'] && ! $field['filled']) {
+                $optional[] = [
+                    'field_id' => $field['field_id'],
+                    'label' => $field['label'],
+                    'type' => $field['type'],
+                    'step' => $field['step'],
+                ];
+            }
+        }
+
+        return $optional;
+    }
+
+    /**
      * @param array<string, mixed> $result
      */
     protected function getPhaseInstruction(ServiceRequest $draft, array $result): string
@@ -254,8 +279,19 @@ class GetDraftStatusTool extends Tool
     protected function getDataCollectionInstruction(array $result): string
     {
         $missing = $result['missing_required'] ?? [];
+        $optionalFields = $result['optional_fields'] ?? [];
 
         if (empty($missing)) {
+            // Check if there are optional fields that might be worth collecting
+            if (! empty($optionalFields)) {
+                $optionalSummary = implode(', ', array_map(fn ($f) => $f['label'], $optionalFields));
+                return sprintf(
+                    'All required fields are filled. There are %d optional field(s) available: %s. Based on the conversation context, decide if any would be helpful to collect. If yes, ask for ONE optional field using the same pattern as required fields (show_field_input for complex types, direct question for text). If no optional fields seem relevant, call submit_service_request to validate and proceed.',
+                    count($optionalFields),
+                    $optionalSummary
+                );
+            }
+
             return 'All required fields are filled. Call submit_service_request to validate and proceed to clarifying questions.';
         }
 
@@ -280,15 +316,21 @@ class GetDraftStatusTool extends Tool
 
                     // Simple text field
                     return sprintf(
-                        'Ask the user: "%s%s" Then STOP and wait for their response. Do NOT call update_form_field until they provide the value in their next message.',
-                        $field['label'],
-                        $field['required'] ? '' : ' (optional)',
+                        'Ask the user: "%s" Then STOP and wait for their response. Do NOT call update_form_field until they provide the value in their next message.',
+                        $field['label']
                     );
                 }
             }
         }
 
         if ($firstMissing === 'description') {
+            if ($hasCustomFields) {
+                $filledCount = count(array_filter($result['form_fields'] ?? [], fn ($f) => $f['filled']));
+                if ($filledCount > 0) {
+                    return 'The user has already provided information through the form fields. Ask if they have any additional details or context to add. If they indicate they have nothing to add, you may use update_description with a brief summary like "See form details above" or similar. Otherwise wait for their response and then call update_description.';
+                }
+            }
+
             return 'Ask the user to describe their issue or request in detail. Then STOP and wait for their response. Do NOT call update_description until they provide the description in their next message.';
         }
 

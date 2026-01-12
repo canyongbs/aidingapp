@@ -62,8 +62,10 @@ The unlocking sequence follows a consistent flow regardless of whether the servi
 ```
 Type Selected
     ↓
-update_form_field, show_field_input for custom fields (unlocked if type has custom fields)
-    ↓ (after all required custom fields filled, or immediately if no custom fields)
+update_form_field, show_field_input for REQUIRED custom fields (unlocked if type has custom fields)
+    ↓ (after all required custom fields filled)
+AI evaluates OPTIONAL custom fields - asks for relevant ones based on context
+    ↓ (after optional fields handled, or immediately if no custom fields)
 update_description (unlocked) - User explains issue/request in detail
     ↓ (after description saved - REQUIRED field)
 update_title (unlocked) - AI suggests title based on description + form fields, user confirms/edits
@@ -75,6 +77,9 @@ submit_service_request (advances to next phase)
 
 **Field Collection Order:**
 1. **Custom form fields** (if the type has any) - Structured data specific to the request type
+   - **Required fields** are collected first and must be completed
+   - **Optional fields** are then considered based on relevance to the user's request
+   - The AI uses judgment to decide which optional fields would be helpful
 2. **Description** (always required) - Detailed explanation of the issue or request
 3. **Title** (always required) - AI suggests based on all information collected so far
 4. **Priority** (always required) - User selects urgency level
@@ -82,9 +87,10 @@ submit_service_request (advances to next phase)
 **Why This Order?**
 
 1. **Structured Data First**: If the type has custom fields, collect them first to provide context for the description
-2. **Description Before Title**: Users explain their issue fully before being asked to summarize it with a title
-3. **Title Before Priority**: AI can suggest a title with confidence when it has all the context (form fields + description)
-4. **Priority Last**: Priority doesn't affect the description or title content - it's purely about urgency and routing
+2. **Optional Field Intelligence**: After required fields, AI evaluates optional fields contextually. Example: For a password reset, "Last successful login date" is useful; "Department phone extension" is not
+3. **Description Before Title**: Users explain their issue fully before being asked to summarize it with a title
+4. **Title Before Priority**: AI can suggest a title with confidence when it has all the context (form fields + description)
+5. **Priority Last**: Priority doesn't affect the description or title content - it's purely about urgency and routing
 
 ### Type Switching Behavior
 
@@ -124,26 +130,35 @@ Retrieves all available service request types organized by category. Does NOT cr
 Displays a UI widget that allows the user to select which type of service request they want to submit. The AI can optionally suggest a specific type based on the conversation context, which will be highlighted in the interface. This emits an event that the frontend listens for to render the appropriate selection interface.
 
 #### Get Draft Status
-Returns comprehensive information about the current state of the service request draft. This includes what's been filled in (title, description, form fields), what's still missing, the current workflow phase, available priorities, the structure of any custom form fields, and instructions for what should happen next. The AI uses this frequently to understand what information still needs to be collected.
+Returns comprehensive information about the current state of the service request draft. This includes what's been filled in (title, description, form fields), what's still missing (required vs optional), the current workflow phase, available priorities, the structure of any custom form fields, and instructions for what should happen next. The AI uses this frequently to understand what information still needs to be collected.
+
+The response includes:
+- `missing_required`: Array of required field IDs that are not yet filled
+- `optional_fields`: Array of optional field objects (field_id, label, type, step) that could be collected
+- `instruction`: Context-specific guidance on what to do next, including whether to consider optional fields
 
 ### Data Collection Phase Tools
 
 These tools unlock progressively as the user provides information:
 
 #### Update Description
-Saves detailed information about the issue or request. This field is REQUIRED and cannot be skipped. The AI asks the user to describe their issue or request in detail. This always comes after custom form fields (if any exist) but before the title.
+Saves detailed information about the issue or request. This field is REQUIRED and cannot be skipped. The AI asks the user to describe their issue or request in detail. This always comes after custom form fields (if any exist and are relevant) but before the title.
 
 Saves immediately without confirmation. Saves to the `close_details` database column.
 
-**When Available**: After all required custom fields are filled (if type has custom fields), OR immediately after type selection (if type has no custom fields)
+**When Available**: After all required custom fields are filled and relevant optional fields are handled (if type has custom fields), OR immediately after type selection (if type has no custom fields)
 
 #### Show Field Input
 Displays a specialized UI widget for custom form fields that require user selection or complex input rather than free text. This includes selects, radio buttons, checkboxes, date pickers, phone number inputs, address fields, and file uploads. The system automatically prompts the user with the appropriate interface and handles the input. Emits an event with the field configuration that the frontend renders.
+
+**Handles Both**: Required and optional fields - AI decides when to use based on field relevance
 
 **When Available**: Immediately after type selection (if type has custom fields)
 
 #### Update Form Field
 Updates the value of simple text-based custom form fields like text inputs, text areas, numbers, and email addresses. Each service request type may have different custom fields defined, and this tool handles the straightforward ones. The AI must ask the user for each field value individually and save immediately. For complex fields like dropdowns or date pickers, the AI should use Show Field Input instead.
+
+**Handles Both**: Required and optional fields - AI decides when to use based on field relevance
 
 **When Available**: Immediately after type selection (if type has custom fields)
 
@@ -819,6 +834,55 @@ Submit Service Request succeeds
    - AI doesn't guess what to do next - tools tell it explicitly
    - Reduces hallucination and off-script behavior
    - Forces linear progression through workflow
+
+5. **Intelligent Optional Field Handling**
+   - Required fields are enforced through validation
+   - Optional fields are exposed with context but not mandatory
+   - AI uses judgment to determine relevance based on user's request
+   - Prevents overwhelming users with unnecessary questions
+
+### Optional Field Collection Strategy
+
+The system differentiates between required and optional form fields:
+
+**Required Fields**:
+- Must be collected before proceeding to description
+- Included in `missing_required` array from Get Draft Status
+- AI is instructed to ask for each one sequentially
+
+**Optional Fields**:
+- Exposed in `optional_fields` array after required fields are complete
+- AI receives list with field metadata: `field_id`, `label`, `type`, `step`
+- AI decides whether to collect based on contextual relevance
+
+**Decision Criteria for Optional Fields**:
+1. **Relevance to Issue**: Would this information help resolve the user's specific request?
+2. **User Context**: Has the user already mentioned related information in conversation?
+3. **Field Purpose**: Does the field label/type suggest it's valuable for this scenario?
+
+**Examples of Good Judgment**:
+- Password reset request → Ask for "Last successful login date" (helpful) ✅
+- Password reset request → Skip "Department phone extension" (not relevant) ❌
+- Hardware request → Ask for "Current device model" (helpful) ✅
+- Hardware request → Skip "Favorite color" (not relevant) ❌
+
+**Implementation**:
+```
+After required fields complete:
+    Get Draft Status returns:
+        "All required fields are filled. There are 3 optional field(s) available: 
+         Last Login Date, Phone Extension, Office Location. 
+         Based on the conversation context, decide if any would be helpful to collect..."
+
+    AI evaluates each field:
+        - Last Login Date: Relevant to password troubleshooting → Ask
+        - Phone Extension: Not needed for password issue → Skip
+        - Office Location: Not needed for password issue → Skip
+    
+    AI collects relevant optional field(s), then calls submit_service_request
+```
+
+This approach balances thoroughness with user experience - collecting helpful optional information without creating questionnaire fatigue.
 
 ### Common Pitfalls to Avoid
 

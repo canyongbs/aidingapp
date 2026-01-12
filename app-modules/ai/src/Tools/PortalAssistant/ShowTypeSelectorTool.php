@@ -53,8 +53,8 @@ class ShowTypeSelectorTool extends Tool
     ) {
         $this
             ->as('show_type_selector')
-            ->for('Displays a UI widget for the user to select a service request type. Call this after fetching types. The system will automatically ask the user to make a selection.')
-            ->withStringParameter('suggested_type_id', 'Optional: The UUID of the type to suggest/highlight based on conversation context')
+            ->for('STEP 2: Displays a UI widget for the user to select a service request type. ALWAYS call this AFTER fetch_service_request_types. If you identified a strong match from analyzing the types_tree, pass that type_id as suggested_type_id.')
+            ->withStringParameter('suggested_type_id', 'Optional: The UUID of the type to suggest/highlight. Use this when you found a clear match by analyzing the types_tree from fetch_service_request_types.')
             ->using($this);
     }
 

@@ -53,7 +53,7 @@ class FetchServiceRequestTypesTool extends Tool
     ) {
         $this
             ->as('fetch_service_request_types')
-            ->for('Retrieves available service request types. Call this when the user wants to submit a service request, report an issue, or speak to a human.')
+            ->for('STEP 1: Retrieves the complete list of available service request types with their IDs, names, and descriptions. ALWAYS call this FIRST when the user wants to submit a service request. Returns a types_tree that you should analyze to find the best matching type_id before calling show_type_selector.')
             ->using($this);
     }
 
@@ -74,7 +74,7 @@ class FetchServiceRequestTypesTool extends Tool
             'types_tree' => $typesTree,
             'has_draft' => $draft !== null,
             'workflow_phase' => $draft?->workflow_phase,
-            'instruction' => 'Call show_type_selector to display the type selection UI. You can pass a suggested_type_id if you can infer the best type from the conversation.',
+            'instruction' => 'IMPORTANT: Carefully analyze the types_tree below to find the best match for the user\'s request. Each type has a type_id, name, and description. If you find a type whose name and description clearly matches what the user described, extract that type_id and pass it as suggested_type_id when calling show_type_selector. If no clear match exists, call show_type_selector without suggested_type_id.',
         ]);
     }
 
