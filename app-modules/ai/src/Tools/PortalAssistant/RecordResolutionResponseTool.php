@@ -80,7 +80,7 @@ class RecordResolutionResponseTool extends Tool
 
         $contact = $this->thread->contact;
 
-        $draft->serviceRequestUpdates()->create([
+        $draft->serviceRequestUpdates()->createQuietly([
             'update' => $accepted ? 'Yes, this resolved my issue.' : 'No, this did not resolve my issue.',
             'update_type' => ServiceRequestUpdateType::AiResolutionResponse,
             'internal' => false,

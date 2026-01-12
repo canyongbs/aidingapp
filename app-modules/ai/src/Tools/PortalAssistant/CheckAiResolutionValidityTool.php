@@ -90,7 +90,7 @@ class CheckAiResolutionValidityTool extends Tool
         $draft->ai_resolution_confidence_score = $confidenceScore;
         $draft->save();
 
-        $draft->serviceRequestUpdates()->create([
+        $draft->serviceRequestUpdates()->createQuietly([
             'update' => "Based on the information you've provided, here is a potential solution:\n\n{$proposed_answer}\n\nDid this resolve your issue?",
             'update_type' => ServiceRequestUpdateType::AiResolutionProposed,
             'internal' => false,
