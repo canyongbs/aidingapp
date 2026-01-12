@@ -39,7 +39,7 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
-use AidingApp\Portal\Actions\GenerateServiceRequestForm;
+
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
@@ -88,17 +88,38 @@ class UpdateFormFieldTool extends Tool
             return $result;
         }
 
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
+        $form = $type->form;
+
+        if (! $form) {
+            $result = json_encode([
+                'success' => false,
+                'error' => 'No form found for this service request type.',
+            ]);
+            $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
+
+            return $result;
+        }
 
         $field = null;
 
+        // Check fields in steps
         foreach ($form->steps as $step) {
             foreach ($step->fields as $f) {
                 if ($f->getKey() === $field_id) {
                     $field = $f;
 
                     break 2;
+                }
+            }
+        }
+
+        // Check fields directly on form
+        if (! $field) {
+            foreach ($form->fields as $f) {
+                if ($f->getKey() === $field_id) {
+                    $field = $f;
+
+                    break;
                 }
             }
         }

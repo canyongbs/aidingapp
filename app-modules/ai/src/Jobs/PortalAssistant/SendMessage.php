@@ -56,7 +56,7 @@ use AidingApp\Ai\Tools\PortalAssistant\UpdateDescriptionTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateFormFieldTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateTitleTool;
 use AidingApp\IntegrationOpenAi\Prism\ValueObjects\Messages\DeveloperMessage;
-use AidingApp\Portal\Actions\GenerateServiceRequestForm;
+
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
@@ -495,17 +495,22 @@ EOT;
             return false;
         }
 
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
+        $form = $type->form;
 
+        if (! $form) {
+            return false;
+        }
+
+        // Check if there are any fields in steps
         foreach ($form->steps as $step) {
-            if ($step->label === 'Main' || $step->label === 'Questions') {
-                continue;
-            }
-
             if (! empty($step->fields)) {
                 return true;
             }
+        }
+
+        // Check if there are any fields directly on the form
+        if (! empty($form->fields)) {
+            return true;
         }
 
         return false;
@@ -522,8 +527,11 @@ EOT;
             return false;
         }
 
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
+        $form = $type->form;
+
+        if (! $form) {
+            return true; // No form means no required fields to check
+        }
 
         $submission = $draft->serviceRequestFormSubmission;
         $filledFields = [];
@@ -536,11 +544,8 @@ EOT;
                 ->all();
         }
 
+        // Check fields in steps
         foreach ($form->steps as $step) {
-            if ($step->label === 'Main' || $step->label === 'Questions') {
-                continue;
-            }
-
             foreach ($step->fields as $field) {
                 if ($field->is_required) {
                     $fieldId = $field->getKey();
@@ -549,6 +554,18 @@ EOT;
                     if ($value === null || $value === '') {
                         return false;
                     }
+                }
+            }
+        }
+
+        // Check fields directly on form
+        foreach ($form->fields as $field) {
+            if ($field->is_required) {
+                $fieldId = $field->getKey();
+                $value = $filledFields[$fieldId] ?? null;
+
+                if ($value === null || $value === '') {
+                    return false;
                 }
             }
         }

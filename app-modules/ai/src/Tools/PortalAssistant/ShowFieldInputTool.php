@@ -40,7 +40,7 @@ use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
-use AidingApp\Portal\Actions\GenerateServiceRequestForm;
+
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use Prism\Prism\Tool;
 
@@ -85,17 +85,38 @@ class ShowFieldInputTool extends Tool
             return $result;
         }
 
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
+        $form = $type->form;
+
+        if (! $form) {
+            $result = json_encode([
+                'error' => true,
+                'message' => 'No form found for this service request type.',
+            ]);
+            $this->logToolResult('show_field_input', $result, ['field_id' => $field_id]);
+
+            return $result;
+        }
 
         $field = null;
 
+        // Check fields in steps
         foreach ($form->steps as $step) {
             foreach ($step->fields as $f) {
                 if ($f->getKey() === $field_id) {
                     $field = $f;
 
                     break 2;
+                }
+            }
+        }
+
+        // Check fields directly on form
+        if (! $field) {
+            foreach ($form->fields as $f) {
+                if ($f->getKey() === $field_id) {
+                    $field = $f;
+
+                    break;
                 }
             }
         }

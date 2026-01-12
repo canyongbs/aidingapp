@@ -40,7 +40,7 @@ use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
-use AidingApp\Portal\Actions\GenerateServiceRequestForm;
+
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
@@ -128,8 +128,11 @@ class GetDraftStatusTool extends Tool
      */
     protected function getFormFields(ServiceRequest $draft, mixed $type): array
     {
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
+        $form = $type->form;
+
+        if (! $form) {
+            return [];
+        }
 
         $submission = $draft->serviceRequestFormSubmission;
         $filledFields = [];
@@ -144,14 +147,16 @@ class GetDraftStatusTool extends Tool
 
         $fields = [];
 
+        // Collect fields from steps
         foreach ($form->steps as $step) {
-            if ($step->label === 'Main' || $step->label === 'Questions') {
-                continue;
-            }
-
             foreach ($step->fields as $field) {
                 $fields[] = $this->formatField($field, $step->label, $filledFields);
             }
+        }
+
+        // Collect fields directly on the form
+        foreach ($form->fields as $field) {
+            $fields[] = $this->formatField($field, null, $filledFields);
         }
 
         return $fields;
@@ -162,7 +167,7 @@ class GetDraftStatusTool extends Tool
      *
      * @return array<string, mixed>
      */
-    protected function formatField(ServiceRequestFormField $field, string $stepLabel, array $filledFields): array
+    protected function formatField(ServiceRequestFormField $field, ?string $stepLabel, array $filledFields): array
     {
         $fieldId = $field->getKey();
         $value = $filledFields[$fieldId] ?? null;

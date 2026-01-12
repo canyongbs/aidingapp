@@ -38,7 +38,7 @@ namespace AidingApp\Ai\Http\Controllers\PortalAssistant;
 
 use AidingApp\Ai\Jobs\PortalAssistant\SendMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
-use AidingApp\Portal\Actions\GenerateServiceRequestForm;
+
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -105,18 +105,42 @@ class UpdateServiceRequestFormFieldController
             ], 400);
         }
 
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
+        $form = $type->form;
+
+        if (! $form) {
+            Log::warning('[PortalAssistant] Widget form field submission failed - no form', [
+                'thread_id' => $data['thread_id'],
+                'field_id' => $data['field_id'],
+                'type_id' => $type->getKey(),
+            ]);
+
+            return response()->json([
+                'message' => 'No form found for this service request type.',
+            ], 400);
+        }
 
         // Validate field belongs to this form
         $fieldExists = false;
         $fieldConfig = null;
+
+        // Check fields in steps
         foreach ($form->steps as $step) {
             foreach ($step->fields as $f) {
                 if ($f->getKey() === $field->getKey()) {
                     $fieldExists = true;
                     $fieldConfig = $f;
                     break 2;
+                }
+            }
+        }
+
+        // Check fields directly on form
+        if (! $fieldExists) {
+            foreach ($form->fields as $f) {
+                if ($f->getKey() === $field->getKey()) {
+                    $fieldExists = true;
+                    $fieldConfig = $f;
+                    break;
                 }
             }
         }
@@ -143,10 +167,16 @@ class UpdateServiceRequestFormFieldController
         } else {
             $fields = collect();
 
+            // Collect all fields from steps
             foreach ($form->steps as $step) {
                 foreach ($step->fields as $f) {
                     $fields->put($f->getKey(), $f->type);
                 }
+            }
+
+            // Collect all fields directly on form
+            foreach ($form->fields as $f) {
+                $fields->put($f->getKey(), $f->type);
             }
 
             app(ProcessServiceRequestSubmissionField::class)->execute(

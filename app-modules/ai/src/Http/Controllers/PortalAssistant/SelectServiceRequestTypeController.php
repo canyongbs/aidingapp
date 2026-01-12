@@ -39,7 +39,7 @@ namespace AidingApp\Ai\Http\Controllers\PortalAssistant;
 use AidingApp\Ai\Jobs\PortalAssistant\SendMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Actions\GenerateServiceRequestForm;
+
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -112,17 +112,18 @@ class SelectServiceRequestTypeController
 
             $draft = ServiceRequest::create($attributes);
 
-            $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-            $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
+            $form = $type->form;
 
-            $submission = $form->submissions()->make([
-                'submitted_at' => null,
-            ]);
+            if ($form) {
+                $submission = $form->submissions()->make([
+                    'submitted_at' => null,
+                ]);
 
-            $submission->save();
+                $submission->save();
 
-            $draft->serviceRequestFormSubmission()->associate($submission);
-            $draft->save();
+                $draft->serviceRequestFormSubmission()->associate($submission);
+                $draft->save();
+            }
 
             // Set as current draft on thread
             $thread->current_service_request_draft_id = $draft->getKey();
