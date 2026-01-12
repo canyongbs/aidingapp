@@ -501,19 +501,7 @@ EOT;
             return false;
         }
 
-        // Check if there are any fields in steps
-        foreach ($form->steps as $step) {
-            if (! empty($step->fields)) {
-                return true;
-            }
-        }
-
-        // Check if there are any fields directly on the form
-        if (! empty($form->fields)) {
-            return true;
-        }
-
-        return false;
+        return ! empty($form->fields);
     }
 
     /**
@@ -544,21 +532,6 @@ EOT;
                 ->all();
         }
 
-        // Check fields in steps
-        foreach ($form->steps as $step) {
-            foreach ($step->fields as $field) {
-                if ($field->is_required) {
-                    $fieldId = $field->getKey();
-                    $value = $filledFields[$fieldId] ?? null;
-
-                    if ($value === null || $value === '') {
-                        return false;
-                    }
-                }
-            }
-        }
-
-        // Check fields directly on form
         foreach ($form->fields as $field) {
             if ($field->is_required) {
                 $fieldId = $field->getKey();

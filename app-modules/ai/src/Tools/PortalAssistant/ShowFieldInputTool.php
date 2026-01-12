@@ -97,29 +97,7 @@ class ShowFieldInputTool extends Tool
             return $result;
         }
 
-        $field = null;
-
-        // Check fields in steps
-        foreach ($form->steps as $step) {
-            foreach ($step->fields as $f) {
-                if ($f->getKey() === $field_id) {
-                    $field = $f;
-
-                    break 2;
-                }
-            }
-        }
-
-        // Check fields directly on form
-        if (! $field) {
-            foreach ($form->fields as $f) {
-                if ($f->getKey() === $field_id) {
-                    $field = $f;
-
-                    break;
-                }
-            }
-        }
+        $field = $form->fields->firstWhere('id', $field_id);
 
         if (! $field) {
             $result = json_encode([

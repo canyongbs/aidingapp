@@ -69,16 +69,6 @@ enum ServiceRequestDraftStage: string
         $form = $serviceRequest->priority?->type?->form;
 
         if ($form) {
-            // Check fields from steps
-            foreach ($form->steps as $step) {
-                foreach ($step->fields as $field) {
-                    if ($field->is_required && blank(data_get($serviceRequest->fields, $field->id))) {
-                        return self::DataCollection;
-                    }
-                }
-            }
-
-            // Check fields directly on form
             foreach ($form->fields as $field) {
                 if ($field->is_required && blank(data_get($serviceRequest->fields, $field->id))) {
                     return self::DataCollection;

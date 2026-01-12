@@ -147,16 +147,8 @@ class GetDraftStatusTool extends Tool
 
         $fields = [];
 
-        // Collect fields from steps
-        foreach ($form->steps as $step) {
-            foreach ($step->fields as $field) {
-                $fields[] = $this->formatField($field, $step->label, $filledFields);
-            }
-        }
-
-        // Collect fields directly on the form
         foreach ($form->fields as $field) {
-            $fields[] = $this->formatField($field, null, $filledFields);
+            $fields[] = $this->formatField($field, $filledFields);
         }
 
         return $fields;
@@ -167,14 +159,13 @@ class GetDraftStatusTool extends Tool
      *
      * @return array<string, mixed>
      */
-    protected function formatField(ServiceRequestFormField $field, ?string $stepLabel, array $filledFields): array
+    protected function formatField(ServiceRequestFormField $field, array $filledFields): array
     {
         $fieldId = $field->getKey();
         $value = $filledFields[$fieldId] ?? null;
 
         $data = [
             'field_id' => $fieldId,
-            'step' => $stepLabel,
             'label' => $field->label,
             'type' => $field->type,
             'required' => (bool) $field->is_required,

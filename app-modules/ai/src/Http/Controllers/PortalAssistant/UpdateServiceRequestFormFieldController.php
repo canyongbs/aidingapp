@@ -120,32 +120,9 @@ class UpdateServiceRequestFormFieldController
         }
 
         // Validate field belongs to this form
-        $fieldExists = false;
-        $fieldConfig = null;
+        $fieldConfig = $form->fields->firstWhere('id', $field->getKey());
 
-        // Check fields in steps
-        foreach ($form->steps as $step) {
-            foreach ($step->fields as $f) {
-                if ($f->getKey() === $field->getKey()) {
-                    $fieldExists = true;
-                    $fieldConfig = $f;
-                    break 2;
-                }
-            }
-        }
-
-        // Check fields directly on form
-        if (! $fieldExists) {
-            foreach ($form->fields as $f) {
-                if ($f->getKey() === $field->getKey()) {
-                    $fieldExists = true;
-                    $fieldConfig = $f;
-                    break;
-                }
-            }
-        }
-
-        if (! $fieldExists) {
+        if (! $fieldConfig) {
             Log::warning('[PortalAssistant] Widget form field submission failed - field not in form', [
                 'thread_id' => $data['thread_id'],
                 'field_id' => $data['field_id'],
@@ -167,14 +144,6 @@ class UpdateServiceRequestFormFieldController
         } else {
             $fields = collect();
 
-            // Collect all fields from steps
-            foreach ($form->steps as $step) {
-                foreach ($step->fields as $f) {
-                    $fields->put($f->getKey(), $f->type);
-                }
-            }
-
-            // Collect all fields directly on form
             foreach ($form->fields as $f) {
                 $fields->put($f->getKey(), $f->type);
             }

@@ -100,29 +100,7 @@ class UpdateFormFieldTool extends Tool
             return $result;
         }
 
-        $field = null;
-
-        // Check fields in steps
-        foreach ($form->steps as $step) {
-            foreach ($step->fields as $f) {
-                if ($f->getKey() === $field_id) {
-                    $field = $f;
-
-                    break 2;
-                }
-            }
-        }
-
-        // Check fields directly on form
-        if (! $field) {
-            foreach ($form->fields as $f) {
-                if ($f->getKey() === $field_id) {
-                    $field = $f;
-
-                    break;
-                }
-            }
-        }
+        $field = $form->fields->firstWhere('id', $field_id);
 
         if (! $field) {
             $result = json_encode([
@@ -153,10 +131,8 @@ class UpdateFormFieldTool extends Tool
         } else {
             $fields = collect();
 
-            foreach ($form->steps as $step) {
-                foreach ($step->fields as $f) {
-                    $fields->put($f->getKey(), $f->type);
-                }
+            foreach ($form->fields as $f) {
+                $fields->put($f->getKey(), $f->type);
             }
 
             app(ProcessServiceRequestSubmissionField::class)->execute(
