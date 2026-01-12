@@ -198,6 +198,10 @@ class GetDraftStatusTool extends Tool
             $missing[] = 'description';
         }
 
+        if (empty($draft->priority_id)) {
+            $missing[] = 'priority';
+        }
+
         foreach ($formFields as $field) {
             if ($field['required'] && ! $field['filled']) {
                 $missing[] = $field['field_id'];
@@ -255,6 +259,10 @@ class GetDraftStatusTool extends Tool
 
         if ($firstMissing === 'description') {
             return 'Ask the user: "Please describe the issue in detail." Then STOP and wait for their response. Do NOT call update_description until they provide the description in their next message.';
+        }
+
+        if ($firstMissing === 'priority') {
+            return 'Call show_priority_selector to display the priority options. Then STOP and wait for the user to select a priority.';
         }
 
         // It's a form field

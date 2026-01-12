@@ -51,12 +51,12 @@ use AidingApp\Ai\Tools\PortalAssistant\GetDraftStatusTool;
 use AidingApp\Ai\Tools\PortalAssistant\RecordResolutionResponseTool;
 use AidingApp\Ai\Tools\PortalAssistant\SaveClarifyingQuestionTool;
 use AidingApp\Ai\Tools\PortalAssistant\ShowFieldInputTool;
+use AidingApp\Ai\Tools\PortalAssistant\ShowPrioritySelectorTool;
 use AidingApp\Ai\Tools\PortalAssistant\ShowTypeSelectorTool;
 use AidingApp\Ai\Tools\PortalAssistant\SubmitAiResolutionTool;
 use AidingApp\Ai\Tools\PortalAssistant\SubmitServiceRequestTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateDescriptionTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateFormFieldTool;
-use AidingApp\Ai\Tools\PortalAssistant\UpdatePriorityTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateTitleTool;
 use AidingApp\Ai\Validators\InternalContentValidator;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
@@ -64,6 +64,7 @@ use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
@@ -258,6 +259,7 @@ class SendMessage implements ShouldQueue
         return match ($this->metadata['type'] ?? null) {
             InternalContentValidator::TYPE_FIELD_RESPONSE => '[System: User completed the form field input. The value has been saved to the draft. Call get_draft_status to see current state.]',
             InternalContentValidator::TYPE_TYPE_SELECTION => '[System: User selected a service request type. The draft has been updated with the selected type and a default priority. Call get_draft_status to see what to collect next.]',
+            InternalContentValidator::TYPE_PRIORITY_SELECTION => '[System: User selected a priority level. The draft has been updated. Call get_draft_status to see what to collect next.]',
             InternalContentValidator::TYPE_WIDGET_CANCELLED => sprintf(
                 '[System: User cancelled the %s widget. Continue the conversation normally.]',
                 $this->metadata['widget_type'] ?? 'input'
@@ -407,10 +409,14 @@ EOT;
             $tools[] = new UpdateDescriptionTool($this->thread);
         }
 
-        // After description exists, form fields become available (and remain available)
+        // After description exists, priority selector becomes available
         // Note: description is stored in close_details field
         if ($draft->title && $draft->close_details) {
-            $tools[] = new UpdatePriorityTool($this->thread);
+            $tools[] = new ShowPrioritySelectorTool($this->thread);
+        }
+
+        // After priority is selected, form fields become available (and remain available)
+        if ($draft->title && $draft->close_details && $draft->priority_id) {
             $tools[] = new UpdateFormFieldTool($this->thread);
             $tools[] = new ShowFieldInputTool($this->thread);
         }
@@ -449,6 +455,7 @@ EOT;
 
         match ($this->metadata['type'] ?? null) {
             InternalContentValidator::TYPE_TYPE_SELECTION => $this->processTypeSelection(),
+            InternalContentValidator::TYPE_PRIORITY_SELECTION => $this->processPrioritySelection(),
             InternalContentValidator::TYPE_FIELD_RESPONSE => $this->processFieldResponse(),
             default => null,
         };
@@ -526,6 +533,45 @@ EOT;
         // Set as current draft on thread
         $this->thread->current_service_request_draft_id = $draft->getKey();
         $this->thread->save();
+    }
+
+    protected function processPrioritySelection(): void
+    {
+        $priorityId = $this->metadata['priority_id'] ?? null;
+
+        if (! $priorityId) {
+            return;
+        }
+
+        if (! $this->thread->current_service_request_draft_id) {
+            return;
+        }
+
+        $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
+            ->where('id', $this->thread->current_service_request_draft_id)
+            ->where('is_draft', true)
+            ->first();
+
+        if (! $draft) {
+            return;
+        }
+
+        $draft->load('priority.type');
+        $currentType = $draft->priority?->type;
+
+        if (! $currentType) {
+            return;
+        }
+
+        $priority = ServiceRequestPriority::where('type_id', $currentType->getKey())
+            ->find($priorityId);
+
+        if (! $priority) {
+            return;
+        }
+
+        $draft->priority()->associate($priority);
+        $draft->save();
     }
 
     protected function processFieldResponse(): void

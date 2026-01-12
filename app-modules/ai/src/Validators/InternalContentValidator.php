@@ -45,6 +45,8 @@ class InternalContentValidator
 
     public const TYPE_TYPE_SELECTION = 'type_selection';
 
+    public const TYPE_PRIORITY_SELECTION = 'priority_selection';
+
     public const TYPE_WIDGET_CANCELLED = 'widget_cancelled';
 
     public const TYPE_WIDGET_ERROR = 'widget_error';
@@ -52,6 +54,7 @@ class InternalContentValidator
     protected const ALLOWED_TYPES = [
         self::TYPE_FIELD_RESPONSE,
         self::TYPE_TYPE_SELECTION,
+        self::TYPE_PRIORITY_SELECTION,
         self::TYPE_WIDGET_CANCELLED,
         self::TYPE_WIDGET_ERROR,
     ];
@@ -75,6 +78,7 @@ class InternalContentValidator
         return match ($internalContent['type']) {
             self::TYPE_FIELD_RESPONSE => $this->validateFieldResponse($internalContent),
             self::TYPE_TYPE_SELECTION => $this->validateTypeSelection($internalContent),
+            self::TYPE_PRIORITY_SELECTION => $this->validatePrioritySelection($internalContent),
             self::TYPE_WIDGET_CANCELLED, self::TYPE_WIDGET_ERROR => InternalContentValidationResult::success(),
         };
     }
@@ -114,6 +118,23 @@ class InternalContentValidator
             if (! $serviceRequestType) {
                 $errors['type_id'] = 'The specified service request type does not exist or is not submittable.';
             }
+        }
+
+        if (! empty($errors)) {
+            return InternalContentValidationResult::failure($errors);
+        }
+
+        return InternalContentValidationResult::success();
+    }
+
+    protected function validatePrioritySelection(array $internalContent): InternalContentValidationResult
+    {
+        $errors = [];
+
+        if (! isset($internalContent['priority_id'])) {
+            $errors['priority_id'] = 'The priority_id is required for priority_selection type.';
+        } elseif (! \AidingApp\ServiceManagement\Models\ServiceRequestPriority::where('id', $internalContent['priority_id'])->exists()) {
+            $errors['priority_id'] = 'The specified priority does not exist.';
         }
 
         if (! empty($errors)) {

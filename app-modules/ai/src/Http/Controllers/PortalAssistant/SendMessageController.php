@@ -53,6 +53,7 @@ class SendMessageController
             'metadata' => ['nullable', 'array'],
             'metadata.type' => ['required_with:metadata', 'string'],
             'metadata.type_id' => ['nullable', 'uuid'],
+            'metadata.priority_id' => ['nullable', 'uuid'],
             'metadata.field_id' => ['nullable', 'uuid'],
             'metadata.value' => ['nullable'],
             'metadata.widget_type' => ['nullable', 'string'],
