@@ -99,7 +99,7 @@ class ContactResource extends Resource
             'index' => ListContacts::route('/'),
             'create' => CreateContact::route('/create'),
             'edit' => EditContact::route('/{record}/edit'),
-            'manage-alerts' => ManageContactAlerts::route('/{record}/alerts'),
+            'manage-alerts' => ManageContactAlerts::route('/{record}/concerns'),
             'manage-engagement' => ManageContactEngagement::route('/{record}/engagement'),
             'manage-files' => ManageContactFiles::route('/{record}/files'),
             'manage-tasks' => ManageContactTasks::route('/{record}/tasks'),

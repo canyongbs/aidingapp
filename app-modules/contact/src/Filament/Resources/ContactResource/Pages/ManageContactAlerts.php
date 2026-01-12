@@ -65,10 +65,12 @@ class ManageContactAlerts extends ManageRelatedRecords
     protected static string $relationship = 'alerts';
 
     // TODO: Automatically set from Filament based on relationship name
-    protected static ?string $navigationLabel = 'Alerts';
+    protected static ?string $navigationLabel = 'Concerns';
 
     // TODO: Automatically set from Filament based on relationship name
-    protected static ?string $breadcrumb = 'Alerts';
+    protected static ?string $breadcrumb = 'Concerns';
+
+    protected static ?string $title = 'Manage Contact Concerns';
 
     public static function getNavigationItems(array $urlParameters = []): array
     {
@@ -149,17 +151,21 @@ class ManageContactAlerts extends ManageRelatedRecords
                     ->options(AlertStatus::class),
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()
+                    ->modalHeading('Create Concern'),
             ])
             ->actions([
                 ViewAction::make(),
-                EditAction::make(),
+                EditAction::make()
+                    ->modalHeading('Edit Concern'),
                 DeleteAction::make(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
-            ]);
+            ])
+            ->emptyStateHeading('No Concerns')
+            ->emptyStateDescription('Create concerns to get started.');
     }
 }
