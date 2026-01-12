@@ -49,7 +49,7 @@ class UpdateTitleTool extends Tool
     ) {
         $this
             ->as('update_title')
-            ->for('Updates the title of the service request draft. IMPORTANT: You MUST ask the user for the title before calling this tool. Do NOT use information from earlier in the conversation - only use what the user provides in their current response. Once the user provides the title, save it immediately without asking for confirmation.')
+            ->for('Saves the title for the service request. When title is missing: suggest a concise title based on the description and form fields (if any), then ask the user to confirm or edit it. This comes after the description is provided. Once they provide/confirm the title, save it immediately without asking for additional confirmation.')
             ->withStringParameter('title', 'The title for the service request')
             ->using($this);
     }

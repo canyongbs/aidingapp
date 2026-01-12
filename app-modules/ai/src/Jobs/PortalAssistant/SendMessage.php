@@ -397,32 +397,110 @@ EOT;
 
     /**
      * Add tools for data collection phase - progressively expose based on what's filled
+     * The flow is UNIFIED regardless of whether the type has custom form fields:
+     * fields (if any) → description → title → priority
+     *
      * Users can always go back and edit previous fields, but can't skip ahead
      */
     protected function addDataCollectionTools(array &$tools, ServiceRequest $draft): void
     {
-        // Title is always editable (first required field)
-        $tools[] = new UpdateTitleTool($this->thread);
+        $draft->load(['priority', 'priority.type']);
 
-        // After title exists, description becomes available (and remains available)
-        if ($draft->title) {
-            $tools[] = new UpdateDescriptionTool($this->thread);
-        }
+        $hasCustomFields = $this->typeHasCustomFields($draft);
 
-        // After description exists, priority selector becomes available
-        // Note: description is stored in close_details field
-        if ($draft->title && $draft->close_details) {
-            $tools[] = new ShowPrioritySelectorTool($this->thread);
-        }
-
-        // After priority is selected, form fields become available (and remain available)
-        if ($draft->title && $draft->close_details && $draft->priority_id) {
+        // Step 1: Form field tools (if type has custom fields)
+        if ($hasCustomFields) {
             $tools[] = new UpdateFormFieldTool($this->thread);
             $tools[] = new ShowFieldInputTool($this->thread);
         }
 
+        // Step 2: After all required form fields filled (or immediately if no fields), description becomes available
+        if (! $hasCustomFields || $this->allRequiredFormFieldsFilled($draft)) {
+            $tools[] = new UpdateDescriptionTool($this->thread);
+        }
+
+        // Step 3: After description filled, title becomes available
+        // AI will suggest title in response text, user confirms/edits, then AI calls update_title
+        // Note: description is stored in close_details field
+        if ($draft->close_details) {
+            $tools[] = new UpdateTitleTool($this->thread);
+        }
+
+        // Step 4: After title saved, priority becomes available
+        if ($draft->title) {
+            $tools[] = new ShowPrioritySelectorTool($this->thread);
+        }
+
         // Always allow submission attempt (validation will catch missing fields)
         $tools[] = new SubmitServiceRequestTool($this->thread);
+    }
+
+    /**
+     * Check if the service request type has custom form fields
+     */
+    protected function typeHasCustomFields(ServiceRequest $draft): bool
+    {
+        if (! $draft->priority?->type) {
+            return false;
+        }
+
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
+        $form = app(GenerateServiceRequestForm::class)->execute($draft->priority->type, $uploadsMediaCollection);
+
+        foreach ($form->steps as $step) {
+            if ($step->label === 'Main' || $step->label === 'Questions') {
+                continue;
+            }
+
+            if (! empty($step->fields)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if all required custom form fields have been filled
+     */
+    protected function allRequiredFormFieldsFilled(ServiceRequest $draft): bool
+    {
+        if (! $draft->priority?->type) {
+            return false;
+        }
+
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
+        $form = app(GenerateServiceRequestForm::class)->execute($draft->priority->type, $uploadsMediaCollection);
+
+        $submission = $draft->serviceRequestFormSubmission;
+        $filledFields = [];
+
+        if ($submission) {
+            $filledFields = $submission->fields()
+                ->get()
+                ->keyBy('id')
+                ->map(fn ($field) => $field->pivot->response)
+                ->all();
+        }
+
+        foreach ($form->steps as $step) {
+            if ($step->label === 'Main' || $step->label === 'Questions') {
+                continue;
+            }
+
+            foreach ($step->fields as $field) {
+                if ($field->is_required) {
+                    $fieldId = $field->getKey();
+                    $value = $filledFields[$fieldId] ?? null;
+
+                    if ($value === null || $value === '') {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     /**

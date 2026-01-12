@@ -36,7 +36,12 @@ This design allows users to explore multiple service request types without losin
 
 The submission process follows a strict sequential workflow:
 
-1. **data_collection** - User provides title, description, and form field values (phase starts after type selection)
+1. **data_collection** - Collects all required information in the following order:
+   - Custom form fields (if the type has any)
+   - Description (detailed explanation)
+   - Title (AI suggests based on all collected information, user can accept/modify)
+   - Priority (urgency level)
+   - Phase starts after type selection
 2. **clarifying_questions** - AI asks 3 clarifying questions to better understand the issue
 3. **resolution** - AI attempts resolution (if enabled) or submits for human review
 
@@ -51,17 +56,34 @@ The system implements a "one-way gate" approach to prevent the AI from overwhelm
 
 ### Data Collection Phase Unlocking
 
+The unlocking sequence follows a consistent flow regardless of whether the service request type has custom form fields:
+
 ```
 Type Selected
     ↓
-update_title (unlocked)
+update_form_field, show_field_input for custom fields (unlocked if type has custom fields)
+    ↓ (after all required custom fields filled, or immediately if no custom fields)
+update_description (unlocked) - User explains issue/request in detail
+    ↓ (after description saved - REQUIRED field)
+update_title (unlocked) - AI suggests title based on description + form fields, user confirms/edits
     ↓ (after title saved)
-update_description (unlocked)
-    ↓ (after description saved)
-update_priority, update_form_field, show_field_input (unlocked)
-    ↓ (after all required fields filled)
+show_priority_selector (unlocked)
+    ↓ (after priority selected)
 submit_service_request (advances to next phase)
 ```
+
+**Field Collection Order:**
+1. **Custom form fields** (if the type has any) - Structured data specific to the request type
+2. **Description** (always required) - Detailed explanation of the issue or request
+3. **Title** (always required) - AI suggests based on all information collected so far
+4. **Priority** (always required) - User selects urgency level
+
+**Why This Order?**
+
+1. **Structured Data First**: If the type has custom fields, collect them first to provide context for the description
+2. **Description Before Title**: Users explain their issue fully before being asked to summarize it with a title
+3. **Title Before Priority**: AI can suggest a title with confidence when it has all the context (form fields + description)
+4. **Priority Last**: Priority doesn't affect the description or title content - it's purely about urgency and routing
 
 ### Type Switching Behavior
 
@@ -107,30 +129,32 @@ Returns comprehensive information about the current state of the service request
 
 These tools unlock progressively as the user provides information:
 
-#### Update Title
-Saves the title for the service request. This is always available once a type has been selected and is the first piece of information collected. The tool description explicitly instructs the AI to ask the user for the title before calling this - it must not auto-fill from earlier conversation history - and to save immediately without asking for confirmation.
-
-**When Available**: Always available once a type is selected
-
 #### Update Description
-Saves the detailed description of the issue or request. This becomes available after the title has been saved. Like the title tool, it explicitly prevents the AI from using information from earlier in the conversation and requires asking the user directly. Saves to the `close_details` database column.
+Saves detailed information about the issue or request. This field is REQUIRED and cannot be skipped. The AI asks the user to describe their issue or request in detail. This always comes after custom form fields (if any exist) but before the title.
 
-**When Available**: After title is saved
+Saves immediately without confirmation. Saves to the `close_details` database column.
 
-#### Update Priority
-Changes the priority level of the service request. The available priorities depend on the selected service request type, and the AI learns what's available by calling Get Draft Status. Users may want to adjust priority based on urgency.
+**When Available**: After all required custom fields are filled (if type has custom fields), OR immediately after type selection (if type has no custom fields)
 
-**When Available**: After title and description are saved
+#### Show Field Input
+Displays a specialized UI widget for custom form fields that require user selection or complex input rather than free text. This includes selects, radio buttons, checkboxes, date pickers, phone number inputs, address fields, and file uploads. The system automatically prompts the user with the appropriate interface and handles the input. Emits an event with the field configuration that the frontend renders.
+
+**When Available**: Immediately after type selection (if type has custom fields)
 
 #### Update Form Field
 Updates the value of simple text-based custom form fields like text inputs, text areas, numbers, and email addresses. Each service request type may have different custom fields defined, and this tool handles the straightforward ones. The AI must ask the user for each field value individually and save immediately. For complex fields like dropdowns or date pickers, the AI should use Show Field Input instead.
 
-**When Available**: After title and description are saved
+**When Available**: Immediately after type selection (if type has custom fields)
 
-#### Show Field Input
-Displays a specialized UI widget for complex form fields that need more than a simple text input. This includes selects, radio buttons, checkboxes, date pickers, phone number inputs, address fields, and file uploads. The system automatically prompts the user with the appropriate interface and handles the input. Emits an event with the field configuration that the frontend renders.
+#### Show Priority Selector
+Displays a UI widget that allows the user to select the priority level for their service request. Each service request type has its own set of available priorities (typically High, Medium, Low, but can vary). The system automatically prompts the user with a selector showing the available priority options, and the user's selection is submitted back to the backend via the metadata mechanism.
 
-**When Available**: After title and description are saved
+**When Available**: After title is saved
+
+#### Update Title
+Saves the title for the service request. When title is needed, the AI suggests a concise, descriptive title based on all collected information so far (form fields and description) and asks the user to confirm or edit it. Once the user provides/confirms the title, the AI saves it immediately without asking for additional confirmation.
+
+**When Available**: After description is saved
 
 #### Submit Service Request
 Validates that all required information has been collected and advances the workflow to the clarifying questions phase. This is always callable, but if validation fails, it returns detailed information about what's still missing. Once validation passes, the draft transitions to the next phase where the AI will ask clarifying questions.
@@ -187,33 +211,9 @@ User: [selects "Password Reset" type via UI]
     Sets thread's current_service_request_draft_id to point to this new draft
     Creates form submission record and associates default priority
     
-AI: "What would you like to title this request?"
-    
-User: "Cannot access student portal"
-
-AI: [calls Update Title]
-    Passes: The string "Cannot access student portal"
-    Returns: Success confirmation that title was saved
-             Includes instruction that title was saved successfully
-
 AI: [calls Get Draft Status]
     Passes: Nothing
-    Returns: Full current state showing title is filled, description is empty
-             Returns instruction: "Ask the user: 'Please describe the issue in detail.' Then STOP..."
-    
-AI: "Please describe the issue in detail."
-
-User: "When I try to log in with my username and password, I get an error message saying invalid credentials. I'm sure my password is correct."
-
-AI: [calls Update Description]
-    Passes: The full description text explaining the error
-    Returns: Success confirmation that description was saved to close_details field
-             Includes instruction that description was saved successfully
-    
-AI: [calls Get Draft Status]
-    Passes: Nothing
-    Returns: Full state showing title and description filled
-             Form fields list showing "Student ID" is required and not yet filled
+    Returns: Full state showing the "Password Reset" type has one required custom field: "Student ID"
              Returns instruction: "Ask the user: 'Student ID' Then STOP..."
     
 AI: "Student ID"
@@ -224,6 +224,40 @@ AI: [calls Update Form Field]
     Passes: The field ID (UUID of the Student ID field) and value "A12345678"
     Returns: Success confirmation with field ID and the field's human-readable label "Student ID"
              Includes instruction that field was saved successfully
+             
+AI: [calls Get Draft Status]
+    Passes: Nothing
+    Returns: All required custom fields are now filled
+             Returns instruction: "Ask the user to describe the issue in detail"
+    
+AI: "Please describe the issue you're experiencing. What happens when you try to log in?"
+
+User: "When I try to log in with my username and password, I get an error message saying invalid credentials. I'm sure my password is correct."
+
+AI: [calls Update Description]
+    Passes: The description text explaining the error
+    Returns: Success confirmation that description was saved to close_details field
+             Includes instruction: "Suggest a concise, descriptive title and ask user to confirm or edit it"
+    
+AI: "Based on your issue, I suggest the title: 'Cannot Access Student Portal'
+
+Would you like to use this title, or would you prefer to change it?"
+
+User: "That's perfect!"
+
+AI: [calls Update Title]
+    Passes: The confirmed title "Cannot Access Student Portal"
+    Returns: Success confirmation that title was saved
+             Includes instruction: "Call show_priority_selector to display the priority options"
+    
+AI: [calls Show Priority Selector]
+    Passes: Nothing (gets priority options from draft's type)
+    Returns: Confirmation that the priority selector widget was displayed
+             UI shows available priorities: High, Medium, Low (specific to Password Reset type)
+             
+User: [selects "Medium" priority via UI]
+    System saves priority selection via metadata.type = 'priority_selection', metadata.priority_id
+    Processes the selection and updates draft's priority field
     
 AI: [calls Submit Service Request]
     Passes: Nothing
@@ -297,39 +331,244 @@ AI: "Great! Your issue has been marked as resolved. Your request number is SR-20
 
 3. [User selects type via UI - no tool call]
 
-4. Update Title
-   → Saves "Cannot access student portal" as the request title
+4. Get Draft Status
+   → Checks current state and discovers "Student ID" custom field is required
 
-5. Update Description
-   → Saves the full description explaining the login error
-
-6. Get Draft Status
-   → Checks current state and discovers "Student ID" is a required field
-
-7. Update Form Field
+5. Update Form Field
    → Saves "A12345678" to the Student ID field
 
-8. Submit Service Request
-   → Validates all required data and advances to clarifying questions phase
+6. Get Draft Status
+   → Checks current state and discovers all custom fields filled, description is next
 
-9. Save Clarifying Question
-   → Records question about last successful login and user's answer (1 of 3)
+7. Update Description
+   → Saves the description explaining the login error
 
-10. Save Clarifying Question
+8. [AI suggests title in response text - no tool call]
+
+9. Update Title
+   → Saves user's confirmed title "Cannot Access Student Portal"
+
+10. Show Priority Selector
+    → Displays priority selector widget with High, Medium, Low options
+
+11. [User selects "Medium" priority via UI - no tool call]
+
+12. Submit Service Request
+    → Validates all required data and advances to clarifying questions phase
+
+13. Save Clarifying Question
+    → Records question about last successful login and user's answer (1 of 3)
+
+14. Save Clarifying Question
     → Records question about password changes and user's answer (2 of 3)
 
-11. Save Clarifying Question
+15. Save Clarifying Question
     → Records question about other systems and user's answer (3 of 3)
     → Automatically advances to resolution phase
 
-12. Submit AI Resolution
+16. Submit AI Resolution
     → Proposes browser cache solution with 75% confidence
     → Confidence exceeds threshold, instructed to present to user
 
-13. Record Resolution Response
+17. Record Resolution Response
     → User accepted the resolution
     → Marks request as resolved with status "Closed"
     → Generates request number SR-2026-00123
+```
+
+### Scenario: General Question (No Custom Form Fields)
+
+This example demonstrates the workflow when a service request type has **NO** custom form fields. The flow is the same as types with custom fields, just skipping the form field step:
+
+```
+User: "I need help understanding the financial aid process"
+
+AI: [calls Fetch Service Request Types]
+    Passes: Nothing
+    Returns: Hierarchical tree of all available service request types
+             Returns that no draft exists yet (has_draft: false)
+             Includes instruction to call Show Type Selector next
+    
+AI: [calls Show Type Selector]
+    Passes: A suggested type ID for "General Question" based on keywords in user's message
+    Returns: Confirmation that the widget was displayed
+             The UI now shows the type selector with "General Question" highlighted as a suggestion
+    
+User: [selects "General Question" type via UI]
+    System creates a new draft for "General Question" type in "data_collection" phase
+    Sets thread's current_service_request_draft_id to point to this new draft
+    Creates form submission record (with no custom fields) and associates default priority
+    
+AI: [calls Get Draft Status]
+    Passes: Nothing
+    Returns: Full state showing the "General Question" type has NO custom fields
+             Returns instruction: "Please describe your issue or request in detail"
+    
+AI: "Please describe your question about financial aid. What specifically do you need help with?"
+
+User: "I'm a transfer student starting in the fall and I'm confused about the deadlines and what documents I need to submit. I haven't filled out my FAFSA yet and I'm not sure if the process is different for transfer students."
+
+AI: [calls Update Description]
+    Passes: The detailed description of the user's question
+    Returns: Success confirmation that description was saved to close_details field
+             Includes instruction: "Suggest a concise, descriptive title and ask user to confirm or edit it"
+    
+AI: "Based on your question, I suggest the title: 'Financial aid process guidance for transfer student'
+
+Would you like to use this title, or would you prefer something different?"
+
+User: "That's perfect"
+
+AI: [calls Update Title]
+    Passes: The confirmed title "Financial aid process guidance for transfer student"
+    Returns: Success confirmation that title was saved
+             Includes instruction: "Call show_priority_selector to display the priority options"
+    
+AI: [calls Show Priority Selector]
+    Passes: Nothing (gets priority options from draft's type)
+    Returns: Confirmation that the priority selector widget was displayed
+             UI shows available priorities: High, Medium, Low
+             
+User: [selects "Medium" priority via UI]
+    System saves priority selection via metadata.type = 'priority_selection', metadata.priority_id
+    Processes the selection and updates draft's priority field
+    
+AI: [calls Submit Service Request]
+    Passes: Nothing
+    Returns: Validation passed - all required fields are filled (description, priority, title)
+             No custom form fields to validate
+             Draft workflow_phase advanced to "clarifying_questions"
+             Returns instruction: "Ask the user 3 clarifying questions specific to their request"
+    
+AI: "To help me provide the best guidance, let me ask a few clarifying questions. 
+
+First, have you already been admitted to the university as a transfer student?"
+
+User: "Yes, I've been admitted for fall 2024"
+
+AI: [calls Save Clarifying Question]
+    Passes: Question "Have you already been admitted to the university as a transfer student?" 
+            Answer "Yes, I've been admitted for fall 2024"
+    Returns: Success with counters showing 1 completed, 2 remaining
+             Instruction to continue asking questions
+    
+AI: "Great! Second question: What's your expected start date - when does the fall semester begin?"
+
+User: "August 25th"
+
+AI: [calls Save Clarifying Question]
+    Passes: Question "What's your expected start date - when does the fall semester begin?"
+            Answer "August 25th"
+    Returns: Success with counters showing 2 completed, 1 remaining
+             Instruction to continue asking questions
+    
+AI: "And finally: Do you have any specific questions about the FAFSA itself, or are you mainly looking for information about deadlines and required documents?"
+
+User: "Mainly deadlines and what documents I need"
+
+AI: [calls Save Clarifying Question]
+    Passes: Question about FAFSA vs deadlines/documents
+            Answer "Mainly deadlines and what documents I need"
+    Returns: Success with counters showing 3 completed, 0 remaining
+             Draft workflow_phase automatically advanced to "resolution"
+             Returns that AI resolution is enabled
+             Returns instruction: "Attempt to resolve using submit_ai_resolution with your confidence score and proposed answer"
+    
+AI: [calls Submit AI Resolution]
+    Passes: Confidence score of 85 (out of 100)
+            Proposed answer explaining the financial aid process for transfer students
+    Returns: Confidence score 85 meets the threshold of 70
+             Returns instruction: "Present your resolution to the user and ask if it solved their problem"
+    
+AI: "I can help explain the financial aid process for transfer students starting in Fall 2024!
+
+**Key Deadlines:**
+- Priority FAFSA deadline: June 1, 2024 (though applications accepted on rolling basis after)
+- Recommended submission: As soon as possible to maximize aid eligibility
+- Aid packages typically sent 2-3 weeks after FAFSA submission
+
+**Required Documents for Transfer Students:**
+1. FAFSA completion at studentaid.gov (you'll need your FSA ID)
+2. List our school code (001234) on your FAFSA
+3. Official transcripts from previous institution(s)
+4. Transfer Student Financial Aid Form (available in your student portal)
+
+**Timeline for August 25th Start:**
+- Submit FAFSA by mid-June to ensure aid package is ready before fall billing
+- Check your student portal weekly for any additional document requests
+- Financial aid packages are typically finalized 4-6 weeks before semester start
+
+Does this answer your question, or do you need to speak with our financial aid office directly?"
+
+User: "This is perfect! That's exactly what I needed to know. Thank you!"
+
+AI: [calls Record Resolution Response]
+    Passes: Boolean true (user accepted the resolution)
+    Returns: Success with generated request number "SR-2026-00456"
+             Resolution was accepted so status set to "Closed" (resolved)
+             Draft marked as finalized (is_draft = false)
+             Request assigned to appropriate team member
+             Returns instruction: "Tell the user their question has been answered. Provide the request number..."
+    
+AI: "Wonderful! I'm glad I could help. Your request has been saved as SR-2026-00456 for our records. If you have any other questions as you go through the financial aid process, feel free to reach out again. Good luck!"
+```
+
+### Tool Call Timeline for General Question (No Custom Fields)
+
+```
+1. Fetch Service Request Types
+   → Returns hierarchical tree of all available types organized by category
+
+2. Show Type Selector
+   → Suggests "General Question" type and displays selection UI to user
+
+3. [User selects type via UI - no tool call]
+   → System detects type has NO custom form fields, unlocks description tool only
+
+4. Get Draft Status
+   → Checks current state and discovers no custom fields exist
+   → Returns instruction: "Please describe your issue or request in detail"
+
+5. Update Description
+   → Saves detailed explanation about financial aid process
+   → Description collected first (no form fields for this type)
+
+6. [AI suggests title in response text - no tool call]
+   → AI has description context to suggest an appropriate title
+
+7. Update Title
+   → Saves user's confirmed title "Financial aid process guidance for transfer student"
+   → Title collected after description
+
+8. Show Priority Selector
+   → Displays priority selector widget with High, Medium, Low options
+
+9. [User selects "Medium" priority via UI - no tool call]
+   → Priority collected last
+
+10. Submit Service Request
+    → Validates all required data (description, title, priority)
+    → No custom form fields to validate
+    → Advances to clarifying questions phase
+
+11. Save Clarifying Question
+    → Records question about admission status (1 of 3)
+
+12. Save Clarifying Question
+    → Records question about start date (2 of 3)
+
+13. Save Clarifying Question
+    → Records question about specific needs (3 of 3)
+    → Automatically advances to resolution phase
+
+14. Submit AI Resolution
+    → Proposes comprehensive financial aid guidance with 85% confidence
+    → Confidence exceeds threshold, instructed to present to user
+
+15. Record Resolution Response
+    → User accepted the resolution
+    → Marks request as resolved with status "Closed"
+    → Generates request number SR-2026-00456
 ```
 
 ## Technical Implementation Details
@@ -547,7 +786,9 @@ The system's observer pattern prevents any changes to the `service_request_numbe
 
 ### Database Field Naming
 
-An important implementation detail: the description text is stored in the `close_details` database column, not a `description` column. This affects the conditional tool unlocking logic - the system checks `$draft->close_details` to determine if the description has been provided before unlocking form field tools.
+An important implementation detail: the description text is stored in the `close_details` database column, not a `description` column. This affects the conditional tool unlocking logic:
+- **For types WITH custom form fields**: The system checks `$draft->close_details` to determine if description has been provided before unlocking submit_service_request
+- **For types WITHOUT custom form fields**: The system checks `$draft->close_details` to determine if description has been provided before unlocking the priority selector
 
 ### AI Behavior Guidelines
 

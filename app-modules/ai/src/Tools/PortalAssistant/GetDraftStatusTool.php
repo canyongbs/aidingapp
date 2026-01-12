@@ -188,24 +188,33 @@ class GetDraftStatusTool extends Tool
      */
     protected function getMissingRequired(ServiceRequest $draft, array $formFields): array
     {
+        $hasCustomFields = ! empty($formFields);
         $missing = [];
 
-        if (empty($draft->title)) {
-            $missing[] = 'title';
+        // UNIFIED flow: fields (if any) → description → title → priority
+
+        // 1. Custom form fields first (if they exist)
+        if ($hasCustomFields) {
+            foreach ($formFields as $field) {
+                if ($field['required'] && ! $field['filled']) {
+                    $missing[] = $field['field_id'];
+                }
+            }
         }
 
+        // 2. Description after form fields (or first if no fields)
         if (empty($draft->close_details)) {
             $missing[] = 'description';
         }
 
-        if (empty($draft->priority_id)) {
-            $missing[] = 'priority';
+        // 3. Title after description
+        if (empty($draft->title)) {
+            $missing[] = 'title';
         }
 
-        foreach ($formFields as $field) {
-            if ($field['required'] && ! $field['filled']) {
-                $missing[] = $field['field_id'];
-            }
+        // 4. Priority after title
+        if (empty($draft->priority_id)) {
+            $missing[] = 'priority';
         }
 
         return $missing;
@@ -250,41 +259,45 @@ class GetDraftStatusTool extends Tool
             return 'All required fields are filled. Call submit_service_request to validate and proceed to clarifying questions.';
         }
 
+        $hasCustomFields = ! empty($result['form_fields'] ?? []);
+
         // Return instruction for ONLY the FIRST missing field
         $firstMissing = $missing[0];
 
-        if ($firstMissing === 'title') {
-            return 'Ask the user: "What would you like to title this request?" Then STOP and wait for their response. Do NOT call update_title until they provide the title in their next message.';
+        // Handle custom form fields first (if they exist and are missing)
+        if ($hasCustomFields && $firstMissing !== 'title' && $firstMissing !== 'description' && $firstMissing !== 'priority') {
+            foreach ($result['form_fields'] ?? [] as $field) {
+                if ($field['field_id'] === $firstMissing) {
+                    // Check if it's a complex field that needs a widget
+                    if (in_array($field['type'], ['select', 'radio', 'checkbox', 'checkboxes', 'date', 'file_upload'])) {
+                        return sprintf(
+                            'Call show_field_input with field_id "%s" to display the %s input for "%s". Then STOP and wait for the user to complete the input.',
+                            $field['field_id'],
+                            $field['type'],
+                            $field['label']
+                        );
+                    }
+
+                    // Simple text field
+                    return sprintf(
+                        'Ask the user: "%s%s" Then STOP and wait for their response. Do NOT call update_form_field until they provide the value in their next message.',
+                        $field['label'],
+                        $field['required'] ? '' : ' (optional)',
+                    );
+                }
+            }
         }
 
         if ($firstMissing === 'description') {
-            return 'Ask the user: "Please describe the issue in detail." Then STOP and wait for their response. Do NOT call update_description until they provide the description in their next message.';
+            return 'Ask the user to describe their issue or request in detail. Then STOP and wait for their response. Do NOT call update_description until they provide the description in their next message.';
+        }
+
+        if ($firstMissing === 'title') {
+            return 'Suggest a concise, descriptive title based on the information collected. Present the suggestion to the user and ask them to confirm or edit it. Then STOP and wait for their response. When they provide/confirm the title, call update_title.';
         }
 
         if ($firstMissing === 'priority') {
             return 'Call show_priority_selector to display the priority options. Then STOP and wait for the user to select a priority.';
-        }
-
-        // It's a form field
-        foreach ($result['form_fields'] ?? [] as $field) {
-            if ($field['field_id'] === $firstMissing) {
-                // Check if it's a complex field that needs a widget
-                if (in_array($field['type'], ['select', 'radio', 'checkbox', 'checkboxes', 'date', 'file_upload'])) {
-                    return sprintf(
-                        'Call show_field_input with field_id "%s" to display the %s input for "%s". Then STOP and wait for the user to complete the input.',
-                        $field['field_id'],
-                        $field['type'],
-                        $field['label']
-                    );
-                }
-
-                // Simple text field
-                return sprintf(
-                    'Ask the user: "%s%s" Then STOP and wait for their response. Do NOT call update_form_field until they provide the value in their next message.',
-                    $field['label'],
-                    $field['required'] ? '' : ' (optional)',
-                );
-            }
         }
 
         return 'Call get_draft_status to check what information is still needed.';

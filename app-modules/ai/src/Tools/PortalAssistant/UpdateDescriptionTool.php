@@ -49,8 +49,8 @@ class UpdateDescriptionTool extends Tool
     ) {
         $this
             ->as('update_description')
-            ->for('Updates the description of the service request draft. IMPORTANT: You MUST ask the user for the description before calling this tool. Do NOT use information from earlier in the conversation - only use what the user provides in their current response. Once the user provides the description, save it immediately without asking for confirmation.')
-            ->withStringParameter('description', 'The detailed description of the service request')
+            ->for('Saves the description for the service request. This field is REQUIRED. Ask the user to describe their issue or request in detail. This comes after custom form fields (if any exist) but before the title. Save immediately without asking for confirmation.')
+            ->withStringParameter('description', 'The description of the service request')
             ->using($this);
     }
 

@@ -50,7 +50,7 @@ class ShowPrioritySelectorTool extends Tool
     ) {
         $this
             ->as('show_priority_selector')
-            ->for('Displays a UI widget for the user to select the priority level for their service request. Call this after the description is saved. The system will automatically prompt the user with the available priority options.')
+            ->for('Displays a UI widget for the user to select the priority level for their service request. This becomes available after the description and title are provided. The system will automatically prompt the user with the available priority options.')
             ->using($this);
     }
 
