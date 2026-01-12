@@ -37,8 +37,7 @@
 namespace AidingApp\Contact\Database\Factories;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\ContactType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -54,8 +53,7 @@ class ContactFactory extends Factory
         $address3 = $this->faker->optional()->words(asText: true);
 
         return [
-            'status_id' => ContactStatus::inRandomOrder()->first() ?? ContactStatus::factory(),
-            'source_id' => ContactSource::inRandomOrder()->first() ?? ContactSource::factory(),
+            'type_id' => ContactType::inRandomOrder()->first() ?? ContactType::factory(),
             'first_name' => $firstName,
             'last_name' => $lastName,
             'full_name' => "{$firstName} {$lastName}",

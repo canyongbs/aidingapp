@@ -86,8 +86,7 @@ test('EditContact is gated with proper access control', function () {
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($contact->fresh()->status_id)->toEqual($request->get('status_id'))
-        ->and($contact->fresh()->source_id)->toEqual($request->get('source_id'))
+    expect($contact->fresh()->type_id)->toEqual($request->get('type_id'))
         ->and($contact->fresh()->first_name)->toEqual($request->get('first_name'))
         ->and($contact->fresh()->last_name)->toEqual($request->get('last_name'))
         ->and($contact->fresh()->full_name)->toEqual($request->get('full_name'))

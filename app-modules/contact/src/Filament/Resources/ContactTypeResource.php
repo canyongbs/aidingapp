@@ -34,24 +34,47 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Database\Factories;
+namespace AidingApp\Contact\Filament\Resources;
 
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
-use AidingApp\Contact\Enums\SystemContactClassification;
-use AidingApp\Contact\Models\ContactStatus;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\CreateContactType;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\EditContactType;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\ListContactTypes;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\ViewContactType;
+use AidingApp\Contact\Models\ContactType;
+use App\Filament\Clusters\ContactManagement;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
 
-/**
- * @extends Factory<ContactStatus>
- */
-class ContactStatusFactory extends Factory
+class ContactTypeResource extends Resource
 {
-    public function definition(): array
+    protected static ?string $model = ContactType::class;
+
+    protected static ?string $navigationLabel = 'Types';
+
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $cluster = ContactManagement::class;
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+            ]);
+    }
+
+    public static function getRelations(): array
     {
         return [
-            'classification' => $this->faker->randomElement(SystemContactClassification::cases()),
-            'name' => $this->faker->word,
-            'color' => $this->faker->randomElement(ContactStatusColorOptions::cases()),
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListContactTypes::route('/'),
+            'create' => CreateContactType::route('/create'),
+            'view' => ViewContactType::route('/{record}'),
+            'edit' => EditContactType::route('/{record}/edit'),
         ];
     }
 }

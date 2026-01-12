@@ -41,7 +41,9 @@ use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
+use App\Features\ContactChangesFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
@@ -95,10 +97,26 @@ class ListContacts extends ListRecords
                         return $query
                             ->join('contact_statuses', 'contacts.status_id', '=', 'contact_statuses.id')
                             ->orderBy('contact_statuses.name', $direction);
-                    }),
+                    })
+                    ->hidden(ContactChangesFeature::active()),
+                TextColumn::make('type')
+                    ->badge()
+                    ->state(function (Contact $record) {
+                        return $record->type->name;
+                    })
+                    ->color(function (Contact $record) {
+                        return $record->type->color->value;
+                    })
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query
+                            ->join('contact_typees', 'contacts.type_id', '=', 'contact_typees.id')
+                            ->orderBy('contact_typees.name', $direction);
+                    })
+                    ->visible(ContactChangesFeature::active()),
                 TextColumn::make('source.name')
                     ->label('Source')
-                    ->sortable(),
+                    ->sortable()
+                    ->hidden(ContactChangesFeature::active()),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime('g:ia - M j, Y')
@@ -108,11 +126,19 @@ class ListContacts extends ListRecords
                 SelectFilter::make('status_id')
                     ->relationship('status', 'name')
                     ->multiple()
-                    ->preload(),
+                    ->preload()
+                    ->hidden(ContactChangesFeature::active()),
+                SelectFilter::make('type_id')
+                    ->label('Type')
+                    ->relationship('type', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->visible(ContactChangesFeature::active()),
                 SelectFilter::make('source_id')
                     ->relationship('source', 'name')
                     ->multiple()
-                    ->preload(),
+                    ->preload()
+                    ->hidden(ContactChangesFeature::active()),
             ])
             ->actions([
                 ViewAction::make(),
@@ -134,7 +160,29 @@ class ListContacts extends ListRecords
                                     'status_id' => 'Status',
                                 ])
                                 ->required()
-                                ->live(),
+                                ->live()
+                                ->hidden(ContactChangesFeature::active()),
+                            Select::make('field')
+                                ->options([
+                                    'assigned_to_id' => 'Assigned To',
+                                    'description' => 'Description',
+                                    'email_bounce' => 'Email Bounce',
+                                    'sms_opt_out' => 'SMS Opt Out',
+                                    'type_id' => 'Type',
+                                ])
+                                ->required()
+                                ->live()
+                                ->visible(ContactChangesFeature::active()),
+                            Select::make('assigned_to_id')
+                                ->label('Assigned To')
+                                ->relationship('assignedTo', 'name')
+                                ->searchable()
+                                ->exists(
+                                    table: (new User())->getTable(),
+                                    column: (new User())->getKeyName()
+                                )
+                                ->required()
+                                ->visible(fn (Get $get) => $get('field') === 'assigned_to_id'),
                             Textarea::make('description')
                                 ->string()
                                 ->required()
@@ -167,6 +215,15 @@ class ListContacts extends ListRecords
                                 )
                                 ->required()
                                 ->visible(fn (Get $get) => $get('field') === 'status_id'),
+                            Select::make('type_id')
+                                ->label('Type')
+                                ->relationship('type', 'name')
+                                ->exists(
+                                    table: (new ContactType())->getTable(),
+                                    column: (new ContactType())->getKeyName()
+                                )
+                                ->required()
+                                ->visible(fn (Get $get) => $get('field') === 'type_id'),
                         ])
                         ->action(function (Collection $records, array $data) {
                             $records->each(

@@ -39,7 +39,6 @@ namespace Database\Seeders;
 use AidingApp\Alert\Database\Seeders\AlertSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSeeder;
 use AidingApp\Contact\Database\Seeders\ContactSourceSeeder;
-use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationIndustrySeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationTypeSeeder;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
@@ -73,7 +72,7 @@ class DatabaseSeeder extends Seeder
             DivisionSeeder::class,
             ServiceRequestStatusSeeder::class,
             ServiceRequestTypeSeeder::class,
-            ContactStatusSeeder::class,
+            ContactTypeSeeder::class,
             ContactSourceSeeder::class,
             KnowledgeBaseCategorySeeder::class,
             KnowledgeBaseQualitySeeder::class,
