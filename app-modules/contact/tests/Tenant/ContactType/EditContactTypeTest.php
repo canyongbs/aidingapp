@@ -38,7 +38,7 @@ use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\EditContactType;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Tests\Tenant\ContactStatus\RequestFactories\EditContactTypeRequestFactory;
+use AidingApp\Contact\Tests\Tenant\ContactType\RequestFactories\EditContactTypeRequestFactory;
 use App\Models\User;
 use Illuminate\Validation\Rules\Enum;
 
