@@ -69,8 +69,11 @@ enum ServiceRequestDraftStage: string
         $form = $serviceRequest->priority?->type?->form;
 
         if ($form) {
+            $submission = $serviceRequest->serviceRequestFormSubmission;
+            $filledFieldIds = $submission?->fields->pluck('id')->all() ?? [];
+
             foreach ($form->fields as $field) {
-                if ($field->is_required && blank(data_get($serviceRequest->fields, $field->id))) {
+                if ($field->is_required && ! in_array($field->id, $filledFieldIds)) {
                     return self::DataCollection;
                 }
             }
