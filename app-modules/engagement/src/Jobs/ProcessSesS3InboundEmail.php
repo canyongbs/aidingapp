@@ -38,8 +38,7 @@ namespace AidingApp\Engagement\Jobs;
 
 use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Exceptions\SesS3InboundServiceRequestTypeNotFound;
@@ -258,24 +257,11 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                                 'full_name' => $fullName,
                             ]);
 
-                        $status = ContactStatus::query()
+                        $type = ContactType::query()
                             ->where('classification', SystemContactClassification::New)
                             ->firstOrFail();
 
-                        $contact->status()->associate($status);
-
-                        $source = ContactSource::query()
-                            ->where('name', 'Service Request Email Auto Creation')
-                            ->first();
-
-                        if (! $source) {
-                            $source = ContactSource::query()
-                                ->create([
-                                    'name' => 'Service Request Email Auto Creation',
-                                ]);
-                        }
-
-                        $contact->source()->associate($source);
+                        $contact->status()->associate($type);
 
                         $contact->organization()->associate($organization);
 

@@ -34,20 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Tests\Tenant\ContactStatus\RequestFactories;
+namespace AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages;
 
-use AidingApp\Contact\Enums\ContactTypeColorOptions;
-use AidingApp\Contact\Enums\SystemContactClassification;
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\CreateRecord;
 
-class EditContactStatusRequestFactory extends RequestFactory
+class CreateContactSource extends CreateRecord
 {
-    public function definition(): array
+    protected static string $resource = ContactSourceResource::class;
+
+    public function form(Form $form): Form
     {
-        return [
-            'classification' => fake()->randomElement(SystemContactClassification::cases()),
-            'name' => fake()->name(),
-            'color' => fake()->randomElement(ContactTypeColorOptions::cases()),
-        ];
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->required()
+                    ->string(),
+            ]);
     }
 }

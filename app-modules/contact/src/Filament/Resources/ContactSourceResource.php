@@ -34,57 +34,44 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactStatus;
-use App\Models\User;
+namespace AidingApp\Contact\Filament\Resources;
 
-use function Pest\Laravel\actingAs;
-use function Tests\asSuperAdmin;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\CreateContactSource;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\EditContactSource;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ListContactSources;
+use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ViewContactSource;
+use AidingApp\Contact\Models\ContactSource;
+use App\Features\ContactChangesFeature;
+use App\Filament\Clusters\ContactManagement;
+use Filament\Resources\Resource;
 
-test('The correct details are displayed on the ViewContactStatus page', function () {
-    $contactStatus = ContactStatus::factory()->create();
+class ContactSourceResource extends Resource
+{
+    protected static ?string $model = ContactSource::class;
 
-    asSuperAdmin()
-        ->get(
-            ContactStatusResource::getUrl('view', [
-                'record' => $contactStatus,
-            ])
-        )
-        ->assertSuccessful()
-        ->assertSeeTextInOrder(
-            [
-                'Name',
-                $contactStatus->name,
-                'Classification',
-                $contactStatus->classification->getLabel(),
-                'Color',
-                $contactStatus->color,
-            ]
-        );
-});
+    protected static ?string $navigationLabel = 'Sources';
 
-// Permission Tests
+    protected static ?int $navigationSort = 2;
 
-test('ViewContactStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    protected static ?string $cluster = ContactManagement::class;
 
-    $contactStatus = ContactStatus::factory()->create();
+    public static function shouldRegisterNavigation(): bool
+    {
+        return ! ContactChangesFeature::active();
+    }
 
-    actingAs($user)
-        ->get(
-            ContactStatusResource::getUrl('view', [
-                'record' => $contactStatus,
-            ])
-        )->assertForbidden();
+    public static function getRelations(): array
+    {
+        return [];
+    }
 
-    $user->givePermissionTo('settings.view-any');
-    $user->givePermissionTo('settings.*.view');
-
-    actingAs($user)
-        ->get(
-            ContactStatusResource::getUrl('view', [
-                'record' => $contactStatus,
-            ])
-        )->assertSuccessful();
-});
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListContactSources::route('/'),
+            'create' => CreateContactSource::route('/create'),
+            'view' => ViewContactSource::route('/{record}'),
+            'edit' => EditContactSource::route('/{record}/edit'),
+        ];
+    }
+}

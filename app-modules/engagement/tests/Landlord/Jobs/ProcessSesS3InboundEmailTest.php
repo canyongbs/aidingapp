@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
 use AidingApp\Contact\Database\Seeders\ContactTypeSeeder;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
