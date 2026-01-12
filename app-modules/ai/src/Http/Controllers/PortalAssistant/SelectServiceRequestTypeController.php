@@ -132,7 +132,8 @@ class SelectServiceRequestTypeController
         ));
 
         return response()->json([
-            'message' => 'Type selection processed.',
+            'message' => 'Message dispatched for processing via websockets.',
+            'thread_id' => $thread->getKey(),
         ]);
     }
 }

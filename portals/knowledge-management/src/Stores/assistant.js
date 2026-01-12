@@ -44,12 +44,18 @@ export const useAssistantStore = defineStore('assistant', () => {
 
     async function setAssistantSendMessageUrl(url) {
         assistantSendMessageUrl.value = url;
-        
-        // Derive other URLs from send message URL
-        const baseUrl = url.replace('/messages', '');
-        selectTypeUrl.value = `${baseUrl}/service-request/select-type`;
-        selectPriorityUrl.value = `${baseUrl}/service-request/select-priority`;
-        updateFieldUrl.value = `${baseUrl}/service-request/update-field`;
+    }
+
+    async function setSelectTypeUrl(url) {
+        selectTypeUrl.value = url;
+    }
+
+    async function setSelectPriorityUrl(url) {
+        selectPriorityUrl.value = url;
+    }
+
+    async function setUpdateFieldUrl(url) {
+        updateFieldUrl.value = url;
     }
 
     async function setWebsocketsConfig(config) {
@@ -75,6 +81,9 @@ export const useAssistantStore = defineStore('assistant', () => {
         updateFieldUrl,
         getAssistantSendMessageUrl,
         setAssistantSendMessageUrl,
+        setSelectTypeUrl,
+        setSelectPriorityUrl,
+        setUpdateFieldUrl,
         websocketsConfig,
         getWebsocketsConfig,
         setWebsocketsConfig,

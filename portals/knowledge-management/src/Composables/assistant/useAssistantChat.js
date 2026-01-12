@@ -131,6 +131,7 @@ export function useAssistantChat() {
             }
             addAssistantMessage();
         } catch (error) {
+            addAssistantMessage();
             updateAssistantMessage('', true, 'Failed to send message.');
         } finally {
             isSending.value = false;
@@ -192,6 +193,7 @@ export function useAssistantChat() {
             }
             addAssistantMessage();
         } catch (error) {
+            addAssistantMessage();
             updateAssistantMessage('', true, 'Failed to submit widget data.');
         } finally {
             isSending.value = false;

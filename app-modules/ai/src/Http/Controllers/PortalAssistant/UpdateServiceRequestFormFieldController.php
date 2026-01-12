@@ -144,7 +144,8 @@ class UpdateServiceRequestFormFieldController
         ));
 
         return response()->json([
-            'message' => 'Field update processed.',
+            'message' => 'Message dispatched for processing via websockets.',
+            'thread_id' => $thread->getKey(),
         ]);
     }
 

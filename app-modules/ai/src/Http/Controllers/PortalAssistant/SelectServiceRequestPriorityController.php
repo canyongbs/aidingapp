@@ -109,7 +109,8 @@ class SelectServiceRequestPriorityController
         ));
 
         return response()->json([
-            'message' => 'Priority selection processed.',
+            'message' => 'Message dispatched for processing via websockets.',
+            'thread_id' => $thread->getKey(),
         ]);
     }
 }

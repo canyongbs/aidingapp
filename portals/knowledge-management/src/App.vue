@@ -166,7 +166,14 @@
 
                 const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
-                const { setAssistantSendMessageUrl, setWebsocketsConfig, setApiUrl } = useAssistantStore();
+                const {
+                    setAssistantSendMessageUrl,
+                    setSelectTypeUrl,
+                    setSelectPriorityUrl,
+                    setUpdateFieldUrl,
+                    setWebsocketsConfig,
+                    setApiUrl,
+                } = useAssistantStore();
 
                 setApiUrl(props.apiUrl);
 
@@ -201,6 +208,9 @@
                 });
 
                 setAssistantSendMessageUrl(response.data.assistant_send_message_url);
+                setSelectTypeUrl(response.data.assistant_select_type_url);
+                setSelectPriorityUrl(response.data.assistant_select_priority_url);
+                setUpdateFieldUrl(response.data.assistant_update_field_url);
                 setWebsocketsConfig(response.data.websockets_config);
 
                 authentication.value.requestUrl = response.data.authentication_url ?? null;
@@ -321,7 +331,14 @@
 
         const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
-        const { setAssistantSendMessageUrl, setWebsocketsConfig, setApiUrl } = useAssistantStore();
+        const {
+            setAssistantSendMessageUrl,
+            setSelectTypeUrl,
+            setSelectPriorityUrl,
+            setUpdateFieldUrl,
+            setWebsocketsConfig,
+            setApiUrl,
+        } = useAssistantStore();
 
         setApiUrl(props.apiUrl);
 
@@ -384,6 +401,9 @@
                         });
 
                         setAssistantSendMessageUrl(response.data.assistant_send_message_url);
+                        setSelectTypeUrl(response.data.assistant_select_type_url);
+                        setSelectPriorityUrl(response.data.assistant_select_priority_url);
+                        setUpdateFieldUrl(response.data.assistant_update_field_url);
                         setWebsocketsConfig(response.data.websockets_config);
 
                         const { hasServiceManagement, hasAssets, hasLicense, hasTasks } = useFeatureStore();
