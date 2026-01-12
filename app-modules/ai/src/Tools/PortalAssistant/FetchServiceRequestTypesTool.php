@@ -38,6 +38,7 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -47,13 +48,14 @@ use Prism\Prism\Tool;
 class FetchServiceRequestTypesTool extends Tool
 {
     use FindsDraftServiceRequest;
+    use LogsToolExecution;
 
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
         $this
             ->as('fetch_service_request_types')
-            ->for('STEP 1: Retrieves the complete list of available service request types with their IDs, names, and descriptions. ALWAYS call this FIRST when the user wants to submit a service request. Returns a types_tree that you should analyze to find the best matching type_id before calling show_type_selector.')
+            ->for('STEP 1: Retrieves the complete list of available service request types. Call this ONLY when: (1) User first expresses intent to submit a NEW service request, or (2) User explicitly wants to CHANGE to a different type. DO NOT call if already working on a draft unless user explicitly requests to change types. Returns a types_tree to analyze before calling show_type_selector.')
             ->using($this);
     }
 
@@ -64,17 +66,22 @@ class FetchServiceRequestTypesTool extends Tool
         $typesTree = $this->buildTypesTree();
 
         if (empty($typesTree)) {
-            return json_encode([
+            $result = json_encode([
                 'error' => true,
                 'message' => 'No service request types are available.',
             ]);
+            $this->logToolResult('fetch_service_request_types', $result);
+            return $result;
         }
 
-        return json_encode([
+        $result = json_encode([
             'types_tree' => $typesTree,
             'has_draft' => $draft !== null,
-            'instruction' => 'IMPORTANT: Carefully analyze the types_tree below to find the best match for the user\'s request. Each type has a type_id, name, and description. If you find a type whose name and description clearly matches what the user described, extract that type_id and pass it as suggested_type_id when calling show_type_selector. If no clear match exists, call show_type_selector without suggested_type_id.',
+            'instruction' => 'CRITICAL: You MUST analyze the types_tree to find a matching type BEFORE calling show_type_selector. Look at BOTH the type name AND description for matches. Examples: User says "printer broken" → matches "Printer Issue" (type_id: "d691de0b-..."), User says "password help" → matches "Password Reset". If you find a match, extract the EXACT type_id UUID string and pass it to show_type_selector(suggested_type_id="uuid-here"). If NO clear match, call show_type_selector() with NO parameters (do not pass empty string).',
         ]);
+        
+        $this->logToolResult('fetch_service_request_types', $result);
+        return $result;
     }
 
     /**

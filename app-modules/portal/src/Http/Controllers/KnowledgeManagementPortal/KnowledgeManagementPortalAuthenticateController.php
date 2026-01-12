@@ -87,7 +87,6 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
             'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,
             'assistant_send_message_url' => app(PortalSettings::class)->ai_support_assistant ? URL::signedRoute('ai.portal-assistants.messages.send') : null,
             'assistant_select_type_url' => app(PortalSettings::class)->ai_support_assistant ? URL::signedRoute('ai.portal-assistants.service-request.select-type') : null,
-            'assistant_select_priority_url' => app(PortalSettings::class)->ai_support_assistant ? URL::signedRoute('ai.portal-assistants.service-request.select-priority') : null,
             'assistant_update_field_url' => app(PortalSettings::class)->ai_support_assistant ? URL::signedRoute('ai.portal-assistants.service-request.update-field') : null,
             'websockets_config' => app(PortalSettings::class)->ai_support_assistant ? config('filament.broadcasting.echo') : [],
         ]);

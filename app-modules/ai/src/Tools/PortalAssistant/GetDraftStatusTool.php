@@ -39,6 +39,7 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
@@ -50,6 +51,8 @@ use Prism\Prism\Tool;
 class GetDraftStatusTool extends Tool
 {
     use FindsDraftServiceRequest;
+    use LogsToolExecution;
+    
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
@@ -80,20 +83,13 @@ class GetDraftStatusTool extends Tool
             'description' => $draft->close_details,
         ];
 
-        $type = $draft->serviceRequestFormSubmission?->submissible?->type;
+        $type = $draft->priority?->type;
 
         if ($type) {
             $result['type_id'] = $type->getKey();
             $result['type_name'] = $type->name;
             $result['priority_id'] = $draft->priority?->getKey();
             $result['priority_name'] = $draft->priority?->name;
-
-            $result['priorities'] = $type->priorities()
-                ->orderByDesc('order')
-                ->get(['id', 'name'])
-                ->map(fn ($p) => ['id' => $p->id, 'name' => $p->name])
-                ->values()
-                ->all();
 
             $result['form_fields'] = $this->getFormFields($draft, $type);
             $result['missing_required'] = $this->getMissingRequired($draft, $result['form_fields']);
@@ -104,7 +100,6 @@ class GetDraftStatusTool extends Tool
             $result['type_name'] = null;
             $result['priority_id'] = null;
             $result['priority_name'] = null;
-            $result['priorities'] = [];
             $result['form_fields'] = [];
             $result['missing_required'] = ['type'];
             $result['optional_fields'] = [];
@@ -122,7 +117,10 @@ class GetDraftStatusTool extends Tool
 
         $result['instruction'] = $this->getStageInstruction($draftStage, $result);
 
-        return json_encode($result);
+        $jsonResult = json_encode($result);
+        $this->logToolResult('get_draft_status', $jsonResult);
+        
+        return $jsonResult;
     }
 
     /**
@@ -200,7 +198,8 @@ class GetDraftStatusTool extends Tool
         $hasCustomFields = ! empty($formFields);
         $missing = [];
 
-        // CORRECT flow: fields (if any) → description → title → priority
+        // CORRECT flow: fields (if any) → description → title
+        // Priority is selected with type, so no longer collected separately
 
         // 1. Custom form fields first (if they exist)
         if ($hasCustomFields) {
@@ -219,11 +218,6 @@ class GetDraftStatusTool extends Tool
         // 3. Title after description
         if (empty($draft->title)) {
             $missing[] = 'title';
-        }
-
-        // 4. Priority after title
-        if (empty($draft->priority_id)) {
-            $missing[] = 'priority';
         }
 
         return $missing;
@@ -300,10 +294,11 @@ class GetDraftStatusTool extends Tool
         // Return instruction for ONLY the FIRST missing field
         $firstMissing = $missing[0];
 
-        // CORRECT ORDER: fields (if any) → description → title → priority
+        // CORRECT ORDER: fields (if any) → description → title
+        // Priority is selected with type, so no longer collected separately
 
         // Handle custom form fields first (if they exist and are missing)
-        if ($hasCustomFields && $firstMissing !== 'title' && $firstMissing !== 'description' && $firstMissing !== 'priority') {
+        if ($hasCustomFields && $firstMissing !== 'title' && $firstMissing !== 'description') {
             foreach ($result['form_fields'] ?? [] as $field) {
                 if ($field['field_id'] === $firstMissing) {
                     // Check if it's a complex field that needs a widget
@@ -338,10 +333,6 @@ class GetDraftStatusTool extends Tool
 
         if ($firstMissing === 'title') {
             return 'Suggest a concise, descriptive title based on the information collected. Present the suggestion to the user and ask them to confirm or edit it. Then STOP and wait for their response. When they provide/confirm the title, call update_title.';
-        }
-
-        if ($firstMissing === 'priority') {
-            return 'Call show_priority_selector to display the priority options. Then STOP and wait for the user to select a priority.';
         }
 
         return 'Call get_draft_status to check what information is still needed.';

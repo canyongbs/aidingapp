@@ -53,7 +53,7 @@ class ShowTypeSelectorTool extends Tool
     ) {
         $this
             ->as('show_type_selector')
-            ->for('STEP 2: Displays a UI widget for the user to select a service request type. ALWAYS call this AFTER fetch_service_request_types. If you identified a strong match from analyzing the types_tree, pass that type_id as suggested_type_id.')
+            ->for('STEP 2: Displays a UI widget to select a service request type. Call this AFTER fetch_service_request_types ONLY when starting a NEW request or when user explicitly wants to CHANGE types. DO NOT call if already collecting data for an existing draft. If you identified a strong match, pass that type_id as suggested_type_id.')
             ->withStringParameter('suggested_type_id', 'Optional: The UUID of the type to suggest/highlight. Use this when you found a clear match by analyzing the types_tree from fetch_service_request_types.')
             ->using($this);
     }
@@ -74,13 +74,22 @@ class ShowTypeSelectorTool extends Tool
         $suggestion = null;
 
         if ($suggested_type_id) {
-            $type = ServiceRequestType::whereHas('form')->find($suggested_type_id);
+            $type = ServiceRequestType::whereHas('form')
+                ->with(['priorities' => fn ($q) => $q->orderByDesc('order')])
+                ->find($suggested_type_id);
 
             if ($type) {
                 $suggestion = [
                     'type_id' => $type->getKey(),
                     'name' => $type->name,
                     'description' => $type->description,
+                    'priorities' => $type->priorities
+                        ->map(fn ($p) => [
+                            'priority_id' => $p->id,
+                            'name' => $p->name,
+                        ])
+                        ->values()
+                        ->all(),
                 ];
             }
         }
@@ -102,13 +111,17 @@ class ShowTypeSelectorTool extends Tool
      */
     protected function buildTypesTree(): array
     {
-        $categories = ServiceRequestTypeCategory::with(['children', 'types' => fn ($q) => $q->whereHas('form')])
+        $categories = ServiceRequestTypeCategory::with([
+            'children',
+            'types' => fn ($q) => $q->whereHas('form')->with(['priorities' => fn ($q) => $q->orderByDesc('order')])
+        ])
             ->whereNull('parent_id')
             ->orderBy('sort')
             ->get();
 
         $uncategorizedTypes = ServiceRequestType::whereHas('form')
             ->whereDoesntHave('category')
+            ->with(['priorities' => fn ($q) => $q->orderByDesc('order')])
             ->get();
 
         $tree = $categories->map(fn ($category) => $this->formatCategory($category))->all();
@@ -122,6 +135,13 @@ class ShowTypeSelectorTool extends Tool
                     'type_id' => $type->getKey(),
                     'name' => $type->name,
                     'description' => $type->description,
+                    'priorities' => $type->priorities
+                        ->map(fn ($p) => [
+                            'priority_id' => $p->id,
+                            'name' => $p->name,
+                        ])
+                        ->values()
+                        ->all(),
                 ])->all(),
             ];
         }
@@ -142,6 +162,13 @@ class ShowTypeSelectorTool extends Tool
                 'type_id' => $type->getKey(),
                 'name' => $type->name,
                 'description' => $type->description,
+                'priorities' => $type->priorities
+                    ->map(fn ($p) => [
+                        'priority_id' => $p->id,
+                        'name' => $p->name,
+                    ])
+                    ->values()
+                    ->all(),
             ])
             ->values()
             ->all();

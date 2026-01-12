@@ -37,17 +37,19 @@
 namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use Illuminate\Support\Str;
 use Prism\Prism\Tool;
-use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 
 class UpdateFormFieldTool extends Tool
 {
     use FindsDraftServiceRequest;
+    use LogsToolExecution;
 
     public function __construct(
         protected PortalAssistantThread $thread,
@@ -65,10 +67,12 @@ class UpdateFormFieldTool extends Tool
         $draft = $this->findDraft();
 
         if (! $draft) {
-            return json_encode([
+            $result = json_encode([
                 'success' => false,
                 'error' => 'No draft exists. Call fetch_service_request_types first.',
             ]);
+            $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
+            return $result;
         }
 
         $draft->load(['priority.type', 'serviceRequestFormSubmission']);
@@ -76,10 +80,12 @@ class UpdateFormFieldTool extends Tool
         $type = $draft->priority?->type;
 
         if (! $type) {
-            return json_encode([
+            $result = json_encode([
                 'success' => false,
                 'error' => 'No type selected. User must select a type first.',
             ]);
+            $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
+            return $result;
         }
 
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
@@ -98,19 +104,23 @@ class UpdateFormFieldTool extends Tool
         }
 
         if (! $field) {
-            return json_encode([
+            $result = json_encode([
                 'success' => false,
                 'error' => 'Field not found for this service request type.',
             ]);
+            $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
+            return $result;
         }
 
         $submission = $draft->serviceRequestFormSubmission;
 
         if (! $submission) {
-            return json_encode([
+            $result = json_encode([
                 'success' => false,
                 'error' => 'Form submission not created. Please select a type first.',
             ]);
+            $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
+            return $result;
         }
 
         $existingField = $submission->fields()->where('service_request_form_field_id', $field_id)->first();
@@ -136,11 +146,19 @@ class UpdateFormFieldTool extends Tool
             );
         }
 
-        return json_encode([
+        $result = json_encode([
             'success' => true,
             'field_id' => $field_id,
             'label' => $field->label,
             'instruction' => 'Field value saved successfully.',
         ]);
+        
+        $this->logToolResult('update_form_field', $result, [
+            'field_id' => $field_id,
+            'field_label' => $field->label,
+            'value' => $value,
+        ]);
+        
+        return $result;
     }
 }

@@ -38,14 +38,16 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\Ai\Models\PortalAssistantThread;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
+use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use Prism\Prism\Tool;
-use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 
 class ShowFieldInputTool extends Tool
 {
     use FindsDraftServiceRequest;
+    use LogsToolExecution;
 
     public function __construct(
         protected PortalAssistantThread $thread,
@@ -62,10 +64,12 @@ class ShowFieldInputTool extends Tool
         $draft = $this->findDraft();
 
         if (! $draft) {
-            return json_encode([
+            $result = json_encode([
                 'error' => true,
                 'message' => 'No draft exists. Call fetch_service_request_types first.',
             ]);
+            $this->logToolResult('show_field_input', $result, ['field_id' => $field_id]);
+            return $result;
         }
 
         $draft->load('priority.type');
@@ -73,10 +77,12 @@ class ShowFieldInputTool extends Tool
         $type = $draft->priority?->type;
 
         if (! $type) {
-            return json_encode([
+            $result = json_encode([
                 'error' => true,
                 'message' => 'No type selected. User must select a type first.',
             ]);
+            $this->logToolResult('show_field_input', $result, ['field_id' => $field_id]);
+            return $result;
         }
 
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
@@ -95,10 +101,12 @@ class ShowFieldInputTool extends Tool
         }
 
         if (! $field) {
-            return json_encode([
+            $result = json_encode([
                 'error' => true,
                 'message' => 'Field not found for this service request type.',
             ]);
+            $this->logToolResult('show_field_input', $result, ['field_id' => $field_id]);
+            return $result;
         }
 
         event(new PortalAssistantActionRequest(
@@ -115,6 +123,13 @@ class ShowFieldInputTool extends Tool
             ]
         ));
 
-        return 'Widget displayed to user.';
+        $result = 'Widget displayed to user.';
+        $this->logToolResult('show_field_input', $result, [
+            'field_id' => $field_id,
+            'field_label' => $field->label,
+            'field_type' => $field->type,
+        ]);
+        
+        return $result;
     }
 }

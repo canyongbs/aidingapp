@@ -177,7 +177,7 @@ export function useAssistantChat() {
 
             if (type === 'type_selection') {
                 endpoint = selectTypeUrl;
-                payload.type_id = type_id;
+                payload.priority_id = priority_id;
             } else if (type === 'priority_selection') {
                 endpoint = selectPriorityUrl;
                 payload.priority_id = priority_id;
@@ -193,6 +193,10 @@ export function useAssistantChat() {
             }
             addAssistantMessage();
         } catch (error) {
+            console.error('[Assistant] Widget submission failed:', error);
+            if (error.response?.data?.message) {
+                console.error('[Assistant] Server error:', error.response.data);
+            }
             addAssistantMessage();
             updateAssistantMessage('', true, 'Failed to submit widget data.');
         } finally {

@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SelectServiceRequestPriorityController
 {
@@ -51,6 +52,12 @@ class SelectServiceRequestPriorityController
             'priority_id' => ['required', 'uuid'],
             'thread_id' => ['required', 'uuid'],
             'message' => ['required', 'string', 'max:500'],
+        ]);
+
+        Log::info('[PortalAssistant] Widget priority selection', [
+            'priority_id' => $data['priority_id'],
+            'message' => $data['message'],
+            'thread_id' => $data['thread_id'],
         ]);
 
         $author = auth('contact')->user();
@@ -63,6 +70,10 @@ class SelectServiceRequestPriorityController
         $priority = ServiceRequestPriority::findOrFail($data['priority_id']);
 
         if (! $thread->current_service_request_draft_id) {
+            Log::warning('[PortalAssistant] Widget priority selection failed - no draft', [
+                'thread_id' => $data['thread_id'],
+            ]);
+            
             return response()->json([
                 'message' => 'No active draft found.',
             ], 400);
@@ -74,15 +85,25 @@ class SelectServiceRequestPriorityController
             ->first();
 
         if (! $draft) {
+            Log::warning('[PortalAssistant] Widget priority selection failed - draft not found', [
+                'thread_id' => $data['thread_id'],
+                'draft_id' => $thread->current_service_request_draft_id,
+            ]);
+            
             return response()->json([
                 'message' => 'Draft not found.',
             ], 404);
         }
 
-        $draft->load('priority.type');
-        $currentType = $draft->priority?->type;
+        $draft->load('serviceRequestFormSubmission.submissible.type');
+        $currentType = $draft->serviceRequestFormSubmission?->submissible?->type;
 
         if (! $currentType) {
+            Log::warning('[PortalAssistant] Widget priority selection failed - no type', [
+                'thread_id' => $data['thread_id'],
+                'draft_id' => $draft->getKey(),
+            ]);
+            
             return response()->json([
                 'message' => 'Draft has no type.',
             ], 400);
@@ -90,6 +111,13 @@ class SelectServiceRequestPriorityController
 
         // Validate priority belongs to the current type
         if ($priority->type_id !== $currentType->getKey()) {
+            Log::warning('[PortalAssistant] Widget priority selection failed - wrong type', [
+                'thread_id' => $data['thread_id'],
+                'priority_id' => $data['priority_id'],
+                'priority_type_id' => $priority->type_id,
+                'draft_type_id' => $currentType->getKey(),
+            ]);
+            
             return response()->json([
                 'message' => 'Priority does not belong to the current type.',
             ], 400);
@@ -107,6 +135,12 @@ class SelectServiceRequestPriorityController
                 $priority->name
             ),
         ));
+
+        Log::info('[PortalAssistant] Widget priority selection successful', [
+            'thread_id' => $data['thread_id'],
+            'priority_id' => $data['priority_id'],
+            'priority_name' => $priority->name,
+        ]);
 
         return response()->json([
             'message' => 'Message dispatched for processing via websockets.',

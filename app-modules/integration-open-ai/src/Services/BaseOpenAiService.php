@@ -358,15 +358,6 @@ abstract class BaseOpenAiService implements AiService
                         }
 
                         if ($chunk->chunkType === ChunkType::ToolCall) {
-                            Log::info('BaseOpenAiService: ToolCall chunk received', [
-                                'tool_calls_count' => count($chunk->toolCalls),
-                                'tool_calls' => collect($chunk->toolCalls)->map(fn ($tc) => [
-                                    'id' => $tc->id,
-                                    'name' => $tc->name,
-                                    'arguments_count' => count($tc->arguments()),
-                                ])->toArray(),
-                            ]);
-                            
                             foreach ($chunk->toolCalls as $toolCall) {
                                 yield new ToolCall(
                                     id: $toolCall->id,

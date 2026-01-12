@@ -51,7 +51,6 @@ use AidingApp\Ai\Tools\PortalAssistant\GetDraftStatusTool;
 use AidingApp\Ai\Tools\PortalAssistant\RecordResolutionResponseTool;
 use AidingApp\Ai\Tools\PortalAssistant\SaveClarifyingQuestionTool;
 use AidingApp\Ai\Tools\PortalAssistant\ShowFieldInputTool;
-use AidingApp\Ai\Tools\PortalAssistant\ShowPrioritySelectorTool;
 use AidingApp\Ai\Tools\PortalAssistant\ShowTypeSelectorTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateDescriptionTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateFormFieldTool;
@@ -98,6 +97,13 @@ class SendMessage implements ShouldQueue
 
     public function handle(): void
     {
+        Log::info('[PortalAssistant] User message received', [
+            'thread_id' => $this->thread->getKey(),
+            'user_content' => $this->content,
+            'internal_content' => $this->internalContent,
+            'request' => $this->request,
+        ]);
+
         $message = new PortalAssistantMessage();
         $message->thread()->associate($this->thread);
         $message->author()->associate($this->thread->author);
@@ -137,6 +143,14 @@ class SendMessage implements ShouldQueue
 
             $tools = $this->buildTools();
 
+            Log::info('[PortalAssistant] Available tools for request', [
+                'thread_id' => $this->thread->getKey(),
+                'tools' => array_map(fn (Tool $tool) => [
+                    'name' => $tool->name(),
+                    'description' => $tool->description(),
+                ], $tools),
+            ]);
+
             $nextRequestOptions = $this->thread->messages()->where('is_assistant', true)->latest()->value('next_request_options') ?? [];
 
             $messages = [
@@ -170,6 +184,12 @@ class SendMessage implements ShouldQueue
                 }
 
                 if ($chunk instanceof ToolCall) {
+                    Log::info('[PortalAssistant] Tool called by AI', [
+                        'thread_id' => $this->thread->getKey(),
+                        'tool_name' => $chunk->name,
+                        'tool_arguments' => $chunk->arguments,
+                    ]);
+                    
                     continue;
                 }
 
@@ -219,6 +239,12 @@ class SendMessage implements ShouldQueue
 
             $response->save();
             $this->thread->touch();
+
+            Log::info('[PortalAssistant] AI response complete', [
+                'thread_id' => $this->thread->getKey(),
+                'ai_content' => $response->content,
+                'message_id' => $response->message_id,
+            ]);
         } catch (Throwable $exception) {
             report($exception);
 
@@ -251,16 +277,24 @@ CRITICAL TWO-STEP PROCESS:
    - The types_tree is hierarchical with categories containing types
    - Example structure: [{"category_id": "...", "name": "Technical Support", "types": [{"type_id": "abc-123", "name": "Password Reset", "description": "Help with password issues"}]}]
    - ANALYZE the user's request against ALL type names and descriptions
-   - Look for keywords and concepts that match
-   - If you find a clear match (e.g., user says "password problem" and you see "Password Reset"), note that exact `type_id`
+   - Look for BOTH keyword matches AND semantic matches
+   - Examples of clear matches:
+     * User: "my printer is broken" → Type: "Printer Issue" (description: "Report problems with printers...")
+     * User: "password problem" → Type: "Password Reset" (description: "Help with password issues")
+     * User: "wifi not working" → Type: "WiFi/Internet Issue" (description: "Report problems with wireless...")
+   - If you find such a match, extract and remember that exact `type_id` UUID for the next step
    
 2. SECOND: Call `show_type_selector` to display the type selection UI
-   - If you identified a strong match in step 1, pass the exact `type_id` string as the `suggested_type_id` parameter
-   - DO NOT pass an empty string - either pass a valid type_id or omit the parameter entirely
-   - If no clear match, omit the `suggested_type_id` parameter (don't call it with empty string)
+   - CRITICAL: Analyze the types_tree to find a match BEFORE calling this tool
+   - If you found a strong match: Pass the exact `type_id` UUID string as the `suggested_type_id` parameter
+     Example: show_type_selector(suggested_type_id="d691de0b-c90d-44b0-aa2b-6e17cf0ea10c")
+   - If NO clear match: Omit the parameter entirely - call show_type_selector() with NO parameters
+   - NEVER pass an empty string, null, or any placeholder value
    - Response style: Your response should briefly acknowledge their request and either:
      * If suggesting a type: "I think this might be a [type name] request. Please confirm or select a different type."
      * If not suggesting: "Please select the type of request that best matches your issue."
+   
+3. THIRD: After user selects type and priority, you will receive an internal message. You MUST call `get_draft_status` FIRST before taking any other action or asking any questions.
 
 ### Collecting Information (Data Collection Phase)
 CRITICAL RULES:
@@ -273,18 +307,21 @@ Collection Order (MUST follow this order):
 1. **Custom form fields** (if the type has any) - Required fields first, then optionally collect helpful optional fields
 2. **Description** - Ask for detailed description of the issue
 3. **Title** - Suggest a title based on all information collected, user can accept/modify
-4. **Priority** - Call `show_priority_selector` to display priority widget (directly after title is confirmed)
 
-After type selection:
-- Call `get_draft_status` to see what to collect
+IMPORTANT: Priority is selected WITH the type at the beginning, not collected separately afterward.
+
+After type/priority selection:
+- ALWAYS call `get_draft_status` FIRST to see what to collect
 - `get_draft_status` will return an instruction telling you exactly what to ask for
 - Ask the user that ONE question, then STOP
 - When user responds, save their answer with the appropriate update tool
-- Then call `get_draft_status` again to get the next instruction
+- Then ALWAYS call `get_draft_status` again to get the next instruction
 - Response style: Just ask ONE question. Nothing else. Do NOT use bold formatting for questions.
 
+CRITICAL: After ANY widget submission (form fields, type selection, etc.), you MUST call `get_draft_status` before asking any questions. This ensures you have the current state and don't ask for information that's already been provided.
+
 Auto-transition to Clarifying Questions:
-- When all required fields (fields/description/title/priority) are filled, `get_draft_status` will automatically transition to `clarifying_questions` phase
+- When all required fields (fields/description/title) are filled, `get_draft_status` will automatically transition to `clarifying_questions` phase
 - You will receive instruction to start asking the first clarifying question
 - No separate submission tool needed
 
@@ -378,7 +415,7 @@ EOT;
                 ->first();
         }
 
-        // Always available tools - users can restart or get status at any time
+        // Always available tools - users can restart or change type at any time
         $tools = [
             new FetchServiceRequestTypesTool($this->thread),
             new ShowTypeSelectorTool($this->thread),
@@ -403,13 +440,14 @@ EOT;
 
     /**
      * Add tools for data collection stage - progressively expose based on what's filled
-     * The flow is: fields (if any) → description → title → priority
+     * The flow is: fields (if any) → description → title
+     * Priority is selected with type, so no longer collected separately
      *
      * When all required fields are filled, GetDraftStatusTool will instruct AI to advance to clarifying_questions
      */
     protected function addDataCollectionTools(array &$tools, ServiceRequest $draft): void
     {
-        $draft->load(['serviceRequestFormSubmission.submissible.type']);
+        $draft->load(['priority.type']);
 
         $hasCustomFields = $this->typeHasCustomFields($draft);
 
@@ -429,11 +467,6 @@ EOT;
             $tools[] = new UpdateTitleTool($this->thread);
         }
 
-        // Step 4: After title saved, priority becomes available
-        if ($draft->title) {
-            $tools[] = new ShowPrioritySelectorTool($this->thread);
-        }
-
         // Auto-advance: When all required fields filled, AI calls get_draft_status which detects completion
         // and instructs AI to transition to clarifying_questions stage
     }
@@ -443,7 +476,7 @@ EOT;
      */
     protected function typeHasCustomFields(ServiceRequest $draft): bool
     {
-        $type = $draft->serviceRequestFormSubmission?->submissible?->type;
+        $type = $draft->priority?->type;
 
         if (! $type) {
             return false;
@@ -470,7 +503,7 @@ EOT;
      */
     protected function allRequiredFormFieldsFilled(ServiceRequest $draft): bool
     {
-        $type = $draft->serviceRequestFormSubmission?->submissible?->type;
+        $type = $draft->priority?->type;
 
         if (! $type) {
             return false;

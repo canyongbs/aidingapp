@@ -42,18 +42,25 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SelectServiceRequestTypeController
 {
     public function __invoke(Request $request): JsonResponse
     {
         $data = $request->validate([
-            'type_id' => ['required', 'uuid'],
+            'priority_id' => ['required', 'uuid'],
             'thread_id' => ['required', 'uuid'],
             'message' => ['required', 'string', 'max:500'],
+        ]);
+
+        Log::info('[PortalAssistant] Widget type and priority selection', [
+            'priority_id' => $data['priority_id'],
+            'message' => $data['message'],
+            'thread_id' => $data['thread_id'],
         ]);
 
         $author = auth('contact')->user();
@@ -63,27 +70,40 @@ class SelectServiceRequestTypeController
             ->whereMorphedTo('author', $author)
             ->firstOrFail();
 
-        $type = ServiceRequestType::whereHas('form')
-            ->findOrFail($data['type_id']);
+        $priority = ServiceRequestPriority::with('type.form')
+            ->findOrFail($data['priority_id']);
 
-        // Check if a draft already exists for this type (user switching back)
+        $type = $priority->type;
+
+        if (! $type || ! $type->form) {
+            Log::warning('[PortalAssistant] Widget type selection failed - type has no form', [
+                'thread_id' => $data['thread_id'],
+                'priority_id' => $data['priority_id'],
+                'type_id' => $type?->getKey(),
+            ]);
+            
+            return response()->json([
+                'message' => 'Selected type does not have a form.',
+            ], 400);
+        }
+
+        // Check if a draft already exists for this type+priority (user switching back)
         $existingDraft = ServiceRequest::withoutGlobalScope('excludeDrafts')
             ->where('portal_assistant_thread_id', $thread->getKey())
             ->where('is_draft', true)
-            ->whereHas('serviceRequestFormSubmission.submissible', function ($query) use ($type) {
-                $query->where('service_request_type_id', $type->getKey());
-            })
+            ->where('priority_id', $priority->getKey())
             ->first();
 
-        // If draft exists for this type, switch to it
+        // If draft exists for this type+priority, switch to it
         if ($existingDraft) {
             $thread->current_service_request_draft_id = $existingDraft->getKey();
             $thread->save();
         } else {
-            // Create new draft for this type
+            // Create new draft for this type+priority
             $attributes = [
                 'is_draft' => true,
                 'portal_assistant_thread_id' => $thread->getKey(),
+                'priority_id' => $priority->getKey(),
             ];
 
             if ($author instanceof Contact) {
@@ -114,10 +134,20 @@ class SelectServiceRequestTypeController
             thread: $thread,
             content: $data['message'],
             internalContent: sprintf(
-                'User selected service request type "%s". The draft has been updated with this type and a default priority. Use get_draft_status to determine what information to collect next.',
-                $type->name
+                'User selected service request type "%s" with priority "%s". The draft has been created. Use get_draft_status to determine what information to collect next.',
+                $type->name,
+                $priority->name
             ),
         ));
+
+        Log::info('[PortalAssistant] Widget type and priority selection successful', [
+            'thread_id' => $data['thread_id'],
+            'type_id' => $type->getKey(),
+            'type_name' => $type->name,
+            'priority_id' => $data['priority_id'],
+            'priority_name' => $priority->name,
+            'draft_id' => $thread->current_service_request_draft_id,
+        ]);
 
         return response()->json([
             'message' => 'Message dispatched for processing via websockets.',

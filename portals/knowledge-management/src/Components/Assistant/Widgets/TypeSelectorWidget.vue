@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed, ref } from 'vue';
+    import { computed, ref, watch } from 'vue';
     import TypeCategory from './TypeCategory.vue';
 
     const props = defineProps({
@@ -47,6 +47,8 @@
     const searchQuery = ref('');
     const suggestion = computed(() => props.params.suggestion);
     const typesTree = computed(() => props.params.types_tree || []);
+    const selectedType = ref(null);
+    const selectedPriorityId = ref(null);
 
     // Auto-expand browse section if there's no suggestion
     const showBrowse = ref(!props.params.suggestion);
@@ -85,90 +87,191 @@
     };
 
     const selectType = (type) => {
+        selectedType.value = type;
+        // Auto-select default priority (highest order, first in list)
+        if (type.priorities && type.priorities.length > 0) {
+            selectedPriorityId.value = type.priorities[0].priority_id;
+        }
+    };
+
+    const submitSelection = () => {
+        if (!selectedType.value || !selectedPriorityId.value) {
+            return;
+        }
+
         emit('submit', {
             type: 'type_selection',
-            type_id: type.type_id,
-            display_text: type.name,
+            type_id: selectedType.value.type_id,
+            priority_id: selectedPriorityId.value,
+            display_text: selectedType.value.name,
         });
+    };
+
+    const goBack = () => {
+        selectedType.value = null;
+        selectedPriorityId.value = null;
     };
 </script>
 
 <template>
     <div class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
-        <div class="p-3 border-b border-gray-200 bg-white">
-            <h3 class="text-sm font-medium text-gray-900">Select Request Type</h3>
-        </div>
-
-        <div class="p-3 space-y-3">
-            <!-- AI Suggestion -->
-            <div v-if="suggestion" class="space-y-2">
-                <p class="text-xs text-gray-600">Based on your message, I suggest:</p>
-                <button
-                    @click="selectType(suggestion)"
-                    class="w-full text-left p-3 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 transition-colors"
-                >
-                    <span class="font-medium text-brand-900">{{ suggestion.name }}</span>
-                    <p v-if="suggestion.description" class="text-xs text-brand-700 mt-1">
-                        {{ suggestion.description }}
-                    </p>
-                </button>
+        <!-- Type Selection View -->
+        <div v-if="!selectedType">
+            <div class="p-3 border-b border-gray-200 bg-white">
+                <h3 class="text-sm font-medium text-gray-900">Select Request Type</h3>
             </div>
 
-            <!-- Browse Other Options -->
-            <div v-if="typesTree.length > 0">
-                <button
-                    v-if="suggestion"
-                    @click="showBrowse = !showBrowse"
-                    class="text-xs text-gray-600 hover:text-gray-900 flex items-center gap-1"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        class="w-4 h-4 transition-transform"
-                        :class="{ 'rotate-90': showBrowse }"
+            <div class="p-3 space-y-3">
+                <!-- AI Suggestion -->
+                <div v-if="suggestion" class="space-y-2">
+                    <p class="text-xs text-gray-600">Based on your message, I suggest:</p>
+                    <button
+                        @click="selectType(suggestion)"
+                        class="w-full text-left p-3 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 transition-colors"
                     >
-                        <path
-                            fill-rule="evenodd"
-                            d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                            clip-rule="evenodd"
-                        />
-                    </svg>
-                    {{ showBrowse ? 'Hide other options' : 'Browse other options' }}
-                </button>
-
-                <div v-if="showBrowse" class="space-y-2" :class="{ 'mt-2': suggestion }">
-                    <!-- Search -->
-                    <input
-                        v-model="searchQuery"
-                        type="text"
-                        placeholder="Search request types..."
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-500 focus:border-brand-500"
-                    />
-
-                    <!-- Category Tree -->
-                    <div class="max-h-48 overflow-y-auto space-y-1">
-                        <TypeCategory
-                            v-for="(category, index) in filteredTree"
-                            :key="category.category_id || `uncategorized-${index}`"
-                            :category="category"
-                            @select="selectType"
-                        />
-
-                        <p v-if="filteredTree.length === 0" class="text-xs text-gray-500 text-center py-2">
-                            No matching request types found
+                        <span class="font-medium text-brand-900">{{ suggestion.name }}</span>
+                        <p v-if="suggestion.description" class="text-xs text-brand-700 mt-1">
+                            {{ suggestion.description }}
                         </p>
+                    </button>
+                </div>
+
+                <!-- Browse Other Options -->
+                <div v-if="typesTree.length > 0">
+                    <button
+                        v-if="suggestion"
+                        @click="showBrowse = !showBrowse"
+                        class="text-xs text-gray-600 hover:text-gray-900 flex items-center gap-1"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            class="w-4 h-4 transition-transform"
+                            :class="{ 'rotate-90': showBrowse }"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                        {{ showBrowse ? 'Hide other options' : 'Browse other options' }}
+                    </button>
+
+                    <div v-if="showBrowse" class="space-y-2" :class="{ 'mt-2': suggestion }">
+                        <!-- Search -->
+                        <input
+                            v-model="searchQuery"
+                            type="text"
+                            placeholder="Search request types..."
+                            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-500 focus:border-brand-500"
+                        />
+
+                        <!-- Category Tree -->
+                        <div class="max-h-48 overflow-y-auto space-y-1">
+                            <TypeCategory
+                                v-for="(category, index) in filteredTree"
+                                :key="category.category_id || `uncategorized-${index}`"
+                                :category="category"
+                                @select="selectType"
+                            />
+
+                            <p v-if="filteredTree.length === 0" class="text-xs text-gray-500 text-center py-2">
+                                No matching request types found
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cancel Button -->
+                <button
+                    @click="emit('cancel')"
+                    class="w-full px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                >
+                    Cancel
+                </button>
+            </div>
+        </div>
+
+        <!-- Priority Selection View -->
+        <div v-else>
+            <div class="p-3 border-b border-gray-200 bg-white">
+                <div class="flex items-center gap-2">
+                    <button
+                        @click="goBack"
+                        class="text-gray-600 hover:text-gray-900"
+                        aria-label="Go back"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            class="w-5 h-5"
+                        >
+                            <path
+                                fill-rule="evenodd"
+                                d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z"
+                                clip-rule="evenodd"
+                            />
+                        </svg>
+                    </button>
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-900">Select Priority</h3>
+                        <p class="text-xs text-gray-600">{{ selectedType.name }}</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Cancel Button -->
-            <button
-                @click="emit('cancel')"
-                class="w-full px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
-            >
-                Cancel
-            </button>
+            <div class="p-3 space-y-2">
+                <!-- Priority Options -->
+                <button
+                    v-for="priority in selectedType.priorities"
+                    :key="priority.priority_id"
+                    @click="selectedPriorityId = priority.priority_id"
+                    class="w-full text-left p-3 border rounded-lg transition-colors"
+                    :class="
+                        selectedPriorityId === priority.priority_id
+                            ? 'bg-brand-50 border-brand-200 hover:bg-brand-100'
+                            : 'bg-white border-gray-200 hover:bg-gray-50'
+                    "
+                >
+                    <span
+                        class="font-medium"
+                        :class="
+                            selectedPriorityId === priority.priority_id ? 'text-brand-900' : 'text-gray-900'
+                        "
+                    >
+                        {{ priority.name }}
+                    </span>
+                </button>
+
+                <p v-if="!selectedType.priorities || selectedType.priorities.length === 0" class="text-xs text-gray-500 text-center py-2">
+                    No priorities available
+                </p>
+
+                <!-- Submit Button -->
+                <button
+                    @click="submitSelection"
+                    :disabled="!selectedPriorityId"
+                    class="w-full px-4 py-2 text-sm font-medium rounded-md transition-colors"
+                    :class="
+                        selectedPriorityId
+                            ? 'bg-brand-600 text-white hover:bg-brand-700'
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    "
+                >
+                    Continue
+                </button>
+
+                <!-- Cancel Button -->
+                <button
+                    @click="emit('cancel')"
+                    class="w-full px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                >
+                    Cancel
+                </button>
+            </div>
         </div>
     </div>
 </template>

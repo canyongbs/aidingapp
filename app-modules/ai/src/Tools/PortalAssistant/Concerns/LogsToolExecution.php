@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,32 +34,22 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Ai\Http\Controllers\PortalAssistant\SelectServiceRequestTypeController;
-use AidingApp\Ai\Http\Controllers\PortalAssistant\SendMessageController;
-use AidingApp\Ai\Http\Controllers\PortalAssistant\UpdateServiceRequestFormFieldController;
-use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
-use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
-use Illuminate\Support\Facades\Route;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+namespace AidingApp\Ai\Tools\PortalAssistant\Concerns;
 
-Route::middleware([
-    'api',
-    EnsureFrontendRequestsAreStateful::class,
-    EnsureKnowledgeManagementPortalIsEnabled::class,
-    EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized::class,
-])
-    ->name('ai.portal-assistants.')
-    ->prefix('api/ai/portal-assistant')
-    ->group(function () {
-        Route::post('/messages', SendMessageController::class)
-            ->middleware(['signed'])
-            ->name('messages.send');
+use Illuminate\Support\Facades\Log;
 
-        Route::post('/service-request/select-type', SelectServiceRequestTypeController::class)
-            ->middleware(['signed'])
-            ->name('service-request.select-type');
-
-        Route::post('/service-request/update-field', UpdateServiceRequestFormFieldController::class)
-            ->middleware(['signed'])
-            ->name('service-request.update-field');
-    });
+trait LogsToolExecution
+{
+    protected function logToolResult(string $toolName, string $result, array $parameters = []): void
+    {
+        $decoded = json_decode($result, true);
+        
+        Log::info('[PortalAssistant] Tool execution result', [
+            'thread_id' => $this->thread->getKey(),
+            'tool_name' => $toolName,
+            'parameters' => $parameters,
+            'result' => $decoded ?? $result,
+            'result_length' => strlen($result),
+        ]);
+    }
+}
