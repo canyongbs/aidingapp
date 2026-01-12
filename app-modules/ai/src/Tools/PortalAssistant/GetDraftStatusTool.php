@@ -258,7 +258,7 @@ class GetDraftStatusTool extends Tool
         return match ($draftStage) {
             ServiceRequestDraftStage::DataCollection => $this->getDataCollectionInstruction($result),
             ServiceRequestDraftStage::ClarifyingQuestions => sprintf(
-                'Ask clarifying question %d of 3. After user answers, save with save_clarifying_question.',
+                'CRITICAL: Ask clarifying question %d of 3 to gather MORE information. Do NOT provide solutions/advice. After user answers, IMMEDIATELY call save_clarifying_question(question="your question text", answer="user response") in the SAME response. Your ONLY job is: ask question → get answer → save it.',
                 ($result['clarifying_questions']['completed'] ?? 0) + 1
             ),
             ServiceRequestDraftStage::Resolution => $this->getResolutionInstruction(),

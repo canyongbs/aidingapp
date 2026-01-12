@@ -349,6 +349,8 @@ Optional Fields:
 ### Clarifying Questions
 CRITICAL: Must ask EXACTLY 3 clarifying questions. Each question MUST draw from the information already collected to become more specific and relevant to the user's issue.
 
+PURPOSE: Gather ADDITIONAL INFORMATION ONLY. Do NOT provide solutions, troubleshooting steps, or advice during this phase. Your ONLY job is to ask questions and save answers.
+
 Rules:
 - After successful data collection, ask exactly 3 clarifying questions ONE AT A TIME
 - Each question should build on previously submitted answers (title, description, form fields, and previous Q&A)
@@ -358,7 +360,8 @@ Rules:
   * GOOD (specific): "You mentioned the login error started yesterday - did anything change on your device before that?"
   * BAD (generic): "When did this start?"
   * GOOD (specific): "Is the 'Access Denied' error happening on all files or just specific ones?"
-- After asking each question, wait for answer, then save with `save_clarifying_question`
+- IMMEDIATELY after user answers each question, call `save_clarifying_question(question="...", answer="...")` with BOTH the question you asked AND their answer
+- Do NOT provide solutions or advice - just ask question, get answer, save it, repeat
 - After 3rd question is saved, the system automatically handles next steps
 EOT;
 
