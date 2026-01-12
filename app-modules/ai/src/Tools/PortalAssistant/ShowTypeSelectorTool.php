@@ -53,8 +53,8 @@ class ShowTypeSelectorTool extends Tool
     ) {
         $this
             ->as('show_type_selector')
-            ->for('STEP 2: Displays a UI widget to select a service request type. Call this AFTER fetch_service_request_types ONLY when starting a NEW request or when user explicitly wants to CHANGE types. DO NOT call if already collecting data for an existing draft. If you identified a strong match, pass that type_id as suggested_type_id.')
-            ->withStringParameter('suggested_type_id', 'Optional: The UUID of the type to suggest/highlight. Use this when you found a clear match by analyzing the types_tree from fetch_service_request_types.')
+            ->for('STEP 2: Displays a UI widget to select a service request type. Call this AFTER fetch_service_request_types ONLY when starting a NEW request or when user explicitly wants to CHANGE types. DO NOT call if already collecting data for an existing draft. If you identified a strong match in the types_tree, you MUST pass that exact type_id UUID as suggested_type_id parameter. If no match, omit the parameter entirely.')
+            ->withStringParameter('suggested_type_id', 'REQUIRED IF MATCH FOUND: The exact UUID of the type to pre-select (e.g., "d691de0b-c90d-44b0-aa2b-6e17cf0ea10c"). Only omit this parameter if you found absolutely no matching type in the types_tree. Never pass an empty string.')
             ->using($this);
     }
 
@@ -73,7 +73,7 @@ class ShowTypeSelectorTool extends Tool
 
         $suggestion = null;
 
-        if ($suggested_type_id) {
+        if ($suggested_type_id && $suggested_type_id !== '') {
             $type = ServiceRequestType::whereHas('form')
                 ->with(['priorities' => fn ($q) => $q->orderByDesc('order')])
                 ->find($suggested_type_id);
