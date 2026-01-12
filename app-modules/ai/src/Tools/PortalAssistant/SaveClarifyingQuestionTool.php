@@ -43,6 +43,7 @@ use AidingApp\Ai\Tools\PortalAssistant\Concerns\SubmitsServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use Prism\Prism\Tool;
 
 class SaveClarifyingQuestionTool extends Tool
@@ -94,21 +95,20 @@ class SaveClarifyingQuestionTool extends Tool
 
         $respondent = $draft->respondent;
 
-        $draft->serviceRequestUpdates()->createMany([
-            [
-                'update' => $question,
-                'update_type' => ServiceRequestUpdateType::ClarifyingQuestion,
-                'internal' => false,
-                'created_by_type' => $draft->getMorphClass(),
-                'created_by_id' => $draft->getKey(),
-            ],
-            [
-                'update' => $answer,
-                'update_type' => ServiceRequestUpdateType::ClarifyingAnswer,
-                'internal' => false,
-                'created_by_type' => $respondent->getMorphClass(),
-                'created_by_id' => $respondent->getKey(),
-            ],
+        $questionUpdate = $draft->serviceRequestUpdates()->createQuietly([
+            'update' => $question,
+            'update_type' => ServiceRequestUpdateType::ClarifyingQuestion,
+            'internal' => false,
+            'created_by_type' => $draft->getMorphClass(),
+            'created_by_id' => $draft->getKey(),
+        ]);
+
+        $answerUpdate = $draft->serviceRequestUpdates()->createQuietly([
+            'update' => $answer,
+            'update_type' => ServiceRequestUpdateType::ClarifyingAnswer,
+            'internal' => false,
+            'created_by_type' => $respondent->getMorphClass(),
+            'created_by_id' => $respondent->getKey(),
         ]);
 
         $completed = $clarifyingQuestionsCount + 1;
