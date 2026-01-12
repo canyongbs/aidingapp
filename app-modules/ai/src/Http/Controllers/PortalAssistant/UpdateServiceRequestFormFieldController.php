@@ -205,7 +205,7 @@ class UpdateServiceRequestFormFieldController
         };
 
         return sprintf(
-            'User completed the "%s" field by providing: %s. The value has been saved to the draft. Use get_draft_status to determine what information to collect next.',
+            'User completed the "%s" field by providing: %s. The value has been saved to the draft. Call get_draft_status now to refresh your context and determine what information to collect next.',
             $fieldLabel,
             $valueDescription
         );

@@ -147,7 +147,7 @@ class UpdateFormFieldTool extends Tool
             'success' => true,
             'field_id' => $field_id,
             'label' => $field->label,
-            'instruction' => 'Field value saved successfully.',
+            'instruction' => 'Field value saved. Call get_draft_status now to refresh your context and determine what information to collect next.',
         ]);
         
         $this->logToolResult('update_form_field', $result, [

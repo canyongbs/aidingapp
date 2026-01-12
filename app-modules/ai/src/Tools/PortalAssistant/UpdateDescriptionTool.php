@@ -71,7 +71,7 @@ class UpdateDescriptionTool extends Tool
         return json_encode([
             'success' => true,
             'description' => $description,
-            'instruction' => 'Description saved successfully.',
+            'instruction' => 'Description saved. Call get_draft_status now to refresh your context and determine what information to collect next.',
         ]);
     }
 }

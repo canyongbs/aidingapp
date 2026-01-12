@@ -71,7 +71,7 @@ class UpdateTitleTool extends Tool
         return json_encode([
             'success' => true,
             'title' => $title,
-            'instruction' => 'Title saved successfully.',
+            'instruction' => 'Title saved. Call get_draft_status now to refresh your context and determine what information to collect next.',
         ]);
     }
 }
