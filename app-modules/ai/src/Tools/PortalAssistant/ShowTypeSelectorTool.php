@@ -75,7 +75,7 @@ class ShowTypeSelectorTool extends Tool
 
         if ($suggested_type_id && $suggested_type_id !== '') {
             $type = ServiceRequestType::whereHas('form')
-                ->with(['priorities' => fn ($q) => $q->orderByDesc('order')])
+                ->with(['priorities' => fn ($q) => $q->orderBy('order')])
                 ->find($suggested_type_id);
 
             if ($type) {
@@ -113,7 +113,7 @@ class ShowTypeSelectorTool extends Tool
     {
         $categories = ServiceRequestTypeCategory::with([
             'children',
-            'types' => fn ($q) => $q->whereHas('form')->with(['priorities' => fn ($q) => $q->orderByDesc('order')])
+            'types' => fn ($q) => $q->whereHas('form')->with(['priorities' => fn ($q) => $q->orderBy('order')])
         ])
             ->whereNull('parent_id')
             ->orderBy('sort')
@@ -121,7 +121,7 @@ class ShowTypeSelectorTool extends Tool
 
         $uncategorizedTypes = ServiceRequestType::whereHas('form')
             ->whereDoesntHave('category')
-            ->with(['priorities' => fn ($q) => $q->orderByDesc('order')])
+            ->with(['priorities' => fn ($q) => $q->orderBy('order')])
             ->get();
 
         $tree = $categories->map(fn ($category) => $this->formatCategory($category))->all();
