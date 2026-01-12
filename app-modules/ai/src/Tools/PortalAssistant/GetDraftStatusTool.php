@@ -304,7 +304,7 @@ class GetDraftStatusTool extends Tool
                     // Check if it's a complex field that needs a widget
                     if (in_array($field['type'], ['select', 'radio', 'checkbox', 'checkboxes', 'date', 'file_upload'])) {
                         return sprintf(
-                            'CRITICAL: In your response, ask the user a natural question about "%s" AND IMMEDIATELY call show_field_input with field_id "%s" in the SAME response. Do both actions together - question + tool call. Example question: Don\'t ask "Printer Type?" - instead ask "What type of printer is it?"',
+                            'CRITICAL: In your response, ask the user a natural question about "%s" AND IMMEDIATELY call show_field_input with field_id "%s" in the SAME response. Do both actions together - question + tool call. Example question: Don\'t ask "Printer Type?" - instead ask "What type of printer is it?" IMPORTANT: Do NOT list the available options in your question - the widget will display them.',
                             $field['label'],
                             $field['field_id']
                         );
