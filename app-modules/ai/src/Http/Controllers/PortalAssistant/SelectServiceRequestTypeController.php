@@ -126,7 +126,7 @@ class SelectServiceRequestTypeController
             thread: $thread,
             content: $data['message'],
             internalContent: sprintf(
-                '[System: User selected service request type "%s". Draft updated with type and default priority. Call get_draft_status for next step.]',
+                'User selected service request type "%s". The draft has been updated with this type and a default priority. Use get_draft_status to determine what information to collect next.',
                 $type->name
             ),
         ));

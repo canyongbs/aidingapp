@@ -58,6 +58,7 @@ use AidingApp\Ai\Tools\PortalAssistant\SubmitServiceRequestTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateDescriptionTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateFormFieldTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateTitleTool;
+use AidingApp\IntegrationOpenAi\Prism\ValueObjects\Messages\DeveloperMessage;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -73,6 +74,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Prism\Prism\Tool;
+use Prism\Prism\ValueObjects\Messages\UserMessage;
 use Throwable;
 
 class SendMessage implements ShouldQueue
@@ -137,12 +139,17 @@ class SendMessage implements ShouldQueue
 
             $nextRequestOptions = $this->thread->messages()->where('is_assistant', true)->latest()->value('next_request_options') ?? [];
 
+            $messages = [
+                ...(filled($this->internalContent) ? [new DeveloperMessage($this->internalContent)] : []),
+                new UserMessage($this->content),
+            ];
+
             $stream = $aiService->streamRaw(
                 prompt: $context,
-                content: $this->internalContent ?? $this->content,
                 files: KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id'])->all(),
                 options: $nextRequestOptions,
                 tools: $tools,
+                messages: $messages,
             );
 
             $response = new PortalAssistantMessage();

@@ -12,6 +12,7 @@ The Portal Assistant provides an AI-powered conversational interface for users t
 - **Portal Assistant Tools** (`app-modules/ai/src/Tools/PortalAssistant/`): 13 specialized tools for different phases of the workflow
 - **Service Request Drafts**: Multiple draft service request records can exist per thread, with the thread tracking which one is currently active
 - **Current Draft Tracking**: The `PortalAssistantThread` model has a `current_service_request_draft_id` field that points to the active draft
+- **Widget Interaction Controllers**: Dedicated controllers handle widget interactions (type selection, priority selection, form field updates) and dispatch SendMessage with Developer messages for context
 
 ### Draft Lifecycle
 
@@ -147,7 +148,7 @@ Updates the value of simple text-based custom form fields like text inputs, text
 **When Available**: Immediately after type selection (if type has custom fields)
 
 #### Show Priority Selector
-Displays a UI widget that allows the user to select the priority level for their service request. Each service request type has its own set of available priorities (typically High, Medium, Low, but can vary). The system automatically prompts the user with a selector showing the available priority options, and the user's selection is submitted back to the backend via the metadata mechanism.
+Displays a UI widget that allows the user to select the priority level for their service request. Each service request type has its own set of available priorities (typically High, Medium, Low, but can vary). The system automatically prompts the user with a selector showing the available priority options, and the user's selection is submitted to a dedicated backend endpoint that updates the draft and provides context to the AI via a Developer message.
 
 **When Available**: After title is saved
 
@@ -256,8 +257,9 @@ AI: [calls Show Priority Selector]
              UI shows available priorities: High, Medium, Low (specific to Password Reset type)
              
 User: [selects "Medium" priority via UI]
-    System saves priority selection via metadata.type = 'priority_selection', metadata.priority_id
-    Processes the selection and updates draft's priority field
+    Frontend calls dedicated priority selection endpoint with priority_id and user-facing message
+    Controller updates draft's priority field
+    Controller dispatches SendMessage with both user message ("Medium Priority") and Developer message providing context
     
 AI: [calls Submit Service Request]
     Passes: Nothing
@@ -430,8 +432,9 @@ AI: [calls Show Priority Selector]
              UI shows available priorities: High, Medium, Low
              
 User: [selects "Medium" priority via UI]
-    System saves priority selection via metadata.type = 'priority_selection', metadata.priority_id
-    Processes the selection and updates draft's priority field
+    Frontend calls dedicated priority selection endpoint with priority_id and user-facing message
+    Controller updates draft's priority field
+    Controller dispatches SendMessage with both user message ("Medium Priority") and Developer message providing context
     
 AI: [calls Submit Service Request]
     Passes: Nothing
@@ -572,6 +575,117 @@ AI: "Wonderful! I'm glad I could help. Your request has been saved as SR-2026-00
 ```
 
 ## Technical Implementation Details
+
+## Widget Interaction Architecture
+
+The system uses dedicated controllers and Developer messages to handle widget interactions (type selection, priority selection, form field updates). This architecture prevents the AI from accidentally leaking internal system messages to users while providing essential context.
+
+### How Widget Interactions Work
+
+1. **User Interacts with Widget**: User clicks a button in a UI widget (e.g., selects "High Priority")
+2. **Frontend Adds Message**: The frontend immediately adds a user message to the chat showing what they selected
+3. **Dedicated Controller Called**: Frontend calls a specific endpoint (not the general SendMessage endpoint)
+4. **Controller Updates Database**: Controller performs the necessary database updates synchronously
+5. **Controller Dispatches SendMessage**: Controller dispatches SendMessage job with:
+   - `content`: The user-facing message shown in chat (e.g., "High Priority")
+   - `internalContent`: A Developer message providing context to the AI (never shown to user)
+
+### Developer Messages
+
+Developer messages are a special message type in the OpenAI API that provide instructions and context to the AI without appearing as part of the user's conversation. They are inserted into the message stream just before the user's message.
+
+**Message Flow Example**:
+```
+Previous conversation history...
+[DeveloperMessage: "User selected priority 'High' for their service request. The draft has been updated. Use get_draft_status to determine what information to collect next."]
+[UserMessage: "High Priority"]
+```
+
+**What the AI sees**:
+- The system context explaining its role and behavior
+- The full conversation history
+- A Developer message explaining what the user just did (internal context)
+- The user's simple message (what they see in chat)
+
+**What the user sees**:
+- Just their message "High Priority" in the chat
+- The AI's helpful response
+
+### Why Developer Messages vs. Internal Content
+
+**Previous Approach (Internal Content)**:
+- Replaced the user's actual message with internal context
+- Risk: AI might reference or leak system details in responses
+- Example: AI says "I see you selected priority via metadata.priority_id=3"
+
+**Current Approach (Developer Messages)**:
+- User message remains authentic and matches what they see in chat
+- Developer message provides context separately
+- AI understands what happened but treats the user message as the visible conversation
+- No risk of leaking implementation details
+
+### Dedicated Widget Controllers
+
+Three specialized controllers handle widget interactions:
+
+#### SelectServiceRequestTypeController
+- **Endpoint**: `POST /service-request/select-type`
+- **Payload**: `{ type_id, thread_id, message }`
+- **Actions**:
+  - Creates new draft or switches to existing draft for the selected type
+  - Sets up form submission if type has custom fields
+  - Updates thread's current_service_request_draft_id pointer
+- **Developer Message**: Includes type name and explains draft was updated
+
+#### SelectServiceRequestPriorityController
+- **Endpoint**: `POST /service-request/select-priority`
+- **Payload**: `{ priority_id, thread_id, message }`
+- **Actions**:
+  - Validates priority belongs to current draft's type
+  - Updates draft's priority field
+- **Developer Message**: Includes priority name and confirms update
+
+#### UpdateServiceRequestFormFieldController
+- **Endpoint**: `POST /service-request/update-field`
+- **Payload**: `{ field_id, value, thread_id, message }`
+- **Actions**:
+  - Validates field belongs to current draft's form
+  - Creates or updates field response with provided value
+- **Developer Message**: Includes field label and intelligent description of what was entered (handles 10+ field types with smart formatting/truncation)
+
+### Message Database Storage
+
+The `PortalAssistantMessage` model has two content fields:
+- `content`: User-facing message shown in chat (always populated)
+- `internal_content`: Developer message sent to AI (nullable, only set for widget interactions)
+
+### Conversation History Management
+
+Azure OpenAI automatically maintains conversation history server-side using the `previous_response_id` mechanism. The SendMessage job only needs to send the current messages:
+
+```php
+// Azure OpenAI handles conversation history via previous_response_id
+// We only need to send the current messages (Developer message + User message)
+$messages = [
+    ...(filled($this->internalContent) ? [new DeveloperMessage($this->internalContent)] : []),
+    new UserMessage($this->content),
+];
+```
+
+**How It Works:**
+1. Each AI response includes a `response_id` (e.g., `resp_abc123`)
+2. This ID is stored in `next_request_options` on the assistant message record
+3. Next request includes `previous_response_id` in the options
+4. Azure OpenAI retrieves the full conversation history associated with that ID
+5. New messages (Developer + User) are appended to that history
+6. API returns a new `response_id` for the next request
+
+**Benefits:**
+- Minimal payload size - only send 1-2 new messages per request
+- No database queries to fetch conversation history
+- No need to map/transform previous messages
+- Azure handles all history management automatically
+- Developer messages work seamlessly with this mechanism
 
 ## AI Instruction Architecture
 

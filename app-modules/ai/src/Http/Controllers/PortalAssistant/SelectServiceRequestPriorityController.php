@@ -103,7 +103,7 @@ class SelectServiceRequestPriorityController
             thread: $thread,
             content: $data['message'],
             internalContent: sprintf(
-                '[System: User selected priority "%s". Draft updated. Call get_draft_status for next step.]',
+                'User selected priority "%s" for their service request. The draft has been updated. Use get_draft_status to determine what information to collect next.',
                 $priority->name
             ),
         ));
