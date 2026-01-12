@@ -38,7 +38,8 @@ import { useTokenStore } from '../../Stores/token.js';
 import { useAssistantConnection } from './useAssistantConnection.js';
 
 export function useAssistantChat() {
-    const { assistantSendMessageUrl, websocketsConfig } = useAssistantStore();
+    const { assistantSendMessageUrl, selectTypeUrl, selectPriorityUrl, updateFieldUrl, websocketsConfig } =
+        useAssistantStore();
     const { getToken } = useTokenStore();
 
     const messages = ref([]);
@@ -115,16 +116,13 @@ export function useAssistantChat() {
         }
     };
 
-    const sendMessage = async (content, metadata = null) => {
+    const sendMessage = async (content) => {
         if (!content || !content.trim() || isSending.value || isAssistantResponding.value) return;
         isSending.value = true;
 
         addUserMessage(content);
 
         const payload = { content, thread_id: threadId.value };
-        if (metadata) {
-            payload.metadata = metadata;
-        }
 
         try {
             const response = await axios.post(assistantSendMessageUrl, payload);
@@ -167,36 +165,42 @@ export function useAssistantChat() {
     const handleWidgetSubmit = async (submitData) => {
         const { type, field_id, type_id, priority_id, value, display_text } = submitData;
 
-        const metadata = { type };
-        if (field_id !== undefined) metadata.field_id = field_id;
-        if (type_id !== undefined) metadata.type_id = type_id;
-        if (priority_id !== undefined) metadata.priority_id = priority_id;
-        if (value !== undefined) metadata.value = value;
+        if (isSending.value || isAssistantResponding.value) return;
+        isSending.value = true;
 
-        await sendMessage(display_text || 'Submitted', metadata);
+        addUserMessage(display_text || 'Submitted');
+
+        try {
+            let endpoint;
+            let payload = { thread_id: threadId.value, message: display_text || 'Submitted' };
+
+            if (type === 'type_selection') {
+                endpoint = selectTypeUrl;
+                payload.type_id = type_id;
+            } else if (type === 'priority_selection') {
+                endpoint = selectPriorityUrl;
+                payload.priority_id = priority_id;
+            } else if (type === 'field_response') {
+                endpoint = updateFieldUrl;
+                payload.field_id = field_id;
+                payload.value = value;
+            }
+
+            const response = await axios.post(endpoint, payload);
+            if (response.data.thread_id) {
+                threadId.value = response.data.thread_id;
+            }
+            addAssistantMessage();
+        } catch (error) {
+            updateAssistantMessage('', true, 'Failed to submit widget data.');
+        } finally {
+            isSending.value = false;
+        }
+
         activeWidget.value = null;
     };
 
     const handleWidgetCancel = async () => {
-        const widget = activeWidget.value;
-        if (!widget) return;
-
-        const widgetTypeMap = {
-            select_service_request_type: 'type_selector',
-            select_priority: 'priority_selector',
-            render_field_input: 'field_input',
-        };
-
-        const internalContent = {
-            type: 'widget_cancelled',
-            widget_type: widgetTypeMap[widget.type] || widget.type,
-        };
-
-        if (widget.params?.field_id) {
-            internalContent.field_id = widget.params.field_id;
-        }
-
-        await sendMessage('Cancelled', internalContent);
         activeWidget.value = null;
     };
 

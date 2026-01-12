@@ -36,11 +36,20 @@ import { ref } from 'vue';
 
 export const useAssistantStore = defineStore('assistant', () => {
     const assistantSendMessageUrl = ref(null);
+    const selectTypeUrl = ref(null);
+    const selectPriorityUrl = ref(null);
+    const updateFieldUrl = ref(null);
     const websocketsConfig = ref(null);
     const apiUrl = ref(null);
 
     async function setAssistantSendMessageUrl(url) {
         assistantSendMessageUrl.value = url;
+        
+        // Derive other URLs from send message URL
+        const baseUrl = url.replace('/messages', '');
+        selectTypeUrl.value = `${baseUrl}/service-request/select-type`;
+        selectPriorityUrl.value = `${baseUrl}/service-request/select-priority`;
+        updateFieldUrl.value = `${baseUrl}/service-request/update-field`;
     }
 
     async function setWebsocketsConfig(config) {
@@ -61,6 +70,9 @@ export const useAssistantStore = defineStore('assistant', () => {
 
     return {
         assistantSendMessageUrl,
+        selectTypeUrl,
+        selectPriorityUrl,
+        updateFieldUrl,
         getAssistantSendMessageUrl,
         setAssistantSendMessageUrl,
         websocketsConfig,

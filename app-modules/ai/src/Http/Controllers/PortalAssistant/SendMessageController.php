@@ -50,14 +50,6 @@ class SendMessageController
         $data = $request->validate([
             'content' => ['required', 'string', 'max:25000'],
             'thread_id' => ['nullable', 'uuid'],
-            'metadata' => ['nullable', 'array'],
-            'metadata.type' => ['required_with:metadata', 'string'],
-            'metadata.type_id' => ['nullable', 'uuid'],
-            'metadata.priority_id' => ['nullable', 'uuid'],
-            'metadata.field_id' => ['nullable', 'uuid'],
-            'metadata.value' => ['nullable'],
-            'metadata.widget_type' => ['nullable', 'string'],
-            'metadata.error' => ['nullable', 'string'],
         ]);
 
         $author = auth('contact')->user();
@@ -83,7 +75,6 @@ class SendMessageController
                 ),
                 'ip' => request()->ip(),
             ],
-            metadata: $data['metadata'] ?? null,
         ));
 
         return response()->json([

@@ -58,13 +58,10 @@ use AidingApp\Ai\Tools\PortalAssistant\SubmitServiceRequestTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateDescriptionTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateFormFieldTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateTitleTool;
-use AidingApp\Ai\Validators\InternalContentValidator;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
-use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
@@ -89,42 +86,21 @@ class SendMessage implements ShouldQueue
 
     /**
      * @param array<string, mixed> $request
-     * @param array<string, mixed>|null $metadata
      */
     public function __construct(
         protected PortalAssistantThread $thread,
         protected string $content,
         protected array $request = [],
-        protected ?array $metadata = null,
+        protected ?string $internalContent = null,
     ) {}
 
     public function handle(): void
     {
-        if ($this->metadata !== null) {
-            $validator = app(InternalContentValidator::class);
-            $validationResult = $validator->validate($this->metadata);
-
-            if ($validationResult->failed()) {
-                event(new PortalAssistantMessageChunk(
-                    $this->thread,
-                    content: '',
-                    isComplete: false,
-                    error: 'Invalid message data: ' . implode(' ', $validationResult->errors),
-                ));
-
-                return;
-            }
-
-            $this->processMetadata();
-        }
-
-        $aiContent = $this->buildAiContent();
-
         $message = new PortalAssistantMessage();
         $message->thread()->associate($this->thread);
         $message->author()->associate($this->thread->author);
         $message->content = $this->content;
-        $message->internal_content = $aiContent !== $this->content ? $aiContent : null;
+        $message->internal_content = $this->internalContent;
         $message->request = $this->request;
         $message->is_assistant = false;
         $message->save();
@@ -157,15 +133,13 @@ class SendMessage implements ShouldQueue
         try {
             $aiService = app(AiIntegratedAssistantSettings::class)->getDefaultModel()->getService();
 
-            $aiContent = $this->buildAiContent();
-
             $tools = $this->buildTools();
 
             $nextRequestOptions = $this->thread->messages()->where('is_assistant', true)->latest()->value('next_request_options') ?? [];
 
             $stream = $aiService->streamRaw(
                 prompt: $context,
-                content: $aiContent,
+                content: $this->internalContent ?? $this->content,
                 files: KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id'])->all(),
                 options: $nextRequestOptions,
                 tools: $tools,
@@ -248,28 +222,6 @@ class SendMessage implements ShouldQueue
                 error: 'An error happened when sending your message.',
             ));
         }
-    }
-
-    protected function buildAiContent(): string
-    {
-        if ($this->metadata === null) {
-            return $this->content;
-        }
-
-        return match ($this->metadata['type'] ?? null) {
-            InternalContentValidator::TYPE_FIELD_RESPONSE => '[System: User completed the form field input. The value has been saved to the draft. Call get_draft_status to see current state.]',
-            InternalContentValidator::TYPE_TYPE_SELECTION => '[System: User selected a service request type. The draft has been updated with the selected type and a default priority. Call get_draft_status to see what to collect next.]',
-            InternalContentValidator::TYPE_PRIORITY_SELECTION => '[System: User selected a priority level. The draft has been updated. Call get_draft_status to see what to collect next.]',
-            InternalContentValidator::TYPE_WIDGET_CANCELLED => sprintf(
-                '[System: User cancelled the %s widget. Continue the conversation normally.]',
-                $this->metadata['widget_type'] ?? 'input'
-            ),
-            InternalContentValidator::TYPE_WIDGET_ERROR => sprintf(
-                '[System: Widget error occurred: %s. Ask the user to try again or collect the information conversationally if possible.]',
-                $this->metadata['error'] ?? 'unknown error'
-            ),
-            default => $this->content,
-        };
     }
 
     protected function buildServiceRequestInstructions(): string
@@ -524,201 +476,5 @@ EOT;
 
         $tools[] = new FinalizeServiceRequestTool($this->thread);
     }
-
-    protected function processMetadata(): void
-    {
-        if ($this->metadata === null) {
-            return;
-        }
-
-        match ($this->metadata['type'] ?? null) {
-            InternalContentValidator::TYPE_TYPE_SELECTION => $this->processTypeSelection(),
-            InternalContentValidator::TYPE_PRIORITY_SELECTION => $this->processPrioritySelection(),
-            InternalContentValidator::TYPE_FIELD_RESPONSE => $this->processFieldResponse(),
-            default => null,
-        };
-    }
-
-    protected function processTypeSelection(): void
-    {
-        $typeId = $this->metadata['type_id'] ?? null;
-
-        if (! $typeId) {
-            return;
-        }
-
-        $type = ServiceRequestType::whereHas('form')->find($typeId);
-
-        if (! $type) {
-            return;
-        }
-
-        // Check if a draft already exists for this type (user switching back)
-        $existingDraft = ServiceRequest::withoutGlobalScope('excludeDrafts')
-            ->where('portal_assistant_thread_id', $this->thread->getKey())
-            ->where('is_draft', true)
-            ->whereHas('priority', function ($query) use ($typeId) {
-                $query->where('type_id', $typeId);
-            })
-            ->first();
-
-        // If draft exists for this type, switch to it
-        if ($existingDraft) {
-            $this->thread->current_service_request_draft_id = $existingDraft->getKey();
-            $this->thread->save();
-
-            return;
-        }
-
-        // Create new draft for this type
-        $contact = $this->thread->author;
-
-        $attributes = [
-            'is_draft' => true,
-            'workflow_phase' => 'data_collection',
-            'clarifying_questions' => [],
-            'portal_assistant_thread_id' => $this->thread->getKey(),
-        ];
-
-        if ($contact instanceof Contact) {
-            $attributes['respondent_id'] = $contact->getKey();
-        }
-
-        $draft = ServiceRequest::create($attributes);
-
-        $defaultPriority = $type->priorities()->orderByDesc('order')->first();
-
-        if ($defaultPriority) {
-            $draft->priority()->associate($defaultPriority);
-        }
-
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
-
-        $submission = $form->submissions()->make([
-            'submitted_at' => null,
-        ]);
-
-        if ($defaultPriority) {
-            $submission->priority()->associate($defaultPriority);
-        }
-
-        $submission->save();
-
-        $draft->serviceRequestFormSubmission()->associate($submission);
-        $draft->save();
-
-        // Set as current draft on thread
-        $this->thread->current_service_request_draft_id = $draft->getKey();
-        $this->thread->save();
-    }
-
-    protected function processPrioritySelection(): void
-    {
-        $priorityId = $this->metadata['priority_id'] ?? null;
-
-        if (! $priorityId) {
-            return;
-        }
-
-        if (! $this->thread->current_service_request_draft_id) {
-            return;
-        }
-
-        $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
-            ->where('id', $this->thread->current_service_request_draft_id)
-            ->where('is_draft', true)
-            ->first();
-
-        if (! $draft) {
-            return;
-        }
-
-        $draft->load('priority.type');
-        $currentType = $draft->priority?->type;
-
-        if (! $currentType) {
-            return;
-        }
-
-        $priority = ServiceRequestPriority::where('type_id', $currentType->getKey())
-            ->find($priorityId);
-
-        if (! $priority) {
-            return;
-        }
-
-        $draft->priority()->associate($priority);
-        $draft->save();
-    }
-
-    protected function processFieldResponse(): void
-    {
-        $fieldId = $this->metadata['field_id'] ?? null;
-        $value = $this->metadata['value'] ?? null;
-
-        if (! $fieldId || $value === null) {
-            return;
-        }
-
-        $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
-            ->where('portal_assistant_thread_id', $this->thread->getKey())
-            ->where('is_draft', true)
-            ->with(['priority.type', 'serviceRequestFormSubmission'])
-            ->latest()
-            ->first();
-
-        if (! $draft || ! $draft->serviceRequestFormSubmission) {
-            return;
-        }
-
-        $type = $draft->priority?->type;
-
-        if (! $type) {
-            return;
-        }
-
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
-
-        $field = null;
-
-        foreach ($form->steps as $step) {
-            foreach ($step->fields as $f) {
-                if ($f->getKey() === $fieldId) {
-                    $field = $f;
-
-                    break 2;
-                }
-            }
-        }
-
-        if (! $field) {
-            return;
-        }
-
-        $submission = $draft->serviceRequestFormSubmission;
-        $existingField = $submission->fields()->where('service_request_form_field_id', $fieldId)->first();
-
-        if ($existingField) {
-            $submission->fields()->updateExistingPivot($fieldId, [
-                'response' => $value,
-            ]);
-        } else {
-            $fields = collect();
-
-            foreach ($form->steps as $step) {
-                foreach ($step->fields as $f) {
-                    $fields->put($f->getKey(), $f->type);
-                }
-            }
-
-            app(ProcessServiceRequestSubmissionField::class)->execute(
-                $submission,
-                $fieldId,
-                $value,
-                $fields->all(),
-            );
-        }
-    }
 }
+

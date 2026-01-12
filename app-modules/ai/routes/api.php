@@ -34,7 +34,10 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Ai\Http\Controllers\PortalAssistant\SelectServiceRequestPriorityController;
+use AidingApp\Ai\Http\Controllers\PortalAssistant\SelectServiceRequestTypeController;
 use AidingApp\Ai\Http\Controllers\PortalAssistant\SendMessageController;
+use AidingApp\Ai\Http\Controllers\PortalAssistant\UpdateServiceRequestFormFieldController;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use Illuminate\Support\Facades\Route;
@@ -52,4 +55,16 @@ Route::middleware([
         Route::post('/messages', SendMessageController::class)
             ->middleware(['signed'])
             ->name('messages.send');
+
+        Route::post('/service-request/select-type', SelectServiceRequestTypeController::class)
+            ->middleware(['signed'])
+            ->name('service-request.select-type');
+
+        Route::post('/service-request/select-priority', SelectServiceRequestPriorityController::class)
+            ->middleware(['signed'])
+            ->name('service-request.select-priority');
+
+        Route::post('/service-request/update-field', UpdateServiceRequestFormFieldController::class)
+            ->middleware(['signed'])
+            ->name('service-request.update-field');
     });
