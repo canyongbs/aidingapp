@@ -52,12 +52,12 @@
             <div class="bg-white/20 p-2 rounded-lg">
                 <ChatBubbleLeftRightIcon class="w-5 h-5" />
             </div>
-            <div>
+            <div class="flex items-baseline gap-2">
                 <h2 class="text-lg font-semibold tracking-tight">Support Assistant</h2>
                 <button
                     v-if="showNewRequestLink"
                     @click="$emit('new-request')"
-                    class="text-xs text-white/80 hover:text-white hover:underline transition-colors"
+                    class="text-xs text-white/70 hover:text-white hover:underline transition-colors"
                 >
                     New request
                 </button>

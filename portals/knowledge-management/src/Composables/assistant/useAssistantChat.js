@@ -256,7 +256,14 @@ export function useAssistantChat() {
     };
 
     const showNewRequestSelector = async () => {
-        if (!getTypesUrl || isSending.value || isAssistantResponding.value) return;
+        if (!getTypesUrl || isSending.value || isAssistantResponding.value || activeWidget.value) return;
+
+        // Immediately show loading state in widget area
+        typeSelectorShown.value = true;
+        activeWidget.value = {
+            type: 'loading',
+            params: {},
+        };
 
         try {
             const response = await axios.get(getTypesUrl);
@@ -264,10 +271,10 @@ export function useAssistantChat() {
 
             if (typesTree.length === 0) {
                 console.error('[Assistant] No service request types available');
+                activeWidget.value = null;
                 return;
             }
 
-            typeSelectorShown.value = true;
             activeWidget.value = {
                 type: 'select_service_request_type',
                 params: {
@@ -277,6 +284,7 @@ export function useAssistantChat() {
             };
         } catch (error) {
             console.error('[Assistant] Failed to fetch service request types:', error);
+            activeWidget.value = null;
         }
     };
 
