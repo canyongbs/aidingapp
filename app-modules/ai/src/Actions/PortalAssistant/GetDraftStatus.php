@@ -376,11 +376,11 @@ After they answer, you MUST call save_clarifying_question_answer(question="<your
 
         if ($isComplexField) {
             return sprintf(
-                'Call show_field_input(field_id="%s") to display the "%s" input, AND in the same response ask a natural question like "Which %s?" or "Please select your %s."',
+                'Call show_field_input(field_id="%s") to display the "%s" input. In the same response, ask ONE natural question (e.g., "What\'s your %s?" or "Could you select the %s?"). Do NOT mention the widget or list the options - the user sees them.',
                 $fieldId,
                 $fieldLabel,
-                strtolower($fieldLabel),
-                strtolower($fieldLabel)
+                $fieldLabel,
+                $fieldLabel
             );
         }
 
