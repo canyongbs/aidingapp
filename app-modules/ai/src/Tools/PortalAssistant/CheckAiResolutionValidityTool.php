@@ -43,7 +43,6 @@ use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\SubmitsServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
-use Illuminate\Support\Facades\Log;
 use Prism\Prism\Tool;
 
 class CheckAiResolutionValidityTool extends Tool
