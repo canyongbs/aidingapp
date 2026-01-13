@@ -169,7 +169,6 @@
                 const {
                     setAssistantSendMessageUrl,
                     setSelectTypeUrl,
-                    setSelectPriorityUrl,
                     setUpdateFieldUrl,
                     setWebsocketsConfig,
                     setApiUrl,
@@ -209,7 +208,6 @@
 
                 setAssistantSendMessageUrl(response.data.assistant_send_message_url);
                 setSelectTypeUrl(response.data.assistant_select_type_url);
-                setSelectPriorityUrl(response.data.assistant_select_priority_url);
                 setUpdateFieldUrl(response.data.assistant_update_field_url);
                 setWebsocketsConfig(response.data.websockets_config);
 
@@ -334,7 +332,6 @@
         const {
             setAssistantSendMessageUrl,
             setSelectTypeUrl,
-            setSelectPriorityUrl,
             setUpdateFieldUrl,
             setWebsocketsConfig,
             setApiUrl,
@@ -402,7 +399,6 @@
 
                         setAssistantSendMessageUrl(response.data.assistant_send_message_url);
                         setSelectTypeUrl(response.data.assistant_select_type_url);
-                        setSelectPriorityUrl(response.data.assistant_select_priority_url);
                         setUpdateFieldUrl(response.data.assistant_update_field_url);
                         setWebsocketsConfig(response.data.websockets_config);
 

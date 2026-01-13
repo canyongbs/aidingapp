@@ -38,7 +38,7 @@ import { useTokenStore } from '../../Stores/token.js';
 import { useAssistantConnection } from './useAssistantConnection.js';
 
 export function useAssistantChat() {
-    const { assistantSendMessageUrl, selectTypeUrl, selectPriorityUrl, updateFieldUrl, websocketsConfig } =
+    const { assistantSendMessageUrl, selectTypeUrl, updateFieldUrl, websocketsConfig } =
         useAssistantStore();
     const { getToken } = useTokenStore();
 
@@ -177,9 +177,6 @@ export function useAssistantChat() {
 
             if (type === 'type_selection') {
                 endpoint = selectTypeUrl;
-                payload.priority_id = priority_id;
-            } else if (type === 'priority_selection') {
-                endpoint = selectPriorityUrl;
                 payload.priority_id = priority_id;
             } else if (type === 'field_response') {
                 endpoint = updateFieldUrl;

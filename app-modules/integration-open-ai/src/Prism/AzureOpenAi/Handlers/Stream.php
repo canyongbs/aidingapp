@@ -54,15 +54,6 @@ class Stream extends BaseStream
 {
     protected function sendRequest(Request $request): Response
     {
-        $builtTools = $this->buildTools($request);
-        $providerTools = $request->providerOptions('tools') ?? [];
-        $mergedTools = [
-            ...$providerTools,
-            ...$builtTools,
-        ];
-
-        $previousResponseId = $request->providerOptions('previous_response_id');
-
         $requestBody = array_merge([
             'stream' => true,
             'model' => $request->model(),
@@ -76,10 +67,13 @@ class Stream extends BaseStream
             'top_p' => $request->topP(),
             'metadata' => $request->providerOptions('metadata'),
             'instructions' => $request->providerOptions('instructions'),
-            'previous_response_id' => $previousResponseId,
+            'previous_response_id' => $request->providerOptions('previous_response_id'),
             'truncation' => $request->providerOptions('truncation'),
             'reasoning' => $request->providerOptions('reasoning'),
-            'tools' => $mergedTools,
+            'tools' => [
+                ...$request->providerOptions('tools') ?? [],
+                ...$this->buildTools($request),
+            ],
             'tool_choice' => $request->providerOptions('tool_choice'),
         ]));
 
@@ -111,9 +105,9 @@ class Stream extends BaseStream
      */
     protected function handleToolCalls(
         Request $request,
-        string  $text,
-        array   $toolCalls,
-        int     $depth
+        string $text,
+        array $toolCalls,
+        int $depth
     ): Generator {
         $toolCalls = $this->mapToolCalls($toolCalls);
 

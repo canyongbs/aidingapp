@@ -37,7 +37,6 @@ import { ref } from 'vue';
 export const useAssistantStore = defineStore('assistant', () => {
     const assistantSendMessageUrl = ref(null);
     const selectTypeUrl = ref(null);
-    const selectPriorityUrl = ref(null);
     const updateFieldUrl = ref(null);
     const websocketsConfig = ref(null);
     const apiUrl = ref(null);
@@ -48,10 +47,6 @@ export const useAssistantStore = defineStore('assistant', () => {
 
     async function setSelectTypeUrl(url) {
         selectTypeUrl.value = url;
-    }
-
-    async function setSelectPriorityUrl(url) {
-        selectPriorityUrl.value = url;
     }
 
     async function setUpdateFieldUrl(url) {
@@ -77,12 +72,10 @@ export const useAssistantStore = defineStore('assistant', () => {
     return {
         assistantSendMessageUrl,
         selectTypeUrl,
-        selectPriorityUrl,
         updateFieldUrl,
         getAssistantSendMessageUrl,
         setAssistantSendMessageUrl,
         setSelectTypeUrl,
-        setSelectPriorityUrl,
         setUpdateFieldUrl,
         websocketsConfig,
         getWebsocketsConfig,
