@@ -120,6 +120,25 @@ class UpdateFormFieldTool extends Tool
         ]);
 
         if (! $isTextField) {
+            // Check if this field was already filled via widget
+            $submission = $draft->serviceRequestFormSubmission;
+
+            if ($submission) {
+                $existingValue = $submission->fields()
+                    ->where('service_request_form_field_id', $field_id)
+                    ->first();
+
+                if ($existingValue && $existingValue->pivot->response !== null && $existingValue->pivot->response !== '') {
+                    $result = json_encode([
+                        'success' => false,
+                        'hint' => "The \"{$field->label}\" field was already saved via widget selection. Check missing_required_fields in the last response for the next field to collect.",
+                    ]);
+                    $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
+
+                    return $result;
+                }
+            }
+
             $result = json_encode([
                 'success' => false,
                 'hint' => "This field requires a widget for proper input/validation (collection_method=\"show_field_input\"). Call show_field_input(field_id=\"{$field_id}\") to display the input, and ask a natural question in the same response.",
