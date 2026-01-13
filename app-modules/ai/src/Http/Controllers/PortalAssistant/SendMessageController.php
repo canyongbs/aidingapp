@@ -54,12 +54,13 @@ class SendMessageController
         $data = $request->validate([
             'content' => ['required', 'string', 'max:25000'],
             'thread_id' => ['nullable', 'uuid'],
-            'file_urls' => ['nullable', 'array', 'max:10'],
-            // Path must be tmp/{uuid}.{extension} - no path traversal allowed
+            'file_urls' => ['nullable', 'array', 'max:6'],
+            // Path must be tmp/filename_uuid.extension
+            // Allow alphanumeric, dash, underscore, space in filename
             'file_urls.*.path' => [
                 'required_with:file_urls',
                 'string',
-                'regex:/^tmp\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-zA-Z0-9]+$/i',
+                'regex:/^tmp\/[a-zA-Z0-9_\-\s]+_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.(pdf|xls|ppt|doc|pptx|xlsx|docx|jpg|jpeg|png|csv|md|markdown|mkd|txt|text|log|mp4|webm|ogg|quicktime|x-msvideo)$/i',
             ],
             'file_urls.*.original_name' => ['required_with:file_urls', 'string', 'max:255'],
         ]);
@@ -79,9 +80,22 @@ class SendMessageController
 
         // Handle file attachments if present
         $fileUrls = $data['file_urls'] ?? [];
+        $internalContent = null;
 
         if (! empty($fileUrls)) {
             $this->persistFileUploads($thread, $fileUrls);
+
+            // Build internal content about attached files
+            // Strip UUID from filenames for cleaner display to AI
+            $fileNames = collect($fileUrls)
+                ->pluck('original_name')
+                ->map(function ($filename) {
+                    // Remove the _uuid pattern before the extension
+                    return preg_replace('/_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\./i', '.', $filename);
+                })
+                ->implode(', ');
+            $fileCount = count($fileUrls);
+            $internalContent = "User attached {$fileCount} " . ($fileCount === 1 ? 'file' : 'files') . ": {$fileNames}";
         }
 
         dispatch(new SendMessage(
@@ -94,6 +108,7 @@ class SendMessageController
                 ),
                 'ip' => request()->ip(),
             ],
+            internalContent: $internalContent,
         ));
 
         return response()->json([
@@ -120,7 +135,7 @@ class SendMessageController
             return;
         }
 
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->execute($draft);
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
 
         $jobs = collect($fileUrls)->map(function (array $file) use ($draft, $uploadsMediaCollection) {
             return new PersistPortalAssistantUpload(

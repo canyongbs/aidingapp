@@ -47,7 +47,13 @@ class GetPortalAssistantUploadUrlRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'filename' => ['required', 'string', 'max:255'],
+            'filename' => [
+                'required',
+                'string',
+                'max:255',
+                // Only allow extensions that match the media collection
+                'regex:/\.(pdf|xls|ppt|doc|pptx|xlsx|docx|jpg|jpeg|png|csv|md|markdown|mkd|txt|text|log|mp4|webm|ogg|quicktime|x-msvideo)$/i',
+            ],
         ];
     }
 }

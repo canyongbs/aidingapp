@@ -99,7 +99,7 @@ class PersistPortalAssistantUpload implements ShouldQueue
             throw new InvalidArgumentException('Invalid path: must be within tmp/ directory');
         }
 
-        if (! preg_match('/^tmp\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-zA-Z0-9]+$/i', $this->path)) {
+        if (! preg_match('/^tmp\/[a-zA-Z0-9_\-\s]+_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-zA-Z0-9]+$/i', $this->path)) {
             throw new InvalidArgumentException('Invalid path: does not match expected format');
         }
     }

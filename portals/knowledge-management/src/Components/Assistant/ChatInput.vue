@@ -170,16 +170,16 @@
                 multiple
                 class="hidden"
                 @change="handleFileSelect"
-                accept="image/*,.pdf,.doc,.docx,.txt,.csv,.xls,.xlsx"
+                accept="image/jpeg,image/png,.pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.ppt,.pptx,.md,.log,.mp4,.webm,.ogg"
             />
 
             <!-- Attachment button (shown when enabled) -->
             <button
                 v-if="props.attachmentsEnabled"
                 @click="triggerFileInput"
+                v-tooltip="'Attach files (up to 6 files, 10MB each)'"
                 class="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg p-3 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-500 shrink-0"
-                aria-label="Attach files"
-                title="Attach files"
+                aria-label="Attach files to your request"
             >
                 <PaperClipIcon20 class="w-5 h-5" />
             </button>

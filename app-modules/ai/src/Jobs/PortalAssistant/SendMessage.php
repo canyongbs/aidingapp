@@ -346,9 +346,8 @@ EOT;
         $tools = [];
 
         if ($draft) {
-            // When a draft exists, get_draft_status and cancel are available
+            // Get draft status always available first
             $tools[] = new GetDraftStatusTool($this->thread);
-            $tools[] = new CancelServiceRequestTool($this->thread);
 
             // Phase-specific tools - progressively unlock as user completes steps
             // Users can always edit previously unlocked fields (go back)
@@ -360,6 +359,9 @@ EOT;
                 ServiceRequestDraftStage::ClarifyingQuestions => $this->addClarifyingTools($tools),
                 ServiceRequestDraftStage::Resolution => $this->addResolutionTools($tools, $aiResolutionSettings),
             };
+
+            // Cancel always last
+            $tools[] = new CancelServiceRequestTool($this->thread);
         } else {
             // When no draft exists, type selection tools are available
             $tools[] = new GetServiceRequestTypesForSuggestionTool($this->thread);

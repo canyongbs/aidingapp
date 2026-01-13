@@ -55,7 +55,31 @@ export function useFileUpload() {
     };
 
     const addFiles = async (fileList) => {
+        const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB in bytes
+        const MAX_FILES = 6;
+
+        // Check if adding these files would exceed the max
+        if (files.value.length + fileList.length > MAX_FILES) {
+            console.error(`[FileUpload] Cannot add files: Maximum ${MAX_FILES} files allowed`);
+            return;
+        }
+
         for (const file of fileList) {
+            // Validate file size
+            if (file.size > MAX_FILE_SIZE) {
+                const fileEntry = {
+                    id: ++fileIdCounter,
+                    file,
+                    originalName: file.name,
+                    path: null,
+                    progress: 0,
+                    status: 'error',
+                    error: 'File too large (max 10MB)',
+                };
+                files.value.push(fileEntry);
+                continue;
+            }
+
             const fileEntry = {
                 id: ++fileIdCounter,
                 file,
@@ -71,8 +95,11 @@ export function useFileUpload() {
     };
 
     const uploadFile = async (fileEntry) => {
+        const fileIndex = files.value.findIndex((f) => f.id === fileEntry.id);
+        if (fileIndex === -1) return;
+
         try {
-            fileEntry.status = 'uploading';
+            files.value[fileIndex].status = 'uploading';
 
             // Get presigned URL from backend
             const response = await axios.get(requestUploadUrl, {
@@ -80,7 +107,7 @@ export function useFileUpload() {
             });
 
             const { path, url, headers } = response.data;
-            fileEntry.path = path;
+            files.value[fileIndex].path = path;
 
             // Upload directly to S3 using presigned URL
             await axios.put(url, fileEntry.file, {
@@ -91,17 +118,17 @@ export function useFileUpload() {
                 onUploadProgress: (progressEvent) => {
                     if (progressEvent.total) {
                         const newProgress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
-                        fileEntry.progress = newProgress;
+                        files.value[fileIndex].progress = newProgress;
                     }
                 },
             });
 
-            fileEntry.status = 'complete';
-            fileEntry.progress = 100;
+            files.value[fileIndex].status = 'complete';
+            files.value[fileIndex].progress = 100;
         } catch (error) {
             console.error('[FileUpload] Upload failed:', error);
-            fileEntry.status = 'error';
-            fileEntry.error = error.message || 'Upload failed';
+            files.value[fileIndex].status = 'error';
+            files.value[fileIndex].error = error.message || 'Upload failed';
         }
     };
 

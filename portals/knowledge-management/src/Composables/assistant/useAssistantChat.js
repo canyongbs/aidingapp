@@ -76,6 +76,11 @@ export function useAssistantChat() {
                     activeWidget.value = messages.value[messageIndex].pendingWidget;
                     delete messages.value[messageIndex].pendingWidget;
                 }
+                // Enable file attachments if pending
+                if (messages.value[messageIndex].pendingFileAttachments) {
+                    fileUpload.enableAttachments();
+                    delete messages.value[messageIndex].pendingFileAttachments;
+                }
             }
             return;
         }
@@ -113,6 +118,11 @@ export function useAssistantChat() {
             if (messages.value[messageIndex].pendingWidget) {
                 activeWidget.value = messages.value[messageIndex].pendingWidget;
                 delete messages.value[messageIndex].pendingWidget;
+            }
+            // Enable file attachments if pending
+            if (messages.value[messageIndex].pendingFileAttachments) {
+                fileUpload.enableAttachments();
+                delete messages.value[messageIndex].pendingFileAttachments;
             }
         } else if (isComplete) {
             messages.value[messageIndex].shouldComplete = true;
@@ -158,16 +168,21 @@ export function useAssistantChat() {
     const connection = useAssistantConnection(websocketsConfig, getToken);
 
     const handleActionRequest = (actionType, params) => {
-        // Handle file attachments action specially - it doesn't show a widget
-        if (actionType === 'enable_file_attachments') {
-            fileUpload.enableAttachments();
-            return;
-        }
-
-        // Don't show widget until assistant response is complete
+        // Don't show widgets or enable attachments until assistant response is complete
         const messageIndex = messages.value.findIndex(
             (message) => message.author === 'assistant' && !message.isComplete,
         );
+
+        if (actionType === 'enable_file_attachments') {
+            if (messageIndex !== -1) {
+                // Store action to execute after response completes
+                messages.value[messageIndex].pendingFileAttachments = true;
+            } else {
+                // Response already complete, enable immediately
+                fileUpload.enableAttachments();
+            }
+            return;
+        }
 
         if (messageIndex !== -1) {
             // Store the widget to show after response completes

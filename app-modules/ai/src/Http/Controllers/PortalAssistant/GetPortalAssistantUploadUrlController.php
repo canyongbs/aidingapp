@@ -46,7 +46,16 @@ class GetPortalAssistantUploadUrlController extends Controller
 {
     public function __invoke(GetPortalAssistantUploadUrlRequest $request): JsonResponse
     {
-        $filename = sprintf('%s.%s', Str::uuid(), str($request->validated('filename'))->afterLast('.'));
+        $originalFilename = $request->validated('filename');
+        $extension = str($originalFilename)->afterLast('.');
+        $basename = str($originalFilename)->beforeLast('.');
+        
+        // Sanitize basename: remove special chars, keep alphanumeric, dash, underscore, and spaces
+        $sanitizedBasename = preg_replace('/[^a-zA-Z0-9_\-\s]/', '', $basename);
+        $sanitizedBasename = trim($sanitizedBasename);
+        
+        // Append UUID to preserve uniqueness: original-name_uuid.ext
+        $filename = sprintf('%s_%s.%s', $sanitizedBasename, Str::uuid(), $extension);
         $path = "tmp/{$filename}";
 
         return response()->json([
