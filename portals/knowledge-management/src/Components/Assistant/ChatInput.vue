@@ -32,10 +32,10 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed, nextTick, ref } from 'vue';
-    import { PaperAirplaneIcon } from '@heroicons/vue/24/outline';
     import { PaperClipIcon as PaperClipIcon16, XMarkIcon } from '@heroicons/vue/16/solid';
     import { PaperClipIcon as PaperClipIcon20 } from '@heroicons/vue/20/solid';
+    import { PaperAirplaneIcon } from '@heroicons/vue/24/outline';
+    import { computed, nextTick, ref } from 'vue';
 
     const emit = defineEmits(['send', 'addFiles', 'removeFile']);
 
