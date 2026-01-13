@@ -36,7 +36,6 @@
 
 namespace AidingApp\IntegrationOpenAi\Prism\AzureOpenAi\Handlers;
 
-use AidingApp\Ai\Tools\ConditionalTool;
 use AidingApp\IntegrationOpenAi\Prism\AzureOpenAi\Maps\MessageMap;
 use Generator;
 use Illuminate\Http\Client\RequestException;
@@ -45,43 +44,14 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Prism\Prism\Enums\ChunkType;
 use Prism\Prism\Providers\OpenAI\Handlers\Stream as BaseStream;
-use Prism\Prism\Providers\OpenAI\Maps\ToolMap;
 use Prism\Prism\Text\Chunk;
 use Prism\Prism\Text\Request;
-use Prism\Prism\Tool;
 use Prism\Prism\ValueObjects\Messages\AssistantMessage;
 use Prism\Prism\ValueObjects\Messages\ToolResultMessage;
-use Prism\Prism\ValueObjects\ProviderTool;
 use ReflectionClass;
 
 class Stream extends BaseStream
 {
-    /**
-     * Override buildTools to filter out unavailable conditional tools
-     */
-    protected function buildTools(Request $request): array
-    {
-        $filteredTools = array_values(array_filter(
-            $request->tools(),
-            fn (Tool $tool): bool => ! ($tool instanceof ConditionalTool) || $tool->isAvailable(),
-        ));
-
-        $tools = ToolMap::map($filteredTools);
-
-        if ($request->providerTools() === []) {
-            return $tools;
-        }
-
-        $providerTools = array_map(
-            fn (ProviderTool $tool): array => [
-                'type' => $tool->type,
-                ...$tool->options,
-            ],
-            $request->providerTools()
-        );
-
-        return array_merge($providerTools, $tools);
-    }
 
     protected function sendRequest(Request $request): Response
     {
@@ -148,12 +118,7 @@ class Stream extends BaseStream
             chunkType: ChunkType::ToolCall,
         );
 
-        $filteredTools = array_values(array_filter(
-            $request->tools(),
-            fn (Tool $tool): bool => ! ($tool instanceof ConditionalTool) || $tool->isAvailable(),
-        ));
-
-        $toolResults = $this->callTools($filteredTools, $toolCalls);
+        $toolResults = $this->callTools($request->tools(), $toolCalls);
 
         yield new Chunk(
             text: '',

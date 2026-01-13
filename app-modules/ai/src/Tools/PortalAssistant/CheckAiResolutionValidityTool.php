@@ -36,15 +36,17 @@
 
 namespace AidingApp\Ai\Tools\PortalAssistant;
 
+use AidingApp\Ai\Actions\PortalAssistant\GetDraftStatus;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiResolutionSettings;
-use AidingApp\Ai\Tools\ConditionalTool;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\SubmitsServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
+use Illuminate\Support\Facades\Log;
+use Prism\Prism\Tool;
 
-class CheckAiResolutionValidityTool extends ConditionalTool
+class CheckAiResolutionValidityTool extends Tool
 {
     use FindsDraftServiceRequest;
     use SubmitsServiceRequest;
@@ -57,16 +59,7 @@ class CheckAiResolutionValidityTool extends ConditionalTool
             ->for('Checks if an AI resolution meets the confidence threshold. Call this after clarifying questions when you have a potential solution. DO NOT show the resolution to the user until this tool returns meets_threshold: true.')
             ->withNumberParameter('confidence_score', 'Your confidence score from 0-100 that this resolution will help the user')
             ->withStringParameter('proposed_answer', 'The resolution text (do not show to user yet)')
-            ->using($this)
-            ->availableWhen(function () {
-                $draft = $this->findDraft();
-                if (! $draft) {
-                    return false;
-                }
-                
-                $stage = ServiceRequestDraftStage::fromServiceRequest($draft);
-                return $stage === ServiceRequestDraftStage::Resolution;
-            });
+            ->using($this);
     }
 
     public function __invoke(int $confidence_score, string $proposed_answer): string
@@ -83,9 +76,13 @@ class CheckAiResolutionValidityTool extends ConditionalTool
         $draftStage = ServiceRequestDraftStage::fromServiceRequest($draft);
 
         if ($draftStage !== ServiceRequestDraftStage::Resolution) {
+            // Too early - return draft status with next instruction
+            $draftStatus = app(GetDraftStatus::class)->execute($draft);
+
             return json_encode([
                 'success' => false,
-                'error' => 'Not in resolution stage. Current stage: ' . $draftStage?->value,
+                'error' => 'Not ready for resolution yet. Complete the required steps first.',
+                ...$draftStatus,
             ]);
         }
 
