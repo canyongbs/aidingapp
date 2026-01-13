@@ -45,7 +45,6 @@ use AidingApp\Ai\Support\StreamingChunks\Finish;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
 use AidingApp\Ai\Support\StreamingChunks\ToolCall;
-use AidingApp\Ai\Tools\ConditionalTool;
 use AidingApp\Ai\Tools\PortalAssistant\CancelServiceRequestTool;
 use AidingApp\Ai\Tools\PortalAssistant\CheckAiResolutionValidityTool;
 use AidingApp\Ai\Tools\PortalAssistant\EnableFileAttachmentsTool;

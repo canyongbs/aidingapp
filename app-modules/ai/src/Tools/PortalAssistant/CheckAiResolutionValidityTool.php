@@ -60,11 +60,13 @@ class CheckAiResolutionValidityTool extends ConditionalTool
             ->using($this)
             ->availableWhen(function () {
                 $draft = $this->findDraft();
+
                 if (! $draft) {
                     return false;
                 }
-                
+
                 $stage = ServiceRequestDraftStage::fromServiceRequest($draft);
+
                 return $stage === ServiceRequestDraftStage::Resolution;
             });
     }
