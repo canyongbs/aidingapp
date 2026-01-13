@@ -56,7 +56,7 @@ class SaveClarifyingQuestionAnswerTool extends Tool
     ) {
         $this
             ->as('save_clarifying_question_answer')
-            ->for('Records ONE clarifying question and its answer. Clarifying questions gather additional information you need to understand the user\'s situation - NOT form data re-collection. You MUST call this tool 3 times total - once after each user response. Call immediately after EACH answer with both the question and their response.')
+            ->for('Saves a Q&A pair. Call IMMEDIATELY after EACH user response - do NOT wait, do NOT batch. You must call this 3 times total, once per answer. If you have an unsaved answer, save it NOW before asking the next question.')
             ->withStringParameter('question', 'The exact clarifying question you asked (e.g., "When did this issue first start?")')
             ->withStringParameter('answer', 'The user\'s complete response to your question')
             ->using($this);
@@ -120,13 +120,17 @@ class SaveClarifyingQuestionAnswerTool extends Tool
 
         $draftStatus = app(GetDraftStatus::class)->execute($draft);
 
+        $saved = $clarifyingQuestionsCount + 1;
+        $remaining = 3 - $saved;
+
         $result = [
             'success' => true,
+            'questions_saved' => $saved,
+            'questions_remaining' => $remaining,
             ...$draftStatus,
         ];
 
-        $remaining = 3 - ($clarifyingQuestionsCount + 1);
-
+        // Override next_instruction with clear post-save guidance
         if ($remaining === 0) {
             $aiResolutionSettings = app(AiResolutionSettings::class);
 
@@ -136,7 +140,11 @@ class SaveClarifyingQuestionAnswerTool extends Tool
 
                 $result['request_number'] = $requestNumber;
                 $result['next_instruction'] = "Service request submitted for human review. Tell user: \"Your request number is {$requestNumber}. A team member will follow up to help resolve this.\"";
+            } else {
+                $result['next_instruction'] = '3/3 questions saved. All clarifying questions complete - proceed to resolution stage.';
             }
+        } else {
+            $result['next_instruction'] = sprintf('%d/3 saved. NOW ask your next clarifying question (topics: when it started, what they\'ve tried, error messages, urgency).', $saved);
         }
 
         return json_encode($result);

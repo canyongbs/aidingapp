@@ -316,23 +316,16 @@ class GetDraftStatus
             return 'All 3 clarifying questions complete. Request will be submitted for review.';
         }
 
-        $transitionMessage = $completed === 0
-            ? 'Tell the user you\'ll ask 3 questions before submitting their request. Then ask your first question naturally (do NOT say "Question 1 of 3").'
-            : 'Ask your next question naturally (do NOT say "Question X of 3").';
+        // Front-load the SAVE instruction since that's what the AI tends to forget
+        if ($completed === 0) {
+            return sprintf(
+                'Tell the user you\'ll ask a few quick questions. Ask your first question naturally. Good topics: when it started, what they\'ve tried, error messages, urgency. AFTER they answer: call save_clarifying_question_answer IMMEDIATELY before saying anything else. (%d/3 saved)',
+                $completed
+            );
+        }
 
         return sprintf(
-            '%s
-
-IMPORTANT: You have access to all previously collected data in the response (title, description, filled_form_fields). Use this context to ask clarifying questions that gather ADDITIONAL information you need - NOT to re-collect form data already provided. Ask focused questions about context, urgency, troubleshooting history, or other relevant details.
-
-Examples of good clarifying questions:
-- "When did this issue first start happening?"
-- "Have you tried anything to resolve this already?"
-- "Is this blocking your work right now?"
-- "Are there any error messages you\'re seeing?"
-
-After they answer, you MUST call save_clarifying_question_answer(question="<your question>", answer="<their answer>") to record it. (%d of 3 questions completed)',
-            $transitionMessage,
+            'SAVE FIRST: Call save_clarifying_question_answer(question="<your last question>", answer="<user\'s response>") NOW. Then ask your next clarifying question. Good topics: when it started, what they\'ve tried, error messages, urgency. (%d/3 saved)',
             $completed
         );
     }
