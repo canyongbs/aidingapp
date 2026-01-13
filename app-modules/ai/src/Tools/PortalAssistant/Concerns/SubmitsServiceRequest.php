@@ -71,15 +71,11 @@ trait SubmitsServiceRequest
             // Resolution accepted - close the ticket
             $status = ServiceRequestStatus::query()
                 ->where('classification', SystemServiceRequestClassification::Closed)
-                ->where('name', 'Resolved')
-                ->where('is_system_protected', true)
                 ->first();
         } else {
             // Resolution rejected or not attempted - open for human review
             $status = ServiceRequestStatus::query()
                 ->where('classification', SystemServiceRequestClassification::Open)
-                ->where('name', 'New')
-                ->where('is_system_protected', true)
                 ->first();
         }
 
