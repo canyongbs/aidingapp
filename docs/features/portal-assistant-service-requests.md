@@ -358,6 +358,7 @@ The AI receives general guidance in the system context. Detailed tool-specific i
 Action tools (`update_form_field`, `update_description`, `update_title`, `save_clarifying_question`, etc.) return the full draft status in their response. The AI does not need to call `get_draft_status` after each action—the next instruction is included in the tool response.
 
 `get_draft_status` is primarily needed:
+
 - At conversation start to understand current state (if resuming a draft)
 - As a fallback if the AI loses track of state
 
@@ -394,29 +395,30 @@ This section documents a complete conversation from the assistant's perspective,
 
 **Available Tools:**
 
-| Tool | Description |
-|------|-------------|
-| `fetch_service_request_types` | STEP 1: Retrieves the complete list of available service request types. Call this ONLY when: (1) User first expresses intent to submit a NEW service request, or (2) User explicitly wants to CHANGE to a different type. DO NOT call if already working on a draft unless user explicitly requests to change types. Returns a types_tree to analyze before calling show_type_selector. |
-| `show_type_selector` | STEP 2: Displays a UI widget to select a service request type. Call this AFTER fetch_service_request_types ONLY when starting a NEW request or when user explicitly wants to CHANGE types. DO NOT call if already collecting data for an existing draft. If you identified a strong match in the types_tree, you MUST pass that exact type_id UUID as suggested_type_id parameter. If no match, omit the parameter entirely. |
-| `get_draft_status` | Returns the current draft state with form fields, missing requirements, and next_instruction. Call at conversation start if resuming a draft, or as a fallback if you lose track of state. Action tools already include this info in their responses. |
+| Tool                          | Description                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fetch_service_request_types` | STEP 1: Retrieves the complete list of available service request types. Call this ONLY when: (1) User first expresses intent to submit a NEW service request, or (2) User explicitly wants to CHANGE to a different type. DO NOT call if already working on a draft unless user explicitly requests to change types. Returns a types_tree to analyze before calling show_type_selector.                                      |
+| `show_type_selector`          | STEP 2: Displays a UI widget to select a service request type. Call this AFTER fetch_service_request_types ONLY when starting a NEW request or when user explicitly wants to CHANGE types. DO NOT call if already collecting data for an existing draft. If you identified a strong match in the types_tree, you MUST pass that exact type_id UUID as suggested_type_id parameter. If no match, omit the parameter entirely. |
+| `get_draft_status`            | Returns the current draft state with form fields, missing requirements, and next_instruction. Call at conversation start if resuming a draft, or as a fallback if you lose track of state. Action tools already include this info in their responses.                                                                                                                                                                        |
 
 **Assistant Decision:** User wants to submit a service request. Call `fetch_service_request_types`.
 
 **Tool Call:** `fetch_service_request_types()`
 
 **Tool Response:**
+
 ```json
 {
-  "types_tree": [
-    {
-      "name": "IT Support",
-      "types": [
-        {"type_id": "a1b2c3d4-...", "name": "Password Reset"},
-        {"type_id": "e5f6g7h8-...", "name": "Software Installation"}
-      ]
-    }
-  ],
-  "next_instruction": "Analyze types_tree. Call show_type_selector(suggested_type_id=\"<uuid>\") if match found, otherwise show_type_selector() with no parameters."
+    "types_tree": [
+        {
+            "name": "IT Support",
+            "types": [
+                { "type_id": "a1b2c3d4-...", "name": "Password Reset" },
+                { "type_id": "e5f6g7h8-...", "name": "Software Installation" }
+            ]
+        }
+    ],
+    "next_instruction": "Analyze types_tree. Call show_type_selector(suggested_type_id=\"<uuid>\") if match found, otherwise show_type_selector() with no parameters."
 }
 ```
 
@@ -425,11 +427,12 @@ This section documents a complete conversation from the assistant's perspective,
 **Tool Call:** `show_type_selector(suggested_type_id="a1b2c3d4-...")`
 
 **Tool Response:**
+
 ```json
 {
-  "success": true,
-  "suggested_type_name": "Password Reset",
-  "next_instruction": "Tell user: \"Based on what you described, I think 'Password Reset' might be what you need. Please confirm or select a different type from the options above.\" Then wait for their selection."
+    "success": true,
+    "suggested_type_name": "Password Reset",
+    "next_instruction": "Tell user: \"Based on what you described, I think 'Password Reset' might be what you need. Please confirm or select a different type from the options above.\" Then wait for their selection."
 }
 ```
 
@@ -446,36 +449,33 @@ This section documents a complete conversation from the assistant's perspective,
 **Note:** This is NOT a regular user message. The frontend sends the selection to `SelectServiceRequestTypeController`, which creates the draft and dispatches `SendMessage` with a Developer message.
 
 **Developer Message (internal_content):**
+
 ```json
 {
-  "event": "type_selected",
-  "draft_stage": "data_collection",
-  "type_name": "Password Reset",
-  "title": null,
-  "description": null,
-  "missing_required_fields": [
-    {"field_id": "f1f2f3f4-...", "label": "Student ID", "type": "text"}
-  ],
-  "missing_optional_fields": [
-    {"field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea"}
-  ],
-  "has_custom_form_fields": true,
-  "next_instruction": "Ask naturally for their student id (e.g., \"What's your student id?\"). After they respond, call update_form_field(field_id=\"f1f2f3f4-...\", value=\"<their response>\")."
+    "event": "type_selected",
+    "draft_stage": "data_collection",
+    "type_name": "Password Reset",
+    "title": null,
+    "description": null,
+    "missing_required_fields": [{ "field_id": "f1f2f3f4-...", "label": "Student ID", "type": "text" }],
+    "missing_optional_fields": [{ "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea" }],
+    "has_custom_form_fields": true,
+    "next_instruction": "Ask naturally for their student id (e.g., \"What's your student id?\"). After they respond, call update_form_field(field_id=\"f1f2f3f4-...\", value=\"<their response>\")."
 }
 ```
 
 **Available Tools:**
 
-| Tool | Description |
-|------|-------------|
-| `get_draft_status` | Returns the current draft state with form fields, missing requirements, and next_instruction. Call at conversation start if resuming a draft, or as a fallback if you lose track of state. Action tools already include this info in their responses. |
-| `cancel_service_request` | Cancels the current service request draft, allowing the user to start over or select a different request type. Use when the user wants to abandon their current request, change to a different type, or start fresh. The draft is preserved and can be restored if the user selects the same type again. |
-| `update_form_field` | Saves a user's response to a text-based form field. Call this AFTER the user provides their answer to your question. For complex fields (select, date, signature), use show_field_input instead to display a widget. |
-| `show_field_input` | Displays a UI widget for complex form fields like selects, radio buttons, dates, phone numbers, addresses, or signatures. Do NOT use this for simple text fields. IMPORTANT: In the SAME response where you call this tool, also ask the user a natural question about what information you need. Do both together - ask the question AND call this tool in a single response. |
-| `update_description` | Saves the user's description of their issue. Call this AFTER the user describes their problem. Pass their full response as the description parameter. |
-| `request_file_attachments` | Enables optional file attachment capability for the user. Call this BEFORE asking for the description to allow users to attach supporting files (screenshots, documents, etc.) with their message. The attachment UI will be enabled until the user sends their next message. |
-| `update_title` | Saves the service request title. Call this AFTER suggesting a title and the user confirms it. Keep titles concise (under 10 words) and descriptive of the core issue. |
-| `save_clarifying_question` | Records your question and the user's answer. Call this IMMEDIATELY after the user answers your clarifying question - pass both what you asked AND their response. You must ask exactly 3 clarifying questions total. Focus on SPECIFIC details about their situation, not generic troubleshooting. |
+| Tool                       | Description                                                                                                                                                                                                                                                                                                                                                                    |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `get_draft_status`         | Returns the current draft state with form fields, missing requirements, and next_instruction. Call at conversation start if resuming a draft, or as a fallback if you lose track of state. Action tools already include this info in their responses.                                                                                                                          |
+| `cancel_service_request`   | Cancels the current service request draft, allowing the user to start over or select a different request type. Use when the user wants to abandon their current request, change to a different type, or start fresh. The draft is preserved and can be restored if the user selects the same type again.                                                                       |
+| `update_form_field`        | Saves a user's response to a text-based form field. Call this AFTER the user provides their answer to your question. For complex fields (select, date, signature), use show_field_input instead to display a widget.                                                                                                                                                           |
+| `show_field_input`         | Displays a UI widget for complex form fields like selects, radio buttons, dates, phone numbers, addresses, or signatures. Do NOT use this for simple text fields. IMPORTANT: In the SAME response where you call this tool, also ask the user a natural question about what information you need. Do both together - ask the question AND call this tool in a single response. |
+| `update_description`       | Saves the user's description of their issue. Call this AFTER the user describes their problem. Pass their full response as the description parameter.                                                                                                                                                                                                                          |
+| `request_file_attachments` | Enables optional file attachment capability for the user. Call this BEFORE asking for the description to allow users to attach supporting files (screenshots, documents, etc.) with their message. The attachment UI will be enabled until the user sends their next message.                                                                                                  |
+| `update_title`             | Saves the service request title. Call this AFTER suggesting a title and the user confirms it. Keep titles concise (under 10 words) and descriptive of the core issue.                                                                                                                                                                                                          |
+| `save_clarifying_question` | Records your question and the user's answer. Call this IMMEDIATELY after the user answers your clarifying question - pass both what you asked AND their response. You must ask exactly 3 clarifying questions total. Focus on SPECIFIC details about their situation, not generic troubleshooting.                                                                             |
 
 **Does assistant know what to do?** ✅ Yes - Developer message includes conversational guidance: `"Ask naturally for their student id (e.g., \"What's your student id?\")..."` with the exact field_id and tool call format.
 
@@ -494,21 +494,18 @@ This section documents a complete conversation from the assistant's perspective,
 **Tool Call:** `update_form_field(field_id="f1f2f3f4-...", value="A00123456")`
 
 **Tool Response:**
+
 ```json
 {
-  "success": true,
-  "draft_stage": "data_collection",
-  "type_name": "Password Reset",
-  "title": null,
-  "description": null,
-  "missing_required_fields": [
-    {"field_id": "description", "label": "Description", "type": "description"}
-  ],
-  "missing_optional_fields": [
-    {"field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea"}
-  ],
-  "has_custom_form_fields": true,
-  "next_instruction": "Call request_file_attachments() first. Then ask: \"Is there anything else you'd like to add about this request? Feel free to attach any files if helpful.\" After they respond, call update_description(description=\"<their response>\"). Optional fields available if relevant: Additional Notes. Only ask about these if they seem useful based on context."
+    "success": true,
+    "draft_stage": "data_collection",
+    "type_name": "Password Reset",
+    "title": null,
+    "description": null,
+    "missing_required_fields": [{ "field_id": "description", "label": "Description", "type": "description" }],
+    "missing_optional_fields": [{ "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea" }],
+    "has_custom_form_fields": true,
+    "next_instruction": "Call request_file_attachments() first. Then ask: \"Is there anything else you'd like to add about this request? Feel free to attach any files if helpful.\" After they respond, call update_description(description=\"<their response>\"). Optional fields available if relevant: Additional Notes. Only ask about these if they seem useful based on context."
 }
 ```
 
@@ -517,10 +514,11 @@ This section documents a complete conversation from the assistant's perspective,
 **Tool Call:** `request_file_attachments()`
 
 **Tool Response:**
+
 ```json
 {
-  "success": true,
-  "next_instruction": "File attachments enabled. Now ask: \"Can you describe what's happening? Feel free to attach any screenshots or files if that helps.\" After they respond, call update_description(description=\"<their response>\")."
+    "success": true,
+    "next_instruction": "File attachments enabled. Now ask: \"Can you describe what's happening? Feel free to attach any screenshots or files if that helps.\" After they respond, call update_description(description=\"<their response>\")."
 }
 ```
 
@@ -541,21 +539,18 @@ This section documents a complete conversation from the assistant's perspective,
 **Tool Call:** `update_description(description="When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.")`
 
 **Tool Response:**
+
 ```json
 {
-  "success": true,
-  "draft_stage": "data_collection",
-  "type_name": "Password Reset",
-  "title": null,
-  "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
-  "missing_required_fields": [
-    {"field_id": "title", "label": "Title", "type": "title"}
-  ],
-  "missing_optional_fields": [
-    {"field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea"}
-  ],
-  "has_custom_form_fields": true,
-  "next_instruction": "Based on what they've told you, suggest a short title. Say something like: \"I'll title this '[your suggested title]' - does that work?\" After they confirm (or suggest changes), call update_title(title=\"<final title>\"). Optional fields available if relevant: Additional Notes. Only ask about these if they seem useful based on context."
+    "success": true,
+    "draft_stage": "data_collection",
+    "type_name": "Password Reset",
+    "title": null,
+    "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
+    "missing_required_fields": [{ "field_id": "title", "label": "Title", "type": "title" }],
+    "missing_optional_fields": [{ "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea" }],
+    "has_custom_form_fields": true,
+    "next_instruction": "Based on what they've told you, suggest a short title. Say something like: \"I'll title this '[your suggested title]' - does that work?\" After they confirm (or suggest changes), call update_title(title=\"<final title>\"). Optional fields available if relevant: Additional Notes. Only ask about these if they seem useful based on context."
 }
 ```
 
@@ -576,15 +571,16 @@ This section documents a complete conversation from the assistant's perspective,
 **Tool Call:** `update_title(title="Cannot log into student portal - invalid credentials error")`
 
 **Tool Response:**
+
 ```json
 {
-  "success": true,
-  "draft_stage": "clarifying_questions",
-  "type_name": "Password Reset",
-  "title": "Cannot log into student portal - invalid credentials error",
-  "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
-  "questions_completed": 0,
-  "next_instruction": "Ask clarifying question 1 of 3. Ask a specific question about WHEN or HOW the issue started (e.g., \"When did you first notice this problem?\" or \"What were you doing when this happened?\"). After they answer, call save_clarifying_question(question=\"<your question>\", answer=\"<their answer>\")."
+    "success": true,
+    "draft_stage": "clarifying_questions",
+    "type_name": "Password Reset",
+    "title": "Cannot log into student portal - invalid credentials error",
+    "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
+    "questions_completed": 0,
+    "next_instruction": "Ask clarifying question 1 of 3. Ask a specific question about WHEN or HOW the issue started (e.g., \"When did you first notice this problem?\" or \"What were you doing when this happened?\"). After they answer, call save_clarifying_question(question=\"<your question>\", answer=\"<their answer>\")."
 }
 ```
 
@@ -605,15 +601,16 @@ This section documents a complete conversation from the assistant's perspective,
 **Tool Call:** `save_clarifying_question(question="When did you first notice this problem - was it working fine before today?", answer="It was working yesterday, the problem started this morning")`
 
 **Tool Response:**
+
 ```json
 {
-  "success": true,
-  "draft_stage": "clarifying_questions",
-  "type_name": "Password Reset",
-  "title": "Cannot log into student portal - invalid credentials error",
-  "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
-  "questions_completed": 1,
-  "next_instruction": "Ask clarifying question 2 of 3. Ask about what they've ALREADY TRIED or any ERROR MESSAGES they saw (e.g., \"Have you tried any troubleshooting steps?\" or \"Did you see any error messages?\"). After they answer, call save_clarifying_question(question=\"<your question>\", answer=\"<their answer>\")."
+    "success": true,
+    "draft_stage": "clarifying_questions",
+    "type_name": "Password Reset",
+    "title": "Cannot log into student portal - invalid credentials error",
+    "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
+    "questions_completed": 1,
+    "next_instruction": "Ask clarifying question 2 of 3. Ask about what they've ALREADY TRIED or any ERROR MESSAGES they saw (e.g., \"Have you tried any troubleshooting steps?\" or \"Did you see any error messages?\"). After they answer, call save_clarifying_question(question=\"<your question>\", answer=\"<their answer>\")."
 }
 ```
 
@@ -632,15 +629,16 @@ This section documents a complete conversation from the assistant's perspective,
 **Tool Call:** `save_clarifying_question(question="Are you typing your password manually or using a saved/autofill password from your browser?", answer="I'm using the saved password from Chrome")`
 
 **Tool Response:**
+
 ```json
 {
-  "success": true,
-  "draft_stage": "clarifying_questions",
-  "type_name": "Password Reset",
-  "title": "Cannot log into student portal - invalid credentials error",
-  "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
-  "questions_completed": 2,
-  "next_instruction": "Ask clarifying question 3 of 3. Ask about their ENVIRONMENT or URGENCY (e.g., \"Are you able to work around this for now?\" or \"Is this affecting anyone else?\"). After they answer, call save_clarifying_question(question=\"<your question>\", answer=\"<their answer>\")."
+    "success": true,
+    "draft_stage": "clarifying_questions",
+    "type_name": "Password Reset",
+    "title": "Cannot log into student portal - invalid credentials error",
+    "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
+    "questions_completed": 2,
+    "next_instruction": "Ask clarifying question 3 of 3. Ask about their ENVIRONMENT or URGENCY (e.g., \"Are you able to work around this for now?\" or \"Is this affecting anyone else?\"). After they answer, call save_clarifying_question(question=\"<your question>\", answer=\"<their answer>\")."
 }
 ```
 
@@ -656,22 +654,23 @@ This section documents a complete conversation from the assistant's perspective,
 
 **Available Tools:** Same as Turn 2, plus:
 
-| Tool | Description |
-|------|-------------|
+| Tool                           | Description                                                                                                                                                                                                               |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `check_ai_resolution_validity` | Checks if an AI resolution meets the confidence threshold. Call this after clarifying questions when you have a potential solution. DO NOT show the resolution to the user until this tool returns meets_threshold: true. |
 
 **Tool Call:** `save_clarifying_question(question="Have you tried logging in from a different browser or device to see if the issue persists?", answer="No I haven't tried that")`
 
 **Tool Response:**
+
 ```json
 {
-  "success": true,
-  "draft_stage": "resolution",
-  "type_name": "Password Reset",
-  "title": "Cannot log into student portal - invalid credentials error",
-  "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
-  "questions_completed": 3,
-  "next_instruction": "Based on everything the user told you, formulate a helpful resolution. Call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer=\"<your detailed resolution>\"). The tool will tell you whether to present it or auto-submit for human review."
+    "success": true,
+    "draft_stage": "resolution",
+    "type_name": "Password Reset",
+    "title": "Cannot log into student portal - invalid credentials error",
+    "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
+    "questions_completed": 3,
+    "next_instruction": "Based on everything the user told you, formulate a helpful resolution. Call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer=\"<your detailed resolution>\"). The tool will tell you whether to present it or auto-submit for human review."
 }
 ```
 
@@ -680,10 +679,11 @@ This section documents a complete conversation from the assistant's perspective,
 **Tool Call:** `check_ai_resolution_validity(confidence_score=82, proposed_answer="Based on your situation, the issue is likely with Chrome's saved password. Try these steps: 1) Go to Chrome settings > Passwords, 2) Find and delete the saved password for the student portal, 3) Go back to the login page and type your password manually. If this doesn't work, try the 'Forgot Password' link to reset it.")`
 
 **Tool Response:**
+
 ```json
 {
-  "meets_threshold": true,
-  "next_instruction": "Present your resolution to the user in a helpful way. End by asking: \"Does this help resolve your issue?\" Based on their response, call record_resolution_response(accepted=true) if they say yes, or record_resolution_response(accepted=false) if they say no or need more help."
+    "meets_threshold": true,
+    "next_instruction": "Present your resolution to the user in a helpful way. End by asking: \"Does this help resolve your issue?\" Based on their response, call record_resolution_response(accepted=true) if they say yes, or record_resolution_response(accepted=false) if they say no or need more help."
 }
 ```
 
@@ -707,8 +707,8 @@ Does this help resolve your issue?"
 
 **Available Tools:** Same as Turn 8, plus:
 
-| Tool | Description |
-|------|-------------|
+| Tool                         | Description                                                                                                                           |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | `record_resolution_response` | Records the user's response to your resolution attempt. Call this after presenting a resolution and getting explicit yes/no feedback. |
 
 **Assistant Decision:** User said resolution didn't work. Call `record_resolution_response` with accepted=false.
@@ -716,11 +716,12 @@ Does this help resolve your issue?"
 **Tool Call:** `record_resolution_response(accepted=false)`
 
 **Tool Response:**
+
 ```json
 {
-  "success": true,
-  "request_number": "SR-2026-00542",
-  "next_instruction": "Tell user: \"Your request number is SR-2026-00542. A team member will follow up to help resolve this.\""
+    "success": true,
+    "request_number": "SR-2026-00542",
+    "next_instruction": "Tell user: \"Your request number is SR-2026-00542. A team member will follow up to help resolve this.\""
 }
 ```
 
@@ -736,17 +737,17 @@ At each turn, the assistant knows what to do because:
 
 1. **Tool descriptions** explain WHEN to use each tool (after user responds, not before)
 2. **Tool responses** include `next_instruction` with:
-   - Conversational prompts to use (e.g., "Ask: 'Can you describe what's happening?'")
-   - Explicit tool calls with parameters (e.g., `update_form_field(field_id="...", value="...")`)
-   - Guidance on question types for clarifying questions
-   - List of optional fields the AI can ask about if relevant
+    - Conversational prompts to use (e.g., "Ask: 'Can you describe what's happening?'")
+    - Explicit tool calls with parameters (e.g., `update_form_field(field_id="...", value="...")`)
+    - Guidance on question types for clarifying questions
+    - List of optional fields the AI can ask about if relevant
 3. **Draft status** is stage-appropriate:
-   - `data_collection`: `missing_required_fields`, `missing_optional_fields` with field_id, label, type; `has_custom_form_fields` flag
-   - `clarifying_questions`/`resolution`: `questions_completed` counter with question-type guidance
+    - `data_collection`: `missing_required_fields`, `missing_optional_fields` with field_id, label, type; `has_custom_form_fields` flag
+    - `clarifying_questions`/`resolution`: `questions_completed` counter with question-type guidance
 4. **Context-aware prompts**:
-   - If form has custom fields, description prompt says "anything else to add" (since form captured details)
-   - If no custom fields, description prompt asks to "describe what's happening"
-   - Complex fields (select, date): AI calls `show_field_input` AND asks a natural question in same response
+    - If form has custom fields, description prompt says "anything else to add" (since form captured details)
+    - If no custom fields, description prompt asks to "describe what's happening"
+    - Complex fields (select, date): AI calls `show_field_input` AND asks a natural question in same response
 5. **Stage transitions** are automatic and visible in the response (`draft_stage` changes)
 6. **Minimal context pollution** - only relevant data for the current stage is included
 
