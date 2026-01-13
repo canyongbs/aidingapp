@@ -367,8 +367,8 @@ EOT;
 
             match ($draftStage) {
                 ServiceRequestDraftStage::DataCollection => $this->addDataCollectionTools($tools, $draft),
-                ServiceRequestDraftStage::ClarifyingQuestions => $this->addClarifyingTools($tools),
-                ServiceRequestDraftStage::Resolution => $this->addResolutionTools($tools, $aiResolutionSettings),
+                ServiceRequestDraftStage::ClarifyingQuestions => $this->addClarifyingTools($tools, $aiResolutionSettings),
+                ServiceRequestDraftStage::Resolution => $this->addResolutionTools($tools, $aiResolutionSettings, $draft),
             };
 
             // Cancel always last
@@ -481,64 +481,34 @@ EOT;
     /**
      * Add tools for clarifying questions phase
      */
-    protected function addClarifyingTools(array &$tools): void
+    protected function addClarifyingTools(array &$tools, AiResolutionSettings $aiResolutionSettings): void
     {
         $tools[] = new SaveClarifyingQuestionAnswerTool($this->thread);
 
-        // No other tools - SaveClarifyingQuestionAnswerTool handles auto-submission if resolution disabled
+        if (! $aiResolutionSettings->is_enabled) {
+            return;
+        }
+
+        $tools[] = new CheckAiResolutionValidityTool($this->thread);
     }
 
     /**
      * Add tools for resolution phase
-     *
-     * @param mixed $aiResolutionSettings
      */
-    protected function addResolutionTools(array &$tools, $aiResolutionSettings): void
+    protected function addResolutionTools(array &$tools, AiResolutionSettings $aiResolutionSettings, ServiceRequest $draft): void
     {
         if (! $aiResolutionSettings->is_enabled) {
             return;
         }
 
-        $draft = null;
+        $hasAiResolutionProposed = $draft->serviceRequestUpdates()
+            ->where('update_type', ServiceRequestUpdateType::AiResolutionProposed)
+            ->exists();
 
-        if ($this->thread->current_service_request_draft_id) {
-            $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
-                ->where('id', $this->thread->current_service_request_draft_id)
-                ->where('is_draft', true)
-                ->first();
-        }
-
-        if (! $draft) {
-            return;
-        }
-
-        $draftStage = ServiceRequestDraftStage::fromServiceRequest($draft);
-
-        // CheckAiResolutionValidityTool is available during ClarifyingQuestions stage and Resolution stage (before submission)
-        if (in_array($draftStage, [ServiceRequestDraftStage::ClarifyingQuestions, ServiceRequestDraftStage::Resolution])) {
-            // Only add if resolution hasn't been submitted yet
-            $hasResolutionSubmitted = $draft->serviceRequestUpdates()
-                ->where('update_type', ServiceRequestUpdateType::AiResolutionSubmitted)
-                ->exists();
-
-            if (! $hasResolutionSubmitted) {
-                $tools[] = new CheckAiResolutionValidityTool($this->thread);
-            }
-        }
-
-        // RecordResolutionResponseTool is only available in Resolution stage after AI proposes resolution with sufficient confidence
-        if ($draftStage === ServiceRequestDraftStage::Resolution) {
-            $hasAiResolutionProposed = $draft->serviceRequestUpdates()
-                ->where('update_type', ServiceRequestUpdateType::AiResolutionProposed)
-                ->exists();
-
-            if ($hasAiResolutionProposed && $draft->ai_resolution_confidence_score) {
-                $threshold = $aiResolutionSettings->confidence_threshold;
-
-                if ($draft->ai_resolution_confidence_score >= $threshold) {
-                    $tools[] = new RecordResolutionResponseTool($this->thread);
-                }
-            }
+        if ($hasAiResolutionProposed) {
+            $tools[] = new RecordResolutionResponseTool($this->thread);
+        } else {
+            $tools[] = new CheckAiResolutionValidityTool($this->thread);
         }
     }
 }
