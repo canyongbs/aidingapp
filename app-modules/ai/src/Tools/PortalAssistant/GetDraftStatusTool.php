@@ -40,6 +40,8 @@ use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
+use AidingApp\Form\Filament\Blocks\TextAreaFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -295,7 +297,7 @@ class GetDraftStatusTool extends Tool
             foreach ($result['form_fields'] ?? [] as $field) {
                 if ($field['field_id'] === $firstMissing) {
                     // Check if it's a complex field that needs a widget
-                    if (in_array($field['type'], ['select', 'radio', 'checkbox', 'checkboxes', 'date', 'file_upload'])) {
+                    if (! in_array($field['type'], [TextInputFormFieldBlock::type(), TextAreaFormFieldBlock::type()])) {
                         return sprintf(
                             'CRITICAL: In your response, ask the user a natural question about "%s" AND IMMEDIATELY call show_field_input with field_id "%s" in the SAME response. Do both actions together - question + tool call. Example question: Don\'t ask "Printer Type?" - instead ask "What type of printer is it?" IMPORTANT: Do NOT list the available options in your question - the widget will display them.',
                             $field['label'],

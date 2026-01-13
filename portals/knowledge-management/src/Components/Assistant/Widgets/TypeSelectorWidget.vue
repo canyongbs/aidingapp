@@ -187,7 +187,7 @@
                 <!-- Cancel Button -->
                 <button
                     @click="emit('cancel')"
-                    class="w-full px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                    class="w-full px-3 py-2 text-sm text-gray-600 bg-white hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
                 >
                     Cancel
                 </button>
@@ -259,7 +259,7 @@
                 <!-- Cancel Button -->
                 <button
                     @click="emit('cancel')"
-                    class="w-full px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+                    class="w-full px-3 py-2 text-sm text-gray-600 bg-white hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
                 >
                     Cancel
                 </button>
