@@ -37,11 +37,18 @@
 namespace AidingApp\IntegrationOpenAi\Prism\AzureOpenAi\Handlers;
 
 use AidingApp\IntegrationOpenAi\Prism\AzureOpenAi\Maps\MessageMap;
+use Generator;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
+use Prism\Prism\Enums\ChunkType;
 use Prism\Prism\Providers\OpenAI\Handlers\Stream as BaseStream;
+use Prism\Prism\Text\Chunk;
 use Prism\Prism\Text\Request;
+use Prism\Prism\ValueObjects\Messages\AssistantMessage;
+use Prism\Prism\ValueObjects\Messages\ToolResultMessage;
+use ReflectionClass;
 
 class Stream extends BaseStream
 {
@@ -81,54 +88,54 @@ class Stream extends BaseStream
                 ->client
                 ->withOptions(['stream' => true])
                 ->post('responses', $requestBody);
-        } catch (\Illuminate\Http\Client\RequestException $e) {
+        } catch (RequestException $exception) {
             Log::error('[AzureOpenAI Stream] Request failed', [
-                'status' => $e->response->status(),
-                'body' => $e->response->body(),
-                'json' => $e->response->json(),
+                'status' => $exception->response->status(),
+                'body' => $exception->response->body(),
+                'json' => $exception->response->json(),
             ]);
-            
-            throw $e;
+
+            throw $exception;
         }
     }
 
     /**
      * Override handleToolCalls to only send newly added messages during tool execution loops.
-     * 
+     *
      * During tool loops, we only want to send the function_call and function_call_output,
      * not the assistant's text content (which was already sent in the previous iteration).
      * This avoids sending duplicate messages on each iteration.
-     * 
-     * Note: previous_response_id is NOT used during tool loops since the response hasn't 
+     *
+     * Note: previous_response_id is NOT used during tool loops since the response hasn't
      * been saved to the database yet. It's only available between user messages.
      */
     protected function handleToolCalls(
-        \Prism\Prism\Text\Request $request,
-        string $text,
-        array $toolCalls,
-        int $depth
-    ): \Generator {
+        Request $request,
+        string  $text,
+        array   $toolCalls,
+        int     $depth
+    ): Generator {
         $toolCalls = $this->mapToolCalls($toolCalls);
 
-        yield new \Prism\Prism\Text\Chunk(
+        yield new Chunk(
             text: '',
             toolCalls: $toolCalls,
-            chunkType: \Prism\Prism\Enums\ChunkType::ToolCall,
+            chunkType: ChunkType::ToolCall,
         );
 
         $toolResults = $this->callTools($request->tools(), $toolCalls);
 
-        yield new \Prism\Prism\Text\Chunk(
+        yield new Chunk(
             text: '',
             toolResults: $toolResults,
-            chunkType: \Prism\Prism\Enums\ChunkType::ToolResult,
+            chunkType: ChunkType::ToolResult,
         );
 
         // Track how many messages exist before we add new ones
         $messageCountBefore = count($request->messages());
 
-        $request->addMessage(new \Prism\Prism\ValueObjects\Messages\AssistantMessage($text, $toolCalls));
-        $request->addMessage(new \Prism\Prism\ValueObjects\Messages\ToolResultMessage($toolResults));
+        $request->addMessage(new AssistantMessage($text, $toolCalls));
+        $request->addMessage(new ToolResultMessage($toolResults));
 
         $depth++;
 
@@ -137,25 +144,25 @@ class Stream extends BaseStream
             // The text was already sent in the previous request, we only need the function_call and function_call_output
             $allMessages = $request->messages();
             $newMessages = array_slice($allMessages, $messageCountBefore);
-            
+
             // Strip text content from AssistantMessage to avoid duplicate assistant messages
             // We only want to send the function_call, not the text
             $newMessages = array_map(function ($message) {
-                if ($message instanceof \Prism\Prism\ValueObjects\Messages\AssistantMessage) {
+                if ($message instanceof AssistantMessage) {
                     // Create a new AssistantMessage with empty text but same tool calls
-                    return new \Prism\Prism\ValueObjects\Messages\AssistantMessage('', $message->toolCalls);
+                    return new AssistantMessage('', $message->toolCalls);
                 }
                 return $message;
             }, $newMessages);
-            
+
             // Temporarily swap messages array to only include new messages
-            $reflection = new \ReflectionClass($request);
+            $reflection = new ReflectionClass($request);
             $messagesProperty = $reflection->getProperty('messages');
             $messagesProperty->setAccessible(true);
             $messagesProperty->setValue($request, $newMessages);
 
             $nextResponse = $this->sendRequest($request);
-            
+
             // Restore full message history
             $messagesProperty->setValue($request, $allMessages);
 
