@@ -62,7 +62,7 @@ class UpdateTitleTool extends Tool
         if (! $draft) {
             return json_encode([
                 'success' => false,
-                'error' => 'No draft exists. Call fetch_service_request_types first.',
+                'error' => 'No draft exists. Call get_service_request_types_for_suggestion first.',
             ]);
         }
 

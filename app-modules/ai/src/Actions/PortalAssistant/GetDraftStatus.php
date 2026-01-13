@@ -283,19 +283,16 @@ class GetDraftStatus
     protected function getClarifyingQuestionsInstruction(array $result): string
     {
         $completed = $result['questions_completed'] ?? 0;
-        $next = $completed + 1;
+        $remaining = 3 - $completed;
 
-        $questionGuidance = match ($next) {
-            1 => 'Ask a specific question about WHEN or HOW the issue started (e.g., "When did you first notice this problem?" or "What were you doing when this happened?").',
-            2 => 'Ask about what they\'ve ALREADY TRIED or any ERROR MESSAGES they saw (e.g., "Have you tried any troubleshooting steps?" or "Did you see any error messages?").',
-            3 => 'Ask about their ENVIRONMENT or URGENCY (e.g., "Are you able to work around this for now?" or "Is this affecting anyone else?").',
-            default => 'Ask a specific follow-up question based on their previous answers.',
-        };
+        if ($remaining === 0) {
+            return 'All 3 clarifying questions complete. Proceed to resolution stage.';
+        }
 
         return sprintf(
-            'Ask clarifying question %d of 3. %s After they answer, call save_clarifying_question(question="<your question>", answer="<their answer>").',
-            $next,
-            $questionGuidance
+            'Question %d of 3 (%d remaining). Ask a clarifying question to better understand their issue. Do NOT attempt to resolve yet - you will have the opportunity to provide a resolution AFTER all 3 questions are saved. After they answer, you MUST call save_clarifying_question_answer(question="<your question>", answer="<their answer>") to record it.',
+            $completed + 1,
+            $remaining
         );
     }
 
@@ -343,10 +340,10 @@ class GetDraftStatus
             $hasFormFields = $this->hasCollectedFormFields($result);
 
             if ($hasFormFields) {
-                return 'Call request_file_attachments() first. Then ask: "Is there anything else you\'d like to add about this request? Feel free to attach any files if helpful." After they respond, call update_description(description="<their response>").' . $optionalNote;
+                return 'Call enable_file_attachments() first. Then ask: "Is there anything else you\'d like to add about this request? Feel free to attach any files if helpful." After they respond, call update_description(description="<their response>").' . $optionalNote;
             }
 
-            return 'Call request_file_attachments() first. Then ask: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." After they respond, call update_description(description="<their response>").' . $optionalNote;
+            return 'Call enable_file_attachments() first. Then ask: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." After they respond, call update_description(description="<their response>").' . $optionalNote;
         }
 
         // Handle title field

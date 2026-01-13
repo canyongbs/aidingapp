@@ -63,7 +63,7 @@ class GetDraftStatusTool extends Tool
         if (! $draft) {
             $result = json_encode([
                 'has_draft' => false,
-                'next_instruction' => 'No active draft. Call fetch_service_request_types to begin.',
+                'next_instruction' => 'No active draft. Call get_service_request_types_for_suggestion to begin.',
             ]);
             $this->logToolResult('get_draft_status', $result);
 

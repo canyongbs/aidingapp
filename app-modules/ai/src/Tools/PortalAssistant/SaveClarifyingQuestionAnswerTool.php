@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -46,7 +46,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use Illuminate\Support\Str;
 use Prism\Prism\Tool;
 
-class SaveClarifyingQuestionTool extends Tool
+class SaveClarifyingQuestionAnswerTool extends Tool
 {
     use FindsDraftServiceRequest;
     use SubmitsServiceRequest;
@@ -55,8 +55,8 @@ class SaveClarifyingQuestionTool extends Tool
         protected PortalAssistantThread $thread,
     ) {
         $this
-            ->as('save_clarifying_question')
-            ->for('Records your question and the user\'s answer. Call this IMMEDIATELY after the user answers your clarifying question - pass both what you asked AND their response. You must ask exactly 3 clarifying questions total. Focus on SPECIFIC details about their situation, not generic troubleshooting.')
+            ->as('save_clarifying_question_answer')
+            ->for('Records ONE clarifying question and its answer. You MUST call this tool 3 times total - once after each user response. Call immediately after EACH answer with both the question and their response.')
             ->withStringParameter('question', 'The exact question text you asked the user')
             ->withStringParameter('answer', 'The user\'s complete response to your question')
             ->using($this);

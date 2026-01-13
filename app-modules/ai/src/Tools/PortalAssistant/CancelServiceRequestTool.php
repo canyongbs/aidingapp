@@ -71,7 +71,7 @@ class CancelServiceRequestTool extends Tool
 
         $result = json_encode([
             'success' => true,
-            'next_instruction' => 'Service request canceled. Call fetch_service_request_types to show available options.',
+            'next_instruction' => 'Service request canceled. Call get_service_request_types_for_suggestion to show available options.',
         ]);
 
         $this->logToolResult('cancel_service_request', $result);
