@@ -52,7 +52,6 @@ use ReflectionClass;
 
 class Stream extends BaseStream
 {
-
     protected function sendRequest(Request $request): Response
     {
         $requestBody = array_merge([
