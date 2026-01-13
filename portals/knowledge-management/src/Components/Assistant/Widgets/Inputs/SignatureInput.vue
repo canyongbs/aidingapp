@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -176,7 +176,7 @@
                 v-model="text"
                 placeholder="Type your signature"
                 class="w-full px-3 py-2 text-3xl text-center border border-gray-300 rounded-md focus:ring-brand-500 focus:border-brand-500"
-                style="font-family: 'Satisfy', cursive; height: 100px;"
+                style="font-family: 'Satisfy', cursive; height: 100px"
                 @input="error = ''"
             />
         </div>
