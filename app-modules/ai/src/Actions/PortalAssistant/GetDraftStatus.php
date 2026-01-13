@@ -356,7 +356,7 @@ class GetDraftStatus
 
         if ($isComplexField) {
             return sprintf(
-                'Call show_field_input(field_id="%s") to display the widget, AND in the same response ask a natural question like "Which %s does this relate to?" or "Please select your %s."',
+                'Call show_field_input(field_id="%s") to display the input, AND in the same response ask a natural question like "Which %s does this relate to?" or "Please select your %s."',
                 $fieldId,
                 strtolower($fieldLabel),
                 strtolower($fieldLabel)

@@ -122,7 +122,7 @@ class UpdateFormFieldTool extends Tool
         if (! $isTextField) {
             $result = json_encode([
                 'success' => false,
-                'hint' => "This field requires a widget for proper input/validation (collection_method=\"show_field_input\"). Call show_field_input(field_id=\"{$field_id}\") to display the widget, and ask a natural question in the same response.",
+                'hint' => "This field requires a widget for proper input/validation (collection_method=\"show_field_input\"). Call show_field_input(field_id=\"{$field_id}\") to display the input, and ask a natural question in the same response.",
             ]);
             $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
 
