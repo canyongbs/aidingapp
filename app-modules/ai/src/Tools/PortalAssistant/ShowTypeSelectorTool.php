@@ -106,13 +106,13 @@ class ShowTypeSelectorTool extends Tool
             return json_encode([
                 'success' => true,
                 'suggested_type_name' => $suggestion['name'],
-                'next_instruction' => "Tell user: \"Based on what you described, I think '{$suggestion['name']}' might be what you need. Please confirm or select a different type from the options shown.\" Then wait for their selection.",
+                'next_instruction' => "Tell user: \"I think '{$suggestion['name']}' fits your needs. You can confirm or choose a different type.\" Then wait for their selection.",
             ]);
         }
 
         return json_encode([
             'success' => true,
-            'next_instruction' => 'Tell user: "Please select the type of request that best matches your needs from the options shown." Then wait for their selection.',
+            'next_instruction' => 'Tell user: "Please select the type that best matches your request." Then wait for their selection.',
         ]);
     }
 
