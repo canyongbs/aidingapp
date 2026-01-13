@@ -376,8 +376,9 @@ After they answer, you MUST call save_clarifying_question_answer(question="<your
 
         if ($isComplexField) {
             return sprintf(
-                'Call show_field_input(field_id="%s") to display the input, AND in the same response ask a natural question like "Which %s does this relate to?" or "Please select your %s."',
+                'Call show_field_input(field_id="%s") to display the "%s" input, AND in the same response ask a natural question like "Which %s?" or "Please select your %s."',
                 $fieldId,
+                $fieldLabel,
                 strtolower($fieldLabel),
                 strtolower($fieldLabel)
             );

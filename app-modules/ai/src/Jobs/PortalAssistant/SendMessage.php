@@ -45,6 +45,7 @@ use AidingApp\Ai\Support\StreamingChunks\Finish;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
 use AidingApp\Ai\Support\StreamingChunks\ToolCall;
+use AidingApp\Ai\Tools\ConditionalTool;
 use AidingApp\Ai\Tools\PortalAssistant\CancelServiceRequestTool;
 use AidingApp\Ai\Tools\PortalAssistant\CheckAiResolutionValidityTool;
 use AidingApp\Ai\Tools\PortalAssistant\EnableFileAttachmentsTool;
@@ -484,6 +485,10 @@ EOT;
      */
     protected function addResolutionTools(array &$tools, $aiResolutionSettings): void
     {
+        if (! $aiResolutionSettings->is_enabled) {
+            return;
+        }
+
         $draft = null;
 
         if ($this->thread->current_service_request_draft_id) {
@@ -493,30 +498,24 @@ EOT;
                 ->first();
         }
 
-        if ($aiResolutionSettings->is_enabled && $draft) {
-            // CheckAiResolutionValidityTool is only available after 3 questions are saved
-            $clarifyingQuestionsCount = $draft->serviceRequestUpdates()
-                ->where('update_type', ServiceRequestUpdateType::ClarifyingQuestion)
-                ->count();
-
-            if ($clarifyingQuestionsCount === 3) {
-                $tools[] = new CheckAiResolutionValidityTool($this->thread);
-            }
-
-            // RecordResolutionResponseTool is only available after AI proposes resolution with sufficient confidence
-            $hasAiResolutionProposed = $draft->serviceRequestUpdates()
-                ->where('update_type', ServiceRequestUpdateType::AiResolutionProposed)
-                ->exists();
-
-            if ($hasAiResolutionProposed && $draft->ai_resolution_confidence_score) {
-                $threshold = $aiResolutionSettings->confidence_threshold;
-
-                if ($draft->ai_resolution_confidence_score >= $threshold) {
-                    $tools[] = new RecordResolutionResponseTool($this->thread);
-                }
-            }
+        if (! $draft) {
+            return;
         }
 
-        // No SubmitServiceRequestTool - resolution tools handle submission internally
+        // CheckAiResolutionValidityTool is conditional - only available in Resolution stage (3 questions completed)
+        $tools[] = new CheckAiResolutionValidityTool($this->thread);
+
+        // RecordResolutionResponseTool is only available after AI proposes resolution with sufficient confidence
+        $hasAiResolutionProposed = $draft->serviceRequestUpdates()
+            ->where('update_type', ServiceRequestUpdateType::AiResolutionProposed)
+            ->exists();
+
+        if ($hasAiResolutionProposed && $draft->ai_resolution_confidence_score) {
+            $threshold = $aiResolutionSettings->confidence_threshold;
+
+            if ($draft->ai_resolution_confidence_score >= $threshold) {
+                $tools[] = new RecordResolutionResponseTool($this->thread);
+            }
+        }
     }
 }

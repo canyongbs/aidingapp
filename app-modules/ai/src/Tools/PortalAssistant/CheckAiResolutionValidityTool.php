@@ -38,13 +38,13 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiResolutionSettings;
+use AidingApp\Ai\Tools\ConditionalTool;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\SubmitsServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
-use Prism\Prism\Tool;
 
-class CheckAiResolutionValidityTool extends Tool
+class CheckAiResolutionValidityTool extends ConditionalTool
 {
     use FindsDraftServiceRequest;
     use SubmitsServiceRequest;
@@ -57,7 +57,16 @@ class CheckAiResolutionValidityTool extends Tool
             ->for('Checks if an AI resolution meets the confidence threshold. Call this after clarifying questions when you have a potential solution. DO NOT show the resolution to the user until this tool returns meets_threshold: true.')
             ->withNumberParameter('confidence_score', 'Your confidence score from 0-100 that this resolution will help the user')
             ->withStringParameter('proposed_answer', 'The resolution text (do not show to user yet)')
-            ->using($this);
+            ->using($this)
+            ->availableWhen(function () {
+                $draft = $this->findDraft();
+                if (! $draft) {
+                    return false;
+                }
+                
+                $stage = ServiceRequestDraftStage::fromServiceRequest($draft);
+                return $stage === ServiceRequestDraftStage::Resolution;
+            });
     }
 
     public function __invoke(int $confidence_score, string $proposed_answer): string

@@ -144,7 +144,7 @@ class ShowFieldInputTool extends Tool
         $result = json_encode([
             'success' => true,
             'field_label' => $field->label,
-            'next_instruction' => "Widget displayed. Ask a brief, natural question (e.g., \"Which {$field->label}?\"). Do NOT list the options - the input shows them. Wait for the user to select.",
+            'next_instruction' => "Widget displayed for \"{$field->label}\". Ask a brief, natural question (e.g., \"Which {$field->label}?\"). Do NOT list the options - the input shows them. Wait for the user to select.",
         ]);
 
         $this->logToolResult('show_field_input', $result, [
