@@ -52,7 +52,7 @@ class ShowTypeSelectorTool extends Tool
     ) {
         $this
             ->as('show_type_selector')
-            ->for('STEP 2: Displays a UI widget to select a service request type. Call this AFTER fetch_service_request_types ONLY when starting a NEW request or when user explicitly wants to CHANGE types. DO NOT call if already collecting data for an existing draft. If you identified a strong match in the types_tree, you MUST pass that exact type_id UUID as suggested_type_id parameter. If no match, omit the parameter entirely.')
+            ->for('Displays a UI widget to select a service request type. Call this AFTER get_service_request_types_for_suggestion. If you identified a match in the types_tree, pass that type_id as suggested_type_id. If no match, omit the parameter.')
             ->withStringParameter('suggested_type_id', 'REQUIRED IF MATCH FOUND: The exact UUID of the type to pre-select (e.g., "d691de0b-c90d-44b0-aa2b-6e17cf0ea10c"). Only omit this parameter if you found absolutely no matching type in the types_tree. Never pass an empty string.')
             ->using($this);
     }

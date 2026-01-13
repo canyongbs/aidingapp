@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -43,7 +43,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use Prism\Prism\Tool;
 
-class FetchServiceRequestTypesTool extends Tool
+class GetServiceRequestTypesForSuggestionTool extends Tool
 {
     use FindsDraftServiceRequest;
     use LogsToolExecution;
@@ -52,8 +52,8 @@ class FetchServiceRequestTypesTool extends Tool
         protected PortalAssistantThread $thread,
     ) {
         $this
-            ->as('fetch_service_request_types')
-            ->for('STEP 1: Retrieves the complete list of available service request types. Call this ONLY when: (1) User first expresses intent to submit a NEW service request, or (2) User explicitly wants to CHANGE to a different type. DO NOT call if already working on a draft unless user explicitly requests to change types. Returns a types_tree to analyze before calling show_type_selector.')
+            ->as('get_service_request_types_for_suggestion')
+            ->for('Retrieves service request types for you to analyze and suggest a match. Call ONLY when starting a NEW request or user wants to CHANGE types. After analyzing types_tree, call show_type_selector with suggested_type_id.')
             ->using($this);
     }
 
@@ -68,7 +68,7 @@ class FetchServiceRequestTypesTool extends Tool
                 'error' => true,
                 'message' => 'No service request types are available.',
             ]);
-            $this->logToolResult('fetch_service_request_types', $result);
+            $this->logToolResult('get_service_request_types_for_suggestion', $result);
 
             return $result;
         }
@@ -78,7 +78,7 @@ class FetchServiceRequestTypesTool extends Tool
             'next_instruction' => 'Analyze types_tree. Call show_type_selector(suggested_type_id="<uuid>") if match found, otherwise show_type_selector() with no parameters.',
         ]);
 
-        $this->logToolResult('fetch_service_request_types', $result);
+        $this->logToolResult('get_service_request_types_for_suggestion', $result);
 
         return $result;
     }

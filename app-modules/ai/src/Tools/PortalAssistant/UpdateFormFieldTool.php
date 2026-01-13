@@ -68,7 +68,7 @@ class UpdateFormFieldTool extends Tool
         if (! $draft) {
             $result = json_encode([
                 'success' => false,
-                'error' => 'No draft exists. Call fetch_service_request_types first.',
+                'error' => 'No draft exists. Call get_service_request_types_for_suggestion first.',
             ]);
             $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
 

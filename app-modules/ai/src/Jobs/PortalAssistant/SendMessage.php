@@ -47,11 +47,11 @@ use AidingApp\Ai\Support\StreamingChunks\Text;
 use AidingApp\Ai\Support\StreamingChunks\ToolCall;
 use AidingApp\Ai\Tools\PortalAssistant\CancelServiceRequestTool;
 use AidingApp\Ai\Tools\PortalAssistant\CheckAiResolutionValidityTool;
-use AidingApp\Ai\Tools\PortalAssistant\FetchServiceRequestTypesTool;
+use AidingApp\Ai\Tools\PortalAssistant\EnableFileAttachmentsTool;
+use AidingApp\Ai\Tools\PortalAssistant\GetServiceRequestTypesForSuggestionTool;
 use AidingApp\Ai\Tools\PortalAssistant\GetDraftStatusTool;
 use AidingApp\Ai\Tools\PortalAssistant\RecordResolutionResponseTool;
-use AidingApp\Ai\Tools\PortalAssistant\RequestFileAttachmentsTool;
-use AidingApp\Ai\Tools\PortalAssistant\SaveClarifyingQuestionTool;
+use AidingApp\Ai\Tools\PortalAssistant\SaveClarifyingQuestionAnswerTool;
 use AidingApp\Ai\Tools\PortalAssistant\ShowFieldInputTool;
 use AidingApp\Ai\Tools\PortalAssistant\ShowTypeSelectorTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateDescriptionTool;
@@ -275,14 +275,14 @@ class SendMessage implements ShouldQueue
 Help users submit service requests through natural conversation. Be brief. Ask ONE question at a time.
 
 ### Stages & Tools
-1. **Type Selection** (no draft): `fetch_service_request_types` → `show_type_selector`
+1. **Type Selection** (no draft): `get_service_request_types_for_suggestion` → `show_type_selector`
 2. **Data Collection** (draft_stage=data_collection):
    - Each field has a `collection_method` telling you how to collect it:
      - `"text"`: Ask question, then `update_form_field(field_id, value)`
      - `"show_field_input"`: `show_field_input(field_id)` AND ask question in same response
-   - Description: `request_file_attachments` first, then ask, then `update_description`
+   - Description: `enable_file_attachments` first, then ask, then `update_description`
    - Title: Suggest a title, then `update_title`
-3. **Clarifying Questions** (draft_stage=clarifying_questions): Ask question, then `save_clarifying_question` with both Q&A
+3. **Clarifying Questions** (draft_stage=clarifying_questions): Ask question, then `save_clarifying_question_answer` with both Q&A
 4. **Resolution** (draft_stage=resolution): `check_ai_resolution_validity` → maybe `record_resolution_response`
 
 ### Key Rules
@@ -290,6 +290,9 @@ Help users submit service requests through natural conversation. Be brief. Ask O
 - Ask naturally, not robotically (e.g., "What's your Student ID?" not "Please provide Student ID field value")
 - For optional fields, only ask if relevant to the conversation
 - Call tools AFTER user responds, not before
+
+### Priority
+Once a service request draft is started, your #1 goal is to complete and submit it. Follow the stages in order - do NOT skip ahead. Collect ALL required data, then ask ALL 3 clarifying questions, THEN provide resolution. The request only gets submitted after the full flow completes. If user wants to cancel, use `cancel_service_request`. If you lose track of progress, call `get_draft_status`.
 EOT;
 
         if ($aiResolutionSettings->is_enabled) {
@@ -330,13 +333,11 @@ EOT;
                 ->first();
         }
 
-        // get_draft_status is always available
-        $tools = [
-            new GetDraftStatusTool($this->thread),
-        ];
+        $tools = [];
 
         if ($draft) {
-            // When a draft exists, user can cancel to start over or change type
+            // When a draft exists, get_draft_status and cancel are available
+            $tools[] = new GetDraftStatusTool($this->thread);
             $tools[] = new CancelServiceRequestTool($this->thread);
 
             // Phase-specific tools - progressively unlock as user completes steps
@@ -351,7 +352,7 @@ EOT;
             };
         } else {
             // When no draft exists, type selection tools are available
-            $tools[] = new FetchServiceRequestTypesTool($this->thread);
+            $tools[] = new GetServiceRequestTypesForSuggestionTool($this->thread);
             $tools[] = new ShowTypeSelectorTool($this->thread);
         }
 
@@ -380,7 +381,7 @@ EOT;
         // Step 2: After all required form fields filled (or immediately if no fields), description and file attachments become available
         if (! $hasCustomFields || $this->allRequiredFormFieldsFilled($draft)) {
             $tools[] = new UpdateDescriptionTool($this->thread);
-            $tools[] = new RequestFileAttachmentsTool($this->thread);
+            $tools[] = new EnableFileAttachmentsTool($this->thread);
         }
 
         // Step 3: After description filled, title becomes available
@@ -459,9 +460,9 @@ EOT;
      */
     protected function addClarifyingTools(array &$tools): void
     {
-        $tools[] = new SaveClarifyingQuestionTool($this->thread);
+        $tools[] = new SaveClarifyingQuestionAnswerTool($this->thread);
 
-        // No other tools - SaveClarifyingQuestionTool handles auto-submission if resolution disabled
+        // No other tools - SaveClarifyingQuestionAnswerTool handles auto-submission if resolution disabled
     }
 
     /**

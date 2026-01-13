@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -42,7 +42,7 @@ use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
 use Prism\Prism\Tool;
 
-class RequestFileAttachmentsTool extends Tool
+class EnableFileAttachmentsTool extends Tool
 {
     use FindsDraftServiceRequest;
     use LogsToolExecution;
@@ -51,8 +51,8 @@ class RequestFileAttachmentsTool extends Tool
         protected PortalAssistantThread $thread,
     ) {
         $this
-            ->as('request_file_attachments')
-            ->for('Enables optional file attachment capability for the user. Call this BEFORE asking for the description to allow users to attach supporting files (screenshots, documents, etc.) with their message. The attachment UI will be enabled until the user sends their next message.')
+            ->as('enable_file_attachments')
+            ->for('Enables file attachment capability for the user\'s next message. Call BEFORE asking for description.')
             ->using($this);
     }
 
@@ -63,9 +63,9 @@ class RequestFileAttachmentsTool extends Tool
         if (! $draft) {
             $result = json_encode([
                 'success' => false,
-                'error' => 'No draft exists. Call fetch_service_request_types first.',
+                'error' => 'No draft exists. Call get_service_request_types_for_suggestion first.',
             ]);
-            $this->logToolResult('request_file_attachments', $result, []);
+            $this->logToolResult('enable_file_attachments', $result, []);
 
             return $result;
         }
@@ -81,7 +81,7 @@ class RequestFileAttachmentsTool extends Tool
             'next_instruction' => 'File attachments enabled. Now ask: "Can you describe what\'s happening? Feel free to attach any screenshots or files if that helps." After they respond, call update_description(description="<their response>").',
         ]);
 
-        $this->logToolResult('request_file_attachments', $result, []);
+        $this->logToolResult('enable_file_attachments', $result, []);
 
         return $result;
     }

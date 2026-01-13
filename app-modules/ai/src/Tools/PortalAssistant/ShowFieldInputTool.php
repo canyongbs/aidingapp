@@ -66,7 +66,7 @@ class ShowFieldInputTool extends Tool
         if (! $draft) {
             $result = json_encode([
                 'error' => true,
-                'message' => 'No draft exists. Call fetch_service_request_types first.',
+                'message' => 'No draft exists. Call get_service_request_types_for_suggestion first.',
             ]);
             $this->logToolResult('show_field_input', $result, ['field_id' => $field_id]);
 
@@ -144,7 +144,7 @@ class ShowFieldInputTool extends Tool
         $result = json_encode([
             'success' => true,
             'field_label' => $field->label,
-            'next_instruction' => "Widget displayed. Ask a natural question prompting the user to complete it (e.g., \"Which {$field->label} does this relate to?\" or \"Please provide your {$field->label}.\"). Then wait for their response.",
+            'next_instruction' => "Widget displayed. Ask a brief, natural question (e.g., \"Which {$field->label}?\"). Do NOT list the options - the widget shows them. Wait for the user to select.",
         ]);
 
         $this->logToolResult('show_field_input', $result, [
