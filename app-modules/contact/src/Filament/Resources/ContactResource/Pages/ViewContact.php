@@ -59,6 +59,8 @@ class ViewContact extends ViewRecord
             ->schema([
                 Section::make('Demographics')
                     ->schema([
+                        TextEntry::make('title')
+                            ->visible(fn (): bool => JobTitleFeature::active()),
                         TextEntry::make('first_name')
                             ->label('First Name'),
                         TextEntry::make('last_name')

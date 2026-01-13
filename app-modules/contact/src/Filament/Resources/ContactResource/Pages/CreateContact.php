@@ -78,6 +78,21 @@ class CreateContact extends CreateRecord
         return $form
             ->schema([
                 Section::make('Demographics')->schema([
+                    Select::make('title')
+                        ->label('Title')
+                        ->options([
+                            'Dr.' => 'Dr.',
+                            'Professor' => 'Professor',
+                            'Mr.' => 'Mr.',
+                            'Ms.' => 'Ms.',
+                            'Mrs.' => 'Mrs.',
+                        ])
+                        ->placeholder('No Title')
+                        ->live(onBlur: true)
+                        ->afterStateUpdated($generateFullName)
+                        ->string()
+                        ->visible(fn (): bool => JobTitleFeature::active())
+                        ->searchable(),
                     TextInput::make('first_name')
                         ->label('First Name')
                         ->required()
@@ -105,7 +120,7 @@ class CreateContact extends CreateRecord
                         ->maxLength(255)
                         ->visible(fn (): bool => JobTitleFeature::active())
                         ->string(),
-                ])->columns(2),
+                ])->columns(JobTitleFeature::active() ? 3 : 2)->columnSpanFull(),
 
                 Section::make('Contact Information')->schema([
                     TextInput::make('email')

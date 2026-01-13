@@ -87,6 +87,21 @@ class EditContact extends EditRecord
             ->schema([
                 Section::make('Demographics')
                     ->schema([
+                        Select::make('title')
+                            ->label('Title')
+                            ->options([
+                                'Dr.' => 'Dr.',
+                                'Professor' => 'Professor',
+                                'Mr.' => 'Mr.',
+                                'Ms.' => 'Ms.',
+                                'Mrs.' => 'Mrs.',
+                            ])
+                            ->placeholder('No Title')
+                            ->live(onBlur: true)
+                            ->afterStateUpdated($generateFullName)
+                            ->string()
+                            ->visible(fn (): bool => JobTitleFeature::active())
+                            ->searchable(),
                         TextInput::make('first_name')
                             ->label('First Name')
                             ->required()

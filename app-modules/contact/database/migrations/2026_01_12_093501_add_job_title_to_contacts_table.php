@@ -45,6 +45,7 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::table('contacts', function (Blueprint $table) {
+                $table->string('title')->nullable();
                 $table->string('job_title')->nullable();
             });
 
@@ -58,7 +59,7 @@ return new class () extends Migration {
             JobTitleFeature::deactivate();
 
             Schema::table('contacts', function (Blueprint $table) {
-                $table->dropColumn('job_title');
+                $table->dropColumn(['title', 'job_title']);
             });
         });
     }
