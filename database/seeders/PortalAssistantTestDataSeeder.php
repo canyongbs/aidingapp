@@ -45,18 +45,25 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use Database\Seeders\Concerns\SeedsKnowledgeBaseForPortalAssistant;
 use DB;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 /**
- * Temporary seeder for testing Portal Assistant service request functionality.
+ * Comprehensive seeder for testing Portal Assistant functionality.
  * Run with: php artisan db:seed --class=PortalAssistantTestDataSeeder
  *
  * This seeder:
  * 1. Clears all existing service requests, types, categories, forms
- * 2. Creates 5 categories (2 with nested subcategories)
+ * 2. Creates 6 categories (2 with nested subcategories) + Testing category
  * 3. Creates 1-5 types per category with realistic forms
+ * 4. Creates knowledge base categories aligned with service request categories
+ * 5. Seeds 25+ knowledge base articles with AI-verifiable "clues"
+ * 6. Enables AI support and triggers knowledge base indexing
+ *
+ * Each knowledge base article contains a unique verification code (e.g., CLUE-IT-SLOW-7429)
+ * that can be used to verify if the AI assistant is actually reading the article content.
  *
  * Field types used in this seeder:
  * - text_input: Simple text fields (no config)
@@ -70,15 +77,18 @@ use Illuminate\Support\Str;
  * - email: Email input (no config)
  * - phone: Phone number input (no config)
  * - url: URL input (no config)
- * - upload: File upload with accept/multiple/limit/size config
+ * - signature: Signature capture (no config)
  */
 class PortalAssistantTestDataSeeder extends Seeder
 {
+    use SeedsKnowledgeBaseForPortalAssistant;
+
     public function run(): void
     {
         $this->clearExistingData();
         $this->createTestData();
         $this->populateStepContent();
+        $this->seedKnowledgeBase();
     }
 
     protected function populateStepContent(): void
@@ -163,6 +173,10 @@ class PortalAssistantTestDataSeeder extends Seeder
         // Category 5: Financial Services (no subcategories)
         $financial = $this->createCategory('Financial Services', 'heroicon-o-currency-dollar', 5);
         $this->createFinancialTypes($financial);
+
+        // Category 6: Testing (for testing all input types)
+        $testing = $this->createCategory('Testing', 'heroicon-o-beaker', 6);
+        $this->createTestingTypes($testing);
 
         $this->command->info('Test data created successfully!');
     }
@@ -356,11 +370,6 @@ class PortalAssistantTestDataSeeder extends Seeder
             ],
         ]);
         $this->createField($form, $issueStep, 'Additional details', 'text_area', false, []);
-        // UPLOAD field example
-        $this->createField($form, $issueStep, 'Screenshot of error (if applicable)', 'upload', false, [
-            'accept' => 'image/*',
-            'multiple' => false,
-        ]);
 
         // Type 2: Printer Issues
         $printerType = $this->createType($category, 'Printer Issue', 'Report problems with printers including paper jams, print quality, or connectivity issues.', 2);
@@ -513,12 +522,6 @@ class PortalAssistantTestDataSeeder extends Seeder
                 'sometimes' => 'Sometimes',
                 'once' => 'It only happened once',
             ],
-        ]);
-        // UPLOAD field - multiple files
-        $this->createField($form, $errorStep, 'Screenshots or Error Logs', 'upload', false, [
-            'accept' => 'image/*,.txt,.log',
-            'multiple' => true,
-            'limit' => 5,
         ]);
 
         // Type 3: Password Reset
@@ -718,12 +721,6 @@ class PortalAssistantTestDataSeeder extends Seeder
             'placeholder' => 'Select event',
         ]);
         $this->createField($form, $requestStep, 'Event Date', 'date', true, []);
-        // UPLOAD field - supporting documents
-        $this->createField($form, $requestStep, 'Supporting Documentation', 'upload', false, [
-            'accept' => '.pdf,.jpg,.png',
-            'multiple' => true,
-            'limit' => 3,
-        ]);
 
         // Type 2: Benefits Question
         $questionType = $this->createType($category, 'Benefits Question', 'Ask questions about your benefits coverage or options.', 2);
@@ -782,11 +779,6 @@ class PortalAssistantTestDataSeeder extends Seeder
         $this->createField($form, $issueStep, 'Expected Amount', 'text_input', false, []);
         $this->createField($form, $issueStep, 'Received Amount', 'text_input', false, []);
         $this->createField($form, $issueStep, 'Description of Issue', 'text_area', true, []);
-        // UPLOAD field - pay stub
-        $this->createField($form, $issueStep, 'Pay Stub Copy (if available)', 'upload', false, [
-            'accept' => '.pdf,.jpg,.png',
-            'multiple' => false,
-        ]);
 
         // Type 2: Direct Deposit Change
         $ddType = $this->createType($category, 'Direct Deposit Change', 'Update your direct deposit bank account information.', 2);
@@ -972,12 +964,6 @@ class PortalAssistantTestDataSeeder extends Seeder
                 'after_hours' => 'After business hours',
             ],
             'placeholder' => 'Select preference',
-        ]);
-        // UPLOAD field - photo of issue
-        $this->createField($form, $issueStep, 'Photo of Issue (if applicable)', 'upload', false, [
-            'accept' => 'image/*',
-            'multiple' => true,
-            'limit' => 3,
         ]);
 
         // Type 2: Room/Space Booking
@@ -1179,12 +1165,6 @@ class PortalAssistantTestDataSeeder extends Seeder
             ],
         ]);
         $this->createField($form, $questionStep, 'Your Question', 'text_area', true, []);
-        // UPLOAD field - supporting documents
-        $this->createField($form, $questionStep, 'Supporting Documents (if applicable)', 'upload', false, [
-            'accept' => '.pdf,.jpg,.png,.doc,.docx',
-            'multiple' => true,
-            'limit' => 5,
-        ]);
 
         // Type 3: Transcript Request
         $transcriptType = $this->createType($category, 'Transcript Request', 'Request official or unofficial transcripts.', 3);
@@ -1236,18 +1216,12 @@ class PortalAssistantTestDataSeeder extends Seeder
         // RADIO field example
         $this->createField($form, $requestStep, 'Do you have documentation?', 'radio', true, [
             'options' => [
-                'yes_uploaded' => 'Yes - Will upload/send',
+                'yes_will_send' => 'Yes - Will send separately',
                 'yes_on_file' => 'Yes - Already on file',
                 'no' => 'No - Need guidance',
             ],
         ]);
         $this->createField($form, $requestStep, 'Best Contact Phone', 'phone', true, []);
-        // UPLOAD field - documentation
-        $this->createField($form, $requestStep, 'Documentation Upload', 'upload', false, [
-            'accept' => '.pdf,.doc,.docx',
-            'multiple' => true,
-            'limit' => 3,
-        ]);
 
         // Type 5: Academic Advising Appointment
         $advisingType = $this->createType($category, 'Advising Appointment', 'Schedule an appointment with an academic advisor.', 5);
@@ -1312,12 +1286,6 @@ class PortalAssistantTestDataSeeder extends Seeder
         $this->createField($form, $receiptsStep, 'Cost Center/Budget Code', 'text_input', true, []);
         $this->createField($form, $receiptsStep, 'Manager Approval Email', 'email', true, []);
         $this->createField($form, $receiptsStep, 'Receipt Notes', 'text_area', false, []);
-        // UPLOAD field - receipts (required for expense)
-        $this->createField($form, $receiptsStep, 'Receipt Upload', 'upload', true, [
-            'accept' => '.pdf,.jpg,.png',
-            'multiple' => true,
-            'limit' => 10,
-        ]);
         // CHECKBOX field
         $this->createField($form, $receiptsStep, 'I certify these expenses are accurate and business-related', 'checkbox', true, []);
 
@@ -1346,11 +1314,6 @@ class PortalAssistantTestDataSeeder extends Seeder
         $this->createField($form, $approvalStep, 'Purchase Order Number (if applicable)', 'text_input', false, []);
         $this->createField($form, $approvalStep, 'Description of Goods/Services', 'text_area', true, []);
         $this->createField($form, $approvalStep, 'Approver Email', 'email', true, []);
-        // UPLOAD field - invoice
-        $this->createField($form, $approvalStep, 'Invoice Document', 'upload', true, [
-            'accept' => '.pdf',
-            'multiple' => false,
-        ]);
 
         // Type 3: Budget Question
         $budgetType = $this->createType($category, 'Budget Inquiry', 'Ask questions about budgets, spending, or financial reports.', 3);
@@ -1405,5 +1368,56 @@ class PortalAssistantTestDataSeeder extends Seeder
         $this->createField($form, $detailStep, 'Manager Email', 'email', true, []);
         // CHECKBOX for lost/stolen
         $this->createField($form, $detailStep, 'If lost/stolen: I confirm I have not made unauthorized purchases', 'checkbox', false, []);
+    }
+
+    // ========================================================================
+    // Testing Types - All Input Types
+    // ========================================================================
+
+    protected function createTestingTypes(ServiceRequestTypeCategory $category): void
+    {
+        // Type 1: All Input Types Test
+        $testType = $this->createType(
+            $category,
+            'All Input Types Test',
+            'A test form containing every available input type for validation and testing purposes.',
+            1
+        );
+        $form = $this->createForm($testType, 'All Input Types Form');
+
+        // Step 1: Text-based inputs
+        $textStep = $this->createStep($form, 'Text Inputs', 1);
+        $this->createField($form, $textStep, 'Simple Text Input', 'text_input', true, []);
+        $this->createField($form, $textStep, 'Multi-line Text Area', 'text_area', true, []);
+        $this->createField($form, $textStep, 'Email Address', 'email', true, []);
+        $this->createField($form, $textStep, 'Phone Number', 'phone', true, []);
+        $this->createField($form, $textStep, 'Website URL', 'url', false, []);
+        $this->createField($form, $textStep, 'Numeric Value', 'number', true, []);
+
+        // Step 2: Selection inputs
+        $selectionStep = $this->createStep($form, 'Selection Inputs', 2);
+        $this->createField($form, $selectionStep, 'Dropdown Select', 'select', true, [
+            'options' => [
+                'option_a' => 'Option A - First Choice',
+                'option_b' => 'Option B - Second Choice',
+                'option_c' => 'Option C - Third Choice',
+                'option_d' => 'Option D - Fourth Choice',
+            ],
+            'placeholder' => 'Select an option',
+        ]);
+        $this->createField($form, $selectionStep, 'Radio Button Selection', 'radio', true, [
+            'options' => [
+                'radio_1' => 'Radio Option 1',
+                'radio_2' => 'Radio Option 2',
+                'radio_3' => 'Radio Option 3',
+            ],
+        ]);
+        $this->createField($form, $selectionStep, 'Checkbox Agreement', 'checkbox', true, []);
+
+        // Step 3: Date, Time, and Special inputs
+        $specialStep = $this->createStep($form, 'Date, Time & Special', 3);
+        $this->createField($form, $specialStep, 'Date Picker', 'date', true, []);
+        $this->createField($form, $specialStep, 'Time Picker', 'time', true, []);
+        $this->createField($form, $specialStep, 'Signature Capture', 'signature', true, []);
     }
 }
