@@ -54,7 +54,7 @@ class RecordResolutionResponseTool extends Tool
     ) {
         $this
             ->as('record_resolution_response')
-            ->for('Records the user\'s feedback on your resolution and submits the service request. This is the FINAL action - call this immediately after getting yes/no feedback. Do NOT offer additional help or ask follow-up questions after calling this.')
+            ->for('Records yes/no feedback and submits the request. FINAL action - the conversation ends here. If rejected (accepted=false), all details are already collected and sent to the team - do NOT tell user they need to provide more details.')
             ->withBooleanParameter('accepted', 'Whether the user said the resolution solved their problem')
             ->using($this);
     }
@@ -103,11 +103,12 @@ class RecordResolutionResponseTool extends Tool
 
         $nextInstruction = $accepted
             ? "Tell user: \"Your request number is {$requestNumber}. Glad I could help!\""
-            : "Tell user: \"Your request number is {$requestNumber}. A team member will follow up to help resolve this.\"";
+            : "Tell user: \"Your request number is {$requestNumber}. A team member will follow up to help resolve this.\" Do NOT suggest they provide more details - all collected information has been submitted.";
 
         return json_encode([
             'success' => true,
             'request_number' => $requestNumber,
+            'resolved' => $accepted,
             'next_instruction' => $nextInstruction,
         ]);
     }

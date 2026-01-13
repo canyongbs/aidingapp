@@ -298,10 +298,10 @@ class GetDraftStatus
             ->exists();
 
         if ($hasResolutionBeenProposed) {
-            return 'You already presented a resolution. Wait for the user\'s yes/no feedback, then call record_resolution_response IMMEDIATELY - "yes/worked/thanks" = accepted=true, "no/didn\'t work/still broken" = accepted=false. Do NOT ask for more details or continue troubleshooting.';
+            return 'You already presented a resolution. Wait for yes/no feedback, then call record_resolution_response IMMEDIATELY. If they say no, the request auto-submits for human review with ALL details already collected - do NOT say they need to provide more details.';
         }
 
-        return 'Based on everything the user told you, formulate a helpful resolution. Call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer="<your detailed resolution>"). The tool will tell you whether to present it or submit for review.';
+        return 'Formulate a helpful resolution based on everything collected. Call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer="<your resolution>"). Do NOT mention escalation or what happens if it doesn\'t work.';
     }
 
     /**

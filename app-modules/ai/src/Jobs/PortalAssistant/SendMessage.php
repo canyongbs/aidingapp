@@ -284,8 +284,10 @@ class SendMessage implements ShouldQueue
 4. **Resolution** (draft_stage=resolution):
    - Based on everything collected, formulate a helpful resolution
    - Call `check_ai_resolution_validity` with confidence score and proposed answer
-   - If confidence meets threshold: Present the resolution, ask if it helped, then call `record_resolution_response` to submit - this is the END
    - If confidence is too low: Inform user their request was submitted for review - this is the END
+   - Present resolution, ask "Did this help?" - do NOT mention escalation or needing more details
+   - After yes/no: call `record_resolution_response` - request auto-submits with ALL collected details
+   - If user says no, team gets everything already - do NOT say they need to provide more info
 EOT
             : '';
 
