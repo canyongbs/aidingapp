@@ -32,7 +32,7 @@
 </COPYRIGHT>
 */
 import axios from 'axios';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useAssistantStore } from '../../Stores/assistant.js';
 
 export function useFileUpload() {
@@ -90,7 +90,8 @@ export function useFileUpload() {
                 },
                 onUploadProgress: (progressEvent) => {
                     if (progressEvent.total) {
-                        fileEntry.progress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                        const newProgress = Math.round((progressEvent.loaded / progressEvent.total) * 100);
+                        fileEntry.progress = newProgress;
                     }
                 },
             });
@@ -126,10 +127,10 @@ export function useFileUpload() {
 
     const hasFiles = () => files.value.length > 0;
 
-    const allUploadsComplete = () => {
+    const allUploadsComplete = computed(() => {
         if (files.value.length === 0) return true;
         return files.value.every((f) => f.status === 'complete' || f.status === 'error');
-    };
+    });
 
     return {
         files,

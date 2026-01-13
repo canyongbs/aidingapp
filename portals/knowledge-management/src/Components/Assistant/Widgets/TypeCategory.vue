@@ -33,6 +33,7 @@
 -->
 <script setup>
     import { computed, ref } from 'vue';
+    import { ChevronRightIcon } from '@heroicons/vue/16/solid';
 
     const props = defineProps({
         category: {
@@ -69,19 +70,10 @@
             class="w-full flex items-center gap-1 px-2 py-1 text-left text-gray-700 hover:bg-gray-100 rounded"
             :style="{ paddingLeft: `${depth * 12 + 8}px` }"
         >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
+            <ChevronRightIcon
                 class="w-4 h-4 flex-shrink-0 text-gray-400 transition-transform"
                 :class="{ 'rotate-90': isExpanded }"
-            >
-                <path
-                    fill-rule="evenodd"
-                    d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                    clip-rule="evenodd"
-                />
-            </svg>
+            />
             <span class="font-medium">{{ category.name }}</span>
         </button>
 

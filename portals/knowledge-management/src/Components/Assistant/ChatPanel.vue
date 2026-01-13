@@ -97,7 +97,7 @@
                     :disabled="isSending || isAssistantResponding"
                     :attachments-enabled="fileAttachmentsEnabled"
                     :file-attachments="fileAttachments"
-                    :all-uploads-complete="allUploadsComplete()"
+                    :all-uploads-complete="allUploadsComplete"
                     @send="sendMessage"
                     @add-files="addFileAttachments"
                     @remove-file="removeFileAttachment"

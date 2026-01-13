@@ -33,6 +33,8 @@
 -->
 <script setup>
     import { computed, ref } from 'vue';
+    import { ChevronRightIcon } from '@heroicons/vue/16/solid';
+    import { ArrowLeftIcon } from '@heroicons/vue/20/solid';
     import TypeCategory from './TypeCategory.vue';
 
     const props = defineProps({
@@ -143,19 +145,10 @@
                         @click="showBrowse = !showBrowse"
                         class="text-xs text-gray-600 hover:text-gray-900 flex items-center gap-1"
                     >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
+                        <ChevronRightIcon
                             class="w-4 h-4 transition-transform"
                             :class="{ 'rotate-90': showBrowse }"
-                        >
-                            <path
-                                fill-rule="evenodd"
-                                d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z"
-                                clip-rule="evenodd"
-                            />
-                        </svg>
+                        />
                         {{ showBrowse ? 'Hide other options' : 'Browse other options' }}
                     </button>
 
@@ -199,13 +192,7 @@
             <div class="p-3 border-b border-gray-200 bg-white">
                 <div class="flex items-center gap-2">
                     <button @click="goBack" class="text-gray-600 hover:text-gray-900" aria-label="Go back">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
-                            <path
-                                fill-rule="evenodd"
-                                d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z"
-                                clip-rule="evenodd"
-                            />
-                        </svg>
+                        <ArrowLeftIcon class="w-5 h-5" />
                     </button>
                     <div>
                         <h3 class="text-sm font-medium text-gray-900">Select Priority</h3>

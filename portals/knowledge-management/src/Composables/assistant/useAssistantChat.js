@@ -123,7 +123,7 @@ export function useAssistantChat() {
         if (!content || !content.trim() || isSending.value || isAssistantResponding.value) return;
 
         // Wait for all uploads to complete before sending
-        if (!fileUpload.allUploadsComplete()) {
+        if (!fileUpload.allUploadsComplete.value) {
             return;
         }
 

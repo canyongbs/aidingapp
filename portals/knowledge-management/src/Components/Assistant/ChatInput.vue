@@ -33,6 +33,9 @@
 -->
 <script setup>
     import { computed, nextTick, ref } from 'vue';
+    import { PaperAirplaneIcon } from '@heroicons/vue/24/outline';
+    import { PaperClipIcon as PaperClipIcon16, XMarkIcon } from '@heroicons/vue/16/solid';
+    import { PaperClipIcon as PaperClipIcon20 } from '@heroicons/vue/20/solid';
 
     const emit = defineEmits(['send', 'addFiles', 'removeFile']);
 
@@ -125,25 +128,25 @@
                 ]"
             >
                 <!-- File icon -->
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="w-4 h-4 shrink-0"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
-                    />
-                </svg>
+                <PaperClipIcon16 class="w-4 h-4 shrink-0" />
 
                 <span :title="file.originalName">{{ truncateFilename(file.originalName) }}</span>
 
-                <!-- Progress indicator for uploading files -->
-                <span v-if="file.status === 'uploading'" class="text-xs opacity-75"> {{ file.progress }}% </span>
+                <!-- Spinner for uploading files -->
+                <svg
+                    v-if="file.status === 'uploading'"
+                    class="animate-spin h-3.5 w-3.5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
+                </svg>
 
                 <!-- Error indicator -->
                 <span v-if="file.status === 'error'" class="text-xs"> Failed </span>
@@ -154,16 +157,7 @@
                     class="ml-1 hover:bg-black/10 rounded-full p-0.5 transition-colors"
                     aria-label="Remove file"
                 >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke-width="2"
-                        stroke="currentColor"
-                        class="w-3 h-3"
-                    >
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <XMarkIcon class="w-3 h-3" />
                 </button>
             </div>
         </div>
@@ -187,20 +181,7 @@
                 aria-label="Attach files"
                 title="Attach files"
             >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="w-5 h-5"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"
-                    />
-                </svg>
+                <PaperClipIcon20 class="w-5 h-5" />
             </button>
 
             <textarea
@@ -220,20 +201,7 @@
                 @click="send"
                 :disabled="props.disabled || !localMessage.trim() || hasPendingUploads"
             >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="w-5 h-5"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.768 59.768 0 013.27 20.876L6 12zm0 0h7.5"
-                    />
-                </svg>
+                <PaperAirplaneIcon class="w-5 h-5" />
             </button>
         </div>
     </div>
