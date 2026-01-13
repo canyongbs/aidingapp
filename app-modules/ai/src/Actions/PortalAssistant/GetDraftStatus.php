@@ -103,6 +103,18 @@ class GetDraftStatus
             $data['missing_optional_fields'] = $this->getMissingOptionalFields($formFields);
             // Track if the form has any custom fields at all (for adjusting description prompt)
             $data['has_custom_form_fields'] = ! empty($formFields);
+
+            // Only include filled fields once all custom form fields are done (for title generation context)
+            $onlyTitleDescriptionRemaining = collect($data['missing_required_fields'])
+                ->every(fn ($field) => in_array($field['type'], ['title', 'description']));
+
+            if ($onlyTitleDescriptionRemaining) {
+                $filledFields = $this->getFilledFormFields($draft, $type);
+
+                if (! empty($filledFields)) {
+                    $data['filled_form_fields'] = $filledFields;
+                }
+            }
         } else {
             $data['missing_required_fields'] = [];
             $data['missing_optional_fields'] = [];
