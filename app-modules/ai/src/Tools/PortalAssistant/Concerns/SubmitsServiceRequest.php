@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -36,7 +36,7 @@
 
 namespace AidingApp\Ai\Tools\PortalAssistant\Concerns;
 
-use AidingApp\Contact\Models\Contact;
+use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -53,6 +53,7 @@ trait SubmitsServiceRequest
      *
      * @param ServiceRequest $draft
      * @param bool $resolutionAccepted Whether user accepted the AI resolution
+     *
      * @return string The generated service request number
      */
     protected function submitServiceRequest(ServiceRequest $draft, bool $resolutionAccepted = false, ?string $resolutionUpdateUuid = null): string
@@ -114,7 +115,7 @@ trait SubmitsServiceRequest
         }
 
         $confidenceScore = $draft->ai_resolution_confidence_score ?? 0;
-        $aiResolutionSettings = app(\AidingApp\Ai\Settings\AiResolutionSettings::class);
+        $aiResolutionSettings = app(AiResolutionSettings::class);
         $threshold = $aiResolutionSettings->confidence_threshold;
         $meetsThreshold = $confidenceScore >= $threshold;
 
@@ -128,8 +129,9 @@ trait SubmitsServiceRequest
         $proposedAnswer = $updateText;
 
         // If it contains the wrapper text, extract just the answer
-        if (str_contains($updateText, "Did this resolve your issue?")) {
+        if (str_contains($updateText, 'Did this resolve your issue?')) {
             preg_match('/here is a potential solution:\n\n(.*?)\n\nDid this resolve your issue\?/s', $updateText, $matches);
+
             if (isset($matches[1])) {
                 $proposedAnswer = $matches[1];
             }

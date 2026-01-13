@@ -45,7 +45,6 @@ use AidingApp\Ai\Support\StreamingChunks\Finish;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
 use AidingApp\Ai\Support\StreamingChunks\ToolCall;
-use Prism\Prism\ValueObjects\ToolResult;
 use AidingApp\Ai\Tools\PortalAssistant\CheckAiResolutionValidityTool;
 use AidingApp\Ai\Tools\PortalAssistant\FetchServiceRequestTypesTool;
 use AidingApp\Ai\Tools\PortalAssistant\GetDraftStatusTool;
@@ -57,15 +56,11 @@ use AidingApp\Ai\Tools\PortalAssistant\UpdateDescriptionTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateFormFieldTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateTitleTool;
 use AidingApp\IntegrationOpenAi\Prism\ValueObjects\Messages\DeveloperMessage;
-
-use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use App\Features\PortalAssistantServiceRequestFeature;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -75,6 +70,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Prism\Prism\Tool;
 use Prism\Prism\ValueObjects\Messages\UserMessage;
+use Prism\Prism\ValueObjects\ToolResult;
 use Throwable;
 
 class SendMessage implements ShouldQueue
@@ -190,7 +186,7 @@ class SendMessage implements ShouldQueue
                         'tool_name' => $chunk->name,
                         'tool_arguments' => $chunk->arguments,
                     ]);
-                    
+
                     continue;
                 }
 
@@ -200,7 +196,7 @@ class SendMessage implements ShouldQueue
                         'tool_name' => $chunk->toolName,
                         'tool_result' => $chunk->result,
                     ]);
-                    
+
                     continue;
                 }
 
@@ -432,6 +428,7 @@ EOT;
 
         // Get current draft from thread's pointer
         $draft = null;
+
         if ($this->thread->current_service_request_draft_id) {
             $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
                 ->where('id', $this->thread->current_service_request_draft_id)
@@ -563,16 +560,19 @@ EOT;
     protected function addClarifyingTools(array &$tools): void
     {
         $tools[] = new SaveClarifyingQuestionTool($this->thread);
-        
+
         // No other tools - SaveClarifyingQuestionTool handles auto-submission if resolution disabled
     }
 
     /**
      * Add tools for resolution phase
+     *
+     * @param mixed $aiResolutionSettings
      */
     protected function addResolutionTools(array &$tools, $aiResolutionSettings): void
     {
         $draft = null;
+
         if ($this->thread->current_service_request_draft_id) {
             $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
                 ->where('id', $this->thread->current_service_request_draft_id)
@@ -597,6 +597,7 @@ EOT;
 
             if ($hasAiResolutionProposed && $draft->ai_resolution_confidence_score) {
                 $threshold = $aiResolutionSettings->confidence_threshold;
+
                 if ($draft->ai_resolution_confidence_score >= $threshold) {
                     $tools[] = new RecordResolutionResponseTool($this->thread);
                 }
@@ -606,4 +607,3 @@ EOT;
         // No SubmitServiceRequestTool - resolution tools handle submission internally
     }
 }
-

@@ -146,6 +146,7 @@ class Stream extends BaseStream
                     // Create a new AssistantMessage with empty text but same tool calls
                     return new AssistantMessage('', $message->toolCalls);
                 }
+
                 return $message;
             }, $newMessages);
 

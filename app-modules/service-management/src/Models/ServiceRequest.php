@@ -42,8 +42,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
-use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;

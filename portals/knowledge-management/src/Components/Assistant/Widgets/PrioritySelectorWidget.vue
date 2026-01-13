@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -76,17 +76,13 @@
             >
                 <span
                     class="font-medium"
-                    :class="
-                        selectedPriorityId === priority.priority_id ? 'text-brand-900' : 'text-gray-900'
-                    "
+                    :class="selectedPriorityId === priority.priority_id ? 'text-brand-900' : 'text-gray-900'"
                 >
                     {{ priority.name }}
                 </span>
             </button>
 
-            <p v-if="priorities.length === 0" class="text-xs text-gray-500 text-center py-2">
-                No priorities available
-            </p>
+            <p v-if="priorities.length === 0" class="text-xs text-gray-500 text-center py-2">No priorities available</p>
 
             <!-- Cancel Button -->
             <button

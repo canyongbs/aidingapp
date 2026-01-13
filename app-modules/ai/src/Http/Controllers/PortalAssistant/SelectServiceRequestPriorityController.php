@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -73,7 +73,7 @@ class SelectServiceRequestPriorityController
             Log::warning('[PortalAssistant] Widget priority selection failed - no draft', [
                 'thread_id' => $data['thread_id'],
             ]);
-            
+
             return response()->json([
                 'message' => 'No active draft found.',
             ], 400);
@@ -89,7 +89,7 @@ class SelectServiceRequestPriorityController
                 'thread_id' => $data['thread_id'],
                 'draft_id' => $thread->current_service_request_draft_id,
             ]);
-            
+
             return response()->json([
                 'message' => 'Draft not found.',
             ], 404);
@@ -103,7 +103,7 @@ class SelectServiceRequestPriorityController
                 'thread_id' => $data['thread_id'],
                 'draft_id' => $draft->getKey(),
             ]);
-            
+
             return response()->json([
                 'message' => 'Draft has no type.',
             ], 400);
@@ -117,7 +117,7 @@ class SelectServiceRequestPriorityController
                 'priority_type_id' => $priority->type_id,
                 'draft_type_id' => $currentType->getKey(),
             ]);
-            
+
             return response()->json([
                 'message' => 'Priority does not belong to the current type.',
             ], 400);

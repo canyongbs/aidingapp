@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -40,8 +40,6 @@ use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
-
-use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -52,7 +50,7 @@ class GetDraftStatusTool extends Tool
 {
     use FindsDraftServiceRequest;
     use LogsToolExecution;
-    
+
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {
@@ -119,7 +117,7 @@ class GetDraftStatusTool extends Tool
 
         $jsonResult = json_encode($result);
         $this->logToolResult('get_draft_status', $jsonResult);
-        
+
         return $jsonResult;
     }
 
@@ -317,6 +315,7 @@ class GetDraftStatusTool extends Tool
         if ($firstMissing === 'description') {
             if ($hasCustomFields) {
                 $filledCount = count(array_filter($result['form_fields'] ?? [], fn ($f) => $f['filled']));
+
                 if ($filledCount > 0) {
                     return 'The user has already provided information through the form fields. Ask if they have any additional details or context to add. If they indicate they have nothing to add, you may use update_description with a brief summary like "See form details above" or similar. Otherwise wait for their response and then call update_description.';
                 }

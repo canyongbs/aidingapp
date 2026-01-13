@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use DB;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
@@ -110,7 +111,7 @@ class PortalAssistantTestDataSeeder extends Seeder
         $this->command->info('Clearing existing service request data...');
 
         // Disable foreign key checks temporarily
-        \DB::statement("SET session_replication_role = 'replica';");
+        DB::statement("SET session_replication_role = 'replica';");
 
         // Clear in order of dependencies
         ServiceRequest::withoutGlobalScopes()->forceDelete();
@@ -122,7 +123,7 @@ class PortalAssistantTestDataSeeder extends Seeder
         ServiceRequestType::query()->forceDelete();
         ServiceRequestTypeCategory::query()->forceDelete();
 
-        \DB::statement("SET session_replication_role = 'origin';");
+        DB::statement("SET session_replication_role = 'origin';");
 
         $this->command->info('Existing data cleared.');
     }

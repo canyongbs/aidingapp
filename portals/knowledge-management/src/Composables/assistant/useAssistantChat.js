@@ -38,8 +38,7 @@ import { useTokenStore } from '../../Stores/token.js';
 import { useAssistantConnection } from './useAssistantConnection.js';
 
 export function useAssistantChat() {
-    const { assistantSendMessageUrl, selectTypeUrl, updateFieldUrl, websocketsConfig } =
-        useAssistantStore();
+    const { assistantSendMessageUrl, selectTypeUrl, updateFieldUrl, websocketsConfig } = useAssistantStore();
     const { getToken } = useTokenStore();
 
     const messages = ref([]);

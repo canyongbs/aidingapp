@@ -329,13 +329,8 @@
 
         const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
-        const {
-            setAssistantSendMessageUrl,
-            setSelectTypeUrl,
-            setUpdateFieldUrl,
-            setWebsocketsConfig,
-            setApiUrl,
-        } = useAssistantStore();
+        const { setAssistantSendMessageUrl, setSelectTypeUrl, setUpdateFieldUrl, setWebsocketsConfig, setApiUrl } =
+            useAssistantStore();
 
         setApiUrl(props.apiUrl);
 

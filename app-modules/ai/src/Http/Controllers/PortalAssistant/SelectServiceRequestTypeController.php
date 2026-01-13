@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -39,8 +39,6 @@ namespace AidingApp\Ai\Http\Controllers\PortalAssistant;
 use AidingApp\Ai\Jobs\PortalAssistant\SendMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
-
-use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use Illuminate\Http\JsonResponse;
@@ -81,7 +79,7 @@ class SelectServiceRequestTypeController
                 'priority_id' => $data['priority_id'],
                 'type_id' => $type?->getKey(),
             ]);
-            
+
             return response()->json([
                 'message' => 'Selected type does not have a form.',
             ], 400);

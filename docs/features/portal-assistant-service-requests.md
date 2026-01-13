@@ -9,22 +9,26 @@ The Portal Assistant Service Request feature enables authenticated portal users 
 ### Core Components
 
 **SendMessage Job** (`app-modules/ai/src/Jobs/PortalAssistant/SendMessage.php`)
+
 - Orchestrates AI streaming responses
 - Controls tool availability based on draft stage
 - Manages progressive disclosure of data collection tools
 
 **Portal Assistant Tools** (`app-modules/ai/src/Tools/PortalAssistant/`)
+
 - 13 specialized tools for type selection, data collection, enrichment, and submission
 - Stage-gated availability prevents workflow bypass
 - No ID passing required - draft state managed automatically
 
 **Service Request Drafts**
+
 - Multiple drafts can exist per thread (one per service request type)
 - Thread tracks active draft via `current_service_request_draft_id`
 - Global scope excludes drafts from standard queries (`is_draft = false`)
 - Drafts persist across sessions until finalized
 
 **Widget Controllers**
+
 - Dedicated HTTP controllers handle widget interactions (type/priority selection, form fields)
 - Dispatch SendMessage with Developer messages providing state context
 - Separate from tool calls to maintain clean AI conversation flow
@@ -42,6 +46,7 @@ Service request drafts progress through sequential stages. The stage is **derive
 **Data Collection Order:** fields (if any) → description → title → **priority** (last step before clarifying questions)
 
 Stage determination logic:
+
 ```php
 if (hasMissingRequiredFields($draft)) return 'data_collection';
 if (clarifyingQuestionsCount($draft) < 3) return 'clarifying_questions';
@@ -59,6 +64,7 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 **Collection Order:** Custom form fields (if present) → Description → Title → Priority
 
 **Tool Availability:**
+
 - `update_form_field`, `show_field_input`: If service request type defines custom fields
 - `update_description`: After required form fields filled (or immediately if no custom fields)
 - `update_title`: After description provided
@@ -69,24 +75,29 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 ### Clarifying Questions Stage
 
 **Tool Availability:**
+
 - `save_clarifying_question`: Always available, accepts exactly 3 question/answer pairs
 
 **Requirements:**
+
 - Exactly 3 questions must be asked and saved
 - Questions must be specific to user's situation, drawing from collected data
 - Each question/answer saved immediately after user responds
 
-**Phase Transition:** 
+**Phase Transition:**
+
 - After 3rd question saved, phase becomes `resolution` (derived from update count)
 - If AI resolution disabled, service request automatically submitted for human review after 3rd question
 
 ### Resolution Phase
 
 **Tool Availability (if AI resolution enabled):**
+
 - `check_ai_resolution_validity`: Available immediately after 3 questions saved
 - `record_resolution_response`: Available only after confidence meets threshold and resolution presented
 
 **Tool Availability (if AI resolution disabled):**
+
 - Phase skipped, proceeds directly to submission
 
 **Process (AI Resolution Enabled):**
@@ -95,6 +106,7 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 2. Tool compares score against configured threshold and creates resolution update
 
 **If confidence below threshold:**
+
 - AI does NOT show resolution to user
 - Tool automatically submits service request for human review
 - Sets `is_ai_resolution_attempted = true`, `is_ai_resolution_successful = false`
@@ -103,18 +115,21 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 - Returns request number to AI
 
 **If confidence meets threshold:**
+
 - Tool instructs AI to present resolution to user
 - AI shows resolution and asks if it solved their problem
 - User responds yes/no
 - AI calls `record_resolution_response` with boolean
 
 **If user says resolution was helpful:**
+
 - Sets `is_ai_resolution_attempted = true`, `is_ai_resolution_successful = true`
 - Sets status to "Closed" (resolved without human intervention)
 - Generates `service_request_number` and sets `is_draft = false`
 - Returns request number to AI
 
 **If user says resolution was not helpful:**
+
 - Sets `is_ai_resolution_attempted = true`, `is_ai_resolution_successful = false`
 - Sets status to "New" (open for human review)
 - Generates `service_request_number` and sets `is_draft = false`
@@ -122,6 +137,7 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 - Returns request number to AI
 
 **Process (AI Resolution Disabled):**
+
 - After 3rd question saved, service request automatically submitted for human review
 - Sets status to "New", generates request number
 - Assigns to team member
@@ -131,11 +147,13 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 ### Type Selection Tools
 
 **fetch_service_request_types**
+
 - Creates draft if none exists for thread
 - Returns hierarchical tree of available service request types
 - Draft initially has no priority (phase: 'type_selection')
 
 **show_type_selector**
+
 - Emits `PortalAssistantActionRequest` event with type tree and optional suggestion
 - Frontend displays widget, hides main chat input
 - User selection processed via dedicated controller
@@ -143,46 +161,54 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 ### Data Collection Tools
 
 **get_draft_status**
+
 - Returns complete draft state including form structure, filled fields, missing requirements
 - Derives current phase from draft state
 - Provides phase-specific instructions
 - Detects when all required data filled and instructs transition to clarifying questions
 
 **update_title**, **update_description**
+
 - Saves conversational text input to draft
 - Description stored in `close_details` field
 
 **update_form_field**
+
 - Saves simple text field responses to `ServiceRequestFormSubmission`
 - For text-based custom fields only
 
 **show_field_input**
+
 - Displays widget for complex field types (select, date, file, etc.)
 - Frontend hides chat input while widget active
 - Response saved directly via controller, not returned to AI
 
 **show_priority_selector**
+
 - Displays priority selection widget after title provided
 - User selection updates draft via dedicated controller
 
 ### Enrichment Tools
 
 **save_clarifying_question**
+
 - Creates two updates immediately:
-  - Question update with `update_type = 'clarifying_question'` (created_by = ServiceRequest)
-  - Answer update with `update_type = 'clarifying_answer'` (created_by = Contact)
+    - Question update with `update_type = 'clarifying_question'` (created_by = ServiceRequest)
+    - Answer update with `update_type = 'clarifying_answer'` (created_by = Contact)
 - After 3rd question saved, phase becomes `resolution` (derived from update count)
 - Returns remaining count and next instruction
 
 ### Resolution Tools
 
 **check_ai_resolution_validity**
+
 - Accepts confidence score (0-100) and proposed resolution text
 - Compares score against configured threshold
 - Creates resolution update with `update_type = 'ai_resolution_proposed'`
 - Stores confidence score in `ai_resolution_confidence_score` field
 
 **If confidence below threshold:**
+
 - Automatically submits service request without showing resolution to user
 - Sets `is_ai_resolution_attempted = true`, `is_ai_resolution_successful = false`
 - Assigns to team member, generates request number
@@ -190,21 +216,25 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 - Returns request number and success message
 
 **If confidence meets threshold:**
+
 - Instructs AI to present resolution to user and wait for response
 - Does NOT submit yet - waits for user feedback
 
 **record_resolution_response**
+
 - Creates response update with `update_type = 'ai_resolution_response'` containing user's answer
 - Sets `is_ai_resolution_attempted = true`
 - Sets `is_ai_resolution_successful` based on user response
 
 **If user accepted resolution:**
+
 - Sets status to "Closed" (resolved without human intervention)
 - Generates `service_request_number` and sets `is_draft = false`
 - Does NOT assign to team (no human review needed)
 - Returns request number
 
 **If user rejected resolution:**
+
 - Sets status to "New" (open for human review)
 - Generates `service_request_number` and sets `is_draft = false`
 - Assigns to team member via type's assignment strategy
@@ -215,12 +245,14 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 Users may change service request type during data collection:
 
 **Switching to Different Type:**
+
 - New draft created for selected type
 - Old draft retained (not deleted)
 - `current_service_request_draft_id` updated to new draft
 - Workflow resets to `data_collection` phase (no priority yet)
 
 **Switching to Previously Selected Type:**
+
 - Existing draft for that type restored
 - `current_service_request_draft_id` updated to previous draft
 - Previously collected data (title, description, fields) restored
@@ -233,16 +265,19 @@ This design allows exploration of multiple request types without data loss while
 Widgets temporarily replace chat input to focus user attention:
 
 **Widget Display:**
+
 1. Main chat input hidden
 2. Widget rendered with available options
 3. "Cancel" link displayed below widget
 
 **Widget Interaction:**
+
 - Selection: Sends `internal_content` message via dedicated controller
 - Cancellation: Sends cancellation `internal_content`, restores chat input
 - AI acknowledges and continues conversation
 
 **Implementation:**
+
 - `portals/knowledge-management/src/Components/Assistant/ChatInput.vue`
 - `portals/knowledge-management/src/Components/Assistant/AssistantWidget.vue`
 - `portals/knowledge-management/src/Composables/assistant/useAssistantChat.js`
@@ -252,27 +287,35 @@ Widgets temporarily replace chat input to focus user attention:
 Widget interactions and user selections processed via `internal_content`:
 
 **type_selection:**
+
 ```json
-{"type": "type_selection", "type_id": "uuid"}
+{ "type": "type_selection", "type_id": "uuid" }
 ```
+
 Validates type, creates draft and form submission. Draft stage becomes `data_collection`.
 
 **priority_selection:**
+
 ```json
-{"type": "priority_selection", "priority_id": "uuid"}
+{ "type": "priority_selection", "priority_id": "uuid" }
 ```
+
 Validates priority belongs to current type, updates draft.
 
 **field_response:**
+
 ```json
 {"type": "field_response", "field_id": "uuid", "value": {...}}
 ```
+
 Validates field belongs to current type's form, saves via `ProcessServiceRequestSubmissionField` action.
 
 **widget_cancelled:**
+
 ```json
-{"type": "widget_cancelled", "widget_type": "...", "field_id": "..."}
+{ "type": "widget_cancelled", "widget_type": "...", "field_id": "..." }
 ```
+
 No data change, restores chat input, AI acknowledges.
 
 ## AI Instructions
@@ -280,18 +323,21 @@ No data change, restores chat input, AI acknowledges.
 The AI receives phase-specific instructions emphasizing:
 
 **Data Collection:**
+
 - Ask ONE question at a time
 - Call `get_draft_status` after each save to determine next step
 - Never combine multiple questions
 - Auto-transition occurs when all required fields filled
 
 **Clarifying Questions:**
+
 - Ask ONE question at a time
 - Call `get_draft_status` after each save to determine next step
 - Never combine multiple questions
 - After 3rd question, phase automatically transitions to resolution (if enabled) or submits for human review
 
 **Resolution:**
+
 - Call `check_ai_resolution_validity` first with confidence and proposed answer
 - If confidence below threshold: tool auto-submits request, AI informs user
 - If confidence meets threshold: AI presents resolution and waits for user response
@@ -302,6 +348,7 @@ The AI receives phase-specific instructions emphasizing:
 
 **Automatic Submission:**
 Both resolution tools (`check_ai_resolution_validity` and `record_resolution_response`) handle the final submission internally. There is no separate `submit_service_request` tool in the resolution phase. This ensures:
+
 - Service requests are always submitted after resolution attempt
 - Data integrity (resolution metrics always captured)
 - Simplified AI interaction model
@@ -326,10 +373,12 @@ This example shows a service request type with multiple required and optional cu
 **User:** "I need to request access to the Biology lab for my research project"
 
 **AI calls `fetch_service_request_types`**
+
 - Creates draft
 - Identifies "Lab Access Request" type based on keywords
 
 **AI calls `show_type_selector`**
+
 - Suggests "Lab Access Request"
 - Widget displays with suggestion
 
@@ -338,6 +387,7 @@ This example shows a service request type with multiple required and optional cu
 **User clicks "Lab Access Request"**
 
 **Backend processes:**
+
 - Updates draft with selected type
 - Creates ServiceRequestFormSubmission
 - Sets default priority to "Medium"
@@ -351,6 +401,7 @@ This example shows a service request type with multiple required and optional cu
 ### Required Fields Collection
 
 **AI calls `get_draft_status`**
+
 - Returns: 3 required custom fields, plus description/title/priority
 - Instruction: "Ask for Building Name first"
 
@@ -359,6 +410,7 @@ This example shows a service request type with multiple required and optional cu
 **User:** "Science Center"
 
 **AI calls `update_form_field`** (Building Name: "Science Center")
+
 - Saves "Science Center" to Building Name field
 - Returns success
 
@@ -367,6 +419,7 @@ This example shows a service request type with multiple required and optional cu
 ---
 
 **AI calls `get_draft_status`**
+
 - Returns: Building Name filled, 2 more required fields
 - Instruction: "Ask for Lab Number"
 
@@ -375,6 +428,7 @@ This example shows a service request type with multiple required and optional cu
 **User:** "Lab 204"
 
 **AI calls `update_form_field`** (Lab Number: "Lab 204")
+
 - Returns success
 
 **Developer message:** "Field 'Lab Number' updated"
@@ -382,6 +436,7 @@ This example shows a service request type with multiple required and optional cu
 ---
 
 **AI calls `get_draft_status`**
+
 - Returns: 2 fields filled, 1 required field remaining
 - Instruction: "Ask for Faculty Supervisor"
 
@@ -390,6 +445,7 @@ This example shows a service request type with multiple required and optional cu
 **User:** "Dr. Sarah Johnson"
 
 **AI calls `update_form_field`** (Faculty Supervisor: "Dr. Sarah Johnson")
+
 - Returns success
 
 **Developer message:** "Field 'Faculty Supervisor' updated"
@@ -399,11 +455,13 @@ This example shows a service request type with multiple required and optional cu
 ### Optional Fields Evaluation
 
 **AI calls `get_draft_status`**
+
 - Returns: All 3 required custom fields filled, but description/title/priority still needed
 - Optional fields available: Preferred Start Date, Research Project Title
 - Instruction: "All required fields are filled. There are 2 optional field(s) available: Preferred Start Date, Research Project Title. Based on the conversation context, decide if any would be helpful to collect. If yes, ask for ONE optional field. If no optional fields seem relevant, call get_draft_status again to proceed to description."
 
 **AI internally evaluates:**
+
 - User mentioned "research project" → Research Project Title seems relevant
 - No time urgency mentioned → Preferred Start Date probably not needed
 - Decision: Collect Research Project Title, skip Preferred Start Date
@@ -413,6 +471,7 @@ This example shows a service request type with multiple required and optional cu
 **User:** "Effects of Temperature Variation on Bacterial Growth Rates"
 
 **AI calls `update_form_field`** (Research Project Title: "Effects of Temperature...")
+
 - Returns success
 
 **Developer message:** "Field 'Research Project Title' updated"
@@ -420,14 +479,17 @@ This example shows a service request type with multiple required and optional cu
 ---
 
 **AI calls `get_draft_status`**
+
 - Returns: 1 optional field remaining (Preferred Start Date), description/title/priority still needed
 - Instruction: "There are 1 optional field(s) available: Preferred Start Date. Based on the conversation context, decide if any would be helpful to collect. If yes, ask for ONE optional field. If no optional fields seem relevant, call get_draft_status again to proceed to description."
 
 **AI internally evaluates:**
+
 - Preferred Start Date: User hasn't mentioned timing, not critical for lab access
 - Decision: Skip this optional field, move to description
 
 **AI calls `get_draft_status`** (to proceed to description)
+
 - Returns: Optional fields done, now need description
 - Instruction: "Ask for detailed description of their issue or request"
 
@@ -436,6 +498,7 @@ This example shows a service request type with multiple required and optional cu
 **User:** "I need access to the incubators and microscopes for bacterial culture observation. I'll be running experiments twice a week."
 
 **AI calls `update_description`**
+
 - Saves description to draft.close_details
 - Returns success
 
@@ -444,6 +507,7 @@ This example shows a service request type with multiple required and optional cu
 ### Title & Priority
 
 **AI calls `get_draft_status`**
+
 - Returns: Description filled, now need title
 - Instruction: "Suggest a title based on all collected information"
 
@@ -452,16 +516,19 @@ This example shows a service request type with multiple required and optional cu
 **User:** "Yes"
 
 **AI calls `update_title`**
+
 - Saves title to draft
 - Returns success
 
 ---
 
 **AI calls `get_draft_status`**
+
 - Returns: Only priority missing now
 - Instruction: "Call show_priority_selector to display priority widget"
 
 **AI calls `show_priority_selector`**
+
 - Widget displays: High, Medium, Low options
 - Chat input hidden
 
@@ -470,6 +537,7 @@ This example shows a service request type with multiple required and optional cu
 **User clicks "Medium"**
 
 **Backend processes:**
+
 - Updates draft.priority_id to "Medium"
 - Sends developer message: "User selected priority 'Medium'"
 
@@ -478,6 +546,7 @@ This example shows a service request type with multiple required and optional cu
 ### Auto-Transition & Questions
 
 **AI calls `get_draft_status`**
+
 - Returns: All required fields filled (collected 1 of 2 optional fields)
 - **Phase is now 'clarifying_questions' (derived from all required fields being filled)**
 - Instruction: "All required information has been collected. Now ask the first of 3 clarifying questions to better understand the user's issue. Make the question specific to their situation based on the information provided."
@@ -487,6 +556,7 @@ This example shows a service request type with multiple required and optional cu
 **User:** "About 3 months"
 
 **AI calls `save_clarifying_question`**
+
 - Saves Q1: "How long do you expect to need lab access for your research?"
 - Saves A1: "About 3 months"
 - Returns: completed: 1, remaining: 2
@@ -498,6 +568,7 @@ This example shows a service request type with multiple required and optional cu
 **User:** "No, I'm already certified for the equipment from last semester"
 
 **AI calls `save_clarifying_question`**
+
 - Saves Q2 and A2
 - Returns: completed: 2, remaining: 1
 
@@ -508,6 +579,7 @@ This example shows a service request type with multiple required and optional cu
 **User:** "Tuesday and Thursday afternoons would be ideal"
 
 **AI calls `save_clarifying_question`**
+
 - Saves Q3 and A3 as updates
 - Returns: completed: 3, remaining: 0
 - **Phase is now 'resolution' (derived from 3 questions in updates)**
@@ -517,10 +589,12 @@ This example shows a service request type with multiple required and optional cu
 ### Resolution & Submission
 
 **AI calls `check_ai_resolution_validity`**
+
 - confidence: 75
 - proposed_answer: "Your lab access request needs approval from your faculty supervisor and the lab coordinator. I can guide you through the next steps..."
 
 **Tool evaluates:**
+
 - Confidence 75 meets configured threshold (70)
 - Stores resolution in draft.ai_resolution with meets_threshold: true
 - Does NOT submit yet
@@ -532,6 +606,7 @@ This example shows a service request type with multiple required and optional cu
 **User:** "Yes, that helps!"
 
 **AI calls `record_resolution_response`**
+
 - accepted: true
 - Auto-submits with status: "Closed" (resolved, no team assignment needed)
 - Request number: SR-2026-00543
@@ -543,14 +618,15 @@ This example shows a service request type with multiple required and optional cu
 ### Final State
 
 **Service Request Created:**
+
 - Number: SR-2026-00543
 - Status: Resolved (Closed) - no team assignment needed
 - Custom Fields Collected:
-  - Building Name: "Science Center" (required) ✓
-  - Lab Number: "Lab 204" (required) ✓
-  - Faculty Supervisor: "Dr. Sarah Johnson" (required) ✓
-  - Research Project Title: "Effects of Temperature..." (optional) ✓
-  - Preferred Start Date: (optional, skipped by AI) ✗
+    - Building Name: "Science Center" (required) ✓
+    - Lab Number: "Lab 204" (required) ✓
+    - Faculty Supervisor: "Dr. Sarah Johnson" (required) ✓
+    - Research Project Title: "Effects of Temperature..." (optional) ✓
+    - Preferred Start Date: (optional, skipped by AI) ✗
 - AI made intelligent decision to collect relevant optional field but skip irrelevant one
 
 ---
@@ -564,10 +640,12 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 **User:** "I can't log into the student portal, it keeps saying my password is wrong"
 
 **AI calls `fetch_service_request_types`**
+
 - Returns tree of available service request types (no draft yet)
 - AI analyzes: user mentioned "password" → identifies "Password Reset" type
 
 **AI calls `show_type_selector`**
+
 - Passes suggested_type_id for "Password Reset"
 - Widget displays with suggestion highlighted
 - Chat input hidden, "Cancel" link shown
@@ -581,6 +659,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 **User clicks "Password Reset" in widget**
 
 **Backend processes selection:**
+
 - Updates draft with selected type
 - Creates ServiceRequestFormSubmission
 - Sets default priority to "Medium"
@@ -592,6 +671,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 ### Data Collection - Custom Field
 
 **AI calls `get_draft_status`**
+
 - Returns: 1 required field (Student ID), plus description/title/priority needed
 - Instruction: "Ask for Student ID Number first"
 
@@ -600,6 +680,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 **User:** "A00123456"
 
 **AI calls `update_form_field`**
+
 - Saves "A00123456" to Student ID field
 - Returns success
 
@@ -608,6 +689,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 ### Data Collection - Description
 
 **AI calls `get_draft_status`**
+
 - Returns: Student ID filled, now need description
 - Instruction: "Ask for detailed description"
 
@@ -616,6 +698,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 **User:** "When I type my password and click login, it shows 'Invalid credentials' but I know my password is correct. I've tried 5 times today and it's the same password I used yesterday."
 
 **AI calls `update_description`**
+
 - Saves description to draft.close_details
 - Returns success
 
@@ -624,6 +707,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 ### Data Collection - Title
 
 **AI calls `get_draft_status`**
+
 - Returns: Student ID and description filled, now need title
 - Instruction: "Suggest a title based on collected info"
 
@@ -632,6 +716,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 **User:** "That's good"
 
 **AI calls `update_title`**
+
 - Saves title to draft
 - Returns success
 
@@ -640,10 +725,12 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 ### Data Collection - Priority
 
 **AI calls `get_draft_status`**
+
 - Returns: Only priority missing now
 - Instruction: "Show priority selector"
 
 **AI calls `show_priority_selector`**
+
 - Widget displays: High, Medium, Low options
 - Chat input hidden
 
@@ -652,6 +739,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 **User clicks "High" in widget**
 
 **Backend processes selection:**
+
 - Updates draft.priority_id to "High"
 - Sends developer message: "User selected priority 'High'"
 
@@ -660,6 +748,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 ### Auto-Transition to Clarifying Questions
 
 **AI calls `get_draft_status`**
+
 - Returns: All required fields filled
 - **Phase is now 'clarifying_questions' (derived from all required fields being filled)**
 - Instruction: "Ask first clarifying question"
@@ -673,6 +762,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 **User:** "No, nothing changed and I didn't get any emails"
 
 **AI calls `save_clarifying_question`**
+
 - Saves Q1 and A1 to draft.clarifying_questions array
 - Returns: completed: 1, remaining: 2
 
@@ -683,6 +773,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 **User:** "Same laptop and same Chrome browser I always use"
 
 **AI calls `save_clarifying_question`**
+
 - Saves Q2 and A2
 - Returns: completed: 2, remaining: 1
 
@@ -693,6 +784,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 **User:** "I'm using the saved password from Chrome"
 
 **AI calls `save_clarifying_question`**
+
 - Saves Q3 and A3 as two updates (question and answer)
 - Returns: completed: 3, remaining: 0
 - **Phase is now 'resolution' (derived from 3 questions in updates)**
@@ -703,6 +795,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 ### AI Resolution Attempt
 
 **AI calls `check_ai_resolution_validity`**
+
 - Confidence score: 85 (out of 100)
 - Proposed answer: Step-by-step guide to clear saved password and type manually
 - Tool compares: 85 >= 70 (threshold) = **meets threshold**
@@ -729,15 +822,16 @@ Did this solve your problem?"
 **User:** "I tried it but I still can't log in. Same error message."
 
 **AI calls `record_resolution_response`**
+
 - Passes: accepted = false
 - Tool internally:
-  - Creates response update with `update_type = 'ai_resolution_response'`
-  - Sets is_ai_resolution_attempted = true
-  - Sets is_ai_resolution_successful = false
-  - Sets status to "New" (Open for human review)
-  - Generates service_request_number: "SR-2026-00542"
-  - Sets is_draft = false
-  - Assigns to team member based on type's assignment strategy
+    - Creates response update with `update_type = 'ai_resolution_response'`
+    - Sets is_ai_resolution_attempted = true
+    - Sets is_ai_resolution_successful = false
+    - Sets status to "New" (Open for human review)
+    - Generates service_request_number: "SR-2026-00542"
+    - Sets is_draft = false
+    - Assigns to team member based on type's assignment strategy
 - Returns: request_number, status: open
 
 **AI responds:** "I've submitted your request for human review. Your request number is **SR-2026-00542**. A team member from IT Support will follow up with you soon to help resolve your login issue."
@@ -747,6 +841,7 @@ Did this solve your problem?"
 ### Final Result
 
 **Service Request Created:**
+
 - Number: SR-2026-00542
 - Status: New (Open)
 - Title: "Cannot log into student portal with correct password"
@@ -754,20 +849,22 @@ Did this solve your problem?"
 - Assigned to: IT Support team member
 - Custom Fields: Student ID = A00123456
 - Updates: 8 total
-  - 6 clarifying Q&A updates (3 questions, 3 answers with `update_type`)
-  - 1 AI resolution proposed update (`update_type = 'ai_resolution_proposed'`)
-  - 1 User rejection update (`update_type = 'ai_resolution_response'`)
+    - 6 clarifying Q&A updates (3 questions, 3 answers with `update_type`)
+    - 1 AI resolution proposed update (`update_type = 'ai_resolution_proposed'`)
+    - 1 User rejection update (`update_type = 'ai_resolution_response'`)
 - AI Resolution: Attempted (85% confidence), presented to user, rejected
 - Timeline: All questions, answers, and resolution visible to team
 
 **Alternative Outcomes:**
 
-*If confidence was 65 (below 70 threshold):*
+_If confidence was 65 (below 70 threshold):_
+
 - Tool would auto-submit without showing resolution to user
 - Resolution stored as internal note only
 - User told: "Request submitted for review" (no resolution shown)
 
-*If user accepted the resolution:*
+_If user accepted the resolution:_
+
 - Status would be "Resolved" (Closed)
 - No team assignment (no human review needed)
 - User told: "Issue marked as resolved, request number for your records"

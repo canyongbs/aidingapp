@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed, ref, watch } from 'vue';
+    import { computed, ref } from 'vue';
     import TypeCategory from './TypeCategory.vue';
 
     const props = defineProps({
@@ -198,17 +198,8 @@
         <div v-else>
             <div class="p-3 border-b border-gray-200 bg-white">
                 <div class="flex items-center gap-2">
-                    <button
-                        @click="goBack"
-                        class="text-gray-600 hover:text-gray-900"
-                        aria-label="Go back"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            class="w-5 h-5"
-                        >
+                    <button @click="goBack" class="text-gray-600 hover:text-gray-900" aria-label="Go back">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5">
                             <path
                                 fill-rule="evenodd"
                                 d="M17 10a.75.75 0 01-.75.75H5.612l4.158 3.96a.75.75 0 11-1.04 1.08l-5.5-5.25a.75.75 0 010-1.08l5.5-5.25a.75.75 0 111.04 1.08L5.612 9.25H16.25A.75.75 0 0117 10z"
@@ -238,15 +229,16 @@
                 >
                     <span
                         class="font-medium"
-                        :class="
-                            selectedPriorityId === priority.priority_id ? 'text-brand-900' : 'text-gray-900'
-                        "
+                        :class="selectedPriorityId === priority.priority_id ? 'text-brand-900' : 'text-gray-900'"
                     >
                         {{ priority.name }}
                     </span>
                 </button>
 
-                <p v-if="!selectedType.priorities || selectedType.priorities.length === 0" class="text-xs text-gray-500 text-center py-2">
+                <p
+                    v-if="!selectedType.priorities || selectedType.priorities.length === 0"
+                    class="text-xs text-gray-500 text-center py-2"
+                >
                     No priorities available
                 </p>
 

@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -39,11 +39,7 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
-
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
-use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
-use Illuminate\Support\Str;
 use Prism\Prism\Tool;
 
 class UpdateFormFieldTool extends Tool
@@ -72,6 +68,7 @@ class UpdateFormFieldTool extends Tool
                 'error' => 'No draft exists. Call fetch_service_request_types first.',
             ]);
             $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
+
             return $result;
         }
 
@@ -85,6 +82,7 @@ class UpdateFormFieldTool extends Tool
                 'error' => 'No type selected. User must select a type first.',
             ]);
             $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
+
             return $result;
         }
 
@@ -108,6 +106,7 @@ class UpdateFormFieldTool extends Tool
                 'error' => 'Field not found for this service request type.',
             ]);
             $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
+
             return $result;
         }
 
@@ -119,6 +118,7 @@ class UpdateFormFieldTool extends Tool
                 'error' => 'Form submission not created. Please select a type first.',
             ]);
             $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
+
             return $result;
         }
 
@@ -149,13 +149,13 @@ class UpdateFormFieldTool extends Tool
             'label' => $field->label,
             'instruction' => 'Field value saved. Call get_draft_status now to refresh your context and determine what information to collect next.',
         ]);
-        
+
         $this->logToolResult('update_form_field', $result, [
             'field_id' => $field_id,
             'field_label' => $field->label,
             'value' => $value,
         ]);
-        
+
         return $result;
     }
 }
