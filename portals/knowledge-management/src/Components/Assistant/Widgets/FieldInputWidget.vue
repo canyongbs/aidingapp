@@ -33,10 +33,16 @@
 -->
 <script setup>
     import { computed } from 'vue';
+    import CheckboxInput from './Inputs/CheckboxInput.vue';
     import DateInput from './Inputs/DateInput.vue';
+    import EmailInput from './Inputs/EmailInput.vue';
+    import NumberInput from './Inputs/NumberInput.vue';
     import PhoneInput from './Inputs/PhoneInput.vue';
     import RadioInput from './Inputs/RadioInput.vue';
     import SelectInput from './Inputs/SelectInput.vue';
+    import SignatureInput from './Inputs/SignatureInput.vue';
+    import TimeInput from './Inputs/TimeInput.vue';
+    import UrlInput from './Inputs/UrlInput.vue';
 
     const props = defineProps({
         params: {

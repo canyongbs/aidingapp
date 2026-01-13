@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -55,36 +55,36 @@
 
     const emit = defineEmits(['submit', 'cancel']);
 
-    const phoneNumber = ref('');
+    const email = ref('');
     const error = ref('');
 
     const isValid = computed(() => {
-        if (!phoneNumber.value) return false;
-        const digitsOnly = phoneNumber.value.replace(/\D/g, '');
-        return digitsOnly.length >= 7 && digitsOnly.length <= 15;
+        if (!email.value) return false;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email.value);
     });
 
     const submit = () => {
-        if (props.required && !phoneNumber.value) {
-            error.value = 'Please enter a phone number';
+        if (props.required && !email.value) {
+            error.value = 'Please enter an email address';
             return;
         }
 
-        if (phoneNumber.value && !isValid.value) {
-            error.value = 'Please enter a valid phone number';
+        if (email.value && !isValid.value) {
+            error.value = 'Please enter a valid email address';
             return;
         }
 
-        emit('submit', phoneNumber.value, phoneNumber.value);
+        emit('submit', email.value, email.value);
     };
 </script>
 
 <template>
     <div class="space-y-3">
         <input
-            type="tel"
-            v-model="phoneNumber"
-            placeholder="Phone number"
+            type="email"
+            v-model="email"
+            placeholder="email@example.com"
             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-500 focus:border-brand-500"
             @input="error = ''"
         />

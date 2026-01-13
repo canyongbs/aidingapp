@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -55,38 +55,35 @@
 
     const emit = defineEmits(['submit', 'cancel']);
 
-    const phoneNumber = ref('');
+    const selectedTime = ref('');
     const error = ref('');
 
-    const isValid = computed(() => {
-        if (!phoneNumber.value) return false;
-        const digitsOnly = phoneNumber.value.replace(/\D/g, '');
-        return digitsOnly.length >= 7 && digitsOnly.length <= 15;
+    const formattedTime = computed(() => {
+        if (!selectedTime.value) return '';
+        const [hours, minutes] = selectedTime.value.split(':');
+        const hour = parseInt(hours);
+        const ampm = hour >= 12 ? 'PM' : 'AM';
+        const displayHour = hour % 12 || 12;
+        return `${displayHour}:${minutes} ${ampm}`;
     });
 
     const submit = () => {
-        if (props.required && !phoneNumber.value) {
-            error.value = 'Please enter a phone number';
+        if (props.required && !selectedTime.value) {
+            error.value = 'Please select a time';
             return;
         }
 
-        if (phoneNumber.value && !isValid.value) {
-            error.value = 'Please enter a valid phone number';
-            return;
-        }
-
-        emit('submit', phoneNumber.value, phoneNumber.value);
+        emit('submit', selectedTime.value, formattedTime.value);
     };
 </script>
 
 <template>
     <div class="space-y-3">
         <input
-            type="tel"
-            v-model="phoneNumber"
-            placeholder="Phone number"
+            type="time"
+            v-model="selectedTime"
             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-500 focus:border-brand-500"
-            @input="error = ''"
+            @change="error = ''"
         />
 
         <p v-if="error" class="text-xs text-red-600">{{ error }}</p>
@@ -94,7 +91,7 @@
         <div class="flex gap-2">
             <button
                 @click="submit"
-                :disabled="required && !isValid"
+                :disabled="required && !selectedTime"
                 class="flex-1 px-3 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
                 Submit

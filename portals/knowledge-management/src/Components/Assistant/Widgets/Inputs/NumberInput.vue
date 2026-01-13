@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -55,36 +55,48 @@
 
     const emit = defineEmits(['submit', 'cancel']);
 
-    const phoneNumber = ref('');
+    const number = ref('');
     const error = ref('');
 
-    const isValid = computed(() => {
-        if (!phoneNumber.value) return false;
-        const digitsOnly = phoneNumber.value.replace(/\D/g, '');
-        return digitsOnly.length >= 7 && digitsOnly.length <= 15;
-    });
+    const min = computed(() => props.config.min);
+    const max = computed(() => props.config.max);
+    const step = computed(() => props.config.step || 1);
 
     const submit = () => {
-        if (props.required && !phoneNumber.value) {
-            error.value = 'Please enter a phone number';
+        if (props.required && !number.value) {
+            error.value = 'Please enter a number';
             return;
         }
 
-        if (phoneNumber.value && !isValid.value) {
-            error.value = 'Please enter a valid phone number';
+        const numValue = parseFloat(number.value);
+
+        if (number.value && isNaN(numValue)) {
+            error.value = 'Please enter a valid number';
             return;
         }
 
-        emit('submit', phoneNumber.value, phoneNumber.value);
+        if (min.value !== undefined && numValue < min.value) {
+            error.value = `Number must be at least ${min.value}`;
+            return;
+        }
+
+        if (max.value !== undefined && numValue > max.value) {
+            error.value = `Number must be at most ${max.value}`;
+            return;
+        }
+
+        emit('submit', numValue, numValue.toString());
     };
 </script>
 
 <template>
     <div class="space-y-3">
         <input
-            type="tel"
-            v-model="phoneNumber"
-            placeholder="Phone number"
+            type="number"
+            v-model="number"
+            :min="min"
+            :max="max"
+            :step="step"
             class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-500 focus:border-brand-500"
             @input="error = ''"
         />
@@ -94,7 +106,7 @@
         <div class="flex gap-2">
             <button
                 @click="submit"
-                :disabled="required && !isValid"
+                :disabled="required && !number"
                 class="flex-1 px-3 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
                 Submit

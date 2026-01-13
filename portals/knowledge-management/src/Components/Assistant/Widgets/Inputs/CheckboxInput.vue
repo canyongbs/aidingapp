@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed, ref } from 'vue';
+    import { ref } from 'vue';
 
     const props = defineProps({
         fieldId: {
@@ -55,46 +55,37 @@
 
     const emit = defineEmits(['submit', 'cancel']);
 
-    const phoneNumber = ref('');
+    const checked = ref(false);
     const error = ref('');
 
-    const isValid = computed(() => {
-        if (!phoneNumber.value) return false;
-        const digitsOnly = phoneNumber.value.replace(/\D/g, '');
-        return digitsOnly.length >= 7 && digitsOnly.length <= 15;
-    });
-
     const submit = () => {
-        if (props.required && !phoneNumber.value) {
-            error.value = 'Please enter a phone number';
+        if (props.required && !checked.value) {
+            error.value = 'This field is required';
             return;
         }
 
-        if (phoneNumber.value && !isValid.value) {
-            error.value = 'Please enter a valid phone number';
-            return;
-        }
-
-        emit('submit', phoneNumber.value, phoneNumber.value);
+        emit('submit', checked.value, checked.value ? 'Yes' : 'No');
     };
 </script>
 
 <template>
     <div class="space-y-3">
-        <input
-            type="tel"
-            v-model="phoneNumber"
-            placeholder="Phone number"
-            class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-brand-500 focus:border-brand-500"
-            @input="error = ''"
-        />
+        <label class="flex items-center gap-2 cursor-pointer">
+            <input
+                type="checkbox"
+                v-model="checked"
+                class="w-4 h-4 text-brand-600 border-gray-300 rounded focus:ring-brand-500"
+                @change="error = ''"
+            />
+            <span class="text-sm text-gray-700">{{ label }}</span>
+        </label>
 
         <p v-if="error" class="text-xs text-red-600">{{ error }}</p>
 
         <div class="flex gap-2">
             <button
                 @click="submit"
-                :disabled="required && !isValid"
+                :disabled="required && !checked"
                 class="flex-1 px-3 py-2 text-sm font-medium text-white bg-brand-600 rounded-md hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
                 Submit
