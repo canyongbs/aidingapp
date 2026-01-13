@@ -16,7 +16,7 @@ The Portal Assistant Service Request feature enables authenticated portal users 
 
 **Portal Assistant Tools** (`app-modules/ai/src/Tools/PortalAssistant/`)
 
-- 11 specialized tools for type selection, data collection, enrichment, and submission
+- 12 specialized tools for type selection, data collection, enrichment, and submission
 - Stage-gated availability prevents workflow bypass
 - No ID passing required - draft state managed automatically
 
@@ -58,6 +58,25 @@ When submitted (finalized), `is_draft = false` and `service_request_number` is g
 ## Progressive Tool Disclosure
 
 Tools unlock sequentially as prerequisites are met, preventing users from being overwhelmed by simultaneous choices while maintaining flexibility to edit previous responses.
+
+### Type Selection (No Active Draft)
+
+**Tool Availability:**
+
+- `fetch_service_request_types`: Always available when no active draft
+- `show_type_selector`: Always available when no active draft
+- `get_draft_status`: Always available (returns instruction to select type if no draft)
+
+Once a type and priority are selected, the draft is created and these tools become unavailable. The user must cancel the current draft to access type selection again.
+
+### Active Draft (Any Stage)
+
+**Tool Availability:**
+
+- `cancel_service_request`: Available whenever an active draft exists
+- `get_draft_status`: Always available
+
+The `cancel_service_request` tool allows users to abandon the current service request and start over with type selection. It sets `current_service_request_draft_id` to null on the thread, making type selection tools available again. The draft itself is retained, so if the user selects the same type again, their previous progress is restored.
 
 ### Data Collection Stage
 
@@ -149,12 +168,22 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 
 - Returns hierarchical tree of available service request types
 - Used by AI to understand available types before showing selector
+- Only available when no active draft exists
 
 **show_type_selector**
 
 - Emits `PortalAssistantActionRequest` event with type tree and optional suggestion
 - Frontend displays widget, hides main chat input
 - User selection processed via dedicated controller
+- Only available when no active draft exists
+
+**cancel_service_request**
+
+- Clears `current_service_request_draft_id` on the thread, deactivating the current draft
+- Only available when an active draft exists
+- Draft is retained (not deleted) so progress can be restored if same type selected again
+- After calling, type selection tools become available again
+- Use when user wants to start over or select a different request type
 
 ### Data Collection Tools
 
@@ -244,16 +273,24 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 
 ## Type Switching Behavior
 
-Users may change service request type during data collection:
+Users may change service request type by first canceling the current draft:
 
-**Switching to Different Type:**
+**Canceling Current Draft:**
+
+- User asks to start over or change request type
+- AI calls `cancel_service_request` tool
+- Thread's `current_service_request_draft_id` set to null
+- Draft retained (not deleted) for potential restoration
+- Type selection tools (`fetch_service_request_types`, `show_type_selector`) become available
+- Data collection tools become unavailable
+
+**Selecting a Different Type:**
 
 - New draft created for selected type
-- Old draft retained (not deleted)
 - `current_service_request_draft_id` updated to new draft
-- Workflow resets to `data_collection` phase
+- Workflow starts at `data_collection` phase
 
-**Switching to Previously Selected Type:**
+**Re-selecting Previously Used Type:**
 
 - Existing draft for that type restored
 - `current_service_request_draft_id` updated to previous draft

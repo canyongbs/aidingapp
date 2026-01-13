@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Ai\Http\Controllers\PortalAssistant\GetPortalAssistantUploadUrlController;
 use AidingApp\Ai\Http\Controllers\PortalAssistant\SelectServiceRequestTypeController;
 use AidingApp\Ai\Http\Controllers\PortalAssistant\SendMessageController;
 use AidingApp\Ai\Http\Controllers\PortalAssistant\UpdateServiceRequestFormFieldController;
@@ -62,4 +63,8 @@ Route::middleware([
         Route::post('/service-request/update-field', UpdateServiceRequestFormFieldController::class)
             ->middleware(['signed'])
             ->name('service-request.update-field');
+
+        Route::get('/request-upload-url', GetPortalAssistantUploadUrlController::class)
+            ->middleware(['auth:sanctum'])
+            ->name('request-upload-url');
     });

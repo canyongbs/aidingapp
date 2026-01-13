@@ -36,6 +36,7 @@ import { computed, onUnmounted, ref, watch } from 'vue';
 import { useAssistantStore } from '../../Stores/assistant.js';
 import { useTokenStore } from '../../Stores/token.js';
 import { useAssistantConnection } from './useAssistantConnection.js';
+import { useFileUpload } from './useFileUpload.js';
 
 export function useAssistantChat() {
     const { assistantSendMessageUrl, selectTypeUrl, updateFieldUrl, websocketsConfig } = useAssistantStore();
@@ -47,6 +48,9 @@ export function useAssistantChat() {
     const wordQueue = ref([]);
     const isTyping = ref(false);
     const activeWidget = ref(null);
+
+    // File upload integration
+    const fileUpload = useFileUpload();
 
     const isAssistantResponding = computed(() => {
         return messages.value.some((m) => m.author === 'assistant' && !m.isComplete);
@@ -117,11 +121,23 @@ export function useAssistantChat() {
 
     const sendMessage = async (content) => {
         if (!content || !content.trim() || isSending.value || isAssistantResponding.value) return;
+
+        // Wait for all uploads to complete before sending
+        if (!fileUpload.allUploadsComplete()) {
+            return;
+        }
+
         isSending.value = true;
 
         addUserMessage(content);
 
         const payload = { content, thread_id: threadId.value };
+
+        // Include file URLs if any files were uploaded
+        const fileUrls = fileUpload.getCompletedFileUrls();
+        if (fileUrls.length > 0) {
+            payload.file_urls = fileUrls;
+        }
 
         try {
             const response = await axios.post(assistantSendMessageUrl, payload);
@@ -134,12 +150,20 @@ export function useAssistantChat() {
             updateAssistantMessage('', true, 'Failed to send message.');
         } finally {
             isSending.value = false;
+            // Clear files and disable attachments after sending
+            fileUpload.disableAttachments();
         }
     };
 
     const connection = useAssistantConnection(websocketsConfig, getToken);
 
     const handleActionRequest = (actionType, params) => {
+        // Handle file attachments action specially - it doesn't show a widget
+        if (actionType === 'enable_file_attachments') {
+            fileUpload.enableAttachments();
+            return;
+        }
+
         // Don't show widget until assistant response is complete
         const messageIndex = messages.value.findIndex(
             (message) => message.author === 'assistant' && !message.isComplete,
@@ -228,5 +252,11 @@ export function useAssistantChat() {
         activeWidget,
         handleWidgetSubmit,
         handleWidgetCancel,
+        // File upload exports
+        fileAttachments: fileUpload.files,
+        fileAttachmentsEnabled: fileUpload.isEnabled,
+        addFileAttachments: fileUpload.addFiles,
+        removeFileAttachment: fileUpload.removeFile,
+        allUploadsComplete: fileUpload.allUploadsComplete,
     };
 }

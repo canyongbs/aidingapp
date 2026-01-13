@@ -45,10 +45,12 @@ use AidingApp\Ai\Support\StreamingChunks\Finish;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
 use AidingApp\Ai\Support\StreamingChunks\ToolCall;
+use AidingApp\Ai\Tools\PortalAssistant\CancelServiceRequestTool;
 use AidingApp\Ai\Tools\PortalAssistant\CheckAiResolutionValidityTool;
 use AidingApp\Ai\Tools\PortalAssistant\FetchServiceRequestTypesTool;
 use AidingApp\Ai\Tools\PortalAssistant\GetDraftStatusTool;
 use AidingApp\Ai\Tools\PortalAssistant\RecordResolutionResponseTool;
+use AidingApp\Ai\Tools\PortalAssistant\RequestFileAttachmentsTool;
 use AidingApp\Ai\Tools\PortalAssistant\SaveClarifyingQuestionTool;
 use AidingApp\Ai\Tools\PortalAssistant\ShowFieldInputTool;
 use AidingApp\Ai\Tools\PortalAssistant\ShowTypeSelectorTool;
@@ -434,17 +436,18 @@ EOT;
                 ->first();
         }
 
-        // Always available tools - users can restart or change type at any time
+        // get_draft_status is always available
         $tools = [
-            new FetchServiceRequestTypesTool($this->thread),
-            new ShowTypeSelectorTool($this->thread),
             new GetDraftStatusTool($this->thread),
         ];
 
-        // Phase-specific tools - progressively unlock as user completes steps
-        // Users can always edit previously unlocked fields (go back)
-        // but cannot access future steps until prerequisites are met (no skipping ahead)
         if ($draft) {
+            // When a draft exists, user can cancel to start over or change type
+            $tools[] = new CancelServiceRequestTool($this->thread);
+
+            // Phase-specific tools - progressively unlock as user completes steps
+            // Users can always edit previously unlocked fields (go back)
+            // but cannot access future steps until prerequisites are met (no skipping ahead)
             $draftStage = ServiceRequestDraftStage::fromServiceRequest($draft);
 
             match ($draftStage) {
@@ -452,6 +455,10 @@ EOT;
                 ServiceRequestDraftStage::ClarifyingQuestions => $this->addClarifyingTools($tools),
                 ServiceRequestDraftStage::Resolution => $this->addResolutionTools($tools, $aiResolutionSettings),
             };
+        } else {
+            // When no draft exists, type selection tools are available
+            $tools[] = new FetchServiceRequestTypesTool($this->thread);
+            $tools[] = new ShowTypeSelectorTool($this->thread);
         }
 
         return $tools;
@@ -476,9 +483,10 @@ EOT;
             $tools[] = new ShowFieldInputTool($this->thread);
         }
 
-        // Step 2: After all required form fields filled (or immediately if no fields), description becomes available
+        // Step 2: After all required form fields filled (or immediately if no fields), description and file attachments become available
         if (! $hasCustomFields || $this->allRequiredFormFieldsFilled($draft)) {
             $tools[] = new UpdateDescriptionTool($this->thread);
+            $tools[] = new RequestFileAttachmentsTool($this->thread);
         }
 
         // Step 3: After description filled, title becomes available

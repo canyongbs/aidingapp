@@ -36,11 +36,15 @@
 
 namespace AidingApp\Ai\Http\Controllers\PortalAssistant;
 
+use AidingApp\Ai\Jobs\PortalAssistant\PersistPortalAssistantUpload;
 use AidingApp\Ai\Jobs\PortalAssistant\SendMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Bus;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class SendMessageController
@@ -50,6 +54,14 @@ class SendMessageController
         $data = $request->validate([
             'content' => ['required', 'string', 'max:25000'],
             'thread_id' => ['nullable', 'uuid'],
+            'file_urls' => ['nullable', 'array', 'max:10'],
+            // Path must be tmp/{uuid}.{extension} - no path traversal allowed
+            'file_urls.*.path' => [
+                'required_with:file_urls',
+                'string',
+                'regex:/^tmp\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-zA-Z0-9]+$/i',
+            ],
+            'file_urls.*.original_name' => ['required_with:file_urls', 'string', 'max:255'],
         ]);
 
         $author = auth('contact')->user();
@@ -63,6 +75,13 @@ class SendMessageController
             $thread = new PortalAssistantThread();
             $thread->author()->associate($author);
             $thread->save();
+        }
+
+        // Handle file attachments if present
+        $fileUrls = $data['file_urls'] ?? [];
+
+        if (! empty($fileUrls)) {
+            $this->persistFileUploads($thread, $fileUrls);
         }
 
         dispatch(new SendMessage(
@@ -81,5 +100,41 @@ class SendMessageController
             'message' => 'Message dispatched for processing via websockets.',
             'thread_id' => $thread->getKey(),
         ]);
+    }
+
+    /**
+     * Persist uploaded files to the service request's uploads media collection.
+     *
+     * @param array<int, array{path: string, original_name: string}> $fileUrls
+     */
+    protected function persistFileUploads(PortalAssistantThread $thread, array $fileUrls): void
+    {
+        // Get the current draft service request
+        $draft = ServiceRequest::withoutGlobalScope('excludeDrafts')
+            ->where('portal_assistant_thread_id', $thread->getKey())
+            ->where('is_draft', true)
+            ->latest()
+            ->first();
+
+        if (! $draft) {
+            return;
+        }
+
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->execute($draft);
+
+        $jobs = collect($fileUrls)->map(function (array $file) use ($draft, $uploadsMediaCollection) {
+            return new PersistPortalAssistantUpload(
+                $draft,
+                $file['path'],
+                $file['original_name'],
+                $uploadsMediaCollection->getName(),
+            );
+        });
+
+        if ($jobs->isNotEmpty()) {
+            Bus::batch($jobs->all())
+                ->name("persist-portal-assistant-uploads-{$draft->getKey()}")
+                ->dispatchAfterResponse();
+        }
     }
 }

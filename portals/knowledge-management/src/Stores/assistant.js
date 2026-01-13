@@ -38,6 +38,7 @@ export const useAssistantStore = defineStore('assistant', () => {
     const assistantSendMessageUrl = ref(null);
     const selectTypeUrl = ref(null);
     const updateFieldUrl = ref(null);
+    const requestUploadUrl = ref(null);
     const websocketsConfig = ref(null);
     const apiUrl = ref(null);
 
@@ -51,6 +52,10 @@ export const useAssistantStore = defineStore('assistant', () => {
 
     async function setUpdateFieldUrl(url) {
         updateFieldUrl.value = url;
+    }
+
+    async function setRequestUploadUrl(url) {
+        requestUploadUrl.value = url;
     }
 
     async function setWebsocketsConfig(config) {
@@ -73,10 +78,12 @@ export const useAssistantStore = defineStore('assistant', () => {
         assistantSendMessageUrl,
         selectTypeUrl,
         updateFieldUrl,
+        requestUploadUrl,
         getAssistantSendMessageUrl,
         setAssistantSendMessageUrl,
         setSelectTypeUrl,
         setUpdateFieldUrl,
+        setRequestUploadUrl,
         websocketsConfig,
         getWebsocketsConfig,
         setWebsocketsConfig,

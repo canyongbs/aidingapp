@@ -54,6 +54,11 @@
         activeWidget,
         handleWidgetSubmit,
         handleWidgetCancel,
+        fileAttachments,
+        fileAttachmentsEnabled,
+        addFileAttachments,
+        removeFileAttachment,
+        allUploadsComplete,
     } = useAssistantChat();
 
     const authStore = useAuthStore();
@@ -88,7 +93,15 @@
                 />
             </template>
             <template v-else>
-                <ChatInput :disabled="isSending || isAssistantResponding" @send="sendMessage" />
+                <ChatInput
+                    :disabled="isSending || isAssistantResponding"
+                    :attachments-enabled="fileAttachmentsEnabled"
+                    :file-attachments="fileAttachments"
+                    :all-uploads-complete="allUploadsComplete()"
+                    @send="sendMessage"
+                    @add-files="addFileAttachments"
+                    @remove-file="removeFileAttachment"
+                />
             </template>
         </div>
     </Transition>

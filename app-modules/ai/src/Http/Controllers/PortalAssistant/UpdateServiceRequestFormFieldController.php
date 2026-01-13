@@ -183,9 +183,6 @@ class UpdateServiceRequestFormFieldController
 
         // Handle different field types
         $valueDescription = match ($fieldType) {
-            'upload' => is_array($value) && isset($value['name'])
-                ? sprintf('uploaded file "%s"', $value['name'])
-                : 'uploaded a file',
             'date' => sprintf('selected date "%s"', $value),
             'select', 'radio' => sprintf('selected "%s"', $value),
             'checkbox' => $value ? 'checked the box' : 'unchecked the box',

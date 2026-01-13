@@ -52,7 +52,7 @@ class UpdateFormFieldTool extends Tool
     ) {
         $this
             ->as('update_form_field')
-            ->for('Updates a text-based custom form field value. Use this for simple text fields, text areas, numbers, and emails. For complex fields like selects, dates, or file uploads, use show_field_input instead. IMPORTANT: You MUST ask the user for this field value before calling this tool. Do NOT use information from earlier in the conversation - only use what the user provides in their current response. Once the user provides the value, save it immediately without asking for confirmation.')
+            ->for('Updates a text-based custom form field value. Use this for simple text fields, text areas, numbers, and emails. For complex fields like selects, dates, or signatures, use show_field_input instead. IMPORTANT: You MUST ask the user for this field value before calling this tool. Do NOT use information from earlier in the conversation - only use what the user provides in their current response. Once the user provides the value, save it immediately without asking for confirmation.')
             ->withStringParameter('field_id', 'The UUID of the form field')
             ->withStringParameter('value', 'The value to set for the field')
             ->using($this);

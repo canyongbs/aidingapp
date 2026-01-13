@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Jobs;
+namespace AidingApp\Ai\Jobs\PortalAssistant;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Bus\Batchable;
@@ -47,13 +47,13 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
-class PersistServiceRequestUpload implements ShouldQueue
+class PersistPortalAssistantUpload implements ShouldQueue
 {
+    use Batchable;
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
-    use Batchable;
 
     public $deleteWhenMissingModels = true;
 
@@ -73,11 +73,8 @@ class PersistServiceRequestUpload implements ShouldQueue
 
     public function handle(): void
     {
-        // Security: Validate path is within tmp/ directory and matches expected pattern
-        // This is defense in depth - the controller should have already validated this
         $this->validatePath();
 
-        // Verify file exists before attempting to copy
         if (! Storage::exists($this->path)) {
             return;
         }
@@ -88,7 +85,6 @@ class PersistServiceRequestUpload implements ShouldQueue
                 ->usingName(pathinfo($this->originalFileName, PATHINFO_FILENAME))
                 ->toMediaCollection($this->collection);
         } finally {
-            // Always delete the temporary file after processing
             Storage::delete($this->path);
         }
     }
@@ -100,17 +96,14 @@ class PersistServiceRequestUpload implements ShouldQueue
      */
     protected function validatePath(): void
     {
-        // Reject any path traversal attempts
         if (str_contains($this->path, '..') || str_contains($this->path, '//')) {
             throw new InvalidArgumentException('Invalid path: path traversal not allowed');
         }
 
-        // Path must start with tmp/
         if (! str_starts_with($this->path, 'tmp/')) {
             throw new InvalidArgumentException('Invalid path: must be within tmp/ directory');
         }
 
-        // Path must match expected pattern: tmp/{uuid}.{extension}
         if (! preg_match('/^tmp\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-zA-Z0-9]+$/i', $this->path)) {
             throw new InvalidArgumentException('Invalid path: does not match expected format');
         }
