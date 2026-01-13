@@ -52,22 +52,28 @@ class SelectServiceRequestTypeController
     {
         $data = $request->validate([
             'priority_id' => ['required', 'uuid'],
-            'thread_id' => ['required', 'uuid'],
+            'thread_id' => ['nullable', 'uuid'],
             'message' => ['required', 'string', 'max:500'],
         ]);
 
         Log::info('[PortalAssistant] Widget type and priority selection', [
             'priority_id' => $data['priority_id'],
             'message' => $data['message'],
-            'thread_id' => $data['thread_id'],
+            'thread_id' => $data['thread_id'] ?? null,
         ]);
 
         $author = auth('contact')->user();
 
-        $thread = PortalAssistantThread::query()
-            ->whereKey($data['thread_id'])
-            ->whereMorphedTo('author', $author)
-            ->firstOrFail();
+        if (filled($data['thread_id'] ?? null)) {
+            $thread = PortalAssistantThread::query()
+                ->whereKey($data['thread_id'])
+                ->whereMorphedTo('author', $author)
+                ->firstOrFail();
+        } else {
+            $thread = new PortalAssistantThread();
+            $thread->author()->associate($author);
+            $thread->save();
+        }
 
         $priority = ServiceRequestPriority::with('type.form')
             ->findOrFail($data['priority_id']);
