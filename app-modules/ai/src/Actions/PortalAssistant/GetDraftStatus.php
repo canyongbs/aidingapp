@@ -280,19 +280,28 @@ class GetDraftStatus
         return match ($draftStage) {
             ServiceRequestDraftStage::DataCollection => $this->getDataCollectionInstruction($result),
             ServiceRequestDraftStage::ClarifyingQuestions => $this->getClarifyingQuestionsInstruction($result),
-            ServiceRequestDraftStage::Resolution => $this->getResolutionInstruction(),
+            ServiceRequestDraftStage::Resolution => $this->getResolutionInstruction($draft),
         };
     }
 
-    protected function getResolutionInstruction(): string
+    protected function getResolutionInstruction(ServiceRequest $draft): string
     {
         $aiResolutionSettings = app(AiResolutionSettings::class);
 
-        if ($aiResolutionSettings->is_enabled) {
-            return 'Based on everything the user told you, formulate a helpful resolution. Call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer="<your detailed resolution>"). The tool will tell you whether to present it or submit for review.';
+        if (! $aiResolutionSettings->is_enabled) {
+            return 'Service request has been submitted for review. Thank the user and let them know a team member will follow up to help resolve this.';
         }
 
-        return 'Service request has been submitted for review. Thank the user and let them know a team member will follow up to help resolve this.';
+        // Check if resolution has already been proposed
+        $hasResolutionBeenProposed = $draft->serviceRequestUpdates()
+            ->where('update_type', ServiceRequestUpdateType::AiResolutionProposed)
+            ->exists();
+
+        if ($hasResolutionBeenProposed) {
+            return 'You already presented a resolution. Wait for the user\'s yes/no feedback, then call record_resolution_response IMMEDIATELY - "yes/worked/thanks" = accepted=true, "no/didn\'t work/still broken" = accepted=false. Do NOT ask for more details or continue troubleshooting.';
+        }
+
+        return 'Based on everything the user told you, formulate a helpful resolution. Call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer="<your detailed resolution>"). The tool will tell you whether to present it or submit for review.';
     }
 
     /**
