@@ -481,7 +481,7 @@ EOT;
     /**
      * Add tools for clarifying questions phase
      */
-    protected function addClarifyingTools(array &$tools, $aiResolutionSettings): void
+    protected function addClarifyingTools(array &$tools, AiResolutionSettings $aiResolutionSettings): void
     {
         $tools[] = new SaveClarifyingQuestionAnswerTool($this->thread);
 
