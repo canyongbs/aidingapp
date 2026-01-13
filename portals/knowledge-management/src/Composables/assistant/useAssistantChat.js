@@ -49,7 +49,7 @@ export function useAssistantChat() {
     const wordQueue = ref([]);
     const isTyping = ref(false);
     const activeWidget = ref(null);
-    const typeSelectorShown = ref(false);
+    const typeSelected = ref(false);
 
     // File upload integration
     const fileUpload = useFileUpload();
@@ -186,11 +186,6 @@ export function useAssistantChat() {
             return;
         }
 
-        // Track when type selector is shown (hides "New Request" link)
-        if (actionType === 'select_service_request_type') {
-            typeSelectorShown.value = true;
-        }
-
         if (messageIndex !== -1) {
             // Store the widget to show after response completes
             messages.value[messageIndex].pendingWidget = { type: actionType, params };
@@ -227,6 +222,7 @@ export function useAssistantChat() {
             if (type === 'type_selection') {
                 endpoint = selectTypeUrl;
                 payload.priority_id = priority_id;
+                typeSelected.value = true;
             } else if (type === 'field_response') {
                 endpoint = updateFieldUrl;
                 payload.field_id = field_id;
@@ -260,7 +256,6 @@ export function useAssistantChat() {
         if (!getTypesUrl || isSending.value || isAssistantResponding.value || activeWidget.value) return;
 
         // Immediately show loading state in widget area
-        typeSelectorShown.value = true;
         activeWidget.value = {
             type: 'loading',
             params: {},
@@ -290,7 +285,7 @@ export function useAssistantChat() {
     };
 
     const showNewRequestLink = computed(() => {
-        return getTypesUrl && !typeSelectorShown.value;
+        return getTypesUrl && !activeWidget.value && !typeSelected.value;
     });
 
     watch(threadId, async (newId) => {
