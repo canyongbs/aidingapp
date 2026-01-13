@@ -193,19 +193,6 @@ class EditContact extends EditRecord
                             ->boolean(),
                     ])
                     ->columns(2),
-                Section::make('Record Details')
-                    ->schema([
-                        Select::make('created_by_id')
-                            ->label('Created By')
-                            ->relationship('createdBy', 'name')
-                            ->searchable()
-                            ->nullable()
-                            ->exists(
-                                table: (new User())->getTable(),
-                                column: (new User())->getKeyName()
-                            ),
-                    ])
-                    ->columns(2),
             ]);
     }
 
