@@ -198,11 +198,11 @@ The `cancel_service_request` tool allows users to abandon the current service re
 - During `data_collection`: Returns `missing_required_fields` and `missing_optional_fields` arrays
 - During `clarifying_questions`/`resolution`: Returns `questions_completed` counter, `title`, `description`, and `filled_form_fields` array
 - `filled_form_fields` contains structured label/value pairs with special handling:
-  - Signature fields: `[Signature provided]` instead of base64 data
-  - Checkbox fields: `Yes`/`No` instead of boolean
-  - All field values limited to 255 characters (truncated with `...`)
-  - Title limited to 255 characters
-  - Description provided in full (not truncated)
+    - Signature fields: `[Signature provided]` instead of base64 data
+    - Checkbox fields: `Yes`/`No` instead of boolean
+    - All field values limited to 255 characters (truncated with `...`)
+    - Title limited to 255 characters
+    - Description provided in full (not truncated)
 - AI receives this structured data to understand what information has already been collected
 - Provides natural-language `next_instruction` guiding the AI on what to do next
 
@@ -590,9 +590,7 @@ This section documents a complete conversation from the assistant's perspective,
     "type_name": "Password Reset",
     "title": "Cannot log into student portal - invalid credentials error",
     "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
-    "filled_form_fields": [
-        { "label": "Student ID", "value": "A00123456" }
-    ],
+    "filled_form_fields": [{ "label": "Student ID", "value": "A00123456" }],
     "questions_completed": 0,
     "next_instruction": "Question 1 of 3 (2 remaining).\n\nIMPORTANT: You have access to all previously collected data in the response (title, description, filled_form_fields). Use this context to ask clarifying questions that gather ADDITIONAL information you need - NOT to re-collect form data already provided. Ask focused questions about context, urgency, troubleshooting history, or other relevant details.\n\nExamples of good clarifying questions:\n- \"When did this issue first start happening?\"\n- \"Have you tried anything to resolve this already?\"\n- \"Is this blocking your work right now?\"\n- \"Are there any error messages you're seeing?\"\n\nAfter they answer, you MUST call save_clarifying_question_answer(question=\"<your question>\", answer=\"<their answer>\") to record it."
 }
@@ -623,9 +621,7 @@ This section documents a complete conversation from the assistant's perspective,
     "type_name": "Password Reset",
     "title": "Cannot log into student portal - invalid credentials error",
     "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
-    "filled_form_fields": [
-        { "label": "Student ID", "value": "A00123456" }
-    ],
+    "filled_form_fields": [{ "label": "Student ID", "value": "A00123456" }],
     "questions_completed": 1,
     "next_instruction": "Question 2 of 3 (1 remaining).\n\nIMPORTANT: You have access to all previously collected data in the response (title, description, filled_form_fields). Use this context to ask clarifying questions that gather ADDITIONAL information you need - NOT to re-collect form data already provided. Ask focused questions about context, urgency, troubleshooting history, or other relevant details.\n\nExamples of good clarifying questions:\n- \"When did this issue first start happening?\"\n- \"Have you tried anything to resolve this already?\"\n- \"Is this blocking your work right now?\"\n- \"Are there any error messages you're seeing?\"\n\nAfter they answer, you MUST call save_clarifying_question_answer(question=\"<your question>\", answer=\"<their answer>\") to record it."
 }
@@ -654,9 +650,7 @@ This section documents a complete conversation from the assistant's perspective,
     "type_name": "Password Reset",
     "title": "Cannot log into student portal - invalid credentials error",
     "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
-    "filled_form_fields": [
-        { "label": "Student ID", "value": "A00123456" }
-    ],
+    "filled_form_fields": [{ "label": "Student ID", "value": "A00123456" }],
     "questions_completed": 2,
     "next_instruction": "Question 3 of 3 (0 remaining).\n\nIMPORTANT: You have access to all previously collected data in the response (title, description, filled_form_fields). Use this context to ask clarifying questions that gather ADDITIONAL information you need - NOT to re-collect form data already provided. Ask focused questions about context, urgency, troubleshooting history, or other relevant details.\n\nExamples of good clarifying questions:\n- \"When did this issue first start happening?\"\n- \"Have you tried anything to resolve this already?\"\n- \"Is this blocking your work right now?\"\n- \"Are there any error messages you're seeing?\"\n\nAfter they answer, you MUST call save_clarifying_question_answer(question=\"<your question>\", answer=\"<their answer>\") to record it."
 }
@@ -674,8 +668,8 @@ This section documents a complete conversation from the assistant's perspective,
 
 **Available Tools:** Same as Turn 2, plus:
 
-| Tool                           | Description                                                                                                                                                                                                               |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tool                           | Description                                                                                                                                                                                                                                               |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `check_ai_resolution_validity` | Checks if an AI resolution meets the confidence threshold. Call this after clarifying questions when you have a potential solution. DO NOT show the resolution to the user until this tool returns meets_threshold: true. Confidence score must be 0-100. |
 
 **Tool Call:** `save_clarifying_question_answer(question="Have you tried logging in from a different browser or device to see if the issue persists?", answer="No I haven't tried that")`
@@ -689,9 +683,7 @@ This section documents a complete conversation from the assistant's perspective,
     "type_name": "Password Reset",
     "title": "Cannot log into student portal - invalid credentials error",
     "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
-    "filled_form_fields": [
-        { "label": "Student ID", "value": "A00123456" }
-    ],
+    "filled_form_fields": [{ "label": "Student ID", "value": "A00123456" }],
     "questions_completed": 3,
     "next_instruction": "Based on everything the user told you, formulate a helpful resolution. Call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer=\"<your detailed resolution>\"). The tool will tell you whether to present it or submit for review."
 }
