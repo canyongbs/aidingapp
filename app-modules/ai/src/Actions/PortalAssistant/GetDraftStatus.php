@@ -147,6 +147,11 @@ class GetDraftStatus
         $fieldId = $field->getKey();
         $value = $filledFields[$fieldId] ?? null;
 
+        $isTextField = in_array($field->type, [
+            TextInputFormFieldBlock::type(),
+            TextAreaFormFieldBlock::type(),
+        ]);
+
         $data = [
             'field_id' => $fieldId,
             'label' => $field->label,
@@ -154,6 +159,7 @@ class GetDraftStatus
             'required' => (bool) $field->is_required,
             'value' => $value,
             'filled' => $value !== null && $value !== '',
+            'collection_method' => $isTextField ? 'text' : 'show_field_input',
         ];
 
         if (isset($field->config['options'])) {
@@ -181,6 +187,7 @@ class GetDraftStatus
                     'field_id' => $field['field_id'],
                     'label' => $field['label'],
                     'type' => $field['type'],
+                    'collection_method' => $field['collection_method'],
                 ];
 
                 if (isset($field['options'])) {
@@ -229,6 +236,7 @@ class GetDraftStatus
                     'field_id' => $field['field_id'],
                     'label' => $field['label'],
                     'type' => $field['type'],
+                    'collection_method' => $field['collection_method'],
                 ];
 
                 if (isset($field['options'])) {

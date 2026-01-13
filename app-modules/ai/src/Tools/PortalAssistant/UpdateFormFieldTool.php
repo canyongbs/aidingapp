@@ -40,6 +40,8 @@ use AidingApp\Ai\Actions\PortalAssistant\GetDraftStatus;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
+use AidingApp\Form\Filament\Blocks\TextAreaFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use Prism\Prism\Tool;
 
@@ -53,7 +55,7 @@ class UpdateFormFieldTool extends Tool
     ) {
         $this
             ->as('update_form_field')
-            ->for('Saves a user\'s response to a text-based form field. Call this AFTER the user provides their answer to your question. For complex fields (select, date, signature), use show_field_input instead to display a widget.')
+            ->for('Saves a user\'s response to a text field (collection_method="text"). Call AFTER the user provides their answer. For other fields (collection_method="show_field_input"), use show_field_input tool instead.')
             ->withStringParameter('field_id', 'The UUID of the form field')
             ->withStringParameter('value', 'The value to set for the field')
             ->using($this);
@@ -105,6 +107,22 @@ class UpdateFormFieldTool extends Tool
             $result = json_encode([
                 'success' => false,
                 'error' => 'Field not found for this service request type.',
+            ]);
+            $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
+
+            return $result;
+        }
+
+        // Check if this is a show_field_input field that shouldn't use text update
+        $isTextField = in_array($field->type, [
+            TextInputFormFieldBlock::type(),
+            TextAreaFormFieldBlock::type(),
+        ]);
+
+        if (! $isTextField) {
+            $result = json_encode([
+                'success' => false,
+                'hint' => "This field requires a widget for proper input/validation (collection_method=\"show_field_input\"). Call show_field_input(field_id=\"{$field_id}\") to display the widget, and ask a natural question in the same response.",
             ]);
             $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
 

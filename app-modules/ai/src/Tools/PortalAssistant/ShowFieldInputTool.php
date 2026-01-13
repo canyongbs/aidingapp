@@ -40,6 +40,8 @@ use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
+use AidingApp\Form\Filament\Blocks\TextAreaFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use Prism\Prism\Tool;
 
 class ShowFieldInputTool extends Tool
@@ -52,7 +54,7 @@ class ShowFieldInputTool extends Tool
     ) {
         $this
             ->as('show_field_input')
-            ->for('Displays a UI widget for complex form fields like selects, radio buttons, dates, phone numbers, addresses, or signatures. Do NOT use this for simple text fields. IMPORTANT: In the SAME response where you call this tool, also ask the user a natural question about what information you need. Do both together - ask the question AND call this tool in a single response.')
+            ->for('Displays a UI widget for fields with collection_method="show_field_input". In the SAME response, ask a natural question prompting the user to complete it. Do NOT use for text fields.')
             ->withStringParameter('field_id', 'The UUID of the form field to display')
             ->using($this);
     }
@@ -103,6 +105,22 @@ class ShowFieldInputTool extends Tool
             $result = json_encode([
                 'error' => true,
                 'message' => 'Field not found for this service request type.',
+            ]);
+            $this->logToolResult('show_field_input', $result, ['field_id' => $field_id]);
+
+            return $result;
+        }
+
+        // Check if this is a text field that shouldn't use the widget
+        $isTextField = in_array($field->type, [
+            TextInputFormFieldBlock::type(),
+            TextAreaFormFieldBlock::type(),
+        ]);
+
+        if ($isTextField) {
+            $result = json_encode([
+                'success' => false,
+                'hint' => "This is a text field (collection_method=\"text\"). Ask the user naturally (e.g., \"What's your {$field->label}?\") and then call update_form_field(field_id=\"{$field_id}\", value=\"<their response>\") with their answer.",
             ]);
             $this->logToolResult('show_field_input', $result, ['field_id' => $field_id]);
 
