@@ -52,7 +52,7 @@
             <div class="bg-white/20 p-2 rounded-lg">
                 <ChatBubbleLeftRightIcon class="w-5 h-5" />
             </div>
-            <div class="flex flex-col gap-0.5">
+            <div class="flex flex-col">
                 <h2 class="text-lg font-semibold tracking-tight">Support Assistant</h2>
                 <button
                     v-if="showNewRequestLink"
