@@ -33,9 +33,7 @@
 -->
 <script setup>
     import { computed } from 'vue';
-    import AddressInput from './Inputs/AddressInput.vue';
     import DateInput from './Inputs/DateInput.vue';
-    import FileUploadInput from './Inputs/FileUploadInput.vue';
     import PhoneInput from './Inputs/PhoneInput.vue';
     import RadioInput from './Inputs/RadioInput.vue';
     import SelectInput from './Inputs/SelectInput.vue';
@@ -54,18 +52,28 @@
 
     const inputComponent = computed(() => {
         switch (fieldConfig.value.type) {
-            case 'select':
-                return SelectInput;
-            case 'radio':
-                return RadioInput;
+            case 'checkbox':
+                return CheckboxInput;
             case 'date':
                 return DateInput;
+            case 'educatable_email':
+                return EmailInput;
+            case 'email':
+                return EmailInput;
+            case 'number':
+                return NumberInput;
             case 'phone':
                 return PhoneInput;
-            case 'address':
-                return AddressInput;
-            case 'upload':
-                return FileUploadInput;
+            case 'radio':
+                return RadioInput;
+            case 'select':
+                return SelectInput;
+            case 'signature':
+                return SignatureInput;
+            case 'time':
+                return TimeInput;
+            case 'url':
+                return UrlInput;
             default:
                 return null;
         }
