@@ -54,6 +54,8 @@
         activeWidget,
         handleWidgetSubmit,
         handleWidgetCancel,
+        showNewRequestLink,
+        showNewRequestSelector,
         fileAttachments,
         fileAttachmentsEnabled,
         addFileAttachments,
@@ -80,7 +82,11 @@
             v-if="props.isOpen"
             class="mb-4 w-[400px] max-w-full h-[650px] max-h-full bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden ring-1 ring-brand-950/5 backdrop-blur-sm origin-bottom-right"
         >
-            <ChatHeader @close="emit('close')" />
+            <ChatHeader
+                :show-new-request-link="showNewRequestLink"
+                @close="emit('close')"
+                @new-request="showNewRequestSelector"
+            />
 
             <ChatMessages :messages="messages" :welcome-message="welcomeMessage" :is-open="props.isOpen" />
 

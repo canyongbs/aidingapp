@@ -32,7 +32,6 @@
         "dropzone": "^5.9.2",
         "esbuild": "^0.27.2",
         "flatpickr": "^4.6.9",
-        "floating-vue": "^5.2.2",
         "jquery": "^3.2",
         "laravel-echo": "^1.14.0",
         "postcss": "^8.4.31",

@@ -171,6 +171,7 @@
                     setSelectTypeUrl,
                     setUpdateFieldUrl,
                     setRequestUploadUrl,
+                    setGetTypesUrl,
                     setWebsocketsConfig,
                     setApiUrl,
                 } = useAssistantStore();
@@ -211,6 +212,7 @@
                 setSelectTypeUrl(response.data.assistant_select_type_url);
                 setUpdateFieldUrl(response.data.assistant_update_field_url);
                 setRequestUploadUrl(response.data.assistant_request_upload_url);
+                setGetTypesUrl(response.data.assistant_get_types_url);
                 setWebsocketsConfig(response.data.websockets_config);
 
                 authentication.value.requestUrl = response.data.authentication_url ?? null;
@@ -336,6 +338,7 @@
             setSelectTypeUrl,
             setUpdateFieldUrl,
             setRequestUploadUrl,
+            setGetTypesUrl,
             setWebsocketsConfig,
             setApiUrl,
         } = useAssistantStore();
@@ -404,6 +407,7 @@
                         setSelectTypeUrl(response.data.assistant_select_type_url);
                         setUpdateFieldUrl(response.data.assistant_update_field_url);
                         setRequestUploadUrl(response.data.assistant_request_upload_url);
+                        setGetTypesUrl(response.data.assistant_get_types_url);
                         setWebsocketsConfig(response.data.websockets_config);
 
                         const { hasServiceManagement, hasAssets, hasLicense, hasTasks } = useFeatureStore();

@@ -39,7 +39,7 @@ import { useAssistantConnection } from './useAssistantConnection.js';
 import { useFileUpload } from './useFileUpload.js';
 
 export function useAssistantChat() {
-    const { assistantSendMessageUrl, selectTypeUrl, updateFieldUrl, websocketsConfig } = useAssistantStore();
+    const { assistantSendMessageUrl, selectTypeUrl, updateFieldUrl, getTypesUrl, websocketsConfig } = useAssistantStore();
     const { getToken } = useTokenStore();
 
     const messages = ref([]);
@@ -48,6 +48,7 @@ export function useAssistantChat() {
     const wordQueue = ref([]);
     const isTyping = ref(false);
     const activeWidget = ref(null);
+    const typeSelectorShown = ref(false);
 
     // File upload integration
     const fileUpload = useFileUpload();
@@ -184,6 +185,11 @@ export function useAssistantChat() {
             return;
         }
 
+        // Track when type selector is shown (hides "New Request" link)
+        if (actionType === 'select_service_request_type') {
+            typeSelectorShown.value = true;
+        }
+
         if (messageIndex !== -1) {
             // Store the widget to show after response completes
             messages.value[messageIndex].pendingWidget = { type: actionType, params };
@@ -249,6 +255,35 @@ export function useAssistantChat() {
         activeWidget.value = null;
     };
 
+    const showNewRequestSelector = async () => {
+        if (!getTypesUrl || isSending.value || isAssistantResponding.value) return;
+
+        try {
+            const response = await axios.get(getTypesUrl);
+            const typesTree = response.data.types_tree || [];
+
+            if (typesTree.length === 0) {
+                console.error('[Assistant] No service request types available');
+                return;
+            }
+
+            typeSelectorShown.value = true;
+            activeWidget.value = {
+                type: 'select_service_request_type',
+                params: {
+                    suggestion: null,
+                    types_tree: typesTree,
+                },
+            };
+        } catch (error) {
+            console.error('[Assistant] Failed to fetch service request types:', error);
+        }
+    };
+
+    const showNewRequestLink = computed(() => {
+        return getTypesUrl && !typeSelectorShown.value;
+    });
+
     watch(threadId, async (newId) => {
         if (!newId) return;
         await connectToThread(newId);
@@ -267,6 +302,9 @@ export function useAssistantChat() {
         activeWidget,
         handleWidgetSubmit,
         handleWidgetCancel,
+        // New request link
+        showNewRequestLink,
+        showNewRequestSelector,
         // File upload exports
         fileAttachments: fileUpload.files,
         fileAttachmentsEnabled: fileUpload.isEnabled,

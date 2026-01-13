@@ -177,7 +177,7 @@
             <button
                 v-if="props.attachmentsEnabled"
                 @click="triggerFileInput"
-                v-tooltip="'Attach files (up to 6 files, 10MB each)'"
+                title="Attach files (up to 6 files, 10MB each)"
                 class="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg p-3 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-500 shrink-0"
                 aria-label="Attach files to your request"
             >

@@ -36,11 +36,11 @@
 
 namespace AidingApp\Ai\Tools\PortalAssistant;
 
+use AidingApp\Ai\Actions\PortalAssistant\BuildServiceRequestTypesTree;
 use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use Prism\Prism\Tool;
 
 class ShowTypeSelectorTool extends Tool
@@ -61,7 +61,7 @@ class ShowTypeSelectorTool extends Tool
     {
         $draft = $this->findDraft();
 
-        $typesTree = $this->buildTypesTree();
+        $typesTree = app(BuildServiceRequestTypesTree::class)->execute();
 
         if (empty($typesTree)) {
             return json_encode([
@@ -114,80 +114,5 @@ class ShowTypeSelectorTool extends Tool
             'success' => true,
             'next_instruction' => 'Tell user: "Please select the type that best matches your request." Then wait for their selection.',
         ]);
-    }
-
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    protected function buildTypesTree(): array
-    {
-        $categories = ServiceRequestTypeCategory::with([
-            'children',
-            'types' => fn ($q) => $q->whereHas('form')->with(['priorities' => fn ($q) => $q->orderBy('order')]),
-        ])
-            ->whereNull('parent_id')
-            ->orderBy('sort')
-            ->get();
-
-        $uncategorizedTypes = ServiceRequestType::whereHas('form')
-            ->whereDoesntHave('category')
-            ->with(['priorities' => fn ($q) => $q->orderBy('order')])
-            ->get();
-
-        $tree = $categories->map(fn ($category) => $this->formatCategory($category))->all();
-
-        if ($uncategorizedTypes->isNotEmpty()) {
-            $tree[] = [
-                'category_id' => null,
-                'name' => 'Other',
-                'children' => [],
-                'types' => $uncategorizedTypes->map(fn ($type) => [
-                    'type_id' => $type->getKey(),
-                    'name' => $type->name,
-                    'description' => $type->description,
-                    'priorities' => $type->priorities
-                        ->map(fn ($p) => [
-                            'priority_id' => $p->id,
-                            'name' => $p->name,
-                        ])
-                        ->values()
-                        ->all(),
-                ])->all(),
-            ];
-        }
-
-        return $tree;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function formatCategory(ServiceRequestTypeCategory $category): array
-    {
-        $children = $category->children->map(fn ($child) => $this->formatCategory($child))->all();
-
-        $types = $category->types
-            ->filter(fn ($type) => $type->form !== null)
-            ->map(fn ($type) => [
-                'type_id' => $type->getKey(),
-                'name' => $type->name,
-                'description' => $type->description,
-                'priorities' => $type->priorities
-                    ->map(fn ($p) => [
-                        'priority_id' => $p->id,
-                        'name' => $p->name,
-                    ])
-                    ->values()
-                    ->all(),
-            ])
-            ->values()
-            ->all();
-
-        return [
-            'category_id' => $category->getKey(),
-            'name' => $category->name,
-            'children' => $children,
-            'types' => $types,
-        ];
     }
 }
