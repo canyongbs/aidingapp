@@ -141,7 +141,8 @@ export function useAssistantChat() {
 
     const handleActionRequest = (actionType, params) => {
         // Don't show widget until assistant response is complete
-        const messageIndex = messages.value.findIndex((m) => m.author === 'assistant' && !m.isComplete);
+        const messageIndex = messages.value.findIndex((message) => message.author === 'assistant' && !message.isComplete);
+
         if (messageIndex !== -1) {
             // Store the widget to show after response completes
             messages.value[messageIndex].pendingWidget = { type: actionType, params };
@@ -153,6 +154,7 @@ export function useAssistantChat() {
 
     const connectToThread = async (id) => {
         if (!id) return;
+
         await connection.connect(
             id,
             (chunk, is_complete, err) => {
