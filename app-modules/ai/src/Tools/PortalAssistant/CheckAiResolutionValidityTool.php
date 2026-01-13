@@ -99,10 +99,8 @@ class CheckAiResolutionValidityTool extends Tool
 
         if ($meetsThreshold) {
             return json_encode([
-                'threshold' => $threshold,
-                'confidence_score' => $confidenceScore,
                 'meets_threshold' => true,
-                'instruction' => 'NOW present your resolution to the user and ask if it solved their problem. Wait for explicit yes/no response. Then call record_resolution_response.',
+                'next_instruction' => 'Present resolution to user and ask if it solved their problem. Then call record_resolution_response with their answer.',
             ]);
         }
 
@@ -114,11 +112,9 @@ class CheckAiResolutionValidityTool extends Tool
         $requestNumber = $this->submitServiceRequest($draft, false);
 
         return json_encode([
-            'threshold' => $threshold,
-            'confidence_score' => $confidenceScore,
             'meets_threshold' => false,
             'request_number' => $requestNumber,
-            'instruction' => "Confidence too low. Resolution was NOT shown to user. Service request has been automatically submitted for human review. Tell the user their request number is {$requestNumber} and a team member will review it.",
+            'next_instruction' => "Confidence too low - resolution NOT shown. Request submitted for human review. Tell user their request number is {$requestNumber}.",
         ]);
     }
 }

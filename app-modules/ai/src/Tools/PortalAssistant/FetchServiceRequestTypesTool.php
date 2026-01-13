@@ -76,7 +76,7 @@ class FetchServiceRequestTypesTool extends Tool
         $result = json_encode([
             'types_tree' => $typesTree,
             'has_draft' => $draft !== null,
-            'instruction' => 'CRITICAL: You MUST analyze the types_tree to find a matching type BEFORE calling show_type_selector. Look at the type name for matches. Examples: User says "printer broken" → matches "Printer Issue" (type_id: "d691de0b-c90d-44b0-aa2b-6e17cf0ea10c"), User says "password help" → matches "Password Reset". If you find a match, extract the EXACT type_id UUID string and pass it like: show_type_selector(suggested_type_id="d691de0b-c90d-44b0-aa2b-6e17cf0ea10c"). If NO clear match exists, call show_type_selector() with NO suggested_type_id parameter at all - omit it completely from your tool call.',
+            'next_instruction' => 'Analyze types_tree for a match. If found, call show_type_selector(suggested_type_id="<uuid>"). If no match, call show_type_selector() with no parameters.',
         ]);
 
         $this->logToolResult('fetch_service_request_types', $result);

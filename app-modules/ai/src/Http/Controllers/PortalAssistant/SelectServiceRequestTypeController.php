@@ -36,6 +36,7 @@
 
 namespace AidingApp\Ai\Http\Controllers\PortalAssistant;
 
+use AidingApp\Ai\Actions\PortalAssistant\GetDraftStatus;
 use AidingApp\Ai\Jobs\PortalAssistant\SendMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
@@ -128,15 +129,22 @@ class SelectServiceRequestTypeController
             $thread->save();
         }
 
+        // Get the current draft for status
+        $currentDraft = ServiceRequest::withoutGlobalScope('excludeDrafts')
+            ->where('id', $thread->current_service_request_draft_id)
+            ->where('is_draft', true)
+            ->first();
+
+        $draftStatus = $currentDraft ? app(GetDraftStatus::class)->execute($currentDraft) : null;
+
         // Let AI respond to guide user to next step
         dispatch(new SendMessage(
             thread: $thread,
             content: $data['message'],
-            internalContent: sprintf(
-                'User selected service request type "%s" with priority "%s". The draft has been created. Use get_draft_status to determine what information to collect next.',
-                $type->name,
-                $priority->name
-            ),
+            internalContent: json_encode([
+                'event' => 'type_selected',
+                ...($draftStatus ?? []),
+            ]),
         ));
 
         Log::info('[PortalAssistant] Widget type and priority selection successful', [

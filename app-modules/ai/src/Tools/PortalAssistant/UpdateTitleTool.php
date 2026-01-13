@@ -36,6 +36,7 @@
 
 namespace AidingApp\Ai\Tools\PortalAssistant;
 
+use AidingApp\Ai\Actions\PortalAssistant\GetDraftStatus;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use Prism\Prism\Tool;
@@ -49,7 +50,7 @@ class UpdateTitleTool extends Tool
     ) {
         $this
             ->as('update_title')
-            ->for('Saves the title for the service request. IMPORTANT: Before calling this, explain to the user that you need a brief title for their service request, then suggest a concise title based on the description and form fields. Example: "I need a brief title for your service request. How about: [title]?" Wait for their confirmation/modification, then save it immediately.')
+            ->for('Saves the service request title. Suggest a concise title based on collected info, ask user to confirm or modify, then save. Example: "How about: [title]?"')
             ->withStringParameter('title', 'The title for the service request')
             ->using($this);
     }
@@ -68,10 +69,11 @@ class UpdateTitleTool extends Tool
         $draft->title = $title;
         $draft->save();
 
+        $draftStatus = app(GetDraftStatus::class)->execute($draft);
+
         return json_encode([
             'success' => true,
-            'title' => $title,
-            'instruction' => 'Title saved. Call get_draft_status now to refresh your context and determine what information to collect next.',
+            ...$draftStatus,
         ]);
     }
 }

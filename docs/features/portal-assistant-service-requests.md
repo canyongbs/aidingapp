@@ -332,558 +332,445 @@ When `enable_file_attachments` action received:
 - `portals/knowledge-management/src/Components/Assistant/AssistantWidget.vue`
 - `portals/knowledge-management/src/Composables/assistant/useAssistantChat.js`
 
-## Internal Content Processing
-
-Widget interactions and user selections processed via `internal_content`:
-
-**type_selection:**
-
-```json
-{ "type": "type_selection", "type_id": "uuid", "priority_id": "uuid" }
-```
-
-Validates type and priority, creates draft with priority set, and creates form submission. Draft stage becomes `data_collection`.
-
-**field_response:**
-
-```json
-{"type": "field_response", "field_id": "uuid", "value": {...}}
-```
-
-Validates field belongs to current type's form, saves via `ProcessServiceRequestSubmissionField` action.
-
-**widget_cancelled:**
-
-```json
-{ "type": "widget_cancelled", "widget_type": "...", "field_id": "..." }
-```
-
-No data change, restores chat input, AI acknowledges.
-
 ## AI Instructions
 
-The AI receives phase-specific instructions emphasizing:
+The AI receives general guidance in the system context. Detailed tool-specific instructions belong in tool descriptions, not the system context.
 
-**Data Collection:**
+**System Context Should Contain:**
 
-- Ask ONE question at a time
-- Call `get_draft_status` after each save to determine next step
-- Never combine multiple questions
-- When prompting for description, call `request_file_attachments` first to enable optional file uploads, then mention the user can attach files
-- Auto-transition occurs when all required fields filled
+- General workflow overview (type selection → data collection → clarifying questions → resolution)
+- High-level behavioral guidelines (ask one question at a time, be conversational)
+- Information about the current draft state (injected dynamically)
 
-**Clarifying Questions:**
+**Tool Descriptions Should Contain:**
 
-- Ask ONE question at a time
-- Call `get_draft_status` after each save to determine next step
-- Never combine multiple questions
-- After 3rd question, phase automatically transitions to resolution (if enabled) or submits for human review
+- Detailed instructions for when/how to use each tool
+- Parameter requirements and validation rules
+- What the tool returns and what to do next
+- Stage-specific constraints and transitions
 
-**Resolution:**
+**Minimizing Tool Call Chains:**
 
-- Call `check_ai_resolution_validity` first with confidence and proposed answer
-- If confidence below threshold: tool auto-submits request, AI informs user
-- If confidence meets threshold: AI presents resolution and waits for user response
-- Call `record_resolution_response` with user's yes/no answer
-- Tool handles submission automatically based on user response
+Action tools (`update_form_field`, `update_description`, `update_title`, `save_clarifying_question`, etc.) return the full draft status in their response. The AI does not need to call `get_draft_status` after each action—the next instruction is included in the tool response.
+
+`get_draft_status` is primarily needed:
+- At conversation start to understand current state (if resuming a draft)
+- As a fallback if the AI loses track of state
+
+**Developer Messages Include Draft Status:**
+
+When controllers handle widget interactions (type selection, complex field inputs), the Developer message includes the full draft status. The AI does not need to call `get_draft_status` after these interactions.
+
+**Ideal Tool Call Flow:**
+
+1. User initiates service request → AI calls `fetch_service_request_types` then `show_type_selector`
+2. User selects type via widget → Developer message includes draft status and next instruction
+3. AI collects each field → Tool response includes draft status and next instruction
+4. User submits complex field via widget → Developer message includes draft status and next instruction
+5. After all fields collected → Response indicates transition to clarifying questions
+6. AI asks/saves each question → Tool response includes remaining count and next instruction
+7. After 3rd question → Tool response indicates resolution phase (or auto-submits if disabled)
+8. AI calls `check_ai_resolution_validity` → Response indicates whether to present or auto-submit
+9. If presented, AI calls `record_resolution_response` → Response includes final request number
 
 ## Implementation Notes
 
-**Automatic Submission:**
-Both resolution tools (`check_ai_resolution_validity` and `record_resolution_response`) handle the final submission internally. There is no separate `submit_service_request` tool in the resolution phase. This ensures:
-
-- Service requests are always submitted after resolution attempt
-- Data integrity (resolution metrics always captured)
-- Simplified AI interaction model
-
-**Tool Naming:**
-Previous iterations included separate validation and submission tools. Current design uses automatic stage transitions and resolution tools that handle submission internally, eliminating redundant steps.
-
-**Validation:**
-When all required fields are filled, `get_draft_status` automatically advances to the next draft stage. This eliminates redundant validation calls and simplifies the AI interaction model.
-
-**Field Order Flexibility:**
-While the collection order is fields → description → title, the system validates all required fields are present regardless of order. This accommodates edge cases where AI collects information out of sequence.
-
 **File Attachment Handling:**
-Files are uploaded directly to a temporary private S3 directory using presigned URLs generated by the frontend. When the user sends their message, the `file_urls` array is included in the request payload. The backend then copies each file from the temporary location into the service request's `uploads` media collection using Spatie Media Library. Temporary files are cleaned up after successful copy.
+Files upload to temporary S3 via presigned URLs. On message send, `file_urls` array is included in the payload. Backend copies files to the service request's `uploads` media collection and cleans up temporary files.
 
 ---
 
-## Example Conversation: Complex Form Fields
+## Detailed Conversation Log
 
-This example shows a service request type with multiple required and optional custom fields, demonstrating how the AI handles optional field collection intelligently.
+This section documents a complete conversation from the assistant's perspective, showing exactly what tools are available, their descriptions, tool responses, and whether the assistant has sufficient context to proceed.
 
-### Initial Request
+### Turn 1: User Initiates Request
 
-**User:** "I need to request access to the Biology lab for my research project"
+**User Message:** "I can't log into the student portal"
 
-**AI calls `fetch_service_request_types`**
+**Available Tools:**
 
-- Creates draft
-- Identifies "Lab Access Request" type based on keywords
+| Tool | Description |
+|------|-------------|
+| `fetch_service_request_types` | STEP 1: Retrieves the complete list of available service request types. Call this ONLY when: (1) User first expresses intent to submit a NEW service request, or (2) User explicitly wants to CHANGE to a different type. DO NOT call if already working on a draft unless user explicitly requests to change types. Returns a types_tree to analyze before calling show_type_selector. |
+| `show_type_selector` | STEP 2: Displays a UI widget to select a service request type. Call this AFTER fetch_service_request_types ONLY when starting a NEW request or when user explicitly wants to CHANGE types. DO NOT call if already collecting data for an existing draft. If you identified a strong match in the types_tree, you MUST pass that exact type_id UUID as suggested_type_id parameter. If no match, omit the parameter entirely. |
+| `get_draft_status` | Returns the current draft state with form fields, missing requirements, and next_instruction. Call at conversation start if resuming a draft, or as a fallback if you lose track of state. Action tools already include this info in their responses. |
 
-**AI calls `show_type_selector`**
+**Assistant Decision:** User wants to submit a service request. Call `fetch_service_request_types`.
 
-- Suggests "Lab Access Request"
-- Widget displays with suggestion
+**Tool Call:** `fetch_service_request_types()`
 
-**AI responds:** "I think this is a Lab Access Request. Please confirm."
+**Tool Response:**
+```json
+{
+  "types_tree": [
+    {
+      "name": "IT Support",
+      "types": [
+        {"type_id": "a1b2c3d4-...", "name": "Password Reset"},
+        {"type_id": "e5f6g7h8-...", "name": "Software Installation"}
+      ]
+    }
+  ],
+  "has_draft": false,
+  "next_instruction": "Analyze types_tree for a match. If found, call show_type_selector(suggested_type_id=\"<uuid>\"). If no match, call show_type_selector() with no parameters."
+}
+```
 
-**User clicks "Lab Access Request", then selects "Medium" priority and confirms**
+**Does assistant know what to do?** ✅ Yes - `next_instruction` says to analyze types and call `show_type_selector`. User mentioned "log into student portal" which matches "Password Reset".
 
-**Backend processes:**
+**Tool Call:** `show_type_selector(suggested_type_id="a1b2c3d4-...")`
 
-- Creates draft with selected type and priority
-- Creates ServiceRequestFormSubmission
-- Phase becomes 'data_collection'
-- Type has 3 required custom fields: Building Name, Lab Number, Faculty Supervisor
-- Type has 2 optional custom fields: Preferred Start Date, Research Project Title
-- Sends developer message to AI: "User selected 'Lab Access Request' with 'Medium' priority. Type has 3 required fields and 2 optional fields."
+**Tool Response:** `"Widget displayed to user."`
 
----
-
-### Required Fields Collection
-
-**AI calls `get_draft_status`**
-
-- Returns: 3 required custom fields, plus description/title
-- Instruction: "Ask for Building Name first"
-
-**AI responds:** "Which building is the lab in?"
-
-**User:** "Science Center"
-
-**AI calls `update_form_field`** (Building Name: "Science Center")
-
-- Saves "Science Center" to Building Name field
-- Returns success
-
-**Developer message:** "Field 'Building Name' updated"
+**Assistant Response:** "I think this might be a Password Reset request. Please confirm or select a different type."
 
 ---
 
-**AI calls `get_draft_status`**
+### Turn 2: User Selects Type via Widget
 
-- Returns: Building Name filled, 2 more required fields
-- Instruction: "Ask for Lab Number"
+**User Action:** Clicks "Password Reset" in widget, selects "High" priority, confirms
 
-**AI responds:** "What is the lab number?"
+**Note:** This is NOT a regular user message. The frontend sends the selection to `SelectServiceRequestTypeController`, which creates the draft and dispatches `SendMessage` with a Developer message.
 
-**User:** "Lab 204"
+**Developer Message (internal_content):**
+```json
+{
+  "event": "type_selected",
+  "has_draft": true,
+  "draft_stage": "data_collection",
+  "type_id": "a1b2c3d4-...",
+  "type_name": "Password Reset",
+  "priority_id": "p1p2p3p4-...",
+  "priority_name": "High",
+  "title": null,
+  "description": null,
+  "form_fields": [
+    {"field_id": "f1f2f3f4-...", "label": "Student ID", "type": "text", "required": true, "value": null, "filled": false}
+  ],
+  "missing_required": ["f1f2f3f4-...", "description", "title"],
+  "optional_fields": [],
+  "clarifying_questions": {"completed": 0, "required": 3},
+  "next_instruction": "Next: Ask about \"Student ID\"."
+}
+```
 
-**AI calls `update_form_field`** (Lab Number: "Lab 204")
+**Available Tools:**
 
-- Returns success
+| Tool | Description |
+|------|-------------|
+| `get_draft_status` | Returns the current draft state with form fields, missing requirements, and next_instruction. Call at conversation start if resuming a draft, or as a fallback if you lose track of state. Action tools already include this info in their responses. |
+| `cancel_service_request` | Cancels the current service request draft, allowing the user to start over or select a different request type. Use when the user wants to abandon their current request, change to a different type, or start fresh. The draft is preserved and can be restored if the user selects the same type again. |
+| `update_form_field` | Saves a text-based form field (text, textarea, number, email). For complex fields (select, date, signature), use show_field_input instead. Ask user for this field, wait for response, then save. |
+| `show_field_input` | Displays a UI widget for complex form fields like selects, radio buttons, dates, phone numbers, addresses, or signatures. Do NOT use this for simple text fields. IMPORTANT: In the SAME response where you call this tool, also ask the user a natural question about what information you need. Do both together - ask the question AND call this tool in a single response. |
+| `update_description` | Saves the issue description. Ask user to describe their issue, wait for response, then save. If form fields already captured details, you may save a brief summary like "See form details". |
+| `request_file_attachments` | Enables optional file attachment capability for the user. Call this BEFORE asking for the description to allow users to attach supporting files (screenshots, documents, etc.) with their message. The attachment UI will be enabled until the user sends their next message. |
+| `update_title` | Saves the service request title. Suggest a concise title based on collected info, ask user to confirm or modify, then save. Example: "How about: [title]?" |
+| `save_clarifying_question` | Saves a clarifying question and answer. Call immediately after user answers. Exactly 3 questions required. Ask SPECIFIC questions based on collected data (e.g., "You mentioned X - did Y happen?"), not generic ones (e.g., "What OS?"). Do NOT provide solutions during this phase. |
 
-**Developer message:** "Field 'Lab Number' updated"
+**Does assistant know what to do?** ✅ Yes - Developer message includes full draft status with `next_instruction: "Next: Ask about \"Student ID\"."` The field type is "text" so assistant should ask and wait for response.
 
----
-
-**AI calls `get_draft_status`**
-
-- Returns: 2 fields filled, 1 required field remaining
-- Instruction: "Ask for Faculty Supervisor"
-
-**AI responds:** "Who is your faculty supervisor for this research?"
-
-**User:** "Dr. Sarah Johnson"
-
-**AI calls `update_form_field`** (Faculty Supervisor: "Dr. Sarah Johnson")
-
-- Returns success
-
-**Developer message:** "Field 'Faculty Supervisor' updated"
-
----
-
-### Optional Fields Evaluation
-
-**AI calls `get_draft_status`**
-
-- Returns: All 3 required custom fields filled, but description/title still needed
-- Optional fields available: Preferred Start Date, Research Project Title
-- Instruction: "All required fields are filled. There are 2 optional field(s) available: Preferred Start Date, Research Project Title. Based on the conversation context, decide if any would be helpful to collect. If yes, ask for ONE optional field. If no optional fields seem relevant, call get_draft_status again to proceed to description."
-
-**AI internally evaluates:**
-
-- User mentioned "research project" → Research Project Title seems relevant
-- No time urgency mentioned → Preferred Start Date probably not needed
-- Decision: Collect Research Project Title, skip Preferred Start Date
-
-**AI responds:** "What is your research project title? This will help the lab coordinator prepare for your access."
-
-**User:** "Effects of Temperature Variation on Bacterial Growth Rates"
-
-**AI calls `update_form_field`** (Research Project Title: "Effects of Temperature...")
-
-- Returns success
-
-**Developer message:** "Field 'Research Project Title' updated"
+**Assistant Response:** "What is your Student ID number?"
 
 ---
 
-**AI calls `get_draft_status`**
+### Turn 3: User Provides Student ID
 
-- Returns: 1 optional field remaining (Preferred Start Date), description/title still needed
-- Instruction: "There are 1 optional field(s) available: Preferred Start Date. Based on the conversation context, decide if any would be helpful to collect. If yes, ask for ONE optional field. If no optional fields seem relevant, call get_draft_status again to proceed to description."
+**User Message:** "A00123456"
 
-**AI internally evaluates:**
+**Available Tools:** Same as Turn 2
 
-- Preferred Start Date: User hasn't mentioned timing, not critical for lab access
-- Decision: Skip this optional field, move to description
+**Assistant Decision:** User provided Student ID. Call `update_form_field` with the value.
 
-**AI calls `get_draft_status`** (to proceed to description)
+**Tool Call:** `update_form_field(field_id="f1f2f3f4-...", value="A00123456")`
 
-- Returns: Optional fields done, now need description
-- Instruction: "Ask for detailed description of their issue or request"
+**Tool Response:**
+```json
+{
+  "success": true,
+  "has_draft": true,
+  "draft_stage": "data_collection",
+  "type_id": "a1b2c3d4-...",
+  "type_name": "Password Reset",
+  "priority_id": "p1p2p3p4-...",
+  "priority_name": "High",
+  "title": null,
+  "description": null,
+  "form_fields": [
+    {"field_id": "f1f2f3f4-...", "label": "Student ID", "type": "text", "required": true, "value": "A00123456", "filled": true}
+  ],
+  "missing_required": ["description", "title"],
+  "optional_fields": [],
+  "clarifying_questions": {"completed": 0, "required": 3},
+  "next_instruction": "Next: Ask for description of their issue."
+}
+```
 
-**AI calls `request_file_attachments`**
+**Does assistant know what to do?** ✅ Yes - `next_instruction` says to ask for description. Tool description for `request_file_attachments` says to call it BEFORE asking for description.
 
-- Enables file attachment button in frontend
+**Tool Call:** `request_file_attachments()`
 
-**AI responds:** "Please describe what equipment or resources you'll need in the lab. You can also attach any relevant documents if you have them."
+**Tool Response:**
+```json
+{
+  "success": true,
+  "next_instruction": "File attachments enabled. Mention user can attach relevant files if helpful."
+}
+```
 
-**User:** "I need access to the incubators and microscopes for bacterial culture observation. I'll be running experiments twice a week."
+**Does assistant know what to do?** ✅ Yes - `next_instruction` says to mention file attachments. Previous tool response said to ask for description.
 
-- User attaches "lab_certification.pdf"
-- File uploads to temp S3 via presigned URL, badge displays with progress
-
-**AI calls `update_description`**
-
-- Saves description to draft.close_details
-- Backend receives `file_urls` array, copies file to service request's `uploads` media collection
-- Attachment UI disabled, badges cleared
-- Returns success
-
----
-
-### Title
-
-**AI calls `get_draft_status`**
-
-- Returns: Description filled, now need title
-- Instruction: "Suggest a title based on all collected information"
-
-**AI responds:** "I suggest: 'Lab access for bacterial growth research in Science Center Lab 204' - Is this okay?"
-
-**User:** "Yes"
-
-**AI calls `update_title`**
-
-- Saves title to draft
-- Returns success
+**Assistant Response:** "Please describe what's happening when you try to log in. You can attach screenshots if that helps."
 
 ---
 
-### Auto-Transition & Questions
+### Turn 4: User Provides Description
 
-**AI calls `get_draft_status`**
+**User Message:** "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times."
 
-- Returns: All required fields filled (collected 1 of 2 optional fields)
-- **Phase is now 'clarifying_questions' (derived from all required fields being filled)**
-- Instruction: "All required information has been collected. Now ask the first of 3 clarifying questions to better understand the user's issue. Make the question specific to their situation based on the information provided."
+**Available Tools:** Same as Turn 2
 
-**AI responds:** "How long do you expect to need lab access for your research?"
+**Assistant Decision:** User provided description. Call `update_description`.
 
-**User:** "About 3 months"
+**Tool Call:** `update_description(description="When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.")`
 
-**AI calls `save_clarifying_question`**
+**Tool Response:**
+```json
+{
+  "success": true,
+  "has_draft": true,
+  "draft_stage": "data_collection",
+  "type_id": "a1b2c3d4-...",
+  "type_name": "Password Reset",
+  "priority_id": "p1p2p3p4-...",
+  "priority_name": "High",
+  "title": null,
+  "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
+  "form_fields": [
+    {"field_id": "f1f2f3f4-...", "label": "Student ID", "type": "text", "required": true, "value": "A00123456", "filled": true}
+  ],
+  "missing_required": ["title"],
+  "optional_fields": [],
+  "clarifying_questions": {"completed": 0, "required": 3},
+  "next_instruction": "Next: Suggest a title based on collected information."
+}
+```
 
-- Saves Q1: "How long do you expect to need lab access for your research?"
-- Saves A1: "About 3 months"
-- Returns: completed: 1, remaining: 2
+**Does assistant know what to do?** ✅ Yes - `next_instruction` says to suggest a title. Tool description for `update_title` says to suggest and ask user to confirm.
 
----
-
-**AI responds:** "Will you need any specialized training for the equipment before starting?"
-
-**User:** "No, I'm already certified for the equipment from last semester"
-
-**AI calls `save_clarifying_question`**
-
-- Saves Q2 and A2
-- Returns: completed: 2, remaining: 1
-
----
-
-**AI responds:** "Are there specific days or times that work best for your lab sessions?"
-
-**User:** "Tuesday and Thursday afternoons would be ideal"
-
-**AI calls `save_clarifying_question`**
-
-- Saves Q3 and A3 as updates
-- Returns: completed: 3, remaining: 0
-- **Phase is now 'resolution' (derived from 3 questions in updates)**
+**Assistant Response:** "I need a brief title for your request. How about: 'Cannot log into student portal - invalid credentials error'?"
 
 ---
 
-### Resolution & Submission
+### Turn 5: User Confirms Title
 
-**AI calls `check_ai_resolution_validity`**
+**User Message:** "Yes that's fine"
 
-- confidence: 75
-- proposed_answer: "Your lab access request needs approval from your faculty supervisor and the lab coordinator. I can guide you through the next steps..."
+**Available Tools:** Same as Turn 2
 
-**Tool evaluates:**
+**Assistant Decision:** User confirmed title. Call `update_title`.
 
-- Confidence 75 meets configured threshold (70)
-- Stores resolution in draft.ai_resolution with meets_threshold: true
-- Does NOT submit yet
+**Tool Call:** `update_title(title="Cannot log into student portal - invalid credentials error")`
 
-**Tool returns:** "Confidence meets threshold. Present the proposed resolution to the user and ask if it resolves their issue."
+**Tool Response:**
+```json
+{
+  "success": true,
+  "has_draft": true,
+  "draft_stage": "clarifying_questions",
+  "type_id": "a1b2c3d4-...",
+  "type_name": "Password Reset",
+  "priority_id": "p1p2p3p4-...",
+  "priority_name": "High",
+  "title": "Cannot log into student portal - invalid credentials error",
+  "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
+  "form_fields": [
+    {"field_id": "f1f2f3f4-...", "label": "Student ID", "type": "text", "required": true, "value": "A00123456", "filled": true}
+  ],
+  "missing_required": [],
+  "optional_fields": [],
+  "clarifying_questions": {"completed": 0, "required": 3},
+  "next_instruction": "Ask clarifying question 1 of 3. After user answers, call save_clarifying_question with both your question and their answer."
+}
+```
 
-**AI responds:** "Your lab access request needs approval from your faculty supervisor and the lab coordinator. I can guide you through the next steps... Does this resolve your issue?"
+**Does assistant know what to do?** ✅ Yes - `draft_stage` changed to `clarifying_questions`. `next_instruction` says to ask question 1 of 3. Tool description says to ask SPECIFIC questions based on collected data.
 
-**User:** "Yes, that helps!"
-
-**AI calls `record_resolution_response`**
-
-- accepted: true
-- Auto-submits with status: "Closed" (resolved, no team assignment needed)
-- Request number: SR-2026-00543
-
-**AI responds:** "Great! Your request has been marked as resolved. Request number: SR-2026-00543"
-
----
-
-### Final State
-
-**Service Request Created:**
-
-- Number: SR-2026-00543
-- Status: Resolved (Closed) - no team assignment needed
-- Custom Fields Collected:
-    - Building Name: "Science Center" (required) ✓
-    - Lab Number: "Lab 204" (required) ✓
-    - Faculty Supervisor: "Dr. Sarah Johnson" (required) ✓
-    - Research Project Title: "Effects of Temperature..." (optional) ✓
-    - Preferred Start Date: (optional, skipped by AI) ✗
-- Attachments: lab_certification.pdf (in `uploads` media collection)
-- AI made intelligent decision to collect relevant optional field but skip irrelevant one
+**Assistant Response:** "You mentioned you've tried 5 times today. When did this problem start - was it working fine before today?"
 
 ---
 
-## Example Conversation: Password Reset
+### Turn 6: User Answers Question 1
 
-This example demonstrates a simpler flow with one custom field, clarifying questions, and rejected resolution.
+**User Message:** "It was working yesterday, the problem started this morning"
 
-### Initial Request
+**Available Tools:** Same as Turn 2
 
-**User:** "I can't log into the student portal, it keeps saying my password is wrong"
+**Assistant Decision:** User answered. Call `save_clarifying_question` with question and answer.
 
-**AI calls `fetch_service_request_types`**
+**Tool Call:** `save_clarifying_question(question="You mentioned you've tried 5 times today. When did this problem start - was it working fine before today?", answer="It was working yesterday, the problem started this morning")`
 
-- Returns tree of available service request types (no draft yet)
-- AI analyzes: user mentioned "password" → identifies "Password Reset" type
+**Tool Response:**
+```json
+{
+  "success": true,
+  "has_draft": true,
+  "draft_stage": "clarifying_questions",
+  "type_id": "a1b2c3d4-...",
+  "type_name": "Password Reset",
+  "priority_id": "p1p2p3p4-...",
+  "priority_name": "High",
+  "title": "Cannot log into student portal - invalid credentials error",
+  "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
+  "form_fields": [
+    {"field_id": "f1f2f3f4-...", "label": "Student ID", "type": "text", "required": true, "value": "A00123456", "filled": true}
+  ],
+  "missing_required": [],
+  "optional_fields": [],
+  "clarifying_questions": {"completed": 1, "required": 3},
+  "next_instruction": "Ask clarifying question 2 of 3. After user answers, call save_clarifying_question with both your question and their answer."
+}
+```
 
-**AI calls `show_type_selector`**
+**Does assistant know what to do?** ✅ Yes - `clarifying_questions.completed` is 1. `next_instruction` says to ask question 2 of 3.
 
-- Passes suggested_type_id for "Password Reset"
-- Widget displays with suggestion highlighted
-- Chat input hidden, "Cancel" link shown
-
-**AI responds:** "I think this might be a Password Reset request. Please confirm or select a different type."
-
----
-
-### Type Selection (via widget)
-
-**User clicks "Password Reset" in widget, then selects "High" priority and confirms**
-
-**Backend processes selection:**
-
-- Creates draft with selected type and priority
-- Creates ServiceRequestFormSubmission
-- Phase becomes 'data_collection'
-- Sends developer message to AI: "User selected 'Password Reset' with 'High' priority. Type has 1 custom field: 'Student ID Number' (required, text)."
-
----
-
-### Data Collection - Custom Field
-
-**AI calls `get_draft_status`**
-
-- Returns: 1 required field (Student ID), plus description/title needed
-- Instruction: "Ask for Student ID Number first"
-
-**AI responds:** "What is your Student ID Number?"
-
-**User:** "A00123456"
-
-**AI calls `update_form_field`**
-
-- Saves "A00123456" to Student ID field
-- Returns success
+**Assistant Response:** "Are you typing your password manually or using a saved/autofill password?"
 
 ---
 
-### Data Collection - Description
+### Turn 7: User Answers Question 2
 
-**AI calls `get_draft_status`**
+**User Message:** "I'm using the saved password from Chrome"
 
-- Returns: Student ID filled, now need description
-- Instruction: "Ask for detailed description"
+**Available Tools:** Same as Turn 2
 
-**AI calls `request_file_attachments`**
+**Tool Call:** `save_clarifying_question(question="Are you typing your password manually or using a saved/autofill password?", answer="I'm using the saved password from Chrome")`
 
-- Enables file attachment button in frontend
+**Tool Response:**
+```json
+{
+  "success": true,
+  "has_draft": true,
+  "draft_stage": "clarifying_questions",
+  "type_id": "a1b2c3d4-...",
+  "type_name": "Password Reset",
+  "priority_id": "p1p2p3p4-...",
+  "priority_name": "High",
+  "title": "Cannot log into student portal - invalid credentials error",
+  "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
+  "form_fields": [
+    {"field_id": "f1f2f3f4-...", "label": "Student ID", "type": "text", "required": true, "value": "A00123456", "filled": true}
+  ],
+  "missing_required": [],
+  "optional_fields": [],
+  "clarifying_questions": {"completed": 2, "required": 3},
+  "next_instruction": "Ask clarifying question 3 of 3. After user answers, call save_clarifying_question with both your question and their answer."
+}
+```
 
-**AI responds:** "Please describe what's happening when you try to log in. You can attach screenshots if that helps."
+**Does assistant know what to do?** ✅ Yes - `clarifying_questions.completed` is 2. `next_instruction` says to ask question 3 of 3.
 
-**User:** "When I type my password and click login, it shows 'Invalid credentials' but I know my password is correct. I've tried 5 times today and it's the same password I used yesterday."
-
-- User attaches "error_screenshot.png"
-- File uploads to temp S3, badge shows progress
-
-**AI calls `update_description`**
-
-- Saves description to draft.close_details
-- Backend copies attached file to service request's `uploads` collection
-- Returns success
-
----
-
-### Data Collection - Title
-
-**AI calls `get_draft_status`**
-
-- Returns: Student ID and description filled, now need title
-- Instruction: "Suggest a title based on collected info"
-
-**AI responds:** "Based on your description, I suggest: 'Cannot log into student portal with correct password' - Is this okay?"
-
-**User:** "That's good"
-
-**AI calls `update_title`**
-
-- Saves title to draft
-- Returns success
+**Assistant Response:** "Have you tried logging in from a different browser or device to see if the issue persists?"
 
 ---
 
-### Auto-Transition to Clarifying Questions
+### Turn 8: User Answers Question 3
 
-**AI calls `get_draft_status`**
+**User Message:** "No I haven't tried that"
 
-- Returns: All required fields filled
-- **Phase is now 'clarifying_questions' (derived from all required fields being filled)**
-- Instruction: "Ask first clarifying question"
+**Available Tools:** Same as Turn 2, plus:
 
----
+| Tool | Description |
+|------|-------------|
+| `check_ai_resolution_validity` | Checks if an AI resolution meets the confidence threshold. Call this after clarifying questions when you have a potential solution. DO NOT show the resolution to the user until this tool returns meets_threshold: true. |
 
-### Clarifying Questions (3 required)
+**Tool Call:** `save_clarifying_question(question="Have you tried logging in from a different browser or device to see if the issue persists?", answer="No I haven't tried that")`
 
-**AI responds:** "You mentioned you used the same password successfully yesterday. Did you make any changes to your account or receive any emails about your account since then?"
+**Tool Response:**
+```json
+{
+  "success": true,
+  "has_draft": true,
+  "draft_stage": "resolution",
+  "type_id": "a1b2c3d4-...",
+  "type_name": "Password Reset",
+  "priority_id": "p1p2p3p4-...",
+  "priority_name": "High",
+  "title": "Cannot log into student portal - invalid credentials error",
+  "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
+  "form_fields": [
+    {"field_id": "f1f2f3f4-...", "label": "Student ID", "type": "text", "required": true, "value": "A00123456", "filled": true}
+  ],
+  "missing_required": [],
+  "optional_fields": [],
+  "clarifying_questions": {"completed": 3, "required": 3},
+  "next_instruction": "Call check_ai_resolution_validity with your confidence score and proposed answer."
+}
+```
 
-**User:** "No, nothing changed and I didn't get any emails"
+**Does assistant know what to do?** ✅ Yes - `draft_stage` changed to `resolution`. `clarifying_questions.completed` is 3. `next_instruction` explicitly says to call `check_ai_resolution_validity`.
 
-**AI calls `save_clarifying_question`**
+**Tool Call:** `check_ai_resolution_validity(confidence_score=82, proposed_answer="Based on your situation, the issue is likely with Chrome's saved password. Try these steps: 1) Go to Chrome settings > Passwords, 2) Find and delete the saved password for the student portal, 3) Go back to the login page and type your password manually. If this doesn't work, try the 'Forgot Password' link to reset it.")`
 
-- Saves Q1 and A1 to draft.clarifying_questions array
-- Returns: completed: 1, remaining: 2
+**Tool Response:**
+```json
+{
+  "meets_threshold": true,
+  "next_instruction": "Present resolution to user and ask if it solved their problem. Then call record_resolution_response with their answer."
+}
+```
 
----
+**Does assistant know what to do?** ✅ Yes - `meets_threshold` is true. `next_instruction` says to present resolution and ask if it solved the problem.
 
-**AI responds:** "Are you trying to log in from a different device or browser than you normally use?"
+**Assistant Response:** "Based on your situation, the issue is likely with Chrome's saved password. Try these steps:
 
-**User:** "Same laptop and same Chrome browser I always use"
+1. Go to Chrome settings > Passwords
+2. Find and delete the saved password for the student portal
+3. Go back to the login page and type your password manually
 
-**AI calls `save_clarifying_question`**
-
-- Saves Q2 and A2
-- Returns: completed: 2, remaining: 1
-
----
-
-**AI responds:** "When you enter your password, are you typing it manually or using a saved password from your browser?"
-
-**User:** "I'm using the saved password from Chrome"
-
-**AI calls `save_clarifying_question`**
-
-- Saves Q3 and A3 as two updates (question and answer)
-- Returns: completed: 3, remaining: 0
-- **Phase is now 'resolution' (derived from 3 questions in updates)**
-- Instruction: "Call check_ai_resolution_validity with your proposed solution"
-
----
-
-### AI Resolution Attempt
-
-**AI calls `check_ai_resolution_validity`**
-
-- Confidence score: 85 (out of 100)
-- Proposed answer: Step-by-step guide to clear saved password and type manually
-- Tool compares: 85 >= 70 (threshold) = **meets threshold**
-- Creates resolution update with `update_type = 'ai_resolution_proposed'`
-- Stores confidence score: 85 in `ai_resolution_confidence_score`
-- Returns: "Present resolution to user and wait for response"
-
-**AI responds with the resolution:**
-"Based on your situation, the issue is likely Chrome's saved password being incorrect. Here's how to fix it:
-
-1. Go to the student portal login page
-2. Clear your browser's saved password for this site
-3. Type your password manually instead of using autofill
-4. Try logging in
-
-If this works, you can save the password again. The autofill sometimes saves an incorrect version after failed attempts.
+If this doesn't work, try the 'Forgot Password' link to reset it.
 
 Did this solve your problem?"
 
 ---
 
-### User Rejects Resolution
+### Turn 9: User Rejects Resolution
 
-**User:** "I tried it but I still can't log in. Same error message."
+**User Message:** "No, I tried that and it still doesn't work"
 
-**AI calls `record_resolution_response`**
+**Available Tools:** Same as Turn 8, plus:
 
-- Passes: accepted = false
-- Tool internally:
-    - Creates response update with `update_type = 'ai_resolution_response'`
-    - Sets is_ai_resolution_attempted = true
-    - Sets is_ai_resolution_successful = false
-    - Sets status to "New" (Open for human review)
-    - Generates service_request_number: "SR-2026-00542"
-    - Sets is_draft = false
-    - Assigns to team member based on type's assignment strategy
-- Returns: request_number, status: open
+| Tool | Description |
+|------|-------------|
+| `record_resolution_response` | Records the user's response to your resolution attempt. Call this after presenting a resolution and getting explicit yes/no feedback. |
 
-**AI responds:** "I've submitted your request for human review. Your request number is **SR-2026-00542**. A team member from IT Support will follow up with you soon to help resolve your login issue."
+**Assistant Decision:** User said resolution didn't work. Call `record_resolution_response` with accepted=false.
+
+**Tool Call:** `record_resolution_response(accepted=false)`
+
+**Tool Response:**
+```json
+{
+  "success": true,
+  "request_number": "SR-2026-00542",
+  "resolution_accepted": false,
+  "next_instruction": "Submitted for human review. Tell user request number SR-2026-00542 and that a team member will follow up."
+}
+```
+
+**Does assistant know what to do?** ✅ Yes - `next_instruction` explicitly tells the assistant what to say.
+
+**Assistant Response:** "I've submitted your request for human review. Your request number is SR-2026-00542. A team member will follow up with you soon to help resolve the login issue."
 
 ---
 
-### Final Result
+### Summary: Information Flow
 
-**Service Request Created:**
+At each turn, the assistant knows what to do because:
 
-- Number: SR-2026-00542
-- Status: New (Open)
-- Title: "Cannot log into student portal with correct password"
-- Priority: High
-- Assigned to: IT Support team member
-- Custom Fields: Student ID = A00123456
-- Attachments: error_screenshot.png (in `uploads` media collection)
-- Updates: 8 total
-    - 6 clarifying Q&A updates (3 questions, 3 answers with `update_type`)
-    - 1 AI resolution proposed update (`update_type = 'ai_resolution_proposed'`)
-    - 1 User rejection update (`update_type = 'ai_resolution_response'`)
-- AI Resolution: Attempted (85% confidence), presented to user, rejected
-- Timeline: All questions, answers, and resolution visible to team
+1. **Tool descriptions** explain when and how to use each tool
+2. **Tool responses** include `next_instruction` with explicit guidance
+3. **Draft status** is included in responses, showing current state and what's missing
+4. **Stage transitions** are automatic and visible in the response (`draft_stage` changes)
 
-**Alternative Outcomes:**
-
-_If confidence was 65 (below 70 threshold):_
-
-- Tool would auto-submit without showing resolution to user
-- Resolution stored as internal note only
-- User told: "Request submitted for review" (no resolution shown)
-
-_If user accepted the resolution:_
-
-- Status would be "Resolved" (Closed)
-- No team assignment (no human review needed)
-- User told: "Issue marked as resolved, request number for your records"
+The assistant never needs to call `get_draft_status` separately because all action tools return the full draft status. The only exception is when resuming a conversation with an existing draft, where `get_draft_status` provides the initial context.

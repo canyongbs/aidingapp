@@ -36,6 +36,7 @@
 
 namespace AidingApp\Ai\Tools\PortalAssistant;
 
+use AidingApp\Ai\Actions\PortalAssistant\GetDraftStatus;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
@@ -52,7 +53,7 @@ class UpdateFormFieldTool extends Tool
     ) {
         $this
             ->as('update_form_field')
-            ->for('Updates a text-based custom form field value. Use this for simple text fields, text areas, numbers, and emails. For complex fields like selects, dates, or signatures, use show_field_input instead. IMPORTANT: You MUST ask the user for this field value before calling this tool. Do NOT use information from earlier in the conversation - only use what the user provides in their current response. Once the user provides the value, save it immediately without asking for confirmation.')
+            ->for('Saves a text-based form field (text, textarea, number, email). For complex fields (select, date, signature), use show_field_input instead. Ask user for this field, wait for response, then save.')
             ->withStringParameter('field_id', 'The UUID of the form field')
             ->withStringParameter('value', 'The value to set for the field')
             ->using($this);
@@ -143,18 +144,14 @@ class UpdateFormFieldTool extends Tool
             );
         }
 
+        $draftStatus = app(GetDraftStatus::class)->execute($draft);
+
         $result = json_encode([
             'success' => true,
-            'field_id' => $field_id,
-            'label' => $field->label,
-            'instruction' => 'Field value saved. Call get_draft_status now to refresh your context and determine what information to collect next.',
+            ...$draftStatus,
         ]);
 
-        $this->logToolResult('update_form_field', $result, [
-            'field_id' => $field_id,
-            'field_label' => $field->label,
-            'value' => $value,
-        ]);
+        $this->logToolResult('update_form_field', $result, ['field_id' => $field_id]);
 
         return $result;
     }

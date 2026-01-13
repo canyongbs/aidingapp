@@ -36,6 +36,7 @@
 
 namespace AidingApp\Ai\Http\Controllers\PortalAssistant;
 
+use AidingApp\Ai\Actions\PortalAssistant\GetDraftStatus;
 use AidingApp\Ai\Jobs\PortalAssistant\SendMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
@@ -154,14 +155,18 @@ class UpdateServiceRequestFormFieldController
             );
         }
 
-        // Build helpful internal content based on field type
-        $internalContent = $this->buildInternalContent($field, $fieldConfig, $data['value']);
+        // Get updated draft status
+        $draft->refresh();
+        $draftStatus = app(GetDraftStatus::class)->execute($draft);
 
         // Let AI respond to guide user to next step
         dispatch(new SendMessage(
             thread: $thread,
             content: $data['message'],
-            internalContent: $internalContent,
+            internalContent: json_encode([
+                'event' => 'field_updated',
+                ...$draftStatus,
+            ]),
         ));
 
         Log::info('[PortalAssistant] Widget form field submission successful', [
@@ -174,35 +179,5 @@ class UpdateServiceRequestFormFieldController
             'message' => 'Message dispatched for processing via websockets.',
             'thread_id' => $thread->getKey(),
         ]);
-    }
-
-    protected function buildInternalContent(ServiceRequestFormField $field, $fieldConfig, mixed $value): string
-    {
-        $fieldType = $fieldConfig?->type ?? 'text';
-        $fieldLabel = $field->label;
-
-        // Handle different field types
-        $valueDescription = match ($fieldType) {
-            'date' => sprintf('selected date "%s"', $value),
-            'select', 'radio' => sprintf('selected "%s"', $value),
-            'checkbox' => $value ? 'checked the box' : 'unchecked the box',
-            'address' => is_array($value)
-                ? sprintf('entered address: %s', implode(', ', array_filter($value)))
-                : sprintf('entered "%s"', $value),
-            'phone' => sprintf('entered phone "%s"', $value),
-            'email' => sprintf('entered email "%s"', $value),
-            'textarea' => strlen($value) > 50
-                ? sprintf('entered text (%.50s...)', $value)
-                : sprintf('entered "%s"', $value),
-            default => strlen($value) > 50
-                ? sprintf('entered "%.50s..."', $value)
-                : sprintf('entered "%s"', $value),
-        };
-
-        return sprintf(
-            'User completed the "%s" field by providing: %s. The value has been saved to the draft. Call get_draft_status now to refresh your context and determine what information to collect next.',
-            $fieldLabel,
-            $valueDescription
-        );
     }
 }

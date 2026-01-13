@@ -36,6 +36,7 @@
 
 namespace AidingApp\Ai\Tools\PortalAssistant;
 
+use AidingApp\Ai\Actions\PortalAssistant\GetDraftStatus;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
@@ -55,7 +56,7 @@ class SaveClarifyingQuestionTool extends Tool
     ) {
         $this
             ->as('save_clarifying_question')
-            ->for('CRITICAL: Saves a clarifying question and the user\'s answer. Must be called IMMEDIATELY after the user answers each question. Call this tool exactly 3 times during clarifying_questions stage. This tool is for gathering information ONLY - do NOT provide solutions or advice before calling this tool.')
+            ->for('Saves a clarifying question and answer. Call immediately after user answers. Exactly 3 questions required. Ask SPECIFIC questions based on collected data (e.g., "You mentioned X - did Y happen?"), not generic ones (e.g., "What OS?"). Do NOT provide solutions during this phase.')
             ->withStringParameter('question', 'The exact question text you asked the user')
             ->withStringParameter('answer', 'The user\'s complete response to your question')
             ->using($this);
@@ -117,28 +118,24 @@ class SaveClarifyingQuestionTool extends Tool
             'created_by_id' => $respondent->getKey(),
         ]);
 
-        $completed = $clarifyingQuestionsCount + 1;
-        $remaining = 3 - $completed;
+        $draftStatus = app(GetDraftStatus::class)->execute($draft);
 
         $result = [
             'success' => true,
-            'completed' => $completed,
-            'remaining' => $remaining,
+            ...$draftStatus,
         ];
+
+        $remaining = 3 - ($clarifyingQuestionsCount + 1);
 
         if ($remaining === 0) {
             $aiResolutionSettings = app(AiResolutionSettings::class);
-            $result['draft_stage'] = ServiceRequestDraftStage::Resolution->value;
-            $result['ai_resolution_enabled'] = $aiResolutionSettings->is_enabled;
 
-            if ($aiResolutionSettings->is_enabled) {
-                $result['instruction'] = 'All 3 clarifying questions complete. You are now in the resolution stage. Call get_draft_status to refresh your context, then call check_ai_resolution_validity with your confidence score and proposed answer. DO NOT show the resolution to the user until the tool tells you to.';
-            } else {
+            if (! $aiResolutionSettings->is_enabled) {
                 // AI resolution disabled - auto-submit for human review
                 $requestNumber = $this->submitServiceRequest($draft, false);
 
                 $result['request_number'] = $requestNumber;
-                $result['instruction'] = "AI resolution is disabled. Service request has been automatically submitted for human review. Tell the user their request number is {$requestNumber} and a team member will review it.";
+                $result['next_instruction'] = "Service request submitted for human review. Request number: {$requestNumber}";
             }
         }
 

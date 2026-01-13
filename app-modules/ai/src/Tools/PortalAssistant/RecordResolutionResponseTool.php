@@ -101,16 +101,15 @@ class RecordResolutionResponseTool extends Tool
 
         $requestNumber = $this->submitServiceRequest($draft, $accepted, resolutionUpdateUuid: $updateUuids->shift());
 
-        $instruction = $accepted
-            ? "Tell the user their issue has been marked as resolved. Provide the request number ({$requestNumber}) for their records."
-            : "Tell the user their request has been submitted for human review. Provide the request number ({$requestNumber}) and let them know a team member will follow up.";
+        $nextInstruction = $accepted
+            ? "Issue resolved. Tell user request number {$requestNumber} for their records."
+            : "Submitted for human review. Tell user request number {$requestNumber} and that a team member will follow up.";
 
         return json_encode([
             'success' => true,
             'request_number' => $requestNumber,
             'resolution_accepted' => $accepted,
-            'status' => $accepted ? 'resolved' : 'open',
-            'instruction' => $instruction,
+            'next_instruction' => $nextInstruction,
         ]);
     }
 }

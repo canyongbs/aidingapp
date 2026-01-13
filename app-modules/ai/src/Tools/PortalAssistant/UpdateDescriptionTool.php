@@ -36,6 +36,7 @@
 
 namespace AidingApp\Ai\Tools\PortalAssistant;
 
+use AidingApp\Ai\Actions\PortalAssistant\GetDraftStatus;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use Prism\Prism\Tool;
@@ -49,7 +50,7 @@ class UpdateDescriptionTool extends Tool
     ) {
         $this
             ->as('update_description')
-            ->for('Saves the description for the service request. If the user has already filled form fields with detailed information, you can save a brief description like "See form details" instead of asking for more. Otherwise, ask the user to describe their issue. Save immediately without asking for confirmation.')
+            ->for('Saves the issue description. Ask user to describe their issue, wait for response, then save. If form fields already captured details, you may save a brief summary like "See form details".')
             ->withStringParameter('description', 'The description of the service request')
             ->using($this);
     }
@@ -68,10 +69,11 @@ class UpdateDescriptionTool extends Tool
         $draft->close_details = $description;
         $draft->save();
 
+        $draftStatus = app(GetDraftStatus::class)->execute($draft);
+
         return json_encode([
             'success' => true,
-            'description' => $description,
-            'instruction' => 'Description saved. Call get_draft_status now to refresh your context and determine what information to collect next.',
+            ...$draftStatus,
         ]);
     }
 }

@@ -78,7 +78,7 @@ class RequestFileAttachmentsTool extends Tool
 
         $result = json_encode([
             'success' => true,
-            'instruction' => 'File attachment button is now visible to the user. In your response, mention that they can attach relevant files if they have any. The attachments will be included with their next message.',
+            'next_instruction' => 'File attachments enabled. Mention user can attach relevant files if helpful.',
         ]);
 
         $this->logToolResult('request_file_attachments', $result, []);
