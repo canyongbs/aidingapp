@@ -16,7 +16,7 @@ The Portal Assistant Service Request feature enables authenticated portal users 
 
 **Portal Assistant Tools** (`app-modules/ai/src/Tools/PortalAssistant/`)
 
-- 13 specialized tools for type selection, data collection, enrichment, and submission
+- 10 specialized tools for type selection, data collection, enrichment, and submission
 - Stage-gated availability prevents workflow bypass
 - No ID passing required - draft state managed automatically
 
@@ -37,13 +37,13 @@ The Portal Assistant Service Request feature enables authenticated portal users 
 
 Service request drafts progress through sequential stages. The stage is **derived from the current state** of the draft:
 
-1. **data_collection** - Draft exists, collecting required fields (form fields, description, title, priority)
+1. **data_collection** - Draft exists, collecting required fields (form fields, description, title)
 2. **clarifying_questions** - All required fields filled, collecting 3 clarifying question/answer pairs
 3. **resolution** - 3 clarifying questions completed, evaluating and presenting AI resolution (if enabled)
 
-**Note:** Type selection happens BEFORE the draft is created. The user interacts with the `show_type_selector` widget, which creates the draft. Once the draft exists, it's always in `data_collection` stage or beyond.
+**Note:** Type and priority selection happen BEFORE the draft is created. The user interacts with the `show_type_selector` widget, selects a type and priority, which creates the draft with the priority already set. Once the draft exists, it's always in `data_collection` stage or beyond.
 
-**Data Collection Order:** fields (if any) → description → title → **priority** (last step before clarifying questions)
+**Data Collection Order:** fields (if any) → description → title
 
 Stage determination logic:
 
@@ -61,16 +61,15 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 
 ### Data Collection Stage
 
-**Collection Order:** Custom form fields (if present) → Description → Title → Priority
+**Collection Order:** Custom form fields (if present) → Description → Title
 
 **Tool Availability:**
 
 - `update_form_field`, `show_field_input`: If service request type defines custom fields
 - `update_description`: After required form fields filled (or immediately if no custom fields)
 - `update_title`: After description provided
-- `show_priority_selector`: After title provided
 
-**Phase Transition:** When priority is selected and all required fields are filled, `get_draft_status` detects the stage is now `clarifying_questions` (derived from state) and instructs AI to begin asking questions.
+**Phase Transition:** When all required fields are filled, `get_draft_status` detects the stage is now `clarifying_questions` (derived from state) and instructs AI to begin asking questions.
 
 ### Clarifying Questions Stage
 
@@ -148,9 +147,8 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 
 **fetch_service_request_types**
 
-- Creates draft if none exists for thread
 - Returns hierarchical tree of available service request types
-- Draft initially has no priority (phase: 'type_selection')
+- Used by AI to understand available types before showing selector
 
 **show_type_selector**
 
@@ -182,11 +180,6 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 - Displays widget for complex field types (select, date, file, etc.)
 - Frontend hides chat input while widget active
 - Response saved directly via controller, not returned to AI
-
-**show_priority_selector**
-
-- Displays priority selection widget after title provided
-- User selection updates draft via dedicated controller
 
 ### Enrichment Tools
 
@@ -249,7 +242,7 @@ Users may change service request type during data collection:
 - New draft created for selected type
 - Old draft retained (not deleted)
 - `current_service_request_draft_id` updated to new draft
-- Workflow resets to `data_collection` phase (no priority yet)
+- Workflow resets to `data_collection` phase
 
 **Switching to Previously Selected Type:**
 
@@ -289,18 +282,10 @@ Widget interactions and user selections processed via `internal_content`:
 **type_selection:**
 
 ```json
-{ "type": "type_selection", "type_id": "uuid" }
+{ "type": "type_selection", "type_id": "uuid", "priority_id": "uuid" }
 ```
 
-Validates type, creates draft and form submission. Draft stage becomes `data_collection`.
-
-**priority_selection:**
-
-```json
-{ "type": "priority_selection", "priority_id": "uuid" }
-```
-
-Validates priority belongs to current type, updates draft.
+Validates type and priority, creates draft with priority set, and creates form submission. Draft stage becomes `data_collection`.
 
 **field_response:**
 
@@ -360,7 +345,7 @@ Previous iterations included separate validation and submission tools. Current d
 When all required fields are filled, `get_draft_status` automatically advances to the next draft stage. This eliminates redundant validation calls and simplifies the AI interaction model.
 
 **Field Order Flexibility:**
-While the collection order is fields → description → title → priority, the system validates all required fields are present regardless of order. This accommodates edge cases where AI collects information out of sequence.
+While the collection order is fields → description → title, the system validates all required fields are present regardless of order. This accommodates edge cases where AI collects information out of sequence.
 
 ---
 
@@ -384,17 +369,16 @@ This example shows a service request type with multiple required and optional cu
 
 **AI responds:** "I think this is a Lab Access Request. Please confirm."
 
-**User clicks "Lab Access Request"**
+**User clicks "Lab Access Request", then selects "Medium" priority and confirms**
 
 **Backend processes:**
 
-- Updates draft with selected type
+- Creates draft with selected type and priority
 - Creates ServiceRequestFormSubmission
-- Sets default priority to "Medium"
-- Phase becomes 'data_collection' (has priority now, but missing required fields)
+- Phase becomes 'data_collection'
 - Type has 3 required custom fields: Building Name, Lab Number, Faculty Supervisor
 - Type has 2 optional custom fields: Preferred Start Date, Research Project Title
-- Sends developer message to AI: "User selected 'Lab Access Request'. Type has 3 required fields and 2 optional fields."
+- Sends developer message to AI: "User selected 'Lab Access Request' with 'Medium' priority. Type has 3 required fields and 2 optional fields."
 
 ---
 
@@ -402,7 +386,7 @@ This example shows a service request type with multiple required and optional cu
 
 **AI calls `get_draft_status`**
 
-- Returns: 3 required custom fields, plus description/title/priority
+- Returns: 3 required custom fields, plus description/title
 - Instruction: "Ask for Building Name first"
 
 **AI responds:** "Which building is the lab in?"
@@ -456,7 +440,7 @@ This example shows a service request type with multiple required and optional cu
 
 **AI calls `get_draft_status`**
 
-- Returns: All 3 required custom fields filled, but description/title/priority still needed
+- Returns: All 3 required custom fields filled, but description/title still needed
 - Optional fields available: Preferred Start Date, Research Project Title
 - Instruction: "All required fields are filled. There are 2 optional field(s) available: Preferred Start Date, Research Project Title. Based on the conversation context, decide if any would be helpful to collect. If yes, ask for ONE optional field. If no optional fields seem relevant, call get_draft_status again to proceed to description."
 
@@ -480,7 +464,7 @@ This example shows a service request type with multiple required and optional cu
 
 **AI calls `get_draft_status`**
 
-- Returns: 1 optional field remaining (Preferred Start Date), description/title/priority still needed
+- Returns: 1 optional field remaining (Preferred Start Date), description/title still needed
 - Instruction: "There are 1 optional field(s) available: Preferred Start Date. Based on the conversation context, decide if any would be helpful to collect. If yes, ask for ONE optional field. If no optional fields seem relevant, call get_draft_status again to proceed to description."
 
 **AI internally evaluates:**
@@ -504,7 +488,7 @@ This example shows a service request type with multiple required and optional cu
 
 ---
 
-### Title & Priority
+### Title
 
 **AI calls `get_draft_status`**
 
@@ -519,27 +503,6 @@ This example shows a service request type with multiple required and optional cu
 
 - Saves title to draft
 - Returns success
-
----
-
-**AI calls `get_draft_status`**
-
-- Returns: Only priority missing now
-- Instruction: "Call show_priority_selector to display priority widget"
-
-**AI calls `show_priority_selector`**
-
-- Widget displays: High, Medium, Low options
-- Chat input hidden
-
-**AI responds:** "Please select the priority level for your request."
-
-**User clicks "Medium"**
-
-**Backend processes:**
-
-- Updates draft.priority_id to "Medium"
-- Sends developer message: "User selected priority 'Medium'"
 
 ---
 
@@ -656,15 +619,14 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 
 ### Type Selection (via widget)
 
-**User clicks "Password Reset" in widget**
+**User clicks "Password Reset" in widget, then selects "High" priority and confirms**
 
 **Backend processes selection:**
 
-- Updates draft with selected type
+- Creates draft with selected type and priority
 - Creates ServiceRequestFormSubmission
-- Sets default priority to "Medium"
-- Phase becomes 'data_collection' (has priority now, but missing fields)
-- Sends developer message to AI: "User selected 'Password Reset'. Type has 1 custom field: 'Student ID Number' (required, text)."
+- Phase becomes 'data_collection'
+- Sends developer message to AI: "User selected 'Password Reset' with 'High' priority. Type has 1 custom field: 'Student ID Number' (required, text)."
 
 ---
 
@@ -672,7 +634,7 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 
 **AI calls `get_draft_status`**
 
-- Returns: 1 required field (Student ID), plus description/title/priority needed
+- Returns: 1 required field (Student ID), plus description/title needed
 - Instruction: "Ask for Student ID Number first"
 
 **AI responds:** "What is your Student ID Number?"
@@ -719,29 +681,6 @@ This example demonstrates a simpler flow with one custom field, clarifying quest
 
 - Saves title to draft
 - Returns success
-
----
-
-### Data Collection - Priority
-
-**AI calls `get_draft_status`**
-
-- Returns: Only priority missing now
-- Instruction: "Show priority selector"
-
-**AI calls `show_priority_selector`**
-
-- Widget displays: High, Medium, Low options
-- Chat input hidden
-
-**AI responds:** "Please select the priority level for your request."
-
-**User clicks "High" in widget**
-
-**Backend processes selection:**
-
-- Updates draft.priority_id to "High"
-- Sends developer message: "User selected priority 'High'"
 
 ---
 
