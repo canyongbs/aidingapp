@@ -32,12 +32,12 @@
 </COPYRIGHT>
 */
 import { defaultConfig, plugin } from '@formkit/vue';
+import FloatingVue from 'floating-vue';
+import 'floating-vue/dist/style.css';
 import { createPinia } from 'pinia';
 import PrimeVue from 'primevue/config';
 import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
-import FloatingVue from 'floating-vue';
-import 'floating-vue/dist/style.css';
 import App from './App.vue';
 import config from './formkit.config.js';
 import './portal.css';
