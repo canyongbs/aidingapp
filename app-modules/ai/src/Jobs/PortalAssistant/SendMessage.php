@@ -70,6 +70,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Prism\Prism\Exceptions\PrismException;
 use Prism\Prism\Tool;
 use Prism\Prism\ValueObjects\Messages\UserMessage;
 use Prism\Prism\ValueObjects\ToolResult;
@@ -161,103 +162,107 @@ class SendMessage implements ShouldQueue
                 new UserMessage($this->content),
             ];
 
-            $stream = $aiService->streamRaw(
-                prompt: $context,
-                files: KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id'])->all(),
-                options: $nextRequestOptions,
-                tools: $tools,
-                messages: $messages,
-            );
+            retry(3, function () use ($aiService, $context, $nextRequestOptions, $tools, $messages) {
+                $stream = $aiService->streamRaw(
+                    prompt: $context,
+                    files: KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id'])->all(),
+                    options: $nextRequestOptions,
+                    tools: $tools,
+                    messages: $messages,
+                );
 
-            $response = new PortalAssistantMessage();
-            $response->thread()->associate($this->thread);
-            $response->content = '';
-            $response->context = $context;
-            $response->is_assistant = true;
+                $response = new PortalAssistantMessage();
+                $response->thread()->associate($this->thread);
+                $response->content = '';
+                $response->context = $context;
+                $response->is_assistant = true;
 
-            $chunkBuffer = [];
-            $chunkCount = 0;
+                $chunkBuffer = [];
+                $chunkCount = 0;
 
-            foreach ($stream() as $chunk) {
-                if ($chunk instanceof Meta) {
-                    $response->message_id = $chunk->messageId;
-                    $response->next_request_options = $chunk->nextRequestOptions;
+                foreach ($stream() as $chunk) {
+                    if ($chunk instanceof Meta) {
+                        $response->message_id = $chunk->messageId;
+                        $response->next_request_options = $chunk->nextRequestOptions;
 
-                    continue;
-                }
+                        continue;
+                    }
 
-                if ($chunk instanceof ToolCall) {
-                    Log::info('[PortalAssistant] Tool called by AI', [
-                        'thread_id' => $this->thread->getKey(),
-                        'tool_name' => $chunk->name,
-                        'tool_arguments' => $chunk->arguments,
-                    ]);
-
-                    continue;
-                }
-
-                if ($chunk instanceof ToolResult) {
-                    Log::info('[PortalAssistant] Tool result', [
-                        'thread_id' => $this->thread->getKey(),
-                        'tool_name' => $chunk->toolName,
-                        'tool_result' => $chunk->result,
-                    ]);
-
-                    continue;
-                }
-
-                if ($chunk instanceof Finish) {
-                    if ($chunk->error) {
-                        Log::error('Portal Assistant: Stream finished with error', [
+                    if ($chunk instanceof ToolCall) {
+                        Log::info('[PortalAssistant] Tool called by AI', [
                             'thread_id' => $this->thread->getKey(),
-                            'error' => $chunk->error,
-                            'finishReason' => $chunk->finishReason?->name,
+                            'tool_name' => $chunk->name,
+                            'tool_arguments' => $chunk->arguments,
                         ]);
+
+                        continue;
                     }
 
-                    // Don't break yet - continue processing to ensure all chunks are handled
-                    continue;
-                }
+                    if ($chunk instanceof ToolResult) {
+                        Log::info('[PortalAssistant] Tool result', [
+                            'thread_id' => $this->thread->getKey(),
+                            'tool_name' => $chunk->toolName,
+                            'tool_result' => $chunk->result,
+                        ]);
 
-                if ($chunk instanceof Text) {
-                    $chunkBuffer[] = $chunk->content;
-                    $chunkCount++;
+                        continue;
+                    }
 
-                    if ($chunkCount >= 30) {
-                        event(new PortalAssistantMessageChunk(
-                            $this->thread,
-                            content: implode('', $chunkBuffer),
-                        ));
-                        $response->content .= implode('', $chunkBuffer);
+                    if ($chunk instanceof Finish) {
+                        if ($chunk->error) {
+                            Log::error('Portal Assistant: Stream finished with error', [
+                                'thread_id' => $this->thread->getKey(),
+                                'error' => $chunk->error,
+                                'finishReason' => $chunk->finishReason?->name,
+                            ]);
+                        }
 
-                        $chunkBuffer = [];
-                        $chunkCount = 0;
+                        // Don't break yet - continue processing to ensure all chunks are handled
+                        continue;
+                    }
+
+                    if ($chunk instanceof Text) {
+                        $chunkBuffer[] = $chunk->content;
+                        $chunkCount++;
+
+                        if ($chunkCount >= 30) {
+                            event(new PortalAssistantMessageChunk(
+                                $this->thread,
+                                content: implode('', $chunkBuffer),
+                            ));
+                            $response->content .= implode('', $chunkBuffer);
+
+                            $chunkBuffer = [];
+                            $chunkCount = 0;
+                        }
                     }
                 }
-            }
 
-            if (! empty($chunkBuffer)) {
+                if (! empty($chunkBuffer)) {
+                    event(new PortalAssistantMessageChunk(
+                        $this->thread,
+                        content: implode('', $chunkBuffer),
+                    ));
+                    $response->content .= implode('', $chunkBuffer);
+                }
+
                 event(new PortalAssistantMessageChunk(
                     $this->thread,
-                    content: implode('', $chunkBuffer),
+                    content: '',
+                    isComplete: true,
                 ));
-                $response->content .= implode('', $chunkBuffer);
-            }
 
-            event(new PortalAssistantMessageChunk(
-                $this->thread,
-                content: '',
-                isComplete: true,
-            ));
+                $response->save();
+                $this->thread->touch();
 
-            $response->save();
-            $this->thread->touch();
-
-            Log::info('[PortalAssistant] AI response complete', [
-                'thread_id' => $this->thread->getKey(),
-                'ai_content' => $response->content,
-                'message_id' => $response->message_id,
-            ]);
+                Log::info('[PortalAssistant] AI response complete', [
+                    'thread_id' => $this->thread->getKey(),
+                    'ai_content' => $response->content,
+                    'message_id' => $response->message_id,
+                ]);
+            }, sleepMilliseconds: 1000, when: function (Throwable $exception) {
+                return $exception instanceof PrismException;
+            });
         } catch (Throwable $exception) {
             report($exception);
 
