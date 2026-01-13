@@ -75,8 +75,7 @@ class FetchServiceRequestTypesTool extends Tool
 
         $result = json_encode([
             'types_tree' => $typesTree,
-            'has_draft' => $draft !== null,
-            'next_instruction' => 'Analyze types_tree for a match. If found, call show_type_selector(suggested_type_id="<uuid>"). If no match, call show_type_selector() with no parameters.',
+            'next_instruction' => 'Analyze types_tree. Call show_type_selector(suggested_type_id="<uuid>") if match found, otherwise show_type_selector() with no parameters.',
         ]);
 
         $this->logToolResult('fetch_service_request_types', $result);

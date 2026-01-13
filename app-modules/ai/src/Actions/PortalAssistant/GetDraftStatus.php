@@ -54,47 +54,56 @@ class GetDraftStatus
         $draft->load(['priority', 'priority.type', 'serviceRequestFormSubmission']);
 
         $draftStage = ServiceRequestDraftStage::fromServiceRequest($draft);
+        $type = $draft->priority?->type;
 
         $result = [
-            'has_draft' => true,
             'draft_stage' => $draftStage?->value,
+            'type_name' => $type?->name,
+        ];
+
+        // Stage-specific data
+        if ($draftStage === ServiceRequestDraftStage::DataCollection) {
+            $result = array_merge($result, $this->getDataCollectionData($draft, $type));
+        } else {
+            // For clarifying_questions and resolution stages, include context info
+            $result['title'] = $draft->title;
+            $result['description'] = $draft->close_details;
+
+            $questionsCompleted = $draft->serviceRequestUpdates()
+                ->where('update_type', ServiceRequestUpdateType::ClarifyingQuestion)
+                ->count();
+
+            $result['questions_completed'] = $questionsCompleted;
+        }
+
+        $result['next_instruction'] = $this->getStageInstruction($draftStage, $draft, $result);
+
+        return $result;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function getDataCollectionData(ServiceRequest $draft, mixed $type): array
+    {
+        $data = [
             'title' => $draft->title,
             'description' => $draft->close_details,
         ];
 
-        $type = $draft->priority?->type;
-
         if ($type) {
-            $result['type_id'] = $type->getKey();
-            $result['type_name'] = $type->name;
-            $result['priority_id'] = $draft->priority?->getKey();
-            $result['priority_name'] = $draft->priority?->name;
-
-            $result['form_fields'] = $this->getFormFields($draft, $type);
-            $result['missing_required'] = $this->getMissingRequired($draft, $result['form_fields']);
-            $result['optional_fields'] = $this->getOptionalFields($result['form_fields']);
+            $formFields = $this->getFormFields($draft, $type);
+            $data['missing_required_fields'] = $this->getMissingRequiredFields($draft, $formFields);
+            $data['missing_optional_fields'] = $this->getMissingOptionalFields($formFields);
+            // Track if the form has any custom fields at all (for adjusting description prompt)
+            $data['has_custom_form_fields'] = ! empty($formFields);
         } else {
-            $result['type_id'] = null;
-            $result['type_name'] = null;
-            $result['priority_id'] = null;
-            $result['priority_name'] = null;
-            $result['form_fields'] = [];
-            $result['missing_required'] = ['type'];
-            $result['optional_fields'] = [];
+            $data['missing_required_fields'] = [];
+            $data['missing_optional_fields'] = [];
+            $data['has_custom_form_fields'] = false;
         }
 
-        $clarifyingQuestionsCount = $draft->serviceRequestUpdates()
-            ->where('update_type', ServiceRequestUpdateType::ClarifyingQuestion)
-            ->count();
-
-        $result['clarifying_questions'] = [
-            'completed' => $clarifyingQuestionsCount,
-            'required' => 3,
-        ];
-
-        $result['next_instruction'] = $this->getStageInstruction($draftStage, $result);
-
-        return $result;
+        return $data;
     }
 
     /**
@@ -151,58 +160,82 @@ class GetDraftStatus
             $data['options'] = $field->config['options'];
         }
 
-        if (isset($field->config['placeholder'])) {
-            $data['placeholder'] = $field->config['placeholder'];
-        }
-
         return $data;
     }
 
     /**
+     * Get missing required fields with full field info for actionable instructions.
+     *
      * @param array<int, array<string, mixed>> $formFields
      *
-     * @return array<int, string>
+     * @return array<int, array<string, mixed>>
      */
-    protected function getMissingRequired(ServiceRequest $draft, array $formFields): array
+    protected function getMissingRequiredFields(ServiceRequest $draft, array $formFields): array
     {
-        $hasCustomFields = ! empty($formFields);
         $missing = [];
 
-        if ($hasCustomFields) {
-            foreach ($formFields as $field) {
-                if ($field['required'] && ! $field['filled']) {
-                    $missing[] = $field['field_id'];
+        // Check custom form fields
+        foreach ($formFields as $field) {
+            if ($field['required'] && ! $field['filled']) {
+                $fieldData = [
+                    'field_id' => $field['field_id'],
+                    'label' => $field['label'],
+                    'type' => $field['type'],
+                ];
+
+                if (isset($field['options'])) {
+                    $fieldData['options'] = $field['options'];
                 }
+
+                $missing[] = $fieldData;
             }
         }
 
+        // Check description
         if (empty($draft->close_details)) {
-            $missing[] = 'description';
+            $missing[] = [
+                'field_id' => 'description',
+                'label' => 'Description',
+                'type' => 'description',
+            ];
         }
 
+        // Check title
         if (empty($draft->title)) {
-            $missing[] = 'title';
+            $missing[] = [
+                'field_id' => 'title',
+                'label' => 'Title',
+                'type' => 'title',
+            ];
         }
 
         return $missing;
     }
 
     /**
+     * Get optional fields that haven't been filled yet.
+     *
      * @param array<int, array<string, mixed>> $formFields
      *
      * @return array<int, array<string, mixed>>
      */
-    protected function getOptionalFields(array $formFields): array
+    protected function getMissingOptionalFields(array $formFields): array
     {
         $optional = [];
 
         foreach ($formFields as $field) {
             if (! $field['required'] && ! $field['filled']) {
-                $optional[] = [
+                $fieldData = [
                     'field_id' => $field['field_id'],
                     'label' => $field['label'],
                     'type' => $field['type'],
                 ];
+
+                if (isset($field['options'])) {
+                    $fieldData['options'] = $field['options'];
+                }
+
+                $optional[] = $fieldData;
             }
         }
 
@@ -212,7 +245,7 @@ class GetDraftStatus
     /**
      * @param array<string, mixed> $result
      */
-    protected function getStageInstruction(?ServiceRequestDraftStage $draftStage, array $result): string
+    protected function getStageInstruction(?ServiceRequestDraftStage $draftStage, ServiceRequest $draft, array $result): string
     {
         if (! $draftStage) {
             return 'Draft stage could not be determined.';
@@ -220,10 +253,7 @@ class GetDraftStatus
 
         return match ($draftStage) {
             ServiceRequestDraftStage::DataCollection => $this->getDataCollectionInstruction($result),
-            ServiceRequestDraftStage::ClarifyingQuestions => sprintf(
-                'Ask clarifying question %d of 3. After user answers, call save_clarifying_question with both your question and their answer.',
-                ($result['clarifying_questions']['completed'] ?? 0) + 1
-            ),
+            ServiceRequestDraftStage::ClarifyingQuestions => $this->getClarifyingQuestionsInstruction($result),
             ServiceRequestDraftStage::Resolution => $this->getResolutionInstruction(),
         };
     }
@@ -233,7 +263,7 @@ class GetDraftStatus
         $aiResolutionSettings = app(AiResolutionSettings::class);
 
         if ($aiResolutionSettings->is_enabled) {
-            return 'Call check_ai_resolution_validity with your confidence score and proposed answer.';
+            return 'Based on everything the user told you, formulate a helpful resolution. Call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer="<your detailed resolution>"). The tool will tell you whether to present it or auto-submit for human review.';
         }
 
         return 'AI resolution is disabled. Service request will be submitted for human review.';
@@ -242,39 +272,107 @@ class GetDraftStatus
     /**
      * @param array<string, mixed> $result
      */
+    protected function getClarifyingQuestionsInstruction(array $result): string
+    {
+        $completed = $result['questions_completed'] ?? 0;
+        $next = $completed + 1;
+
+        $questionGuidance = match ($next) {
+            1 => 'Ask a specific question about WHEN or HOW the issue started (e.g., "When did you first notice this problem?" or "What were you doing when this happened?").',
+            2 => 'Ask about what they\'ve ALREADY TRIED or any ERROR MESSAGES they saw (e.g., "Have you tried any troubleshooting steps?" or "Did you see any error messages?").',
+            3 => 'Ask about their ENVIRONMENT or URGENCY (e.g., "Are you able to work around this for now?" or "Is this affecting anyone else?").',
+            default => 'Ask a specific follow-up question based on their previous answers.',
+        };
+
+        return sprintf(
+            'Ask clarifying question %d of 3. %s After they answer, call save_clarifying_question(question="<your question>", answer="<their answer>").',
+            $next,
+            $questionGuidance
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $result
+     */
     protected function getDataCollectionInstruction(array $result): string
     {
-        $missing = $result['missing_required'] ?? [];
+        $missingRequired = $result['missing_required_fields'] ?? [];
+        $missingOptional = $result['missing_optional_fields'] ?? [];
 
-        if (empty($missing)) {
-            return 'All required information collected. Stage will transition to clarifying_questions.';
+        // Build optional fields note if any exist
+        $optionalNote = '';
+
+        if (! empty($missingOptional)) {
+            $optionalLabels = array_map(fn ($f) => $f['label'], $missingOptional);
+            $optionalNote = sprintf(
+                ' Optional fields available if relevant: %s. Only ask about these if they seem useful based on context.',
+                implode(', ', $optionalLabels)
+            );
         }
 
-        $hasCustomFields = ! empty($result['form_fields'] ?? []);
-        $firstMissing = $missing[0];
+        if (empty($missingRequired)) {
+            // All required fields collected
+            if (! empty($missingOptional)) {
+                $optionalLabels = array_map(fn ($f) => strtolower($f['label']), $missingOptional);
 
-        if ($hasCustomFields && $firstMissing !== 'title' && $firstMissing !== 'description') {
-            foreach ($result['form_fields'] ?? [] as $field) {
-                if ($field['field_id'] === $firstMissing) {
-                    $isComplexField = ! in_array($field['type'], [TextInputFormFieldBlock::type(), TextAreaFormFieldBlock::type()]);
-
-                    return sprintf(
-                        'Next: Ask about "%s"%s.',
-                        $field['label'],
-                        $isComplexField ? ' (use show_field_input for widget)' : ''
-                    );
-                }
+                return sprintf(
+                    'All required info collected. If any of these optional fields seem relevant based on the conversation, ask about them: %s. Use update_form_field(field_id="<id>", value="<response>") to save. Otherwise, transition to clarifying questions.',
+                    implode(', ', $optionalLabels)
+                );
             }
+
+            return 'All required information collected. Transition to asking clarifying questions.';
         }
 
-        if ($firstMissing === 'description') {
-            return 'Next: Ask for description of their issue.';
+        $firstMissing = $missingRequired[0];
+        $fieldId = $firstMissing['field_id'];
+        $fieldLabel = $firstMissing['label'];
+        $fieldType = $firstMissing['type'];
+
+        // Handle description field
+        if ($fieldId === 'description') {
+            // Check if there were any form fields (required or optional) that we've already collected
+            $hasFormFields = $this->hasCollectedFormFields($result);
+
+            if ($hasFormFields) {
+                return 'Call request_file_attachments() first. Then ask: "Is there anything else you\'d like to add about this request? Feel free to attach any files if helpful." After they respond, call update_description(description="<their response>").' . $optionalNote;
+            }
+
+            return 'Call request_file_attachments() first. Then ask: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." After they respond, call update_description(description="<their response>").' . $optionalNote;
         }
 
-        if ($firstMissing === 'title') {
-            return 'Next: Suggest a title based on collected information.';
+        // Handle title field
+        if ($fieldId === 'title') {
+            return 'Based on what they\'ve told you, suggest a short title. Say something like: "I\'ll title this \'[your suggested title]\' - does that work?" After they confirm (or suggest changes), call update_title(title="<final title>").' . $optionalNote;
         }
 
-        return 'Continue collecting required information.';
+        // Handle custom form fields
+        $isComplexField = ! in_array($fieldType, [TextInputFormFieldBlock::type(), TextAreaFormFieldBlock::type()]);
+
+        if ($isComplexField) {
+            return sprintf(
+                'Call show_field_input(field_id="%s") to display the widget, AND in the same response ask a natural question like "Which %s does this relate to?" or "Please select your %s."',
+                $fieldId,
+                strtolower($fieldLabel),
+                strtolower($fieldLabel)
+            );
+        }
+
+        return sprintf(
+            'Ask naturally for their %s (e.g., "What\'s your %s?"). After they respond, call update_form_field(field_id="%s", value="<their response>").',
+            strtolower($fieldLabel),
+            strtolower($fieldLabel),
+            $fieldId
+        );
+    }
+
+    /**
+     * Check if the form has custom fields (not counting description/title).
+     *
+     * @param array<string, mixed> $result
+     */
+    protected function hasCollectedFormFields(array $result): bool
+    {
+        return $result['has_custom_form_fields'] ?? false;
     }
 }

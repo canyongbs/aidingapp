@@ -53,7 +53,7 @@ class UpdateFormFieldTool extends Tool
     ) {
         $this
             ->as('update_form_field')
-            ->for('Saves a text-based form field (text, textarea, number, email). For complex fields (select, date, signature), use show_field_input instead. Ask user for this field, wait for response, then save.')
+            ->for('Saves a user\'s response to a text-based form field. Call this AFTER the user provides their answer to your question. For complex fields (select, date, signature), use show_field_input instead to display a widget.')
             ->withStringParameter('field_id', 'The UUID of the form field')
             ->withStringParameter('value', 'The value to set for the field')
             ->using($this);

@@ -56,7 +56,7 @@ class SaveClarifyingQuestionTool extends Tool
     ) {
         $this
             ->as('save_clarifying_question')
-            ->for('Saves a clarifying question and answer. Call immediately after user answers. Exactly 3 questions required. Ask SPECIFIC questions based on collected data (e.g., "You mentioned X - did Y happen?"), not generic ones (e.g., "What OS?"). Do NOT provide solutions during this phase.')
+            ->for('Records your question and the user\'s answer. Call this IMMEDIATELY after the user answers your clarifying question - pass both what you asked AND their response. You must ask exactly 3 clarifying questions total. Focus on SPECIFIC details about their situation, not generic troubleshooting.')
             ->withStringParameter('question', 'The exact question text you asked the user')
             ->withStringParameter('answer', 'The user\'s complete response to your question')
             ->using($this);
@@ -135,7 +135,7 @@ class SaveClarifyingQuestionTool extends Tool
                 $requestNumber = $this->submitServiceRequest($draft, false);
 
                 $result['request_number'] = $requestNumber;
-                $result['next_instruction'] = "Service request submitted for human review. Request number: {$requestNumber}";
+                $result['next_instruction'] = "Service request submitted for human review. Tell user: \"Your request number is {$requestNumber}. A team member will follow up to help resolve this.\"";
             }
         }
 

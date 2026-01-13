@@ -50,7 +50,7 @@ class UpdateDescriptionTool extends Tool
     ) {
         $this
             ->as('update_description')
-            ->for('Saves the issue description. Ask user to describe their issue, wait for response, then save. If form fields already captured details, you may save a brief summary like "See form details".')
+            ->for('Saves the user\'s description of their issue. Call this AFTER the user describes their problem. Pass their full response as the description parameter.')
             ->withStringParameter('description', 'The description of the service request')
             ->using($this);
     }

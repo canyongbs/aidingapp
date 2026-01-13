@@ -50,7 +50,7 @@ class UpdateTitleTool extends Tool
     ) {
         $this
             ->as('update_title')
-            ->for('Saves the service request title. Suggest a concise title based on collected info, ask user to confirm or modify, then save. Example: "How about: [title]?"')
+            ->for('Saves the service request title. Call this AFTER suggesting a title and the user confirms it. Keep titles concise (under 10 words) and descriptive of the core issue.')
             ->withStringParameter('title', 'The title for the service request')
             ->using($this);
     }

@@ -123,7 +123,12 @@ class ShowFieldInputTool extends Tool
             ]
         ));
 
-        $result = 'Widget displayed to user.';
+        $result = json_encode([
+            'success' => true,
+            'field_label' => $field->label,
+            'next_instruction' => "Widget displayed. Ask a natural question prompting the user to complete it (e.g., \"Which {$field->label} does this relate to?\" or \"Please provide your {$field->label}.\"). Then wait for their response.",
+        ]);
+
         $this->logToolResult('show_field_input', $result, [
             'field_id' => $field_id,
             'field_label' => $field->label,

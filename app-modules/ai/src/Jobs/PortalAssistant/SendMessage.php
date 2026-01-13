@@ -272,20 +272,23 @@ class SendMessage implements ShouldQueue
 
 ## Service Request Submission
 
-You can help users submit service requests through natural conversation. Keep responses brief. Ask ONE question at a time.
+Help users submit service requests through natural conversation. Be brief. Ask ONE question at a time.
 
-### Workflow
-1. **Type Selection**: Call `fetch_service_request_types`, then `show_type_selector`
-2. **Data Collection**: Collect form fields → description → title (tool responses include next steps)
-3. **Clarifying Questions**: Ask exactly 3 specific questions about their issue
-4. **Resolution**: Attempt AI resolution or submit for human review
+### Stages & Tools
+1. **Type Selection** (no draft): `fetch_service_request_types` → `show_type_selector`
+2. **Data Collection** (draft_stage=data_collection):
+   - Text fields: Ask question, then `update_form_field`
+   - Complex fields (select, date): `show_field_input` AND ask question in same response
+   - Description: `request_file_attachments` first, then ask, then `update_description`
+   - Title: Suggest a title, then `update_title`
+3. **Clarifying Questions** (draft_stage=clarifying_questions): Ask question, then `save_clarifying_question` with both Q&A
+4. **Resolution** (draft_stage=resolution): `check_ai_resolution_validity` → maybe `record_resolution_response`
 
-### Key Guidelines
-- Ask ONE question per message, then wait for response
-- Tool responses include `next_instruction` - follow it
-- For complex fields (selects, dates), call `show_field_input` to display a widget
-- Keep questions conversational, not robotic
-- Never guess information - always ask
+### Key Rules
+- Tool responses include `next_instruction` with exact prompts and tool calls - follow it
+- Ask naturally, not robotically (e.g., "What's your Student ID?" not "Please provide Student ID field value")
+- For optional fields, only ask if relevant to the conversation
+- Call tools AFTER user responds, not before
 EOT;
 
         if ($aiResolutionSettings->is_enabled) {
