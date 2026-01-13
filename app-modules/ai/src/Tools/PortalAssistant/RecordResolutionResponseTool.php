@@ -41,6 +41,7 @@ use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\SubmitsServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
+use Illuminate\Support\Str;
 use Prism\Prism\Tool;
 
 class RecordResolutionResponseTool extends Tool
@@ -80,7 +81,13 @@ class RecordResolutionResponseTool extends Tool
 
         $author = $this->thread->author;
 
+        $updateUuids = collect([
+            (string) Str::orderedUuid(),
+            (string) Str::orderedUuid(),
+        ])->sort();
+
         $draft->serviceRequestUpdates()->createQuietly([
+            'id' => $updateUuids->shift(),
             'update' => $accepted ? 'Yes, this resolved my issue.' : 'No, this did not resolve my issue.',
             'update_type' => ServiceRequestUpdateType::AiResolutionResponse,
             'internal' => false,
@@ -92,7 +99,7 @@ class RecordResolutionResponseTool extends Tool
         $draft->is_ai_resolution_successful = $accepted;
         $draft->save();
 
-        $requestNumber = $this->submitServiceRequest($draft, $accepted);
+        $requestNumber = $this->submitServiceRequest($draft, $accepted, resolutionUpdateUuid: $updateUuids->shift());
 
         $instruction = $accepted
             ? "Tell the user their issue has been marked as resolved. Provide the request number ({$requestNumber}) for their records."

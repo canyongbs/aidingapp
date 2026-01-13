@@ -77,9 +77,9 @@ class FetchServiceRequestTypesTool extends Tool
         $result = json_encode([
             'types_tree' => $typesTree,
             'has_draft' => $draft !== null,
-            'instruction' => 'CRITICAL: You MUST analyze the types_tree to find a matching type BEFORE calling show_type_selector. Look at BOTH the type name AND description for matches. Examples: User says "printer broken" → matches "Printer Issue" (type_id: "d691de0b-c90d-44b0-aa2b-6e17cf0ea10c"), User says "password help" → matches "Password Reset". If you find a match, extract the EXACT type_id UUID string and pass it like: show_type_selector(suggested_type_id="d691de0b-c90d-44b0-aa2b-6e17cf0ea10c"). If NO clear match exists, call show_type_selector() with NO suggested_type_id parameter at all - omit it completely from your tool call.',
+            'instruction' => 'CRITICAL: You MUST analyze the types_tree to find a matching type BEFORE calling show_type_selector. Look at the type name for matches. Examples: User says "printer broken" → matches "Printer Issue" (type_id: "d691de0b-c90d-44b0-aa2b-6e17cf0ea10c"), User says "password help" → matches "Password Reset". If you find a match, extract the EXACT type_id UUID string and pass it like: show_type_selector(suggested_type_id="d691de0b-c90d-44b0-aa2b-6e17cf0ea10c"). If NO clear match exists, call show_type_selector() with NO suggested_type_id parameter at all - omit it completely from your tool call.',
         ]);
-        
+
         $this->logToolResult('fetch_service_request_types', $result);
         return $result;
     }
@@ -102,13 +102,11 @@ class FetchServiceRequestTypesTool extends Tool
 
         if ($uncategorizedTypes->isNotEmpty()) {
             $tree[] = [
-                'category_id' => null,
                 'name' => 'Other',
                 'children' => [],
                 'types' => $uncategorizedTypes->map(fn ($type) => [
                     'type_id' => $type->getKey(),
                     'name' => $type->name,
-                    'description' => $type->description,
                 ])->all(),
             ];
         }
@@ -128,13 +126,11 @@ class FetchServiceRequestTypesTool extends Tool
             ->map(fn ($type) => [
                 'type_id' => $type->getKey(),
                 'name' => $type->name,
-                'description' => $type->description,
             ])
             ->values()
             ->all();
 
         return [
-            'category_id' => $category->getKey(),
             'name' => $category->name,
             'children' => $children,
             'types' => $types,

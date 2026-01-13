@@ -98,7 +98,7 @@ class SaveClarifyingQuestionTool extends Tool
         $updateUuids = collect([
             (string) Str::orderedUuid(),
             (string) Str::orderedUuid(),
-        ]);
+        ])->sort();
 
         $draft->serviceRequestUpdates()->createQuietly([
             'id' => $updateUuids->shift(),

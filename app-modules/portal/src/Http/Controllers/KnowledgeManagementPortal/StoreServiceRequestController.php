@@ -383,6 +383,7 @@ class StoreServiceRequestController extends Controller
         $serviceRequest->serviceRequestUpdates()->createQuietly([
             'id' => $updateUuids->shift(),
             'update' => "AI Resolution Attempt (Confidence: {$confidenceScore}%)\n\nProposed Answer:\n{$aiProposedAnswer}\n\nUser indicated this did not resolve their issue.",
+            'update_type' => ServiceRequestUpdateType::AiResolutionSummary,
             'internal' => true,
             'created_by_id' => $serviceRequest->getKey(),
             'created_by_type' => $serviceRequest->getMorphClass(),

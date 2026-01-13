@@ -55,14 +55,14 @@ trait SubmitsServiceRequest
      * @param bool $resolutionAccepted Whether user accepted the AI resolution
      * @return string The generated service request number
      */
-    protected function submitServiceRequest(ServiceRequest $draft, bool $resolutionAccepted = false): string
+    protected function submitServiceRequest(ServiceRequest $draft, bool $resolutionAccepted = false, ?string $resolutionUpdateUuid = null): string
     {
         $hasAiResolution = $draft->serviceRequestUpdates()
             ->where('update_type', ServiceRequestUpdateType::AiResolutionProposed)
             ->exists();
 
         if ($hasAiResolution) {
-            $this->createResolutionUpdates($draft, $resolutionAccepted);
+            $this->createResolutionUpdates($draft, $resolutionAccepted, $resolutionUpdateUuid);
         }
 
         // Determine status based on resolution outcome
@@ -103,7 +103,7 @@ trait SubmitsServiceRequest
         return $draft->service_request_number;
     }
 
-    protected function createResolutionUpdates(ServiceRequest $draft, bool $wasAccepted): void
+    protected function createResolutionUpdates(ServiceRequest $draft, bool $wasAccepted, ?string $resolutionUpdateUuid = null): void
     {
         $aiResolutionUpdate = $draft->serviceRequestUpdates()
             ->where('update_type', ServiceRequestUpdateType::AiResolutionProposed)
@@ -126,7 +126,7 @@ trait SubmitsServiceRequest
         // Extract the proposed answer from the update (remove wrapper text)
         $updateText = $aiResolutionUpdate->update;
         $proposedAnswer = $updateText;
-        
+
         // If it contains the wrapper text, extract just the answer
         if (str_contains($updateText, "Did this resolve your issue?")) {
             preg_match('/here is a potential solution:\n\n(.*?)\n\nDid this resolve your issue\?/s', $updateText, $matches);
@@ -136,8 +136,9 @@ trait SubmitsServiceRequest
         }
 
         $resolutionUpdate = $draft->serviceRequestUpdates()->createQuietly([
-            'id' => (string) Str::orderedUuid(),
+            'id' => $resolutionUpdateUuid ?? ((string) Str::orderedUuid()),
             'update' => "AI Resolution Attempt (Confidence: {$confidenceScore}%)\n\nProposed Answer:\n{$proposedAnswer}\n\nUser indicated this did not resolve their issue.",
+            'update_type' => ServiceRequestUpdateType::AiResolutionSummary,
             'internal' => true,
             'created_by_id' => $draft->getKey(),
             'created_by_type' => $draft->getMorphClass(),

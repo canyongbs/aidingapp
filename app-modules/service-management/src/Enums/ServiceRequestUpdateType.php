@@ -42,4 +42,5 @@ enum ServiceRequestUpdateType: string
     case ClarifyingAnswer = 'clarifying_answer';
     case AiResolutionProposed = 'ai_resolution_proposed';
     case AiResolutionResponse = 'ai_resolution_response';
+    case AiResolutionSummary = 'ai_resolution_summary';
 }
