@@ -78,7 +78,7 @@ class EnableFileAttachmentsTool extends Tool
 
         $result = json_encode([
             'success' => true,
-            'next_instruction' => 'Ask: "Can you describe what\'s happening? Feel free to attach screenshots or files if that helps." After they respond, call update_description(description="<their response>").',
+            'next_instruction' => 'Ask: "Can you describe what\'s happening? Feel free to attach screenshots or files if that helps." IMMEDIATELY after they respond with ANY description, you MUST call update_description(description="<their response>") before doing anything else.',
         ]);
 
         $this->logToolResult('enable_file_attachments', $result, []);

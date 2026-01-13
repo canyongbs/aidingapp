@@ -360,10 +360,10 @@ After they answer, you MUST call save_clarifying_question_answer(question="<your
             $hasFormFields = $this->hasCollectedFormFields($result);
 
             if ($hasFormFields) {
-                return 'Call enable_file_attachments() first. Then ask: "Is there anything else you\'d like to add about this request? Feel free to attach any files if helpful." After they respond, call update_description(description="<their response>").' . $optionalNote;
+                return 'Call enable_file_attachments() first. Then ask: "Is there anything else you\'d like to add about this request? Feel free to attach any files if helpful." IMMEDIATELY after they respond with ANY text, you MUST call update_description(description="<their response>") before doing anything else.' . $optionalNote;
             }
 
-            return 'Call enable_file_attachments() first. Then ask: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." After they respond, call update_description(description="<their response>").' . $optionalNote;
+            return 'Call enable_file_attachments() first. Then ask: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." IMMEDIATELY after they respond with ANY description, you MUST call update_description(description="<their response>") before doing anything else.' . $optionalNote;
         }
 
         // Handle title field

@@ -129,6 +129,12 @@ class SendMessage implements ShouldQueue
             - Never mention technical details like field_ids, JSON, internal state, or how you're organizing information
             - Keep responses conversational and focused on helping the user
 
+            CRITICAL: During service request data collection, DO NOT search the knowledge base or provide troubleshooting suggestions unless the user explicitly asks. Focus ONLY on collecting required information. Knowledge base search is appropriate ONLY when:
+            1. User explicitly asks a question about how to do something
+            2. During clarifying questions stage to better understand their issue
+            3. During resolution stage to provide helpful solutions
+            During data collection, your ONLY job is to ask for and save the required information using the tools.
+
             CRITICAL: You MUST format ALL responses using Markdown. This is non-negotiable. Always use proper Markdown formatting. NEVER mention that you are responding using Markdown.
             EOT;
 
