@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\Organization;
+use App\Features\RemoveAssignedToFeature;
 use App\Models\Scopes\HasLicense;
 use App\Models\User;
 use Filament\Forms\Components\Radio;
@@ -162,6 +163,23 @@ class CreateContact extends CreateRecord
                         ->default(false)
                         ->boolean(),
                 ])->columns(2),
+
+                Section::make('Record Details')->schema([
+                    Select::make('assigned_to_id')
+                        ->label('Assigned To')
+                        ->relationship(
+                            'assignedTo',
+                            'name',
+                            fn (Builder $query) => $query->tap(new HasLicense(Contact::getLicenseType())),
+                        )
+                        ->searchable()
+                        ->nullable()
+                        ->exists(
+                            table: (new User())->getTable(),
+                            column: (new User())->getKeyName()
+                        ),
+                ])
+                    ->visible(!RemoveAssignedToFeature::active()),
 
                 // TODO: Display this based on system configurable data format
             ]);

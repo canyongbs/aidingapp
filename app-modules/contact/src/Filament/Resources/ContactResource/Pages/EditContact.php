@@ -42,6 +42,7 @@ use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\Organization;
 use App\Concerns\EditPageRedirection;
+use App\Features\RemoveAssignedToFeature;
 use App\Models\Scopes\HasLicense;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
@@ -206,6 +207,20 @@ class EditContact extends EditRecord
                                 table: (new User())->getTable(),
                                 column: (new User())->getKeyName()
                             ),
+                        Select::make('assigned_to_id')
+                            ->label('Assigned To')
+                            ->relationship(
+                                'assignedTo',
+                                'name',
+                                fn (Builder $query) => $query->tap(new HasLicense(Contact::getLicenseType())),
+                            )
+                            ->searchable()
+                            ->nullable()
+                            ->exists(
+                                table: (new User())->getTable(),
+                                column: (new User())->getKeyName(),
+                            )
+                            ->visible(!RemoveAssignedToFeature::active()),
                     ])
                     ->columns(2),
             ]);
