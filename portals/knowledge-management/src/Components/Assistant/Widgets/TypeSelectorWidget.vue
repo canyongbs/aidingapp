@@ -32,9 +32,9 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed, ref } from 'vue';
     import { ChevronRightIcon } from '@heroicons/vue/16/solid';
     import { ArrowLeftIcon } from '@heroicons/vue/20/solid';
+    import { computed, ref } from 'vue';
     import TypeCategory from './TypeCategory.vue';
 
     const props = defineProps({
@@ -145,10 +145,7 @@
                         @click="showBrowse = !showBrowse"
                         class="text-xs text-gray-600 hover:text-gray-900 flex items-center gap-1"
                     >
-                        <ChevronRightIcon
-                            class="w-4 h-4 transition-transform"
-                            :class="{ 'rotate-90': showBrowse }"
-                        />
+                        <ChevronRightIcon class="w-4 h-4 transition-transform" :class="{ 'rotate-90': showBrowse }" />
                         {{ showBrowse ? 'Hide other options' : 'Browse other options' }}
                     </button>
 

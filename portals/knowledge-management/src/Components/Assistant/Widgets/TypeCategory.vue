@@ -32,8 +32,8 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed, ref } from 'vue';
     import { ChevronRightIcon } from '@heroicons/vue/16/solid';
+    import { computed, ref } from 'vue';
 
     const props = defineProps({
         category: {
