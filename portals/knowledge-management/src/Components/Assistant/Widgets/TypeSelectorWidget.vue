@@ -88,9 +88,9 @@
 
     const selectType = (type) => {
         selectedType.value = type;
-        // Auto-select default priority (highest order, first in list)
+        // Auto-select default priority (lowest order, last in list, encourages user to not overprioritize)
         if (type.priorities && type.priorities.length > 0) {
-            selectedPriorityId.value = type.priorities[0].priority_id;
+            selectedPriorityId.value = type.priorities[type.priorities.length - 1].priority_id;
         }
     };
 
