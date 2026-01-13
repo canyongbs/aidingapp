@@ -118,7 +118,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'city',
         'state',
         'postal',
-        'assigned_to_id',
         'created_by_id',
     ];
 

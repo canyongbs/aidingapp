@@ -97,11 +97,6 @@ test('ListContacts can bulk update characteristics', function () {
 
     $component
         ->callTableBulkAction('bulk_update', $contacts, [
-            'field' => 'assigned_to_id',
-            'assigned_to_id' => $user->id,
-        ])
-        ->assertHasNoTableBulkActionErrors()
-        ->callTableBulkAction('bulk_update', $contacts, [
             'field' => 'description',
             'description' => $description,
         ])
@@ -131,7 +126,6 @@ test('ListContacts can bulk update characteristics', function () {
         ->each(
             fn ($contact) => $contact
                 ->refresh()
-                ->assigned_to_id->toBe($user->id)
                 ->description->toBe($description)
                 ->email_bounce->toBeTrue()
                 ->sms_opt_out->toBeTrue()

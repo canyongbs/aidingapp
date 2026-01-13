@@ -206,19 +206,6 @@ class EditContact extends EditRecord
                                 table: (new User())->getTable(),
                                 column: (new User())->getKeyName()
                             ),
-                        Select::make('assigned_to_id')
-                            ->label('Assigned To')
-                            ->relationship(
-                                'assignedTo',
-                                'name',
-                                fn (Builder $query) => $query->tap(new HasLicense(Contact::getLicenseType())),
-                            )
-                            ->searchable()
-                            ->nullable()
-                            ->exists(
-                                table: (new User())->getTable(),
-                                column: (new User())->getKeyName(),
-                            ),
                     ])
                     ->columns(2),
             ]);

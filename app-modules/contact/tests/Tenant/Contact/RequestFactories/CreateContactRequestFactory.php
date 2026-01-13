@@ -63,7 +63,6 @@ class CreateContactRequestFactory extends RequestFactory
             'phone' => $this->faker->e164PhoneNumber(),
             'address' => $this->faker->address(),
             'address_2' => $this->faker->address(),
-            'assigned_to_id' => User::factory()->create()->id,
             'created_by_id' => User::factory()->create()->id,
         ];
     }

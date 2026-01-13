@@ -163,22 +163,6 @@ class CreateContact extends CreateRecord
                         ->boolean(),
                 ])->columns(2),
 
-                Section::make('Record Details')->schema([
-                    Select::make('assigned_to_id')
-                        ->label('Assigned To')
-                        ->relationship(
-                            'assignedTo',
-                            'name',
-                            fn (Builder $query) => $query->tap(new HasLicense(Contact::getLicenseType())),
-                        )
-                        ->searchable()
-                        ->nullable()
-                        ->exists(
-                            table: (new User())->getTable(),
-                            column: (new User())->getKeyName()
-                        ),
-                ]),
-
                 // TODO: Display this based on system configurable data format
             ]);
     }
