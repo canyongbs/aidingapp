@@ -43,7 +43,8 @@ export function useMarkdown() {
     const renderMarkdown = (content) => {
         if (!content) return '';
         try {
-            const html = marked.parse(content, { async: false });
+            const cleanedContent = content.replace(/【[^】]*】/g, '');
+            const html = marked.parse(cleanedContent, { async: false });
             return DOMPurify.sanitize(html);
         } catch (error) {
             console.error('Error rendering markdown:', error);
