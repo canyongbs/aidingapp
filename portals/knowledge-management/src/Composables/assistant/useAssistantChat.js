@@ -39,7 +39,8 @@ import { useAssistantConnection } from './useAssistantConnection.js';
 import { useFileUpload } from './useFileUpload.js';
 
 export function useAssistantChat() {
-    const { assistantSendMessageUrl, selectTypeUrl, updateFieldUrl, getTypesUrl, websocketsConfig } = useAssistantStore();
+    const { assistantSendMessageUrl, selectTypeUrl, updateFieldUrl, getTypesUrl, websocketsConfig } =
+        useAssistantStore();
     const { getToken } = useTokenStore();
 
     const messages = ref([]);
