@@ -82,26 +82,31 @@ trait SeedsKnowledgeBaseForPortalAssistant
         return [
             'it_support' => KnowledgeBaseCategory::create([
                 'name' => 'IT Support & Technology',
+                'slug' => 'it-support-technology',
                 'description' => 'Technical support articles for hardware, software, and network issues.',
                 'icon' => null,
             ]),
             'hr_services' => KnowledgeBaseCategory::create([
                 'name' => 'Human Resources',
+                'slug' => 'human-resources',
                 'description' => 'HR policies, benefits information, and employee services.',
                 'icon' => null,
             ]),
             'facilities' => KnowledgeBaseCategory::create([
                 'name' => 'Facilities & Building Services',
+                'slug' => 'facilities-building-services',
                 'description' => 'Building maintenance, room booking, and facilities information.',
                 'icon' => null,
             ]),
             'student_services' => KnowledgeBaseCategory::create([
                 'name' => 'Student Services & Academic',
+                'slug' => 'student-services-academic',
                 'description' => 'Academic support, enrollment, and student resources.',
                 'icon' => null,
             ]),
             'financial' => KnowledgeBaseCategory::create([
                 'name' => 'Financial Services',
+                'slug' => 'financial-services',
                 'description' => 'Expense reimbursement, budgets, and financial procedures.',
                 'icon' => null,
             ]),
