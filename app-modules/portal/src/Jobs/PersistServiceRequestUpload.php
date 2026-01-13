@@ -73,11 +73,8 @@ class PersistServiceRequestUpload implements ShouldQueue
 
     public function handle(): void
     {
-        // Security: Validate path is within tmp/ directory and matches expected pattern
-        // This is defense in depth - the controller should have already validated this
         $this->validatePath();
 
-        // Verify file exists before attempting to copy
         if (! Storage::exists($this->path)) {
             return;
         }
@@ -88,29 +85,20 @@ class PersistServiceRequestUpload implements ShouldQueue
                 ->usingName(pathinfo($this->originalFileName, PATHINFO_FILENAME))
                 ->toMediaCollection($this->collection);
         } finally {
-            // Always delete the temporary file after processing
             Storage::delete($this->path);
         }
     }
 
-    /**
-     * Validate the path is safe to use.
-     *
-     * @throws InvalidArgumentException
-     */
     protected function validatePath(): void
     {
-        // Reject any path traversal attempts
         if (str_contains($this->path, '..') || str_contains($this->path, '//')) {
             throw new InvalidArgumentException('Invalid path: path traversal not allowed');
         }
 
-        // Path must start with tmp/
         if (! str_starts_with($this->path, 'tmp/')) {
             throw new InvalidArgumentException('Invalid path: must be within tmp/ directory');
         }
 
-        // Path must match expected pattern: tmp/{uuid}.{extension}
         if (! preg_match('/^tmp\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-zA-Z0-9]+$/i', $this->path)) {
             throw new InvalidArgumentException('Invalid path: does not match expected format');
         }

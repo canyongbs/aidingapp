@@ -89,11 +89,6 @@ class PersistPortalAssistantUpload implements ShouldQueue
         }
     }
 
-    /**
-     * Validate the path is safe to use.
-     *
-     * @throws InvalidArgumentException
-     */
     protected function validatePath(): void
     {
         if (str_contains($this->path, '..') || str_contains($this->path, '//')) {
