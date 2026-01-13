@@ -220,7 +220,7 @@ class EditContact extends EditRecord
                                 table: (new User())->getTable(),
                                 column: (new User())->getKeyName(),
                             )
-                            ->visible(!RemoveAssignedToFeature::active()),
+                            ->visible(! RemoveAssignedToFeature::active()),
                     ])
                     ->columns(2),
             ]);

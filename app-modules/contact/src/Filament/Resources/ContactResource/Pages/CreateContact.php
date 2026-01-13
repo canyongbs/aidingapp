@@ -179,7 +179,7 @@ class CreateContact extends CreateRecord
                             column: (new User())->getKeyName()
                         ),
                 ])
-                    ->visible(!RemoveAssignedToFeature::active()),
+                    ->visible(! RemoveAssignedToFeature::active()),
 
                 // TODO: Display this based on system configurable data format
             ]);

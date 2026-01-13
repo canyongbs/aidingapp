@@ -43,7 +43,6 @@ use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
 use App\Filament\Tables\Columns\IdColumn;
-use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
 use Filament\Forms\Components\Radio;
