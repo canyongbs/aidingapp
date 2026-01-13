@@ -99,7 +99,10 @@ The `cancel_service_request` tool allows users to abandon the current service re
 **Requirements:**
 
 - Exactly 3 questions must be asked and saved
-- Questions must be specific to user's situation, drawing from collected data
+- Questions gather additional information needed to understand the user's situation
+- Questions are NOT for re-collecting form data already provided
+- Questions focus on context, urgency, troubleshooting history, or other relevant details
+- AI receives all previously collected data (title, description, filled form fields) to avoid duplicate questions
 - Each question/answer saved immediately after user responds
 
 **Phase Transition:**
@@ -190,11 +193,18 @@ The `cancel_service_request` tool allows users to abandon the current service re
 
 **get_draft_status**
 
-- Returns stage-appropriate draft state with conversational instructions
+- Returns stage-appropriate draft state with conversational instructions in structured JSON format
 - Derives current phase from draft state
 - During `data_collection`: Returns `missing_required_fields` and `missing_optional_fields` arrays
-- During `clarifying_questions`/`resolution`: Returns `questions_completed` counter
-- Provides natural-language prompts suggesting what to say to the user
+- During `clarifying_questions`/`resolution`: Returns `questions_completed` counter, `title`, `description`, and `filled_form_fields` array
+- `filled_form_fields` contains structured label/value pairs with special handling:
+  - Signature fields: `[Signature provided]` instead of base64 data
+  - Checkbox fields: `Yes`/`No` instead of boolean
+  - All field values limited to 255 characters (truncated with `...`)
+  - Title limited to 255 characters
+  - Description provided in full (not truncated)
+- AI receives this structured data to understand what information has already been collected
+- Provides natural-language `next_instruction` guiding the AI on what to do next
 
 **update_title**, **update_description**
 
@@ -230,8 +240,9 @@ The `cancel_service_request` tool allows users to abandon the current service re
 - Creates two updates immediately:
     - Question update with `update_type = 'clarifying_question'` (created_by = ServiceRequest)
     - Answer update with `update_type = 'clarifying_answer'` (created_by = Contact)
-- After 3rd question saved, phase becomes `resolution` (derived from update count)
-- Returns remaining count and contextual guidance for next question type
+- After 3rd question saved, phase becomes `resolution` (derived from update count) if AI resolution enabled, otherwise submits immediately
+- Returns remaining count and contextual guidance
+- Tool description emphasizes questions are for gathering additional information, not form data re-collection
 
 ### Resolution Tools
 
@@ -579,12 +590,15 @@ This section documents a complete conversation from the assistant's perspective,
     "type_name": "Password Reset",
     "title": "Cannot log into student portal - invalid credentials error",
     "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
+    "filled_form_fields": [
+        { "label": "Student ID", "value": "A00123456" }
+    ],
     "questions_completed": 0,
-    "next_instruction": "Ask clarifying question 1 of 3. Ask a specific question about WHEN or HOW the issue started (e.g., \"When did you first notice this problem?\" or \"What were you doing when this happened?\"). After they answer, call save_clarifying_question_answer(question=\"<your question>\", answer=\"<their answer>\")."
+    "next_instruction": "Question 1 of 3 (2 remaining).\n\nIMPORTANT: You have access to all previously collected data in the response (title, description, filled_form_fields). Use this context to ask clarifying questions that gather ADDITIONAL information you need - NOT to re-collect form data already provided. Ask focused questions about context, urgency, troubleshooting history, or other relevant details.\n\nExamples of good clarifying questions:\n- \"When did this issue first start happening?\"\n- \"Have you tried anything to resolve this already?\"\n- \"Is this blocking your work right now?\"\n- \"Are there any error messages you're seeing?\"\n\nAfter they answer, you MUST call save_clarifying_question_answer(question=\"<your question>\", answer=\"<their answer>\") to record it."
 }
 ```
 
-**Does assistant know what to do?** ✅ Yes - `draft_stage` changed to `clarifying_questions`. `next_instruction` provides specific guidance on what TYPE of question to ask (timing/context) with examples.
+**Does assistant know what to do?** ✅ Yes - `draft_stage` changed to `clarifying_questions`. `next_instruction` provides structured data in the response and guidance on asking clarifying questions that don't duplicate the form data already collected.
 
 **Assistant Response:** "When did you first notice this problem - was it working fine before today?"
 
@@ -609,12 +623,15 @@ This section documents a complete conversation from the assistant's perspective,
     "type_name": "Password Reset",
     "title": "Cannot log into student portal - invalid credentials error",
     "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
+    "filled_form_fields": [
+        { "label": "Student ID", "value": "A00123456" }
+    ],
     "questions_completed": 1,
-    "next_instruction": "Ask clarifying question 2 of 3. Ask about what they've ALREADY TRIED or any ERROR MESSAGES they saw (e.g., \"Have you tried any troubleshooting steps?\" or \"Did you see any error messages?\"). After they answer, call save_clarifying_question_answer(question=\"<your question>\", answer=\"<their answer>\")."
+    "next_instruction": "Question 2 of 3 (1 remaining).\n\nIMPORTANT: You have access to all previously collected data in the response (title, description, filled_form_fields). Use this context to ask clarifying questions that gather ADDITIONAL information you need - NOT to re-collect form data already provided. Ask focused questions about context, urgency, troubleshooting history, or other relevant details.\n\nExamples of good clarifying questions:\n- \"When did this issue first start happening?\"\n- \"Have you tried anything to resolve this already?\"\n- \"Is this blocking your work right now?\"\n- \"Are there any error messages you're seeing?\"\n\nAfter they answer, you MUST call save_clarifying_question_answer(question=\"<your question>\", answer=\"<their answer>\") to record it."
 }
 ```
 
-**Does assistant know what to do?** ✅ Yes - `questions_completed` is 1. `next_instruction` guides them to ask about troubleshooting or error messages.
+**Does assistant know what to do?** ✅ Yes - `questions_completed` is 1. `next_instruction` continues to provide context and guidance. The AI can see the Student ID was already collected in `filled_form_fields`.
 
 **Assistant Response:** "Are you typing your password manually or using a saved/autofill password from your browser?"
 
@@ -637,12 +654,15 @@ This section documents a complete conversation from the assistant's perspective,
     "type_name": "Password Reset",
     "title": "Cannot log into student portal - invalid credentials error",
     "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
+    "filled_form_fields": [
+        { "label": "Student ID", "value": "A00123456" }
+    ],
     "questions_completed": 2,
-    "next_instruction": "Ask clarifying question 3 of 3. Ask about their ENVIRONMENT or URGENCY (e.g., \"Are you able to work around this for now?\" or \"Is this affecting anyone else?\"). After they answer, call save_clarifying_question_answer(question=\"<your question>\", answer=\"<their answer>\")."
+    "next_instruction": "Question 3 of 3 (0 remaining).\n\nIMPORTANT: You have access to all previously collected data in the response (title, description, filled_form_fields). Use this context to ask clarifying questions that gather ADDITIONAL information you need - NOT to re-collect form data already provided. Ask focused questions about context, urgency, troubleshooting history, or other relevant details.\n\nExamples of good clarifying questions:\n- \"When did this issue first start happening?\"\n- \"Have you tried anything to resolve this already?\"\n- \"Is this blocking your work right now?\"\n- \"Are there any error messages you're seeing?\"\n\nAfter they answer, you MUST call save_clarifying_question_answer(question=\"<your question>\", answer=\"<their answer>\") to record it."
 }
 ```
 
-**Does assistant know what to do?** ✅ Yes - `questions_completed` is 2. `next_instruction` guides them to ask about environment or urgency.
+**Does assistant know what to do?** ✅ Yes - `questions_completed` is 2. This is the final clarifying question.
 
 **Assistant Response:** "Have you tried logging in from a different browser or device to see if the issue persists?"
 
@@ -656,7 +676,7 @@ This section documents a complete conversation from the assistant's perspective,
 
 | Tool                           | Description                                                                                                                                                                                                               |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `check_ai_resolution_validity` | Checks if an AI resolution meets the confidence threshold. Call this after clarifying questions when you have a potential solution. DO NOT show the resolution to the user until this tool returns meets_threshold: true. |
+| `check_ai_resolution_validity` | Checks if an AI resolution meets the confidence threshold. Call this after clarifying questions when you have a potential solution. DO NOT show the resolution to the user until this tool returns meets_threshold: true. Confidence score must be 0-100. |
 
 **Tool Call:** `save_clarifying_question_answer(question="Have you tried logging in from a different browser or device to see if the issue persists?", answer="No I haven't tried that")`
 
@@ -669,12 +689,15 @@ This section documents a complete conversation from the assistant's perspective,
     "type_name": "Password Reset",
     "title": "Cannot log into student portal - invalid credentials error",
     "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
+    "filled_form_fields": [
+        { "label": "Student ID", "value": "A00123456" }
+    ],
     "questions_completed": 3,
-    "next_instruction": "Based on everything the user told you, formulate a helpful resolution. Call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer=\"<your detailed resolution>\"). The tool will tell you whether to present it or auto-submit for human review."
+    "next_instruction": "Based on everything the user told you, formulate a helpful resolution. Call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer=\"<your detailed resolution>\"). The tool will tell you whether to present it or submit for review."
 }
 ```
 
-**Does assistant know what to do?** ✅ Yes - `draft_stage` changed to `resolution`. `questions_completed` is 3. `next_instruction` tells them to formulate a resolution and call `check_ai_resolution_validity`.
+**Does assistant know what to do?** ✅ Yes - `draft_stage` changed to `resolution`. `questions_completed` is 3. `next_instruction` tells them to formulate a resolution and call `check_ai_resolution_validity`. The AI has access to all collected data including form fields.
 
 **Tool Call:** `check_ai_resolution_validity(confidence_score=82, proposed_answer="Based on your situation, the issue is likely with Chrome's saved password. Try these steps: 1) Go to Chrome settings > Passwords, 2) Find and delete the saved password for the student portal, 3) Go back to the login page and type your password manually. If this doesn't work, try the 'Forgot Password' link to reset it.")`
 
@@ -743,7 +766,7 @@ At each turn, the assistant knows what to do because:
     - List of optional fields the AI can ask about if relevant
 3. **Draft status** is stage-appropriate:
     - `data_collection`: `missing_required_fields`, `missing_optional_fields` with field_id, label, type; `has_custom_form_fields` flag
-    - `clarifying_questions`/`resolution`: `questions_completed` counter with question-type guidance
+    - `clarifying_questions`/`resolution`: `questions_completed` counter, `title`, `description`, and `filled_form_fields` array with structured data (signatures show as `[Signature provided]`, checkboxes as `Yes`/`No`, all values limited to 255 chars)
 4. **Context-aware prompts**:
     - If form has custom fields, description prompt says "anything else to add" (since form captured details)
     - If no custom fields, description prompt asks to "describe what's happening"

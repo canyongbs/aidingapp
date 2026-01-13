@@ -54,7 +54,7 @@ class RecordResolutionResponseTool extends Tool
     ) {
         $this
             ->as('record_resolution_response')
-            ->for('Records the user\'s response to your resolution attempt. Call this after presenting a resolution and getting explicit yes/no feedback.')
+            ->for('Records the user\'s feedback on your resolution and submits the service request. This is the FINAL action - call this immediately after getting yes/no feedback. Do NOT offer additional help or ask follow-up questions after calling this.')
             ->withBooleanParameter('accepted', 'Whether the user said the resolution solved their problem')
             ->using($this);
     }

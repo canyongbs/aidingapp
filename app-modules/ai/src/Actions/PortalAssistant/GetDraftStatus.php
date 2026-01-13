@@ -37,12 +37,15 @@
 namespace AidingApp\Ai\Actions\PortalAssistant;
 
 use AidingApp\Ai\Settings\AiResolutionSettings;
+use AidingApp\Form\Filament\Blocks\CheckboxFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\SignatureFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\TextAreaFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use Illuminate\Support\Str;
 
 class GetDraftStatus
 {
@@ -68,6 +71,9 @@ class GetDraftStatus
             // For clarifying_questions and resolution stages, include context info
             $result['title'] = $draft->title;
             $result['description'] = $draft->close_details;
+
+            // Include filled form fields so AI has full context
+            $result['filled_form_fields'] = $this->getFilledFormFields($draft, $type);
 
             $questionsCompleted = $draft->serviceRequestUpdates()
                 ->where('update_type', ServiceRequestUpdateType::ClarifyingQuestion)
@@ -271,10 +277,10 @@ class GetDraftStatus
         $aiResolutionSettings = app(AiResolutionSettings::class);
 
         if ($aiResolutionSettings->is_enabled) {
-            return 'Based on everything the user told you, formulate a helpful resolution. Call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer="<your detailed resolution>"). The tool will tell you whether to present it or auto-submit for human review.';
+            return 'Based on everything the user told you, formulate a helpful resolution. Call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer="<your detailed resolution>"). The tool will tell you whether to present it or submit for review.';
         }
 
-        return 'AI resolution is disabled. Service request will be submitted for human review.';
+        return 'Service request has been submitted for review. Thank the user and let them know a team member will follow up to help resolve this.';
     }
 
     /**
@@ -286,13 +292,27 @@ class GetDraftStatus
         $remaining = 3 - $completed;
 
         if ($remaining === 0) {
-            return 'All 3 clarifying questions complete. Proceed to resolution stage.';
+            return 'All 3 clarifying questions complete. Request will be submitted for review.';
         }
 
+        $transitionMessage = $completed === 0
+            ? 'Tell the user you\'ll ask 3 questions before submitting their request. Then ask your first question naturally (do NOT say "Question 1 of 3").'
+            : 'Ask your next question naturally (do NOT say "Question X of 3").';
+
         return sprintf(
-            'Question %d of 3 (%d remaining). Ask a clarifying question to better understand their issue. Do NOT attempt to resolve yet - you will have the opportunity to provide a resolution AFTER all 3 questions are saved. After they answer, you MUST call save_clarifying_question_answer(question="<your question>", answer="<their answer>") to record it.',
-            $completed + 1,
-            $remaining
+            '%s
+
+IMPORTANT: You have access to all previously collected data in the response (title, description, filled_form_fields). Use this context to ask clarifying questions that gather ADDITIONAL information you need - NOT to re-collect form data already provided. Ask focused questions about context, urgency, troubleshooting history, or other relevant details.
+
+Examples of good clarifying questions:
+- "When did this issue first start happening?"
+- "Have you tried anything to resolve this already?"
+- "Is this blocking your work right now?"
+- "Are there any error messages you\'re seeing?"
+
+After they answer, you MUST call save_clarifying_question_answer(question="<your question>", answer="<their answer>") to record it. (%d of 3 questions completed)',
+            $transitionMessage,
+            $completed
         );
     }
 
@@ -379,5 +399,75 @@ class GetDraftStatus
     protected function hasCollectedFormFields(array $result): bool
     {
         return $result['has_custom_form_fields'] ?? false;
+    }
+
+    /**
+     * Get all filled form fields with their labels and values for AI context.
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getFilledFormFields(ServiceRequest $draft, mixed $type): array
+    {
+        if (! $type) {
+            return [];
+        }
+
+        $form = $type->form;
+
+        if (! $form) {
+            return [];
+        }
+
+        $submission = $draft->serviceRequestFormSubmission;
+
+        if (! $submission) {
+            return [];
+        }
+
+        // Build a map of field IDs to their types
+        $fieldTypes = $form->fields->keyBy('id')->map(fn ($field) => $field->type);
+
+        $filledFields = $submission->fields()
+            ->get()
+            ->keyBy('id')
+            ->map(function ($field) use ($fieldTypes) {
+                $rawValue = $field->pivot->response;
+                $displayValue = $this->getDisplayValueForField($field->type ?? $fieldTypes[$field->id] ?? null, $rawValue, $field->label);
+
+                return [
+                    'label' => $field->label,
+                    'value' => $displayValue,
+                ];
+            })
+            ->filter(fn ($field) => $field['value'] !== null && $field['value'] !== '')
+            ->values()
+            ->all();
+
+        return $filledFields;
+    }
+
+    /**
+     * Get a human-readable display value for different field types.
+     */
+    protected function getDisplayValueForField(?string $fieldType, mixed $rawValue, string $label): string
+    {
+        if ($rawValue === null || $rawValue === '') {
+            return '';
+        }
+
+        // Handle signature fields - they store base64 data URLs which are too long for AI context
+        if ($fieldType === SignatureFormFieldBlock::type()) {
+            return '[Signature provided]';
+        }
+
+        // Handle checkbox fields - convert boolean to Yes/No
+        if ($fieldType === CheckboxFormFieldBlock::type()) {
+            return $rawValue ? 'Yes' : 'No';
+        }
+
+        // For all other fields, limit length and return the value
+        $stringValue = (string) $rawValue;
+
+        return Str::limit($stringValue, 255);
     }
 }

@@ -100,7 +100,7 @@ class CheckAiResolutionValidityTool extends Tool
         if ($meetsThreshold) {
             return json_encode([
                 'meets_threshold' => true,
-                'next_instruction' => 'Present your resolution to the user in a helpful way. End by asking: "Does this help resolve your issue?" Based on their response, call record_resolution_response(accepted=true) if they say yes, or record_resolution_response(accepted=false) if they say no or need more help.',
+                'next_instruction' => 'Present your resolution to the user in a helpful way. End by asking: "Did this help resolve your issue?" Wait for their yes/no answer, then immediately call record_resolution_response(accepted=true/false). This will submit their request - do NOT offer any additional help after calling it.',
             ]);
         }
 

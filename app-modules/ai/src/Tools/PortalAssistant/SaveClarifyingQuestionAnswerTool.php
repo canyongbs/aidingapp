@@ -56,8 +56,8 @@ class SaveClarifyingQuestionAnswerTool extends Tool
     ) {
         $this
             ->as('save_clarifying_question_answer')
-            ->for('Records ONE clarifying question and its answer. You MUST call this tool 3 times total - once after each user response. Call immediately after EACH answer with both the question and their response.')
-            ->withStringParameter('question', 'The exact question text you asked the user')
+            ->for('Records ONE clarifying question and its answer. Clarifying questions gather additional information you need to understand the user\'s situation - NOT form data re-collection. You MUST call this tool 3 times total - once after each user response. Call immediately after EACH answer with both the question and their response.')
+            ->withStringParameter('question', 'The exact clarifying question you asked (e.g., "When did this issue first start?")')
             ->withStringParameter('answer', 'The user\'s complete response to your question')
             ->using($this);
     }

@@ -268,7 +268,25 @@ class SendMessage implements ShouldQueue
     {
         $aiResolutionSettings = app(AiResolutionSettings::class);
 
-        $instructions = <<<'EOT'
+        $resolutionStage = $aiResolutionSettings->is_enabled
+            ? <<<'EOT'
+4. **Resolution** (draft_stage=resolution):
+   - Based on everything collected, formulate a helpful resolution
+   - Call `check_ai_resolution_validity` with confidence score and proposed answer
+   - If confidence meets threshold: Present the resolution, ask if it helped, then call `record_resolution_response` to submit - this is the END
+   - If confidence is too low: Inform user their request was submitted for review - this is the END
+EOT
+            : '';
+
+        $afterClarifyingQuestions = $aiResolutionSettings->is_enabled
+            ? ''
+            : '   - After all 3 questions are answered, the request will be submitted for review';
+
+        $priorityText = $aiResolutionSettings->is_enabled
+            ? 'Follow the stages in order - collect data, ask clarifying questions, then attempt resolution.'
+            : 'Follow the stages in order - collect data, ask clarifying questions, then the request submits for review.';
+
+        $instructions = <<<EOT
 
 ## Service Request Submission
 
@@ -282,8 +300,14 @@ Help users submit service requests through natural conversation. Be brief. Ask O
      - `"show_field_input"`: `show_field_input(field_id)` AND ask question in same response
    - Description: `enable_file_attachments` first, then ask, then `update_description`
    - Title: Suggest a title, then `update_title`
-3. **Clarifying Questions** (draft_stage=clarifying_questions): Ask question, then `save_clarifying_question_answer` with both Q&A
-4. **Resolution** (draft_stage=resolution): `check_ai_resolution_validity` → maybe `record_resolution_response`
+3. **Clarifying Questions** (draft_stage=clarifying_questions):
+   - Ask 3 questions to gather additional information you need to better understand their situation
+   - These are NOT for re-collecting form data - ask about context, urgency, troubleshooting history, or any other relevant details
+   - Examples: "When did this start?", "Have you tried anything already?", "Is this blocking your work?"
+   - After each answer, call `save_clarifying_question_answer` with both question and answer
+   - You will receive the already-collected form fields, title, and description in context - do NOT ask about these again
+{$afterClarifyingQuestions}
+{$resolutionStage}
 
 ### Key Rules
 - Tool responses include `next_instruction` with exact prompts and tool calls - follow it
@@ -292,22 +316,8 @@ Help users submit service requests through natural conversation. Be brief. Ask O
 - Call tools AFTER user responds, not before
 
 ### Priority
-Once a service request draft is started, your #1 goal is to complete and submit it. Follow the stages in order - do NOT skip ahead. Collect ALL required data, then ask ALL 3 clarifying questions, THEN provide resolution. The request only gets submitted after the full flow completes. If user wants to cancel, use `cancel_service_request`. If you lose track of progress, call `get_draft_status`.
+Once a service request draft is started, your #1 goal is to complete and submit it. Follow the stages in order - do NOT skip ahead. {$priorityText} If user wants to cancel, use `cancel_service_request`. If you lose track of progress, call `get_draft_status`.
 EOT;
-
-        if ($aiResolutionSettings->is_enabled) {
-            $instructions .= <<<'EOT'
-
-### Resolution
-After clarifying questions, call `check_ai_resolution_validity` with confidence score and proposed answer. Tool response indicates whether to present resolution or auto-submit for review.
-EOT;
-        } else {
-            $instructions .= <<<'EOT'
-
-### Submission
-AI resolution is disabled. After 3 clarifying questions, request auto-submits for human review.
-EOT;
-        }
 
         return $instructions;
     }
