@@ -41,7 +41,7 @@
 
     $content['content'] = app(InjectSubmissionStateIntoTipTapContent::class)(
         $submission,
-        $content['content'] ?? [§],
+        $content['content'] ?? [],
         $blocks,
     );
 @endphp
