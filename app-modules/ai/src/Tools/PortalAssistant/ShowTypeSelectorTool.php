@@ -40,6 +40,7 @@ use AidingApp\Ai\Actions\PortalAssistant\BuildServiceRequestTypesTree;
 use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Prism\Prism\Tool;
 
@@ -84,8 +85,8 @@ class ShowTypeSelectorTool extends Tool
                     'name' => $type->name,
                     'description' => $type->description,
                     'priorities' => $type->priorities
-                        ->map(fn ($priority) => [
-                            'priority_id' => $priority->id,
+                        ->map(fn (ServiceRequestPriority $priority): array => [
+                            'priority_id' => $priority->getKey(),
                             'name' => $priority->name,
                         ])
                         ->values()

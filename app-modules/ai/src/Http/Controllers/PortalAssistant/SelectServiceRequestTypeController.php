@@ -73,6 +73,7 @@ class SelectServiceRequestTypeController
 
         $type = $priority->type;
 
+        // @phpstan-ignore booleanNot.alwaysFalse
         if (! $type || ! $type->form) {
             return response()->json([
                 'message' => 'Selected type does not have a form.',
@@ -106,7 +107,7 @@ class SelectServiceRequestTypeController
 
             $form = $type->form;
 
-            if ($form) {
+            if ($form) { // @phpstan-ignore if.alwaysTrue
                 $submission = $form->submissions()->make([
                     'submitted_at' => null,
                 ]);

@@ -333,11 +333,13 @@ EOT;
             // but cannot access future steps until prerequisites are met (no skipping ahead)
             $draftStage = ServiceRequestDraftStage::fromServiceRequest($draft);
 
-            match ($draftStage) {
-                ServiceRequestDraftStage::DataCollection => $this->addDataCollectionTools($tools, $draft),
-                ServiceRequestDraftStage::ClarifyingQuestions => $this->addClarifyingQuestionsTools($tools, $aiResolutionSettings),
-                ServiceRequestDraftStage::Resolution => $this->addResolutionTools($tools, $aiResolutionSettings, $draft),
-            };
+            if ($draftStage !== null) {
+                match ($draftStage) {
+                    ServiceRequestDraftStage::DataCollection => $this->addDataCollectionTools($tools, $draft),
+                    ServiceRequestDraftStage::ClarifyingQuestions => $this->addClarifyingQuestionsTools($tools, $aiResolutionSettings),
+                    ServiceRequestDraftStage::Resolution => $this->addResolutionTools($tools, $aiResolutionSettings, $draft),
+                };
+            }
 
             // Cancel always last
             $tools[] = new CancelServiceRequestTool($this->thread);
@@ -412,7 +414,7 @@ EOT;
             $filledFields = $submission->fields()
                 ->get()
                 ->keyBy('id')
-                ->map(fn ($field) => $field->pivot->response)
+                ->map(fn ($field) => $field->getRelationValue('pivot')->response)
                 ->all();
         }
 

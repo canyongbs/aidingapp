@@ -44,6 +44,8 @@ use AidingApp\Ai\Support\StreamingChunks\Text;
 use Closure;
 use Exception;
 use Generator;
+use Prism\Prism\Contracts\Message;
+use Prism\Prism\Tool;
 
 class TestAiService implements AiService
 {
@@ -67,9 +69,10 @@ class TestAiService implements AiService
     /**
      * @param array<AiFile> $files
      * @param array<string, mixed> $options
-     * @param array<\Prism\Prism\Tool> $tools
+     * @param array<Tool> $tools
+     * @param ?array<Message> $messages
      */
-    public function streamRaw(string $prompt, string $content, array $files = [], array $options = [], array $tools = []): Closure
+    public function streamRaw(string $prompt, string $content, array $files = [], array $options = [], array $tools = [], ?array $messages = null): Closure
     {
         throw new Exception('Plain text streaming is not supported by this service.');
     }

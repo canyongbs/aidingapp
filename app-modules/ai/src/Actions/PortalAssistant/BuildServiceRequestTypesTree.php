@@ -36,6 +36,7 @@
 
 namespace AidingApp\Ai\Actions\PortalAssistant;
 
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 
@@ -104,8 +105,8 @@ class BuildServiceRequestTypesTree
             'name' => $type->name,
             'description' => $type->description,
             'priorities' => $type->priorities
-                ->map(fn ($priority) => [
-                    'priority_id' => $priority->id,
+                ->map(fn (ServiceRequestPriority $priority): array => [
+                    'priority_id' => $priority->getKey(),
                     'name' => $priority->name,
                 ])
                 ->values()

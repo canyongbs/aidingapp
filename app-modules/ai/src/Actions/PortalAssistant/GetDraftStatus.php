@@ -91,14 +91,16 @@ class GetDraftStatus
         // Strip position from field arrays (used internally for optional field logic)
         if (isset($result['missing_required_fields'])) {
             $result['missing_required_fields'] = array_map(
-                fn ($field) => collect($field)->except('position')->all(),
+                /** @param array<string, mixed> $field */
+                fn (array $field) => collect($field)->except('position')->all(),
                 $result['missing_required_fields']
             );
         }
 
         if (isset($result['missing_optional_fields'])) {
             $result['missing_optional_fields'] = array_map(
-                fn ($field) => collect($field)->except('position')->all(),
+                /** @param array<string, mixed> $field */
+                fn (array $field) => collect($field)->except('position')->all(),
                 $result['missing_optional_fields']
             );
         }
@@ -162,7 +164,7 @@ class GetDraftStatus
             $filledFields = $submission->fields()
                 ->get()
                 ->keyBy('id')
-                ->map(fn ($field) => $field->pivot->response)
+                ->map(fn (ServiceRequestFormField $field) => $field->getRelationValue('pivot')->response)
                 ->all();
         }
 
@@ -417,7 +419,7 @@ class GetDraftStatus
         if (empty($missingRequired)) {
             // All required fields collected
             if (! empty($missingOptional)) {
-                $optionalLabels = array_map(fn ($f) => strtolower($f['label']), $missingOptional);
+                $optionalLabels = array_map(fn ($field) => strtolower($field['label']), $missingOptional);
 
                 return sprintf(
                     'All required info collected. If any of these optional fields seem relevant based on the conversation, ask about them: %s. Use update_form_field(field_id="<id>", value="<response>") to save. Otherwise, transition to clarifying questions.',
@@ -439,7 +441,7 @@ class GetDraftStatus
         $skippedOptional = $this->getSkippedOptionalFields($formFields, $missingOptional, $nextRequiredPosition);
 
         if (! empty($skippedOptional)) {
-            $skippedLabels = array_map(fn ($f) => $f['label'], $skippedOptional);
+            $skippedLabels = array_map(fn ($field) => $field['label'], $skippedOptional);
             $skippedOptionalNote = sprintf(
                 ' You skipped these optional fields: %s - ask about them if they seem relevant based on the conversation.',
                 implode(', ', $skippedLabels)
@@ -451,7 +453,7 @@ class GetDraftStatus
             $remainingOptionalNote = '';
 
             if (! empty($missingOptional)) {
-                $optionalLabels = array_map(fn ($f) => $f['label'], $missingOptional);
+                $optionalLabels = array_map(fn ($field) => $field['label'], $missingOptional);
                 $remainingOptionalNote = sprintf(
                     ' Before moving on, these optional fields are still available: %s - ask about them if they seem relevant based on the conversation.',
                     implode(', ', $optionalLabels)
@@ -530,21 +532,22 @@ class GetDraftStatus
         }
 
         // Build a map of field IDs to their types
-        $fieldTypes = $form->fields->keyBy('id')->map(fn ($field) => $field->type);
+        $fieldTypes = $form->fields->keyBy('id')->map(fn (ServiceRequestFormField $field) => $field->type);
 
+        /** @var array<int, array<string, mixed>> $filledFields */
         $filledFields = $submission->fields()
             ->get()
             ->keyBy('id')
-            ->map(function ($field) use ($fieldTypes) {
-                $rawValue = $field->pivot->response;
-                $displayValue = $this->getDisplayValueForField($field->type ?? $fieldTypes[$field->id] ?? null, $rawValue, $field->label);
+            ->map(function (ServiceRequestFormField $field) use ($fieldTypes) {
+                $rawValue = $field->getRelationValue('pivot')->response;
+                $displayValue = $this->getDisplayValueForField($field->type ?? $fieldTypes[$field->getKey()] ?? null, $rawValue, $field->label);
 
                 return [
                     'label' => $field->label,
                     'value' => $displayValue,
                 ];
             })
-            ->filter(fn ($field) => $field['value'] !== null && $field['value'] !== '')
+            ->filter(fn (array $field) => $field['value'] !== null && $field['value'] !== '')
             ->values()
             ->all();
 

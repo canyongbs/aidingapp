@@ -59,6 +59,7 @@ class UpdateFormFieldTool extends Tool
             ->using($this);
     }
 
+    /** @phpstan-ignore MeliorStan.parameterNameNotCamelCase (tool parameter names must match AI tool definition) */
     public function __invoke(string $field_id, string $value): string
     {
         $draft = $this->findDraft();
@@ -114,7 +115,7 @@ class UpdateFormFieldTool extends Tool
                     ->where('service_request_form_field_id', $field_id)
                     ->first();
 
-                if ($existingValue && $existingValue->pivot->response !== null && $existingValue->pivot->response !== '') {
+                if ($existingValue && $existingValue->getRelationValue('pivot')->response !== null && $existingValue->getRelationValue('pivot')->response !== '') {
                     return json_encode([
                         'success' => false,
                         'hint' => "The \"{$field->label}\" field was already saved via widget selection. Check missing_required_fields in the last response for the next field to collect.",
@@ -146,8 +147,8 @@ class UpdateFormFieldTool extends Tool
         } else {
             $fields = collect();
 
-            foreach ($form->fields as $f) {
-                $fields->put($f->getKey(), $f->type);
+            foreach ($form->fields as $formField) {
+                $fields->put($formField->getKey(), $formField->type);
             }
 
             app(ProcessServiceRequestSubmissionField::class)->execute(
