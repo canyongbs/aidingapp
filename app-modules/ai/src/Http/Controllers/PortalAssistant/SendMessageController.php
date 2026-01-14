@@ -103,7 +103,7 @@ class SendMessageController
             $thread,
             $data['content'],
             request: [
-                'headers' => Arr::Only(
+                'headers' => Arr::only(
                     request()->headers->all(),
                     ['host', 'sec-ch-ua', 'user-agent', 'sec-ch-ua-platform', 'origin', 'referer', 'accept-language'],
                 ),
