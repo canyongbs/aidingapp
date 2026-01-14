@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -45,15 +45,26 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::table('portal_assistant_messages', function (Blueprint $table) {
-                $table->text('internal_content')->nullable()->after('content');
+                $table->text('internal_content')->nullable();
+            });
+
+            Schema::table('service_requests', function (Blueprint $table) {
+                $table->boolean('is_draft')->default(false);
+                $table->foreignUuid('portal_assistant_thread_id')
+                    ->nullable()
+                    ->constrained('portal_assistant_threads')
+                    ->nullOnDelete();
             });
 
             Schema::table('portal_assistant_threads', function (Blueprint $table) {
                 $table->foreignUuid('current_service_request_draft_id')
                     ->nullable()
-                    ->after('author_id')
                     ->constrained('service_requests')
                     ->nullOnDelete();
+            });
+
+            Schema::table('service_request_updates', function (Blueprint $table) {
+                $table->string('update_type')->nullable();
             });
 
             PortalAssistantServiceRequestFeature::activate();
@@ -65,8 +76,17 @@ return new class () extends Migration {
         DB::transaction(function () {
             PortalAssistantServiceRequestFeature::deactivate();
 
+            Schema::table('service_request_updates', function (Blueprint $table) {
+                $table->dropColumn('update_type');
+            });
+
             Schema::table('portal_assistant_threads', function (Blueprint $table) {
                 $table->dropConstrainedForeignId('current_service_request_draft_id');
+            });
+
+            Schema::table('service_requests', function (Blueprint $table) {
+                $table->dropConstrainedForeignId('portal_assistant_thread_id');
+                $table->dropColumn('is_draft');
             });
 
             Schema::table('portal_assistant_messages', function (Blueprint $table) {
