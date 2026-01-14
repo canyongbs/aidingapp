@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
+use App\Features\PortalAssistantServiceRequestFeature;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
@@ -287,6 +288,10 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
     public function isDraft(): bool
     {
+        if (! PortalAssistantServiceRequestFeature::active()) {
+            return false;
+        }
+
         return $this->is_draft === true;
     }
 
@@ -433,9 +438,11 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
             }
         });
 
-        static::addGlobalScope('excludeDrafts', function (Builder $builder) {
-            $builder->where('is_draft', false);
-        });
+        if (PortalAssistantServiceRequestFeature::active()) {
+            static::addGlobalScope('excludeDrafts', function (Builder $builder) {
+                $builder->where('is_draft', false);
+            });
+        }
     }
 
     protected function serializeDate(DateTimeInterface $date): string
