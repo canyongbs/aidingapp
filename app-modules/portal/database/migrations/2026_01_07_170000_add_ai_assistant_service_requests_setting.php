@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,38 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Jobs;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\PortalAssistantServiceRequestFeature;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Foundation\Queue\Queueable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-
-class AutoSubmitStaleDraftServiceRequests implements ShouldQueue, ShouldBeUnique
-{
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-
-    public function handle(): void
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        if (! PortalAssistantServiceRequestFeature::active() || ! app(PortalSettings::class)->ai_assistant_service_requests) {
-            return;
-        }
-
-        $cutoffTime = now()->subHour();
-
-        ServiceRequest::query()
-            ->withoutGlobalScope('excludeDrafts')
-            ->where('is_draft', true)
-            ->where('updated_at', '<=', $cutoffTime)
-            ->pluck('id')
-            ->each(fn (string $id) => dispatch(new AutoSubmitStaleDraftServiceRequest($id)));
+        $this->migrator->add('portal.ai_assistant_service_requests', false);
     }
-}
+
+    public function down(): void
+    {
+        $this->migrator->delete('portal.ai_assistant_service_requests');
+    }
+};

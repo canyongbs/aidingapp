@@ -60,6 +60,7 @@ use AidingApp\Ai\Tools\PortalAssistant\UpdateTitleTool;
 use AidingApp\IntegrationOpenAi\Prism\ValueObjects\Messages\DeveloperMessage;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
+use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -131,7 +132,7 @@ class SendMessage implements ShouldQueue
             CRITICAL: You MUST format ALL responses using Markdown. This is non-negotiable. Always use proper Markdown formatting. NEVER mention that you are responding using Markdown.
             EOT;
 
-        if (PortalAssistantServiceRequestFeature::active()) {
+        if (PortalAssistantServiceRequestFeature::active() && app(PortalSettings::class)->ai_assistant_service_requests) {
             $context .= $this->buildServiceRequestInstructions();
         }
 
@@ -190,7 +191,6 @@ class SendMessage implements ShouldQueue
                             ]);
                         }
 
-                        // Don't break yet - continue processing to ensure all chunks are handled
                         continue;
                     }
 
@@ -306,7 +306,7 @@ EOT;
      */
     protected function buildTools(): array
     {
-        if (! PortalAssistantServiceRequestFeature::active()) {
+        if (! PortalAssistantServiceRequestFeature::active() || ! app(PortalSettings::class)->ai_assistant_service_requests) {
             return [];
         }
 
@@ -335,7 +335,7 @@ EOT;
 
             match ($draftStage) {
                 ServiceRequestDraftStage::DataCollection => $this->addDataCollectionTools($tools, $draft),
-                ServiceRequestDraftStage::ClarifyingQuestions => $this->addClarifyingTools($tools, $aiResolutionSettings),
+                ServiceRequestDraftStage::ClarifyingQuestions => $this->addClarifyingQuestionsTools($tools, $aiResolutionSettings),
                 ServiceRequestDraftStage::Resolution => $this->addResolutionTools($tools, $aiResolutionSettings, $draft),
             };
 
@@ -351,11 +351,7 @@ EOT;
     }
 
     /**
-     * Add tools for data collection stage - progressively expose based on what's filled
-     * The flow is: fields (if any) → description → title
-     * Priority is selected with type, so no longer collected separately
-     *
-     * When all required fields are filled, GetDraftStatusTool will instruct AI to advance to clarifying_questions
+     * @param array<int, Tool> $tools
      */
     protected function addDataCollectionTools(array &$tools, ServiceRequest $draft): void
     {
@@ -363,30 +359,21 @@ EOT;
 
         $hasCustomFields = $this->typeHasCustomFields($draft);
 
-        // Step 1: Form field tools (if type has custom fields)
         if ($hasCustomFields) {
             $tools[] = new UpdateFormFieldTool($this->thread);
             $tools[] = new ShowFieldInputTool($this->thread);
         }
 
-        // Step 2: After all required form fields filled (or immediately if no fields), description and file attachments become available
         if (! $hasCustomFields || $this->allRequiredFormFieldsFilled($draft)) {
             $tools[] = new UpdateDescriptionTool($this->thread);
             $tools[] = new EnableFileAttachmentsTool($this->thread);
         }
 
-        // Step 3: After description filled, title becomes available
         if ($draft->close_details) {
             $tools[] = new UpdateTitleTool($this->thread);
         }
-
-        // Auto-advance: When all required fields filled, AI calls get_draft_status which detects completion
-        // and instructs AI to transition to clarifying_questions stage
     }
 
-    /**
-     * Check if the service request type has custom form fields
-     */
     protected function typeHasCustomFields(ServiceRequest $draft): bool
     {
         $type = $draft->priority?->type;
@@ -404,9 +391,6 @@ EOT;
         return ! empty($form->fields);
     }
 
-    /**
-     * Check if all required custom form fields have been filled
-     */
     protected function allRequiredFormFieldsFilled(ServiceRequest $draft): bool
     {
         $type = $draft->priority?->type;
@@ -418,7 +402,7 @@ EOT;
         $form = $type->form;
 
         if (! $form) {
-            return true; // No form means no required fields to check
+            return true;
         }
 
         $submission = $draft->serviceRequestFormSubmission;
@@ -447,9 +431,9 @@ EOT;
     }
 
     /**
-     * Add tools for clarifying questions phase
+     * @param array<int, Tool> $tools
      */
-    protected function addClarifyingTools(array &$tools, AiResolutionSettings $aiResolutionSettings): void
+    protected function addClarifyingQuestionsTools(array &$tools, AiResolutionSettings $aiResolutionSettings): void
     {
         $tools[] = new SaveClarifyingQuestionAnswerTool($this->thread);
 
@@ -461,7 +445,7 @@ EOT;
     }
 
     /**
-     * Add tools for resolution phase
+     * @param array<int, Tool> $tools
      */
     protected function addResolutionTools(array &$tools, AiResolutionSettings $aiResolutionSettings, ServiceRequest $draft): void
     {

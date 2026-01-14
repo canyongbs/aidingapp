@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use AidingApp\Portal\Settings\PortalSettings;
 use App\Features\PortalAssistantServiceRequestFeature;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
@@ -69,7 +70,7 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        if (! PortalAssistantServiceRequestFeature::active()) {
+        if (! PortalAssistantServiceRequestFeature::active() || ! app(PortalSettings::class)->ai_assistant_service_requests) {
             return;
         }
 

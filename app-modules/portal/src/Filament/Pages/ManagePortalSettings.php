@@ -42,6 +42,7 @@ use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
+use App\Features\PortalAssistantServiceRequestFeature;
 use App\Models\User;
 use App\Rules\ValidUrl;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
@@ -123,6 +124,12 @@ class ManagePortalSettings extends SettingsPage
                             ->columnSpanFull(),
                         Toggle::make('ai_support_assistant')
                             ->label('AI Support Assistant')
+                            ->columnSpanFull(),
+                        Toggle::make('ai_assistant_service_requests')
+                            ->label('AI Assistant Service Requests')
+                            ->helperText('Allow the AI Support Assistant to help users submit service requests.')
+                            ->visible(fn (Get $get) => $get('ai_support_assistant'))
+                            ->hidden(! PortalAssistantServiceRequestFeature::active())
                             ->columnSpanFull(),
                         Grid::make()->schema([
                             TextInput::make('page_title')
