@@ -46,7 +46,7 @@ enum ServiceRequestDraftStage: string
 
     public static function fromServiceRequest(ServiceRequest $serviceRequest): ?self
     {
-        if (! $serviceRequest->is_draft) {
+        if (! $serviceRequest->isDraft()) {
             return null;
         }
 

@@ -148,7 +148,7 @@ class ServiceRequestObserver
 
     public function saved(ServiceRequest $serviceRequest): void
     {
-        if (! $serviceRequest->is_draft) {
+        if (! $serviceRequest->isDraft()) {
             CreateServiceRequestHistory::dispatch($serviceRequest, $serviceRequest->getChanges(), $serviceRequest->getOriginal());
         }
 

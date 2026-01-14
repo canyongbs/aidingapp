@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use App\Features\PortalAssistantServiceRequestFeature;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
@@ -68,6 +69,10 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
+        if (! PortalAssistantServiceRequestFeature::active()) {
+            return;
+        }
+
         $cutoffTime = now()->subHour();
 
         $draft = ServiceRequest::query()

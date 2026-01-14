@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\PortalAssistantServiceRequestFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -53,6 +54,10 @@ class AutoSubmitStaleDraftServiceRequests implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
+        if (! PortalAssistantServiceRequestFeature::active()) {
+            return;
+        }
+
         $cutoffTime = now()->subHour();
 
         ServiceRequest::query()
