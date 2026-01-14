@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
-use App\Features\PortalAssistantServiceRequestFeature;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
@@ -49,6 +48,7 @@ use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsEx
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use App\Features\PortalAssistantServiceRequestFeature;
 use App\Models\Authenticatable;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
