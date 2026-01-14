@@ -43,7 +43,7 @@ export function useMarkdown() {
     const renderMarkdown = (content) => {
         if (!content) return '';
         try {
-            const cleanedContent = content.replace(/【[^】]*】/g, '');
+            const cleanedContent = content.replace(/【[^】]*】/g, ''); // Remove citations
             const html = marked.parse(cleanedContent, { async: false });
             return DOMPurify.sanitize(html);
         } catch (error) {

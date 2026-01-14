@@ -95,7 +95,7 @@ export function useFileUpload() {
     };
 
     const uploadFile = async (fileEntry) => {
-        const fileIndex = files.value.findIndex((f) => f.id === fileEntry.id);
+        const fileIndex = files.value.findIndex((file) => file.id === fileEntry.id);
         if (fileIndex === -1) return;
 
         try {
@@ -133,7 +133,7 @@ export function useFileUpload() {
     };
 
     const removeFile = (fileId) => {
-        const index = files.value.findIndex((f) => f.id === fileId);
+        const index = files.value.findIndex((file) => file.id === fileId);
         if (index !== -1) {
             files.value.splice(index, 1);
         }
@@ -141,10 +141,10 @@ export function useFileUpload() {
 
     const getCompletedFileUrls = () => {
         return files.value
-            .filter((f) => f.status === 'complete' && f.path)
-            .map((f) => ({
-                path: f.path,
-                original_name: f.originalName,
+            .filter((file) => file.status === 'complete' && file.path)
+            .map((file) => ({
+                path: file.path,
+                original_name: file.originalName,
             }));
     };
 
@@ -156,7 +156,7 @@ export function useFileUpload() {
 
     const allUploadsComplete = computed(() => {
         if (files.value.length === 0) return true;
-        return files.value.every((f) => f.status === 'complete' || f.status === 'error');
+        return files.value.every((file) => file.status === 'complete' || file.status === 'error');
     });
 
     return {
