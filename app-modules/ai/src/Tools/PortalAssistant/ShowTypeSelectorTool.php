@@ -61,8 +61,6 @@ class ShowTypeSelectorTool extends Tool
     /** @phpstan-ignore MeliorStan.parameterNameNotCamelCase (tool parameter names must match AI tool definition) */
     public function __invoke(?string $suggested_type_id = null): string
     {
-        $draft = $this->findDraft();
-
         $typesTree = app(BuildServiceRequestTypesTree::class)->execute();
 
         if (empty($typesTree)) {
