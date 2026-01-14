@@ -124,13 +124,12 @@ class ManagePortalSettings extends SettingsPage
                             ->columnSpanFull(),
                         Toggle::make('ai_support_assistant')
                             ->label('AI Support Assistant')
-                            ->columnSpanFull(),
+                            ->live(),
                         Toggle::make('ai_assistant_service_requests')
                             ->label('AI Assistant Service Requests')
                             ->helperText('Allow the AI Support Assistant to help users submit service requests.')
                             ->visible(fn (Get $get) => $get('ai_support_assistant'))
-                            ->hidden(! PortalAssistantServiceRequestFeature::active())
-                            ->columnSpanFull(),
+                            ->hidden(! PortalAssistantServiceRequestFeature::active()),
                         Grid::make()->schema([
                             TextInput::make('page_title')
                                 ->label('Page Title')
@@ -140,7 +139,7 @@ class ManagePortalSettings extends SettingsPage
                                 ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
                                 ->disabled(! Gate::check(Feature::KnowledgeManagement->getGateName()))
                                 ->hintIcon(fn (TextInput $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null),
-                        ])->columns(2),
+                        ])->columns(2)->columnSpanFull(),
                         SpatieMediaLibraryFileUpload::make('favicon')
                             ->collection('portal_favicon')
                             ->visibility('private')
