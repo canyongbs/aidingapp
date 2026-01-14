@@ -63,18 +63,20 @@ Tools unlock sequentially as prerequisites are met, preventing users from being 
 
 **Tool Availability:**
 
-- `get_service_request_types_for_suggestion`: Always available when no active draft
-- `show_type_selector`: Always available when no active draft
-- `get_draft_status`: Always available (returns instruction to select type if no draft)
+- `get_service_request_types_for_suggestion`: Available when no active draft
+- `show_type_selector`: Available when no active draft
 
-Once a type and priority are selected, the draft is created and these tools become unavailable. The user must cancel the current draft to access type selection again.
+Note: `get_draft_status` is NOT available when no draft exists - it only becomes available after a draft is created.
+
+Once a type and priority are selected, the draft is created and type selection tools become unavailable. The user must cancel the current draft to access type selection again.
 
 ### Active Draft (Any Stage)
 
 **Tool Availability:**
 
-- `cancel_service_request`: Available whenever an active draft exists
-- `get_draft_status`: Always available
+- `get_draft_status`: Always available when draft exists (listed first)
+- `cancel_service_request`: Always available when draft exists (listed last)
+- Stage-specific tools listed in between (see below)
 
 The `cancel_service_request` tool allows users to abandon the current service request and start over with type selection. It sets `current_service_request_draft_id` to null on the thread, making type selection tools available again. The draft itself is retained, so if the user selects the same type again, their previous progress is restored.
 
@@ -82,13 +84,15 @@ The `cancel_service_request` tool allows users to abandon the current service re
 
 **Collection Order:** Custom form fields (if present) → Description → Title
 
-**Tool Availability:**
+**Tool Availability (progressive unlocking):**
 
 - `update_form_field`, `show_field_input`: If service request type defines custom fields
-- `update_description`, `enable_file_attachments`: After required form fields filled (or immediately if no custom fields)
-- `update_title`: After description provided
+- `update_description`, `enable_file_attachments`: Unlocked after ALL required form fields filled (or immediately if no custom fields)
+- `update_title`: Unlocked only after description is provided
 
-**Phase Transition:** When all required fields are filled, `get_draft_status` detects the stage is now `clarifying_questions` (derived from state) and instructs AI to begin asking questions.
+Note: Tools remain available once unlocked - users can edit previous responses. But they cannot skip ahead to tools that aren't yet unlocked.
+
+**Phase Transition:** When all required fields are filled (form fields + description + title), the stage automatically becomes `clarifying_questions` (derived from state) and stage-specific tools change.
 
 ### Optional Field Handling
 
@@ -126,7 +130,8 @@ Fields are collected in step order (by `ServiceRequestFormStep.sort`). The optio
 
 **Tool Availability:**
 
-- `save_clarifying_question_answer`: Always available, accepts exactly 3 question/answer pairs
+- `save_clarifying_question_answer`: Always available during this stage
+- `check_ai_resolution_validity`: Also available if AI resolution is enabled (allows early transition if AI formulates a resolution)
 
 **Requirements:**
 
@@ -146,8 +151,8 @@ Fields are collected in step order (by `ServiceRequestFormStep.sort`). The optio
 
 **Tool Availability (if AI resolution enabled):**
 
-- `check_ai_resolution_validity`: Available immediately after 3 questions saved
-- `record_resolution_response`: Available only after confidence meets threshold and resolution presented
+- `check_ai_resolution_validity`: Available if resolution has NOT yet been proposed
+- `record_resolution_response`: Available only after resolution has been proposed (after `check_ai_resolution_validity` creates the `ai_resolution_proposed` update)
 
 **Tool Availability (if AI resolution disabled):**
 
@@ -384,9 +389,10 @@ The AI receives general guidance in the system context. Detailed tool-specific i
 
 **System Context Contains:**
 
-- General workflow overview (type selection → data collection → clarifying questions → resolution)
-- High-level behavioral guidelines (ask one question at a time, be conversational)
-- Information about the current draft state (injected dynamically)
+- General assistant role and knowledge base usage guidelines
+- Service request workflow overview (type selection → data collection → clarifying questions → resolution)
+- High-level behavioral rules (ask one question at a time, be conversational, follow tool responses)
+- Note: Draft state is NOT in the system context - it comes via Developer messages and tool responses
 
 **Tool Descriptions Contain:**
 
@@ -395,18 +401,18 @@ The AI receives general guidance in the system context. Detailed tool-specific i
 - What the tool returns and what to do next
 - Stage-specific constraints and transitions
 
-**Minimizing Tool Call Chains:**
+**Draft State Delivery:**
 
-Action tools (`update_form_field`, `update_description`, `update_title`, `save_clarifying_question_answer`, etc.) return the full draft status in their response. The AI does not need to call `get_draft_status` after each action - the next instruction is included in the tool response.
+Draft state is provided to the AI via two mechanisms:
+
+1. **Tool Responses:** Action tools (`update_form_field`, `update_description`, `update_title`, `save_clarifying_question_answer`, etc.) return the full draft status in their response. The AI does not need to call `get_draft_status` after each action - the `next_instruction` is included.
+
+2. **Developer Messages:** When controllers handle widget interactions (type selection, complex field inputs), the Developer message includes the full draft status.
 
 `get_draft_status` is primarily needed:
 
 - At conversation start to understand current state (if resuming a draft)
 - As a fallback if the AI loses track of state
-
-**Developer Messages Include Draft Status:**
-
-When controllers handle widget interactions (type selection, complex field inputs), the Developer message includes the full draft status. The AI does not need to call `get_draft_status` after these interactions.
 
 ---
 
@@ -482,7 +488,9 @@ The frontend sends the selection to `SelectServiceRequestTypeController`, which 
 }
 ```
 
-**Available Tools:** `get_draft_status`, `cancel_service_request`, `update_form_field`, `show_field_input`, `update_description`, `enable_file_attachments`, `update_title`, `save_clarifying_question_answer`
+**Available Tools:** `get_draft_status`, `update_form_field`, `show_field_input`, `cancel_service_request`
+
+Note: `update_description`, `enable_file_attachments`, and `update_title` are not yet available because required form fields haven't been filled. `save_clarifying_question_answer` is not available during data_collection stage.
 
 **Assistant Response:** "Great! What's your Student ID?"
 
