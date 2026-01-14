@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -36,25 +36,16 @@
 
 namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use Illuminate\Support\Facades\DB;
 
-class CreateServiceRequestAction
+class AssignServiceRequestToTeam
 {
-    public function __construct(
-        protected AssignServiceRequestToTeam $assignServiceRequestToTeam,
-    ) {}
-
-    public function execute(ServiceRequestDataObject $serviceRequestDataObject): ServiceRequest
+    public function execute(ServiceRequest $serviceRequest): void
     {
-        return DB::transaction(function () use ($serviceRequestDataObject) {
-            $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
-            $serviceRequest->save();
+        $serviceRequest->load('priority.type');
 
-            $this->assignServiceRequestToTeam->execute($serviceRequest);
+        $assigner = $serviceRequest->priority?->type?->assignment_type?->getAssignerClass();
 
-            return $serviceRequest;
-        });
+        $assigner?->execute($serviceRequest);
     }
 }

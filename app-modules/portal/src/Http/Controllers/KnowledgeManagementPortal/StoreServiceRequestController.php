@@ -41,6 +41,7 @@ use AidingApp\Form\Actions\GenerateSubmissibleValidation;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
+use AidingApp\ServiceManagement\Actions\AssignServiceRequestToTeam;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -400,11 +401,7 @@ class StoreServiceRequestController extends Controller
 
     protected function assignServiceRequest(ServiceRequest $serviceRequest): void
     {
-        $assignmentClass = $serviceRequest->priority->type->assignment_type->getAssignerClass();
-
-        if ($assignmentClass) {
-            $assignmentClass->execute($serviceRequest);
-        }
+        app(AssignServiceRequestToTeam::class)->execute($serviceRequest);
     }
 
     /**

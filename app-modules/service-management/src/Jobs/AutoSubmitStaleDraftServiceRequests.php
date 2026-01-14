@@ -55,7 +55,7 @@ class AutoSubmitStaleDraftServiceRequests implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        if (! PortalAssistantServiceRequestFeature::active() || ! app(PortalSettings::class)->ai_assistant_service_requests) {
+        if (! PortalAssistantServiceRequestFeature::active()) {
             return;
         }
 
@@ -65,7 +65,9 @@ class AutoSubmitStaleDraftServiceRequests implements ShouldQueue, ShouldBeUnique
             ->withoutGlobalScope('excludeDrafts')
             ->where('is_draft', true)
             ->where('updated_at', '<=', $cutoffTime)
-            ->pluck('id')
-            ->each(fn (string $id) => dispatch(new AutoSubmitStaleDraftServiceRequest($id)));
+            ->select('id')
+            ->eachById(function (ServiceRequest $draft) {
+                dispatch(new AutoSubmitStaleDraftServiceRequest($draft->getKey()));
+            }, 100);
     }
 }

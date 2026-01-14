@@ -36,20 +36,20 @@
 
 namespace AidingApp\ServiceManagement\Jobs;
 
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Actions\SubmitServiceRequestDraft;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\PortalAssistantServiceRequestFeature;
 use Carbon\Carbon;
-use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
@@ -58,6 +58,8 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+
+    protected Carbon $cutoffTime;
 
     public function __construct(
         protected string $serviceRequestId,
@@ -70,146 +72,153 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        if (! PortalAssistantServiceRequestFeature::active() || ! app(PortalSettings::class)->ai_assistant_service_requests) {
+        if ($this->featureIsDisabled()) {
             return;
         }
 
-        $cutoffTime = now()->subHour();
+        $this->cutoffTime = now()->subHour();
 
-        $draft = ServiceRequest::query()
-            ->withoutGlobalScope('excludeDrafts')
-            ->where('is_draft', true)
-            ->where('id', $this->serviceRequestId)
-            ->with(['serviceRequestFormSubmission', 'priority.type.form.fields'])
-            ->first();
+        $draft = $this->findDraft();
 
         if (! $draft) {
             return;
         }
 
-        if (! $this->isStale($draft, $cutoffTime)) {
+        if ($this->draftHasRecentActivity($draft)) {
             return;
         }
 
-        if (! $this->hasAllRequiredFields($draft)) {
+        if ($this->draftIsMissingRequiredFields($draft)) {
             return;
         }
 
         $this->submitDraft($draft);
     }
 
-    protected function isStale(ServiceRequest $draft, Carbon $cutoffTime): bool
+    protected function featureIsDisabled(): bool
     {
-        // Check service request itself
-        if ($draft->updated_at > $cutoffTime) {
-            return false;
-        }
-
-        // Check form submission
-        $submission = $draft->serviceRequestFormSubmission;
-
-        if ($submission && $submission->updated_at > $cutoffTime) {
-            return false;
-        }
-
-        // Check pivot table (form field submissions)
-        if ($submission) {
-            $latestFieldUpdate = DB::table('service_request_form_field_submission')
-                ->where('service_request_form_submission_id', $submission->id)
-                ->max('updated_at');
-
-            if ($latestFieldUpdate && Carbon::parse($latestFieldUpdate) > $cutoffTime) {
-                return false;
-            }
-        }
-
-        // Check service request updates
-        $latestUpdateTime = $draft->serviceRequestUpdates()->max('updated_at');
-
-        if ($latestUpdateTime && Carbon::parse($latestUpdateTime) > $cutoffTime) {
-            return false;
-        }
-
-        return true;
+        return ! PortalAssistantServiceRequestFeature::active();
     }
 
-    protected function hasAllRequiredFields(ServiceRequest $draft): bool
+    protected function findDraft(): ?ServiceRequest
     {
-        // Check title
-        if (empty($draft->title)) {
+        return ServiceRequest::query()
+            ->withoutGlobalScope('excludeDrafts')
+            ->where('is_draft', true)
+            ->where('id', $this->serviceRequestId)
+            ->with(['serviceRequestFormSubmission', 'priority.type.form.fields'])
+            ->first();
+    }
+
+    protected function draftHasRecentActivity(ServiceRequest $draft): bool
+    {
+        return $this->draftWasRecentlyUpdated($draft)
+            || $this->formSubmissionWasRecentlyUpdated($draft->serviceRequestFormSubmission)
+            || $this->formFieldsWereRecentlyUpdated($draft->serviceRequestFormSubmission)
+            || $this->serviceRequestUpdatesWereRecentlyAdded($draft);
+    }
+
+    protected function draftWasRecentlyUpdated(ServiceRequest $draft): bool
+    {
+        return $draft->updated_at > $this->cutoffTime;
+    }
+
+    protected function formSubmissionWasRecentlyUpdated(?ServiceRequestFormSubmission $submission): bool
+    {
+        return $submission && $submission->updated_at > $this->cutoffTime;
+    }
+
+    protected function formFieldsWereRecentlyUpdated(?ServiceRequestFormSubmission $submission): bool
+    {
+        if (! $submission) {
             return false;
         }
 
-        // Check description
-        if (empty($draft->close_details)) {
-            return false;
-        }
+        $latestFieldUpdate = DB::table('service_request_form_field_submission')
+            ->where('service_request_form_submission_id', $submission->id)
+            ->max('updated_at');
 
-        // Check custom form fields
+        return $latestFieldUpdate && Carbon::parse($latestFieldUpdate) > $this->cutoffTime;
+    }
+
+    protected function serviceRequestUpdatesWereRecentlyAdded(ServiceRequest $draft): bool
+    {
+        $latestUpdateTime = $draft->serviceRequestUpdates()->max('updated_at');
+
+        return $latestUpdateTime && Carbon::parse($latestUpdateTime) > $this->cutoffTime;
+    }
+
+    protected function draftIsMissingRequiredFields(ServiceRequest $draft): bool
+    {
+        return $this->isMissingTitle($draft)
+            || $this->isMissingDescription($draft)
+            || $this->isMissingRequiredFormFields($draft);
+    }
+
+    protected function isMissingTitle(ServiceRequest $draft): bool
+    {
+        return empty($draft->title);
+    }
+
+    protected function isMissingDescription(ServiceRequest $draft): bool
+    {
+        return empty($draft->close_details);
+    }
+
+    protected function isMissingRequiredFormFields(ServiceRequest $draft): bool
+    {
         $type = $draft->priority?->type;
 
-        if (! $type) {
-            return true;
+        if (! $type?->form) {
+            return false;
         }
 
-        $form = $type->form;
-
-        if (! $form) {
-            return true;
-        }
-
-        $requiredFields = $form->fields->where('is_required', true);
+        $requiredFields = $this->getRequiredFields($type);
 
         if ($requiredFields->isEmpty()) {
-            return true;
+            return false;
         }
 
+        return ! $this->allRequiredFieldsAreFilled($draft, $requiredFields);
+    }
+
+    /**
+     * @return Collection<int, ServiceRequestFormField>
+     */
+    protected function getRequiredFields(ServiceRequestType $type): Collection
+    {
+        return $type->form->fields->where('is_required', true);
+    }
+
+    /**
+     * @param Collection<int, ServiceRequestFormField> $requiredFields
+     */
+    protected function allRequiredFieldsAreFilled(ServiceRequest $draft, Collection $requiredFields): bool
+    {
         $submission = $draft->serviceRequestFormSubmission;
 
         if (! $submission) {
-            return $requiredFields->isEmpty();
+            return false;
         }
 
-        $filledFieldIds = $submission->fields()
+        $filledFieldIds = $this->getFilledFieldIds($submission);
+
+        return $requiredFields->every(
+            fn ($field) => in_array($field->getKey(), $filledFieldIds)
+        );
+    }
+
+    protected function getFilledFieldIds(ServiceRequestFormSubmission $submission): array
+    {
+        return $submission->fields()
             ->wherePivotNotNull('response')
             ->wherePivot('response', '!=', '')
             ->pluck('service_request_form_fields.id')
             ->toArray();
-
-        foreach ($requiredFields as $field) {
-            if (! in_array($field->getKey(), $filledFieldIds)) {
-                return false;
-            }
-        }
-
-        return true;
     }
 
     protected function submitDraft(ServiceRequest $draft): void
     {
-        $status = ServiceRequestStatus::query()
-            ->where('classification', SystemServiceRequestClassification::Open)
-            ->where('name', 'New')
-            ->where('is_system_protected', true)
-            ->first();
-
-        if ($status) {
-            $draft->status()->associate($status);
-            $draft->status_updated_at = CarbonImmutable::now();
-        }
-
-        if (! $draft->service_request_number) {
-            $draft->service_request_number = app(ServiceRequestNumberGenerator::class)->generate();
-        }
-
-        $draft->is_draft = false;
-        $draft->save();
-
-        $draft->load('priority.type');
-        $assignmentClass = $draft->priority?->type?->assignment_type?->getAssignerClass();
-
-        if ($assignmentClass) {
-            $assignmentClass->execute($draft);
-        }
+        app(SubmitServiceRequestDraft::class)->execute($draft);
     }
 }
