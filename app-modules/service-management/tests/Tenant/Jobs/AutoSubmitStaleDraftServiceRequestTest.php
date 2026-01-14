@@ -155,6 +155,7 @@ it('does nothing when form fields were recently updated', function () {
         'label' => 'Test Field',
         'type' => 'text_input',
         'is_required' => false,
+        'config' => [],
     ]);
 
     travelTo(now()->subHours(2));
@@ -209,6 +210,8 @@ it('does nothing when service request updates were recently added', function () 
     $draft->serviceRequestUpdates()->create([
         'update' => 'Test update',
         'internal' => false,
+        'created_by_id' => $draft->respondent_id,
+        'created_by_type' => $draft->respondent_type,
     ]);
 
     (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
@@ -298,6 +301,7 @@ it('does nothing when required form fields are missing and no submission exists'
         'label' => 'Required Field',
         'type' => 'text_input',
         'is_required' => true,
+        'config' => [],
     ]);
 
     travelTo(now()->subHours(2));
@@ -332,6 +336,7 @@ it('does nothing when required form fields are not filled', function () {
         'label' => 'Required Field',
         'type' => 'text_input',
         'is_required' => true,
+        'config' => [],
     ]);
 
     travelTo(now()->subHours(2));
@@ -373,6 +378,7 @@ it('does nothing when required form field has empty response', function () {
         'label' => 'Required Field',
         'type' => 'text_input',
         'is_required' => true,
+        'config' => [],
     ]);
 
     travelTo(now()->subHours(2));
@@ -435,6 +441,7 @@ it('submits draft when form has only optional fields', function () {
         'label' => 'Optional Field',
         'type' => 'text_input',
         'is_required' => false,
+        'config' => [],
     ]);
 
     travelTo(now()->subHours(2));
@@ -469,6 +476,7 @@ it('submits draft when all required form fields are filled', function () {
         'label' => 'Required Field',
         'type' => 'text_input',
         'is_required' => true,
+        'config' => [],
     ]);
 
     ServiceRequestFormField::create([
@@ -476,6 +484,7 @@ it('submits draft when all required form fields are filled', function () {
         'label' => 'Optional Field',
         'type' => 'text_input',
         'is_required' => false,
+        'config' => [],
     ]);
 
     travelTo(now()->subHours(2));
