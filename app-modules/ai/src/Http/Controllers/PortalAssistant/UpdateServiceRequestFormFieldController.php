@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class UpdateServiceRequestFormFieldController
 {
@@ -55,12 +54,6 @@ class UpdateServiceRequestFormFieldController
             'value' => ['required'],
             'thread_id' => ['required', 'uuid'],
             'message' => ['required', 'string', 'max:500'],
-        ]);
-
-        Log::info('[PortalAssistant] Widget form field submission', [
-            'field_id' => $data['field_id'],
-            'message' => $data['message'],
-            'thread_id' => $data['thread_id'],
         ]);
 
         $author = auth('contact')->user();
@@ -80,11 +73,6 @@ class UpdateServiceRequestFormFieldController
             ->first();
 
         if (! $draft || ! $draft->serviceRequestFormSubmission) {
-            Log::warning('[PortalAssistant] Widget form field submission failed - no draft', [
-                'thread_id' => $data['thread_id'],
-                'field_id' => $data['field_id'],
-            ]);
-
             return response()->json([
                 'message' => 'No active draft found.',
             ], 400);
@@ -93,12 +81,6 @@ class UpdateServiceRequestFormFieldController
         $type = $draft->priority?->type;
 
         if (! $type) {
-            Log::warning('[PortalAssistant] Widget form field submission failed - no type', [
-                'thread_id' => $data['thread_id'],
-                'field_id' => $data['field_id'],
-                'draft_id' => $draft->getKey(),
-            ]);
-
             return response()->json([
                 'message' => 'Draft has no type.',
             ], 400);
@@ -107,12 +89,6 @@ class UpdateServiceRequestFormFieldController
         $form = $type->form;
 
         if (! $form) {
-            Log::warning('[PortalAssistant] Widget form field submission failed - no form', [
-                'thread_id' => $data['thread_id'],
-                'field_id' => $data['field_id'],
-                'type_id' => $type->getKey(),
-            ]);
-
             return response()->json([
                 'message' => 'No form found for this service request type.',
             ], 400);
@@ -122,12 +98,6 @@ class UpdateServiceRequestFormFieldController
         $fieldConfig = $form->fields->firstWhere('id', $field->getKey());
 
         if (! $fieldConfig) {
-            Log::warning('[PortalAssistant] Widget form field submission failed - field not in form', [
-                'thread_id' => $data['thread_id'],
-                'field_id' => $data['field_id'],
-                'type_id' => $type->getKey(),
-            ]);
-
             return response()->json([
                 'message' => 'Field does not belong to this form.',
             ], 400);
@@ -169,12 +139,6 @@ class UpdateServiceRequestFormFieldController
                 ...$draftStatus,
             ]),
         ));
-
-        Log::info('[PortalAssistant] Widget form field submission successful', [
-            'thread_id' => $data['thread_id'],
-            'field_id' => $data['field_id'],
-            'field_label' => $field->label,
-        ]);
 
         return response()->json([
             'message' => 'Message dispatched for processing via websockets.',

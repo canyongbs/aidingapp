@@ -39,13 +39,11 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 use AidingApp\Ai\Actions\PortalAssistant\GetDraftStatus;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
-use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
 use Prism\Prism\Tool;
 
 class GetDraftStatusTool extends Tool
 {
     use FindsDraftServiceRequest;
-    use LogsToolExecution;
 
     public function __construct(
         protected PortalAssistantThread $thread,
@@ -61,20 +59,12 @@ class GetDraftStatusTool extends Tool
         $draft = $this->findDraft();
 
         if (! $draft) {
-            $result = json_encode([
+            return json_encode([
                 'has_draft' => false,
                 'next_instruction' => 'No active draft. Call get_service_request_types_for_suggestion to begin.',
             ]);
-            $this->logToolResult('get_draft_status', $result);
-
-            return $result;
         }
 
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        $jsonResult = json_encode($result);
-        $this->logToolResult('get_draft_status', $jsonResult);
-
-        return $jsonResult;
+        return json_encode(app(GetDraftStatus::class)->execute($draft));
     }
 }

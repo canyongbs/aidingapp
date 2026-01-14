@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class SelectServiceRequestTypeController
 {
@@ -54,12 +53,6 @@ class SelectServiceRequestTypeController
             'priority_id' => ['required', 'uuid'],
             'thread_id' => ['nullable', 'uuid'],
             'message' => ['required', 'string', 'max:500'],
-        ]);
-
-        Log::info('[PortalAssistant] Widget type and priority selection', [
-            'priority_id' => $data['priority_id'],
-            'message' => $data['message'],
-            'thread_id' => $data['thread_id'] ?? null,
         ]);
 
         $author = auth('contact')->user();
@@ -81,12 +74,6 @@ class SelectServiceRequestTypeController
         $type = $priority->type;
 
         if (! $type || ! $type->form) {
-            Log::warning('[PortalAssistant] Widget type selection failed - type has no form', [
-                'thread_id' => $data['thread_id'],
-                'priority_id' => $data['priority_id'],
-                'type_id' => $type?->getKey(),
-            ]);
-
             return response()->json([
                 'message' => 'Selected type does not have a form.',
             ], 400);
@@ -152,15 +139,6 @@ class SelectServiceRequestTypeController
                 ...($draftStatus ?? []),
             ]),
         ));
-
-        Log::info('[PortalAssistant] Widget type and priority selection successful', [
-            'thread_id' => $data['thread_id'],
-            'type_id' => $type->getKey(),
-            'type_name' => $type->name,
-            'priority_id' => $data['priority_id'],
-            'priority_name' => $priority->name,
-            'draft_id' => $thread->current_service_request_draft_id,
-        ]);
 
         return response()->json([
             'message' => 'Message dispatched for processing via websockets.',

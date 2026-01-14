@@ -37,12 +37,10 @@
 namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
-use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
 use Prism\Prism\Tool;
 
 class CancelServiceRequestTool extends Tool
 {
-    use LogsToolExecution;
 
     public function __construct(
         protected PortalAssistantThread $thread,
@@ -56,26 +54,19 @@ class CancelServiceRequestTool extends Tool
     public function __invoke(): string
     {
         if (! $this->thread->current_service_request_draft_id) {
-            $result = json_encode([
+            return json_encode([
                 'success' => false,
                 'error' => 'No active service request draft to cancel.',
             ]);
-            $this->logToolResult('cancel_service_request', $result);
-
-            return $result;
         }
 
         // Clear the current draft reference (but don't delete the draft itself)
         $this->thread->current_service_request_draft_id = null;
         $this->thread->save();
 
-        $result = json_encode([
+        return json_encode([
             'success' => true,
             'next_instruction' => 'Service request canceled. Call get_service_request_types_for_suggestion to show available options.',
         ]);
-
-        $this->logToolResult('cancel_service_request', $result);
-
-        return $result;
     }
 }

@@ -39,7 +39,6 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
-use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
 use AidingApp\Form\Filament\Blocks\TextAreaFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use Prism\Prism\Tool;
@@ -47,7 +46,6 @@ use Prism\Prism\Tool;
 class ShowFieldInputTool extends Tool
 {
     use FindsDraftServiceRequest;
-    use LogsToolExecution;
 
     public function __construct(
         protected PortalAssistantThread $thread,
@@ -64,13 +62,10 @@ class ShowFieldInputTool extends Tool
         $draft = $this->findDraft();
 
         if (! $draft) {
-            $result = json_encode([
+            return json_encode([
                 'error' => true,
                 'message' => 'No draft exists. Call get_service_request_types_for_suggestion first.',
             ]);
-            $this->logToolResult('show_field_input', $result, ['field_id' => $field_id]);
-
-            return $result;
         }
 
         $draft->load('priority.type');
@@ -78,37 +73,28 @@ class ShowFieldInputTool extends Tool
         $type = $draft->priority?->type;
 
         if (! $type) {
-            $result = json_encode([
+            return json_encode([
                 'error' => true,
                 'message' => 'No type selected. User must select a type first.',
             ]);
-            $this->logToolResult('show_field_input', $result, ['field_id' => $field_id]);
-
-            return $result;
         }
 
         $form = $type->form;
 
         if (! $form) {
-            $result = json_encode([
+            return json_encode([
                 'error' => true,
                 'message' => 'No form found for this service request type.',
             ]);
-            $this->logToolResult('show_field_input', $result, ['field_id' => $field_id]);
-
-            return $result;
         }
 
         $field = $form->fields->firstWhere('id', $field_id);
 
         if (! $field) {
-            $result = json_encode([
+            return json_encode([
                 'error' => true,
                 'message' => 'Field not found for this service request type.',
             ]);
-            $this->logToolResult('show_field_input', $result, ['field_id' => $field_id]);
-
-            return $result;
         }
 
         // Check if this is a text field that shouldn't use the widget
@@ -118,13 +104,10 @@ class ShowFieldInputTool extends Tool
         ]);
 
         if ($isTextField) {
-            $result = json_encode([
+            return json_encode([
                 'success' => false,
                 'hint' => "This is a text field (collection_method=\"text\"). Ask the user naturally (e.g., \"What's your {$field->label}?\") and then call update_form_field(field_id=\"{$field_id}\", value=\"<their response>\") with their answer.",
             ]);
-            $this->logToolResult('show_field_input', $result, ['field_id' => $field_id]);
-
-            return $result;
         }
 
         event(new PortalAssistantActionRequest(
@@ -141,18 +124,10 @@ class ShowFieldInputTool extends Tool
             ]
         ));
 
-        $result = json_encode([
+        return json_encode([
             'success' => true,
             'field_label' => $field->label,
             'next_instruction' => "Do NOT mention the widget or that something is displayed. Just ask ONE natural question (e.g., \"What's your {$field->label}?\" or \"Could you select the {$field->label}?\"). Do NOT list the options or add explanation - the user sees the input. Wait for their selection.",
         ]);
-
-        $this->logToolResult('show_field_input', $result, [
-            'field_id' => $field_id,
-            'field_label' => $field->label,
-            'field_type' => $field->type,
-        ]);
-
-        return $result;
     }
 }

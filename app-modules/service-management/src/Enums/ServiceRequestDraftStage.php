@@ -50,9 +50,6 @@ enum ServiceRequestDraftStage: string
             return null;
         }
 
-        // Once draft exists, we're always in data collection or beyond
-        // Type selection happens BEFORE draft creation (via show_type_selector widget)
-
         $requiredFields = [
             'priority_id',
             'title',

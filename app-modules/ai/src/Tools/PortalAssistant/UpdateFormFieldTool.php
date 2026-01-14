@@ -39,7 +39,6 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 use AidingApp\Ai\Actions\PortalAssistant\GetDraftStatus;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
-use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
 use AidingApp\Form\Filament\Blocks\TextAreaFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
@@ -48,7 +47,6 @@ use Prism\Prism\Tool;
 class UpdateFormFieldTool extends Tool
 {
     use FindsDraftServiceRequest;
-    use LogsToolExecution;
 
     public function __construct(
         protected PortalAssistantThread $thread,
@@ -66,13 +64,10 @@ class UpdateFormFieldTool extends Tool
         $draft = $this->findDraft();
 
         if (! $draft) {
-            $result = json_encode([
+            return json_encode([
                 'success' => false,
                 'error' => 'No draft exists. Call get_service_request_types_for_suggestion first.',
             ]);
-            $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
-
-            return $result;
         }
 
         $draft->load(['priority.type', 'serviceRequestFormSubmission']);
@@ -80,37 +75,28 @@ class UpdateFormFieldTool extends Tool
         $type = $draft->priority?->type;
 
         if (! $type) {
-            $result = json_encode([
+            return json_encode([
                 'success' => false,
                 'error' => 'No type selected. User must select a type first.',
             ]);
-            $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
-
-            return $result;
         }
 
         $form = $type->form;
 
         if (! $form) {
-            $result = json_encode([
+            return json_encode([
                 'success' => false,
                 'error' => 'No form found for this service request type.',
             ]);
-            $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
-
-            return $result;
         }
 
         $field = $form->fields->firstWhere('id', $field_id);
 
         if (! $field) {
-            $result = json_encode([
+            return json_encode([
                 'success' => false,
                 'error' => 'Field not found for this service request type.',
             ]);
-            $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
-
-            return $result;
         }
 
         // Check if this is a show_field_input field that shouldn't use text update
@@ -129,35 +115,26 @@ class UpdateFormFieldTool extends Tool
                     ->first();
 
                 if ($existingValue && $existingValue->pivot->response !== null && $existingValue->pivot->response !== '') {
-                    $result = json_encode([
+                    return json_encode([
                         'success' => false,
                         'hint' => "The \"{$field->label}\" field was already saved via widget selection. Check missing_required_fields in the last response for the next field to collect.",
                     ]);
-                    $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
-
-                    return $result;
                 }
             }
 
-            $result = json_encode([
+            return json_encode([
                 'success' => false,
                 'hint' => "This field requires a widget for proper input/validation (collection_method=\"show_field_input\"). Call show_field_input(field_id=\"{$field_id}\") to display the input, and ask a natural question in the same response.",
             ]);
-            $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
-
-            return $result;
         }
 
         $submission = $draft->serviceRequestFormSubmission;
 
         if (! $submission) {
-            $result = json_encode([
+            return json_encode([
                 'success' => false,
                 'error' => 'Form submission not created. Please select a type first.',
             ]);
-            $this->logToolResult('update_form_field', $result, ['field_id' => $field_id, 'value' => $value]);
-
-            return $result;
         }
 
         $existingField = $submission->fields()->where('service_request_form_field_id', $field_id)->first();
@@ -183,13 +160,9 @@ class UpdateFormFieldTool extends Tool
 
         $draftStatus = app(GetDraftStatus::class)->execute($draft);
 
-        $result = json_encode([
+        return json_encode([
             'success' => true,
             ...$draftStatus,
         ]);
-
-        $this->logToolResult('update_form_field', $result, ['field_id' => $field_id]);
-
-        return $result;
     }
 }

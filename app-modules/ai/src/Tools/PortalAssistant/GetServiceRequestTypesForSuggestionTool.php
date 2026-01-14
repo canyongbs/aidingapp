@@ -38,7 +38,6 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
-use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use Prism\Prism\Tool;
@@ -46,7 +45,6 @@ use Prism\Prism\Tool;
 class GetServiceRequestTypesForSuggestionTool extends Tool
 {
     use FindsDraftServiceRequest;
-    use LogsToolExecution;
 
     public function __construct(
         protected PortalAssistantThread $thread,
@@ -59,28 +57,19 @@ class GetServiceRequestTypesForSuggestionTool extends Tool
 
     public function __invoke(): string
     {
-        $draft = $this->findDraft();
-
         $typesTree = $this->buildTypesTree();
 
         if (empty($typesTree)) {
-            $result = json_encode([
+            return json_encode([
                 'error' => true,
                 'message' => 'No service request types are available.',
             ]);
-            $this->logToolResult('get_service_request_types_for_suggestion', $result);
-
-            return $result;
         }
 
-        $result = json_encode([
+        return json_encode([
             'types_tree' => $typesTree,
             'next_instruction' => 'Analyze types_tree. Call show_type_selector(suggested_type_id="<uuid>") if match found, otherwise show_type_selector() with no parameters.',
         ]);
-
-        $this->logToolResult('get_service_request_types_for_suggestion', $result);
-
-        return $result;
     }
 
     /**

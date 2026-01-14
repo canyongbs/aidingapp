@@ -39,13 +39,11 @@ namespace AidingApp\Ai\Tools\PortalAssistant;
 use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Tools\PortalAssistant\Concerns\FindsDraftServiceRequest;
-use AidingApp\Ai\Tools\PortalAssistant\Concerns\LogsToolExecution;
 use Prism\Prism\Tool;
 
 class EnableFileAttachmentsTool extends Tool
 {
     use FindsDraftServiceRequest;
-    use LogsToolExecution;
 
     public function __construct(
         protected PortalAssistantThread $thread,
@@ -61,13 +59,10 @@ class EnableFileAttachmentsTool extends Tool
         $draft = $this->findDraft();
 
         if (! $draft) {
-            $result = json_encode([
+            return json_encode([
                 'success' => false,
                 'error' => 'No draft exists. Call get_service_request_types_for_suggestion first.',
             ]);
-            $this->logToolResult('enable_file_attachments', $result, []);
-
-            return $result;
         }
 
         event(new PortalAssistantActionRequest(
@@ -76,13 +71,9 @@ class EnableFileAttachmentsTool extends Tool
             []
         ));
 
-        $result = json_encode([
+        return json_encode([
             'success' => true,
             'next_instruction' => 'Do NOT mention file attachments being enabled. Just ask naturally: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." IMMEDIATELY after they respond, call update_description(description="<their response>").',
         ]);
-
-        $this->logToolResult('enable_file_attachments', $result, []);
-
-        return $result;
     }
 }

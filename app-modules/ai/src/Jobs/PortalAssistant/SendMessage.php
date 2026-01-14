@@ -97,13 +97,6 @@ class SendMessage implements ShouldQueue
 
     public function handle(): void
     {
-        Log::info('[PortalAssistant] User message received', [
-            'thread_id' => $this->thread->getKey(),
-            'user_content' => $this->content,
-            'internal_content' => $this->internalContent,
-            'request' => $this->request,
-        ]);
-
         $message = new PortalAssistantMessage();
         $message->thread()->associate($this->thread);
         $message->author()->associate($this->thread->author);
@@ -147,14 +140,6 @@ class SendMessage implements ShouldQueue
 
             $tools = $this->buildTools();
 
-            Log::info('[PortalAssistant] Available tools for request', [
-                'thread_id' => $this->thread->getKey(),
-                'tools' => array_map(fn (Tool $tool) => [
-                    'name' => $tool->name(),
-                    'description' => $tool->description(),
-                ], $tools),
-            ]);
-
             $nextRequestOptions = $this->thread->messages()->where('is_assistant', true)->latest()->value('next_request_options') ?? [];
 
             $messages = [
@@ -189,22 +174,10 @@ class SendMessage implements ShouldQueue
                     }
 
                     if ($chunk instanceof ToolCall) {
-                        Log::info('[PortalAssistant] Tool called by AI', [
-                            'thread_id' => $this->thread->getKey(),
-                            'tool_name' => $chunk->name,
-                            'tool_arguments' => $chunk->arguments,
-                        ]);
-
                         continue;
                     }
 
                     if ($chunk instanceof ToolResult) {
-                        Log::info('[PortalAssistant] Tool result', [
-                            'thread_id' => $this->thread->getKey(),
-                            'tool_name' => $chunk->toolName,
-                            'tool_result' => $chunk->result,
-                        ]);
-
                         continue;
                     }
 
@@ -254,12 +227,6 @@ class SendMessage implements ShouldQueue
 
                 $response->save();
                 $this->thread->touch();
-
-                Log::info('[PortalAssistant] AI response complete', [
-                    'thread_id' => $this->thread->getKey(),
-                    'ai_content' => $response->content,
-                    'message_id' => $response->message_id,
-                ]);
             }, sleepMilliseconds: 1000, when: function (Throwable $exception) {
                 return $exception instanceof PrismException;
             });
