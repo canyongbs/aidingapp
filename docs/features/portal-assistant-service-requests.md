@@ -426,10 +426,10 @@ This section documents a complete conversation showing tool availability, tool r
 
 **Available Tools:**
 
-| Tool | Description |
-| ---- | ----------- |
-| `get_service_request_types_for_suggestion` | Retrieves the complete list of available service request types. Returns a types_tree to analyze before calling show_type_selector. |
-| `show_type_selector` | Displays a UI widget to select a service request type. If a strong match is identified in the types_tree, pass the type_id UUID as suggested_type_id parameter. |
+| Tool                                       | Description                                                                                                                                                     |
+| ------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `get_service_request_types_for_suggestion` | Retrieves the complete list of available service request types. Returns a types_tree to analyze before calling show_type_selector.                              |
+| `show_type_selector`                       | Displays a UI widget to select a service request type. If a strong match is identified in the types_tree, pass the type_id UUID as suggested_type_id parameter. |
 
 **Tool Call:** `get_service_request_types_for_suggestion()`
 
@@ -481,8 +481,12 @@ The frontend sends the selection to `SelectServiceRequestTypeController`, which 
     "type_name": "Password Reset",
     "title": null,
     "description": null,
-    "missing_required_fields": [{ "field_id": "f1f2f3f4-...", "label": "Student ID", "type": "text", "collection_method": "text" }],
-    "missing_optional_fields": [{ "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea", "collection_method": "text" }],
+    "missing_required_fields": [
+        { "field_id": "f1f2f3f4-...", "label": "Student ID", "type": "text", "collection_method": "text" }
+    ],
+    "missing_optional_fields": [
+        { "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea", "collection_method": "text" }
+    ],
     "has_custom_form_fields": true,
     "next_instruction": "Ask naturally for their student id (e.g., \"What's your student id?\"). After they respond, call update_form_field(field_id=\"f1f2f3f4-...\", value=\"<their response>\")."
 }
@@ -512,7 +516,9 @@ Note: `update_description`, `enable_file_attachments`, and `update_title` are no
     "title": null,
     "description": null,
     "missing_required_fields": [{ "field_id": "description", "label": "Description", "type": "description" }],
-    "missing_optional_fields": [{ "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea", "collection_method": "text" }],
+    "missing_optional_fields": [
+        { "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea", "collection_method": "text" }
+    ],
     "has_custom_form_fields": true,
     "next_instruction": "Call enable_file_attachments() first. Then ask: \"Is there anything else you'd like to add about this request? Feel free to attach any files if helpful.\" Before moving on, these optional fields are still available: Additional Notes - ask about them if they seem relevant based on the conversation."
 }
@@ -549,7 +555,9 @@ Note: `update_description`, `enable_file_attachments`, and `update_title` are no
     "title": null,
     "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
     "missing_required_fields": [{ "field_id": "title", "label": "Title", "type": "title" }],
-    "missing_optional_fields": [{ "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea", "collection_method": "text" }],
+    "missing_optional_fields": [
+        { "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea", "collection_method": "text" }
+    ],
     "has_custom_form_fields": true,
     "next_instruction": "Based on what they've told you, suggest a short title. Say something like: \"I'll title this '[your suggested title]' - does that work?\" After they confirm (or suggest changes), call update_title(title=\"<final title>\")."
 }
