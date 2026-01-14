@@ -43,7 +43,7 @@ Service request drafts progress through sequential stages. The stage is **derive
 
 **Note:** Type and priority selection happen BEFORE the draft is created. The user interacts with the `show_type_selector` widget, selects a type and priority, which creates the draft with the priority already set. Once the draft exists, it's always in `data_collection` stage or beyond.
 
-**Data Collection Order:** fields (if any) → description → title
+**Data Collection Order:** fields (if any, ordered by step then position within step) → description → title
 
 Stage determination logic:
 
@@ -89,6 +89,35 @@ The `cancel_service_request` tool allows users to abandon the current service re
 - `update_title`: After description provided
 
 **Phase Transition:** When all required fields are filled, `get_draft_status` detects the stage is now `clarifying_questions` (derived from state) and instructs AI to begin asking questions.
+
+### Optional Field Handling
+
+Optional fields are surfaced contextually to the AI without blocking progress:
+
+**During Custom Form Field Collection:**
+
+When the AI is instructed to collect the next required field, any optional fields that were "skipped over" (between the last filled field and the next required field) are mentioned in the instruction. This allows the AI to:
+- Proactively ask about them if they seem relevant based on the conversation context
+- Skip them if they don't seem relevant
+- Never block progress - optional fields are offered, not required
+
+Example instruction:
+```
+"Ask for their department. You skipped these optional fields: Preferred Name, Secondary Email - ask about them if they seem relevant based on the conversation."
+```
+
+**Before Description (End of Custom Form Fields):**
+
+When transitioning to the description field (meaning all required custom form fields are complete), ALL remaining unfilled optional fields are listed. This gives the AI one final opportunity to collect any optional information before moving to description/title.
+
+Example instruction:
+```
+"Call enable_file_attachments() first. Then ask: 'Is there anything else you'd like to add...' Before moving on, these optional fields are still available: Additional Notes, Preferred Contact Method - ask about them if they seem relevant based on the conversation."
+```
+
+**Multi-Step Forms:**
+
+Fields are collected in step order (by `ServiceRequestFormStep.sort`). The optional field logic respects this ordering - skipped optional fields are those between the last filled field and the next required field in the step-ordered sequence.
 
 ### Clarifying Questions Stage
 
@@ -516,11 +545,11 @@ This section documents a complete conversation from the assistant's perspective,
     "missing_required_fields": [{ "field_id": "description", "label": "Description", "type": "description" }],
     "missing_optional_fields": [{ "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea" }],
     "has_custom_form_fields": true,
-    "next_instruction": "Call enable_file_attachments() first. Then ask: \"Is there anything else you'd like to add about this request? Feel free to attach any files if helpful.\" After they respond, call update_description(description=\"<their response>\"). Optional fields available if relevant: Additional Notes. Only ask about these if they seem useful based on context."
+    "next_instruction": "Call enable_file_attachments() first. Then ask: \"Is there anything else you'd like to add about this request? Feel free to attach any files if helpful.\" IMMEDIATELY after they respond with ANY text, you MUST call update_description(description=\"<their response>\") before doing anything else. Before moving on, these optional fields are still available: Additional Notes - ask about them if they seem relevant based on the conversation."
 }
 ```
 
-**Does assistant know what to do?** ✅ Yes - `next_instruction` tells them to call `enable_file_attachments()` first. Since form fields were already collected, the prompt asks for "anything else to add" rather than describing the issue from scratch. Optional fields are listed for the AI to consider.
+**Does assistant know what to do?** ✅ Yes - `next_instruction` tells them to call `enable_file_attachments()` first. Since form fields were already collected, the prompt asks for "anything else to add" rather than describing the issue from scratch. All remaining optional fields (Additional Notes) are listed since we're transitioning to description, giving the AI a final opportunity to collect them if relevant.
 
 **Tool Call:** `enable_file_attachments()`
 
@@ -561,11 +590,11 @@ This section documents a complete conversation from the assistant's perspective,
     "missing_required_fields": [{ "field_id": "title", "label": "Title", "type": "title" }],
     "missing_optional_fields": [{ "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea" }],
     "has_custom_form_fields": true,
-    "next_instruction": "Based on what they've told you, suggest a short title. Say something like: \"I'll title this '[your suggested title]' - does that work?\" After they confirm (or suggest changes), call update_title(title=\"<final title>\"). Optional fields available if relevant: Additional Notes. Only ask about these if they seem useful based on context."
+    "next_instruction": "Based on what they've told you, suggest a short title. Say something like: \"I'll title this '[your suggested title]' - does that work?\" After they confirm (or suggest changes), call update_title(title=\"<final title>\")."
 }
 ```
 
-**Does assistant know what to do?** ✅ Yes - `next_instruction` tells them exactly how to phrase the title suggestion. Optional fields are noted but the AI can skip them if not relevant.
+**Does assistant know what to do?** ✅ Yes - `next_instruction` tells them exactly how to phrase the title suggestion. Optional fields were already offered before description, so they're not repeated here.
 
 **Assistant Response:** "I'll title this 'Cannot log into student portal - invalid credentials error' - does that work?"
 
@@ -755,7 +784,7 @@ At each turn, the assistant knows what to do because:
     - Conversational prompts to use (e.g., "Ask: 'Can you describe what's happening?'")
     - Explicit tool calls with parameters (e.g., `update_form_field(field_id="...", value="...")`)
     - Guidance on question types for clarifying questions
-    - List of optional fields the AI can ask about if relevant
+    - Contextual optional field prompts (skipped fields or all remaining fields before description)
 3. **Draft status** is stage-appropriate:
     - `data_collection`: `missing_required_fields`, `missing_optional_fields` with field_id, label, type; `has_custom_form_fields` flag
     - `clarifying_questions`/`resolution`: `questions_completed` counter, `title`, `description`, and `filled_form_fields` array with structured data (signatures show as `[Signature provided]`, checkboxes as `Yes`/`No`, all values limited to 255 chars)
@@ -763,7 +792,9 @@ At each turn, the assistant knows what to do because:
     - If form has custom fields, description prompt says "anything else to add" (since form captured details)
     - If no custom fields, description prompt asks to "describe what's happening"
     - Complex fields (select, date): AI calls `show_field_input` AND asks a natural question in same response
+    - Optional fields surfaced contextually: skipped fields during collection, all remaining before description
 5. **Stage transitions** are automatic and visible in the response (`draft_stage` changes)
 6. **Minimal context pollution** - only relevant data for the current stage is included
+7. **Multi-step form ordering** - Fields are collected in step order (by `sort`), ensuring logical flow through form sections
 
 The assistant never needs to call `get_draft_status` separately because all action tools return the full draft status. The only exception is when resuming a conversation with an existing draft, where `get_draft_status` provides the initial context.

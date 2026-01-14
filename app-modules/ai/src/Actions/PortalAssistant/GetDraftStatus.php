@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestDraftStage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use Illuminate\Support\Str;
 
 class GetDraftStatus
@@ -84,6 +85,24 @@ class GetDraftStatus
 
         $result['next_instruction'] = $this->getStageInstruction($draftStage, $draft, $result);
 
+        // Remove internal-only fields before returning to AI
+        unset($result['form_fields']);
+
+        // Strip position from field arrays (used internally for optional field logic)
+        if (isset($result['missing_required_fields'])) {
+            $result['missing_required_fields'] = array_map(
+                fn ($field) => collect($field)->except('position')->all(),
+                $result['missing_required_fields']
+            );
+        }
+
+        if (isset($result['missing_optional_fields'])) {
+            $result['missing_optional_fields'] = array_map(
+                fn ($field) => collect($field)->except('position')->all(),
+                $result['missing_optional_fields']
+            );
+        }
+
         return $result;
     }
 
@@ -99,6 +118,7 @@ class GetDraftStatus
 
         if ($type) {
             $formFields = $this->getFormFields($draft, $type);
+            $data['form_fields'] = $formFields;
             $data['missing_required_fields'] = $this->getMissingRequiredFields($draft, $formFields);
             $data['missing_optional_fields'] = $this->getMissingOptionalFields($formFields);
             // Track if the form has any custom fields at all (for adjusting description prompt)
@@ -147,9 +167,22 @@ class GetDraftStatus
         }
 
         $fields = [];
+        $position = 0;
 
-        foreach ($form->fields as $field) {
-            $fields[] = $this->formatField($field, $filledFields);
+        // Get steps ordered by sort, with their fields
+        $steps = $form->steps()->orderBy('sort')->with('fields')->get();
+
+        foreach ($steps as $step) {
+            foreach ($step->fields as $field) {
+                $fields[] = $this->formatField($field, $filledFields, $position, $step);
+                $position++;
+            }
+        }
+
+        // Also include any fields without a step (orphaned fields)
+        foreach ($form->fields()->whereNull('service_request_form_step_id')->get() as $field) {
+            $fields[] = $this->formatField($field, $filledFields, $position, null);
+            $position++;
         }
 
         return $fields;
@@ -160,7 +193,7 @@ class GetDraftStatus
      *
      * @return array<string, mixed>
      */
-    protected function formatField(ServiceRequestFormField $field, array $filledFields): array
+    protected function formatField(ServiceRequestFormField $field, array $filledFields, int $position = 0, ?ServiceRequestFormStep $step = null): array
     {
         $fieldId = $field->getKey();
         $value = $filledFields[$fieldId] ?? null;
@@ -178,6 +211,9 @@ class GetDraftStatus
             'value' => $value,
             'filled' => $value !== null && $value !== '',
             'collection_method' => $isTextField ? 'text' : 'show_field_input',
+            'position' => $position,
+            'step_id' => $step?->getKey(),
+            'step_label' => $step?->label,
         ];
 
         if (isset($field->config['options'])) {
@@ -206,6 +242,7 @@ class GetDraftStatus
                     'label' => $field['label'],
                     'type' => $field['type'],
                     'collection_method' => $field['collection_method'],
+                    'position' => $field['position'],
                 ];
 
                 if (isset($field['options'])) {
@@ -216,12 +253,16 @@ class GetDraftStatus
             }
         }
 
+        // Get max position from form fields for description/title positioning
+        $maxPosition = count($formFields);
+
         // Check description
         if (empty($draft->close_details)) {
             $missing[] = [
                 'field_id' => 'description',
                 'label' => 'Description',
                 'type' => 'description',
+                'position' => $maxPosition,
             ];
         }
 
@@ -231,6 +272,7 @@ class GetDraftStatus
                 'field_id' => 'title',
                 'label' => 'Title',
                 'type' => 'title',
+                'position' => $maxPosition + 1,
             ];
         }
 
@@ -255,6 +297,7 @@ class GetDraftStatus
                     'label' => $field['label'],
                     'type' => $field['type'],
                     'collection_method' => $field['collection_method'],
+                    'position' => $field['position'],
                 ];
 
                 if (isset($field['options'])) {
@@ -266,6 +309,38 @@ class GetDraftStatus
         }
 
         return $optional;
+    }
+
+    /**
+     * Get optional fields that were skipped over (between last filled field and next required field).
+     *
+     * @param array<int, array<string, mixed>> $formFields      All form fields with position
+     * @param array<int, array<string, mixed>> $missingOptional Missing optional fields with position
+     * @param int                              $nextRequiredPosition Position of the next required field
+     *
+     * @return array<int, array<string, mixed>>
+     */
+    protected function getSkippedOptionalFields(array $formFields, array $missingOptional, int $nextRequiredPosition): array
+    {
+        // Find the position of the last filled field
+        $lastFilledPosition = -1;
+
+        foreach ($formFields as $field) {
+            if ($field['filled'] && $field['position'] > $lastFilledPosition) {
+                $lastFilledPosition = $field['position'];
+            }
+        }
+
+        // Find optional fields between last filled and next required
+        $skipped = [];
+
+        foreach ($missingOptional as $field) {
+            if ($field['position'] > $lastFilledPosition && $field['position'] < $nextRequiredPosition) {
+                $skipped[] = $field;
+            }
+        }
+
+        return $skipped;
     }
 
     /**
@@ -337,17 +412,7 @@ class GetDraftStatus
     {
         $missingRequired = $result['missing_required_fields'] ?? [];
         $missingOptional = $result['missing_optional_fields'] ?? [];
-
-        // Build optional fields note if any exist
-        $optionalNote = '';
-
-        if (! empty($missingOptional)) {
-            $optionalLabels = array_map(fn ($f) => $f['label'], $missingOptional);
-            $optionalNote = sprintf(
-                ' Optional fields available if relevant: %s. Only ask about these if they seem useful based on context.',
-                implode(', ', $optionalLabels)
-            );
-        }
+        $formFields = $result['form_fields'] ?? [];
 
         if (empty($missingRequired)) {
             // All required fields collected
@@ -367,22 +432,45 @@ class GetDraftStatus
         $fieldId = $firstMissing['field_id'];
         $fieldLabel = $firstMissing['label'];
         $fieldType = $firstMissing['type'];
+        $nextRequiredPosition = $firstMissing['position'] ?? PHP_INT_MAX;
 
-        // Handle description field
+        // Build skipped optional fields note (only optional fields between last filled and next required)
+        $skippedOptionalNote = '';
+        $skippedOptional = $this->getSkippedOptionalFields($formFields, $missingOptional, $nextRequiredPosition);
+
+        if (! empty($skippedOptional)) {
+            $skippedLabels = array_map(fn ($f) => $f['label'], $skippedOptional);
+            $skippedOptionalNote = sprintf(
+                ' You skipped these optional fields: %s - ask about them if they seem relevant based on the conversation.',
+                implode(', ', $skippedLabels)
+            );
+        }
+
+        // Handle description field - show ALL remaining optional fields since we're done with custom form fields
         if ($fieldId === 'description') {
+            $remainingOptionalNote = '';
+
+            if (! empty($missingOptional)) {
+                $optionalLabels = array_map(fn ($f) => $f['label'], $missingOptional);
+                $remainingOptionalNote = sprintf(
+                    ' Before moving on, these optional fields are still available: %s - ask about them if they seem relevant based on the conversation.',
+                    implode(', ', $optionalLabels)
+                );
+            }
+
             // Check if there were any form fields (required or optional) that we've already collected
             $hasFormFields = $this->hasCollectedFormFields($result);
 
             if ($hasFormFields) {
-                return 'Call enable_file_attachments() first. Then ask: "Is there anything else you\'d like to add about this request? Feel free to attach any files if helpful." IMMEDIATELY after they respond with ANY text, you MUST call update_description(description="<their response>") before doing anything else.' . $optionalNote;
+                return 'Call enable_file_attachments() first. Then ask: "Is there anything else you\'d like to add about this request? Feel free to attach any files if helpful." IMMEDIATELY after they respond with ANY text, you MUST call update_description(description="<their response>") before doing anything else.' . $remainingOptionalNote;
             }
 
-            return 'Call enable_file_attachments() first. Then ask: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." IMMEDIATELY after they respond with ANY description, you MUST call update_description(description="<their response>") before doing anything else.' . $optionalNote;
+            return 'Call enable_file_attachments() first. Then ask: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." IMMEDIATELY after they respond with ANY description, you MUST call update_description(description="<their response>") before doing anything else.' . $remainingOptionalNote;
         }
 
         // Handle title field
         if ($fieldId === 'title') {
-            return 'Based on what they\'ve told you, suggest a short title. Say something like: "I\'ll title this \'[your suggested title]\' - does that work?" After they confirm (or suggest changes), call update_title(title="<final title>").' . $optionalNote;
+            return 'Based on what they\'ve told you, suggest a short title. Say something like: "I\'ll title this \'[your suggested title]\' - does that work?" After they confirm (or suggest changes), call update_title(title="<final title>").';
         }
 
         // Handle custom form fields
@@ -390,19 +478,21 @@ class GetDraftStatus
 
         if ($isComplexField) {
             return sprintf(
-                'Call show_field_input(field_id="%s") to display the "%s" input. In the same response, ask ONE natural question (e.g., "What\'s your %s?" or "Could you select the %s?"). Do NOT mention the widget or list the options - the user sees them.',
+                'Call show_field_input(field_id="%s") to display the "%s" input. In the same response, ask ONE natural question (e.g., "What\'s your %s?" or "Could you select the %s?"). Do NOT mention the widget or list the options - the user sees them.%s',
                 $fieldId,
                 $fieldLabel,
                 $fieldLabel,
-                $fieldLabel
+                $fieldLabel,
+                $skippedOptionalNote
             );
         }
 
         return sprintf(
-            'Ask naturally for their %s (e.g., "What\'s your %s?"). After they respond, call update_form_field(field_id="%s", value="<their response>").',
+            'Ask naturally for their %s (e.g., "What\'s your %s?"). After they respond, call update_form_field(field_id="%s", value="<their response>").%s',
             strtolower($fieldLabel),
             strtolower($fieldLabel),
-            $fieldId
+            $fieldId,
+            $skippedOptionalNote
         );
     }
 
