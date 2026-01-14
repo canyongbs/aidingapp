@@ -67,6 +67,10 @@ class Kernel extends ConsoleKernel
             ->name('Gather and Dispatch SES S3 Inbound Emails')
             ->onOneServer();
 
+        // TODO: Start breaking this out into aggregate jobs that dispatch items per Tenant
+        // There will probably need to be two new queues, one for Tenant aggregate dispatch jobs and one for per-Tenant / landlord jobs.
+        // We should also consider using Context to keep track of whether or not jobs are being processed within the time period the task is scheduled for.
+
         Tenant::query()
             ->tap(new SetupIsComplete())
             ->cursor()
