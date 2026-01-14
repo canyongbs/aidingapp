@@ -70,7 +70,7 @@ enum ServiceRequestDraftStage: string
             $filledFieldIds = $submission?->fields->pluck('id')->all() ?? [];
 
             foreach ($form->fields as $field) {
-                if ($field->is_required && ! in_array($field->id, $filledFieldIds)) {
+                if ($field->is_required && ! in_array($field->getKey(), $filledFieldIds)) {
                     return self::DataCollection;
                 }
             }
