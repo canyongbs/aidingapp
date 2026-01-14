@@ -48,14 +48,6 @@ use Illuminate\Support\Str;
 
 trait SubmitsServiceRequest
 {
-    /**
-     * Submit service request for human review or close if AI resolution accepted
-     *
-     * @param ServiceRequest $draft
-     * @param bool $resolutionAccepted Whether user accepted the AI resolution
-     *
-     * @return string The generated service request number
-     */
     protected function submitServiceRequest(ServiceRequest $draft, bool $resolutionAccepted = false, ?string $resolutionUpdateUuid = null): string
     {
         $hasAiResolution = $draft->serviceRequestUpdates()
@@ -66,14 +58,11 @@ trait SubmitsServiceRequest
             $this->createResolutionUpdates($draft, $resolutionAccepted, $resolutionUpdateUuid);
         }
 
-        // Determine status based on resolution outcome
         if ($resolutionAccepted) {
-            // Resolution accepted - close the ticket
             $status = ServiceRequestStatus::query()
                 ->where('classification', SystemServiceRequestClassification::Closed)
                 ->first();
         } else {
-            // Resolution rejected or not attempted - open for human review
             $status = ServiceRequestStatus::query()
                 ->where('classification', SystemServiceRequestClassification::Open)
                 ->first();
@@ -84,7 +73,6 @@ trait SubmitsServiceRequest
             $draft->status_updated_at = CarbonImmutable::now();
         }
 
-        // Only generate number if it doesn't exist (prevents observer error on retry)
         if (! $draft->service_request_number) {
             $draft->service_request_number = app(ServiceRequestNumberGenerator::class)->generate();
         }
@@ -92,7 +80,6 @@ trait SubmitsServiceRequest
         $draft->is_draft = false;
         $draft->save();
 
-        // Only assign to team if resolution was not accepted (needs human review)
         if (! $resolutionAccepted) {
             $this->assignServiceRequest($draft);
         }
@@ -111,20 +98,14 @@ trait SubmitsServiceRequest
         }
 
         $confidenceScore = $draft->ai_resolution_confidence_score ?? 0;
-        $aiResolutionSettings = app(AiResolutionSettings::class);
-        $threshold = $aiResolutionSettings->confidence_threshold;
-        $meetsThreshold = $confidenceScore >= $threshold;
 
-        // Only create internal summary if resolution was rejected or not shown
         if ($wasAccepted) {
             return;
         }
 
-        // Extract the proposed answer from the update (remove wrapper text)
         $updateText = $aiResolutionUpdate->update;
         $proposedAnswer = $updateText;
 
-        // If it contains the wrapper text, extract just the answer
         if (str_contains($updateText, 'Did this resolve your issue?')) {
             preg_match('/here is a potential solution:\n\n(.*?)\n\nDid this resolve your issue\?/s', $updateText, $matches);
 
