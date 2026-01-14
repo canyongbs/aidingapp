@@ -97,11 +97,13 @@ Optional fields are surfaced contextually to the AI without blocking progress:
 **During Custom Form Field Collection:**
 
 When the AI is instructed to collect the next required field, any optional fields that were "skipped over" (between the last filled field and the next required field) are mentioned in the instruction. This allows the AI to:
+
 - Proactively ask about them if they seem relevant based on the conversation context
 - Skip them if they don't seem relevant
 - Never block progress - optional fields are offered, not required
 
 Example instruction:
+
 ```
 "Ask for their department. You skipped these optional fields: Preferred Name, Secondary Email - ask about them if they seem relevant based on the conversation."
 ```
@@ -111,6 +113,7 @@ Example instruction:
 When transitioning to the description field (meaning all required custom form fields are complete), ALL remaining unfilled optional fields are listed. This gives the AI one final opportunity to collect any optional information before moving to description/title.
 
 Example instruction:
+
 ```
 "Call enable_file_attachments() first. Then ask: 'Is there anything else you'd like to add...' Before moving on, these optional fields are still available: Additional Notes, Preferred Contact Method - ask about them if they seem relevant based on the conversation."
 ```
