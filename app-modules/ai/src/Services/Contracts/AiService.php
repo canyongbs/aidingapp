@@ -67,7 +67,7 @@ interface AiService
      * @param array<Tool> $tools
      * @param ?array<Message> $messages
      */
-    public function streamRaw(string $prompt, string $content, array $files = [], array $options = [], array $tools = [], ?array $messages = null): Closure;
+    public function streamRaw(string $prompt, ?string $content = null, array $files = [], array $options = [], array $tools = [], ?array $messages = null): Closure;
 
     /**
      * This method is passed an unsaved `AiMessage` model and should send the

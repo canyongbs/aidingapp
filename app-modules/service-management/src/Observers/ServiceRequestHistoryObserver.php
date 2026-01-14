@@ -46,7 +46,7 @@ class ServiceRequestHistoryObserver
     {
         $serviceRequest = $serviceRequestHistory->serviceRequest;
 
-        // @phpstan-ignore booleanNot.alwaysFalse the service request could be null at runtime if it is excluded by a global scope
+        /** @phpstan-ignore booleanNot.alwaysFalse */
         if (! $serviceRequest) {
             return;
         }
@@ -58,7 +58,7 @@ class ServiceRequestHistoryObserver
     {
         $serviceRequest = $serviceRequestHistory->serviceRequest;
 
-        // @phpstan-ignore booleanNot.alwaysFalse the service request could be null at runtime if it is excluded by a global scope
+        /** @phpstan-ignore booleanNot.alwaysFalse */
         if (! $serviceRequest) {
             return;
         }

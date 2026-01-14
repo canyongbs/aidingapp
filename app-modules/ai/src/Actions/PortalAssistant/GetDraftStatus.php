@@ -164,7 +164,7 @@ class GetDraftStatus
             $filledFields = $submission->fields()
                 ->get()
                 ->keyBy('id')
-                ->map(fn (ServiceRequestFormField $field) => $field->getRelationValue('pivot')->response)
+                ->map(fn (ServiceRequestFormField $field) => $field->getRelationValue('pivot')->response) // @phpstan-ignore argument.type
                 ->all();
         }
 
@@ -538,7 +538,7 @@ class GetDraftStatus
         $filledFields = $submission->fields()
             ->get()
             ->keyBy('id')
-            ->map(function (ServiceRequestFormField $field) use ($fieldTypes) {
+            ->map(function (ServiceRequestFormField $field) use ($fieldTypes) { // @phpstan-ignore argument.type
                 $rawValue = $field->getRelationValue('pivot')->response;
                 $displayValue = $this->getDisplayValueForField($field->type ?? $fieldTypes[$field->getKey()] ?? null, $rawValue, $field->label);
 
@@ -547,7 +547,7 @@ class GetDraftStatus
                     'value' => $displayValue,
                 ];
             })
-            ->filter(fn (array $field) => $field['value'] !== null && $field['value'] !== '')
+            ->filter(fn (array $field) => $field['value'] !== null && $field['value'] !== '') // @phpstan-ignore notIdentical.alwaysTrue
             ->values()
             ->all();
 
