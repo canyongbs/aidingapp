@@ -94,14 +94,11 @@ class Stream extends BaseStream
     }
 
     /**
-     * Override handleToolCalls to only send newly added messages during tool execution loops.
+     * Override `handleToolCalls` to only send newly added messages during tool execution loops.
      *
-     * During tool loops, we only want to send the function_call and function_call_output,
+     * During tool loops, we only want to send the `function_call` and `function_call_output`,
      * not the assistant's text content (which was already sent in the previous iteration).
      * This avoids sending duplicate messages on each iteration.
-     *
-     * Note: previous_response_id is NOT used during tool loops since the response hasn't
-     * been saved to the database yet. It's only available between user messages.
      */
     protected function handleToolCalls(
         Request $request,
@@ -135,15 +132,15 @@ class Stream extends BaseStream
 
         if ($depth < $request->maxSteps()) {
             // Only send the 2 messages we just added, but WITHOUT the assistant's text content
-            // The text was already sent in the previous request, we only need the function_call and function_call_output
+            // The text was already sent in the previous request, we only need the `function_call` and `function_call_output`
             $allMessages = $request->messages();
             $newMessages = array_slice($allMessages, $messageCountBefore);
 
-            // Strip text content from AssistantMessage to avoid duplicate assistant messages
-            // We only want to send the function_call, not the text
+            // Strip text content from `AssistantMessage` to avoid duplicate assistant messages
+            // We only want to send the `function_call`, not the text
             $newMessages = array_map(function ($message) {
                 if ($message instanceof AssistantMessage) {
-                    // Create a new AssistantMessage with empty text but same tool calls
+                    // Create a new `AssistantMessage` with empty text but same tool calls
                     return new AssistantMessage('', $message->toolCalls);
                 }
 
