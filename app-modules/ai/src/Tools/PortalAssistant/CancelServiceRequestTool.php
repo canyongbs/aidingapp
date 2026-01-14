@@ -41,7 +41,6 @@ use Prism\Prism\Tool;
 
 class CancelServiceRequestTool extends Tool
 {
-
     public function __construct(
         protected PortalAssistantThread $thread,
     ) {

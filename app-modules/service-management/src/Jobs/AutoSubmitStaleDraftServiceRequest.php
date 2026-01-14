@@ -37,10 +37,10 @@
 namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use App\Features\PortalAssistantServiceRequestFeature;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use App\Features\PortalAssistantServiceRequestFeature;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
