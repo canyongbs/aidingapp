@@ -138,7 +138,7 @@ class Stream extends BaseStream
 
             // Strip text content from `AssistantMessage` to avoid duplicate assistant messages
             // We only want to send the `function_call`, not the text
-            $newMessages = array_map(function ($message) {
+            $newMessages = array_map(function (AssistantMessage|ToolResultMessage $message) {
                 if ($message instanceof AssistantMessage) {
                     // Create a new `AssistantMessage` with empty text but same tool calls
                     return new AssistantMessage('', $message->toolCalls);
