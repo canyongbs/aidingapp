@@ -61,8 +61,7 @@ class CheckAiResolutionValidityTool extends Tool
             ->using($this);
     }
 
-    /** @phpstan-ignore MeliorStan.parameterNameNotCamelCase */
-    public function __invoke(int $confidence_score, string $proposed_answer): string
+    public function __invoke(int $confidence_score, string $proposed_answer): string // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
     {
         $draft = $this->findDraft();
 
