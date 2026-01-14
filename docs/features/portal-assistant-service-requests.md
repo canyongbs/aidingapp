@@ -53,7 +53,7 @@ if (clarifyingQuestionsCount($draft) < 3) return 'clarifying_questions';
 return 'resolution';
 ```
 
-When submitted (finalized), `is_draft = false` and `service_request_number` is generated. Status set to "Closed" if resolution accepted, "New" if rejected or resolution disabled/below threshold.
+When submitted (finalized), `is_draft = false` and `service_request_number` is generated. Status classification set to "Closed" if resolution accepted, "Open" if rejected or resolution disabled/below threshold.
 
 ## Progressive Tool Disclosure
 
@@ -177,14 +177,14 @@ Fields are collected in step order (by `ServiceRequestFormStep.sort`). The optio
 **If user says resolution was helpful:**
 
 - Sets `is_ai_resolution_attempted = true`, `is_ai_resolution_successful = true`
-- Sets status to "Closed" (resolved without human intervention)
+- Sets status classification to "Closed" (resolved without human intervention)
 - Generates `service_request_number` and sets `is_draft = false`
 - Returns request number to AI
 
 **If user says resolution was not helpful:**
 
 - Sets `is_ai_resolution_attempted = true`, `is_ai_resolution_successful = false`
-- Sets status to "New" (open for human review)
+- Sets status classification to "Open" (for human review)
 - Generates `service_request_number` and sets `is_draft = false`
 - Assigns to team member
 - Returns request number to AI
@@ -192,7 +192,7 @@ Fields are collected in step order (by `ServiceRequestFormStep.sort`). The optio
 **Process (AI Resolution Disabled):**
 
 - After 3rd question saved, service request automatically submitted for human review
-- Sets status to "New", generates request number
+- Sets status classification to "Open", generates request number
 - Assigns to team member
 
 ## Tool Reference
@@ -232,9 +232,8 @@ Fields are collected in step order (by `ServiceRequestFormStep.sort`). The optio
 - `filled_form_fields` contains structured label/value pairs with special handling:
     - Signature fields: `[Signature provided]` instead of base64 data
     - Checkbox fields: `Yes`/`No` instead of boolean
-    - All field values limited to 255 characters (truncated with `...`)
-    - Title limited to 255 characters
-    - Description provided in full (not truncated)
+    - Field values limited to 255 characters (truncated with `...`)
+    - Title and description provided in full (not truncated)
 - AI receives this structured data to understand what information has already been collected
 - Provides natural-language `next_instruction` guiding the AI on what to do next
 
@@ -290,7 +289,7 @@ Fields are collected in step order (by `ServiceRequestFormStep.sort`). The optio
 - Automatically submits service request without showing resolution to user
 - Sets `is_ai_resolution_attempted = true`, `is_ai_resolution_successful = false`
 - Assigns to team member, generates request number
-- Sets `is_draft = false`, status to "New"
+- Sets `is_draft = false`, status classification to "Open"
 - Returns request number and success message
 
 **If confidence meets threshold:**
@@ -306,14 +305,14 @@ Fields are collected in step order (by `ServiceRequestFormStep.sort`). The optio
 
 **If user accepted resolution:**
 
-- Sets status to "Closed" (resolved without human intervention)
+- Sets status classification to "Closed" (resolved without human intervention)
 - Generates `service_request_number` and sets `is_draft = false`
 - Does NOT assign to team (no human review needed)
 - Returns request number with friendly message to convey
 
 **If user rejected resolution:**
 
-- Sets status to "New" (open for human review)
+- Sets status classification to "Open" (for human review)
 - Generates `service_request_number` and sets `is_draft = false`
 - Assigns to team member via type's assignment strategy
 - Returns request number with message about human follow-up
@@ -453,11 +452,11 @@ This section documents a complete conversation showing tool availability, tool r
 {
     "success": true,
     "suggested_type_name": "Password Reset",
-    "next_instruction": "Tell user: \"Based on what you described, I think 'Password Reset' might be what you need. Please confirm or select a different type from the options above.\" Then wait for their selection."
+    "next_instruction": "Tell user: \"I think 'Password Reset' fits your needs. You can confirm or choose a different type.\" Then wait for their selection."
 }
 ```
 
-**Assistant Response:** "Based on what you described, I think 'Password Reset' might be what you need. Please confirm or select a different type from the options above."
+**Assistant Response:** "I think 'Password Reset' fits your needs. You can confirm or choose a different type from the options shown."
 
 ---
 
@@ -476,8 +475,8 @@ The frontend sends the selection to `SelectServiceRequestTypeController`, which 
     "type_name": "Password Reset",
     "title": null,
     "description": null,
-    "missing_required_fields": [{ "field_id": "f1f2f3f4-...", "label": "Student ID", "type": "text" }],
-    "missing_optional_fields": [{ "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea" }],
+    "missing_required_fields": [{ "field_id": "f1f2f3f4-...", "label": "Student ID", "type": "text", "collection_method": "text" }],
+    "missing_optional_fields": [{ "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea", "collection_method": "text" }],
     "has_custom_form_fields": true,
     "next_instruction": "Ask naturally for their student id (e.g., \"What's your student id?\"). After they respond, call update_form_field(field_id=\"f1f2f3f4-...\", value=\"<their response>\")."
 }
@@ -505,7 +504,7 @@ The frontend sends the selection to `SelectServiceRequestTypeController`, which 
     "title": null,
     "description": null,
     "missing_required_fields": [{ "field_id": "description", "label": "Description", "type": "description" }],
-    "missing_optional_fields": [{ "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea" }],
+    "missing_optional_fields": [{ "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea", "collection_method": "text" }],
     "has_custom_form_fields": true,
     "next_instruction": "Call enable_file_attachments() first. Then ask: \"Is there anything else you'd like to add about this request? Feel free to attach any files if helpful.\" Before moving on, these optional fields are still available: Additional Notes - ask about them if they seem relevant based on the conversation."
 }
@@ -518,7 +517,7 @@ The frontend sends the selection to `SelectServiceRequestTypeController`, which 
 ```json
 {
     "success": true,
-    "next_instruction": "File attachments enabled. Now ask: \"Can you describe what's happening? Feel free to attach any screenshots or files if that helps.\" After they respond, call update_description(description=\"<their response>\")."
+    "next_instruction": "Do NOT mention file attachments being enabled. Just ask naturally: \"Can you describe what's happening? Feel free to attach any screenshots if that helps.\" IMMEDIATELY after they respond, call update_description(description=\"<their response>\")."
 }
 ```
 
@@ -542,7 +541,7 @@ The frontend sends the selection to `SelectServiceRequestTypeController`, which 
     "title": null,
     "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
     "missing_required_fields": [{ "field_id": "title", "label": "Title", "type": "title" }],
-    "missing_optional_fields": [{ "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea" }],
+    "missing_optional_fields": [{ "field_id": "x9y8z7w6-...", "label": "Additional Notes", "type": "textarea", "collection_method": "text" }],
     "has_custom_form_fields": true,
     "next_instruction": "Based on what they've told you, suggest a short title. Say something like: \"I'll title this '[your suggested title]' - does that work?\" After they confirm (or suggest changes), call update_title(title=\"<final title>\")."
 }
@@ -569,7 +568,7 @@ The frontend sends the selection to `SelectServiceRequestTypeController`, which 
     "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
     "filled_form_fields": [{ "label": "Student ID", "value": "A00123456" }],
     "questions_completed": 0,
-    "next_instruction": "Question 1 of 3 (2 remaining). Ask clarifying questions that gather ADDITIONAL information - NOT to re-collect form data already provided. Focus on context, urgency, troubleshooting history, or other relevant details. After they answer, call save_clarifying_question_answer(question=\"<your question>\", answer=\"<their answer>\")."
+    "next_instruction": "Tell the user you'll ask a few quick questions. Ask your first question naturally. Good topics: when it started, what they've tried, error messages, urgency. AFTER they answer: call save_clarifying_question_answer IMMEDIATELY before saying anything else. (0/3 saved)"
 }
 ```
 
@@ -588,9 +587,11 @@ The frontend sends the selection to `SelectServiceRequestTypeController`, which 
 ```json
 {
     "success": true,
+    "questions_saved": 1,
+    "questions_remaining": 2,
     "draft_stage": "clarifying_questions",
     "questions_completed": 1,
-    "next_instruction": "Question 2 of 3 (1 remaining). Continue asking clarifying questions..."
+    "next_instruction": "1/3 saved. NOW ask your next clarifying question (topics: when it started, what they've tried, error messages, urgency)."
 }
 ```
 
@@ -609,9 +610,11 @@ The frontend sends the selection to `SelectServiceRequestTypeController`, which 
 ```json
 {
     "success": true,
+    "questions_saved": 2,
+    "questions_remaining": 1,
     "draft_stage": "clarifying_questions",
     "questions_completed": 2,
-    "next_instruction": "Question 3 of 3 (0 remaining). Continue asking clarifying questions..."
+    "next_instruction": "2/3 saved. NOW ask your next clarifying question (topics: when it started, what they've tried, error messages, urgency)."
 }
 ```
 
@@ -630,13 +633,15 @@ The frontend sends the selection to `SelectServiceRequestTypeController`, which 
 ```json
 {
     "success": true,
+    "questions_saved": 3,
+    "questions_remaining": 0,
     "draft_stage": "resolution",
     "type_name": "Password Reset",
     "title": "Cannot log into student portal - invalid credentials error",
     "description": "When I enter my password it says 'Invalid credentials' but I know I'm using the right password. I've tried 5 times.",
     "filled_form_fields": [{ "label": "Student ID", "value": "A00123456" }],
     "questions_completed": 3,
-    "next_instruction": "Based on everything the user told you, formulate a helpful resolution. Call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer=\"<your detailed resolution>\"). The tool will tell you whether to present it or submit for review."
+    "next_instruction": "3/3 questions saved. All clarifying questions complete - proceed to resolution stage."
 }
 ```
 
@@ -647,7 +652,7 @@ The frontend sends the selection to `SelectServiceRequestTypeController`, which 
 ```json
 {
     "meets_threshold": true,
-    "next_instruction": "Present your resolution to the user in a helpful way. End by asking: \"Does this help resolve your issue?\" Based on their response, call record_resolution_response(accepted=true) if they say yes, or record_resolution_response(accepted=false) if they say no."
+    "next_instruction": "Present your resolution to the user and end with \"Did this help resolve your issue?\" IMPORTANT: Do NOT mention escalation, providing more details, or what happens if it doesn't work - just present the solution and ask if it helped. When they respond yes/no, call record_resolution_response immediately."
 }
 ```
 
@@ -659,7 +664,7 @@ The frontend sends the selection to `SelectServiceRequestTypeController`, which 
 
 If that doesn't work, try the 'Forgot Password' link to reset it.
 
-Does this help resolve your issue?"
+Did this help resolve your issue?"
 
 ---
 
@@ -675,7 +680,8 @@ Does this help resolve your issue?"
 {
     "success": true,
     "request_number": "SR-2026-00542",
-    "next_instruction": "Tell user: \"Your request number is SR-2026-00542. A team member will follow up to help resolve this.\""
+    "resolved": false,
+    "next_instruction": "Tell user: \"Your request number is SR-2026-00542. A team member will follow up to help resolve this.\" Do NOT suggest they provide more details - all collected information has been submitted."
 }
 ```
 
