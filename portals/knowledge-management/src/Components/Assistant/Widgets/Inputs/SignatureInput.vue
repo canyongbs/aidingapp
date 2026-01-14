@@ -33,6 +33,7 @@
 -->
 <script setup>
     import { onMounted, ref, watch } from 'vue';
+    import { VueSignaturePad } from 'vue-signature-pad';
 
     const props = defineProps({
         fieldId: {
@@ -90,13 +91,13 @@
 
     watch(text, () => {
         const canvas = document.createElement('canvas');
-        canvas.height = 100;
+        canvas.height = 200;
         canvas.width = 350;
 
         const canvasContext = canvas.getContext('2d');
 
-        canvasContext.font = '30px Satisfy';
-        canvasContext.fillText(text.value, 10, 50);
+        canvasContext.font = '48px Satisfy';
+        canvasContext.fillText(text.value, 10, 100);
 
         signatureData.value = canvas.toDataURL();
     });
@@ -145,7 +146,7 @@
         <div v-if="mode === 'draw'" class="space-y-2">
             <VueSignaturePad
                 width="100%"
-                height="100px"
+                height="200px"
                 ref="drawingPad"
                 :options="{ onBegin: resizeCanvas, onEnd: saveDrawing }"
                 class="w-full border border-gray-300 rounded-md"
@@ -176,7 +177,7 @@
                 v-model="text"
                 placeholder="Type your signature"
                 class="w-full px-3 py-2 text-3xl text-center border border-gray-300 rounded-md focus:ring-brand-500 focus:border-brand-500"
-                style="font-family: 'Satisfy', cursive; height: 100px"
+                style="font-family: 'Satisfy', cursive; height: 200px"
                 @input="error = ''"
             />
         </div>

@@ -36,6 +36,7 @@
 
 namespace AidingApp\IntegrationOpenAi\Services;
 
+use AidingApp\Ai\Enums\AiReasoningEffort;
 use AidingApp\Ai\Exceptions\MessageResponseException;
 use AidingApp\Ai\Models\AiAssistant;
 use AidingApp\Ai\Models\AiMessage;
@@ -266,6 +267,11 @@ abstract class BaseOpenAiService implements AiService
                             ...$hasImageGeneration ? [[
                                 'type' => 'image_generation',
                             ]] : [],
+                        ],
+                    ] : []),
+                    ...($this->hasReasoning() ? [
+                        'reasoning' => [
+                            'effort' => filled($vectorStoreId) ? AiReasoningEffort::Low : AiReasoningEffort::Minimal,
                         ],
                     ] : []),
                     ...$options,
