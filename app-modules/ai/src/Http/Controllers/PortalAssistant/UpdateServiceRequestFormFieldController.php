@@ -113,8 +113,8 @@ class UpdateServiceRequestFormFieldController
         } else {
             $fields = collect();
 
-            foreach ($form->fields as $f) {
-                $fields->put($f->getKey(), $f->type);
+            foreach ($form->fields as $formField) {
+                $fields->put($formField->getKey(), $formField->type);
             }
 
             app(ProcessServiceRequestSubmissionField::class)->execute(

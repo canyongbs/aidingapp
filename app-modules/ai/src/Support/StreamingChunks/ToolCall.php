@@ -38,6 +38,9 @@ namespace AidingApp\Ai\Support\StreamingChunks;
 
 readonly class ToolCall
 {
+    /**
+     * @param array<string, mixed> $arguments
+     */
     public function __construct(
         public string $id,
         public string $name,

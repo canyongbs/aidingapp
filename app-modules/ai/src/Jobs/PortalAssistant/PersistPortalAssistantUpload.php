@@ -55,7 +55,7 @@ class PersistPortalAssistantUpload implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public $deleteWhenMissingModels = true;
+    public bool $deleteWhenMissingModels = true;
 
     public function __construct(
         protected ServiceRequest $serviceRequest,
@@ -64,6 +64,9 @@ class PersistPortalAssistantUpload implements ShouldQueue
         protected string $collection,
     ) {}
 
+    /**
+     * @return array<int, object>
+     */
     public function middleware(): array
     {
         return [

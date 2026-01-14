@@ -67,8 +67,9 @@ class TestAiService implements AiService
     /**
      * @param array<AiFile> $files
      * @param array<string, mixed> $options
+     * @param array<\Prism\Prism\Tool> $tools
      */
-    public function streamRaw(string $prompt, string $content, array $files = [], array $options = []): Closure
+    public function streamRaw(string $prompt, string $content, array $files = [], array $options = [], array $tools = []): Closure
     {
         throw new Exception('Plain text streaming is not supported by this service.');
     }

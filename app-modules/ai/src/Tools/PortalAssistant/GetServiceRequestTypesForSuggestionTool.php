@@ -77,7 +77,7 @@ class GetServiceRequestTypesForSuggestionTool extends Tool
      */
     protected function buildTypesTree(): array
     {
-        $categories = ServiceRequestTypeCategory::with(['children', 'types' => fn ($q) => $q->whereHas('form')])
+        $categories = ServiceRequestTypeCategory::with(['children', 'types' => fn ($query) => $query->whereHas('form')])
             ->whereNull('parent_id')
             ->orderBy('sort')
             ->get();

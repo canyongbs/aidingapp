@@ -57,6 +57,7 @@ class ShowTypeSelectorTool extends Tool
             ->using($this);
     }
 
+    /** @phpstan-ignore MeliorStan.parameterNameNotCamelCase (tool parameter names must match AI tool definition) */
     public function __invoke(?string $suggested_type_id = null): string
     {
         $draft = $this->findDraft();
@@ -72,9 +73,9 @@ class ShowTypeSelectorTool extends Tool
 
         $suggestion = null;
 
-        if ($suggested_type_id && $suggested_type_id !== '') {
+        if ($suggested_type_id !== null && $suggested_type_id !== '') {
             $type = ServiceRequestType::whereHas('form')
-                ->with(['priorities' => fn ($q) => $q->orderBy('order')])
+                ->with(['priorities' => fn ($query) => $query->orderBy('order')])
                 ->find($suggested_type_id);
 
             if ($type) {
@@ -83,9 +84,9 @@ class ShowTypeSelectorTool extends Tool
                     'name' => $type->name,
                     'description' => $type->description,
                     'priorities' => $type->priorities
-                        ->map(fn ($p) => [
-                            'priority_id' => $p->id,
-                            'name' => $p->name,
+                        ->map(fn ($priority) => [
+                            'priority_id' => $priority->id,
+                            'name' => $priority->name,
                         ])
                         ->values()
                         ->all(),

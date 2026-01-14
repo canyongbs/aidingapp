@@ -87,11 +87,12 @@ class SendMessageController
 
             // Build internal content about attached files
             // Strip UUID from filenames for cleaner display to AI
+            /** @var array<int, array{path: string, original_name: string}> $fileUrls */
             $fileNames = collect($fileUrls)
                 ->pluck('original_name')
-                ->map(function ($filename) {
+                ->map(function (string $filename): string {
                     // Remove the _uuid pattern before the extension
-                    return preg_replace('/_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\./i', '.', $filename);
+                    return preg_replace('/_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\./i', '.', $filename) ?? $filename;
                 })
                 ->implode(', ');
             $fileCount = count($fileUrls);

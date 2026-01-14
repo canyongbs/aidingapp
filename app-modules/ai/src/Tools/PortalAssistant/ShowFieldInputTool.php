@@ -57,6 +57,7 @@ class ShowFieldInputTool extends Tool
             ->using($this);
     }
 
+    /** @phpstan-ignore MeliorStan.parameterNameNotCamelCase (tool parameter names must match AI tool definition) */
     public function __invoke(string $field_id): string
     {
         $draft = $this->findDraft();
