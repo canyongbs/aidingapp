@@ -48,6 +48,7 @@ use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsEx
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use AidingApp\Portal\Settings\PortalSettings;
 use App\Features\PortalAssistantServiceRequestFeature;
 use App\Models\Authenticatable;
 use App\Models\BaseModel;
