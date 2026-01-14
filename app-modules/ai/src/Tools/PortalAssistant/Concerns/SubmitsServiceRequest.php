@@ -36,7 +36,6 @@
 
 namespace AidingApp\Ai\Tools\PortalAssistant\Concerns;
 
-use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
