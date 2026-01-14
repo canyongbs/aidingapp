@@ -177,7 +177,7 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
             ->toArray();
 
         foreach ($requiredFields as $field) {
-            if (! in_array($field->id, $filledFieldIds)) {
+            if (! in_array($field->getKey(), $filledFieldIds)) {
                 return false;
             }
         }
