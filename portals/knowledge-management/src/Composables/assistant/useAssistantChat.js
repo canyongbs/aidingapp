@@ -42,6 +42,7 @@ export function useAssistantChat() {
     const { assistantSendMessageUrl, selectTypeUrl, updateFieldUrl, getTypesUrl, websocketsConfig } =
         useAssistantStore();
     const { getToken } = useTokenStore();
+    const fileUpload = useFileUpload();
 
     const messages = ref([]);
     const threadId = ref(null);
@@ -50,9 +51,6 @@ export function useAssistantChat() {
     const isTyping = ref(false);
     const activeWidget = ref(null);
     const typeSelected = ref(false);
-
-    // File upload integration
-    const fileUpload = useFileUpload();
 
     const isAssistantResponding = computed(() => {
         return messages.value.some((m) => m.author === 'assistant' && !m.isComplete);
@@ -306,10 +304,8 @@ export function useAssistantChat() {
         activeWidget,
         handleWidgetSubmit,
         handleWidgetCancel,
-        // New request link
         showNewRequestLink,
         showNewRequestSelector,
-        // File upload exports
         fileAttachments: fileUpload.files,
         fileAttachmentsEnabled: fileUpload.isEnabled,
         addFileAttachments: fileUpload.addFiles,
