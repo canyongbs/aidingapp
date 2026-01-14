@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Jobs;
 
+use AidingApp\Form\Models\SubmissibleField;
 use AidingApp\ServiceManagement\Actions\SubmitServiceRequestDraft;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
@@ -183,7 +184,7 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
     }
 
     /**
-     * @return Collection<int, ServiceRequestFormField>
+     * @return Collection<int, SubmissibleField>
      */
     protected function getRequiredFields(ServiceRequestType $type): Collection
     {
@@ -191,7 +192,7 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
     }
 
     /**
-     * @param Collection<int, ServiceRequestFormField> $requiredFields
+     * @param Collection<int, SubmissibleField> $requiredFields
      */
     protected function allRequiredFieldsAreFilled(ServiceRequest $draft, Collection $requiredFields): bool
     {
@@ -208,6 +209,9 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
         );
     }
 
+    /**
+     * @return array<string>
+     */
     protected function getFilledFieldIds(ServiceRequestFormSubmission $submission): array
     {
         return $submission->fields()
