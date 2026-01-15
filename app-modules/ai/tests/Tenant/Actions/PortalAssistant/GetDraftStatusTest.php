@@ -351,7 +351,6 @@ describe('ClarifyingQuestions and Resolution Stage Data', function () {
             'title' => 'Test Title',
             'close_details' => 'Test Description',
             'priority_id' => $priority->getKey(),
-            'respondent_type' => $contact->getMorphClass(),
             'respondent_id' => $contact->getKey(),
         ]);
 
@@ -399,18 +398,20 @@ describe('Form Field Processing', function () {
         $step1 = $form->steps()->create(['label' => 'Step 1', 'sort' => 1]);
         $step2 = $form->steps()->create(['label' => 'Step 2', 'sort' => 2]);
 
-        $step2->fields()->create([
+        $form->fields()->create([
             'label' => 'Field B',
             'type' => TextInputFormFieldBlock::type(),
             'is_required' => true,
             'config' => [],
+            'service_request_form_step_id' => $step2->getKey(),
         ]);
 
-        $step1->fields()->create([
+        $form->fields()->create([
             'label' => 'Field A',
             'type' => TextInputFormFieldBlock::type(),
             'is_required' => true,
             'config' => [],
+            'service_request_form_step_id' => $step1->getKey(),
         ]);
 
         $draft = ServiceRequest::factory()->create([
@@ -724,25 +725,28 @@ describe('Skipped Optional Fields', function () {
         $form = $type->form()->create(['name' => 'Test Form']);
         $step = $form->steps()->create(['label' => 'Step 1', 'sort' => 1]);
 
-        $required1 = $step->fields()->create([
+        $required1 = $form->fields()->create([
             'label' => 'Required 1',
             'type' => TextInputFormFieldBlock::type(),
             'is_required' => true,
             'config' => [],
+            'service_request_form_step_id' => $step->getKey(),
         ]);
 
-        $step->fields()->create([
+        $form->fields()->create([
             'label' => 'Optional Skipped',
             'type' => TextInputFormFieldBlock::type(),
             'is_required' => false,
             'config' => [],
+            'service_request_form_step_id' => $step->getKey(),
         ]);
 
-        $step->fields()->create([
+        $form->fields()->create([
             'label' => 'Required 2',
             'type' => TextInputFormFieldBlock::type(),
             'is_required' => true,
             'config' => [],
+            'service_request_form_step_id' => $step->getKey(),
         ]);
 
         $draft = ServiceRequest::factory()->create([
@@ -788,7 +792,6 @@ describe('DataCollection Instructions', function () {
         $draft = createCompleteDraftWithoutRespondent();
 
         $contact = Contact::factory()->create();
-        $draft->respondent_type = $contact->getMorphClass();
         $draft->respondent_id = $contact->getKey();
         $draft->saveQuietly();
 
@@ -1043,8 +1046,7 @@ describe('Filled Form Fields Display', function () {
             'title' => 'Test',
             'close_details' => 'Test',
             'priority_id' => $priority->getKey(),
-            'respondent_type' => $contact->getMorphClass(),
-            'respondent_id' => $contact->getKey(),
+                        'respondent_id' => $contact->getKey(),
         ]);
 
         $result = app(GetDraftStatus::class)->execute($draft);
@@ -1071,8 +1073,7 @@ describe('Filled Form Fields Display', function () {
             'title' => 'Test',
             'close_details' => 'Test',
             'priority_id' => $priority->getKey(),
-            'respondent_type' => $contact->getMorphClass(),
-            'respondent_id' => $contact->getKey(),
+                        'respondent_id' => $contact->getKey(),
         ]);
 
         $submission = $form->submissions()->create();
@@ -1107,8 +1108,7 @@ describe('Filled Form Fields Display', function () {
             'title' => 'Test',
             'close_details' => 'Test',
             'priority_id' => $priority->getKey(),
-            'respondent_type' => $contact->getMorphClass(),
-            'respondent_id' => $contact->getKey(),
+                        'respondent_id' => $contact->getKey(),
         ]);
 
         $submission = $form->submissions()->create();
@@ -1141,8 +1141,7 @@ describe('Filled Form Fields Display', function () {
             'title' => 'Test',
             'close_details' => 'Test',
             'priority_id' => $priority->getKey(),
-            'respondent_type' => $contact->getMorphClass(),
-            'respondent_id' => $contact->getKey(),
+                        'respondent_id' => $contact->getKey(),
         ]);
 
         $submission = $form->submissions()->create();
@@ -1175,8 +1174,7 @@ describe('Filled Form Fields Display', function () {
             'title' => 'Test',
             'close_details' => 'Test',
             'priority_id' => $priority->getKey(),
-            'respondent_type' => $contact->getMorphClass(),
-            'respondent_id' => $contact->getKey(),
+                        'respondent_id' => $contact->getKey(),
         ]);
 
         $submission = $form->submissions()->create();
@@ -1209,8 +1207,7 @@ describe('Filled Form Fields Display', function () {
             'title' => 'Test',
             'close_details' => 'Test',
             'priority_id' => $priority->getKey(),
-            'respondent_type' => $contact->getMorphClass(),
-            'respondent_id' => $contact->getKey(),
+                        'respondent_id' => $contact->getKey(),
         ]);
 
         $submission = $form->submissions()->create();
@@ -1252,8 +1249,7 @@ describe('Filled Form Fields Display', function () {
             'title' => 'Test',
             'close_details' => 'Test',
             'priority_id' => $priority->getKey(),
-            'respondent_type' => $contact->getMorphClass(),
-            'respondent_id' => $contact->getKey(),
+                        'respondent_id' => $contact->getKey(),
         ]);
 
         $submission = $form->submissions()->create();
@@ -1328,8 +1324,7 @@ function createCompleteDraft(): ServiceRequest
         'title' => 'Test Title',
         'close_details' => 'Test Description',
         'priority_id' => $priority->getKey(),
-        'respondent_type' => $contact->getMorphClass(),
-        'respondent_id' => $contact->getKey(),
+                'respondent_id' => $contact->getKey(),
     ]);
 }
 
