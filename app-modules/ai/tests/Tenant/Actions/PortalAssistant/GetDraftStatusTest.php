@@ -949,15 +949,14 @@ describe('ClarifyingQuestions Instructions', function () {
             ->and($result['next_instruction'])->toContain('(1/3 saved)');
     });
 
-    it('instruction for 3 questions mentions complete', function () {
+    it('instruction for 3 questions transitions to resolution stage', function () {
         $draft = createCompleteDraft();
 
         addClarifyingQuestions($draft, 3);
 
         $result = app(GetDraftStatus::class)->execute($draft);
 
-        expect($result['draft_stage'])->toBe('resolution')
-            ->or($result['next_instruction'])->toContain('complete');
+        expect($result['draft_stage'])->toBe('resolution');
     });
 });
 
@@ -1335,20 +1334,6 @@ function createCompleteDraft(): ServiceRequest
         'close_details' => 'Test Description',
         'priority_id' => $priority->getKey(),
                 'respondent_id' => $contact->getKey(),
-    ]);
-}
-
-function createCompleteDraftWithoutRespondent(): ServiceRequest
-{
-    $type = ServiceRequestType::factory()->create();
-    $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-    return ServiceRequest::factory()->create([
-        'is_draft' => true,
-        'title' => 'Test Title',
-        'close_details' => 'Test Description',
-        'priority_id' => $priority->getKey(),
-        'respondent_id' => null,
     ]);
 }
 
