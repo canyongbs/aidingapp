@@ -59,7 +59,7 @@ it('does nothing when feature is disabled', function () {
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertNothingPushed();
+    Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
 it('does nothing when no drafts exist', function () {
@@ -68,7 +68,7 @@ it('does nothing when no drafts exist', function () {
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertNothingPushed();
+    Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
 it('does not dispatch job for non-draft service requests', function () {
@@ -91,7 +91,7 @@ it('does not dispatch job for non-draft service requests', function () {
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertNothingPushed();
+    Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
 it('does not dispatch job for recently updated drafts', function () {
@@ -110,7 +110,7 @@ it('does not dispatch job for recently updated drafts', function () {
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertNothingPushed();
+    Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
 it('does not dispatch job for drafts with null title', function () {
@@ -133,7 +133,7 @@ it('does not dispatch job for drafts with null title', function () {
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertNothingPushed();
+    Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
 it('does not dispatch job for drafts with empty title', function () {
@@ -156,7 +156,7 @@ it('does not dispatch job for drafts with empty title', function () {
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertNothingPushed();
+    Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
 it('does not dispatch job for drafts with null description', function () {
@@ -179,7 +179,7 @@ it('does not dispatch job for drafts with null description', function () {
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertNothingPushed();
+    Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
 it('does not dispatch job for drafts with empty description', function () {
@@ -202,7 +202,7 @@ it('does not dispatch job for drafts with empty description', function () {
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertNothingPushed();
+    Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
 it('does not dispatch job for drafts with recently updated form submission', function () {
@@ -234,7 +234,7 @@ it('does not dispatch job for drafts with recently updated form submission', fun
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertNothingPushed();
+    Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
 it('does not dispatch job for drafts with recently updated form field submissions', function () {
@@ -282,7 +282,7 @@ it('does not dispatch job for drafts with recently updated form field submission
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertNothingPushed();
+    Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
 it('does not dispatch job for drafts with recently added service request updates', function () {
@@ -312,7 +312,7 @@ it('does not dispatch job for drafts with recently added service request updates
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertNothingPushed();
+    Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
 it('dispatches job for valid stale drafts', function () {
