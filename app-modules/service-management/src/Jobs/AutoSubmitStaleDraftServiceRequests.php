@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\PortalAssistantServiceRequestFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -65,6 +66,19 @@ class AutoSubmitStaleDraftServiceRequests implements ShouldQueue, ShouldBeUnique
             ->withoutGlobalScope('excludeDrafts')
             ->where('is_draft', true)
             ->where('updated_at', '<=', $cutoffTime)
+            ->whereNotNull('title')
+            ->where('title', '!=', '')
+            ->whereNotNull('close_details')
+            ->where('close_details', '!=', '')
+            ->whereDoesntHave('serviceRequestFormSubmission', function (Builder $query) use ($cutoffTime) {
+                $query->where('updated_at', '>', $cutoffTime);
+            })
+            ->whereDoesntHave('serviceRequestFormSubmission.fields', function (Builder $query) use ($cutoffTime) {
+                $query->wherePivot('updated_at', '>', $cutoffTime);
+            })
+            ->whereDoesntHave('serviceRequestUpdates', function (Builder $query) use ($cutoffTime) {
+                $query->where('updated_at', '>', $cutoffTime);
+            })
             ->select('id')
             ->eachById(function (ServiceRequest $draft) {
                 dispatch(new AutoSubmitStaleDraftServiceRequest($draft->getKey()));

@@ -39,11 +39,9 @@ namespace AidingApp\ServiceManagement\Jobs;
 use AidingApp\Form\Models\SubmissibleField;
 use AidingApp\ServiceManagement\Actions\SubmitServiceRequestDraft;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\PortalAssistantServiceRequestFeature;
-use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -51,7 +49,6 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 
 class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
 {
@@ -59,8 +56,6 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
-
-    protected Carbon $cutoffTime;
 
     public function __construct(
         protected string $serviceRequestId,
@@ -77,19 +72,13 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
             return;
         }
 
-        $this->cutoffTime = now()->subHour();
-
         $draft = $this->findDraft();
 
         if (! $draft) {
             return;
         }
 
-        if ($this->draftHasRecentActivity($draft)) {
-            return;
-        }
-
-        if ($this->draftIsMissingRequiredFields($draft)) {
+        if ($this->isMissingRequiredFormFields($draft)) {
             return;
         }
 
@@ -104,61 +93,6 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
             ->where('id', $this->serviceRequestId)
             ->with(['serviceRequestFormSubmission', 'priority.type.form.fields'])
             ->first();
-    }
-
-    protected function draftHasRecentActivity(ServiceRequest $draft): bool
-    {
-        return $this->draftWasRecentlyUpdated($draft)
-            || $this->formSubmissionWasRecentlyUpdated($draft->serviceRequestFormSubmission)
-            || $this->formFieldsWereRecentlyUpdated($draft->serviceRequestFormSubmission)
-            || $this->serviceRequestUpdatesWereRecentlyAdded($draft);
-    }
-
-    protected function draftWasRecentlyUpdated(ServiceRequest $draft): bool
-    {
-        return $draft->updated_at > $this->cutoffTime;
-    }
-
-    protected function formSubmissionWasRecentlyUpdated(?ServiceRequestFormSubmission $submission): bool
-    {
-        return $submission && $submission->updated_at > $this->cutoffTime;
-    }
-
-    protected function formFieldsWereRecentlyUpdated(?ServiceRequestFormSubmission $submission): bool
-    {
-        if (! $submission) {
-            return false;
-        }
-
-        $latestFieldUpdate = DB::table('service_request_form_field_submission')
-            ->where('service_request_form_submission_id', $submission->id)
-            ->max('updated_at');
-
-        return $latestFieldUpdate && Carbon::parse($latestFieldUpdate) > $this->cutoffTime;
-    }
-
-    protected function serviceRequestUpdatesWereRecentlyAdded(ServiceRequest $draft): bool
-    {
-        $latestUpdateTime = $draft->serviceRequestUpdates()->max('updated_at');
-
-        return $latestUpdateTime && Carbon::parse($latestUpdateTime) > $this->cutoffTime;
-    }
-
-    protected function draftIsMissingRequiredFields(ServiceRequest $draft): bool
-    {
-        return $this->isMissingTitle($draft)
-            || $this->isMissingDescription($draft)
-            || $this->isMissingRequiredFormFields($draft);
-    }
-
-    protected function isMissingTitle(ServiceRequest $draft): bool
-    {
-        return empty($draft->title);
-    }
-
-    protected function isMissingDescription(ServiceRequest $draft): bool
-    {
-        return empty($draft->close_details);
     }
 
     protected function isMissingRequiredFormFields(ServiceRequest $draft): bool

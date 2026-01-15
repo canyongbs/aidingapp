@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Jobs\AutoSubmitStaleDraftServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -42,9 +41,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\PortalAssistantServiceRequestFeature;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-
-use function Pest\Laravel\travelBack;
-use function Pest\Laravel\travelTo;
 
 beforeEach(function () {
     PortalAssistantServiceRequestFeature::activate();
@@ -66,16 +62,12 @@ it('does nothing when service request is not a draft', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
-    travelTo(now()->subHours(2));
-
     $serviceRequest = ServiceRequest::factory()->create([
         'is_draft' => false,
         'title' => 'Test Title',
         'close_details' => 'Test Description',
         'priority_id' => $priority->getKey(),
     ]);
-
-    travelBack();
 
     $originalNumber = $serviceRequest->service_request_number;
 
@@ -85,197 +77,6 @@ it('does nothing when service request is not a draft', function () {
 
     expect($serviceRequest->is_draft)->toBeFalse()
         ->and($serviceRequest->service_request_number)->toBe($originalNumber);
-});
-
-it('does nothing when draft was recently updated', function () {
-    $type = ServiceRequestType::factory()->create();
-    $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-    $draft = ServiceRequest::factory()->create([
-        'is_draft' => true,
-        'title' => 'Test Title',
-        'close_details' => 'Test Description',
-        'priority_id' => $priority->getKey(),
-    ]);
-
-    (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
-
-    $draft->refresh();
-
-    expect($draft->is_draft)->toBeTrue();
-});
-
-it('does nothing when form submission was recently updated', function () {
-    $type = ServiceRequestType::factory()->create();
-    $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-    $form = $type->form()->create([
-        'name' => 'Test Form',
-    ]);
-
-    travelTo(now()->subHours(2));
-
-    $draft = ServiceRequest::factory()->create([
-        'is_draft' => true,
-        'title' => 'Test Title',
-        'close_details' => 'Test Description',
-        'priority_id' => $priority->getKey(),
-    ]);
-
-    travelBack();
-
-    $submission = $form->submissions()->create();
-
-    $draft->service_request_form_submission_id = $submission->getKey();
-    $draft->saveQuietly();
-
-    (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
-
-    $draft->refresh();
-
-    expect($draft->is_draft)->toBeTrue();
-});
-
-it('does nothing when form fields were recently updated', function () {
-    $type = ServiceRequestType::factory()->create();
-    $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-    $form = $type->form()->create([
-        'name' => 'Test Form',
-    ]);
-
-    $field = $form->fields()->create([
-        'label' => 'Test Field',
-        'type' => 'text_input',
-        'is_required' => false,
-        'config' => [],
-    ]);
-
-    travelTo(now()->subHours(2));
-
-    $draft = ServiceRequest::factory()->create([
-        'is_draft' => true,
-        'title' => 'Test Title',
-        'close_details' => 'Test Description',
-        'priority_id' => $priority->getKey(),
-    ]);
-
-    $submission = $form->submissions()->create();
-
-    $draft->service_request_form_submission_id = $submission->getKey();
-    $draft->saveQuietly();
-
-    travelBack();
-
-    DB::table('service_request_form_field_submission')->insert([
-        'id' => Str::uuid()->toString(),
-        'service_request_form_submission_id' => $submission->getKey(),
-        'service_request_form_field_id' => $field->getKey(),
-        'response' => 'Test response',
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
-
-    (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
-
-    $draft->refresh();
-
-    expect($draft->is_draft)->toBeTrue();
-});
-
-it('does nothing when service request updates were recently added', function () {
-    $type = ServiceRequestType::factory()->create();
-    $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-    travelTo(now()->subHours(2));
-
-    $draft = ServiceRequest::factory()->create([
-        'is_draft' => true,
-        'title' => 'Test Title',
-        'close_details' => 'Test Description',
-        'priority_id' => $priority->getKey(),
-    ]);
-
-    travelBack();
-
-    $draft->serviceRequestUpdates()->createQuietly([
-        'update' => 'Test update',
-        'internal' => false,
-        'created_by_id' => $draft->respondent_id,
-        'created_by_type' => (new Contact())->getMorphClass(),
-    ]);
-
-    (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
-
-    $draft->refresh();
-
-    expect($draft->is_draft)->toBeTrue();
-});
-
-it('does nothing when title is missing', function () {
-    $type = ServiceRequestType::factory()->create();
-    $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-    travelTo(now()->subHours(2));
-
-    $draft = ServiceRequest::factory()->create([
-        'is_draft' => true,
-        'title' => null,
-        'close_details' => 'Test Description',
-        'priority_id' => $priority->getKey(),
-    ]);
-
-    travelBack();
-
-    (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
-
-    $draft->refresh();
-
-    expect($draft->is_draft)->toBeTrue();
-});
-
-it('does nothing when description is missing', function () {
-    $type = ServiceRequestType::factory()->create();
-    $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-    travelTo(now()->subHours(2));
-
-    $draft = ServiceRequest::factory()->create([
-        'is_draft' => true,
-        'title' => 'Test Title',
-        'close_details' => null,
-        'priority_id' => $priority->getKey(),
-    ]);
-
-    travelBack();
-
-    (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
-
-    $draft->refresh();
-
-    expect($draft->is_draft)->toBeTrue();
-});
-
-it('does nothing when description is empty string', function () {
-    $type = ServiceRequestType::factory()->create();
-    $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-    travelTo(now()->subHours(2));
-
-    $draft = ServiceRequest::factory()->create([
-        'is_draft' => true,
-        'title' => 'Test Title',
-        'close_details' => '',
-        'priority_id' => $priority->getKey(),
-    ]);
-
-    travelBack();
-
-    (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
-
-    $draft->refresh();
-
-    expect($draft->is_draft)->toBeTrue();
 });
 
 it('does nothing when required form fields are missing and no submission exists', function () {
@@ -293,16 +94,12 @@ it('does nothing when required form fields are missing and no submission exists'
         'config' => [],
     ]);
 
-    travelTo(now()->subHours(2));
-
     $draft = ServiceRequest::factory()->create([
         'is_draft' => true,
         'title' => 'Test Title',
         'close_details' => 'Test Description',
         'priority_id' => $priority->getKey(),
     ]);
-
-    travelBack();
 
     (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
 
@@ -326,8 +123,6 @@ it('does nothing when required form fields are not filled', function () {
         'config' => [],
     ]);
 
-    travelTo(now()->subHours(2));
-
     $draft = ServiceRequest::factory()->create([
         'is_draft' => true,
         'title' => 'Test Title',
@@ -339,8 +134,6 @@ it('does nothing when required form fields are not filled', function () {
 
     $draft->service_request_form_submission_id = $submission->getKey();
     $draft->saveQuietly();
-
-    travelBack();
 
     (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
 
@@ -364,8 +157,6 @@ it('does nothing when required form field has empty response', function () {
         'config' => [],
     ]);
 
-    travelTo(now()->subHours(2));
-
     $draft = ServiceRequest::factory()->create([
         'is_draft' => true,
         'title' => 'Test Title',
@@ -383,11 +174,9 @@ it('does nothing when required form field has empty response', function () {
         'service_request_form_submission_id' => $submission->getKey(),
         'service_request_form_field_id' => $field->getKey(),
         'response' => '',
-        'created_at' => now()->subHours(2),
-        'updated_at' => now()->subHours(2),
+        'created_at' => now(),
+        'updated_at' => now(),
     ]);
-
-    travelBack();
 
     (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
 
@@ -423,16 +212,12 @@ it('submits draft when form has only optional fields', function () {
         'config' => [],
     ]);
 
-    travelTo(now()->subHours(2));
-
     $draft = ServiceRequest::factory()->create([
         'is_draft' => true,
         'title' => 'Test Title',
         'close_details' => 'Test Description',
         'priority_id' => $priority->getKey(),
     ]);
-
-    travelBack();
 
     (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
 
@@ -463,8 +248,6 @@ it('submits draft when all required form fields are filled', function () {
         'config' => [],
     ]);
 
-    travelTo(now()->subHours(2));
-
     $draft = ServiceRequest::factory()->create([
         'is_draft' => true,
         'title' => 'Test Title',
@@ -482,11 +265,9 @@ it('submits draft when all required form fields are filled', function () {
         'service_request_form_submission_id' => $submission->getKey(),
         'service_request_form_field_id' => $requiredField->getKey(),
         'response' => 'Filled response',
-        'created_at' => now()->subHours(2),
-        'updated_at' => now()->subHours(2),
+        'created_at' => now(),
+        'updated_at' => now(),
     ]);
-
-    travelBack();
 
     (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
 
@@ -502,16 +283,12 @@ function createStaleDraft(): ServiceRequest
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
-    travelTo(now()->subHours(2));
-
     $draft = ServiceRequest::factory()->create([
         'is_draft' => true,
         'title' => 'Test Title',
         'close_details' => 'Test Description',
         'priority_id' => $priority->getKey(),
     ]);
-
-    travelBack();
 
     return $draft;
 }
