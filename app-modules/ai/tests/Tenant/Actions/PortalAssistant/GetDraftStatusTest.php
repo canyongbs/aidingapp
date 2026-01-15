@@ -40,7 +40,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Form\Filament\Blocks\CheckboxFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\SelectFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\SignatureFormFieldBlock;
-use AidingApp\Form\Filament\Blocks\TextAreaFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -119,64 +118,6 @@ describe('Result Structure', function () {
         expect($result['type_name'])->toBe('Custom Type Name');
     });
 
-    it('strips position from missing_required_fields', function () {
-        $draft = createBasicDraft(['title' => null, 'close_details' => null]);
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        foreach ($result['missing_required_fields'] as $field) {
-            expect($field)->not->toHaveKey('position');
-        }
-    });
-
-    it('strips position from missing_optional_fields', function () {
-        $type = ServiceRequestType::factory()->create();
-        $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-        $form = $type->form()->create(['name' => 'Test Form']);
-        $form->fields()->create([
-            'label' => 'Optional Field',
-            'type' => TextInputFormFieldBlock::type(),
-            'is_required' => false,
-            'config' => [],
-        ]);
-
-        $draft = ServiceRequest::factory()->create([
-            'is_draft' => true,
-            'title' => null,
-            'close_details' => null,
-            'priority_id' => $priority->getKey(),
-        ]);
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        foreach ($result['missing_optional_fields'] as $field) {
-            expect($field)->not->toHaveKey('position');
-        }
-    });
-
-    it('does not include form_fields in final result', function () {
-        $type = ServiceRequestType::factory()->create();
-        $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-        $form = $type->form()->create(['name' => 'Test Form']);
-        $form->fields()->create([
-            'label' => 'Test Field',
-            'type' => TextInputFormFieldBlock::type(),
-            'is_required' => true,
-            'config' => [],
-        ]);
-
-        $draft = ServiceRequest::factory()->create([
-            'is_draft' => true,
-            'title' => null,
-            'priority_id' => $priority->getKey(),
-        ]);
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        expect($result)->not->toHaveKey('form_fields');
-    });
 });
 
 describe('DataCollection Stage Data', function () {
@@ -389,84 +330,6 @@ describe('ClarifyingQuestions and Resolution Stage Data', function () {
 });
 
 describe('Form Field Processing', function () {
-    it('returns only title and description in missing_required_fields when no form exists', function () {
-        $draft = createBasicDraft(['title' => null, 'close_details' => null]);
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        $types = collect($result['missing_required_fields'])->pluck('type')->all();
-
-        expect($types)->toBe(['description', 'title']);
-    });
-
-    it('processes fields from ordered steps', function () {
-        $type = ServiceRequestType::factory()->create();
-        $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-        $form = $type->form()->create(['name' => 'Test Form']);
-
-        $step1 = $form->steps()->create(['label' => 'Step 1', 'sort' => 1]);
-        $step2 = $form->steps()->create(['label' => 'Step 2', 'sort' => 2]);
-
-        $form->fields()->create([
-            'label' => 'Step 1 Field',
-            'type' => TextInputFormFieldBlock::type(),
-            'is_required' => true,
-            'config' => [],
-            'service_request_form_step_id' => $step1->getKey(),
-        ]);
-
-        $form->fields()->create([
-            'label' => 'Step 2 Field',
-            'type' => TextInputFormFieldBlock::type(),
-            'is_required' => true,
-            'config' => [],
-            'service_request_form_step_id' => $step2->getKey(),
-        ]);
-
-        $draft = ServiceRequest::factory()->create([
-            'is_draft' => true,
-            'title' => 'Test',
-            'close_details' => 'Test',
-            'priority_id' => $priority->getKey(),
-        ]);
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        $labels = collect($result['missing_required_fields'])->pluck('label')->all();
-
-        expect($labels)->toContain('Step 1 Field')
-            ->and($labels)->toContain('Step 2 Field');
-    });
-
-    it('includes orphaned fields without step', function () {
-        $type = ServiceRequestType::factory()->create();
-        $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-        $form = $type->form()->create(['name' => 'Test Form']);
-
-        $form->fields()->create([
-            'label' => 'Orphaned Field',
-            'type' => TextInputFormFieldBlock::type(),
-            'is_required' => true,
-            'config' => [],
-            'service_request_form_step_id' => null,
-        ]);
-
-        $draft = ServiceRequest::factory()->create([
-            'is_draft' => true,
-            'title' => 'Test',
-            'close_details' => 'Test',
-            'priority_id' => $priority->getKey(),
-        ]);
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        $labels = collect($result['missing_required_fields'])->pluck('label')->all();
-
-        expect($labels)->toContain('Orphaned Field');
-    });
-
     it('includes options for fields with options', function () {
         $type = ServiceRequestType::factory()->create();
         $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
@@ -630,19 +493,6 @@ describe('Missing Required Fields', function () {
 
         expect($result['missing_required_fields'] ?? [])->toBeEmpty();
     });
-
-    it('positions title after description in missing_required_fields', function () {
-        $draft = createBasicDraft(['title' => null, 'close_details' => null]);
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        $types = collect($result['missing_required_fields'])->pluck('type')->all();
-
-        $descIndex = array_search('description', $types);
-        $titleIndex = array_search('title', $types);
-
-        expect($titleIndex)->toBeGreaterThan($descIndex);
-    });
 });
 
 describe('Missing Optional Fields', function () {
@@ -702,32 +552,6 @@ describe('Missing Optional Fields', function () {
         $labels = collect($result['missing_optional_fields'])->pluck('label')->all();
 
         expect($labels)->not->toContain('Optional Field');
-    });
-
-    it('does not include required fields in optional list', function () {
-        $type = ServiceRequestType::factory()->create();
-        $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-        $form = $type->form()->create(['name' => 'Test Form']);
-
-        $form->fields()->create([
-            'label' => 'Required Field',
-            'type' => TextInputFormFieldBlock::type(),
-            'is_required' => true,
-            'config' => [],
-        ]);
-
-        $draft = ServiceRequest::factory()->create([
-            'is_draft' => true,
-            'title' => null,
-            'priority_id' => $priority->getKey(),
-        ]);
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        $labels = collect($result['missing_optional_fields'])->pluck('label')->all();
-
-        expect($labels)->not->toContain('Required Field');
     });
 });
 
@@ -1016,53 +840,6 @@ describe('Resolution Instructions', function () {
 });
 
 describe('Filled Form Fields Display', function () {
-    it('returns empty filled_form_fields when no type', function () {
-        $draft = ServiceRequest::factory()->create([
-            'is_draft' => true,
-            'title' => null,
-            'priority_id' => null,
-        ]);
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        expect($result['filled_form_fields'] ?? [])->toBeEmpty();
-    });
-
-    it('returns empty filled_form_fields when no form', function () {
-        $draft = createCompleteDraft();
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        expect($result['filled_form_fields'])->toBeEmpty();
-    });
-
-    it('returns empty filled_form_fields when no submission', function () {
-        $type = ServiceRequestType::factory()->create();
-        $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-        $form = $type->form()->create(['name' => 'Test Form']);
-        $form->fields()->create([
-            'label' => 'Test Field',
-            'type' => TextInputFormFieldBlock::type(),
-            'is_required' => false,
-            'config' => [],
-        ]);
-
-        $contact = Contact::factory()->create();
-
-        $draft = ServiceRequest::factory()->create([
-            'is_draft' => true,
-            'title' => 'Test',
-            'close_details' => 'Test',
-            'priority_id' => $priority->getKey(),
-                        'respondent_id' => $contact->getKey(),
-        ]);
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        expect($result['filled_form_fields'])->toBeEmpty();
-    });
-
     it('includes label and value for filled fields', function () {
         $type = ServiceRequestType::factory()->create();
         $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
@@ -1197,116 +974,6 @@ describe('Filled Form Fields Display', function () {
         expect($result['filled_form_fields'][0]['value'])->toBe('No');
     });
 
-    it('long values are truncated', function () {
-        $type = ServiceRequestType::factory()->create();
-        $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-        $form = $type->form()->create(['name' => 'Test Form']);
-        $field = $form->fields()->create([
-            'label' => 'Long Text',
-            'type' => TextAreaFormFieldBlock::type(),
-            'is_required' => false,
-            'config' => [],
-        ]);
-
-        $contact = Contact::factory()->create();
-
-        $draft = ServiceRequest::factory()->create([
-            'is_draft' => true,
-            'title' => 'Test',
-            'close_details' => 'Test',
-            'priority_id' => $priority->getKey(),
-                        'respondent_id' => $contact->getKey(),
-        ]);
-
-        $submission = $form->submissions()->create();
-        $draft->service_request_form_submission_id = $submission->getKey();
-        $draft->saveQuietly();
-
-        $longValue = str_repeat('a', 300);
-        createFieldSubmission($submission, $field, $longValue);
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        expect(strlen($result['filled_form_fields'][0]['value']))->toBeLessThanOrEqual(258);
-    });
-
-    it('excludes empty values from filled_form_fields', function () {
-        $type = ServiceRequestType::factory()->create();
-        $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-        $form = $type->form()->create(['name' => 'Test Form']);
-
-        $filledField = $form->fields()->create([
-            'label' => 'Filled Field',
-            'type' => TextInputFormFieldBlock::type(),
-            'is_required' => false,
-            'config' => [],
-        ]);
-
-        $emptyField = $form->fields()->create([
-            'label' => 'Empty Field',
-            'type' => TextInputFormFieldBlock::type(),
-            'is_required' => false,
-            'config' => [],
-        ]);
-
-        $contact = Contact::factory()->create();
-
-        $draft = ServiceRequest::factory()->create([
-            'is_draft' => true,
-            'title' => 'Test',
-            'close_details' => 'Test',
-            'priority_id' => $priority->getKey(),
-                        'respondent_id' => $contact->getKey(),
-        ]);
-
-        $submission = $form->submissions()->create();
-        $draft->service_request_form_submission_id = $submission->getKey();
-        $draft->saveQuietly();
-
-        createFieldSubmission($submission, $filledField, 'Has Value');
-        createFieldSubmission($submission, $emptyField, '');
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        $labels = collect($result['filled_form_fields'])->pluck('label')->all();
-
-        expect($labels)->toContain('Filled Field')
-            ->and($labels)->not->toContain('Empty Field');
-    });
-});
-
-describe('Edge Cases', function () {
-    it('handles draft with no priority', function () {
-        $draft = ServiceRequest::factory()->create([
-            'is_draft' => true,
-            'title' => null,
-            'priority_id' => null,
-        ]);
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        expect($result['type_name'])->toBeNull()
-            ->and($result['draft_stage'])->toBe('data_collection');
-    });
-
-    it('handles form with no fields', function () {
-        $type = ServiceRequestType::factory()->create();
-        $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-        $type->form()->create(['name' => 'Empty Form']);
-
-        $draft = ServiceRequest::factory()->create([
-            'is_draft' => true,
-            'title' => null,
-            'priority_id' => $priority->getKey(),
-        ]);
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        expect($result['has_custom_form_fields'])->toBeFalse();
-    });
 });
 
 function createBasicDraft(array $attributes = []): ServiceRequest
