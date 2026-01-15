@@ -73,7 +73,7 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        if ($this->featureIsDisabled()) {
+        if (! PortalAssistantServiceRequestFeature::active()) {
             return;
         }
 
@@ -94,11 +94,6 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
         }
 
         $this->submitDraft($draft);
-    }
-
-    protected function featureIsDisabled(): bool
-    {
-        return ! PortalAssistantServiceRequestFeature::active();
     }
 
     protected function findDraft(): ?ServiceRequest
