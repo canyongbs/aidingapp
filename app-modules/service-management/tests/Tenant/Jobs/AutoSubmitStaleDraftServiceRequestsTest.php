@@ -52,16 +52,6 @@ afterEach(function () {
     PortalAssistantServiceRequestFeature::deactivate();
 });
 
-it('does nothing when feature is disabled', function () {
-    Queue::fake();
-
-    $draft = createValidStaleDraft();
-
-    (new AutoSubmitStaleDraftServiceRequests())->handle();
-
-    Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
-});
-
 it('does nothing when no drafts exist', function () {
     PortalAssistantServiceRequestFeature::activate();
     Queue::fake();

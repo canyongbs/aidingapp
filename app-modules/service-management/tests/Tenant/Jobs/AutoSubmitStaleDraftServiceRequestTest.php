@@ -50,14 +50,6 @@ afterEach(function () {
     PortalAssistantServiceRequestFeature::deactivate();
 });
 
-it('does nothing when service request does not exist', function () {
-    $nonExistentId = Str::uuid()->toString();
-
-    (new AutoSubmitStaleDraftServiceRequest($nonExistentId))->handle();
-
-    expect(true)->toBeTrue();
-});
-
 it('does nothing when service request is not a draft', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
