@@ -181,13 +181,23 @@ describe('Result Structure', function () {
 
 describe('DataCollection Stage Data', function () {
     it('includes title and description in data_collection stage', function () {
-        $draft = createBasicDraft([
-            'title' => 'My Title',
-            'close_details' => 'My Description',
+        $type = ServiceRequestType::factory()->create();
+        $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
+
+        $form = $type->form()->create(['name' => 'Test Form']);
+        $form->fields()->create([
+            'label' => 'Required Field',
+            'type' => TextInputFormFieldBlock::type(),
+            'is_required' => true,
+            'config' => [],
         ]);
 
-        $draft->respondent_id = null;
-        $draft->saveQuietly();
+        $draft = ServiceRequest::factory()->create([
+            'is_draft' => true,
+            'title' => 'My Title',
+            'close_details' => 'My Description',
+            'priority_id' => $priority->getKey(),
+        ]);
 
         $result = app(GetDraftStatus::class)->execute($draft);
 
@@ -399,19 +409,19 @@ describe('Form Field Processing', function () {
         $step2 = $form->steps()->create(['label' => 'Step 2', 'sort' => 2]);
 
         $form->fields()->create([
-            'label' => 'Field B',
-            'type' => TextInputFormFieldBlock::type(),
-            'is_required' => true,
-            'config' => [],
-            'service_request_form_step_id' => $step2->getKey(),
-        ]);
-
-        $form->fields()->create([
-            'label' => 'Field A',
+            'label' => 'Step 1 Field',
             'type' => TextInputFormFieldBlock::type(),
             'is_required' => true,
             'config' => [],
             'service_request_form_step_id' => $step1->getKey(),
+        ]);
+
+        $form->fields()->create([
+            'label' => 'Step 2 Field',
+            'type' => TextInputFormFieldBlock::type(),
+            'is_required' => true,
+            'config' => [],
+            'service_request_form_step_id' => $step2->getKey(),
         ]);
 
         $draft = ServiceRequest::factory()->create([
@@ -425,8 +435,8 @@ describe('Form Field Processing', function () {
 
         $labels = collect($result['missing_required_fields'])->pluck('label')->all();
 
-        expect($labels[0])->toBe('Field A')
-            ->and($labels[1])->toBe('Field B');
+        expect($labels)->toContain('Step 1 Field')
+            ->and($labels)->toContain('Step 2 Field');
     });
 
     it('includes orphaned fields without step', function () {
@@ -506,7 +516,7 @@ describe('Form Field Processing', function () {
 
         $draft = ServiceRequest::factory()->create([
             'is_draft' => true,
-            'title' => 'Test',
+            'title' => null,
             'close_details' => 'Test',
             'priority_id' => $priority->getKey(),
         ]);
@@ -518,6 +528,8 @@ describe('Form Field Processing', function () {
         createFieldSubmission($submission, $field, 'Filled Value');
 
         $result = app(GetDraftStatus::class)->execute($draft);
+
+        expect($result['draft_stage'])->toBe('data_collection');
 
         $labels = collect($result['missing_required_fields'])->pluck('label')->all();
 
@@ -539,7 +551,7 @@ describe('Form Field Processing', function () {
 
         $draft = ServiceRequest::factory()->create([
             'is_draft' => true,
-            'title' => 'Test',
+            'title' => null,
             'close_details' => 'Test',
             'priority_id' => $priority->getKey(),
         ]);
@@ -551,6 +563,8 @@ describe('Form Field Processing', function () {
         createFieldSubmission($submission, $field, '');
 
         $result = app(GetDraftStatus::class)->execute($draft);
+
+        expect($result['draft_stage'])->toBe('data_collection');
 
         $labels = collect($result['missing_required_fields'])->pluck('label')->all();
 
@@ -789,16 +803,12 @@ describe('Stage Instructions', function () {
 
 describe('DataCollection Instructions', function () {
     it('instruction mentions transition to clarifying questions when all required collected', function () {
-        $draft = createCompleteDraftWithoutRespondent();
-
-        $contact = Contact::factory()->create();
-        $draft->respondent_id = $contact->getKey();
-        $draft->saveQuietly();
+        $draft = createCompleteDraft();
 
         $result = app(GetDraftStatus::class)->execute($draft);
 
         expect($result['draft_stage'])->toBe('clarifying_questions')
-            ->or($result['next_instruction'])->toContain('clarifying');
+            ->and($result['next_instruction'])->toContain('clarifying');
     });
 
     it('instruction for description field mentions enable_file_attachments', function () {
@@ -991,7 +1001,7 @@ describe('Resolution Instructions', function () {
 
         addClarifyingQuestions($draft, 3);
 
-        $draft->serviceRequestUpdates()->create([
+        $draft->serviceRequestUpdates()->createQuietly([
             'update' => 'AI proposed resolution',
             'update_type' => ServiceRequestUpdateType::AiResolutionProposed,
             'internal' => false,
@@ -1345,7 +1355,7 @@ function createCompleteDraftWithoutRespondent(): ServiceRequest
 function addClarifyingQuestions(ServiceRequest $draft, int $count): void
 {
     for ($i = 0; $i < $count; $i++) {
-        $draft->serviceRequestUpdates()->create([
+        $draft->serviceRequestUpdates()->createQuietly([
             'update' => "Question {$i}",
             'update_type' => ServiceRequestUpdateType::ClarifyingQuestion,
             'internal' => false,
