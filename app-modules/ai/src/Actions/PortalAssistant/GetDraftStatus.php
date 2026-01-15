@@ -122,7 +122,7 @@ class GetDraftStatus
      */
     protected function addFilledFieldsIfOnlyTitleDescriptionRemaining(array &$data, ServiceRequest $draft, ServiceRequestType $type): void
     {
-        $onlyTitleDescriptionRemaining = collect($data['missing_required_fields'])
+        $onlyTitleDescriptionRemaining = collect($data['missing_required_fields']) /** @phpstan-ignore argument.templateType, argument.templateType */
             ->every(fn ($field) => in_array($field['type'], ['title', 'description']));
 
         if (! $onlyTitleDescriptionRemaining) {
@@ -235,6 +235,8 @@ class GetDraftStatus
 
         foreach ($this->getOrderedSteps($form) as $step) {
             foreach ($step->fields as $field) {
+                assert($field instanceof ServiceRequestFormField);
+
                 $fields[] = $this->formatField($field, $filledValues, $position++, $step);
             }
         }
