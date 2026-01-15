@@ -34,36 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Tests\Tenant\Contact\RequestFactories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Models\ContactStatus;
-use App\Models\User;
-use Worksome\RequestFactories\RequestFactory;
-
-class CreateContactRequestFactory extends RequestFactory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        $firstName = $this->faker->firstName();
-        $lastName = $this->faker->lastName();
-
-        return [
-            'status_id' => ContactStatus::inRandomOrder()->first() ?? ContactStatus::factory()->create()->id,
-            'source_id' => ContactSource::inRandomOrder()->first() ?? ContactSource::factory()->create()->id,
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'full_name' => "{$firstName} {$lastName}",
-            'preferred' => $this->faker->firstName(),
-            'description' => $this->faker->paragraph(),
-            'email' => $this->faker->email(),
-            'mobile' => $this->faker->e164PhoneNumber(),
-            'sms_opt_out' => $this->faker->boolean(),
-            'email_bounce' => $this->faker->boolean(),
-            'phone' => $this->faker->e164PhoneNumber(),
-            'address' => $this->faker->address(),
-            'address_2' => $this->faker->address(),
-            'created_by_id' => User::factory()->create()->id,
-        ];
+        Schema::table('contacts', function (Blueprint $table) {
+            $table->dropColumn('assigned_to_id');
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('contacts', function (Blueprint $table) {
+            $table->foreignUuid('assigned_to_id')->nullable()->references('id')->on('users');
+        });
+    }
+};

@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Tests\Tenant\Contact\RequestFactories;
 
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
-use App\Models\User;
 use Worksome\RequestFactories\RequestFactory;
 
 class EditContactRequestFactory extends RequestFactory
@@ -63,8 +62,6 @@ class EditContactRequestFactory extends RequestFactory
             'phone' => $this->faker->e164PhoneNumber(),
             'address' => $this->faker->address(),
             'address_2' => $this->faker->address(),
-            'assigned_to_id' => User::factory()->create()->id,
-            'created_by_id' => User::factory()->create()->id,
         ];
     }
 }

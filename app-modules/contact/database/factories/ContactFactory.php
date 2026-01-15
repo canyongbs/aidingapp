@@ -72,7 +72,6 @@ class ContactFactory extends Factory
             'city' => $this->faker->city(),
             'state' => $this->faker->stateAbbr(),
             'postal' => str($this->faker->postcode())->before('-')->toString(),
-            'assigned_to_id' => User::factory(),
             'created_by_id' => User::factory(),
         ];
     }

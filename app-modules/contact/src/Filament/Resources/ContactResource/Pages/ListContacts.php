@@ -43,7 +43,6 @@ use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
 use App\Filament\Tables\Columns\IdColumn;
-use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
 use Filament\Forms\Components\Radio;
@@ -128,7 +127,6 @@ class ListContacts extends ListRecords
                         ->form([
                             Select::make('field')
                                 ->options([
-                                    'assigned_to_id' => 'Assigned To',
                                     'description' => 'Description',
                                     'email_bounce' => 'Email Bounce',
                                     'sms_opt_out' => 'SMS Opt Out',
@@ -137,16 +135,6 @@ class ListContacts extends ListRecords
                                 ])
                                 ->required()
                                 ->live(),
-                            Select::make('assigned_to_id')
-                                ->label('Assigned To')
-                                ->relationship('assignedTo', 'name')
-                                ->searchable()
-                                ->exists(
-                                    table: (new User())->getTable(),
-                                    column: (new User())->getKeyName()
-                                )
-                                ->required()
-                                ->visible(fn (Get $get) => $get('field') === 'assigned_to_id'),
                             Textarea::make('description')
                                 ->string()
                                 ->required()

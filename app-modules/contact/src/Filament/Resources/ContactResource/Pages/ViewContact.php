@@ -113,14 +113,6 @@ class ViewContact extends ViewRecord
                             ->boolean(),
                     ])
                     ->columns(2),
-                Section::make('Record Details')
-                    ->schema([
-                        TextEntry::make('createdBy.name')
-                            ->label('Created By'),
-                        TextEntry::make('assignedTo.name')
-                            ->label('Assigned To'),
-                    ])
-                    ->columns(2),
             ]);
     }
 

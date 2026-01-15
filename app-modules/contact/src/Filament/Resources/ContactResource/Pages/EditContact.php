@@ -42,8 +42,6 @@ use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\Organization;
 use App\Concerns\EditPageRedirection;
-use App\Models\Scopes\HasLicense;
-use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Radio;
@@ -55,7 +53,6 @@ use Filament\Forms\Form;
 use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Database\Eloquent\Builder;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class EditContact extends EditRecord
@@ -193,32 +190,6 @@ class EditContact extends EditRecord
                         Radio::make('email_bounce')
                             ->label('Email Bounce')
                             ->boolean(),
-                    ])
-                    ->columns(2),
-                Section::make('Record Details')
-                    ->schema([
-                        Select::make('created_by_id')
-                            ->label('Created By')
-                            ->relationship('createdBy', 'name')
-                            ->searchable()
-                            ->nullable()
-                            ->exists(
-                                table: (new User())->getTable(),
-                                column: (new User())->getKeyName()
-                            ),
-                        Select::make('assigned_to_id')
-                            ->label('Assigned To')
-                            ->relationship(
-                                'assignedTo',
-                                'name',
-                                fn (Builder $query) => $query->tap(new HasLicense(Contact::getLicenseType())),
-                            )
-                            ->searchable()
-                            ->nullable()
-                            ->exists(
-                                table: (new User())->getTable(),
-                                column: (new User())->getKeyName(),
-                            ),
                     ])
                     ->columns(2),
             ]);
