@@ -34,11 +34,9 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Jobs\AutoSubmitStaleDraftServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
-use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\PortalAssistantServiceRequestFeature;
@@ -111,8 +109,7 @@ it('does nothing when form submission was recently updated', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
-    $form = ServiceRequestForm::create([
-        'service_request_type_id' => $type->getKey(),
+    $form = $type->form()->create([
         'name' => 'Test Form',
     ]);
 
@@ -127,9 +124,7 @@ it('does nothing when form submission was recently updated', function () {
 
     travelBack();
 
-    $submission = ServiceRequestFormSubmission::create([
-        'service_request_form_id' => $form->getKey(),
-    ]);
+    $submission = $form->submissions()->create();
 
     $draft->service_request_form_submission_id = $submission->getKey();
     $draft->saveQuietly();
@@ -145,13 +140,11 @@ it('does nothing when form fields were recently updated', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
-    $form = ServiceRequestForm::create([
-        'service_request_type_id' => $type->getKey(),
+    $form = $type->form()->create([
         'name' => 'Test Form',
     ]);
 
-    $field = ServiceRequestFormField::create([
-        'service_request_form_id' => $form->getKey(),
+    $field = $form->fields()->create([
         'label' => 'Test Field',
         'type' => 'text_input',
         'is_required' => false,
@@ -167,9 +160,7 @@ it('does nothing when form fields were recently updated', function () {
         'priority_id' => $priority->getKey(),
     ]);
 
-    $submission = ServiceRequestFormSubmission::create([
-        'service_request_form_id' => $form->getKey(),
-    ]);
+    $submission = $form->submissions()->create();
 
     $draft->service_request_form_submission_id = $submission->getKey();
     $draft->saveQuietly();
@@ -211,7 +202,7 @@ it('does nothing when service request updates were recently added', function () 
         'update' => 'Test update',
         'internal' => false,
         'created_by_id' => $draft->respondent_id,
-        'created_by_type' => $draft->respondent_type,
+        'created_by_type' => (new Contact())->getMorphClass(),
     ]);
 
     (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
@@ -291,13 +282,11 @@ it('does nothing when required form fields are missing and no submission exists'
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
-    $form = ServiceRequestForm::create([
-        'service_request_type_id' => $type->getKey(),
+    $form = $type->form()->create([
         'name' => 'Test Form',
     ]);
 
-    ServiceRequestFormField::create([
-        'service_request_form_id' => $form->getKey(),
+    $form->fields()->create([
         'label' => 'Required Field',
         'type' => 'text_input',
         'is_required' => true,
@@ -326,13 +315,11 @@ it('does nothing when required form fields are not filled', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
-    $form = ServiceRequestForm::create([
-        'service_request_type_id' => $type->getKey(),
+    $form = $type->form()->create([
         'name' => 'Test Form',
     ]);
 
-    ServiceRequestFormField::create([
-        'service_request_form_id' => $form->getKey(),
+    $form->fields()->create([
         'label' => 'Required Field',
         'type' => 'text_input',
         'is_required' => true,
@@ -348,9 +335,7 @@ it('does nothing when required form fields are not filled', function () {
         'priority_id' => $priority->getKey(),
     ]);
 
-    $submission = ServiceRequestFormSubmission::create([
-        'service_request_form_id' => $form->getKey(),
-    ]);
+    $submission = $form->submissions()->create();
 
     $draft->service_request_form_submission_id = $submission->getKey();
     $draft->saveQuietly();
@@ -368,13 +353,11 @@ it('does nothing when required form field has empty response', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
-    $form = ServiceRequestForm::create([
-        'service_request_type_id' => $type->getKey(),
+    $form = $type->form()->create([
         'name' => 'Test Form',
     ]);
 
-    $field = ServiceRequestFormField::create([
-        'service_request_form_id' => $form->getKey(),
+    $field = $form->fields()->create([
         'label' => 'Required Field',
         'type' => 'text_input',
         'is_required' => true,
@@ -390,9 +373,7 @@ it('does nothing when required form field has empty response', function () {
         'priority_id' => $priority->getKey(),
     ]);
 
-    $submission = ServiceRequestFormSubmission::create([
-        'service_request_form_id' => $form->getKey(),
-    ]);
+    $submission = $form->submissions()->create();
 
     $draft->service_request_form_submission_id = $submission->getKey();
     $draft->saveQuietly();
@@ -431,13 +412,11 @@ it('submits draft when form has only optional fields', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
-    $form = ServiceRequestForm::create([
-        'service_request_type_id' => $type->getKey(),
+    $form = $type->form()->create([
         'name' => 'Test Form',
     ]);
 
-    ServiceRequestFormField::create([
-        'service_request_form_id' => $form->getKey(),
+    $form->fields()->create([
         'label' => 'Optional Field',
         'type' => 'text_input',
         'is_required' => false,
@@ -466,21 +445,18 @@ it('submits draft when all required form fields are filled', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
-    $form = ServiceRequestForm::create([
-        'service_request_type_id' => $type->getKey(),
+    $form = $type->form()->create([
         'name' => 'Test Form',
     ]);
 
-    $requiredField = ServiceRequestFormField::create([
-        'service_request_form_id' => $form->getKey(),
+    $requiredField = $form->fields()->create([
         'label' => 'Required Field',
         'type' => 'text_input',
         'is_required' => true,
         'config' => [],
     ]);
 
-    ServiceRequestFormField::create([
-        'service_request_form_id' => $form->getKey(),
+    $form->fields()->create([
         'label' => 'Optional Field',
         'type' => 'text_input',
         'is_required' => false,
@@ -496,9 +472,7 @@ it('submits draft when all required form fields are filled', function () {
         'priority_id' => $priority->getKey(),
     ]);
 
-    $submission = ServiceRequestFormSubmission::create([
-        'service_request_form_id' => $form->getKey(),
-    ]);
+    $submission = $form->submissions()->create();
 
     $draft->service_request_form_submission_id = $submission->getKey();
     $draft->saveQuietly();
