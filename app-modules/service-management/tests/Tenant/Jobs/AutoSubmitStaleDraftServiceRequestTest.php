@@ -198,7 +198,7 @@ it('does nothing when service request updates were recently added', function () 
 
     travelBack();
 
-    $draft->serviceRequestUpdates()->create([
+    $draft->serviceRequestUpdates()->createQuietly([
         'update' => 'Test update',
         'internal' => false,
         'created_by_id' => $draft->respondent_id,
