@@ -74,7 +74,7 @@ class AutoSubmitStaleDraftServiceRequests implements ShouldQueue, ShouldBeUnique
                 $query->where('updated_at', '>', $cutoffTime);
             })
             ->whereDoesntHave('serviceRequestFormSubmission.fields', function (Builder $query) use ($cutoffTime) {
-                $query->wherePivot('updated_at', '>', $cutoffTime);
+                $query->where('service_request_form_field_submission.updated_at', '>', $cutoffTime);
             })
             ->whereDoesntHave('serviceRequestUpdates', function (Builder $query) use ($cutoffTime) {
                 $query->where('updated_at', '>', $cutoffTime);
