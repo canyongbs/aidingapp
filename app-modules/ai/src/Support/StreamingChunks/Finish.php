@@ -37,6 +37,7 @@
 namespace AidingApp\Ai\Support\StreamingChunks;
 
 use Carbon\CarbonInterface;
+use Prism\Prism\Enums\FinishReason;
 
 readonly class Finish
 {
@@ -44,5 +45,6 @@ readonly class Finish
         public bool $isIncomplete = false,
         public ?string $error = null,
         public ?CarbonInterface $rateLimitResetsAt = null,
+        public ?FinishReason $finishReason = null,
     ) {}
 }

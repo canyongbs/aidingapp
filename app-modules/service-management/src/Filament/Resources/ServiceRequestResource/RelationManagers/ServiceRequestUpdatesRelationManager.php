@@ -60,6 +60,7 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class ServiceRequestUpdatesRelationManager extends RelationManager
@@ -128,7 +129,7 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                 TextColumn::make('updated_at')
                     ->sortable(),
             ])
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort(fn (Builder $query) => $query->orderBy('created_at', 'desc')->orderBy('id', 'desc'))
             ->filters([
             ])
             ->headerActions([

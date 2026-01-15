@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestUpdateFactory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Timelines\ServiceRequestUpdateTimeline;
@@ -70,6 +71,7 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
         'id', // To allow assignment in the correct order during bulk-creation.
         'service_request_id',
         'update',
+        'update_type',
         'internal',
         'created_by_id',
         'created_by_type',
@@ -77,6 +79,7 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
 
     protected $casts = [
         'internal' => 'boolean',
+        'update_type' => ServiceRequestUpdateType::class,
     ];
 
     public function serviceRequest(): BelongsTo

@@ -39,7 +39,11 @@
 
     $blocks = app(ResolveBlockRegistry::class)($submission->submissible);
 
-    $content['content'] = app(InjectSubmissionStateIntoTipTapContent::class)($submission, $content['content'], $blocks);
+    $content['content'] = app(InjectSubmissionStateIntoTipTapContent::class)(
+        $submission,
+        $content['content'] ?? [],
+        $blocks,
+    );
 @endphp
 
 <div class="prose max-w-none dark:prose-invert">

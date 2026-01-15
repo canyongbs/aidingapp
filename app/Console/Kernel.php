@@ -44,6 +44,7 @@ use AidingApp\Engagement\Jobs\UnmatchedInboundCommunicationsJob;
 use AidingApp\Engagement\Models\EngagementFile;
 use AidingApp\Project\Models\ProjectFile;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\ServiceManagement\Jobs\AutoSubmitStaleDraftServiceRequests;
 use AidingApp\ServiceManagement\Jobs\SendClosedServiceRequestFeedbackReminders;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
 use App\Models\HealthCheckResultHistoryItem;
@@ -130,6 +131,13 @@ class Kernel extends ConsoleKernel
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
                             dispatch(new SendClosedServiceRequestFeedbackReminders());
+                        });
+                    })
+                        ->hourly();
+
+                    $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
+                            dispatch(new AutoSubmitStaleDraftServiceRequests());
                         });
                     })
                         ->hourly();

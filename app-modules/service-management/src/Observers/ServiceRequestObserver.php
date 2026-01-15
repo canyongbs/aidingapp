@@ -69,6 +69,10 @@ class ServiceRequestObserver
 
     public function created(ServiceRequest $serviceRequest): void
     {
+        if (! $serviceRequest->priority) {
+            return;
+        }
+
         $customerEmailTemplate = $this->fetchTemplate(
             $serviceRequest->priority->type,
             ServiceRequestEmailTemplateType::Created,
@@ -76,7 +80,7 @@ class ServiceRequestObserver
         );
 
         if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open
-            && $serviceRequest->priority?->type->is_customers_service_request_created_email_enabled) {
+            && $serviceRequest->priority->type->is_customers_service_request_created_email_enabled) {
             $serviceRequest->respondent->notify(
                 new SendEducatableServiceRequestOpenedNotification($serviceRequest, $customerEmailTemplate)
             );
@@ -144,7 +148,13 @@ class ServiceRequestObserver
 
     public function saved(ServiceRequest $serviceRequest): void
     {
-        CreateServiceRequestHistory::dispatch($serviceRequest, $serviceRequest->getChanges(), $serviceRequest->getOriginal());
+        if (! $serviceRequest->isDraft()) {
+            CreateServiceRequestHistory::dispatch($serviceRequest, $serviceRequest->getChanges(), $serviceRequest->getOriginal());
+        }
+
+        if (! $serviceRequest->priority) {
+            return;
+        }
 
         $customerEmailTemplate = $this->fetchTemplate(
             $serviceRequest->priority->type,
@@ -155,16 +165,16 @@ class ServiceRequestObserver
         if (
             $serviceRequest->wasChanged('status_id')
             && $serviceRequest->status?->classification === SystemServiceRequestClassification::Closed
-            && $serviceRequest->priority?->type->is_customers_service_request_closed_email_enabled
+            && $serviceRequest->priority->type->is_customers_service_request_closed_email_enabled
         ) {
             $serviceRequest->respondent->notify(new SendEducatableServiceRequestClosedNotification($serviceRequest, $customerEmailTemplate));
         }
 
         if (
             Gate::check(Feature::FeedbackManagement->getGateName()) &&
-            $serviceRequest?->priority?->type?->has_enabled_feedback_collection &&
-            $serviceRequest?->status?->classification == SystemServiceRequestClassification::Closed &&
-            ! $serviceRequest?->feedback()->count()
+            $serviceRequest->priority->type->has_enabled_feedback_collection &&
+            $serviceRequest->status?->classification == SystemServiceRequestClassification::Closed &&
+            ! $serviceRequest->feedback()->count()
         ) {
             if ($serviceRequest->priority->type->is_customers_survey_response_email_enabled) {
                 $customerEmailTemplateForSurveyResponse = $this->fetchTemplate(
@@ -187,6 +197,10 @@ class ServiceRequestObserver
 
     public function updated(ServiceRequest $serviceRequest): void
     {
+        if (! $serviceRequest->priority) {
+            return;
+        }
+
         if ($serviceRequest->wasChanged('status_id')) {
             if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Closed) {
                 $managerEmailTemplate = $this->fetchTemplate(
@@ -235,7 +249,7 @@ class ServiceRequestObserver
                     ServiceRequestTypeEmailTemplateRole::Customer
                 );
 
-                if ($serviceRequest->priority?->type->is_customers_service_request_status_change_email_enabled) {
+                if ($serviceRequest->priority->type->is_customers_service_request_status_change_email_enabled) {
                     $serviceRequest->respondent->notify(new SendEducatableServiceRequestStatusChangeNotification($serviceRequest, $customerEmailTemplate));
                 }
 

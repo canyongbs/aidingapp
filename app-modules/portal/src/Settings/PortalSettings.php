@@ -58,6 +58,8 @@ class PortalSettings extends SettingsWithMedia
 
     public bool $ai_support_assistant = false;
 
+    public bool $ai_assistant_service_requests = false;
+
     public ?string $knowledge_management_portal_primary_color = null;
 
     public ?string $knowledge_management_portal_rounding = null;
