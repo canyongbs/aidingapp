@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Jobs;
 
-use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\PortalAssistantServiceRequestFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;

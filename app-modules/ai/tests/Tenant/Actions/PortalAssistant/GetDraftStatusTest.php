@@ -117,7 +117,6 @@ describe('Result Structure', function () {
 
         expect($result['type_name'])->toBe('Custom Type Name');
     });
-
 });
 
 describe('DataCollection Stage Data', function () {
@@ -859,7 +858,7 @@ describe('Filled Form Fields Display', function () {
             'title' => 'Test',
             'close_details' => 'Test',
             'priority_id' => $priority->getKey(),
-                        'respondent_id' => $contact->getKey(),
+            'respondent_id' => $contact->getKey(),
         ]);
 
         $submission = $form->submissions()->create();
@@ -894,7 +893,7 @@ describe('Filled Form Fields Display', function () {
             'title' => 'Test',
             'close_details' => 'Test',
             'priority_id' => $priority->getKey(),
-                        'respondent_id' => $contact->getKey(),
+            'respondent_id' => $contact->getKey(),
         ]);
 
         $submission = $form->submissions()->create();
@@ -927,7 +926,7 @@ describe('Filled Form Fields Display', function () {
             'title' => 'Test',
             'close_details' => 'Test',
             'priority_id' => $priority->getKey(),
-                        'respondent_id' => $contact->getKey(),
+            'respondent_id' => $contact->getKey(),
         ]);
 
         $submission = $form->submissions()->create();
@@ -960,7 +959,7 @@ describe('Filled Form Fields Display', function () {
             'title' => 'Test',
             'close_details' => 'Test',
             'priority_id' => $priority->getKey(),
-                        'respondent_id' => $contact->getKey(),
+            'respondent_id' => $contact->getKey(),
         ]);
 
         $submission = $form->submissions()->create();
@@ -973,7 +972,6 @@ describe('Filled Form Fields Display', function () {
 
         expect($result['filled_form_fields'][0]['value'])->toBe('No');
     });
-
 });
 
 function createBasicDraft(array $attributes = []): ServiceRequest
@@ -1000,7 +998,7 @@ function createCompleteDraft(): ServiceRequest
         'title' => 'Test Title',
         'close_details' => 'Test Description',
         'priority_id' => $priority->getKey(),
-                'respondent_id' => $contact->getKey(),
+        'respondent_id' => $contact->getKey(),
     ]);
 }
 
