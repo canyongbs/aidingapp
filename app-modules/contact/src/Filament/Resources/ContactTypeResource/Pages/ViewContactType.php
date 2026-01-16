@@ -34,24 +34,51 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Database\Factories;
+namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
-use AidingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use AidingApp\Contact\Models\ContactStatus;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\Contact\Models\ContactType;
+use App\Features\ContactChangesFeature;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
-/**
- * @extends Factory<ContactStatus>
- */
-class ContactStatusFactory extends Factory
+class ViewContactType extends ViewRecord
 {
-    public function definition(): array
+    protected static string $resource = ContactTypeResource::class;
+
+    public function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Name'),
+                        TextEntry::make('classification')
+                            ->label('Classification'),
+                        TextEntry::make('color')
+                            ->label('Color')
+                            ->badge()
+                            ->color(fn (ContactType $contactType) => $contactType->color->value)
+                            ->visible(ContactChangesFeature::active()),
+                        TextEntry::make('color')
+                            ->label('Color')
+                            ->badge()
+                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value)
+                            ->hidden(ContactChangesFeature::active()),
+                    ])
+                    ->columns(),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
     {
         return [
-            'classification' => $this->faker->randomElement(SystemContactClassification::cases()),
-            'name' => $this->faker->word,
-            'color' => $this->faker->randomElement(ContactStatusColorOptions::cases()),
+            EditAction::make(),
         ];
     }
 }

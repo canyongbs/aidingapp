@@ -34,16 +34,51 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Tests\Tenant\ContactSource\RequestFactories;
+namespace AidingApp\Contact\Models;
 
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Database\Factories\ContactTypeFactory;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
+use AidingApp\Contact\Enums\SystemContactClassification;
+use App\Models\BaseModel;
+use DateTimeInterface;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class CreateContactSourceRequestFactory extends RequestFactory
+/**
+ * @mixin IdeHelperContactType
+ */
+class ContactType extends BaseModel implements Auditable
 {
-    public function definition(): array
+    use SoftDeletes;
+    use AuditableTrait;
+
+    /** @use HasFactory<ContactTypeFactory> */
+    use HasFactory;
+
+    protected $fillable = [
+        'classification',
+        'name',
+        'color',
+    ];
+
+    protected $casts = [
+        'classification' => SystemContactClassification::class,
+        'color' => ContactTypeColorOptions::class,
+    ];
+
+    /**
+     * @return HasMany<Contact, $this>
+     */
+    public function contacts(): HasMany
     {
-        return [
-            'name' => $this->faker->word(),
-        ];
+        return $this->hasMany(Contact::class, 'type_id');
+    }
+
+    protected function serializeDate(DateTimeInterface $date): string
+    {
+        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

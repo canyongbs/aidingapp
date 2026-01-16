@@ -34,57 +34,35 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactStatus;
-use App\Models\User;
+use App\Features\ContactChangesFeature;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use function Pest\Laravel\actingAs;
-use function Tests\asSuperAdmin;
+return new class () extends Migration {
+    public function up(): void
+    {
+        DB::transaction(function () {
+            Schema::rename('contact_statuses', 'contact_types');
 
-test('The correct details are displayed on the ViewContactStatus page', function () {
-    $contactStatus = ContactStatus::factory()->create();
+            Schema::table('contacts', function (Blueprint $table) {
+                $table->renameColumn('status_id', 'type_id');
+            });
 
-    asSuperAdmin()
-        ->get(
-            ContactStatusResource::getUrl('view', [
-                'record' => $contactStatus,
-            ])
-        )
-        ->assertSuccessful()
-        ->assertSeeTextInOrder(
-            [
-                'Name',
-                $contactStatus->name,
-                'Classification',
-                $contactStatus->classification->getLabel(),
-                'Color',
-                $contactStatus->color,
-            ]
-        );
-});
+            ContactChangesFeature::activate();
+        });
+    }
 
-// Permission Tests
+    public function down(): void
+    {
+        DB::transaction(function () {
+            ContactChangesFeature::deactivate();
 
-test('ViewContactStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+            Schema::table('contacts', function (Blueprint $table) {
+                $table->renameColumn('type_id', 'status_id');
+            });
 
-    $contactStatus = ContactStatus::factory()->create();
-
-    actingAs($user)
-        ->get(
-            ContactStatusResource::getUrl('view', [
-                'record' => $contactStatus,
-            ])
-        )->assertForbidden();
-
-    $user->givePermissionTo('settings.view-any');
-    $user->givePermissionTo('settings.*.view');
-
-    actingAs($user)
-        ->get(
-            ContactStatusResource::getUrl('view', [
-                'record' => $contactStatus,
-            ])
-        )->assertSuccessful();
-});
+            Schema::rename('contact_types', 'contact_statuses');
+        });
+    }
+};

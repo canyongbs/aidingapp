@@ -34,12 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\ContactType;
+use App\Features\ContactChangesFeature;
 use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions;
+use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\BulkActionGroup;
 use Filament\Tables\Actions\DeleteBulkAction;
@@ -48,9 +50,9 @@ use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class ListContactStatuses extends ListRecords
+class ListContactTypes extends ListRecords
 {
-    protected static string $resource = ContactStatusResource::class;
+    protected static string $resource = ContactTypeResource::class;
 
     public function table(Table $table): Table
     {
@@ -68,7 +70,13 @@ class ListContactStatuses extends ListRecords
                 TextColumn::make('color')
                     ->label('Color')
                     ->badge()
-                    ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
+                    ->color(fn (ContactType $contactType) => $contactType->color->value)
+                    ->visible(ContactChangesFeature::active()),
+                TextColumn::make('color')
+                    ->label('Color')
+                    ->badge()
+                    ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value)
+                    ->hidden(ContactChangesFeature::active()),
                 TextColumn::make('contacts_count')
                     ->label('# of Contacts')
                     ->counts('contacts')
@@ -88,7 +96,7 @@ class ListContactStatuses extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            CreateAction::make(),
         ];
     }
 }

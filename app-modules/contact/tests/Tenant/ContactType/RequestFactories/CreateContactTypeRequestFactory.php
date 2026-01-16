@@ -34,47 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources;
+namespace AidingApp\Contact\Tests\Tenant\ContactType\RequestFactories;
 
-use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\CreateContactStatus;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\EditContactStatus;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ListContactStatuses;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ViewContactStatus;
-use AidingApp\Contact\Models\ContactStatus;
-use App\Filament\Clusters\ContactManagement;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
+use AidingApp\Contact\Enums\SystemContactClassification;
+use Worksome\RequestFactories\RequestFactory;
 
-class ContactStatusResource extends Resource
+class CreateContactTypeRequestFactory extends RequestFactory
 {
-    protected static ?string $model = ContactStatus::class;
-
-    protected static ?string $navigationLabel = 'Statuses';
-
-    protected static ?int $navigationSort = 1;
-
-    protected static ?string $cluster = ContactManagement::class;
-
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-            ]);
-    }
-
-    public static function getRelations(): array
+    public function definition(): array
     {
         return [
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListContactStatuses::route('/'),
-            'create' => CreateContactStatus::route('/create'),
-            'view' => ViewContactStatus::route('/{record}'),
-            'edit' => EditContactStatus::route('/{record}/edit'),
+            'classification' => fake()->randomElement(SystemContactClassification::cases()),
+            'name' => fake()->name(),
+            'color' => fake()->randomElement(ContactTypeColorOptions::cases()),
         ];
     }
 }

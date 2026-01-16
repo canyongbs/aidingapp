@@ -37,12 +37,10 @@
 namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Contact\Database\Factories\ContactStatusFactory;
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
 use App\Models\BaseModel;
 use DateTimeInterface;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -55,9 +53,6 @@ class ContactStatus extends BaseModel implements Auditable
     use SoftDeletes;
     use AuditableTrait;
 
-    /** @use HasFactory<ContactStatusFactory> */
-    use HasFactory;
-
     protected $fillable = [
         'classification',
         'name',
@@ -66,7 +61,7 @@ class ContactStatus extends BaseModel implements Auditable
 
     protected $casts = [
         'classification' => SystemContactClassification::class,
-        'color' => ContactStatusColorOptions::class,
+        'color' => ContactTypeColorOptions::class,
     ];
 
     /**

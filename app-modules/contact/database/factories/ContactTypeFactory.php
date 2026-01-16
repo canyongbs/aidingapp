@@ -34,52 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Database\Factories;
 
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Pages\EditRecord;
+use AidingApp\Contact\Models\ContactType;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class EditContactStatus extends EditRecord
+/**
+ * @extends Factory<ContactType>
+ */
+class ContactTypeFactory extends Factory
 {
-    use EditPageRedirection;
-
-    protected static string $resource = ContactStatusResource::class;
-
-    public function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->string(),
-                Select::make('classification')
-                    ->label('Classification')
-                    ->searchable()
-                    ->options(SystemContactClassification::class)
-                    ->required()
-                    ->enum(SystemContactClassification::class),
-                Select::make('color')
-                    ->label('Color')
-                    ->searchable()
-                    ->options(ContactStatusColorOptions::class)
-                    ->required()
-                    ->enum(ContactStatusColorOptions::class),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
+    public function definition(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            'classification' => $this->faker->randomElement(SystemContactClassification::cases()),
+            'name' => $this->faker->word,
+            'color' => $this->faker->randomElement(ContactTypeColorOptions::cases()),
         ];
     }
 }

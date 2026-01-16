@@ -34,20 +34,57 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Tests\Tenant\ContactStatus\RequestFactories;
+namespace AidingApp\Contact\Filament\Resources;
 
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
-use AidingApp\Contact\Enums\SystemContactClassification;
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\CreateContactType;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\EditContactType;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\ListContactTypes;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\ViewContactType;
+use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\ContactType;
+use App\Features\ContactChangesFeature;
+use App\Filament\Clusters\ContactManagement;
+use Filament\Forms\Form;
+use Filament\Resources\Resource;
 
-class CreateContactStatusRequestFactory extends RequestFactory
+class ContactTypeResource extends Resource
 {
-    public function definition(): array
+    protected static ?string $navigationLabel = 'Types';
+
+    protected static ?int $navigationSort = 1;
+
+    protected static ?string $cluster = ContactManagement::class;
+
+    public static function getModel(): string
+    {
+        return ContactChangesFeature::active() ? ContactType::class : ContactStatus::class;
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return ContactChangesFeature::active() ? 'Types' : 'Statuses';
+    }
+
+    public static function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+            ]);
+    }
+
+    public static function getRelations(): array
     {
         return [
-            'classification' => fake()->randomElement(SystemContactClassification::cases()),
-            'name' => fake()->name(),
-            'color' => fake()->randomElement(ContactStatusColorOptions::cases()),
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListContactTypes::route('/'),
+            'create' => CreateContactType::route('/create'),
+            'view' => ViewContactType::route('/{record}'),
+            'edit' => EditContactType::route('/{record}/edit'),
         ];
     }
 }

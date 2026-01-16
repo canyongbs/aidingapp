@@ -36,8 +36,7 @@
 
 namespace AidingApp\Contact\Tests\Tenant\Contact\RequestFactories;
 
-use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\ContactType;
 use App\Models\User;
 use Worksome\RequestFactories\RequestFactory;
 
@@ -49,8 +48,7 @@ class CreateContactRequestFactory extends RequestFactory
         $lastName = $this->faker->lastName();
 
         return [
-            'status_id' => ContactStatus::inRandomOrder()->first() ?? ContactStatus::factory()->create()->id,
-            'source_id' => ContactSource::inRandomOrder()->first() ?? ContactSource::factory()->create()->id,
+            'type_id' => ContactType::inRandomOrder()->first() ?? ContactType::factory()->create()->id,
             'first_name' => $firstName,
             'last_name' => $lastName,
             'full_name' => "{$firstName} {$lastName}",

@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Observers;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
+use App\Features\ContactChangesFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 
@@ -47,11 +48,17 @@ class ContactObserver
     {
         $user = auth()->user();
 
-        /** @var ContactSource|null $contactSource */
-        $contactSource = $contact->source;
+        if (! ContactChangesFeature::active()) {
+            /** @var ContactSource|null $contactSource */
+            $contactSource = $contact->source;
 
-        if ($user instanceof User && ! $contact->createdBy && $contactSource?->name !== 'Portal Generated') {
-            $contact->createdBy()->associate($user);
+            if ($user instanceof User && ! $contact->createdBy && $contactSource?->name !== 'Portal Generated') { /** @phpstan-ignore-line */
+                $contact->createdBy()->associate($user);
+            }
+        } else {
+            if ($user instanceof User && ! $contact->createdBy) {
+                $contact->createdBy()->associate($user);
+            }
         }
     }
 

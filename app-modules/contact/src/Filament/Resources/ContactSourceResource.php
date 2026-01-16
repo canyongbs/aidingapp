@@ -41,6 +41,7 @@ use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\EditContact
 use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ListContactSources;
 use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ViewContactSource;
 use AidingApp\Contact\Models\ContactSource;
+use App\Features\ContactChangesFeature;
 use App\Filament\Clusters\ContactManagement;
 use Filament\Resources\Resource;
 
@@ -53,6 +54,11 @@ class ContactSourceResource extends Resource
     protected static ?int $navigationSort = 2;
 
     protected static ?string $cluster = ContactManagement::class;
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return ! ContactChangesFeature::active();
+    }
 
     public static function getRelations(): array
     {

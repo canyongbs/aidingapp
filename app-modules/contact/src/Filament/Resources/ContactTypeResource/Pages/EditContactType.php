@@ -34,20 +34,53 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Tests\Tenant\ContactStatus\RequestFactories;
+namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\EditRecord;
 
-class EditContactStatusRequestFactory extends RequestFactory
+class EditContactType extends EditRecord
 {
-    public function definition(): array
+    use EditPageRedirection;
+
+    protected static string $resource = ContactTypeResource::class;
+
+    public function form(Form $form): Form
+    {
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->required()
+                    ->string(),
+                Select::make('classification')
+                    ->label('Classification')
+                    ->searchable()
+                    ->options(SystemContactClassification::class)
+                    ->required()
+                    ->enum(SystemContactClassification::class),
+                Select::make('color')
+                    ->label('Color')
+                    ->searchable()
+                    ->options(ContactTypeColorOptions::class)
+                    ->required()
+                    ->enum(ContactTypeColorOptions::class),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
     {
         return [
-            'classification' => fake()->randomElement(SystemContactClassification::cases()),
-            'name' => fake()->name(),
-            'color' => fake()->randomElement(ContactStatusColorOptions::cases()),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

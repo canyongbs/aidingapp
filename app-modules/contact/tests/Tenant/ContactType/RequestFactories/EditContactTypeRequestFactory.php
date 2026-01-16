@@ -34,40 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Tests\Tenant\ContactType\RequestFactories;
 
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Resources\Pages\CreateRecord;
+use Worksome\RequestFactories\RequestFactory;
 
-class CreateContactStatus extends CreateRecord
+class EditContactTypeRequestFactory extends RequestFactory
 {
-    protected static string $resource = ContactStatusResource::class;
-
-    public function form(Form $form): Form
+    public function definition(): array
     {
-        return $form
-            ->schema([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->string(),
-                Select::make('classification')
-                    ->label('Classification')
-                    ->searchable()
-                    ->options(SystemContactClassification::class)
-                    ->required()
-                    ->enum(SystemContactClassification::class),
-                Select::make('color')
-                    ->label('Color')
-                    ->searchable()
-                    ->options(ContactStatusColorOptions::class)
-                    ->required()
-                    ->enum(ContactStatusColorOptions::class),
-            ]);
+        return [
+            'classification' => fake()->randomElement(SystemContactClassification::cases()),
+            'name' => fake()->name(),
+            'color' => fake()->randomElement(ContactTypeColorOptions::cases()),
+        ];
     }
 }

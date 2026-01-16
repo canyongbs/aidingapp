@@ -34,43 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages;
+namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
-use AidingApp\Contact\Models\ContactStatus;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
-use Filament\Resources\Pages\ViewRecord;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
+use AidingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\CreateRecord;
 
-class ViewContactStatus extends ViewRecord
+class CreateContactType extends CreateRecord
 {
-    protected static string $resource = ContactStatusResource::class;
+    protected static string $resource = ContactTypeResource::class;
 
-    public function infolist(Infolist $infolist): Infolist
+    public function form(Form $form): Form
     {
-        return $infolist
+        return $form
             ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name'),
-                        TextEntry::make('classification')
-                            ->label('Classification'),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->badge()
-                            ->color(fn (ContactStatus $contactStatus) => $contactStatus->color->value),
-                    ])
-                    ->columns(),
+                TextInput::make('name')
+                    ->label('Name')
+                    ->required()
+                    ->string(),
+                Select::make('classification')
+                    ->label('Classification')
+                    ->searchable()
+                    ->options(SystemContactClassification::class)
+                    ->required()
+                    ->enum(SystemContactClassification::class),
+                Select::make('color')
+                    ->label('Color')
+                    ->searchable()
+                    ->options(ContactTypeColorOptions::class)
+                    ->required()
+                    ->enum(ContactTypeColorOptions::class),
             ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            EditAction::make(),
-        ];
     }
 }

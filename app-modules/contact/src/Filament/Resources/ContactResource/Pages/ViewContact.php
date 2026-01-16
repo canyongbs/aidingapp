@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use App\Features\ContactChangesFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\Section;
@@ -93,9 +94,14 @@ class ViewContact extends ViewRecord
                 Section::make('Classification')
                     ->schema([
                         TextEntry::make('status.name')
-                            ->label('Status'),
+                            ->label('Status')
+                            ->hidden(ContactChangesFeature::active()),
+                        TextEntry::make('type.name')
+                            ->label('Type')
+                            ->visible(ContactChangesFeature::active()),
                         TextEntry::make('source.name')
-                            ->label('Source'),
+                            ->label('Source')
+                            ->hidden(ContactChangesFeature::active()),
                         TextEntry::make('organization.name')
                             ->label('Organization'),
                         TextEntry::make('description')

@@ -40,6 +40,7 @@ use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Exceptions\SesS3InboundServiceRequestTypeNotFound;
@@ -52,6 +53,7 @@ use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailService
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
+use App\Features\ContactChangesFeature;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV2;
 use Aws\Kms\KmsClient;
@@ -258,24 +260,33 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                                 'full_name' => $fullName,
                             ]);
 
-                        $status = ContactStatus::query()
-                            ->where('classification', SystemContactClassification::New)
-                            ->firstOrFail();
+                        if (ContactChangesFeature::active()) {
+                            $type = ContactType::query()
+                                ->where('classification', SystemContactClassification::New)
+                                ->firstOrFail();
 
-                        $contact->status()->associate($status);
+                            $contact->type()->associate($type);
+                        } else {
+                            $status = ContactStatus::query()
+                                ->where('classification', SystemContactClassification::New)
+                                ->firstOrFail();
 
-                        $source = ContactSource::query()
-                            ->where('name', 'Service Request Email Auto Creation')
-                            ->first();
+                            $contact->status()->associate($status);
 
-                        if (! $source) {
                             $source = ContactSource::query()
-                                ->create([
-                                    'name' => 'Service Request Email Auto Creation',
-                                ]);
-                        }
+                                ->where('name', 'Service Request Email Auto Creation')
+                                ->first();
 
-                        $contact->source()->associate($source);
+                            if (! $source) {
+                                $source = ContactSource::query()
+                                    ->create([
+                                        'name' => 'Service Request Email Auto Creation',
+                                    ]);
+                            }
+
+                            $contact->source()->associate($source);
+                            $contact->status()->associate($status);
+                        }
 
                         $contact->organization()->associate($organization);
 

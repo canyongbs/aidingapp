@@ -34,20 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Database\Factories;
+namespace AidingApp\Contact\Enums;
 
-use AidingApp\Contact\Models\ContactSource;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Filament\Support\Contracts\HasLabel;
 
-/**
- * @extends Factory<ContactSource>
- */
-class ContactSourceFactory extends Factory
+enum ContactTypeColorOptions: string implements HasLabel
 {
-    public function definition(): array
+    case Success = 'success';
+
+    case Danger = 'danger';
+
+    case Warning = 'warning';
+
+    case Info = 'info';
+
+    case Primary = 'primary';
+
+    case Gray = 'gray';
+
+    public function getLabel(): string
     {
-        return [
-            'name' => $this->faker->word(),
-        ];
+        return $this->value;
     }
 }

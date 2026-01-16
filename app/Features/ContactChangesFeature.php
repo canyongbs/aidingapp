@@ -34,16 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Tests\Tenant\ContactSource\RequestFactories;
+namespace App\Features;
 
-use Worksome\RequestFactories\RequestFactory;
+use App\Support\AbstractFeatureFlag;
 
-class EditContactSourceRequestFactory extends RequestFactory
+class ContactChangesFeature extends AbstractFeatureFlag
 {
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'name' => $this->faker->word(),
-        ];
+        return false;
     }
 }

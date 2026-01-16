@@ -34,65 +34,57 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Filament\Resources\ContactSourceResource;
-use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ListContactSources;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactType;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ListContactSources page', function () {
-    $contactSources = ContactSource::factory()
-        // TODO: Fix this once Contact factory is created
-        //->has(ServiceRequest::factory()->count(fake()->randomNumber(1)), 'serviceRequests')
-        ->count(10)
-        ->create();
+test('The correct details are displayed on the ViewContactType page', function () {
+    $contactType = ContactType::factory()->create();
 
-    asSuperAdmin();
-
-    $component = livewire(ListContactSources::class);
-
-    $component
+    asSuperAdmin()
+        ->get(
+            ContactTypeResource::getUrl('view', [
+                'record' => $contactType,
+            ])
+        )
         ->assertSuccessful()
-        ->assertCanSeeTableRecords($contactSources)
-        ->assertCountTableRecords(10)
-        ->assertTableColumnExists('contacts_count');
-
-    $contactSources->each(
-        fn (ContactSource $contactSource) => $component
-            ->assertTableColumnStateSet(
-                'id',
-                $contactSource->id,
-                $contactSource
-            )
-            ->assertTableColumnStateSet(
-                'name',
-                $contactSource->name,
-                $contactSource
-            )
-        // Currently setting not test for service_requests_count as there is no easy way to check now, relying on underlying package tests
-    );
+        ->assertSeeTextInOrder(
+            [
+                'Name',
+                $contactType->name,
+                'Classification',
+                $contactType->classification->getLabel(),
+                'Color',
+                $contactType->color,
+            ]
+        );
 });
-
-// TODO: Sorting and Searching tests
 
 // Permission Tests
 
-test('ListContactSources is gated with proper access control', function () {
+test('ViewContactType is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
+
+    $contactType = ContactType::factory()->create();
 
     actingAs($user)
         ->get(
-            ContactSourceResource::getUrl('index')
+            ContactTypeResource::getUrl('view', [
+                'record' => $contactType,
+            ])
         )->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.view');
 
     actingAs($user)
         ->get(
-            ContactSourceResource::getUrl('index')
+            ContactTypeResource::getUrl('view', [
+                'record' => $contactType,
+            ])
         )->assertSuccessful();
 });
