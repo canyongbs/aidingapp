@@ -44,8 +44,6 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use App\Features\JobTitleFeature;
 use App\Features\ContactChangesFeature;
-use App\Models\Scopes\HasLicense;
-use App\Models\User;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;

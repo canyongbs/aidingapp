@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Tests\Tenant\Contact\RequestFactories;
 
 use AidingApp\Contact\Models\ContactType;
-use App\Models\User;
 use Worksome\RequestFactories\RequestFactory;
 
 class EditContactRequestFactory extends RequestFactory
