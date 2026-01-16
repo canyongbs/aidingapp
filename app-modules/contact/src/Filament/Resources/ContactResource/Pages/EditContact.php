@@ -42,6 +42,7 @@ use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\Organization;
 use App\Concerns\EditPageRedirection;
+use App\Features\JobTitleFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Radio;
@@ -67,6 +68,8 @@ class EditContact extends EditRecord
     public function form(Form $form): Form
     {
         $generateFullName = function (Get $get, Set $set) {
+            $title = $get('title') ?? '';
+
             $firstName = trim($get('first_name'));
 
             if (blank($firstName)) {
@@ -79,13 +82,30 @@ class EditContact extends EditRecord
                 return;
             }
 
-            $set(Contact::displayNameKey(), "{$firstName} {$lastName}");
+            $set(Contact::displayNameKey(), "{$title} {$firstName} {$lastName}");
         };
 
         return $form
             ->schema([
                 Section::make('Demographics')
                     ->schema([
+                        Select::make('title')
+                            ->label('Title')
+                            ->options([
+                                'Dr.' => 'Dr.',
+                                'Professor' => 'Professor',
+                                'Mr.' => 'Mr.',
+                                'Ms.' => 'Ms.',
+                                'Mrs.' => 'Mrs.',
+                            ])
+                            ->in(['Dr.', 'Professor', 'Mr.', 'Ms.', 'Mrs.'])
+                            ->nullable()
+                            ->placeholder('No Title')
+                            ->live(onBlur: true)
+                            ->afterStateUpdated($generateFullName)
+                            ->string()
+                            ->visible(fn (): bool => JobTitleFeature::active())
+                            ->searchable(),
                         TextInput::make('first_name')
                             ->label('First Name')
                             ->required()
@@ -111,8 +131,14 @@ class EditContact extends EditRecord
                             ->label('Preferred Name')
                             ->string()
                             ->maxLength(255),
+                        TextInput::make('job_title')
+                            ->maxLength(255)
+                            ->visible(fn (): bool => JobTitleFeature::active())
+                            ->nullable()
+                            ->string(),
                     ])
-                    ->columns(2),
+                    ->columns(JobTitleFeature::active() ? 3 : 2)
+                    ->columnSpanFull(),
                 Section::make('Contact Information')
                     ->schema([
                         TextInput::make('email')
