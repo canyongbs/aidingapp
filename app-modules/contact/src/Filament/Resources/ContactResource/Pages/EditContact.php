@@ -44,8 +44,6 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use App\Concerns\EditPageRedirection;
 use App\Features\ContactChangesFeature;
-use App\Models\Scopes\HasLicense;
-use App\Models\User;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Radio;
