@@ -68,6 +68,8 @@ class EditContact extends EditRecord
     public function form(Form $form): Form
     {
         $generateFullName = function (Get $get, Set $set) {
+            $title = $get('title') ?? '';
+
             $firstName = trim($get('first_name'));
 
             if (blank($firstName)) {
@@ -80,7 +82,7 @@ class EditContact extends EditRecord
                 return;
             }
 
-            $set(Contact::displayNameKey(), "{$firstName} {$lastName}");
+            $set(Contact::displayNameKey(), "{$title} {$firstName} {$lastName}");
         };
 
         return $form
@@ -96,6 +98,8 @@ class EditContact extends EditRecord
                                 'Ms.' => 'Ms.',
                                 'Mrs.' => 'Mrs.',
                             ])
+                            ->in(['Dr.', 'Professor', 'Mr.', 'Ms.', 'Mrs.'])
+                            ->nullable()
                             ->placeholder('No Title')
                             ->live(onBlur: true)
                             ->afterStateUpdated($generateFullName)
@@ -130,9 +134,11 @@ class EditContact extends EditRecord
                         TextInput::make('job_title')
                             ->maxLength(255)
                             ->visible(fn (): bool => JobTitleFeature::active())
+                            ->nullable()
                             ->string(),
                     ])
-                    ->columns(2),
+                    ->columns(JobTitleFeature::active() ? 3 : 2)
+                    ->columnSpanFull(),
                 Section::make('Contact Information')
                     ->schema([
                         TextInput::make('email')

@@ -73,7 +73,8 @@ class ViewContact extends ViewRecord
                             ->visible(fn (): bool => JobTitleFeature::active())
                             ->label('Job Title'),
                     ])
-                    ->columns(2),
+                    ->columns(JobTitleFeature::active() ? 3 : 2)
+                    ->columnSpanFull(),
                 Section::make('Contact Information')
                     ->schema([
                         TextEntry::make('email')
