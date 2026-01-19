@@ -48,14 +48,14 @@ jobs:
 
             - name: Fill in the new image ID in the Amazon ECS task definition
               id: task-def
-              uses: aws-actions/amazon-ecs-render-task-definition@06472d439cb66af6210a6709bfc842c26b053706 #1.8.2
+              uses: aws-actions/amazon-ecs-render-task-definition@6b89923a897d41e9ad789181d8865b532ecf973c #1.8.3
               with:
                   task-definition: 'docker/devops/ecs/aidingapp/aidingapp-prod-task-definition.json'
                   container-name: 'app'
                   image: ${{ steps.build-image.outputs.image }}
 
             - name: Deploy Amazon ECS task definition
-              uses: aws-actions/amazon-ecs-deploy-task-definition@c6e19c08506099e50400581201a3a767fd8e3ff4 #2.5.1
+              uses: aws-actions/amazon-ecs-deploy-task-definition@cbf54ec46642b86ff78c2f5793da6746954cf8ff #2.6.0
               with:
                   task-definition: ${{ steps.task-def.outputs.task-definition }}
                   service: 'aidingapp-prod-service'
