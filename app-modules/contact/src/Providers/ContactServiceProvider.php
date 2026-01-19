@@ -39,7 +39,6 @@ namespace AidingApp\Contact\Providers;
 use AidingApp\Contact\ContactPlugin;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
@@ -60,7 +59,6 @@ class ContactServiceProvider extends ServiceProvider
         Relation::morphMap([
             'contact' => Contact::class,
             'contact_source' => ContactSource::class,
-            'contact_status' => ContactStatus::class,
             'contact_type' => ContactType::class,
             'organization' => Organization::class,
             'organization_industry' => OrganizationIndustry::class,

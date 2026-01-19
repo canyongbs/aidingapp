@@ -39,7 +39,6 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalRegisterRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
@@ -72,24 +71,15 @@ class KnowledgeManagementPortalRegisterController extends Controller
                 'phone' => $data['phone'] ?? null,
                 'sms_opt_out' => $data['sms_opt_out'],
             ]);
+        $type = ContactType::query()
+            ->where('classification', SystemContactClassification::New)
+            ->first();
 
-        if (ContactChangesFeature::active()) {
-            $type = ContactType::query()
-                ->where('classification', SystemContactClassification::New)
-                ->first();
+        if ($type) {
+            $contact->type()->associate($type);
+        }
 
-            if ($type) {
-                $contact->type()->associate($type);
-            }
-        } else {
-            $status = ContactStatus::query()
-                ->where('classification', SystemContactClassification::New)
-                ->first();
-
-            if ($status) {
-                $contact->status()->associate($status);
-            }
-
+        if (! ContactChangesFeature::active()) {
             $source = ContactSource::query()
                 ->where('name', 'Portal Generated')
                 ->first();

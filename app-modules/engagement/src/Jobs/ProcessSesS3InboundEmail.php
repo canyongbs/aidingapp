@@ -39,7 +39,6 @@ namespace AidingApp\Engagement\Jobs;
 use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Engagement\Enums\EngagementResponseType;
@@ -260,19 +259,13 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                                 'full_name' => $fullName,
                             ]);
 
-                        if (ContactChangesFeature::active()) {
-                            $type = ContactType::query()
-                                ->where('classification', SystemContactClassification::New)
-                                ->firstOrFail();
+                        $type = ContactType::query()
+                            ->where('classification', SystemContactClassification::New)
+                            ->firstOrFail();
 
-                            $contact->type()->associate($type);
-                        } else {
-                            $status = ContactStatus::query()
-                                ->where('classification', SystemContactClassification::New)
-                                ->firstOrFail();
+                        $contact->type()->associate($type);
 
-                            $contact->status()->associate($status);
-
+                        if (! ContactChangesFeature::active()) {
                             $source = ContactSource::query()
                                 ->where('name', 'Service Request Email Auto Creation')
                                 ->first();
@@ -285,7 +278,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                             }
 
                             $contact->source()->associate($source);
-                            $contact->status()->associate($status);
                         }
 
                         $contact->organization()->associate($organization);

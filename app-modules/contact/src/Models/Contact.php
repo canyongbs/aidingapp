@@ -57,6 +57,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Task\Models\Task;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use AidingApp\Timeline\Models\Timeline;
+use App\Features\ContactChangesFeature;
 use App\Models\Authenticatable;
 use App\Models\Contracts\Educatable;
 use App\Models\User;
@@ -182,19 +183,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return BelongsTo<ContactStatus, $this>
-     */
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(ContactStatus::class);
-    }
-
-    /**
      * @return BelongsTo<ContactType, $this>
      */
     public function type(): BelongsTo
     {
-        return $this->belongsTo(ContactType::class);
+        return ContactChangesFeature::active() ? $this->belongsTo(ContactType::class) : $this->belongsTo(ContactType::class, 'status_id');
     }
 
     /**

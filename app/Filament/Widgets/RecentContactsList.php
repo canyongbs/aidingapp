@@ -76,16 +76,6 @@ class RecentContactsList extends BaseWidget
                 TextColumn::make('email'),
                 TextColumn::make('mobile')
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('status')
-                    ->badge()
-                    ->state(function (Contact $record) {
-                        return $record->status->name; /** @phpstan-ignore-line */
-                    })
-                    ->color(function (Contact $record) {
-                        return $record->status->color->value;
-                    })
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->hidden(ContactChangesFeature::active()),
                 TextColumn::make('type')
                     ->badge()
                     ->state(function (Contact $record) {
@@ -94,8 +84,7 @@ class RecentContactsList extends BaseWidget
                     ->color(function (Contact $record) {
                         return $record->type->color->value;
                     })
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->visible(ContactChangesFeature::active()),
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('source.name')
                     ->label('Source')
                     ->toggleable(isToggledHiddenByDefault: true)

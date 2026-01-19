@@ -39,7 +39,6 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use App\Features\JobTitleFeature;
@@ -148,24 +147,14 @@ class CreateContact extends CreateRecord
                 ])->columns(2),
 
                 Section::make('Classification')->schema([
-                    Select::make('status_id')
-                        ->label('Status')
-                        ->required()
-                        ->relationship('status', 'name')
-                        ->exists(
-                            table: (new ContactStatus())->getTable(),
-                            column: (new ContactStatus())->getKeyName()
-                        )
-                        ->hidden(ContactChangesFeature::active()),
-                    Select::make('type_id')
-                        ->label('Type')
+                    Select::make(ContactChangesFeature::active() ? 'type_id' : 'status_id')
+                        ->label(ContactChangesFeature::active() ? 'Type' : 'Status')
                         ->required()
                         ->relationship('type', 'name')
                         ->exists(
                             table: (new ContactType())->getTable(),
                             column: (new ContactType())->getKeyName()
-                        )
-                        ->visible(ContactChangesFeature::active()),
+                        ),
                     Select::make('source_id')
                         ->label('Source')
                         ->required()

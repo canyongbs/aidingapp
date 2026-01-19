@@ -66,20 +66,6 @@ class ContactsTable
                 TextColumn::make('mobile')
                     ->label('Mobile')
                     ->sortable(),
-                TextColumn::make('status')
-                    ->badge()
-                    ->state(function (Contact $record) {
-                        return $record->status->name; /** @phpstan-ignore-line */
-                    })
-                    ->color(function (Contact $record) {
-                        return $record->status->color->value;
-                    })
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        return $query
-                            ->join('contact_statuses', 'contacts.status_id', '=', 'contact_statuses.id')
-                            ->orderBy('contact_statuses.name', $direction);
-                    })
-                    ->hidden(ContactChangesFeature::active()),
                 TextColumn::make('type')
                     ->badge()
                     ->state(function (Contact $record) {
@@ -89,11 +75,16 @@ class ContactsTable
                         return $record->type->color->value;
                     })
                     ->sortable(query: function (Builder $query, string $direction): Builder {
+                        if (! ContactChangesFeature::active()) {
+                            return $query
+                                ->join('contact_statuses', 'contacts.status_id', '=', 'contact_statuses.id')
+                                ->orderBy('contact_statuses.name', $direction);
+                        }
+
                         return $query
                             ->join('contact_types', 'contacts.type_id', '=', 'contact_types.id')
                             ->orderBy('contact_types.name', $direction);
-                    })
-                    ->visible(ContactChangesFeature::active()),
+                    }),
                 TextColumn::make('source.name')
                     ->label('Source')
                     ->sortable()

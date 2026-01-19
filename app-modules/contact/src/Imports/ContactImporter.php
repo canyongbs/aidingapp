@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Imports;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Models\ContactStatus;
 use AidingApp\Contact\Models\ContactType;
 use App\Features\ContactChangesFeature;
 use App\Models\User;
@@ -70,10 +69,7 @@ class ContactImporter extends Importer
                 ->example('Jonathan Smith'),
             ImportColumn::make('preferred')
                 ->example('John'),
-        ];
-
-        if (ContactChangesFeature::active()) {
-            $columns[] = ImportColumn::make('type')
+            ImportColumn::make('type')
                 ->relationship(
                     resolveUsing: fn (mixed $state) => ContactType::query()
                         ->when(
@@ -83,24 +79,12 @@ class ContactImporter extends Importer
                         )
                         ->first(),
                 )
-                ->guess(['type_id', 'type_name'])
+                ->guess(ContactChangesFeature::active() ? ['type_id', 'type_name'] : ['status_id', 'status_name'])
                 ->requiredMapping()
-                ->example(fn (): ?string => ContactType::query()->value('name'));
-        } else {
-            $columns[] = ImportColumn::make('status')
-                ->relationship(
-                    resolveUsing: fn (mixed $state) => ContactStatus::query()
-                        ->when(
-                            Str::isUuid($state),
-                            fn (Builder $query) => $query->whereKey($state),
-                            fn (Builder $query) => $query->where('name', $state),
-                        )
-                        ->first(),
-                )
-                ->guess(['status_id', 'status_name'])
-                ->requiredMapping()
-                ->example(fn (): ?string => ContactStatus::query()->value('name'));
+                ->example(fn (): ?string => ContactType::query()->value('name')),
+        ];
 
+        if (! ContactChangesFeature::active()) {
             $columns[] = ImportColumn::make('source')
                 ->relationship(
                     resolveUsing: fn (mixed $state) => ContactSource::query()
