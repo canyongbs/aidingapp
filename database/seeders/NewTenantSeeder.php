@@ -52,14 +52,11 @@ use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
 use App\Models\Authenticatable;
 use Illuminate\Database\Seeder;
-use Laravel\Pennant\Feature;
 
 class NewTenantSeeder extends Seeder
 {
     public function run(): void
     {
-        Feature::flushCache();
-
         Role::create([
             'name' => Authenticatable::SUPER_ADMIN_ROLE,
             'guard_name' => 'web',
