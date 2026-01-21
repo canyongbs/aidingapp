@@ -102,10 +102,6 @@ class ListContacts extends ListRecords
                             ->join('contact_types', 'contacts.type_id', '=', 'contact_types.id')
                             ->orderBy('contact_types.name', $direction);
                     }),
-                TextColumn::make('source.name')
-                    ->label('Source')
-                    ->sortable()
-                    ->hidden(ContactChangesFeature::active()),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime('g:ia - M j, Y')
