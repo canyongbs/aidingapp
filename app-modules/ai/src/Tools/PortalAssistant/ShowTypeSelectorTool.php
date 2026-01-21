@@ -72,7 +72,7 @@ class ShowTypeSelectorTool extends Tool
 
         $suggestion = null;
 
-        if (filled($suggested_type_id) {
+        if (filled($suggested_type_id)) {
             $type = ServiceRequestType::whereHas('form')
                 ->with(['priorities' => fn ($query) => $query->orderBy('order')])
                 ->find($suggested_type_id);
