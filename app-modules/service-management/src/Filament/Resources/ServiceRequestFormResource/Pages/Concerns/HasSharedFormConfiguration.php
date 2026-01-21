@@ -134,6 +134,7 @@ trait HasSharedFormConfiguration
                 ->disabled(fn (?ServiceRequestForm $record) => $record?->submissions()->submitted()->exists())
                 ->relationship()
                 ->reorderable()
+                ->orderColumn('sort')
                 ->columnSpanFull(),
             Section::make('Appearance')
                 ->schema([

@@ -44,6 +44,8 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 
 class PersistServiceRequestUpload implements ShouldQueue
 {
@@ -71,9 +73,34 @@ class PersistServiceRequestUpload implements ShouldQueue
 
     public function handle(): void
     {
-        $this->serviceRequest
-            ->addMediaFromDisk($this->path)
-            ->usingName(pathinfo($this->originalFileName, PATHINFO_FILENAME))
-            ->toMediaCollection($this->collection);
+        $this->validatePath();
+
+        if (! Storage::exists($this->path)) {
+            return;
+        }
+
+        try {
+            $this->serviceRequest
+                ->addMediaFromDisk($this->path)
+                ->usingName(pathinfo($this->originalFileName, PATHINFO_FILENAME))
+                ->toMediaCollection($this->collection);
+        } finally {
+            Storage::delete($this->path);
+        }
+    }
+
+    protected function validatePath(): void
+    {
+        if (str_contains($this->path, '..') || str_contains($this->path, '//')) {
+            throw new InvalidArgumentException('Invalid path: path traversal not allowed');
+        }
+
+        if (! str_starts_with($this->path, 'tmp/')) {
+            throw new InvalidArgumentException('Invalid path: must be within tmp/ directory');
+        }
+
+        if (! preg_match('/^tmp\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-zA-Z0-9]+$/i', $this->path)) {
+            throw new InvalidArgumentException('Invalid path: does not match expected format');
+        }
     }
 }

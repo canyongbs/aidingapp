@@ -44,7 +44,7 @@ export function useAssistantConnection(websocketsConfig, getToken) {
     const echo = ref(null);
     const currentThread = ref(null);
 
-    const connect = async (threadId, onChunk) => {
+    const connect = async (threadId, onChunk, onActionRequest = null) => {
         if (!websocketsConfig || !threadId) return;
 
         if (echo.value && currentThread.value) {
@@ -95,9 +95,17 @@ export function useAssistantConnection(websocketsConfig, getToken) {
 
         currentThread.value = threadId;
 
-        echo.value.private(`portal-assistant-thread-${threadId}`).listen('.portal-assistant-message.chunk', (event) => {
+        const channel = echo.value.private(`portal-assistant-thread-${threadId}`);
+
+        channel.listen('.portal-assistant-message.chunk', (event) => {
             if (onChunk) {
                 onChunk(event.content || '', event.is_complete, event.error);
+            }
+        });
+
+        channel.listen('.portal-assistant-action.requested', (event) => {
+            if (onActionRequest) {
+                onActionRequest(event.action_type, event.params);
             }
         });
     };

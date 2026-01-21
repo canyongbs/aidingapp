@@ -37,9 +37,11 @@
 namespace AidingApp\Ai\Models;
 
 use AidingApp\Ai\Database\Factories\PortalAssistantThreadFactory;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
@@ -54,6 +56,7 @@ class PortalAssistantThread extends BaseModel
     public $fillable = [
         'author_type',
         'author_id',
+        'current_service_request_draft_id',
     ];
 
     /**
@@ -70,5 +73,23 @@ class PortalAssistantThread extends BaseModel
     public function author(): MorphTo
     {
         return $this->morphTo('author');
+    }
+
+    /**
+     * @return HasMany<ServiceRequest, $this>
+     */
+    public function serviceRequests(): HasMany
+    {
+        return $this->hasMany(ServiceRequest::class, 'portal_assistant_thread_id')
+            ->withoutGlobalScope('excludeDrafts');
+    }
+
+    /**
+     * @return BelongsTo<ServiceRequest, $this>
+     */
+    public function currentServiceRequestDraft(): BelongsTo
+    {
+        return $this->belongsTo(ServiceRequest::class, 'current_service_request_draft_id')
+            ->withoutGlobalScope('excludeDrafts');
     }
 }

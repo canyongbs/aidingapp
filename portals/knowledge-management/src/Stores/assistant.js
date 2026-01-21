@@ -36,14 +36,39 @@ import { ref } from 'vue';
 
 export const useAssistantStore = defineStore('assistant', () => {
     const assistantSendMessageUrl = ref(null);
+    const selectTypeUrl = ref(null);
+    const updateFieldUrl = ref(null);
+    const requestUploadUrl = ref(null);
+    const getTypesUrl = ref(null);
     const websocketsConfig = ref(null);
+    const apiUrl = ref(null);
 
     async function setAssistantSendMessageUrl(url) {
         assistantSendMessageUrl.value = url;
     }
 
+    async function setSelectTypeUrl(url) {
+        selectTypeUrl.value = url;
+    }
+
+    async function setUpdateFieldUrl(url) {
+        updateFieldUrl.value = url;
+    }
+
+    async function setRequestUploadUrl(url) {
+        requestUploadUrl.value = url;
+    }
+
+    async function setGetTypesUrl(url) {
+        getTypesUrl.value = url;
+    }
+
     async function setWebsocketsConfig(config) {
         websocketsConfig.value = config;
+    }
+
+    async function setApiUrl(url) {
+        apiUrl.value = url;
     }
 
     async function getAssistantSendMessageUrl() {
@@ -56,10 +81,20 @@ export const useAssistantStore = defineStore('assistant', () => {
 
     return {
         assistantSendMessageUrl,
+        selectTypeUrl,
+        updateFieldUrl,
+        requestUploadUrl,
+        getTypesUrl,
         getAssistantSendMessageUrl,
         setAssistantSendMessageUrl,
+        setSelectTypeUrl,
+        setUpdateFieldUrl,
+        setRequestUploadUrl,
+        setGetTypesUrl,
         websocketsConfig,
         getWebsocketsConfig,
         setWebsocketsConfig,
+        apiUrl,
+        setApiUrl,
     };
 });

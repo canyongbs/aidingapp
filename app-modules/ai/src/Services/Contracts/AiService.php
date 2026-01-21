@@ -39,6 +39,8 @@ namespace AidingApp\Ai\Services\Contracts;
 use AidingApp\Ai\Models\AiMessage;
 use AidingApp\Ai\Models\Contracts\AiFile;
 use Closure;
+use Prism\Prism\Contracts\Message;
+use Prism\Prism\Tool;
 
 interface AiService
 {
@@ -62,8 +64,10 @@ interface AiService
      *
      * @param array<AiFile> $files
      * @param array<string, mixed> $options
+     * @param array<Tool> $tools
+     * @param ?array<Message> $messages
      */
-    public function streamRaw(string $prompt, string $content, array $files = [], array $options = []): Closure;
+    public function streamRaw(string $prompt, ?string $content = null, array $files = [], array $options = [], array $tools = [], ?array $messages = null): Closure;
 
     /**
      * This method is passed an unsaved `AiMessage` model and should send the

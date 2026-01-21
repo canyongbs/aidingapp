@@ -41,7 +41,9 @@ use AidingApp\Form\Actions\GenerateSubmissibleValidation;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
+use AidingApp\ServiceManagement\Actions\AssignServiceRequestToTeam;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -150,6 +152,14 @@ class StoreServiceRequestController extends Controller
             'is_ai_resolution_successful' => ['nullable', 'boolean'],
             'ai_resolution_confidence_score' => ['nullable', 'integer', 'min:1', 'max:100'],
             'encrypted_ai_proposed_answer' => ['nullable', 'string'],
+            // Security: Validate file upload paths match expected pattern (tmp/{uuid}.{extension})
+            'Main.upload-file' => ['nullable', 'array'],
+            'Main.upload-file.*.path' => [
+                'required_with:Main.upload-file',
+                'string',
+                'regex:/^tmp\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-zA-Z0-9]+$/i',
+            ],
+            'Main.upload-file.*.originalFileName' => ['required_with:Main.upload-file', 'string', 'max:255'],
         ]);
 
         if ($validator->fails()) {
@@ -245,6 +255,7 @@ class StoreServiceRequestController extends Controller
             $questionUpdate = $serviceRequest->serviceRequestUpdates()->createQuietly([
                 'id' => $updateUuids->shift(),
                 'update' => decrypt($encryptedQuestion),
+                'update_type' => ServiceRequestUpdateType::ClarifyingQuestion,
                 'internal' => false,
                 'created_by_id' => $serviceRequest->getKey(),
                 'created_by_type' => $serviceRequest->getMorphClass(),
@@ -255,6 +266,7 @@ class StoreServiceRequestController extends Controller
             $answerUpdate = $serviceRequest->serviceRequestUpdates()->createQuietly([
                 'id' => $updateUuids->shift(),
                 'update' => $answer,
+                'update_type' => ServiceRequestUpdateType::ClarifyingAnswer,
                 'internal' => false,
                 'created_by_id' => $contact->getKey(),
                 'created_by_type' => $contact->getMorphClass(),
@@ -314,6 +326,7 @@ class StoreServiceRequestController extends Controller
         $aiAnswerUpdate = $serviceRequest->serviceRequestUpdates()->createQuietly([
             'id' => $updateUuids->shift(),
             'update' => "Based on the information you've provided, here is a potential solution:\n\n{$aiProposedAnswer}\n\nDid this resolve your issue?",
+            'update_type' => ServiceRequestUpdateType::AiResolutionProposed,
             'internal' => false,
             'created_by_id' => $serviceRequest->getKey(),
             'created_by_type' => $serviceRequest->getMorphClass(),
@@ -335,6 +348,7 @@ class StoreServiceRequestController extends Controller
         $userConfirmationUpdate = $serviceRequest->serviceRequestUpdates()->createQuietly([
             'id' => $updateUuids->shift(),
             'update' => 'Yes, this resolved my issue.',
+            'update_type' => ServiceRequestUpdateType::AiResolutionResponse,
             'internal' => false,
             'created_by_id' => $contact->getKey(),
             'created_by_type' => $contact->getMorphClass(),
@@ -367,6 +381,7 @@ class StoreServiceRequestController extends Controller
         $userDeclineUpdate = $serviceRequest->serviceRequestUpdates()->createQuietly([
             'id' => $updateUuids->shift(),
             'update' => 'No, this did not resolve my issue.',
+            'update_type' => ServiceRequestUpdateType::AiResolutionResponse,
             'internal' => false,
             'created_by_id' => $contact->getKey(),
             'created_by_type' => $contact->getMorphClass(),
@@ -377,6 +392,7 @@ class StoreServiceRequestController extends Controller
         $serviceRequest->serviceRequestUpdates()->createQuietly([
             'id' => $updateUuids->shift(),
             'update' => "AI Resolution Attempt (Confidence: {$confidenceScore}%)\n\nProposed Answer:\n{$aiProposedAnswer}\n\nUser indicated this did not resolve their issue.",
+            'update_type' => ServiceRequestUpdateType::AiResolutionSummary,
             'internal' => true,
             'created_by_id' => $serviceRequest->getKey(),
             'created_by_type' => $serviceRequest->getMorphClass(),
@@ -385,11 +401,7 @@ class StoreServiceRequestController extends Controller
 
     protected function assignServiceRequest(ServiceRequest $serviceRequest): void
     {
-        $assignmentClass = $serviceRequest->priority->type->assignment_type->getAssignerClass();
-
-        if ($assignmentClass) {
-            $assignmentClass->execute($serviceRequest);
-        }
+        app(AssignServiceRequestToTeam::class)->execute($serviceRequest);
     }
 
     /**

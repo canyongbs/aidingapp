@@ -36,6 +36,7 @@
 
 namespace AidingApp\IntegrationOpenAi\Services;
 
+use AidingApp\Ai\Enums\AiReasoningEffort;
 use AidingApp\Ai\Exceptions\MessageResponseException;
 use AidingApp\Ai\Models\AiAssistant;
 use AidingApp\Ai\Models\AiMessage;
@@ -48,6 +49,7 @@ use AidingApp\Ai\Support\StreamingChunks\Finish;
 use AidingApp\Ai\Support\StreamingChunks\Image;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
+use AidingApp\Ai\Support\StreamingChunks\ToolCall;
 use AidingApp\IntegrationOpenAi\Models\OpenAiVectorStore;
 use AidingApp\IntegrationOpenAi\Prism\ValueObjects\Messages\DeveloperMessage;
 use AidingApp\IntegrationOpenAi\Services\BaseOpenAiService\Concerns\InteractsWithVectorStores;
@@ -66,6 +68,7 @@ use Prism\Prism\Enums\ChunkType;
 use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Exceptions\PrismRateLimitedException;
 use Prism\Prism\Prism;
+use Prism\Prism\Tool;
 use Prism\Prism\ValueObjects\Messages\AssistantMessage;
 use Prism\Prism\ValueObjects\Messages\UserMessage;
 use Throwable;
@@ -234,9 +237,10 @@ abstract class BaseOpenAiService implements AiService
      *
      * @param array<AiFile> $files
      * @param array<string, mixed> $options
+     * @param array<Tool> $tools
      * @param ?array<Message> $messages
      */
-    public function streamRaw(?string $prompt = null, ?string $content = null, array $files = [], array $options = [], ?array $messages = null, bool $hasImageGeneration = false): Closure
+    public function streamRaw(?string $prompt = null, ?string $content = null, array $files = [], array $options = [], array $tools = [], ?array $messages = null, bool $hasImageGeneration = false): Closure
     {
         $aiSettings = app(AiSettings::class);
 
@@ -265,6 +269,11 @@ abstract class BaseOpenAiService implements AiService
                             ]] : [],
                         ],
                     ] : []),
+                    ...($this->hasReasoning() ? [
+                        'reasoning' => [
+                            'effort' => filled($vectorStoreId) ? AiReasoningEffort::Low : AiReasoningEffort::Minimal,
+                        ],
+                    ] : []),
                     ...$options,
                 ]);
 
@@ -277,6 +286,12 @@ abstract class BaseOpenAiService implements AiService
             $request
                 ->withMaxTokens(null)
                 ->usingTemperature($this->hasTemperature() ? $aiSettings->temperature : null);
+
+            if (filled($tools)) {
+                $request
+                    ->withTools($tools)
+                    ->withMaxSteps(10);
+            }
 
             if ($hasImageGeneration) {
                 return function () use ($request): Generator {
@@ -310,6 +325,7 @@ abstract class BaseOpenAiService implements AiService
                         yield new Finish(
                             isIncomplete: $response->finishReason === FinishReason::Length,
                             error: ($response->finishReason === FinishReason::Error) ? 'Something went wrong' : null,
+                            finishReason: $response->finishReason,
                         );
                     } catch (PrismRateLimitedException $exception) {
                         foreach ($exception->rateLimits as $rateLimit) {
@@ -336,15 +352,31 @@ abstract class BaseOpenAiService implements AiService
                     $stream = $request->asStream();
 
                     foreach ($stream as $chunk) {
-                        if (
-                            ($chunk->chunkType === ChunkType::Meta) &&
-                            filled($chunk->meta?->id)
-                        ) {
-                            yield new Meta(
-                                messageId: $chunk->meta->id,
-                                nextRequestOptions: ['previous_response_id' => $chunk->meta->id],
-                            );
+                        if ($chunk->chunkType === ChunkType::Meta) {
+                            if (filled($chunk->meta?->id)) {
+                                yield new Meta(
+                                    messageId: $chunk->meta->id,
+                                    nextRequestOptions: ['previous_response_id' => $chunk->meta->id],
+                                );
+                            }
 
+                            continue;
+                        }
+
+                        if ($chunk->chunkType === ChunkType::ToolCall) {
+                            foreach ($chunk->toolCalls as $toolCall) {
+                                yield new ToolCall(
+                                    id: $toolCall->id,
+                                    name: $toolCall->name,
+                                    arguments: $toolCall->arguments(),
+                                    result: null,
+                                );
+                            }
+
+                            continue;
+                        }
+
+                        if ($chunk->chunkType === ChunkType::ToolResult) {
                             continue;
                         }
 
@@ -362,9 +394,8 @@ abstract class BaseOpenAiService implements AiService
                             yield new Finish(
                                 isIncomplete: $chunk->finishReason === FinishReason::Length,
                                 error: ($chunk->finishReason === FinishReason::Error) ? 'Something went wrong' : null,
+                                finishReason: $chunk->finishReason,
                             );
-
-                            break;
                         }
                     }
                 } catch (PrismRateLimitedException $exception) {

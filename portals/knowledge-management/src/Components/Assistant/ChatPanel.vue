@@ -35,6 +35,7 @@
     import { computed } from 'vue';
     import { useAssistantChat } from '../../Composables/assistant/useAssistantChat.js';
     import { useAuthStore } from '../../Stores/auth.js';
+    import AssistantWidget from './AssistantWidget.vue';
     import ChatHeader from './ChatHeader.vue';
     import ChatInput from './ChatInput.vue';
     import ChatMessages from './ChatMessages.vue';
@@ -45,7 +46,22 @@
 
     const emit = defineEmits(['close']);
 
-    const { messages, isSending, isAssistantResponding, sendMessage } = useAssistantChat();
+    const {
+        messages,
+        isSending,
+        isAssistantResponding,
+        sendMessage,
+        activeWidget,
+        handleWidgetSubmit,
+        handleWidgetCancel,
+        showNewRequestLink,
+        showNewRequestSelector,
+        fileAttachments,
+        fileAttachmentsEnabled,
+        addFileAttachments,
+        removeFileAttachment,
+        allUploadsComplete,
+    } = useAssistantChat();
 
     const authStore = useAuthStore();
     const welcomeMessage = computed(() => {
@@ -66,11 +82,33 @@
             v-if="props.isOpen"
             class="mb-4 w-[400px] max-w-full h-[650px] max-h-full bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden ring-1 ring-brand-950/5 backdrop-blur-sm origin-bottom-right"
         >
-            <ChatHeader @close="emit('close')" />
+            <ChatHeader
+                :show-new-request-link="showNewRequestLink"
+                @close="emit('close')"
+                @new-request="showNewRequestSelector"
+            />
 
             <ChatMessages :messages="messages" :welcome-message="welcomeMessage" :is-open="props.isOpen" />
 
-            <ChatInput :disabled="isSending || isAssistantResponding" @send="sendMessage" />
+            <template v-if="activeWidget">
+                <AssistantWidget
+                    :action-type="activeWidget.type"
+                    :params="activeWidget.params"
+                    @submit="handleWidgetSubmit"
+                    @cancel="handleWidgetCancel"
+                />
+            </template>
+            <template v-else>
+                <ChatInput
+                    :disabled="isSending || isAssistantResponding"
+                    :attachments-enabled="fileAttachmentsEnabled"
+                    :file-attachments="fileAttachments"
+                    :all-uploads-complete="allUploadsComplete"
+                    @send="sendMessage"
+                    @add-files="addFileAttachments"
+                    @remove-file="removeFileAttachment"
+                />
+            </template>
         </div>
     </Transition>
 </template>

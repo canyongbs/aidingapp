@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
+use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
@@ -47,6 +48,7 @@ use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsEx
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use App\Features\PortalAssistantServiceRequestFeature;
 use App\Models\Authenticatable;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
@@ -101,6 +103,8 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'ai_resolution_confidence_score',
         'is_ai_resolution_attempted',
         'is_ai_resolution_successful',
+        'is_draft',
+        'portal_assistant_thread_id',
     ];
 
     protected $casts = [
@@ -111,6 +115,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'ai_resolution_confidence_score' => 'integer',
         'is_ai_resolution_attempted' => 'boolean',
         'is_ai_resolution_successful' => 'boolean',
+        'is_draft' => 'boolean',
     ];
 
     public function registerMediaCollections(): void
@@ -273,6 +278,23 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<PortalAssistantThread, $this>
+     */
+    public function portalAssistantThread(): BelongsTo
+    {
+        return $this->belongsTo(PortalAssistantThread::class);
+    }
+
+    public function isDraft(): bool
+    {
+        if (! PortalAssistantServiceRequestFeature::active()) {
+            return false;
+        }
+
+        return $this->is_draft === true;
+    }
+
     public function scopeOpen(Builder $query): void
     {
         $query->whereIn(
@@ -415,6 +437,12 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
                 $builder->whereRaw('1 = 0');
             }
         });
+
+        if (PortalAssistantServiceRequestFeature::active()) {
+            static::addGlobalScope('excludeDrafts', function (Builder $builder) {
+                $builder->where('is_draft', false);
+            });
+        }
     }
 
     protected function serializeDate(DateTimeInterface $date): string

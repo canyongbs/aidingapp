@@ -42,20 +42,19 @@ use Illuminate\Support\Facades\DB;
 
 class CreateServiceRequestAction
 {
-    public function execute(ServiceRequestDataObject $serviceRequestDataObject)
+    public function __construct(
+        protected AssignServiceRequestToTeam $assignServiceRequestToTeam,
+    ) {}
+
+    public function execute(ServiceRequestDataObject $serviceRequestDataObject): ServiceRequest
     {
-        return DB::transaction(
-            function () use ($serviceRequestDataObject) {
-                $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
-                $assignmentClass = $serviceRequest->priority->type?->assignment_type?->getAssignerClass();
-                $serviceRequest->save();
+        return DB::transaction(function () use ($serviceRequestDataObject) {
+            $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
+            $serviceRequest->save();
 
-                if ($assignmentClass) {
-                    $assignmentClass->execute($serviceRequest);
-                }
+            $this->assignServiceRequestToTeam->execute($serviceRequest);
 
-                return $serviceRequest;
-            }
-        );
+            return $serviceRequest;
+        });
     }
 }

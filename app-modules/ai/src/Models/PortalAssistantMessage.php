@@ -54,6 +54,7 @@ class PortalAssistantMessage extends BaseModel
     public $fillable = [
         'message_id',
         'content',
+        'internal_content',
         'context',
         'request',
         'next_request_options',
