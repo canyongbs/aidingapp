@@ -65,9 +65,11 @@ class GetDraftStatus
         $type = $draft->priority?->type;
 
         $result = $this->buildResult($draft, $stage, $type);
-        $result['next_instruction'] = $this->getStageInstruction($stage, $draft, $result);
 
-        return $this->cleanupResult($result);
+        return $this->cleanupResult([
+            'next_instruction' => $this->getStageInstruction($stage, $draft, $result),
+            ...$result,
+        ]);
     }
 
     /**
