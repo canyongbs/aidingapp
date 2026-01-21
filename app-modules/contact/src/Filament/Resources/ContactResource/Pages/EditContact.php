@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use App\Concerns\EditPageRedirection;
@@ -188,15 +187,6 @@ class EditContact extends EditRecord
                                 table: (new ContactType())->getTable(),
                                 column: (new ContactType())->getKeyName()
                             ),
-                        Select::make('source_id')
-                            ->label('Source')
-                            ->required()
-                            ->relationship('source', 'name')
-                            ->exists(
-                                table: (new ContactSource())->getTable(),
-                                column: (new ContactSource())->getKeyName()
-                            )
-                            ->hidden(ContactChangesFeature::active()),
                         Select::make('organization_id')
                             ->label('Organization')
                             ->relationship('organization', 'name')

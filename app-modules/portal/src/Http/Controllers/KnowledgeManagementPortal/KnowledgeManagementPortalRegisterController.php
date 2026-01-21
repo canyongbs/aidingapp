@@ -38,11 +38,9 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalRegisterRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
-use App\Features\ContactChangesFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -77,21 +75,6 @@ class KnowledgeManagementPortalRegisterController extends Controller
 
         if ($type) {
             $contact->type()->associate($type);
-        }
-
-        if (! ContactChangesFeature::active()) {
-            $source = ContactSource::query()
-                ->where('name', 'Portal Generated')
-                ->first();
-
-            if (! $source) {
-                $source = ContactSource::query()
-                    ->create([
-                        'name' => 'Portal Generated',
-                    ]);
-            }
-
-            $contact->source()->associate($source);
         }
 
         $contact->save();

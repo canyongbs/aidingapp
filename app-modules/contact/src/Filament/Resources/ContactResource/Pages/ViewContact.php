@@ -102,9 +102,6 @@ class ViewContact extends ViewRecord
                     ->schema([
                         TextEntry::make('type.name')
                             ->label(ContactChangesFeature::active() ? 'Type' : 'Status'),
-                        TextEntry::make('source.name')
-                            ->label('Source')
-                            ->hidden(ContactChangesFeature::active()),
                         TextEntry::make('organization.name')
                             ->label('Organization'),
                         TextEntry::make('description')

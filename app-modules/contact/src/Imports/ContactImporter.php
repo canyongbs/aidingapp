@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Imports;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactType;
 use App\Features\ContactChangesFeature;
 use App\Models\User;
@@ -54,7 +53,7 @@ class ContactImporter extends Importer
 
     public static function getColumns(): array
     {
-        $columns = [
+        return [
             ImportColumn::make('first_name')
                 ->rules(['required'])
                 ->requiredMapping()
@@ -82,25 +81,6 @@ class ContactImporter extends Importer
                 ->guess(ContactChangesFeature::active() ? ['type_id', 'type_name'] : ['status_id', 'status_name'])
                 ->requiredMapping()
                 ->example(fn (): ?string => ContactType::query()->value('name')),
-        ];
-
-        if (! ContactChangesFeature::active()) {
-            $columns[] = ImportColumn::make('source')
-                ->relationship(
-                    resolveUsing: fn (mixed $state) => ContactSource::query()
-                        ->when(
-                            Str::isUuid($state),
-                            fn (Builder $query) => $query->whereKey($state),
-                            fn (Builder $query) => $query->where('name', $state),
-                        )
-                        ->first(),
-                )
-                ->guess(['source_id', 'source_name'])
-                ->requiredMapping()
-                ->example(fn (): ?string => ContactSource::query()->value('name'));
-        }
-
-        $columns = array_merge($columns, [
             ImportColumn::make('description')
                 ->example('A description of the contact.'),
             ImportColumn::make('email')
@@ -124,9 +104,7 @@ class ContactImporter extends Importer
                 ->example('123 Main St.'),
             ImportColumn::make('address_2')
                 ->example('Apt. 1'),
-        ]);
-
-        return $columns;
+        ];
     }
 
     public function resolveRecord(): ?Model

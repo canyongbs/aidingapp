@@ -38,7 +38,6 @@ namespace AidingApp\Engagement\Jobs;
 
 use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Engagement\Enums\EngagementResponseType;
@@ -52,7 +51,6 @@ use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailService
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
-use App\Features\ContactChangesFeature;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV2;
 use Aws\Kms\KmsClient;
@@ -264,21 +262,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                             ->firstOrFail();
 
                         $contact->type()->associate($type);
-
-                        if (! ContactChangesFeature::active()) {
-                            $source = ContactSource::query()
-                                ->where('name', 'Service Request Email Auto Creation')
-                                ->first();
-
-                            if (! $source) {
-                                $source = ContactSource::query()
-                                    ->create([
-                                        'name' => 'Service Request Email Auto Creation',
-                                    ]);
-                            }
-
-                            $contact->source()->associate($source);
-                        }
 
                         $contact->organization()->associate($organization);
 

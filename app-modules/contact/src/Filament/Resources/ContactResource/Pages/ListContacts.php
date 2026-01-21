@@ -39,12 +39,10 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactSource;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
 use App\Features\ContactChangesFeature;
 use App\Filament\Tables\Columns\IdColumn;
-use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ImportAction;
 use Filament\Forms\Components\Radio;
@@ -88,10 +86,10 @@ class ListContacts extends ListRecords
                 TextColumn::make('type')
                     ->badge()
                     ->state(function (Contact $record) {
-                        return ContactChangesFeature::active() ? $record->type->name : $record->type->name;
+                        return $record->type->name;
                     })
                     ->color(function (Contact $record) {
-                        return ContactChangesFeature::active() ? $record->type->color->value : $record->type->color->value;
+                        return $record->type->color->value;
                     })
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         if (! ContactChangesFeature::active()) {
@@ -119,11 +117,6 @@ class ListContacts extends ListRecords
                     ->relationship('type', 'name')
                     ->multiple()
                     ->preload(),
-                SelectFilter::make('source_id')
-                    ->relationship('source', 'name')
-                    ->multiple()
-                    ->preload()
-                    ->hidden(ContactChangesFeature::active()),
             ])
             ->actions([
                 ViewAction::make(),
@@ -141,21 +134,10 @@ class ListContacts extends ListRecords
                                     'description' => 'Description',
                                     'email_bounce' => 'Email Bounce',
                                     'sms_opt_out' => 'SMS Opt Out',
-                                    'source_id' => 'Source',
                                     (ContactChangesFeature::active() ? 'type_id' : 'status_id') => 'Type',
                                 ])
                                 ->required()
                                 ->live(),
-                            Select::make('assigned_to_id')
-                                ->label('Assigned To')
-                                ->relationship('assignedTo', 'name')
-                                ->searchable()
-                                ->exists(
-                                    table: (new User())->getTable(),
-                                    column: (new User())->getKeyName()
-                                )
-                                ->required()
-                                ->visible(fn (Get $get) => $get('field') === 'assigned_to_id'),
                             Textarea::make('description')
                                 ->string()
                                 ->required()
@@ -170,15 +152,6 @@ class ListContacts extends ListRecords
                                 ->boolean()
                                 ->required()
                                 ->visible(fn (Get $get) => $get('field') === 'sms_opt_out'),
-                            Select::make('source_id')
-                                ->label('Source')
-                                ->relationship('source', 'name')
-                                ->exists(
-                                    table: (new ContactSource())->getTable(),
-                                    column: (new ContactSource())->getKeyName()
-                                )
-                                ->required()
-                                ->visible(fn (Get $get) => $get('field') === 'source_id'),
                             Select::make(ContactChangesFeature::active() ? 'type_id' : 'status_id')
                                 ->label('Type')
                                 ->relationship('type', 'name')

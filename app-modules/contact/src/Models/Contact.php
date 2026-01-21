@@ -111,7 +111,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'sms_opt_out',
         'email_bounce',
         'status_id',
-        'source_id',
         'type_id',
         'phone',
         'address',
@@ -188,14 +187,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public function type(): BelongsTo
     {
         return ContactChangesFeature::active() ? $this->belongsTo(ContactType::class) : $this->belongsTo(ContactType::class, 'status_id');
-    }
-
-    /**
-     * @return BelongsTo<ContactSource, $this>
-     */
-    public function source(): BelongsTo
-    {
-        return $this->belongsTo(ContactSource::class);
     }
 
     /**
