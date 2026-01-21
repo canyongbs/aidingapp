@@ -34,57 +34,57 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactStatus;
-use App\Models\User;
+namespace AidingApp\Contact\Models;
 
-use function Pest\Laravel\actingAs;
-use function Tests\asSuperAdmin;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Database\Factories\ContactTypeFactory;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
+use AidingApp\Contact\Enums\SystemContactClassification;
+use App\Features\ContactChangesFeature;
+use App\Models\BaseModel;
+use DateTimeInterface;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
-test('The correct details are displayed on the ViewContactStatus page', function () {
-    $contactStatus = ContactStatus::factory()->create();
+/**
+ * @mixin IdeHelperContactType
+ */
+class ContactType extends BaseModel implements Auditable
+{
+    use SoftDeletes;
+    use AuditableTrait;
 
-    asSuperAdmin()
-        ->get(
-            ContactStatusResource::getUrl('view', [
-                'record' => $contactStatus,
-            ])
-        )
-        ->assertSuccessful()
-        ->assertSeeTextInOrder(
-            [
-                'Name',
-                $contactStatus->name,
-                'Classification',
-                $contactStatus->classification->getLabel(),
-                'Color',
-                $contactStatus->color,
-            ]
-        );
-});
+    /** @use HasFactory<ContactTypeFactory> */
+    use HasFactory;
 
-// Permission Tests
+    protected $fillable = [
+        'classification',
+        'name',
+        'color',
+    ];
 
-test('ViewContactStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    protected $casts = [
+        'classification' => SystemContactClassification::class,
+        'color' => ContactTypeColorOptions::class,
+    ];
 
-    $contactStatus = ContactStatus::factory()->create();
+    /**
+     * @return HasMany<Contact, $this>
+     */
+    public function contacts(): HasMany
+    {
+        return ContactChangesFeature::active() ? $this->hasMany(Contact::class, 'type_id') : $this->hasMany(Contact::class, 'status_id');
+    }
 
-    actingAs($user)
-        ->get(
-            ContactStatusResource::getUrl('view', [
-                'record' => $contactStatus,
-            ])
-        )->assertForbidden();
+    public function getTable()
+    {
+        return ContactChangesFeature::active() ? 'contact_types' : 'contact_statuses';
+    }
 
-    $user->givePermissionTo('settings.view-any');
-    $user->givePermissionTo('settings.*.view');
-
-    actingAs($user)
-        ->get(
-            ContactStatusResource::getUrl('view', [
-                'record' => $contactStatus,
-            ])
-        )->assertSuccessful();
-});
+    protected function serializeDate(DateTimeInterface $date): string
+    {
+        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+    }
+}

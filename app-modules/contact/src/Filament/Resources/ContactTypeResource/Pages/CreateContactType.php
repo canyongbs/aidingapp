@@ -34,20 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Database\Factories;
+namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
-use AidingApp\Contact\Models\ContactSource;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
+use AidingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Form;
+use Filament\Resources\Pages\CreateRecord;
 
-/**
- * @extends Factory<ContactSource>
- */
-class ContactSourceFactory extends Factory
+class CreateContactType extends CreateRecord
 {
-    public function definition(): array
+    protected static string $resource = ContactTypeResource::class;
+
+    public function form(Form $form): Form
     {
-        return [
-            'name' => $this->faker->word(),
-        ];
+        return $form
+            ->schema([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->required()
+                    ->string(),
+                Select::make('classification')
+                    ->label('Classification')
+                    ->searchable()
+                    ->options(SystemContactClassification::class)
+                    ->required()
+                    ->enum(SystemContactClassification::class),
+                Select::make('color')
+                    ->label('Color')
+                    ->searchable()
+                    ->options(ContactTypeColorOptions::class)
+                    ->required()
+                    ->enum(ContactTypeColorOptions::class),
+            ]);
     }
 }

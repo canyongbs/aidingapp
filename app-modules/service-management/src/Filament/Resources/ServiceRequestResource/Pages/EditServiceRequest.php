@@ -153,7 +153,7 @@ class EditServiceRequest extends EditRecord
                             ->relationship(
                                 name: 'respondent',
                                 titleAttribute: 'full_name',
-                                modifyQueryUsing: fn (Builder $query) => $query->with('status')->orderBy('first_name')
+                                modifyQueryUsing: fn (Builder $query) => $query->with('type')->orderBy('first_name')
                             )
                             ->label('Related To')
                             ->required()

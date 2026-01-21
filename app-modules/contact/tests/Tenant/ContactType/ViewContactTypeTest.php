@@ -34,38 +34,57 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
+use App\Models\User;
 
-use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\CreateContactSource;
-use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\EditContactSource;
-use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ListContactSources;
-use AidingApp\Contact\Filament\Resources\ContactSourceResource\Pages\ViewContactSource;
-use AidingApp\Contact\Models\ContactSource;
-use App\Filament\Clusters\ContactManagement;
-use Filament\Resources\Resource;
+use function Pest\Laravel\actingAs;
+use function Tests\asSuperAdmin;
 
-class ContactSourceResource extends Resource
-{
-    protected static ?string $model = ContactSource::class;
+test('The correct details are displayed on the ViewContactType page', function () {
+    $contactType = ContactType::factory()->create();
 
-    protected static ?string $navigationLabel = 'Sources';
+    asSuperAdmin()
+        ->get(
+            ContactTypeResource::getUrl('view', [
+                'record' => $contactType,
+            ])
+        )
+        ->assertSuccessful()
+        ->assertSeeTextInOrder(
+            [
+                'Name',
+                $contactType->name,
+                'Classification',
+                $contactType->classification->getLabel(),
+                'Color',
+                $contactType->color,
+            ]
+        );
+});
 
-    protected static ?int $navigationSort = 2;
+// Permission Tests
 
-    protected static ?string $cluster = ContactManagement::class;
+test('ViewContactType is gated with proper access control', function () {
+    $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
-    public static function getRelations(): array
-    {
-        return [];
-    }
+    $contactType = ContactType::factory()->create();
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListContactSources::route('/'),
-            'create' => CreateContactSource::route('/create'),
-            'view' => ViewContactSource::route('/{record}'),
-            'edit' => EditContactSource::route('/{record}/edit'),
-        ];
-    }
-}
+    actingAs($user)
+        ->get(
+            ContactTypeResource::getUrl('view', [
+                'record' => $contactType,
+            ])
+        )->assertForbidden();
+
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.view');
+
+    actingAs($user)
+        ->get(
+            ContactTypeResource::getUrl('view', [
+                'record' => $contactType,
+            ])
+        )->assertSuccessful();
+});

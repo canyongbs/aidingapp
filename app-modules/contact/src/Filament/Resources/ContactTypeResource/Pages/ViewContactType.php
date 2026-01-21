@@ -34,16 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Tests\Tenant\ContactSource\RequestFactories;
+namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource;
+use AidingApp\Contact\Models\ContactType;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\Section;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
+use Filament\Resources\Pages\ViewRecord;
 
-class CreateContactSourceRequestFactory extends RequestFactory
+class ViewContactType extends ViewRecord
 {
-    public function definition(): array
+    protected static string $resource = ContactTypeResource::class;
+
+    public function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Name'),
+                        TextEntry::make('classification')
+                            ->label('Classification'),
+                        TextEntry::make('color')
+                            ->label('Color')
+                            ->badge()
+                            ->color(fn (ContactType $contactType) => $contactType->color->value),
+                    ])
+                    ->columns(),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
     {
         return [
-            'name' => $this->faker->word(),
+            EditAction::make(),
         ];
     }
 }

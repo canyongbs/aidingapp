@@ -37,11 +37,11 @@
 namespace AidingApp\Contact\Policies;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactSource;
+use AidingApp\Contact\Models\ContactType;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
-class ContactSourcePolicy
+class ContactTypePolicy
 {
     public function before(Authenticatable $authenticatable): ?Response
     {
@@ -56,15 +56,15 @@ class ContactSourcePolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.view-any',
-            denyResponse: 'You do not have permission to view contact sources.'
+            denyResponse: 'You do not have permission to view contact types.'
         );
     }
 
-    public function view(Authenticatable $authenticatable, ContactSource $contactSource): Response
+    public function view(Authenticatable $authenticatable, ContactType $contactType): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.view',
-            denyResponse: 'You do not have permission to view this contact source.'
+            denyResponse: 'You do not have permission to view contact type.'
         );
     }
 
@@ -72,39 +72,39 @@ class ContactSourcePolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.create',
-            denyResponse: 'You do not have permission to create contact sources.'
+            denyResponse: 'You do not have permission to create contact types.'
         );
     }
 
-    public function update(Authenticatable $authenticatable, ContactSource $contactSource): Response
+    public function update(Authenticatable $authenticatable, ContactType $contactType): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.update',
-            denyResponse: 'You do not have permission to update this contact source.'
+            denyResponse: 'You do not have permission to update contact type.'
         );
     }
 
-    public function delete(Authenticatable $authenticatable, ContactSource $contactSource): Response
+    public function delete(Authenticatable $authenticatable, ContactType $contactType): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.delete',
-            denyResponse: 'You do not have permission to delete this contact source.'
+            denyResponse: 'You do not have permission to delete contact type.'
         );
     }
 
-    public function restore(Authenticatable $authenticatable, ContactSource $contactSource): Response
+    public function restore(Authenticatable $authenticatable, ContactType $contactType): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.restore',
-            denyResponse: 'You do not have permission to restore this contact source.'
+            denyResponse: 'You do not have permission to restore contact type.'
         );
     }
 
-    public function forceDelete(Authenticatable $authenticatable, ContactSource $contactSource): Response
+    public function forceDelete(Authenticatable $authenticatable, ContactType $contactType): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
-            denyResponse: 'You do not have permission to force delete this contact source.'
+            denyResponse: 'You do not have permission to force delete contact type.'
         );
     }
 }

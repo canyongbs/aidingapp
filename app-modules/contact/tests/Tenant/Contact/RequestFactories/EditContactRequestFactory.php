@@ -36,8 +36,7 @@
 
 namespace AidingApp\Contact\Tests\Tenant\Contact\RequestFactories;
 
-use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\ContactType;
 use Worksome\RequestFactories\RequestFactory;
 
 class EditContactRequestFactory extends RequestFactory
@@ -48,8 +47,7 @@ class EditContactRequestFactory extends RequestFactory
         $lastName = $this->faker->lastName();
 
         return [
-            'status_id' => ContactStatus::inRandomOrder()->first()?->id ?? ContactStatus::factory()->create()->id,
-            'source_id' => ContactSource::inRandomOrder()->first()?->id ?? ContactSource::factory()->create()->id,
+            'type_id' => ContactType::inRandomOrder()->first()?->id ?? ContactType::factory()->create()->id,
             'first_name' => $firstName,
             'last_name' => $lastName,
             'full_name' => "{$firstName} {$lastName}",

@@ -36,45 +36,31 @@
 
 namespace AidingApp\Contact\Filament\Resources;
 
-use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\CreateContactStatus;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\EditContactStatus;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ListContactStatuses;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ViewContactStatus;
-use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\CreateContactType;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\EditContactType;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\ListContactTypes;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\ViewContactType;
+use AidingApp\Contact\Models\ContactType;
 use App\Filament\Clusters\ContactManagement;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 
-class ContactStatusResource extends Resource
+class ContactTypeResource extends Resource
 {
-    protected static ?string $model = ContactStatus::class;
+    protected static ?string $navigationLabel = 'Types';
 
-    protected static ?string $navigationLabel = 'Statuses';
+    protected static ?string $model = ContactType::class;
 
     protected static ?int $navigationSort = 1;
 
     protected static ?string $cluster = ContactManagement::class;
 
-    public static function form(Form $form): Form
-    {
-        return $form
-            ->schema([
-            ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-        ];
-    }
-
     public static function getPages(): array
     {
         return [
-            'index' => ListContactStatuses::route('/'),
-            'create' => CreateContactStatus::route('/create'),
-            'view' => ViewContactStatus::route('/{record}'),
-            'edit' => EditContactStatus::route('/{record}/edit'),
+            'index' => ListContactTypes::route('/'),
+            'create' => CreateContactType::route('/create'),
+            'view' => ViewContactType::route('/{record}'),
+            'edit' => EditContactType::route('/{record}/edit'),
         ];
     }
 }

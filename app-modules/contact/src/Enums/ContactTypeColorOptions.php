@@ -34,20 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Tests\Tenant\ContactStatus\RequestFactories;
+namespace AidingApp\Contact\Enums;
 
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
-use AidingApp\Contact\Enums\SystemContactClassification;
-use Worksome\RequestFactories\RequestFactory;
+use Filament\Support\Contracts\HasLabel;
 
-class CreateContactStatusRequestFactory extends RequestFactory
+enum ContactTypeColorOptions: string implements HasLabel
 {
-    public function definition(): array
+    case Success = 'success';
+
+    case Danger = 'danger';
+
+    case Warning = 'warning';
+
+    case Info = 'info';
+
+    case Primary = 'primary';
+
+    case Gray = 'gray';
+
+    public function getLabel(): string
     {
-        return [
-            'classification' => fake()->randomElement(SystemContactClassification::cases()),
-            'name' => fake()->name(),
-            'color' => fake()->randomElement(ContactStatusColorOptions::cases()),
-        ];
+        return $this->value;
     }
 }

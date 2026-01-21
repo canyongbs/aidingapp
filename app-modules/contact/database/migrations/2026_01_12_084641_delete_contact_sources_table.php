@@ -34,24 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
-use AidingApp\Contact\Enums\SystemContactClassification;
-use AidingApp\Contact\Models\ContactStatus;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<ContactStatus>
- */
-class ContactStatusFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'classification' => $this->faker->randomElement(SystemContactClassification::cases()),
-            'name' => $this->faker->word,
-            'color' => $this->faker->randomElement(ContactStatusColorOptions::cases()),
-        ];
+        DB::transaction(function () {
+            Schema::table('contacts', function (Blueprint $table) {
+                $table->dropColumn('source_id');
+            });
+
+            Schema::dropIfExists('contact_sources');
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            Schema::create('contact_sources', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+
+                $table->string('name');
+
+                $table->timestamps();
+                $table->softDeletes();
+            });
+
+            Schema::table('contacts', function (Blueprint $table) {
+                $table->uuid('source_id')->nullable();
+            });
+        });
+    }
+};

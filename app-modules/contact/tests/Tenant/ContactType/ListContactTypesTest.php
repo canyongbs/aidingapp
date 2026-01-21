@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Filament\Resources\ContactStatusResource;
-use AidingApp\Contact\Filament\Resources\ContactStatusResource\Pages\ListContactStatuses;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\ListContactTypes;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\ContactType;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ListContactStatuses page', function () {
-    $contactStatuses = ContactStatus::factory()
+test('The correct details are displayed on the ListContactTypes page', function () {
+    $contactTypes = ContactType::factory()
         // TODO: Fix this once Contact factory is created
         //->has(ServiceRequest::factory()->count(fake()->randomNumber(1)), 'serviceRequests')
         ->count(10)
@@ -53,35 +53,35 @@ test('The correct details are displayed on the ListContactStatuses page', functi
 
     asSuperAdmin();
 
-    $component = livewire(ListContactStatuses::class);
+    $component = livewire(ListContactTypes::class);
 
     $component
         ->assertSuccessful()
-        ->assertCanSeeTableRecords($contactStatuses)
+        ->assertCanSeeTableRecords($contactTypes)
         ->assertCountTableRecords(10)
         ->assertTableColumnExists('contacts_count');
 
-    $contactStatuses->each(
-        fn (ContactStatus $contactStatus) => $component
+    $contactTypes->each(
+        fn (ContactType $contactType) => $component
             ->assertTableColumnStateSet(
                 'id',
-                $contactStatus->id,
-                $contactStatus
+                $contactType->id,
+                $contactType
             )
             ->assertTableColumnStateSet(
                 'name',
-                $contactStatus->name,
-                $contactStatus
+                $contactType->name,
+                $contactType
             )
             ->assertTableColumnFormattedStateSet(
                 'classification',
-                $contactStatus->classification->getLabel(),
-                $contactStatus
+                $contactType->classification->getLabel(),
+                $contactType
             )
             ->assertTableColumnFormattedStateSet(
                 'color',
-                $contactStatus->color->getLabel(),
-                $contactStatus
+                $contactType->color->getLabel(),
+                $contactType
             )
         // Currently setting not test for service_requests_count as there is no easy way to check now, relying on underlying package tests
     );
@@ -91,18 +91,18 @@ test('The correct details are displayed on the ListContactStatuses page', functi
 
 // Permission Tests
 
-test('ListContactStatuses is gated with proper access control', function () {
+test('ListContactTypes is gated with proper access control', function () {
     $user = User::factory()->licensed(Contact::getLicenseType())->create();
 
     actingAs($user)
         ->get(
-            ContactStatusResource::getUrl('index')
+            ContactTypeResource::getUrl('index')
         )->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
 
     actingAs($user)
         ->get(
-            ContactStatusResource::getUrl('index')
+            ContactTypeResource::getUrl('index')
         )->assertSuccessful();
 });

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Database\Seeders\ContactStatusSeeder;
+use AidingApp\Contact\Database\Seeders\ContactTypeSeeder;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Engagement\Enums\EngagementResponseType;
@@ -748,7 +748,7 @@ it('creates a new contact for a service request when is_email_automatic_creation
     assert($tenant instanceof Tenant);
 
     [$organization, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
-        seed(ContactStatusSeeder::class);
+        seed(ContactTypeSeeder::class);
 
         $organization = Organization::factory()->create([
             'domains' => ['canyongbs.com'],

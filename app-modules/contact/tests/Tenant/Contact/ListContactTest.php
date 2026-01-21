@@ -39,8 +39,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementsRelationManager;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
@@ -89,9 +88,7 @@ test('ListContacts can bulk update characteristics', function () {
         ->assertCountTableRecords($contacts->count())
         ->assertTableBulkActionExists('bulk_update');
 
-    $source = ContactSource::factory()->create();
-
-    $status = ContactStatus::factory()->create();
+    $type = ContactType::factory()->create();
 
     $description = 'abc123';
 
@@ -112,13 +109,8 @@ test('ListContacts can bulk update characteristics', function () {
         ])
         ->assertHasNoTableBulkActionErrors()
         ->callTableBulkAction('bulk_update', $contacts, [
-            'field' => 'source_id',
-            'source_id' => $source->id,
-        ])
-        ->assertHasNoTableBulkActionErrors()
-        ->callTableBulkAction('bulk_update', $contacts, [
-            'field' => 'status_id',
-            'status_id' => $status->id,
+            'field' => 'type_id',
+            'type_id' => $type->id,
         ])
         ->assertHasNoTableBulkActionErrors();
 
@@ -129,8 +121,7 @@ test('ListContacts can bulk update characteristics', function () {
                 ->description->toBe($description)
                 ->email_bounce->toBeTrue()
                 ->sms_opt_out->toBeTrue()
-                ->source_id->toBe($source->id)
-                ->status_id->toBe($status->id)
+                ->type_id->toBe($type->id)
         );
 });
 

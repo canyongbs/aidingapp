@@ -57,6 +57,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Task\Models\Task;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use AidingApp\Timeline\Models\Timeline;
+use App\Features\ContactChangesFeature;
 use App\Models\Authenticatable;
 use App\Models\Contracts\Educatable;
 use App\Models\User;
@@ -110,7 +111,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'sms_opt_out',
         'email_bounce',
         'status_id',
-        'source_id',
+        'type_id',
         'phone',
         'address',
         'address_2',
@@ -181,19 +182,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return BelongsTo<ContactStatus, $this>
+     * @return BelongsTo<ContactType, $this>
      */
-    public function status(): BelongsTo
+    public function type(): BelongsTo
     {
-        return $this->belongsTo(ContactStatus::class);
-    }
-
-    /**
-     * @return BelongsTo<ContactSource, $this>
-     */
-    public function source(): BelongsTo
-    {
-        return $this->belongsTo(ContactSource::class);
+        return ContactChangesFeature::active() ? $this->belongsTo(ContactType::class) : $this->belongsTo(ContactType::class, 'status_id');
     }
 
     /**

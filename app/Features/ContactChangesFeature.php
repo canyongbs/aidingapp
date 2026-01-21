@@ -34,51 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Models;
+namespace App\Features;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Contact\Database\Factories\ContactStatusFactory;
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
-use AidingApp\Contact\Enums\SystemContactClassification;
-use App\Models\BaseModel;
-use DateTimeInterface;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperContactStatus
- */
-class ContactStatus extends BaseModel implements Auditable
+class ContactChangesFeature extends AbstractFeatureFlag
 {
-    use SoftDeletes;
-    use AuditableTrait;
-
-    /** @use HasFactory<ContactStatusFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'classification',
-        'name',
-        'color',
-    ];
-
-    protected $casts = [
-        'classification' => SystemContactClassification::class,
-        'color' => ContactStatusColorOptions::class,
-    ];
-
-    /**
-     * @return HasMany<Contact, $this>
-     */
-    public function contacts(): HasMany
+    public function resolve(mixed $scope): mixed
     {
-        return $this->hasMany(Contact::class, 'status_id');
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+        return false;
     }
 }

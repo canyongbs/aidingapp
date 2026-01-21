@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use App\Features\ContactChangesFeature;
 use App\Features\JobTitleFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
@@ -99,10 +100,8 @@ class ViewContact extends ViewRecord
                     ->columns(2),
                 Section::make('Classification')
                     ->schema([
-                        TextEntry::make('status.name')
-                            ->label('Status'),
-                        TextEntry::make('source.name')
-                            ->label('Source'),
+                        TextEntry::make('type.name')
+                            ->label(ContactChangesFeature::active() ? 'Type' : 'Status'),
                         TextEntry::make('organization.name')
                             ->label('Organization'),
                         TextEntry::make('description')

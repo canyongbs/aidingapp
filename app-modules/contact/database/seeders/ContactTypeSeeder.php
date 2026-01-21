@@ -36,47 +36,47 @@
 
 namespace AidingApp\Contact\Database\Seeders;
 
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
-use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\ContactType;
 use Illuminate\Database\Seeder;
 
-class ContactStatusSeeder extends Seeder
+class ContactTypeSeeder extends Seeder
 {
     public function run(): void
     {
-        ContactStatus::factory()
+        ContactType::factory()
             ->createMany(
                 [
                     [
                         'classification' => SystemContactClassification::New,
                         'name' => 'New',
-                        'color' => ContactStatusColorOptions::Info->value,
+                        'color' => ContactTypeColorOptions::Info->value,
                     ],
                     [
                         'classification' => SystemContactClassification::Assigned,
                         'name' => 'Assigned',
-                        'color' => ContactStatusColorOptions::Warning->value,
+                        'color' => ContactTypeColorOptions::Warning->value,
                     ],
                     [
                         'classification' => SystemContactClassification::InProgress,
                         'name' => 'In-Progress',
-                        'color' => ContactStatusColorOptions::Primary->value,
+                        'color' => ContactTypeColorOptions::Primary->value,
                     ],
                     [
                         'classification' => SystemContactClassification::Converted,
                         'name' => 'Converted',
-                        'color' => ContactStatusColorOptions::Success->value,
+                        'color' => ContactTypeColorOptions::Success->value,
                     ],
                     [
                         'classification' => SystemContactClassification::Recycled,
                         'name' => 'Recycled',
-                        'color' => ContactStatusColorOptions::Gray->value,
+                        'color' => ContactTypeColorOptions::Gray->value,
                     ],
                     [
                         'classification' => SystemContactClassification::NotInterested,
                         'name' => 'Not Interested',
-                        'color' => ContactStatusColorOptions::Danger->value,
+                        'color' => ContactTypeColorOptions::Danger->value,
                     ],
                 ]
             );

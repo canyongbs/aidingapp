@@ -34,20 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Tests\Tenant\ContactStatus\RequestFactories;
+namespace AidingApp\Contact\Database\Factories;
 
-use AidingApp\Contact\Enums\ContactStatusColorOptions;
+use AidingApp\Contact\Enums\ContactTypeColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\Contact\Models\ContactType;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class EditContactStatusRequestFactory extends RequestFactory
+/**
+ * @extends Factory<ContactType>
+ */
+class ContactTypeFactory extends Factory
 {
     public function definition(): array
     {
         return [
-            'classification' => fake()->randomElement(SystemContactClassification::cases()),
-            'name' => fake()->name(),
-            'color' => fake()->randomElement(ContactStatusColorOptions::cases()),
+            'classification' => $this->faker->randomElement(SystemContactClassification::cases()),
+            'name' => $this->faker->word,
+            'color' => $this->faker->randomElement(ContactTypeColorOptions::cases()),
         ];
     }
 }

@@ -37,8 +37,8 @@
 namespace AidingApp\Contact\Imports;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactSource;
-use AidingApp\Contact\Models\ContactStatus;
+use AidingApp\Contact\Models\ContactType;
+use App\Features\ContactChangesFeature;
 use App\Models\User;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -68,9 +68,9 @@ class ContactImporter extends Importer
                 ->example('Jonathan Smith'),
             ImportColumn::make('preferred')
                 ->example('John'),
-            ImportColumn::make('status')
+            ImportColumn::make('type')
                 ->relationship(
-                    resolveUsing: fn (mixed $state) => ContactStatus::query()
+                    resolveUsing: fn (mixed $state) => ContactType::query()
                         ->when(
                             Str::isUuid($state),
                             fn (Builder $query) => $query->whereKey($state),
@@ -78,22 +78,9 @@ class ContactImporter extends Importer
                         )
                         ->first(),
                 )
-                ->guess(['status_id', 'status_name'])
+                ->guess(ContactChangesFeature::active() ? ['type_id', 'type_name'] : ['status_id', 'status_name'])
                 ->requiredMapping()
-                ->example(fn (): ?string => ContactStatus::query()->value('name')),
-            ImportColumn::make('source')
-                ->relationship(
-                    resolveUsing: fn (mixed $state) => ContactSource::query()
-                        ->when(
-                            Str::isUuid($state),
-                            fn (Builder $query) => $query->whereKey($state),
-                            fn (Builder $query) => $query->where('name', $state),
-                        )
-                        ->first(),
-                )
-                ->guess(['source_id', 'source_name'])
-                ->requiredMapping()
-                ->example(fn (): ?string => ContactSource::query()->value('name')),
+                ->example(fn (): ?string => ContactType::query()->value('name')),
             ImportColumn::make('description')
                 ->example('A description of the contact.'),
             ImportColumn::make('email')
