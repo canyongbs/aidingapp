@@ -81,7 +81,7 @@ class PersistPortalAssistantUpload implements ShouldQueue
 
         if (! Storage::exists($this->path)) {
             throw new Exception('File not found at path: ' . $this->path);
-            
+
             return;
         }
 
