@@ -37,6 +37,7 @@
 namespace AidingApp\Ai\Jobs\PortalAssistant;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Exception;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -79,6 +80,8 @@ class PersistPortalAssistantUpload implements ShouldQueue
         $this->validatePath();
 
         if (! Storage::exists($this->path)) {
+            throw new Exception('File not found at path: ' . $this->path);
+            
             return;
         }
 

@@ -46,9 +46,7 @@ trait FindsDraftServiceRequest
             return null;
         }
 
-        return ServiceRequest::query()
-            ->withoutGlobalScope('excludeDrafts')
-            ->whereKey($this->thread->current_service_request_draft_id)
+        return $this->thread->currentServiceRequestDraft()
             ->where('is_draft', true)
             ->first();
     }
