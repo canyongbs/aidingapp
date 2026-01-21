@@ -38,8 +38,8 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
-use App\Features\JobTitleFeature;
 use App\Features\ContactChangesFeature;
+use App\Features\JobTitleFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\Section;
