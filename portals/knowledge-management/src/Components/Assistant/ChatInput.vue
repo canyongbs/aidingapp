@@ -32,26 +32,18 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { PaperClipIcon as PaperClipIcon16, XMarkIcon } from '@heroicons/vue/16/solid';
-    import { PaperClipIcon as PaperClipIcon20 } from '@heroicons/vue/20/solid';
     import { PaperAirplaneIcon } from '@heroicons/vue/24/outline';
-    import { computed, nextTick, ref } from 'vue';
+    import { nextTick, ref } from 'vue';
 
     const emit = defineEmits(['send', 'addFiles', 'removeFile']);
 
     const props = defineProps({
         disabled: { type: Boolean, default: false },
-        attachmentsEnabled: { type: Boolean, default: false },
-        fileAttachments: { type: Array, default: () => [] },
-        allUploadsComplete: { type: Boolean, default: true },
     });
 
     const textarea = ref(null);
     const fileInput = ref(null);
     const localMessage = ref('');
-
-    const hasFiles = computed(() => props.fileAttachments.length > 0);
-    const hasPendingUploads = computed(() => !props.allUploadsComplete);
 
     const adjustTextareaHeight = () => {
         if (!textarea.value) return;
@@ -70,7 +62,6 @@
     const send = () => {
         const content = localMessage.value;
         if (!content || !content.trim()) return;
-        if (hasPendingUploads.value) return;
         emit('send', content);
         localMessage.value = '';
         nextTick(() => adjustTextareaHeight());
@@ -99,8 +90,6 @@
                 return 'bg-green-100 text-green-800';
             case 'error':
                 return 'bg-red-100 text-red-800';
-            case 'uploading':
-                return 'bg-blue-100 text-blue-800';
             default:
                 return 'bg-gray-100 text-gray-800';
         }
@@ -117,73 +106,7 @@
 
 <template>
     <div class="border-t border-gray-200/80 bg-white p-4 shadow-lg shrink-0">
-        <!-- File attachments display -->
-        <div v-if="hasFiles" class="mb-3 flex flex-wrap gap-2">
-            <div
-                v-for="file in props.fileAttachments"
-                :key="file.id"
-                :class="[
-                    'inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium transition-all',
-                    getStatusColor(file.status),
-                ]"
-            >
-                <!-- File icon -->
-                <PaperClipIcon16 class="w-4 h-4 shrink-0" />
-
-                <span :title="file.originalName">{{ truncateFilename(file.originalName) }}</span>
-
-                <!-- Spinner for uploading files -->
-                <svg
-                    v-if="file.status === 'uploading'"
-                    class="animate-spin h-3.5 w-3.5"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                >
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path
-                        class="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
-                </svg>
-
-                <!-- Error indicator -->
-                <span v-if="file.status === 'error'" class="text-xs"> Failed </span>
-
-                <!-- Remove button -->
-                <button
-                    @click="removeFile(file.id)"
-                    class="ml-1 hover:bg-black/10 rounded-full p-0.5 transition-colors"
-                    aria-label="Remove file"
-                >
-                    <XMarkIcon class="w-3 h-3" />
-                </button>
-            </div>
-        </div>
-
         <div class="flex items-end gap-2">
-            <!-- Hidden file input -->
-            <input
-                ref="fileInput"
-                type="file"
-                multiple
-                class="hidden"
-                @change="handleFileSelect"
-                accept="image/jpeg,image/png,.pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.ppt,.pptx,.md,.log,.mp4,.webm,.ogg"
-            />
-
-            <!-- Attachment button (shown when enabled) -->
-            <button
-                v-if="props.attachmentsEnabled"
-                @click="triggerFileInput"
-                title="Attach files (up to 6 files, 10MB each)"
-                class="text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg p-3 transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-500 shrink-0"
-                aria-label="Attach files to your request"
-            >
-                <PaperClipIcon20 class="w-5 h-5" />
-            </button>
-
             <textarea
                 ref="textarea"
                 v-model="localMessage"
@@ -199,7 +122,7 @@
                 class="bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white rounded-lg p-3 font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                 aria-label="Send message"
                 @click="send"
-                :disabled="props.disabled || !localMessage.trim() || hasPendingUploads"
+                :disabled="props.disabled || !localMessage.trim()"
             >
                 <PaperAirplaneIcon class="w-5 h-5" />
             </button>

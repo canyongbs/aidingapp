@@ -83,10 +83,6 @@ class KnowledgeManagementPortalController extends Controller
             ),
             'footer_logo' => Vite::asset('resources/svg/CGBS_Logo_FullColor_Light.svg'),
             'assistant_send_message_url' => (app(PortalSettings::class)->ai_support_assistant && auth()->guard('contact')->user()) ? URL::signedRoute('ai.portal-assistants.messages.send') : null,
-            'assistant_select_type_url' => (app(PortalSettings::class)->ai_support_assistant && auth()->guard('contact')->user()) ? URL::signedRoute('ai.portal-assistants.service-request.select-type') : null,
-            'assistant_update_field_url' => (app(PortalSettings::class)->ai_support_assistant && auth()->guard('contact')->user()) ? URL::signedRoute('ai.portal-assistants.service-request.update-field') : null,
-            'assistant_request_upload_url' => (app(PortalSettings::class)->ai_support_assistant && auth()->guard('contact')->user()) ? route('ai.portal-assistants.request-upload-url') : null,
-            'assistant_get_types_url' => (app(PortalSettings::class)->ai_support_assistant && app(PortalSettings::class)->ai_assistant_service_requests && auth()->guard('contact')->user()) ? route('ai.portal-assistants.service-request.types') : null,
             'websockets_config' => (app(PortalSettings::class)->ai_support_assistant && auth()->guard('contact')->user()) ? config('filament.broadcasting.echo') : [],
         ]);
     }

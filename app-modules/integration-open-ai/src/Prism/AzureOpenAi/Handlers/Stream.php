@@ -43,11 +43,15 @@ use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Prism\Prism\Enums\ChunkType;
+use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Providers\OpenAI\Handlers\Stream as BaseStream;
 use Prism\Prism\Text\Chunk;
 use Prism\Prism\Text\Request;
 use Prism\Prism\ValueObjects\Messages\AssistantMessage;
 use Prism\Prism\ValueObjects\Messages\ToolResultMessage;
+use Prism\Prism\ValueObjects\Meta;
+use Prism\Prism\ValueObjects\Usage;
+use Psr\Http\Message\MessageInterface;
 use ReflectionClass;
 
 class Stream extends BaseStream
@@ -78,6 +82,15 @@ class Stream extends BaseStream
         ]));
 
         try {
+            file_put_contents(
+                storage_path('logs/azure_openai_stream/' . now()->toDateTimeString() . '_' . now()->getTimestampMs()) . '.json',
+                json_encode([
+                    ...$requestBody,
+                    'instructions' => explode(PHP_EOL, $requestBody['instructions']),
+                ], flags: JSON_PRETTY_PRINT),
+            );
+            usleep(1000);
+
             return $this
                 ->client
                 ->withOptions(['stream' => true])
@@ -94,72 +107,158 @@ class Stream extends BaseStream
     }
 
     /**
-     * Override `handleToolCalls` to only send newly added messages during tool execution loops.
-     *
-     * During tool loops, we only want to send the `function_call` and `function_call_output`,
-     * not the assistant's text content (which was already sent in the previous iteration).
-     * This avoids sending duplicate messages on each iteration.
+     * @return Generator<Chunk>
      */
-    protected function handleToolCalls(
-        Request $request,
-        string $text,
-        array $toolCalls,
-        int $depth
-    ): Generator {
-        $toolCalls = $this->mapToolCalls($toolCalls);
+    protected function processStream(Response $response, Request $request, int $depth = 0): Generator
+    {
+        $text = '';
+        $toolCalls = [];
+        $reasoningItems = [];
 
-        yield new Chunk(
-            text: '',
-            toolCalls: $toolCalls,
-            chunkType: ChunkType::ToolCall,
-        );
+        $newResponseId = null;
 
-        $toolResults = $this->callTools($request->tools(), $toolCalls);
+        assert($response instanceof MessageInterface);
 
-        yield new Chunk(
-            text: '',
-            toolResults: $toolResults,
-            chunkType: ChunkType::ToolResult,
-        );
+        while (! $response->getBody()->eof()) {
+            $data = $this->parseNextDataLine($response->getBody());
 
-        // Track how many messages exist before we add new ones
-        $messageCountBefore = count($request->messages());
+            if ($data === null) {
+                continue;
+            }
 
-        $request->addMessage(new AssistantMessage($text, $toolCalls));
-        $request->addMessage(new ToolResultMessage($toolResults));
+            if ($data['type'] === 'error') {
+                $this->handleErrors($data, $request);
+            }
 
-        $depth++;
+            if ($data['type'] === 'response.created') {
+                $newResponseId = $data['response']['id'] ?? $newResponseId;
 
-        if ($depth < $request->maxSteps()) {
-            // Only send the 2 messages we just added, but WITHOUT the assistant's text content
-            // The text was already sent in the previous request, we only need the `function_call` and `function_call_output`
-            $allMessages = $request->messages();
-            $newMessages = array_slice($allMessages, $messageCountBefore);
+                yield new Chunk(
+                    text: '',
+                    finishReason: null,
+                    meta: new Meta(
+                        id: $data['response']['id'] ?? null,
+                        model: $data['response']['model'] ?? null,
+                    ),
+                    chunkType: ChunkType::Meta,
+                );
 
-            // Strip text content from `AssistantMessage` to avoid duplicate assistant messages
-            // We only want to send the `function_call`, not the text
-            // @phpstan-ignore argument.type
-            $newMessages = array_map(function (AssistantMessage|ToolResultMessage $message) {
-                if ($message instanceof AssistantMessage) {
-                    // Create a new `AssistantMessage` with empty text but same tool calls
-                    return new AssistantMessage('', $message->toolCalls);
+                continue;
+            }
+
+            if ($this->hasReasoningSummaryDelta($data)) {
+                $reasoningDelta = $this->extractReasoningSummaryDelta($data);
+
+                if ($reasoningDelta !== '') {
+                    yield new Chunk(
+                        text: $reasoningDelta,
+                        finishReason: null,
+                        chunkType: ChunkType::Thinking
+                    );
                 }
 
-                return $message;
-            }, $newMessages);
+                continue;
+            }
 
-            // Temporarily swap messages array to only include new messages
-            $reflection = new ReflectionClass($request);
-            $messagesProperty = $reflection->getProperty('messages');
-            $messagesProperty->setAccessible(true);
-            $messagesProperty->setValue($request, $newMessages);
+            if ($this->hasReasoningItems($data)) {
+                $reasoningItems = $this->extractReasoningItems($data, $reasoningItems);
 
-            $nextResponse = $this->sendRequest($request);
+                continue;
+            }
 
-            // Restore full message history
-            $messagesProperty->setValue($request, $allMessages);
+            if ($this->hasToolCalls($data)) {
+                $toolCalls = $this->extractToolCalls($data, $toolCalls, $reasoningItems);
 
-            yield from $this->processStream($nextResponse, $request, $depth);
+                continue;
+            }
+
+            $content = $this->extractOutputTextDelta($data);
+
+            $text .= $content;
+
+            $finishReason = $this->mapFinishReason($data);
+
+            yield new Chunk(
+                text: $content,
+                finishReason: $finishReason !== FinishReason::Unknown ? $finishReason : null
+            );
+
+            if (data_get($data, 'type') === 'response.completed') {
+                yield new Chunk(
+                    text: '',
+                    usage: new Usage(
+                        promptTokens: data_get($data, 'response.usage.input_tokens'),
+                        completionTokens: data_get($data, 'response.usage.output_tokens'),
+                        cacheReadInputTokens: data_get($data, 'response.usage.input_tokens_details.cached_tokens'),
+                        thoughtTokens: data_get($data, 'response.usage.output_tokens_details.reasoning_tokens')
+                    ),
+                    chunkType: ChunkType::Meta,
+                );
+            }
+        }
+
+        if ($toolCalls !== []) {
+            $toolCalls = $this->mapToolCalls($toolCalls);
+
+            yield new Chunk(
+                text: '',
+                toolCalls: $toolCalls,
+                chunkType: ChunkType::ToolCall,
+            );
+
+            $toolResults = $this->callTools($request->tools(), $toolCalls);
+
+            yield new Chunk(
+                text: '',
+                toolResults: $toolResults,
+                chunkType: ChunkType::ToolResult,
+            );
+
+            // Track how many messages exist before we add new ones
+            $messageCountBefore = count($request->messages());
+
+            $request->addMessage(new ToolResultMessage($toolResults));
+
+            $depth++;
+
+            if ($depth < $request->maxSteps()) {
+                // Only send the 2 messages we just added, but WITHOUT the assistant's text content
+                // The text was already sent in the previous request, we only need the `function_call` and `function_call_output`
+                $allMessages = $request->messages();
+                $newMessages = array_slice($allMessages, $messageCountBefore);
+
+                // Strip text content from `AssistantMessage` to avoid duplicate assistant messages
+                // We only want to send the `function_call`, not the text
+                // @phpstan-ignore argument.type
+                $newMessages = array_map(function (AssistantMessage|ToolResultMessage $message) {
+                    if ($message instanceof AssistantMessage) {
+                        // Create a new `AssistantMessage` with empty text but same tool calls
+                        return new AssistantMessage('', $message->toolCalls);
+                    }
+
+                    return $message;
+                }, $newMessages);
+
+                $reflection = new ReflectionClass($request);
+
+                $messagesProperty = $reflection->getProperty('messages');
+                $messagesProperty->setAccessible(true);
+                $messagesProperty->setValue($request, $newMessages);
+
+                $providerOptionsProperty = $reflection->getProperty('providerOptions');
+                $providerOptionsProperty->setAccessible(true);
+                $providerOptionsProperty->setValue($request, [
+                    ...$request->providerOptions(),
+                    'previous_response_id' => $newResponseId,
+                ]);
+
+                $nextResponse = $this->sendRequest($request);
+
+                // Restore full message history
+                $messagesProperty->setValue($request, $allMessages);
+
+                yield from $this->processStream($nextResponse, $request, $depth);
+            }
         }
     }
 }
