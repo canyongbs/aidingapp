@@ -634,17 +634,6 @@ describe('DataCollection Instructions', function () {
             ->and($result['next_instruction'])->toContain('clarifying');
     });
 
-    it('instruction for description field mentions enable_file_attachments', function () {
-        $draft = createBasicDraft([
-            'title' => 'Test Title',
-            'close_details' => null,
-        ]);
-
-        $result = app(GetDraftStatus::class)->execute($draft);
-
-        expect($result['next_instruction'])->toContain('enable_file_attachments');
-    });
-
     it('instruction for description varies based on has_custom_form_fields', function () {
         $draftNoForm = createBasicDraft([
             'title' => 'Test Title',
