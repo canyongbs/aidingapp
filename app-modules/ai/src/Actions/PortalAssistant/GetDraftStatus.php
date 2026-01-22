@@ -597,7 +597,7 @@ class GetDraftStatus
 
         if ($this->isComplexField($fieldType)) {
             return sprintf(
-                'Call show_field_input(field_id="%s") to display the "%s" input. In the same response, ask ONE natural question to prompt for the "%s" field (e.g., "What\'s your *?" or "Could you select the *?"). Do NOT mention the widget or list the options - the user sees them.%s',
+                'Call show_field_input(field_id="%s") to display the "%s" input. In the same response, ask ONE natural question to prompt for the "%s" field (e.g., "What\'s your *?" or "Could you select the *?"). Do NOT mention the widget or list the options - the user sees them. Wait for their widget submission.%s',
                 $fieldId,
                 $fieldLabel,
                 $fieldLabel,
@@ -606,7 +606,7 @@ class GetDraftStatus
         }
 
         return sprintf(
-            'Ask naturally for "%s" (e.g., "What\'s your *?"). After they respond, call update_form_field(field_id="%s", value="<their response>").%s',
+            'Ask the user for "%s" (e.g., "What\'s your *?"). Wait for their NEW response, then call update_form_field(field_id="%s", value="<their NEW response>").%s',
             strtolower($fieldLabel),
             $fieldId,
             $skippedNote

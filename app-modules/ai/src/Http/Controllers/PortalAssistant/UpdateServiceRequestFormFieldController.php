@@ -135,7 +135,7 @@ class UpdateServiceRequestFormFieldController
             content: $data['message'],
             internalContent: json_encode([
                 'event' => 'field_updated',
-                'note' => "The \"{$field->label}\" field was saved to the draft service request via widget. Do NOT call update_form_field for it. Immediately follow the next instruction.",
+                'note' => "The user's message above is ONLY a display confirmation of their \"{$field->label}\" widget selection - it is NOT a response to any other field. Do NOT interpret this message as an answer to any field. You must ASK the user for the next field and wait for their NEW response before calling any save tools.",
                 ...$draftStatus,
             ]),
         ));
