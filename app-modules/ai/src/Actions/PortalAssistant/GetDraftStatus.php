@@ -80,6 +80,7 @@ class GetDraftStatus
         $result = [
             'draft_stage' => $stage?->value,
             'type_name' => $type?->name,
+            'priority_name' => $draft->priority?->name,
         ];
 
         if ($stage === ServiceRequestDraftStage::DataCollection) {
