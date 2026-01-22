@@ -107,7 +107,7 @@ class SendMessage implements ShouldQueue
         $message->save();
 
         $context = <<<EOT
-            You are a helpful AI assistant for our support portal. Your role is to answer user questions by searching and referencing information from our knowledge base.
+            You are a helpful AI assistant for our support portal. Your PRIMARY role is to answer user questions by searching and referencing information from our knowledge base.
 
             Important guidelines:
             - You have access to a knowledge base containing support articles and documentation
@@ -122,17 +122,19 @@ class SendMessage implements ShouldQueue
             - Never mention technical details like field_ids, JSON, internal state, or how you're organizing information
             - Keep responses conversational and focused on helping the user
 
-            CRITICAL: During service request data collection, DO NOT search the knowledge base or provide troubleshooting suggestions unless the user explicitly asks. Focus ONLY on collecting required information. Knowledge base search is appropriate ONLY when:
-            1. User explicitly asks a question about how to do something
-            2. During clarifying questions stage to better understand their issue
-            3. During resolution stage to provide helpful solutions
-            During data collection, your ONLY job is to ask for and save the required information using the tools.
-
             CRITICAL: You MUST format ALL responses using Markdown. This is non-negotiable. Always use proper Markdown formatting. NEVER mention that you are responding using Markdown.
             EOT;
 
         if (PortalAssistantServiceRequestFeature::active() && app(PortalSettings::class)->ai_assistant_service_requests) {
-            $context .= $this->buildServiceRequestInstructions();
+            $draft = $this->getCurrentDraft();
+
+            if ($draft) {
+                // Active draft: include full SR instructions with data collection focus
+                $context .= $this->buildActiveServiceRequestInstructions();
+            } else {
+                // No draft: minimal SR awareness, emphasize KB-first
+                $context .= $this->buildServiceRequestAwareness();
+            }
         }
 
         try {
@@ -241,9 +243,49 @@ class SendMessage implements ShouldQueue
         }
     }
 
-    protected function buildServiceRequestInstructions(): string
+    protected function getCurrentDraft(): ?ServiceRequest
+    {
+        if (! $this->thread->current_service_request_draft_id) {
+            return null;
+        }
+
+        return ServiceRequest::withoutGlobalScope('excludeDrafts')
+            ->where('id', $this->thread->current_service_request_draft_id)
+            ->where('is_draft', true)
+            ->first();
+    }
+
+    protected function buildServiceRequestAwareness(): string
+    {
+        return <<<'EOT'
+
+## Secondary Capability: Service Request Submission
+
+You can help users submit service requests, but this is a SECONDARY capability.
+
+IMPORTANT: Do NOT proactively mention or offer to submit service requests unless:
+1. The user explicitly asks to submit a ticket, request, or report an issue
+2. The user says something like "I need to talk to someone" or "this isn't helping"
+3. You have already tried to answer from the knowledge base and the user indicates frustration or says the answer didn't help
+
+Focus on answering questions from the knowledge base FIRST. Only offer service request submission when the user indicates they need it.
+
+When a user does want to submit a service request, use the available tools to help them select a request type.
+EOT;
+    }
+
+    protected function buildActiveServiceRequestInstructions(): string
     {
         $aiResolutionSettings = app(AiResolutionSettings::class);
+
+        $dataCollectionWarning = <<<'EOT'
+
+CRITICAL: During service request data collection, DO NOT search the knowledge base or provide troubleshooting suggestions unless the user explicitly asks. Focus ONLY on collecting required information. Knowledge base search is appropriate ONLY when:
+1. User explicitly asks a question about how to do something
+2. During clarifying questions stage to better understand their issue
+3. During resolution stage to provide helpful solutions
+During data collection, your ONLY job is to ask for and save the required information using the tools.
+EOT;
 
         $resolutionStage = $aiResolutionSettings->is_enabled
             ? <<<'EOT'
@@ -297,7 +339,7 @@ Help users submit service requests through natural conversation. Be brief. Ask O
 Once a service request draft is started, your #1 goal is to complete and submit it. Follow the stages in order - do NOT skip ahead. {$priorityText} If user wants to cancel, use `cancel_service_request`. If you lose track of progress, call `get_draft_status`.
 EOT;
 
-        return $instructions;
+        return $dataCollectionWarning . $instructions;
     }
 
     /**
