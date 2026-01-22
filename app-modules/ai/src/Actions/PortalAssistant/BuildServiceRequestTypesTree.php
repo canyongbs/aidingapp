@@ -49,13 +49,13 @@ class BuildServiceRequestTypesTree
     {
         $categories = ServiceRequestTypeCategory::with([
             'children',
-            'types' => fn ($query) => $query->whereHas('form')->with(['priorities' => fn ($priorityQuery) => $priorityQuery->orderBy('order')]),
+            'types' => fn ($query) => $query->with(['priorities' => fn ($priorityQuery) => $priorityQuery->orderBy('order')]),
         ])
             ->whereNull('parent_id')
             ->orderBy('sort')
             ->get();
 
-        $uncategorizedTypes = ServiceRequestType::whereHas('form')
+        $uncategorizedTypes = ServiceRequestType::query()
             ->whereDoesntHave('category')
             ->with(['priorities' => fn ($query) => $query->orderBy('order')])
             ->get();

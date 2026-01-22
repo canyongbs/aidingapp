@@ -141,7 +141,7 @@ class SaveClarifyingQuestionAnswerTool extends Tool
                 $result['request_number'] = $requestNumber;
                 $result['next_instruction'] = "Service request submitted for human review. Tell user: \"Your request number is {$requestNumber}. A team member will follow up to help resolve this.\"";
             } else {
-                $result['next_instruction'] = '3/3 questions saved. All clarifying questions complete - proceed to resolution stage.';
+                $result['next_instruction'] = '3/3 questions saved. All clarifying questions complete - proceed to resolution stage. ' . $result['next_instruction'];
             }
         } else {
             $result['next_instruction'] = sprintf('%d/3 saved. NOW ask your next clarifying question (topics: when it started, what they\'ve tried, error messages, urgency).', $saved);

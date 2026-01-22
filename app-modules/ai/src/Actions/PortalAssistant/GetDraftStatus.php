@@ -473,7 +473,7 @@ class GetDraftStatus
             return 'You already presented a resolution. Wait for yes/no feedback, then call record_resolution_response IMMEDIATELY. If they say no, the request auto-submits for human review with ALL details already collected - do NOT say they need to provide more details.';
         }
 
-        return 'Formulate a helpful resolution based on everything collected. Call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer="<your resolution>"). Do NOT mention escalation or what happens if it doesn\'t work.';
+        return 'The request has not been submitted to a human yet. To submit to a human, you are first required to attempt to resolve the user\'s issue or tell the system that you do not have the ability to do so and that a human must be involved. Formulate a helpful resolution based on everything collected, if you can. You MUST now call check_ai_resolution_validity(confidence_score=<0-100>, proposed_answer="<your resolution>"). If you are not able to solve the issue and would like to submit the ticket for a human, use confidence_score=0. Do NOT mention escalation or what happens if it doesn\'t work.';
     }
 
     protected function isAiResolutionEnabled(): bool
@@ -571,10 +571,10 @@ class GetDraftStatus
         $hasFormFields = $result['has_custom_form_fields'] ?? false;
 
         if ($hasFormFields) {
-            return 'Call enable_file_attachments() first. Then ask: "Is there anything else you\'d like to add about this request? Feel free to attach any files if helpful." IMMEDIATELY after they respond with ANY text, you MUST call update_description(description="<their response>") before doing anything else.' . $optionalNote;
+            return 'Call enable_file_attachments() first. Then ask: "Is there anything else you\'d like to add about this request? Feel free to attach any files if helpful." IMMEDIATELY after they respond with ANY text, you MUST call update_description(description="<their response>") before doing anything else. Do not push them to improve their description even if it is vague, just move on.' . $optionalNote;
         }
 
-        return 'Call enable_file_attachments() first. Then ask: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." IMMEDIATELY after they respond with ANY description, you MUST call update_description(description="<their response>") before doing anything else.' . $optionalNote;
+        return 'Call enable_file_attachments() first. Then ask: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." IMMEDIATELY after they respond with ANY description, you MUST call update_description(description="<their response>") before doing anything else. Do not push them to improve their description even if it is vague, just move on.' . $optionalNote;
     }
 
     protected function getTitleFieldInstruction(): string
@@ -597,9 +597,8 @@ class GetDraftStatus
 
         if ($this->isComplexField($fieldType)) {
             return sprintf(
-                'Call show_field_input(field_id="%s") to display the "%s" input. In the same response, ask ONE natural question (e.g., "What\'s your %s?" or "Could you select the %s?"). Do NOT mention the widget or list the options - the user sees them.%s',
+                'Call show_field_input(field_id="%s") to display the "%s" input. In the same response, ask ONE natural question to prompt for the "%s" field (e.g., "What\'s your *?" or "Could you select the *?"). Do NOT mention the widget or list the options - the user sees them.%s',
                 $fieldId,
-                $fieldLabel,
                 $fieldLabel,
                 $fieldLabel,
                 $skippedNote
@@ -607,8 +606,7 @@ class GetDraftStatus
         }
 
         return sprintf(
-            'Ask naturally for their %s (e.g., "What\'s your %s?"). After they respond, call update_form_field(field_id="%s", value="<their response>").%s',
-            strtolower($fieldLabel),
+            'Ask naturally for "%s" (e.g., "What\'s your *?"). After they respond, call update_form_field(field_id="%s", value="<their response>").%s',
             strtolower($fieldLabel),
             $fieldId,
             $skippedNote

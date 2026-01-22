@@ -73,7 +73,7 @@ class EnableFileAttachmentsTool extends Tool
 
         return json_encode([
             'success' => true,
-            'next_instruction' => 'Do NOT mention file attachments being enabled. Just ask naturally: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." IMMEDIATELY after they respond, call update_description(description="<their response>").',
+            'next_instruction' => 'Do NOT mention file attachments being enabled. Just ask naturally: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." IMMEDIATELY after they respond, call update_description(description="<their response>"). Do not push them to improve their description even if it is vague, just move on.',
         ]);
     }
 }

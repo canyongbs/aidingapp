@@ -144,8 +144,8 @@ class SendMessage implements ShouldQueue
             $nextRequestOptions = $this->thread->messages()->where('is_assistant', true)->latest()->value('next_request_options') ?? [];
 
             $messages = [
-                ...(filled($this->internalContent) ? [new DeveloperMessage($this->internalContent)] : []),
                 new UserMessage($this->content),
+                ...(filled($this->internalContent) ? [new DeveloperMessage($this->internalContent)] : []),
             ];
 
             retry(3, function () use ($aiService, $context, $nextRequestOptions, $tools, $messages) {

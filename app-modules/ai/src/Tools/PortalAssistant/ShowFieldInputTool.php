@@ -107,7 +107,7 @@ class ShowFieldInputTool extends Tool
         if ($isTextField) {
             return json_encode([
                 'success' => false,
-                'hint' => "This is a text field (collection_method=\"text\"). Ask the user naturally (e.g., \"What's your {$field->label}?\") and then call update_form_field(field_id=\"{$field_id}\", value=\"<their response>\") with their answer.",
+                'hint' => "This is a text field (collection_method=\"text\"). Ask the user naturally for the \"{$field->label}\" (e.g., \"What's your *?\") and then call update_form_field(field_id=\"{$field_id}\", value=\"<their response>\") with their answer.",
             ]);
         }
 
@@ -128,7 +128,7 @@ class ShowFieldInputTool extends Tool
         return json_encode([
             'success' => true,
             'field_label' => $field->label,
-            'next_instruction' => "Do NOT mention the widget or that something is displayed. Just ask ONE natural question (e.g., \"What's your {$field->label}?\" or \"Could you select the {$field->label}?\"). Do NOT list the options or add explanation - the user sees the input. Wait for their selection.",
+            'next_instruction' => "Do NOT mention the widget or that something is displayed. Just ask ONE natural question to prompt for the \"{$field->label}\" field (e.g., \"What's your *?\" or \"Could you select the *?\"). Do NOT list the options or add explanation - the user sees the input. Wait for their selection.",
         ]);
     }
 }
