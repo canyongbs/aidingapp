@@ -41,7 +41,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use App\Features\ContactChangesFeature;
-use App\Features\JobTitleFeature;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
@@ -95,7 +94,6 @@ class CreateContact extends CreateRecord
                         ->live(onBlur: true)
                         ->afterStateUpdated($generateFullName)
                         ->string()
-                        ->visible(fn (): bool => JobTitleFeature::active())
                         ->searchable(),
                     TextInput::make('first_name')
                         ->label('First Name')
@@ -122,10 +120,9 @@ class CreateContact extends CreateRecord
                         ->string(),
                     TextInput::make('job_title')
                         ->maxLength(255)
-                        ->visible(fn (): bool => JobTitleFeature::active())
                         ->nullable()
                         ->string(),
-                ])->columns(JobTitleFeature::active() ? 3 : 2)->columnSpanFull(),
+                ])->columns(3)->columnSpanFull(),
 
                 Section::make('Contact Information')->schema([
                     TextInput::make('email')
