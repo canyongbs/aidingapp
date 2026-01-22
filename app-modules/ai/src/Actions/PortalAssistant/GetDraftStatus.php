@@ -102,33 +102,36 @@ class GetDraftStatus
 
         if (! $type) {
             return array_merge($data, [
-                'missing_required_fields' => [],
-                'missing_optional_fields' => [],
+                'next_field' => null,
                 'has_custom_form_fields' => false,
             ]);
         }
 
         $formFields = $this->getFormFields($draft, $type);
+        $nextField = $this->getNextFieldToCollect($draft, $formFields);
 
         $data['form_fields'] = $formFields;
-        $data['missing_required_fields'] = $this->getMissingRequiredFields($draft, $formFields);
-        $data['missing_optional_fields'] = $this->getMissingOptionalFields($formFields);
+        $data['next_field'] = $nextField;
         $data['has_custom_form_fields'] = ! empty($formFields);
 
-        $this->addFilledFieldsIfOnlyTitleDescriptionRemaining($data, $draft, $type);
+        $this->addFilledFieldsIfOnlyTitleDescriptionRemaining($data, $draft, $type, $nextField);
 
         return $data;
     }
 
     /**
      * @param array<string, mixed> $data
+     * @param array<string, mixed>|null $nextField
      */
-    protected function addFilledFieldsIfOnlyTitleDescriptionRemaining(array &$data, ServiceRequest $draft, ServiceRequestType $type): void
+    protected function addFilledFieldsIfOnlyTitleDescriptionRemaining(array &$data, ServiceRequest $draft, ServiceRequestType $type, ?array $nextField): void
     {
-        $onlyTitleDescriptionRemaining = collect($data['missing_required_fields']) /** @phpstan-ignore argument.templateType, argument.templateType */
-            ->every(fn ($field) => in_array($field['type'], ['title', 'description']));
+        if ($nextField === null) {
+            return;
+        }
 
-        if (! $onlyTitleDescriptionRemaining) {
+        $fieldId = $nextField['field_id'] ?? null;
+
+        if (! in_array($fieldId, ['title', 'description'])) {
             return;
         }
 
@@ -170,28 +173,7 @@ class GetDraftStatus
     {
         unset($result['form_fields']);
 
-        if (isset($result['missing_required_fields'])) {
-            $result['missing_required_fields'] = $this->stripPositionFromFields($result['missing_required_fields']);
-        }
-
-        if (isset($result['missing_optional_fields'])) {
-            $result['missing_optional_fields'] = $this->stripPositionFromFields($result['missing_optional_fields']);
-        }
-
         return $result;
-    }
-
-    /**
-     * @param array<int, array<string, mixed>> $fields
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    protected function stripPositionFromFields(array $fields): array
-    {
-        return array_map(
-            fn (array $field) => collect($field)->except('position')->all(),
-            $fields
-        );
     }
 
     /**
@@ -219,11 +201,16 @@ class GetDraftStatus
             return [];
         }
 
-        return $submission->fields()
-            ->get()
-            ->keyBy('id')
-            ->map(fn (ServiceRequestFormField $field) => $field->getRelationValue('pivot')->response) // @phpstan-ignore argument.type
-            ->all();
+        $submittedFieldIds = $submission->fields()->pluck('service_request_form_field_id')->all();
+
+        $values = [];
+
+        foreach ($submittedFieldIds as $fieldId) {
+            $field = $submission->fields()->where('service_request_form_field_id', $fieldId)->first();
+            $values[$fieldId] = $field?->getRelationValue('pivot')->response ?? '';
+        }
+
+        return $values;
     }
 
     /**
@@ -234,18 +221,17 @@ class GetDraftStatus
     protected function collectFieldsFromForm(mixed $form, array $filledValues): array
     {
         $fields = [];
-        $position = 0;
 
         foreach ($this->getOrderedSteps($form) as $step) {
             foreach ($step->fields as $field) {
                 assert($field instanceof ServiceRequestFormField);
 
-                $fields[] = $this->formatField($field, $filledValues, $position++, $step);
+                $fields[] = $this->formatField($field, $filledValues, $step);
             }
         }
 
         foreach ($this->getOrphanedFields($form) as $field) {
-            $fields[] = $this->formatField($field, $filledValues, $position++, null);
+            $fields[] = $this->formatField($field, $filledValues, null);
         }
 
         return $fields;
@@ -272,9 +258,10 @@ class GetDraftStatus
      *
      * @return array<string, mixed>
      */
-    protected function formatField(ServiceRequestFormField $field, array $filledValues, int $position, ?ServiceRequestFormStep $step): array
+    protected function formatField(ServiceRequestFormField $field, array $filledValues, ?ServiceRequestFormStep $step): array
     {
         $fieldId = $field->getKey();
+        $hasSubmission = array_key_exists($fieldId, $filledValues);
         $value = $filledValues[$fieldId] ?? null;
 
         $data = [
@@ -283,9 +270,9 @@ class GetDraftStatus
             'type' => $field->type,
             'required' => (bool) $field->is_required,
             'value' => $value,
-            'filled' => $value !== null && $value !== '',
+            'has_submission' => $hasSubmission,
+            'filled' => $hasSubmission && $value !== '',
             'collection_method' => $this->getCollectionMethod($field->type),
-            'position' => $position,
             'step_id' => $step?->getKey(),
             'step_label' => $step?->label,
         ];
@@ -310,42 +297,37 @@ class GetDraftStatus
     /**
      * @param array<int, array<string, mixed>> $formFields
      *
-     * @return array<int, array<string, mixed>>
+     * @return array<string, mixed>|null
      */
-    protected function getMissingRequiredFields(ServiceRequest $draft, array $formFields): array
+    protected function getNextFieldToCollect(ServiceRequest $draft, array $formFields): ?array
     {
-        $missing = $this->getMissingRequiredFormFields($formFields);
-        $maxPosition = count($formFields);
+        foreach ($formFields as $field) {
+            if (! $field['has_submission']) {
+                return $this->buildNextFieldData($field);
+            }
+        }
 
         if (empty($draft->close_details)) {
-            $missing[] = $this->buildDescriptionField($maxPosition);
+            return [
+                'field_id' => 'description',
+                'label' => 'Description',
+                'type' => 'description',
+                'required' => true,
+                'is_optional' => false,
+            ];
         }
 
         if (empty($draft->title)) {
-            $missing[] = $this->buildTitleField($maxPosition + 1);
+            return [
+                'field_id' => 'title',
+                'label' => 'Title',
+                'type' => 'title',
+                'required' => true,
+                'is_optional' => false,
+            ];
         }
 
-        return $missing;
-    }
-
-    /**
-     * @param array<int, array<string, mixed>> $formFields
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    protected function getMissingRequiredFormFields(array $formFields): array
-    {
-        $missing = [];
-
-        foreach ($formFields as $field) {
-            if (! $field['required'] || $field['filled']) {
-                continue;
-            }
-
-            $missing[] = $this->buildMissingFieldData($field);
-        }
-
-        return $missing;
+        return null;
     }
 
     /**
@@ -353,14 +335,15 @@ class GetDraftStatus
      *
      * @return array<string, mixed>
      */
-    protected function buildMissingFieldData(array $field): array
+    protected function buildNextFieldData(array $field): array
     {
         $data = [
             'field_id' => $field['field_id'],
             'label' => $field['label'],
             'type' => $field['type'],
+            'required' => $field['required'],
+            'is_optional' => ! $field['required'],
             'collection_method' => $field['collection_method'],
-            'position' => $field['position'],
         ];
 
         if (isset($field['options'])) {
@@ -368,84 +351,6 @@ class GetDraftStatus
         }
 
         return $data;
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function buildDescriptionField(int $position): array
-    {
-        return [
-            'field_id' => 'description',
-            'label' => 'Description',
-            'type' => 'description',
-            'position' => $position,
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function buildTitleField(int $position): array
-    {
-        return [
-            'field_id' => 'title',
-            'label' => 'Title',
-            'type' => 'title',
-            'position' => $position,
-        ];
-    }
-
-    /**
-     * @param array<int, array<string, mixed>> $formFields
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    protected function getMissingOptionalFields(array $formFields): array
-    {
-        $optional = [];
-
-        foreach ($formFields as $field) {
-            if ($field['required'] || $field['filled']) {
-                continue;
-            }
-
-            $optional[] = $this->buildMissingFieldData($field);
-        }
-
-        return $optional;
-    }
-
-    /**
-     * @param array<int, array<string, mixed>> $formFields
-     * @param array<int, array<string, mixed>> $missingOptional
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    protected function getSkippedOptionalFields(array $formFields, array $missingOptional, int $nextRequiredPosition): array
-    {
-        $lastFilledPosition = $this->findLastFilledPosition($formFields);
-
-        return array_filter(
-            $missingOptional,
-            fn ($field) => $field['position'] > $lastFilledPosition && $field['position'] < $nextRequiredPosition
-        );
-    }
-
-    /**
-     * @param array<int, array<string, mixed>> $formFields
-     */
-    protected function findLastFilledPosition(array $formFields): int
-    {
-        $lastFilledPosition = -1;
-
-        foreach ($formFields as $field) {
-            if ($field['filled'] && $field['position'] > $lastFilledPosition) {
-                $lastFilledPosition = $field['position'];
-            }
-        }
-
-        return $lastFilledPosition;
     }
 
     /**
@@ -513,96 +418,52 @@ class GetDraftStatus
      */
     protected function getDataCollectionInstruction(array $result): string
     {
-        $missingRequired = $result['missing_required_fields'] ?? [];
-        $missingOptional = $result['missing_optional_fields'] ?? [];
+        $nextField = $result['next_field'] ?? null;
 
-        if (empty($missingRequired)) {
-            return $this->getAllRequiredCollectedInstruction($missingOptional);
+        if (! $nextField) {
+            return 'All information collected. Transition to asking clarifying questions.';
         }
 
-        return $this->getNextFieldInstruction($result, $missingRequired, $missingOptional);
+        return $this->getFieldInstruction($nextField, $result);
     }
 
     /**
-     * @param array<int, array<string, mixed>> $missingOptional
+     * @param array<string, mixed> $field
+     * @param array<string, mixed> $result
      */
-    protected function getAllRequiredCollectedInstruction(array $missingOptional): string
-    {
-        if (empty($missingOptional)) {
-            return 'All required information collected. Transition to asking clarifying questions.';
-        }
-
-        $optionalLabels = $this->extractLabels($missingOptional, lowercase: true);
-
-        return sprintf(
-            'All required info collected. If any of these optional fields seem relevant based on the conversation, ask about them: %s. Use update_form_field(field_id="<id>", value="<response>") to save. Otherwise, transition to clarifying questions.',
-            implode(', ', $optionalLabels)
-        );
-    }
-
-    /**
-     * @param array<string, mixed>             $result
-     * @param array<int, array<string, mixed>> $missingRequired
-     * @param array<int, array<string, mixed>> $missingOptional
-     */
-    protected function getNextFieldInstruction(array $result, array $missingRequired, array $missingOptional): string
-    {
-        $firstMissing = $missingRequired[0];
-        $fieldId = $firstMissing['field_id'];
-        $fieldType = $firstMissing['type'];
-
-        if ($fieldId === 'description') {
-            return $this->getDescriptionFieldInstruction($result, $missingOptional);
-        }
-
-        if ($fieldId === 'title') {
-            return $this->getTitleFieldInstruction();
-        }
-
-        return $this->getCustomFieldInstruction($result, $firstMissing, $fieldType, $missingOptional);
-    }
-
-    /**
-     * @param array<string, mixed>             $result
-     * @param array<int, array<string, mixed>> $missingOptional
-     */
-    protected function getDescriptionFieldInstruction(array $result, array $missingOptional): string
-    {
-        $optionalNote = $this->buildRemainingOptionalNote($missingOptional);
-        $hasFormFields = $result['has_custom_form_fields'] ?? false;
-
-        if ($hasFormFields) {
-            return 'Ask: "Is there anything else you\'d like to add about this request? Feel free to attach any files if helpful." IMMEDIATELY after they respond with ANY text, you MUST call update_description(description="<their response>") before doing anything else. Do not push them to improve their description even if it is vague, just move on.' . $optionalNote;
-        }
-
-        return 'Ask: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." IMMEDIATELY after they respond with ANY description, you MUST call update_description(description="<their response>") before doing anything else. Do not push them to improve their description even if it is vague, just move on.' . $optionalNote;
-    }
-
-    protected function getTitleFieldInstruction(): string
-    {
-        return 'Based on what they\'ve told you, suggest a short title. Say something like: "I\'ll title this \'[your suggested title]\' - does that work?" After they confirm (or suggest changes), call update_title(title="<final title>").';
-    }
-
-    /**
-     * @param array<string, mixed>             $result
-     * @param array<string, mixed>             $field
-     * @param array<int, array<string, mixed>> $missingOptional
-     */
-    protected function getCustomFieldInstruction(array $result, array $field, string $fieldType, array $missingOptional): string
+    protected function getFieldInstruction(array $field, array $result): string
     {
         $fieldId = $field['field_id'];
         $fieldLabel = $field['label'];
-        $nextRequiredPosition = $field['position'] ?? PHP_INT_MAX;
+        $isOptional = $field['is_optional'] ?? false;
 
-        $skippedNote = $this->buildSkippedOptionalNote($result, $missingOptional, $nextRequiredPosition);
+        $skipNote = $isOptional
+            ? " This field is optional - if the user says skip, N/A, or doesn't have this info, call skip_form_field(field_id=\"{$fieldId}\")."
+            : '';
 
-        if ($this->isComplexField($fieldType)) {
+        if ($fieldId === 'description') {
+            $hasFormFields = $result['has_custom_form_fields'] ?? false;
+
+            if ($hasFormFields) {
+                return 'Ask: "Is there anything else you\'d like to add about this request? Feel free to attach any files if helpful." IMMEDIATELY after they respond with ANY text, you MUST call update_description(description="<their response>") before doing anything else. Do not push them to improve their description even if it is vague, just move on.';
+            }
+
+            return 'Ask: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." IMMEDIATELY after they respond with ANY description, you MUST call update_description(description="<their response>") before doing anything else. Do not push them to improve their description even if it is vague, just move on.';
+        }
+
+        if ($fieldId === 'title') {
+            return 'Based on what they\'ve told you, suggest a short title. Say something like: "I\'ll title this \'[your suggested title]\' - does that work?" After they confirm (or suggest changes), call update_title(title="<final title>").';
+        }
+
+        $collectionMethod = $field['collection_method'] ?? 'text';
+
+        if ($collectionMethod === 'show_field_input') {
             return sprintf(
                 'Call show_field_input(field_id="%s") to display the "%s" input. In the same response, ask ONE natural question to prompt for the "%s" field (e.g., "What\'s your *?" or "Could you select the *?"). Do NOT mention the widget or list the options - the user sees them. Wait for their widget submission.%s',
                 $fieldId,
                 $fieldLabel,
                 $fieldLabel,
-                $skippedNote
+                $skipNote
             );
         }
 
@@ -610,68 +471,7 @@ class GetDraftStatus
             'Ask the user for "%s" (e.g., "What\'s your *?"). Wait for their NEW response, then call update_form_field(field_id="%s", value="<their NEW response>").%s',
             strtolower($fieldLabel),
             $fieldId,
-            $skippedNote
-        );
-    }
-
-    protected function isComplexField(string $fieldType): bool
-    {
-        $simpleTypes = [
-            TextInputFormFieldBlock::type(),
-            TextAreaFormFieldBlock::type(),
-        ];
-
-        return ! in_array($fieldType, $simpleTypes);
-    }
-
-    /**
-     * @param array<int, array<string, mixed>> $missingOptional
-     */
-    protected function buildRemainingOptionalNote(array $missingOptional): string
-    {
-        if (empty($missingOptional)) {
-            return '';
-        }
-
-        $labels = $this->extractLabels($missingOptional);
-
-        return sprintf(
-            ' Before moving on, these optional fields are still available: %s - ask about them if they seem relevant based on the conversation.',
-            implode(', ', $labels)
-        );
-    }
-
-    /**
-     * @param array<string, mixed>             $result
-     * @param array<int, array<string, mixed>> $missingOptional
-     */
-    protected function buildSkippedOptionalNote(array $result, array $missingOptional, int $nextRequiredPosition): string
-    {
-        $formFields = $result['form_fields'] ?? [];
-        $skippedOptional = $this->getSkippedOptionalFields($formFields, $missingOptional, $nextRequiredPosition);
-
-        if (empty($skippedOptional)) {
-            return '';
-        }
-
-        $labels = $this->extractLabels($skippedOptional);
-
-        return sprintf(
-            ' You skipped these optional fields: %s - ask about them if they seem relevant based on the conversation.',
-            implode(', ', $labels)
-        );
-    }
-
-    /**
-     * @param array<int, array<string, mixed>> $fields
-     *
-     * @return array<int, string>
-     */
-    protected function extractLabels(array $fields, bool $lowercase = false): array
-    {
-        return array_map(
-            fn ($field) => $lowercase ? strtolower($field['label']) : $field['label'],
-            $fields
+            $skipNote
         );
     }
 

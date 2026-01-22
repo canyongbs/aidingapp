@@ -53,6 +53,7 @@ use AidingApp\Ai\Tools\PortalAssistant\RecordResolutionResponseTool;
 use AidingApp\Ai\Tools\PortalAssistant\SaveClarifyingQuestionAnswerTool;
 use AidingApp\Ai\Tools\PortalAssistant\ShowFieldInputTool;
 use AidingApp\Ai\Tools\PortalAssistant\ShowTypeSelectorTool;
+use AidingApp\Ai\Tools\PortalAssistant\SkipFormFieldTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateDescriptionTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateFormFieldTool;
 use AidingApp\Ai\Tools\PortalAssistant\UpdateTitleTool;
@@ -412,6 +413,7 @@ EOT;
         if ($hasCustomFields) {
             $tools[] = new UpdateFormFieldTool($this->thread);
             $tools[] = new ShowFieldInputTool($this->thread);
+            $tools[] = new SkipFormFieldTool($this->thread);
         }
 
         if (! $hasCustomFields || $this->allRequiredFormFieldsFilled($draft)) {
