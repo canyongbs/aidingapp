@@ -571,10 +571,10 @@ class GetDraftStatus
         $hasFormFields = $result['has_custom_form_fields'] ?? false;
 
         if ($hasFormFields) {
-            return 'Call enable_file_attachments() first. Then ask: "Is there anything else you\'d like to add about this request? Feel free to attach any files if helpful." IMMEDIATELY after they respond with ANY text, you MUST call update_description(description="<their response>") before doing anything else. Do not push them to improve their description even if it is vague, just move on.' . $optionalNote;
+            return 'Ask: "Is there anything else you\'d like to add about this request? Feel free to attach any files if helpful." IMMEDIATELY after they respond with ANY text, you MUST call update_description(description="<their response>") before doing anything else. Do not push them to improve their description even if it is vague, just move on.' . $optionalNote;
         }
 
-        return 'Call enable_file_attachments() first. Then ask: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." IMMEDIATELY after they respond with ANY description, you MUST call update_description(description="<their response>") before doing anything else. Do not push them to improve their description even if it is vague, just move on.' . $optionalNote;
+        return 'Ask: "Can you describe what\'s happening? Feel free to attach any screenshots if that helps." IMMEDIATELY after they respond with ANY description, you MUST call update_description(description="<their response>") before doing anything else. Do not push them to improve their description even if it is vague, just move on.' . $optionalNote;
     }
 
     protected function getTitleFieldInstruction(): string

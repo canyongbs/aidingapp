@@ -47,7 +47,6 @@ use AidingApp\Ai\Support\StreamingChunks\Text;
 use AidingApp\Ai\Support\StreamingChunks\ToolCall;
 use AidingApp\Ai\Tools\PortalAssistant\CancelServiceRequestTool;
 use AidingApp\Ai\Tools\PortalAssistant\CheckAiResolutionValidityTool;
-use AidingApp\Ai\Tools\PortalAssistant\EnableFileAttachmentsTool;
 use AidingApp\Ai\Tools\PortalAssistant\GetDraftStatusTool;
 use AidingApp\Ai\Tools\PortalAssistant\GetServiceRequestTypesForSuggestionTool;
 use AidingApp\Ai\Tools\PortalAssistant\RecordResolutionResponseTool;
@@ -278,7 +277,7 @@ Help users submit service requests through natural conversation. Be brief. Ask O
    - Each field has a `collection_method` telling you how to collect it:
      - `"text"`: Ask question, then `update_form_field(field_id, value)`
      - `"show_field_input"`: `show_field_input(field_id)` AND ask question in same response
-   - Description: `enable_file_attachments` first, then ask, then `update_description`
+   - Description: Ask naturally (users can attach files anytime during draft), then `update_description`
    - Title: Suggest a title, then `update_title`
 3. **Clarifying Questions** (draft_stage=clarifying_questions):
    - Ask 3 questions about context, urgency, or troubleshooting history (NOT form data you already collected)
@@ -368,7 +367,6 @@ EOT;
 
         if (! $hasCustomFields || $this->allRequiredFormFieldsFilled($draft)) {
             $tools[] = new UpdateDescriptionTool($this->thread);
-            $tools[] = new EnableFileAttachmentsTool($this->thread);
         }
 
         if ($draft->close_details) {

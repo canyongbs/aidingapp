@@ -37,6 +37,7 @@
 namespace AidingApp\Ai\Http\Controllers\PortalAssistant;
 
 use AidingApp\Ai\Actions\PortalAssistant\GetDraftStatus;
+use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\Ai\Jobs\PortalAssistant\SendMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
@@ -122,6 +123,12 @@ class SelectServiceRequestTypeController
             $thread->current_service_request_draft_id = $draft->getKey();
             $thread->save();
         }
+
+        event(new PortalAssistantActionRequest(
+            $thread,
+            'draft_attached',
+            []
+        ));
 
         // Get the current draft for status
         $currentDraft = ServiceRequest::withoutGlobalScope('excludeDrafts')

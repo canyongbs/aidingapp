@@ -36,6 +36,7 @@
 
 namespace AidingApp\Ai\Tools\PortalAssistant;
 
+use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use Prism\Prism\Tool;
 
@@ -62,6 +63,12 @@ class CancelServiceRequestTool extends Tool
         // Clear the current draft reference (but don't delete the draft itself)
         $this->thread->current_service_request_draft_id = null;
         $this->thread->save();
+
+        event(new PortalAssistantActionRequest(
+            $this->thread,
+            'draft_detached',
+            []
+        ));
 
         return json_encode([
             'success' => true,

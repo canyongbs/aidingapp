@@ -36,6 +36,7 @@
 
 namespace AidingApp\Ai\Tools\PortalAssistant\Concerns;
 
+use AidingApp\Ai\Events\PortalAssistant\PortalAssistantActionRequest;
 use AidingApp\ServiceManagement\Actions\SubmitServiceRequestDraft;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -53,11 +54,27 @@ trait SubmitsServiceRequest
             ? SystemServiceRequestClassification::Closed
             : SystemServiceRequestClassification::Open;
 
-        return app(SubmitServiceRequestDraft::class)->execute(
+        $requestNumber = app(SubmitServiceRequestDraft::class)->execute(
             draft: $draft,
             statusClassification: $statusClassification,
             assignToTeam: ! $resolutionAccepted,
         );
+
+        $this->detachDraftFromThread();
+
+        return $requestNumber;
+    }
+
+    protected function detachDraftFromThread(): void
+    {
+        $this->thread->current_service_request_draft_id = null;
+        $this->thread->save();
+
+        event(new PortalAssistantActionRequest(
+            $this->thread,
+            'draft_detached',
+            []
+        ));
     }
 
     protected function recordAiResolutionOutcome(ServiceRequest $draft, bool $wasAccepted, ?string $resolutionUpdateUuid = null): void
