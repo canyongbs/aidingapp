@@ -39,7 +39,6 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use App\Features\ContactChangesFeature;
-use App\Features\JobTitleFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\Section;
@@ -60,8 +59,7 @@ class ViewContact extends ViewRecord
             ->schema([
                 Section::make('Demographics')
                     ->schema([
-                        TextEntry::make('title')
-                            ->visible(fn (): bool => JobTitleFeature::active()),
+                        TextEntry::make('title'),
                         TextEntry::make('first_name')
                             ->label('First Name'),
                         TextEntry::make('last_name')
@@ -71,10 +69,9 @@ class ViewContact extends ViewRecord
                         TextEntry::make('preferred')
                             ->label('Preferred Name'),
                         TextEntry::make('job_title')
-                            ->visible(fn (): bool => JobTitleFeature::active())
                             ->label('Job Title'),
                     ])
-                    ->columns(JobTitleFeature::active() ? 3 : 2)
+                    ->columns(3)
                     ->columnSpanFull(),
                 Section::make('Contact Information')
                     ->schema([
