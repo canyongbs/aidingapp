@@ -42,7 +42,6 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Prism\Prism\Enums\ChunkType;
 use Prism\Prism\Enums\FinishReason;
 use Prism\Prism\Providers\OpenAI\Handlers\Stream as BaseStream;
@@ -52,6 +51,7 @@ use Prism\Prism\ValueObjects\Messages\AssistantMessage;
 use Prism\Prism\ValueObjects\Messages\ToolResultMessage;
 use Prism\Prism\ValueObjects\Meta;
 use Prism\Prism\ValueObjects\Usage;
+use Psr\Http\Message\MessageInterface;
 use ReflectionClass;
 
 class Stream extends BaseStream
@@ -116,6 +116,8 @@ class Stream extends BaseStream
         $reasoningItems = [];
 
         $newResponseId = null;
+
+        assert($response instanceof MessageInterface);
 
         while (! $response->getBody()->eof()) {
             $data = $this->parseNextDataLine($response->getBody());

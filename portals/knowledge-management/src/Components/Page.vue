@@ -32,16 +32,8 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps } from 'vue';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
-
-    defineProps({
-        hasNewRequestButton: {
-            type: Boolean,
-            default: true,
-        },
-    });
 
     const { user } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
@@ -51,7 +43,7 @@
     <div class="flex-1 bg-gray-50">
         <div class="bg-gradient-to-br from-brand-500 to-brand-800 px-6">
             <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
-                <div class="text-right" v-if="hasNewRequestButton && hasServiceManagement && user">
+                <div class="text-right" v-if="hasServiceManagement && user">
                     <router-link :to="{ name: 'create-service-request' }">
                         <button
                             class="px-3 py-2 font-medium text-sm rounded bg-white text-brand-700 dark:text-brand-400"

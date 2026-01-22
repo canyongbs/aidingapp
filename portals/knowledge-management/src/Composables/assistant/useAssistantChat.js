@@ -36,21 +36,17 @@ import { computed, onUnmounted, ref, watch } from 'vue';
 import { useAssistantStore } from '../../Stores/assistant.js';
 import { useTokenStore } from '../../Stores/token.js';
 import { useAssistantConnection } from './useAssistantConnection.js';
-import { useFileUpload } from './useFileUpload.js';
 
 export function useAssistantChat() {
     const { assistantSendMessageUrl, selectTypeUrl, updateFieldUrl, getTypesUrl, websocketsConfig } =
         useAssistantStore();
     const { getToken } = useTokenStore();
-    const fileUpload = useFileUpload();
 
     const messages = ref([]);
     const threadId = ref(null);
     const isSending = ref(false);
     const wordQueue = ref([]);
     const isTyping = ref(false);
-    const activeWidget = ref(null);
-    const typeSelected = ref(false);
 
     const isAssistantResponding = computed(() => {
         return messages.value.some((m) => m.author === 'assistant' && !m.isComplete);
@@ -71,11 +67,6 @@ export function useAssistantChat() {
             if (messages.value[messageIndex]?.shouldComplete) {
                 messages.value[messageIndex].isComplete = true;
                 delete messages.value[messageIndex].shouldComplete;
-                // Show pending widget if any
-                if (messages.value[messageIndex].pendingWidget) {
-                    activeWidget.value = messages.value[messageIndex].pendingWidget;
-                    delete messages.value[messageIndex].pendingWidget;
-                }
             }
             return;
         }
@@ -109,11 +100,6 @@ export function useAssistantChat() {
 
         if (isComplete && wordQueue.value.length === 0 && !isTyping.value) {
             messages.value[messageIndex].isComplete = true;
-            // Show pending widget if any
-            if (messages.value[messageIndex].pendingWidget) {
-                activeWidget.value = messages.value[messageIndex].pendingWidget;
-                delete messages.value[messageIndex].pendingWidget;
-            }
         } else if (isComplete) {
             messages.value[messageIndex].shouldComplete = true;
         }
@@ -122,22 +108,11 @@ export function useAssistantChat() {
     const sendMessage = async (content) => {
         if (!content || !content.trim() || isSending.value || isAssistantResponding.value) return;
 
-        // Wait for all uploads to complete before sending
-        if (!fileUpload.allUploadsComplete.value) {
-            return;
-        }
-
         isSending.value = true;
 
         addUserMessage(content);
 
         const payload = { content, thread_id: threadId.value };
-
-        // Include file URLs if any files were uploaded
-        const fileUrls = fileUpload.getCompletedFileUrls();
-        if (fileUrls.length > 0) {
-            payload.file_urls = fileUrls;
-        }
 
         try {
             const response = await axios.post(assistantSendMessageUrl, payload);
@@ -150,131 +125,18 @@ export function useAssistantChat() {
             updateAssistantMessage('', true, 'Failed to send message.');
         } finally {
             isSending.value = false;
-            // Clear uploaded files after sending (keep attachment button visible)
-            fileUpload.clearFiles();
         }
     };
 
     const connection = useAssistantConnection(websocketsConfig, getToken);
 
-    const handleActionRequest = (actionType, params) => {
-        // Handle file attachment state changes immediately (not dependent on message completion)
-        if (actionType === 'draft_attached') {
-            fileUpload.enableAttachments();
-            return;
-        }
-
-        if (actionType === 'draft_detached') {
-            fileUpload.disableAttachments();
-            return;
-        }
-
-        // Don't show widgets until assistant response is complete
-        const messageIndex = messages.value.findIndex(
-            (message) => message.author === 'assistant' && !message.isComplete,
-        );
-
-        if (messageIndex !== -1) {
-            // Store the widget to show after response completes
-            messages.value[messageIndex].pendingWidget = { type: actionType, params };
-        } else {
-            // Response already complete, show immediately
-            activeWidget.value = { type: actionType, params };
-        }
-    };
-
     const connectToThread = async (id) => {
         if (!id) return;
 
-        await connection.connect(
-            id,
-            (chunk, is_complete, err) => {
-                updateAssistantMessage(chunk, is_complete, err);
-            },
-            handleActionRequest,
-        );
+        await connection.connect(id, (chunk, is_complete, err) => {
+            updateAssistantMessage(chunk, is_complete, err);
+        });
     };
-
-    const handleWidgetSubmit = async (submitData) => {
-        const { type, field_id, type_id, priority_id, value, display_text } = submitData;
-
-        if (isSending.value || isAssistantResponding.value) return;
-        isSending.value = true;
-
-        addUserMessage(display_text || 'Submitted');
-
-        try {
-            let endpoint;
-            let payload = { thread_id: threadId.value, message: display_text || 'Submitted' };
-
-            if (type === 'type_selection') {
-                endpoint = selectTypeUrl;
-                payload.priority_id = priority_id;
-                typeSelected.value = true;
-            } else if (type === 'field_response') {
-                endpoint = updateFieldUrl;
-                payload.field_id = field_id;
-                payload.value = value;
-            }
-
-            const response = await axios.post(endpoint, payload);
-            if (response.data.thread_id) {
-                threadId.value = response.data.thread_id;
-            }
-            addAssistantMessage();
-        } catch (error) {
-            console.error('[Assistant] Widget submission failed:', error);
-            if (error.response?.data?.message) {
-                console.error('[Assistant] Server error:', error.response.data);
-            }
-            addAssistantMessage();
-            updateAssistantMessage('', true, 'Failed to submit widget data.');
-        } finally {
-            isSending.value = false;
-        }
-
-        activeWidget.value = null;
-    };
-
-    const handleWidgetCancel = async () => {
-        activeWidget.value = null;
-    };
-
-    const showNewRequestSelector = async () => {
-        if (!getTypesUrl || isSending.value || isAssistantResponding.value || activeWidget.value) return;
-
-        // Immediately show loading state in widget area
-        activeWidget.value = {
-            type: 'loading',
-            params: {},
-        };
-
-        try {
-            const response = await axios.get(getTypesUrl);
-            const typesTree = response.data.types_tree || [];
-
-            if (typesTree.length === 0) {
-                console.error('[Assistant] No service request types available');
-                activeWidget.value = null;
-                return;
-            }
-
-            activeWidget.value = {
-                type: 'select_service_request_type',
-                params: {
-                    suggestion: null,
-                    types_tree: typesTree,
-                },
-            };
-        } catch (error) {
-            console.error('[Assistant] Failed to fetch service request types:', error);
-            activeWidget.value = null;
-        }
-    };
-
-    const showNewRequestLink = computed(() => {
-        return getTypesUrl && !activeWidget.value && !typeSelected.value;
-    });
 
     watch(threadId, async (newId) => {
         if (!newId) return;
@@ -291,15 +153,5 @@ export function useAssistantChat() {
         isSending,
         isAssistantResponding,
         sendMessage,
-        activeWidget,
-        handleWidgetSubmit,
-        handleWidgetCancel,
-        showNewRequestLink,
-        showNewRequestSelector,
-        fileAttachments: fileUpload.files,
-        fileAttachmentsEnabled: fileUpload.isEnabled,
-        addFileAttachments: fileUpload.addFiles,
-        removeFileAttachment: fileUpload.removeFile,
-        allUploadsComplete: fileUpload.allUploadsComplete,
     };
 }

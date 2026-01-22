@@ -34,11 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Ai\Http\Controllers\PortalAssistant\GetPortalAssistantUploadUrlController;
-use AidingApp\Ai\Http\Controllers\PortalAssistant\GetServiceRequestTypesController;
-use AidingApp\Ai\Http\Controllers\PortalAssistant\SelectServiceRequestTypeController;
 use AidingApp\Ai\Http\Controllers\PortalAssistant\SendMessageController;
-use AidingApp\Ai\Http\Controllers\PortalAssistant\UpdateServiceRequestFormFieldController;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use Illuminate\Support\Facades\Route;
@@ -56,20 +52,4 @@ Route::middleware([
         Route::post('/messages', SendMessageController::class)
             ->middleware(['signed'])
             ->name('messages.send');
-
-        Route::post('/service-request/select-type', SelectServiceRequestTypeController::class)
-            ->middleware(['signed'])
-            ->name('service-request.select-type');
-
-        Route::post('/service-request/update-field', UpdateServiceRequestFormFieldController::class)
-            ->middleware(['signed'])
-            ->name('service-request.update-field');
-
-        Route::get('/request-upload-url', GetPortalAssistantUploadUrlController::class)
-            ->middleware(['auth:sanctum'])
-            ->name('request-upload-url');
-
-        Route::get('/service-request/types', GetServiceRequestTypesController::class)
-            ->middleware(['auth:sanctum'])
-            ->name('service-request.types');
     });
