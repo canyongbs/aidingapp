@@ -38,17 +38,8 @@ use AidingApp\ServiceManagement\Jobs\AutoSubmitStaleDraftServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\PortalAssistantServiceRequestFeature;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-
-beforeEach(function () {
-    PortalAssistantServiceRequestFeature::activate();
-});
-
-afterEach(function () {
-    PortalAssistantServiceRequestFeature::deactivate();
-});
 
 it('does nothing when service request is not a draft', function () {
     $type = ServiceRequestType::factory()->create();

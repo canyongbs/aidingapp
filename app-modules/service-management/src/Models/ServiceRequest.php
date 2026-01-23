@@ -48,7 +48,6 @@ use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsEx
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use App\Features\PortalAssistantServiceRequestFeature;
 use App\Models\Authenticatable;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
@@ -288,10 +287,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
     public function isDraft(): bool
     {
-        if (! PortalAssistantServiceRequestFeature::active()) {
-            return false;
-        }
-
         return $this->is_draft === true;
     }
 
@@ -438,11 +433,9 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
             }
         });
 
-        if (PortalAssistantServiceRequestFeature::active()) {
-            static::addGlobalScope('excludeDrafts', function (Builder $builder) {
-                $builder->where('is_draft', false);
-            });
-        }
+        static::addGlobalScope('excludeDrafts', function (Builder $builder) {
+            $builder->where('is_draft', false);
+        });
     }
 
     protected function serializeDate(DateTimeInterface $date): string

@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Actions\SubmitServiceRequestDraft;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\PortalAssistantServiceRequestFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -68,10 +67,6 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        if (! PortalAssistantServiceRequestFeature::active()) {
-            return;
-        }
-
         $draft = $this->findDraft();
 
         if (! $draft) {
