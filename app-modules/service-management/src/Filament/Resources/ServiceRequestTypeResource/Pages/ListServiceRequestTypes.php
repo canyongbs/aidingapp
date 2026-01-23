@@ -246,7 +246,7 @@ class ListServiceRequestTypes extends ListRecords
                 ]);
             }
 
-            $type->forceDelete();
+            $type->delete();
         }
     }
 
@@ -277,13 +277,13 @@ class ListServiceRequestTypes extends ListRecords
 
     protected function deleteCategoryWithDescendants(ServiceRequestTypeCategory $category): void
     {
-        $category->types()->forceDelete();
+        $category->types()->delete();
 
         foreach ($category->children as $child) {
             $this->deleteCategoryWithDescendants($child);
         }
 
-        $category->forceDelete();
+        $category->delete();
     }
 
     /**

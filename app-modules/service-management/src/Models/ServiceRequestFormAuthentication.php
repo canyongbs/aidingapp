@@ -48,6 +48,6 @@ class ServiceRequestFormAuthentication extends SubmissibleAuthentication
 {
     public function submissible(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestForm::class, 'service_request_form_id');
+        return $this->belongsTo(ServiceRequestForm::class, 'service_request_form_id')->withTrashed()->withArchived();
     }
 }

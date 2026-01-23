@@ -38,6 +38,9 @@ parameters:
     scanFiles:
         - ./_ide_helper_models.php
 
+    stubFiles:
+        - .stubs.php
+
     # Level 9 is the highest level
     level: 6
 
