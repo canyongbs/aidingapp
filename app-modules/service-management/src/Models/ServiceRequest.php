@@ -215,7 +215,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
      */
     public function priority(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestPriority::class);
+        return $this->belongsTo(ServiceRequestPriority::class)->withTrashed();
     }
 
     /**
@@ -223,7 +223,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
      */
     public function serviceRequestFormSubmission(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestFormSubmission::class, 'service_request_form_submission_id');
+        return $this->belongsTo(ServiceRequestFormSubmission::class, 'service_request_form_submission_id')->withTrashed();
     }
 
     /**

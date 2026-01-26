@@ -67,7 +67,7 @@ class TenantServiceRequestTypeDomain extends Model
      */
     public function serviceRequestType(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestType::class, 'service_request_type_id', 'id', 'domain');
+        return $this->belongsTo(ServiceRequestType::class, 'service_request_type_id', 'id', 'domain')->withTrashed()->withArchived();
     }
 
     /**

@@ -46,6 +46,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Concerns\EditPageRedirection;
+use App\Filament\Support\ModifySoftDeletableArchivableSelectQuery;
+use App\Filament\Support\ModifySoftDeletableSelectQuery;
 use Filament\Actions;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
@@ -58,6 +60,7 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 class EditServiceRequest extends EditRecord
@@ -127,7 +130,7 @@ class EditServiceRequest extends EditRecord
                                     ->relationship(
                                         name: 'priority',
                                         titleAttribute: 'name',
-                                        modifyQueryUsing: fn (Get $get, Builder $query, $record) => $query->where('type_id', $get('type_id'))->orderBy('order'),
+                                        modifyQueryUsing: fn (Get $get, Builder $query, ?Model $record, Select $component) => app(ModifySoftDeletableSelectQuery::class)($query, $record, $component)->where('type_id', $get('type_id'))->orderBy('order'),
                                     )
                                     ->label('Priority')
                                     ->required()

@@ -86,7 +86,7 @@ class ServiceRequestFormSubmission extends Submission
 
     public function priority(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestPriority::class, 'service_request_priority_id');
+        return $this->belongsTo(ServiceRequestPriority::class, 'service_request_priority_id')->withTrashed();
     }
 
     public function fields(): BelongsToMany
@@ -97,7 +97,8 @@ class ServiceRequestFormSubmission extends Submission
             'service_request_form_submission_id',
             'service_request_form_field_id',
         )
-            ->withPivot(['id', 'response']);
+            ->withPivot(['id', 'response'])
+            ->withTrashed();
     }
 
     public function deliverRequest(): void

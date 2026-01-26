@@ -232,7 +232,7 @@ class ServiceRequestType extends BaseModel implements Auditable
      */
     public function emailAutomaticCreationPriority(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestPriority::class, 'email_automatic_creation_priority_id', 'id');
+        return $this->belongsTo(ServiceRequestPriority::class, 'email_automatic_creation_priority_id', 'id')->withTrashed();
     }
 
     /**

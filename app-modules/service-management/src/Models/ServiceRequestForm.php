@@ -95,6 +95,6 @@ class ServiceRequestForm extends Submissible
 
     public function type(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestType::class, 'service_request_type_id');
+        return $this->belongsTo(ServiceRequestType::class, 'service_request_type_id')->withTrashed()->withArchived();
     }
 }

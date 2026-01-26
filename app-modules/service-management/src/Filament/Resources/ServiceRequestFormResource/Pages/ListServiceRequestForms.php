@@ -47,6 +47,7 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListServiceRequestForms extends ListRecords
 {
@@ -55,6 +56,7 @@ class ListServiceRequestForms extends ListRecords
     public function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->whereHas('type', fn (Builder $query) => $query->withoutTrashed()))
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('name'),
