@@ -320,6 +320,8 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
     public function failed(?Throwable $exception): void
     {
+        report($exception);
+
         if ($exception === null) {
             $this->moveFile('/failed');
 
@@ -330,8 +332,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             SesS3InboundSpamOrVirusDetected::class => $this->moveFile('/spam-or-virus-detected'),
             default => $this->moveFile('/failed'),
         };
-
-        report($exception);
     }
 
     protected function getContent(): string
