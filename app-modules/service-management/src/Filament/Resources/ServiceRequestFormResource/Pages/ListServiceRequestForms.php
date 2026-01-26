@@ -56,7 +56,7 @@ class ListServiceRequestForms extends ListRecords
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->whereHas('type', fn (Builder $query) => $query->withoutTrashed()))
+            ->modifyQueryUsing(fn (Builder $query) => $query->whereHas('type', fn (Builder $query) => $query->withoutTrashed())) /** @phpstan-ignore method.notFound */
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('name'),
