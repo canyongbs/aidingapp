@@ -123,6 +123,11 @@ trait CanBeArchived
         return static::withoutEvents(fn () => $this->unarchive());
     }
 
+    public function isArchived(): bool
+    {
+        return ! is_null($this->{$this->getArchivedAtColumn()});
+    }
+
     /**
      * @param  QueuedClosure|callable|class-string  $callback
      */

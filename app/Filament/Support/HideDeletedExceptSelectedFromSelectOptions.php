@@ -40,7 +40,13 @@ use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-class ModifySoftDeletableArchivableSelectQuery
+/**
+ * This is used in the `modifyQueryUsing` argument of a `Select` `relationship()` method,
+ * usually for a `BelongsTo` relationship, to hide soft-deleted records from the select
+ * options, while also ensuring that if the currently-selected record is soft-deleted,
+ * it is still loaded and shown as an option.
+ */
+class HideDeletedExceptSelectedFromSelectOptions
 {
     /**
      * @param Builder<Model> $query
@@ -50,12 +56,8 @@ class ModifySoftDeletableArchivableSelectQuery
     public function __invoke(Builder $query, ?Model $record, Select $component): Builder
     {
         return $query->where(
-            fn (Builder $query) => $query
-                ->where(
-                    fn (Builder $query) => $query /** @phpstan-ignore method.notFound */
-                        ->withoutTrashed()
-                        ->withoutArchived(),
-                )
+            fn (Builder $query) => $query /** @phpstan-ignore method.notFound */
+                ->withoutTrashed()
                 ->orWhere(
                     $component->getRelationship()->getQualifiedOwnerKeyName(),
                     $record?->getAttributeValue($component->getRelationship()->getForeignKeyName()),
