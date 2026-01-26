@@ -77,6 +77,6 @@ class ServiceRequestTypeEmailTemplate extends Model implements Auditable
      */
     public function serviceRequestType(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestType::class);
+        return $this->belongsTo(ServiceRequestType::class)->withTrashed()->withArchived();
     }
 }

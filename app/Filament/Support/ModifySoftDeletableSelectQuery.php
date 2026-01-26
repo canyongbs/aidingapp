@@ -34,47 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace App\Filament\Support;
 
-use AidingApp\ServiceManagement\Database\Factories\TenantServiceRequestTypeDomainFactory;
-use App\Models\Tenant;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Filament\Forms\Components\Select;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
 
-/**
- * @mixin IdeHelperTenantServiceRequestTypeDomain
- */
-class TenantServiceRequestTypeDomain extends Model
+class ModifySoftDeletableSelectQuery
 {
-    /** @use HasFactory<TenantServiceRequestTypeDomainFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use UsesLandlordConnection;
-    // TODO: Add Auditing
-
-    protected $fillable = [
-        'tenant_id',
-        'service_request_type_id',
-        'domain',
-    ];
-
     /**
-     * @return BelongsTo<ServiceRequestType, $this>
+     * @param Builder<Model> $query
+     *
+     * @return Builder<Model>
      */
-    public function serviceRequestType(): BelongsTo
+    public function __invoke(Builder $query, ?Model $record, Select $component): Builder
     {
-        return $this->belongsTo(ServiceRequestType::class, 'service_request_type_id', 'id', 'domain')->withTrashed()->withArchived();
-    }
-
-    /**
-     * @return BelongsTo<Tenant, $this>
-     */
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class, 'tenant_id');
+        return $query->where(
+            fn (Builder $query) => $query /** @phpstan-ignore method.notFound */
+                ->withoutTrashed()
+                ->orWhere(
+                    $component->getRelationship()->getQualifiedOwnerKeyName(),
+                    $record?->getAttributeValue($component->getRelationship()->getForeignKeyName()),
+                ),
+        );
     }
 }

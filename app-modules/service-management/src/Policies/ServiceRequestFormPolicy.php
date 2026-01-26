@@ -97,6 +97,10 @@ class ServiceRequestFormPolicy implements PerformsChecksBeforeAuthorization
 
     public function delete(Authenticatable $authenticatable, ServiceRequestForm $serviceRequestForm): Response
     {
+        if ($serviceRequestForm->submissions()->exists()) {
+            return Response::deny('You cannot delete this service request form because it has associated submissions.');
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'settings.*.delete',
             denyResponse: 'You do not have permission to delete this service request form.'

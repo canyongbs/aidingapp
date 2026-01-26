@@ -43,6 +43,7 @@ use AidingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
+use App\Filament\Support\ModifySoftDeletableArchivableSelectQuery;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Repeater;
@@ -74,7 +75,7 @@ trait HasSharedFormConfiguration
             Select::make('service_request_type_id')
                 ->label('Service Request Type')
                 ->helperText('This is the type of service request that will be created when this form is submitted.')
-                ->relationship('type', 'name')
+                ->relationship('type', 'name', app(ModifySoftDeletableArchivableSelectQuery::class)(...))
                 ->preload()
                 ->searchable()
                 ->required(),
