@@ -36,7 +36,6 @@
 
 namespace App\Models\Concerns;
 
-use App\Features\ServiceRequestFormAndTypeArchivingFeature;
 use App\Models\Scopes\ArchivingScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Events\QueuedClosure;
@@ -50,10 +49,6 @@ trait CanBeArchived
 {
     public static function bootCanBeArchived(): void
     {
-        if (! ServiceRequestFormAndTypeArchivingFeature::active()) {
-            return;
-        }
-
         static::addGlobalScope(new ArchivingScope());
     }
 
