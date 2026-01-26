@@ -109,9 +109,6 @@ class ServiceRequestPrioritiesRelationManager extends RelationManager
             ->actions([
                 EditAction::make(),
                 DeleteAction::make(),
-            ])
-            ->groupedBulkActions([
-                DeleteBulkAction::make(),
             ]);
     }
 }
