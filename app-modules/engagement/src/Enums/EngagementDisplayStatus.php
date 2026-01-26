@@ -39,6 +39,7 @@ namespace AidingApp\Engagement\Enums;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Notification\Enums\EmailMessageEventType;
 use AidingApp\Notification\Enums\NotificationChannel;
+use AidingApp\Notification\Models\EmailMessageEvent;
 use App\Features\EngagementDispatchFailedAtFeature;
 use Exception;
 use Filament\Support\Contracts\HasColor;
@@ -112,7 +113,7 @@ enum EngagementDisplayStatus implements HasLabel, HasColor
 
         $events = $engagement->latestEmailMessage?->events()->orderBy('occurred_at', 'asc')->get();
 
-        $events?->each(function ($event) use (&$status) {
+        $events?->each(function (EmailMessageEvent $event) use (&$status) {
             match ($event->type) {
                 // This is needed due to a bug where sometimes the Dispatched event isn't saved
                 // until some of the other external events have already come in
