@@ -93,6 +93,7 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
         'scheduled_at',
         'dispatched_at',
         'channel',
+        'dispatch_failed_at',
     ];
 
     protected $casts = [
@@ -100,6 +101,7 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
         'scheduled_at' => 'datetime',
         'dispatched_at' => 'datetime',
         'channel' => NotificationChannel::class,
+        'dispatch_failed_at' => 'datetime',
     ];
 
     /**
