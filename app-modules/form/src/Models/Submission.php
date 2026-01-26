@@ -42,6 +42,7 @@ use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @property-read Submissible $submissible
@@ -51,6 +52,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 abstract class Submission extends BaseModel
 {
     use BelongsToEducatable;
+    use SoftDeletes;
 
     abstract public function submissible(): BelongsTo;
 

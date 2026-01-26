@@ -68,6 +68,6 @@ class ServiceRequestTypeAuditor extends Pivot
      */
     public function serviceRequestType(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestType::class);
+        return $this->belongsTo(ServiceRequestType::class)->withTrashed()->withArchived();
     }
 }

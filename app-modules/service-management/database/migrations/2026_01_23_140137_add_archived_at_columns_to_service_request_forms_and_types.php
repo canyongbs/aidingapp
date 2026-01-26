@@ -34,47 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+use App\Features\ServiceRequestFormAndTypeArchivingFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Database\Factories\TenantServiceRequestTypeDomainFactory;
-use App\Models\Tenant;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
-
-/**
- * @mixin IdeHelperTenantServiceRequestTypeDomain
- */
-class TenantServiceRequestTypeDomain extends Model
-{
-    /** @use HasFactory<TenantServiceRequestTypeDomainFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use UsesLandlordConnection;
-    // TODO: Add Auditing
-
-    protected $fillable = [
-        'tenant_id',
-        'service_request_type_id',
-        'domain',
-    ];
-
-    /**
-     * @return BelongsTo<ServiceRequestType, $this>
-     */
-    public function serviceRequestType(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(ServiceRequestType::class, 'service_request_type_id', 'id', 'domain')->withTrashed()->withArchived();
+        DB::transaction(function () {
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->timestamp('archived_at')->nullable();
+            });
+
+            Schema::table('service_request_forms', function (Blueprint $table) {
+                $table->timestamp('archived_at')->nullable();
+            });
+
+            ServiceRequestFormAndTypeArchivingFeature::activate();
+        });
     }
 
-    /**
-     * @return BelongsTo<Tenant, $this>
-     */
-    public function tenant(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(Tenant::class, 'tenant_id');
+        DB::transaction(function () {
+            ServiceRequestFormAndTypeArchivingFeature::deactivate();
+
+            Schema::table('service_request_forms', function (Blueprint $table) {
+                $table->dropColumn('archived_at');
+            });
+
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->dropColumn('archived_at');
+            });
+        });
     }
-}
+};

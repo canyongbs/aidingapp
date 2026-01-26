@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\PortalAssistantServiceRequestFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -66,16 +65,12 @@ return new class () extends Migration {
             Schema::table('service_request_updates', function (Blueprint $table) {
                 $table->string('update_type')->nullable();
             });
-
-            PortalAssistantServiceRequestFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            PortalAssistantServiceRequestFeature::deactivate();
-
             Schema::table('service_request_updates', function (Blueprint $table) {
                 $table->dropColumn('update_type');
             });

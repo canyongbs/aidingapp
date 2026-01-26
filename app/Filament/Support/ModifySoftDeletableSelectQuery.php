@@ -34,14 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace App\Filament\Support;
 
-use App\Support\AbstractFeatureFlag;
+use Filament\Forms\Components\Select;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
-class PortalAssistantServiceRequestFeature extends AbstractFeatureFlag
+class ModifySoftDeletableSelectQuery
 {
-    public function resolve(mixed $scope): mixed
+    /**
+     * @param Builder<Model> $query
+     *
+     * @return Builder<Model>
+     */
+    public function __invoke(Builder $query, ?Model $record, Select $component): Builder
     {
-        return false;
+        return $query->where(
+            fn (Builder $query) => $query /** @phpstan-ignore method.notFound */
+                ->withoutTrashed()
+                ->orWhere(
+                    $component->getRelationship()->getQualifiedOwnerKeyName(),
+                    $record?->getAttributeValue($component->getRelationship()->getForeignKeyName()),
+                ),
+        );
     }
 }

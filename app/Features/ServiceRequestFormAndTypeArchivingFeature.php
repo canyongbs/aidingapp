@@ -34,47 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Database\Factories\TenantServiceRequestTypeDomainFactory;
-use App\Models\Tenant;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperTenantServiceRequestTypeDomain
- */
-class TenantServiceRequestTypeDomain extends Model
+class ServiceRequestFormAndTypeArchivingFeature extends AbstractFeatureFlag
 {
-    /** @use HasFactory<TenantServiceRequestTypeDomainFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use UsesLandlordConnection;
-    // TODO: Add Auditing
-
-    protected $fillable = [
-        'tenant_id',
-        'service_request_type_id',
-        'domain',
-    ];
-
-    /**
-     * @return BelongsTo<ServiceRequestType, $this>
-     */
-    public function serviceRequestType(): BelongsTo
+    public function resolve(mixed $scope): mixed
     {
-        return $this->belongsTo(ServiceRequestType::class, 'service_request_type_id', 'id', 'domain')->withTrashed()->withArchived();
-    }
-
-    /**
-     * @return BelongsTo<Tenant, $this>
-     */
-    public function tenant(): BelongsTo
-    {
-        return $this->belongsTo(Tenant::class, 'tenant_id');
+        return false;
     }
 }

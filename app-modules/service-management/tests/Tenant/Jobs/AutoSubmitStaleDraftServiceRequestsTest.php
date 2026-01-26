@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Jobs\AutoSubmitStaleDraftServiceRequests;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\PortalAssistantServiceRequestFeature;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Str;
@@ -48,12 +47,7 @@ use Illuminate\Support\Str;
 use function Pest\Laravel\travelBack;
 use function Pest\Laravel\travelTo;
 
-afterEach(function () {
-    PortalAssistantServiceRequestFeature::deactivate();
-});
-
 it('does nothing when no drafts exist', function () {
-    PortalAssistantServiceRequestFeature::activate();
     Queue::fake();
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
@@ -62,7 +56,6 @@ it('does nothing when no drafts exist', function () {
 });
 
 it('does not dispatch job for non-draft service requests', function () {
-    PortalAssistantServiceRequestFeature::activate();
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -85,7 +78,6 @@ it('does not dispatch job for non-draft service requests', function () {
 });
 
 it('does not dispatch job for recently updated drafts', function () {
-    PortalAssistantServiceRequestFeature::activate();
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -104,7 +96,6 @@ it('does not dispatch job for recently updated drafts', function () {
 });
 
 it('does not dispatch job for drafts with null title', function () {
-    PortalAssistantServiceRequestFeature::activate();
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -127,7 +118,6 @@ it('does not dispatch job for drafts with null title', function () {
 });
 
 it('does not dispatch job for drafts with empty title', function () {
-    PortalAssistantServiceRequestFeature::activate();
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -150,7 +140,6 @@ it('does not dispatch job for drafts with empty title', function () {
 });
 
 it('does not dispatch job for drafts with null description', function () {
-    PortalAssistantServiceRequestFeature::activate();
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -173,7 +162,6 @@ it('does not dispatch job for drafts with null description', function () {
 });
 
 it('does not dispatch job for drafts with empty description', function () {
-    PortalAssistantServiceRequestFeature::activate();
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -196,7 +184,6 @@ it('does not dispatch job for drafts with empty description', function () {
 });
 
 it('does not dispatch job for drafts with recently updated form submission', function () {
-    PortalAssistantServiceRequestFeature::activate();
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -228,7 +215,6 @@ it('does not dispatch job for drafts with recently updated form submission', fun
 });
 
 it('does not dispatch job for drafts with recently updated form field submissions', function () {
-    PortalAssistantServiceRequestFeature::activate();
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -276,7 +262,6 @@ it('does not dispatch job for drafts with recently updated form field submission
 });
 
 it('does not dispatch job for drafts with recently added service request updates', function () {
-    PortalAssistantServiceRequestFeature::activate();
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
@@ -306,7 +291,6 @@ it('does not dispatch job for drafts with recently added service request updates
 });
 
 it('dispatches job for valid stale drafts', function () {
-    PortalAssistantServiceRequestFeature::activate();
     Queue::fake();
 
     $draft = createValidStaleDraft();
@@ -319,7 +303,6 @@ it('dispatches job for valid stale drafts', function () {
 });
 
 it('dispatches jobs for multiple valid stale drafts', function () {
-    PortalAssistantServiceRequestFeature::activate();
     Queue::fake();
 
     $draft1 = createValidStaleDraft();
@@ -331,7 +314,6 @@ it('dispatches jobs for multiple valid stale drafts', function () {
 });
 
 it('dispatches job for stale draft with old form submission', function () {
-    PortalAssistantServiceRequestFeature::activate();
     Queue::fake();
 
     $type = ServiceRequestType::factory()->create();
