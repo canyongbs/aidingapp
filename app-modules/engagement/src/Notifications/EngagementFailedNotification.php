@@ -36,6 +36,7 @@
 
 namespace AidingApp\Engagement\Notifications;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
@@ -64,12 +65,28 @@ class EngagementFailedNotification extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
+        $sender = $this->engagement->user;
+        $fromName = $sender->name ?? 'N/A';
+        $fromEmail = $sender->email ?? 'N/A';
+
+        $recipient = $this->engagement->recipient;
+
+        $to = match (true) {
+            $recipient instanceof Contact => (function () use ($recipient) {
+                return "{$recipient->full_name} <{$recipient->email}> (Contact)";
+            })(),
+            default => 'N/A',
+        };
+
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject('An engagement failed to deliver')
-            ->line("The engagement {$this->engagement->channel->getLabel()} failed to be delivered to {$this->engagement->recipient->display_name}:")
-            ->line('Subject: ' . ($this->engagement->subject ?? 'n/a'))
-            ->line('Body: ' . $this->engagement->getBody());
+            ->subject("Delivery Failed: {$this->engagement->getSubject()}")
+            ->markdown('engagement::mail.engagement-failed-notification', [
+                'from' => "{$fromName} <{$fromEmail}>",
+                'date' => $this->engagement->created_at?->format('l, F j, Y \a\t g:i A') ?? 'N/A',
+                'to' => $to,
+                'subject' => $this->engagement->getSubject(),
+            ]);
     }
 
     public function toDatabase(object $notifiable): array
