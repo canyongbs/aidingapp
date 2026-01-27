@@ -49,7 +49,6 @@ use Carbon\CarbonInterval;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\IconEntry\IconEntrySize;
 use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
