@@ -217,7 +217,7 @@ it('updates the `updated_at` timestamp when archiving', function () {
 it('can bulk archive models using query builder', function () {
     ServiceRequestType::factory()->count(3)->create();
 
-    ServiceRequestType::query()->archive();
+    ServiceRequestType::query()->archive(); /** @phpstan-ignore method.notFound */
 
     expect(ServiceRequestType::count())->toBe(0);
     expect(ServiceRequestType::withArchived()->count())->toBe(3);
@@ -225,11 +225,11 @@ it('can bulk archive models using query builder', function () {
 
 it('can bulk unarchive models using query builder', function () {
     ServiceRequestType::factory()->count(3)->create();
-    ServiceRequestType::query()->archive();
+    ServiceRequestType::query()->archive(); /** @phpstan-ignore method.notFound */
 
     expect(ServiceRequestType::count())->toBe(0);
 
-    ServiceRequestType::onlyArchived()->unarchive();
+    ServiceRequestType::onlyArchived()->unarchive(); /** @phpstan-ignore method.notFound */
 
     expect(ServiceRequestType::count())->toBe(3);
 });
