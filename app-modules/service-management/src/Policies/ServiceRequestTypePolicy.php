@@ -133,6 +133,18 @@ class ServiceRequestTypePolicy
         );
     }
 
+    public function archive(Authenticatable $authenticatable, ServiceRequestType $serviceRequestType): Response
+    {
+        if (! $serviceRequestType->serviceRequests()->exists()) {
+            return Response::deny('You should delete this service request type instead of archiving it.');
+        }
+
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.delete',
+            denyResponse: 'You do not have permissions to archive this service request type.'
+        );
+    }
+
     protected function requiredFeatures(): array
     {
         return [Feature::ServiceManagement];
