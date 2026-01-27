@@ -34,10 +34,8 @@
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
 import plugin from 'tailwindcss/plugin';
-import preset from './vendor/filament/support/tailwind.config.preset';
 
 export default {
-    presets: [preset],
     safelist: [
         'text-black',
         'text-gray-900',
