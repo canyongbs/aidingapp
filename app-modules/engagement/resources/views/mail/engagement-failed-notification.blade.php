@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
@@ -32,38 +30,21 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+<x-mail::message>
+**This is an automated message from Aiding App.**
 
-namespace AidingApp\Notification\Models;
+We attempted to deliver the following message but were unsuccessful due to an internal system failure:
 
-use AidingApp\Notification\Database\Factories\EmailMessageEventFactory;
-use AidingApp\Notification\Enums\EmailMessageEventType;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+**From:** {{ $from }}
 
-/**
- * @mixin IdeHelperEmailMessageEvent
- */
-class EmailMessageEvent extends BaseModel
-{
-    /** @use HasFactory<EmailMessageEventFactory> */
-    use HasFactory;
+**Date:** {{ $date }}
 
-    protected $fillable = [
-        'type',
-        'payload',
-        'occurred_at',
-    ];
+**To:** {{ $to }}
 
-    protected $casts = [
-        'type' => EmailMessageEventType::class,
-        'payload' => 'array',
-        'occurred_at' => 'datetime',
-    ];
+**Subject:** {{ $subject }}
 
-    public function message(): BelongsTo
-    {
-        return $this->belongsTo(EmailMessage::class);
-    }
-}
+The status of the message in sent items has been updated to **System Failed**.
+
+Please try again and if this issue continues, report the problem to your system administrator.
+</x-mail::message>

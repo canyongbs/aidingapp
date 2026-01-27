@@ -34,36 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Models;
+use App\Features\EngagementDispatchFailedAtFeature;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Notification\Database\Factories\EmailMessageEventFactory;
-use AidingApp\Notification\Enums\EmailMessageEventType;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
-/**
- * @mixin IdeHelperEmailMessageEvent
- */
-class EmailMessageEvent extends BaseModel
-{
-    /** @use HasFactory<EmailMessageEventFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'type',
-        'payload',
-        'occurred_at',
-    ];
-
-    protected $casts = [
-        'type' => EmailMessageEventType::class,
-        'payload' => 'array',
-        'occurred_at' => 'datetime',
-    ];
-
-    public function message(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(EmailMessage::class);
+        DB::transaction(function () {
+            Schema::table('engagements', function (Blueprint $table) {
+                $table->timestamp('dispatch_failed_at')->nullable();
+            });
+
+            EngagementDispatchFailedAtFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            EngagementDispatchFailedAtFeature::deactivate();
+
+            Schema::table('engagements', function (Blueprint $table) {
+                $table->dropColumn('dispatch_failed_at');
+            });
+        });
+    }
+};

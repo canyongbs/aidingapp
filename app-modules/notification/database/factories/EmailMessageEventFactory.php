@@ -34,36 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Models;
+namespace AidingApp\Notification\Database\Factories;
 
-use AidingApp\Notification\Database\Factories\EmailMessageEventFactory;
 use AidingApp\Notification\Enums\EmailMessageEventType;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use AidingApp\Notification\Models\EmailMessageEvent;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @mixin IdeHelperEmailMessageEvent
+ * @extends Factory<EmailMessageEvent>
  */
-class EmailMessageEvent extends BaseModel
+class EmailMessageEventFactory extends Factory
 {
-    /** @use HasFactory<EmailMessageEventFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'type',
-        'payload',
-        'occurred_at',
-    ];
-
-    protected $casts = [
-        'type' => EmailMessageEventType::class,
-        'payload' => 'array',
-        'occurred_at' => 'datetime',
-    ];
-
-    public function message(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(EmailMessage::class);
+        return [
+            'type' => $this->faker->randomElement(EmailMessageEventType::cases()),
+            'payload' => [],
+            'occurred_at' => now(),
+        ];
     }
 }

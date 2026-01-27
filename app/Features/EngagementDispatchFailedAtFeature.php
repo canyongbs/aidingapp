@@ -34,36 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Models;
+namespace App\Features;
 
-use AidingApp\Notification\Database\Factories\EmailMessageEventFactory;
-use AidingApp\Notification\Enums\EmailMessageEventType;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperEmailMessageEvent
- */
-class EmailMessageEvent extends BaseModel
+class EngagementDispatchFailedAtFeature extends AbstractFeatureFlag
 {
-    /** @use HasFactory<EmailMessageEventFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'type',
-        'payload',
-        'occurred_at',
-    ];
-
-    protected $casts = [
-        'type' => EmailMessageEventType::class,
-        'payload' => 'array',
-        'occurred_at' => 'datetime',
-    ];
-
-    public function message(): BelongsTo
+    public function resolve(mixed $scope): mixed
     {
-        return $this->belongsTo(EmailMessage::class);
+        return false;
     }
 }

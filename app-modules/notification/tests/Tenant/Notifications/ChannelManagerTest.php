@@ -34,36 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Models;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Notification\Tests\Fixtures\TestEmailNotification;
+use Carbon\Carbon;
+use Illuminate\Notifications\SendQueuedNotifications;
+use Illuminate\Support\Facades\Queue;
 
-use AidingApp\Notification\Database\Factories\EmailMessageEventFactory;
-use AidingApp\Notification\Enums\EmailMessageEventType;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use function Pest\Laravel\freezeTime;
 
-/**
- * @mixin IdeHelperEmailMessageEvent
- */
-class EmailMessageEvent extends BaseModel
-{
-    /** @use HasFactory<EmailMessageEventFactory> */
-    use HasFactory;
+it('modifies the SendQueuedNotifications job properly', function () {
+    Queue::fake();
 
-    protected $fillable = [
-        'type',
-        'payload',
-        'occurred_at',
-    ];
+    $recipient = Contact::factory()->create();
+    $notification = new TestEmailNotification();
 
-    protected $casts = [
-        'type' => EmailMessageEventType::class,
-        'payload' => 'array',
-        'occurred_at' => 'datetime',
-    ];
+    freezeTime(function () use ($recipient, $notification) {
+        $recipient->notify($notification);
 
-    public function message(): BelongsTo
-    {
-        return $this->belongsTo(EmailMessage::class);
-    }
-}
+        Queue::assertPushed(SendQueuedNotifications::class, function ($job) use ($recipient, $notification) {
+            return $job->notification::class === $notification::class
+                && $job->notifiables->count() === 1
+                && $job->notifiables->first()->is($recipient)
+                && $job->channels === ['mail']
+                && $job->retryUntil() instanceof Carbon && $job->retryUntil()->equalTo(now()->addHours(2))
+                && $job->maxExceptions === 5;
+        });
+    });
+});

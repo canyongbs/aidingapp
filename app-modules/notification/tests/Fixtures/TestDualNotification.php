@@ -34,36 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Models;
+namespace AidingApp\Notification\Tests\Fixtures;
 
-use AidingApp\Notification\Database\Factories\EmailMessageEventFactory;
-use AidingApp\Notification\Enums\EmailMessageEventType;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
+use Filament\Notifications\Notification as FilamentNotification;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
 
-/**
- * @mixin IdeHelperEmailMessageEvent
- */
-class EmailMessageEvent extends BaseModel
+class TestDualNotification extends Notification implements ShouldQueue
 {
-    /** @use HasFactory<EmailMessageEventFactory> */
-    use HasFactory;
+    use Queueable;
 
-    protected $fillable = [
-        'type',
-        'payload',
-        'occurred_at',
-    ];
-
-    protected $casts = [
-        'type' => EmailMessageEventType::class,
-        'payload' => 'array',
-        'occurred_at' => 'datetime',
-    ];
-
-    public function message(): BelongsTo
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
     {
-        return $this->belongsTo(EmailMessage::class);
+        return ['mail', 'database'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return MailMessage::make()
+            ->subject('Test Subject')
+            ->greeting('Test Greeting')
+            ->content('This is a test email');
+    }
+
+    public function toDatabase(object $notifiable): array
+    {
+        return FilamentNotification::make()
+            ->success()
+            ->title('Test Title')
+            ->body('This is a test.')
+            ->getDatabaseMessage();
     }
 }
