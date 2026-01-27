@@ -42,8 +42,6 @@ use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -56,7 +54,7 @@ class ListServiceRequestForms extends ListRecords
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->whereHas('type', fn (Builder $query) => $query->withoutTrashed())) /** @phpstan-ignore method.notFound */
+            ->modifyQueryUsing(fn (Builder $query) => $query->whereHas('type', fn (Builder $query) => $query->withoutTrashed()->withoutArchived())) /** @phpstan-ignore method.notFound */
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('name'),
@@ -68,11 +66,6 @@ class ListServiceRequestForms extends ListRecords
                     ->openUrlInNewTab()
                     ->color('gray'),
                 EditAction::make(),
-            ])
-            ->bulkActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
             ]);
     }
 

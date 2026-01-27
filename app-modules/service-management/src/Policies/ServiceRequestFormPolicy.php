@@ -117,9 +117,25 @@ class ServiceRequestFormPolicy implements PerformsChecksBeforeAuthorization
 
     public function forceDelete(Authenticatable $authenticatable, ServiceRequestForm $serviceRequestForm): Response
     {
+        if ($serviceRequestForm->submissions()->exists()) {
+            return Response::deny('You cannot force delete this service request form because it has associated submissions.');
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete this service request form.'
+        );
+    }
+
+    public function archive(Authenticatable $authenticatable, ServiceRequestForm $serviceRequestForm): Response
+    {
+        if (! $serviceRequestForm->submissions()->exists()) {
+            return Response::deny('You should delete this service request form instead of archiving it.');
+        }
+
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.delete',
+            denyResponse: 'You do not have permission to archive this service request form.'
         );
     }
 

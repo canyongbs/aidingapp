@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
+use App\Filament\Actions\ArchiveAction;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -120,6 +121,7 @@ class EditServiceRequestType extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            ArchiveAction::make(),
             DeleteAction::make(),
             RestoreAction::make(),
             ForceDeleteAction::make(),

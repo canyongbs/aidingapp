@@ -129,6 +129,7 @@ class ListServiceRequestTypes extends ListRecords
             'treeData.updated_types' => 'array',
             'treeData.deleted_categories' => 'array',
             'treeData.deleted_types' => 'array',
+            'treeData.archived_types' => 'array',
         ]);
 
         $this->assertMaxCategoryDepth($treeData['categories'] ?? []);
@@ -214,6 +215,7 @@ class ListServiceRequestTypes extends ListRecords
 
             $this->handleDeletedTypes($treeData['deleted_types'] ?? []);
             $this->handleDeletedCategories($treeData['deleted_categories'] ?? []);
+            $this->handleArchivedTypes($treeData['archived_types'] ?? []);
         });
 
         // Clear the cached hierarchicalData to force refresh
@@ -284,6 +286,31 @@ class ListServiceRequestTypes extends ListRecords
         }
 
         $category->delete();
+    }
+
+    /**
+     * @param array<int, string> $typeIds
+     */
+    protected function handleArchivedTypes(array $typeIds): void
+    {
+        if (empty($typeIds)) {
+            return;
+        }
+
+        $types = ServiceRequestType::query()
+            ->whereIn('id', $typeIds)
+            ->withCount('serviceRequests')
+            ->get();
+
+        foreach ($types as $type) {
+            if ($type->service_requests_count === 0) {
+                throw ValidationException::withMessages([
+                    'treeData.archived_types' => "Cannot archive type {$type->name} without service requests. Delete it instead.",
+                ]);
+            }
+
+            $type->archive();
+        }
     }
 
     /**
