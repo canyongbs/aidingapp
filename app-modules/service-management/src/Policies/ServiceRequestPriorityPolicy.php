@@ -115,6 +115,10 @@ class ServiceRequestPriorityPolicy
 
     public function forceDelete(Authenticatable $authenticatable, ServiceRequestPriority $serviceRequestPriority): Response
     {
+        if ($serviceRequestPriority->serviceRequests()->exists()) {
+            return Response::deny('You cannot force delete this service request priority because it has associated service requests.');
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['service_request_priority.*.force-delete', "service_request_priority.{$serviceRequestPriority->id}.force-delete"],
             denyResponse: 'You do not have permissions to force delete this service request priority.'

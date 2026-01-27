@@ -46,7 +46,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Concerns\EditPageRedirection;
-use App\Filament\Support\ModifySoftDeletableSelectQuery;
+use App\Filament\Support\HideDeletedExceptSelectedFromSelectOptions;
 use Filament\Actions;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Section;
@@ -107,14 +107,21 @@ class EditServiceRequest extends EditRecord
                             ->schema([
                                 Select::make('type_id')
                                     ->options(
-                                        fn (ServiceRequest $record) => ServiceRequestType::withTrashed()
-                                            ->whereKey($record->priority?->type_id)
-                                            ->orWhereNull('deleted_at')
-                                            ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                                                $query->whereHas('managers', function (Builder $query): void {
-                                                    $query->where('teams.id', auth()->user()->team?->getKey());
-                                                });
-                                            })
+                                        fn (ServiceRequest $record) => ServiceRequestType::query() // @phpstan-ignore method.notFound
+                                            ->withTrashed()
+                                            ->withArchived()
+                                            ->where(
+                                                fn (Builder $query) => $query // @phpstan-ignore method.notFound
+                                                    ->withoutTrashed()
+                                                    ->withoutArchived()
+                                                    ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
+                                                        $query->whereRelation('managers', 'teams.id', auth()->user()->team?->getKey());
+                                                    }),
+                                            )
+                                            ->orWhere(
+                                                $record->priority->type->getQualifiedKeyName(),
+                                                $record->priority->type->getKey(),
+                                            )
                                             ->orderBy('name')
                                             ->pluck('name', 'id')
                                     )
@@ -129,7 +136,7 @@ class EditServiceRequest extends EditRecord
                                     ->relationship(
                                         name: 'priority',
                                         titleAttribute: 'name',
-                                        modifyQueryUsing: fn (Get $get, Builder $query, ?Model $record, Select $component) => app(ModifySoftDeletableSelectQuery::class)($query, $record, $component)->where('type_id', $get('type_id'))->orderBy('order'),
+                                        modifyQueryUsing: fn (Get $get, Builder $query, ?Model $record, Select $component) => app(HideDeletedExceptSelectedFromSelectOptions::class)($query, $record, $component)->where('type_id', $get('type_id'))->orderBy('order'),
                                     )
                                     ->label('Priority')
                                     ->required()
