@@ -110,12 +110,29 @@ class ServiceRequestsRelationManager extends RelationManager
                 Grid::make()
                     ->schema([
                         Select::make('type_id')
-                            ->options(ServiceRequestType::when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                                $query->whereHas('managers', function (Builder $query): void {
-                                    $query->where('teams.id', auth()->user()->team?->getKey());
-                                });
-                            })
-                                ->pluck('name', 'id'))
+                            ->options(
+                                fn (?ServiceRequest $record) => ServiceRequestType::query() // @phpstan-ignore method.notFound
+                                    ->withTrashed()
+                                    ->withArchived()
+                                    ->where(
+                                        fn (Builder $query) => $query // @phpstan-ignore method.notFound
+                                            ->withoutTrashed()
+                                            ->withoutArchived()
+                                            ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
+                                                $query->whereRelation('managers', 'teams.id', auth()->user()->team?->getKey());
+                                            }),
+                                    )
+                                    ->when(
+                                        filled($record),
+                                        fn (Builder $query) => $query
+                                            ->orWhere(
+                                                $record?->priority->type->getQualifiedKeyName(),
+                                                $record?->priority->type->getKey(),
+                                            ),
+                                    )
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id')
+                            )
                             ->rule(new ManagedServiceRequestType())
                             ->afterStateUpdated(function (Set $set, Select $component) {
                                 $set('priority_id', null);
