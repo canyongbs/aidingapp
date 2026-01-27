@@ -65,6 +65,7 @@ document.addEventListener('alpine:init', () => {
             this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
             this.deletedCategories = [];
             this.deletedTypes = [];
+            this.archivedTypes = [];
             this.renamingCategories = {};
             this.renamingTypes = {};
         },
@@ -126,6 +127,7 @@ document.addEventListener('alpine:init', () => {
         renderType(type) {
             const requestCount = typeof type.service_requests_count === 'number' ? type.service_requests_count : 0;
             const canDelete = requestCount === 0;
+            const canArchive = requestCount > 0;
             const isRenaming = this.renamingTypes[type.id] || false;
 
             return `<div data-type-id="${type.id}" class="type-item ${this.canEdit ? 'draggable cursor-grab active:cursor-grabbing' : ''} flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-600 dark:bg-gray-800 transition-all duration-150 ease-out" ${this.canEdit ? 'draggable="true"' : ''}>
@@ -175,6 +177,16 @@ document.addEventListener('alpine:init', () => {
                                         <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
                                     </svg>
                                 </button>`
+                                : ''
+                        }
+                        ${
+                            this.canEdit && canArchive && !isRenaming
+                                ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-warning-50 dark:hover:bg-warning-600/20 text-warning-600 hover:text-warning-800 dark:text-warning-500 dark:hover:text-warning-300 transition-colors" @click.stop="stageTypeArchive('${type.id}')" x-tooltip.raw="Archive">
+                                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                            <path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3Z" />
+                                            <path fill-rule="evenodd" d="M13 6H3v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6ZM5.72 7.47a.75.75 0 0 1 1.06 0L8 8.69l1.22-1.22a.75.75 0 1 1 1.06 1.06l-1.22 1.22 1.22 1.22a.75.75 0 1 1-1.06 1.06L8 10.81l-1.22 1.22a.75.75 0 0 1-1.06-1.06l1.22-1.22-1.22-1.22a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>`
                                 : ''
                         }
                         ${
@@ -1344,6 +1356,7 @@ document.addEventListener('alpine:init', () => {
 
             this.deletedCategories = this.deletedCategories || [];
             this.deletedTypes = this.deletedTypes || [];
+            this.archivedTypes = this.archivedTypes || [];
 
             this.updateSortOrders();
             this.extractNewItems(this.treeData.categories || [], newCategories, newTypes, null);
@@ -1360,6 +1373,7 @@ document.addEventListener('alpine:init', () => {
                 updated_types: updatedTypes,
                 deleted_categories: this.deletedCategories,
                 deleted_types: this.deletedTypes,
+                archived_types: this.archivedTypes,
             };
         },
 
@@ -1782,6 +1796,17 @@ document.addEventListener('alpine:init', () => {
             this.deletedTypes = this.deletedTypes || [];
             if (!this.deletedTypes.includes(typeId)) {
                 this.deletedTypes.push(typeId);
+            }
+
+            this.removeTypeFromTree(typeId);
+            this.markAsChanged();
+            this.render();
+        },
+
+        stageTypeArchive(typeId) {
+            this.archivedTypes = this.archivedTypes || [];
+            if (!this.archivedTypes.includes(typeId)) {
+                this.archivedTypes.push(typeId);
             }
 
             this.removeTypeFromTree(typeId);
