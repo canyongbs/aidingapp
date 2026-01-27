@@ -42,8 +42,10 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ListIn
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ManageIncidentUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ViewIncident;
 use AidingApp\ServiceManagement\Models\Incident;
+use BackedEnum;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use UnitEnum;
 
 class IncidentResource extends Resource
 {
@@ -51,9 +53,9 @@ class IncidentResource extends Resource
 
     protected static ?string $navigationLabel = 'Incident Management';
 
-    protected static ?string $navigationIcon = 'heroicon-m-clipboard-document-list';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-m-clipboard-document-list';
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
 
     protected static ?int $navigationSort = 60;
 

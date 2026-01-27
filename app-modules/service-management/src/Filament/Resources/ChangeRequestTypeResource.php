@@ -42,19 +42,21 @@ use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pag
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages\ViewChangeRequestType;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use App\Filament\Clusters\ServiceManagementAdministration;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class ChangeRequestTypeResource extends Resource
 {
     protected static ?string $model = ChangeRequestType::class;
 
-    protected static ?string $navigationIcon = 'heroicon-m-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-m-rectangle-stack';
 
     protected static ?int $navigationSort = 40;
 
-    protected static ?string $navigationGroup = 'Change Requests';
+    protected static string | UnitEnum | null $navigationGroup = 'Change Requests';
 
     protected static ?string $navigationLabel = 'Types';
 

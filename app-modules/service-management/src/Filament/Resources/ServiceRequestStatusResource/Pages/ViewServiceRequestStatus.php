@@ -39,10 +39,10 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusRes
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\View\View;
@@ -60,7 +60,7 @@ class ViewServiceRequestStatus extends ViewRecord
         );
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
         return $infolist
             ->schema([

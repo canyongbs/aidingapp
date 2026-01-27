@@ -39,11 +39,10 @@ namespace AidingApp\Authorization\Filament\Pages\Auth;
 use AidingApp\Authorization\Settings\AzureSsoSettings;
 use AidingApp\Authorization\Settings\GoogleSsoSettings;
 use Filament\Actions\Action;
-use Filament\Pages\Auth\Login as FilamentLogin;
 
-class Login extends FilamentLogin
+class Login extends \Filament\Auth\Pages\Login
 {
-    protected static string $view = 'authorization::login';
+    protected string $view = 'authorization::login';
 
     protected static string $layout = 'filament-panels::components.layouts.login';
 

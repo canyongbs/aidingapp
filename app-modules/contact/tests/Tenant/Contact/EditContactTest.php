@@ -33,8 +33,8 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\EditContactRequestFactory;
 use App\Models\User;
@@ -61,7 +61,7 @@ test('EditContact is gated with proper access control', function () {
             ])
         )->assertForbidden();
 
-    livewire(ContactResource\Pages\EditContact::class, [
+    livewire(EditContact::class, [
         'record' => $contact->getRouteKey(),
     ])
         ->assertForbidden();
@@ -79,7 +79,7 @@ test('EditContact is gated with proper access control', function () {
     // TODO: Finish these tests to ensure changes are allowed
     $request = collect(EditContactRequestFactory::new()->create());
 
-    livewire(ContactResource\Pages\EditContact::class, [
+    livewire(EditContact::class, [
         'record' => $contact->getRouteKey(),
     ])
         ->fillForm($request->toArray())

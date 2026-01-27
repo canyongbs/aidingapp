@@ -45,14 +45,14 @@ use App\Features\ContactChangesFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class EditContact extends EditRecord
@@ -64,7 +64,7 @@ class EditContact extends EditRecord
     // TODO: Automatically set from Filament
     protected static ?string $navigationLabel = 'Edit';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
         $generateFullName = function (Get $get, Set $set) {
             $title = $get('title') ?? '';
@@ -84,8 +84,8 @@ class EditContact extends EditRecord
             $set(Contact::displayNameKey(), "{$title} {$firstName} {$lastName}");
         };
 
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Demographics')
                     ->schema([
                         Select::make('title')

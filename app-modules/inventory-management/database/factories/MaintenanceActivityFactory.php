@@ -38,12 +38,13 @@ namespace AidingApp\InventoryManagement\Database\Factories;
 
 use AidingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
 use AidingApp\InventoryManagement\Models\Asset;
+use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 use AidingApp\InventoryManagement\Models\MaintenanceProvider;
 use Database\Factories\Concerns\RandomizeState;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\InventoryManagement\Models\MaintenanceActivity>
+ * @extends Factory<MaintenanceActivity>
  */
 class MaintenanceActivityFactory extends Factory
 {

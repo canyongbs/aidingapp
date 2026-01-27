@@ -41,11 +41,11 @@ use App\Filament\Clusters\GlobalArtificialIntelligence;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class ManageAiResolutionSettings extends SettingsPage
 {
@@ -65,10 +65,10 @@ class ManageAiResolutionSettings extends SettingsPage
         return $user->isSuperAdmin();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('AI Resolution Settings')
                     ->description('Configure automatic AI resolution for service requests. When enabled, AI will attempt to resolve service requests automatically before escalating to support staff.')
                     ->schema([

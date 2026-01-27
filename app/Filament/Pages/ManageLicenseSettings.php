@@ -39,17 +39,19 @@ namespace App\Filament\Pages;
 use App\DataTransferObjects\LicenseManagement\LicenseData;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use UnitEnum;
 
 class ManageLicenseSettings extends SettingsPage
 {
-    protected static ?string $navigationIcon = 'heroicon-o-key';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-key';
 
     protected static ?string $navigationLabel = 'Subscription';
 
@@ -57,7 +59,7 @@ class ManageLicenseSettings extends SettingsPage
 
     protected static string $settings = LicenseSettings::class;
 
-    protected static ?string $navigationGroup = 'Global Administration';
+    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
 
     public static function canAccess(): bool
     {
@@ -67,10 +69,10 @@ class ManageLicenseSettings extends SettingsPage
         return $user->isSuperAdmin() && parent::canAccess();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('license_key')
                     ->label('License Key')
                     ->required()

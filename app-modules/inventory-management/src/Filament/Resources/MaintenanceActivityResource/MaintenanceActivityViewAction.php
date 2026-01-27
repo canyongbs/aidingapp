@@ -49,6 +49,6 @@ class MaintenanceActivityViewAction extends ViewAction
 
         $this->modalHeading('View Maintenance Activity');
 
-        $this->infolist($this->renderInfolist());
+        $this->schema($this->renderInfolist());
     }
 }

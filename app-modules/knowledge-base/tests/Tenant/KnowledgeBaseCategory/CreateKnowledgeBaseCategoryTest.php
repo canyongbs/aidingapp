@@ -33,9 +33,9 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\CreateKnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseCategory\RequestFactories\CreateKnowledgeBaseCategoryRequestFactory;
 use App\Models\User;
@@ -61,7 +61,7 @@ test('CreateKnowledgeBaseCategory is gated with proper access control', function
             KnowledgeBaseCategoryResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(KnowledgeBaseCategoryResource\Pages\CreateKnowledgeBaseCategory::class)
+    livewire(CreateKnowledgeBaseCategory::class)
         ->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
@@ -74,7 +74,7 @@ test('CreateKnowledgeBaseCategory is gated with proper access control', function
 
     $request = collect(CreateKnowledgeBaseCategoryRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseCategoryResource\Pages\CreateKnowledgeBaseCategory::class)
+    livewire(CreateKnowledgeBaseCategory::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
@@ -101,7 +101,7 @@ test('CreateKnowledgeBaseCategory is gated with proper feature access control', 
             KnowledgeBaseCategoryResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(KnowledgeBaseCategoryResource\Pages\CreateKnowledgeBaseCategory::class)
+    livewire(CreateKnowledgeBaseCategory::class)
         ->assertForbidden();
 
     $settings->data->addons->knowledgeManagement = true;
@@ -115,7 +115,7 @@ test('CreateKnowledgeBaseCategory is gated with proper feature access control', 
 
     $request = collect(CreateKnowledgeBaseCategoryRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseCategoryResource\Pages\CreateKnowledgeBaseCategory::class)
+    livewire(CreateKnowledgeBaseCategory::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();

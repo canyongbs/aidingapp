@@ -39,12 +39,12 @@ namespace AidingApp\ServiceManagement\Filament\Resources\SlaResource\RelationMan
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\AssociateAction;
+use Filament\Actions\DissociateAction;
+use Filament\Actions\DissociateBulkAction;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Get;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\AssociateAction;
-use Filament\Tables\Actions\DissociateAction;
-use Filament\Tables\Actions\DissociateBulkAction;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -96,7 +96,7 @@ class ServiceRequestPrioritiesRelationManager extends RelationManager
                             ->visible(fn (Get $get): bool => filled($get('type_id'))),
                     ]),
             ])
-            ->actions([
+            ->recordActions([
                 DissociateAction::make(),
             ])
             ->groupedBulkActions([

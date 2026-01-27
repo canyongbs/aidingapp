@@ -47,13 +47,13 @@ use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\User;
-use Filament\Forms\Components\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Support\Enums\MaxWidth;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Support\Enums\Width;
 use Illuminate\Support\Facades\Vite;
 
 class DraftServiceRequestUpdateWithAiAction extends Action
@@ -77,7 +77,7 @@ class DraftServiceRequestUpdateWithAiAction extends Action
                         ?->getFirstTemporaryUrl(now()->addHour(), 'avatar', 'avatar-height-250px') ?: Vite::asset('resources/images/canyon-ai-headshot.jpg'),
                 ]);
             })
-            ->modalWidth(MaxWidth::ExtraLarge)
+            ->modalWidth(Width::ExtraLarge)
             ->modalSubmitActionLabel('Draft')
             ->form([
                 Textarea::make('instructions')

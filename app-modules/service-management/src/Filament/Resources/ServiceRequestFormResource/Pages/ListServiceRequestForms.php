@@ -39,12 +39,12 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResou
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -61,7 +61,7 @@ class ListServiceRequestForms extends ListRecords
                 IdColumn::make(),
                 TextColumn::make('name'),
             ])
-            ->actions([
+            ->recordActions([
                 Action::make('Respond')
                     ->url(fn (ServiceRequestForm $form) => route('service-request-forms.show', ['serviceRequestForm' => $form]))
                     ->icon('heroicon-m-arrow-top-right-on-square')
@@ -69,7 +69,7 @@ class ListServiceRequestForms extends ListRecords
                     ->color('gray'),
                 EditAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

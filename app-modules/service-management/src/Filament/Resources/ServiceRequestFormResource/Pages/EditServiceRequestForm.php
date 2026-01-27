@@ -43,9 +43,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Concerns\EditPageRedirection;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Form;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Schema;
 
 class EditServiceRequestForm extends EditRecord
 {
@@ -54,10 +54,10 @@ class EditServiceRequestForm extends EditRecord
 
     protected static string $resource = ServiceRequestFormResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema($this->fields());
+        return $schema
+            ->components($this->fields());
     }
 
     protected function getHeaderActions(): array
@@ -69,7 +69,7 @@ class EditServiceRequestForm extends EditRecord
                 ->openUrlInNewTab(),
             Action::make('embed_snippet')
                 ->label('Embed Snippet')
-                ->infolist(
+                ->schema(
                     [
                         TextEntry::make('snippet')
                             ->label('Click to Copy')

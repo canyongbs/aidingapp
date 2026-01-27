@@ -38,15 +38,15 @@ namespace AidingApp\InventoryManagement\Filament\Resources\AssetResource\Relatio
 
 use AidingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
 use AidingApp\InventoryManagement\Models\MaintenanceProvider;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -55,9 +55,9 @@ class MaintenanceActivitiesRelationManager extends RelationManager
 {
     protected static string $relationship = 'maintenanceActivities';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
             TextInput::make('details')
                 ->label('Nature of Service')
                 ->required(),
@@ -108,11 +108,11 @@ class MaintenanceActivitiesRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make(),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
             ])
             ->defaultSort('scheduled_date', 'asc');
     }

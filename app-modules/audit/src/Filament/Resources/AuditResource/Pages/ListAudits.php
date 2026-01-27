@@ -40,8 +40,8 @@ use AidingApp\Audit\Actions\Finders\AuditableModels;
 use AidingApp\Audit\Filament\Resources\AuditResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
+use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -77,10 +77,10 @@ class ListAudits extends ListRecords
                     ->options(AuditableModels::all())
                     ->query(fn (Builder $query, array $data) => $data['value'] ? $query->where('auditable_type', $data['value']) : null),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make(),
             ])
-            ->bulkActions([]);
+            ->toolbarActions([]);
     }
 
     protected function getHeaderActions(): array

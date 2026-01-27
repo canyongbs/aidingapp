@@ -44,19 +44,19 @@ use AidingApp\Task\Models\Task;
 use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\HasLicense;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DetachAction;
-use Filament\Tables\Actions\DetachBulkAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -66,10 +66,10 @@ use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseTaskRelationManager extends ManageRelatedRecords
 {
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Fieldset::make('Confidentiality')
                     ->schema([
                         Checkbox::make('is_confidential')
@@ -192,13 +192,13 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                         return $task;
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 TaskViewAction::make(),
                 EditAction::make(),
                 DetachAction::make(),
             ])
             ->recordUrl(null)
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make(),
                 ]),

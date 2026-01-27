@@ -36,13 +36,15 @@
 
 namespace App\Filament\Clusters;
 
+use BackedEnum;
 use Filament\Clusters\Cluster;
+use UnitEnum;
 
 class KnowledgeManagement extends Cluster
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static string | UnitEnum | null $navigationGroup = 'Settings';
 
     protected static ?string $navigationLabel = 'Knowledge Base';
 

@@ -37,10 +37,10 @@
 namespace AidingApp\Project\Filament\Resources\ProjectResource\RelationManagers;
 
 use AidingApp\Project\Models\Project;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\AttachAction;
-use Filament\Tables\Actions\DetachAction;
-use Filament\Tables\Actions\DetachBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -61,11 +61,11 @@ class AuditorTeamsRelationManager extends RelationManager
                 AttachAction::make()
                     ->authorize('update', Project::class),
             ])
-            ->actions([
+            ->recordActions([
                 DetachAction::make()
                     ->authorize('update', Project::class),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 DetachBulkAction::make()
                     ->authorize('update', Project::class),
             ])

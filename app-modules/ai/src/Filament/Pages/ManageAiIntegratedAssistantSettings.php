@@ -45,8 +45,8 @@ use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Schema;
 use Illuminate\Validation\Rule;
 
 /**
@@ -70,10 +70,10 @@ class ManageAiIntegratedAssistantSettings extends SettingsPage
         return $user->isSuperAdmin();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('default_model')
                     ->options(fn (AiModel|string|null $state) => array_unique([
                         ...AiModelApplicabilityFeature::IntegratedAdvisor->getModelsAsSelectOptions(),

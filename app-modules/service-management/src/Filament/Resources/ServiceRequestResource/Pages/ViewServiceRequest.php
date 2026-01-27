@@ -46,17 +46,17 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\Actions\Action as InfolistAction;
-use Filament\Infolists\Components\Group;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\IconEntry\IconEntrySize;
 use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ViewServiceRequest extends ViewRecord
@@ -67,7 +67,7 @@ class ViewServiceRequest extends ViewRecord
 
     protected static ?string $navigationLabel = 'View';
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
         $formatSecondsAsInterval = fn (?int $state): ?string => $state ? CarbonInterval::seconds($state)->cascade()->forHumans(short: true) : null;
 
@@ -141,7 +141,7 @@ class ViewServiceRequest extends ViewRecord
                                 $mimeType = $media->mime_type;
                                 $isImage = in_array($mimeType, ['image/jpeg', 'image/png']);
 
-                                $downloadAction = InfolistAction::make('download')
+                                $downloadAction = Action::make('download')
                                     ->label('Download')
                                     ->icon('heroicon-m-arrow-down-tray')
                                     ->color('primary')

@@ -38,11 +38,12 @@ namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\ServiceManagement\Models\ServiceRequestAssignment>
+ * @extends Factory<ServiceRequestAssignment>
  */
 class ServiceRequestAssignmentFactory extends Factory
 {

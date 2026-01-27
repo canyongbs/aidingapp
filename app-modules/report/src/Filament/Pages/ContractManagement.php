@@ -39,12 +39,13 @@ namespace AidingApp\Report\Filament\Pages;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Pages\Dashboard;
+use UnitEnum;
 
 class ContractManagement extends Dashboard
 {
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static ?string $navigationGroup = 'Purchasing';
+    protected static string | UnitEnum | null $navigationGroup = 'Purchasing';
 
     protected static ?string $navigationLabel = 'Contract Management';
 
@@ -52,7 +53,7 @@ class ContractManagement extends Dashboard
 
     protected static string $routePath = 'contract-management';
 
-    protected static string $view = 'filament.pages.coming-soon';
+    protected string $view = 'filament.pages.coming-soon';
 
     protected static ?int $navigationSort = 70;
 

@@ -39,9 +39,9 @@ namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
 use AidingApp\Authorization\Filament\Resources\RoleResource;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
-use Filament\Resources\Components\Tab;
+use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Database\Eloquent\Builder;
@@ -78,10 +78,10 @@ class ListRoles extends ListRecords
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
             ]);
     }
 

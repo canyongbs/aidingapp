@@ -33,9 +33,9 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\EditKnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseQuality\RequestFactories\EditKnowledgeBaseQualityRequestFactory;
 use App\Models\User;
@@ -64,7 +64,7 @@ test('EditKnowledgeBaseQuality is gated with proper access control', function ()
             ])
         )->assertForbidden();
 
-    livewire(KnowledgeBaseQualityResource\Pages\EditKnowledgeBaseQuality::class, [
+    livewire(EditKnowledgeBaseQuality::class, [
         'record' => $knowledgeBaseQuality->getRouteKey(),
     ])
         ->assertForbidden();
@@ -81,7 +81,7 @@ test('EditKnowledgeBaseQuality is gated with proper access control', function ()
 
     $request = collect(EditKnowledgeBaseQualityRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseQualityResource\Pages\EditKnowledgeBaseQuality::class, [
+    livewire(EditKnowledgeBaseQuality::class, [
         'record' => $knowledgeBaseQuality->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -112,7 +112,7 @@ test('EditKnowledgeBaseQuality is gated with proper feature access control', fun
             ])
         )->assertForbidden();
 
-    livewire(KnowledgeBaseQualityResource\Pages\EditKnowledgeBaseQuality::class, [
+    livewire(EditKnowledgeBaseQuality::class, [
         'record' => $knowledgeBaseQuality->getRouteKey(),
     ])
         ->assertForbidden();
@@ -130,7 +130,7 @@ test('EditKnowledgeBaseQuality is gated with proper feature access control', fun
 
     $request = collect(EditKnowledgeBaseQualityRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseQualityResource\Pages\EditKnowledgeBaseQuality::class, [
+    livewire(EditKnowledgeBaseQuality::class, [
         'record' => $knowledgeBaseQuality->getRouteKey(),
     ])
         ->fillForm($request->toArray())

@@ -33,7 +33,6 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory;
@@ -42,9 +41,9 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseCategory\RequestFactories\EditKnowledgeBaseCategoryRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\AssociateAction;
+use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Select;
-use Filament\Tables\Actions\AssociateAction;
-use Filament\Tables\Actions\CreateAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;

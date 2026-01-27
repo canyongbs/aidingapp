@@ -39,11 +39,11 @@ namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class ViewOrganization extends ViewRecord
 {
@@ -51,7 +51,7 @@ class ViewOrganization extends ViewRecord
 
     protected static ?string $navigationLabel = 'View';
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
         return $infolist
             ->schema([

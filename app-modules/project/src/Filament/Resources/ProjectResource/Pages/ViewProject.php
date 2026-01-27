@@ -38,10 +38,10 @@ namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class ViewProject extends ViewRecord
 {
@@ -49,7 +49,7 @@ class ViewProject extends ViewRecord
 
     protected static ?string $navigationLabel = 'View';
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
         return $infolist
             ->schema([

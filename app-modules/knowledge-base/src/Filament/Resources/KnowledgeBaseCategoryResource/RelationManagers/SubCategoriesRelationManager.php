@@ -38,23 +38,22 @@ namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResour
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use App\Filament\Forms\Components\IconSelect;
+use Filament\Actions\ActionGroup;
+use Filament\Actions\AssociateAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\DissociateAction;
+use Filament\Actions\DissociateBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Actions\AssociateAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\DissociateAction;
-use Filament\Tables\Actions\DissociateBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -66,10 +65,10 @@ class SubCategoriesRelationManager extends RelationManager
 
     protected static ?string $inverseRelationship = 'parentCategory';
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->schema([
+        return $schema
+            ->components([
                 Section::make()
                     ->schema([
                         TextEntry::make('name')
@@ -88,10 +87,10 @@ class SubCategoriesRelationManager extends RelationManager
             ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->label('Name')
                     ->required()
@@ -135,7 +134,7 @@ class SubCategoriesRelationManager extends RelationManager
                             ->doesntHave('subCategories')
                     ),
             ])
-            ->actions([
+            ->recordActions([
                 ActionGroup::make([
                     ViewAction::make(),
                     EditAction::make(),
@@ -143,7 +142,7 @@ class SubCategoriesRelationManager extends RelationManager
                     DeleteAction::make(),
                 ]),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DissociateBulkAction::make(),
                     DeleteBulkAction::make(),

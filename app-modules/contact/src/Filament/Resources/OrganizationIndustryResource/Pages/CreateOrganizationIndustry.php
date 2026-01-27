@@ -38,20 +38,20 @@ namespace AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Page
 
 use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource;
 use AidingApp\Contact\Models\OrganizationIndustry;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class CreateOrganizationIndustry extends CreateRecord
 {
     protected static string $resource = OrganizationIndustryResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make()
                     ->columns()
                     ->schema([

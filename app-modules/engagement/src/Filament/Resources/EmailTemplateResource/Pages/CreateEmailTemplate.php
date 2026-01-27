@@ -39,20 +39,20 @@ namespace AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages;
 use AidingApp\Engagement\Filament\Resources\EmailTemplateResource;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use FilamentTiptapEditor\TiptapEditor;
 
 class CreateEmailTemplate extends CreateRecord
 {
     protected static string $resource = EmailTemplateResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->columns(1)
-            ->schema([
+            ->components([
                 TextInput::make('name')
                     ->string()
                     ->required()

@@ -46,26 +46,25 @@ use App\Filament\Resources\UserResource;
 use Carbon\CarbonInterface;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\Actions\Action as InfolistAction;
 use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\IconSize;
 
 class ViewChangeRequest extends ViewRecord
 {
     protected static string $resource = ChangeRequestResource::class;
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
         return $infolist
             ->schema([
                 Section::make('Approval Status')
                     ->headerActions([
-                        InfolistAction::make('approveChangeRequest')
+                        Action::make('approveChangeRequest')
                             ->requiresConfirmation()
                             ->hidden(fn (ChangeRequest $record) => $record->type()->withTrashed()->first()->number_of_required_approvals === 0 || $record->isNotNew())
                             ->disabled(fn (ChangeRequest $record) => $record->isNotNew() || ! $record->canBeApprovedBy(auth()->user()))

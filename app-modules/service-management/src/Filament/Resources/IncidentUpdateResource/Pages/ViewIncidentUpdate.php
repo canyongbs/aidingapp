@@ -41,16 +41,16 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
 use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class ViewIncidentUpdate extends ViewRecord
 {
     protected static string $resource = IncidentUpdateResource::class;
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
         return $infolist
             ->schema([

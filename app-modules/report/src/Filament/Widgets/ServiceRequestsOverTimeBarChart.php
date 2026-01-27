@@ -45,7 +45,7 @@ class ServiceRequestsOverTimeBarChart extends BarChartReportWidget
 {
     use InteractsWithPageFilters;
 
-    protected static ?string $heading = 'Requests Over Time';
+    protected ?string $heading = 'Requests Over Time';
 
     protected int | string | array $columnSpan = 'full';
 

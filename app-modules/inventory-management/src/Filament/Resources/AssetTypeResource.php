@@ -41,15 +41,16 @@ use AidingApp\InventoryManagement\Filament\Resources\AssetTypeResource\Pages\Lis
 use AidingApp\InventoryManagement\Filament\Resources\AssetTypeResource\Pages\ViewAssetType;
 use AidingApp\InventoryManagement\Models\AssetType;
 use App\Filament\Clusters\AssetManagement;
+use BackedEnum;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 
 class AssetTypeResource extends Resource
 {
     protected static ?string $model = AssetType::class;
 
-    protected static ?string $navigationIcon = 'heroicon-m-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-m-rectangle-stack';
 
     protected static ?string $navigationLabel = 'Types';
 
@@ -57,10 +58,10 @@ class AssetTypeResource extends Resource
 
     protected static ?string $cluster = AssetManagement::class;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->autofocus()
                     ->required(),

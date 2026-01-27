@@ -40,15 +40,15 @@ use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
+use Filament\Schemas\Schema;
 
 class NotificationSettingForm
 {
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->columns(1)
-            ->schema([
+            ->components([
                 TextInput::make('name')
                     ->string()
                     ->required()

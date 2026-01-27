@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers\ServiceRequestFormSubmissionRelationManager;
+use BackedEnum;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Illuminate\Database\Eloquent\Model;
 
@@ -52,7 +53,7 @@ class ManageServiceRequestFormSubmission extends ManageRelatedRecords
 
     protected static ?string $breadcrumb = 'Form Submission';
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-check';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-check';
 
     public static function canAccess(array $arguments = []): bool
     {

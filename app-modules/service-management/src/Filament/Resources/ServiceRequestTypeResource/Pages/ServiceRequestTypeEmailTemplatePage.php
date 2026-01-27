@@ -44,14 +44,15 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Concerns\EditPageRedirection;
-use Filament\Forms\Components\Tabs;
-use Filament\Forms\Components\Tabs\Tab;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use UnitEnum;
 
 /** @property-read ?ServiceRequestTypeEmailTemplate $template */
 class ServiceRequestTypeEmailTemplatePage extends EditRecord
@@ -63,7 +64,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     #[Locked]
     public ServiceRequestEmailTemplateType $type;
 
-    public static ?string $navigationGroup = 'Email Templates';
+    public static string | UnitEnum | null $navigationGroup = 'Email Templates';
 
     public function getRelationManagers(): array
     {
@@ -71,7 +72,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
         return [];
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
         $roles = ServiceRequestTypeEmailTemplateRole::cases();
 
@@ -79,8 +80,8 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
             $roles = [ServiceRequestTypeEmailTemplateRole::Customer];
         }
 
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Tabs::make('Email template roles')
                     ->persistTab()
                     ->id('email-template-role-tabs')

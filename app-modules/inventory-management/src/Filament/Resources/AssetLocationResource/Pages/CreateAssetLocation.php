@@ -38,17 +38,17 @@ namespace AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource
 
 use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
 class CreateAssetLocation extends CreateRecord
 {
     protected static string $resource = AssetLocationResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->required(),
             ]);

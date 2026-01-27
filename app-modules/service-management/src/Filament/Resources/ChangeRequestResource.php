@@ -41,7 +41,9 @@ use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\E
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\ListChangeRequests;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\ViewChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
+use BackedEnum;
 use Filament\Resources\Resource;
+use UnitEnum;
 
 class ChangeRequestResource extends Resource
 {
@@ -49,9 +51,9 @@ class ChangeRequestResource extends Resource
 
     protected static ?string $navigationLabel = 'Change Management';
 
-    protected static ?string $navigationIcon = 'heroicon-m-arrow-path-rounded-square';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-m-arrow-path-rounded-square';
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
 
     protected static ?int $navigationSort = 70;
 

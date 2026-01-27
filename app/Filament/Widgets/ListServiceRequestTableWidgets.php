@@ -44,9 +44,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Actions\Action;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -137,7 +137,7 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     ->multiple()
                     ->preload(),
             ])
-            ->actions([
+            ->recordActions([
                 Action::make('View')->url(function (ServiceRequest $serviceRequest) {
                     return ServiceRequestResource::getUrl('view', ['record' => $serviceRequest]);
                 }),
@@ -145,7 +145,7 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     return ServiceRequestResource::getUrl('edit', ['record' => $serviceRequest]);
                 }),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

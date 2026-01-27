@@ -33,16 +33,15 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Authorization\Enums\LicenseType;
 use App\Filament\Resources\UserResource;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
 use App\Models\Authenticatable;
 use App\Models\User;
+use Filament\Actions\AttachAction;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
-use Filament\Tables\Actions\AttachAction;
 use Illuminate\Support\Collection;
 
 use function Pest\Laravel\actingAs;

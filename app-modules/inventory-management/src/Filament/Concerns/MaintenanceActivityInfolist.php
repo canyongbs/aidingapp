@@ -36,9 +36,9 @@
 
 namespace AidingApp\InventoryManagement\Filament\Concerns;
 
-use Filament\Infolists\Components\Component;
-use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Fieldset;
 
 // TODO Re-use this trait across other places where infolist is rendered
 trait MaintenanceActivityInfolist

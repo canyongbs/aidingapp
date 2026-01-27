@@ -39,9 +39,9 @@ namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\
 use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
 use App\Filament\Resources\UserResource;
-use Filament\Infolists\Components\Component;
-use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Fieldset;
 
 trait HasAssetCheckInInfolist
 {

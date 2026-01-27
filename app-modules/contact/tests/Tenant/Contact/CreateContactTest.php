@@ -33,8 +33,8 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\CreateContactRequestFactory;
 use App\Models\User;
@@ -59,7 +59,7 @@ test('CreateContact is gated with proper access control', function () {
             ContactResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(ContactResource\Pages\CreateContact::class)
+    livewire(CreateContact::class)
         ->assertForbidden();
 
     $user->givePermissionTo('contact.view-any');
@@ -74,7 +74,7 @@ test('CreateContact is gated with proper access control', function () {
         'created_by_id' => $user->id,
     ]));
 
-    livewire(ContactResource\Pages\CreateContact::class)
+    livewire(CreateContact::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();

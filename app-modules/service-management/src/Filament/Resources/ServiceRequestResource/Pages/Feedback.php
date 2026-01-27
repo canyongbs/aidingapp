@@ -38,10 +38,10 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class Feedback extends ViewRecord
 {
@@ -51,7 +51,7 @@ class Feedback extends ViewRecord
 
     protected static ?string $breadcrumb = 'Feedback';
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
         $serviceRequest = $this->record;
         assert($serviceRequest instanceof ServiceRequest);

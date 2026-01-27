@@ -38,8 +38,8 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResou
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\Concerns\HasSharedFormConfiguration;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
 class CreateServiceRequestForm extends CreateRecord
 {
@@ -47,9 +47,9 @@ class CreateServiceRequestForm extends CreateRecord
 
     protected static string $resource = ServiceRequestFormResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema($this->fields());
+        return $schema
+            ->components($this->fields());
     }
 }

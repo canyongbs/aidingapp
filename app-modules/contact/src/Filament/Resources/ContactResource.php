@@ -48,17 +48,19 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactFile
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactTasks;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Models\Contact;
+use BackedEnum;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
+use UnitEnum;
 
 class ContactResource extends Resource
 {
     protected static ?string $model = Contact::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $navigationGroup = 'Clients';
+    protected static string | UnitEnum | null $navigationGroup = 'Clients';
 
     protected static ?int $navigationSort = 20;
 

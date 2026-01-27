@@ -44,24 +44,26 @@ use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
 use App\Models\User;
 use App\Rules\ValidUrl;
+use BackedEnum;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Support\Facades\Gate;
+use UnitEnum;
 
 class ManagePortalSettings extends SettingsPage
 {
-    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     protected static ?string $navigationLabel = 'Client Portal';
 
@@ -71,7 +73,7 @@ class ManagePortalSettings extends SettingsPage
 
     protected static ?string $title = 'Client Portal';
 
-    protected static ?string $navigationGroup = 'Settings';
+    protected static string | UnitEnum | null $navigationGroup = 'Settings';
 
     public static function canAccess(): bool
     {
@@ -81,10 +83,10 @@ class ManagePortalSettings extends SettingsPage
         return $user->can(['settings.view-any']);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Client Portal')
                     ->schema([
                         Toggle::make('knowledge_management_portal_enabled')
@@ -230,7 +232,7 @@ class ManagePortalSettings extends SettingsPage
     }
 
     /**
-     * @return array<Action | ActionGroup>
+     * @return array<Action|ActionGroup>
      */
     public function getFormActions(): array
     {

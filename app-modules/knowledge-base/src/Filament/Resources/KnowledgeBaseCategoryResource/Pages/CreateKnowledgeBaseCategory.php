@@ -40,18 +40,18 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 use Illuminate\Validation\Rules\Unique;
 
 class CreateKnowledgeBaseCategory extends CreateRecord
 {
     protected static string $resource = KnowledgeBaseCategoryResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->label('Name')
                     ->required()

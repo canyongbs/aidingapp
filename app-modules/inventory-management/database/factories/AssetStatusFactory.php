@@ -37,10 +37,11 @@
 namespace AidingApp\InventoryManagement\Database\Factories;
 
 use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
+use AidingApp\InventoryManagement\Models\AssetStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\InventoryManagement\Models\AssetStatus>
+ * @extends Factory<AssetStatus>
  */
 class AssetStatusFactory extends Factory
 {

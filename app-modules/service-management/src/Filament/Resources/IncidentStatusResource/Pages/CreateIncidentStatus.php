@@ -40,17 +40,17 @@ use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
 class CreateIncidentStatus extends CreateRecord
 {
     protected static string $resource = IncidentStatusResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->label('Name')
                     ->maxLength('255')

@@ -42,12 +42,13 @@ use AidingApp\Report\Filament\Widgets\RefreshWidget;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Pages\Dashboard;
+use UnitEnum;
 
 class AssetManagement extends Dashboard
 {
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
 
     protected static ?string $navigationLabel = 'Asset Management';
 
@@ -76,7 +77,7 @@ class AssetManagement extends Dashboard
         ];
     }
 
-    public function getColumns(): int|string|array
+    public function getColumns(): int|array
     {
         return [
             'sm' => 2,

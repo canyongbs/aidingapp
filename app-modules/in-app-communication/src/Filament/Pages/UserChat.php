@@ -39,12 +39,14 @@ namespace AidingApp\InAppCommunication\Filament\Pages;
 use AidingApp\Authorization\Enums\LicenseType;
 use App\Enums\Feature;
 use App\Models\User;
+use BackedEnum;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Gate;
+use UnitEnum;
 
 class UserChat extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-oval-left-ellipsis';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-chat-bubble-oval-left-ellipsis';
 
     protected static ?string $navigationLabel = 'Live Chat';
 
@@ -52,11 +54,11 @@ class UserChat extends Page
 
     protected static ?string $slug = 'live-chat';
 
-    protected static ?string $navigationGroup = 'Engagement';
+    protected static string | UnitEnum | null $navigationGroup = 'Engagement';
 
     protected static ?int $navigationSort = 10;
 
-    protected static string $view = 'in-app-communication::filament.pages.user-chat';
+    protected string $view = 'in-app-communication::filament.pages.user-chat';
 
     public static function canAccess(): bool
     {

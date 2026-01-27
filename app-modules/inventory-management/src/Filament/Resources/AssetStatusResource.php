@@ -41,15 +41,16 @@ use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages\L
 use AidingApp\InventoryManagement\Filament\Resources\AssetStatusResource\Pages\ViewAssetStatus;
 use AidingApp\InventoryManagement\Models\AssetStatus;
 use App\Filament\Clusters\AssetManagement;
+use BackedEnum;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 
 class AssetStatusResource extends Resource
 {
     protected static ?string $model = AssetStatus::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-tag';
 
     protected static ?string $navigationLabel = 'Statuses';
 
@@ -57,10 +58,10 @@ class AssetStatusResource extends Resource
 
     protected static ?string $cluster = AssetManagement::class;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->autofocus()
                     ->required(),

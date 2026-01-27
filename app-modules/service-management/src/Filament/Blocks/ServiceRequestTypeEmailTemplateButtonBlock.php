@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Filament\Blocks;
 
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Component;
 use FilamentTiptapEditor\TiptapBlock;
 
 class ServiceRequestTypeEmailTemplateButtonBlock extends TiptapBlock

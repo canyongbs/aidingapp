@@ -42,12 +42,13 @@ use AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages\ListEmai
 use AidingApp\Engagement\Models\EmailTemplate;
 use App\Filament\Clusters\Communication;
 use Filament\Resources\Resource;
+use UnitEnum;
 
 class EmailTemplateResource extends Resource
 {
     protected static ?string $model = EmailTemplate::class;
 
-    protected static ?string $navigationGroup = 'Communication';
+    protected static string | UnitEnum | null $navigationGroup = 'Communication';
 
     protected static ?int $navigationSort = 120;
 

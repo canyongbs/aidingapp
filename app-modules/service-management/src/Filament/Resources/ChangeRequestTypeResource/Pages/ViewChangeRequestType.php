@@ -40,16 +40,16 @@ use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource;
 use App\Filament\Resources\UserResource;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class ViewChangeRequestType extends ViewRecord
 {
     protected static string $resource = ChangeRequestTypeResource::class;
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
         return $infolist
             ->schema([

@@ -38,19 +38,19 @@ namespace AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages;
 
 use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
 use AidingApp\Engagement\Models\EngagementFile;
-use Filament\Actions;
-use Filament\Infolists\Components\Actions\Action;
-use Filament\Infolists\Components\Section;
+use Filament\Actions\Action;
+use Filament\Actions\EditAction;
 use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class ViewEngagementFile extends ViewRecord
 {
     protected static string $resource = EngagementFileResource::class;
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
         /**
          * @var EngagementFile $record
@@ -87,7 +87,7 @@ class ViewEngagementFile extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            EditAction::make(),
         ];
     }
 }

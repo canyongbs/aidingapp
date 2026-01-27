@@ -39,16 +39,16 @@ namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use AidingApp\Contact\Models\ContactType;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class ViewContactType extends ViewRecord
 {
     protected static string $resource = ContactTypeResource::class;
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
         return $infolist
             ->schema([

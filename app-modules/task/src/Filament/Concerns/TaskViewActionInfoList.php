@@ -41,11 +41,11 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;
 use App\Filament\Resources\UserResource;
-use Filament\Infolists\Components\Component;
-use Filament\Infolists\Components\Fieldset;
-use Filament\Infolists\Components\Grid;
-use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Flex;
+use Filament\Schemas\Components\Grid;
 
 trait TaskViewActionInfoList
 {
@@ -55,7 +55,7 @@ trait TaskViewActionInfoList
     public function taskInfoList(): array
     {
         return [
-            Split::make([
+            Flex::make([
                 Grid::make()
                     ->schema([
                         TextEntry::make('is_confidential')

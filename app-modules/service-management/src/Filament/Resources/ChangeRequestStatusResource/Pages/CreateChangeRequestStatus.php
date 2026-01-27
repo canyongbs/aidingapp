@@ -38,20 +38,20 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusReso
 
 use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class CreateChangeRequestStatus extends CreateRecord
 {
     protected static string $resource = ChangeRequestStatusResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make()
                     ->columns()
                     ->schema([
