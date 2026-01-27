@@ -44,7 +44,6 @@ use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Section;
-use Filament\Support\Colors\Color;
 
 class Licenses extends Section
 {
@@ -75,8 +74,8 @@ class Licenses extends Section
                     ->content(fn () => "{$licenseType->getAvailableSeats()} / {$licenseType->getSeats()}"),
                 Toggle::make("{$licenseType->value}_enabled")
                     ->hiddenLabel()
-                    ->offColor(Color::Red)
-                    ->onColor(Color::Green)
+                    ->offColor('danger')
+                    ->onColor('success')
                     ->formatStateUsing(function (?User $record) use ($licenseType) {
                         return $record?->hasLicense($licenseType);
                     })

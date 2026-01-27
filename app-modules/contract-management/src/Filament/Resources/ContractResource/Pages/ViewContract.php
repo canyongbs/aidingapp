@@ -52,7 +52,7 @@ class ViewContract extends ViewRecord
 
     public function infolist(Schema $schema): Schema
     {
-        return $infolist->schema([
+        return $schema->schema([
             Section::make()
                 ->schema([
                     TextEntry::make('name'),

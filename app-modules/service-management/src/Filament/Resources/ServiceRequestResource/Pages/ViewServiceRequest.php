@@ -57,6 +57,7 @@ use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\IconSize;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ViewServiceRequest extends ViewRecord
@@ -73,7 +74,7 @@ class ViewServiceRequest extends ViewRecord
 
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
 
-        return $infolist
+        return $schema
             ->schema([
                 Section::make()
                     ->schema([
@@ -172,7 +173,7 @@ class ViewServiceRequest extends ViewRecord
                                         'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'heroicon-o-presentation-chart-bar',
                                         default => 'heroicon-o-paper-clip',
                                     })
-                                    ->size(IconEntrySize::TwoExtraLarge)
+                                    ->size(IconSize::TwoExtraLarge)
                                     ->hintAction($downloadAction);
                             })
                             ->toArray()

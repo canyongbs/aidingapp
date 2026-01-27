@@ -49,6 +49,6 @@ class ViewAssetCheckOut extends ViewRecord
 
     public function infolist(Schema $schema): Schema
     {
-        return $infolist($this->renderInfolist());
+        return $schema($this->renderInfolist());
     }
 }

@@ -57,7 +57,7 @@ class ViewEngagementFile extends ViewRecord
          */
         $record = $this->record;
 
-        return $infolist
+        return $schema
             ->schema([
                 Section::make()
                     ->schema([

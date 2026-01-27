@@ -56,7 +56,7 @@ class Feedback extends ViewRecord
         $serviceRequest = $this->record;
         assert($serviceRequest instanceof ServiceRequest);
 
-        return $infolist
+        return $schema
             ->schema([
                 Section::make()
                     ->schema([

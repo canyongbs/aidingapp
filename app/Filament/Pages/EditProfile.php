@@ -261,7 +261,8 @@ class EditProfile extends Page
                                     ->visible(fn (Get $get) => $get('out_of_office_is_enabled')),
                             ]),
                     ]),
-            ]);
+            ])
+            ->model($this->getUser());
     }
 
     public function mount(): void
@@ -428,27 +429,6 @@ class EditProfile extends Page
             ->required()
             ->visible(fn (Get $get): bool => filled($get('password')))
             ->dehydrated(false);
-    }
-
-    /**
-     * @return array<int|string, string|Schema>
-     */
-    protected function getForms(): array
-    {
-        return [
-            'form' => $this->form(
-                $this->makeForm()
-                    ->components([
-                        $this->getNameFormComponent(),
-                        $this->getEmailFormComponent(),
-                        $this->getPasswordFormComponent(),
-                        $this->getPasswordConfirmationFormComponent(),
-                    ])
-                    ->operation('edit')
-                    ->model($this->getUser())
-                    ->statePath('data'),
-            ),
-        ];
     }
 
     /**
