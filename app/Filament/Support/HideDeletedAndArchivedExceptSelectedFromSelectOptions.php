@@ -44,7 +44,7 @@ use Illuminate\Database\Eloquent\Model;
  * This is used in the `modifyQueryUsing` argument of a `Select` `relationship()` method,
  * usually for a `BelongsTo` relationship, to hide soft-deleted and archived records
  * from the select options, while also ensuring that if the currently-selected
- * record is soft-deleted, it is still loaded and shown as an option.
+ * record is soft-deleted or archived, it is still loaded and shown as an option.
  */
 class HideDeletedAndArchivedExceptSelectedFromSelectOptions
 {
