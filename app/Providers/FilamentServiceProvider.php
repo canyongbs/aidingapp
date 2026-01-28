@@ -302,8 +302,7 @@ class FilamentServiceProvider extends ServiceProvider
         Table::configureUsing(function (Table $table): void {
             $table
                 ->deferFilters(false)
-                ->paginationPageOptions([5, 10, 20])
-                ->defaultPaginationPageOption(5);
+                ->paginationPageOptions([5, 10, 20]);
         });
 
         Fieldset::configureUsing(fn (Fieldset $fieldset) => $fieldset

@@ -146,7 +146,7 @@ it('does not allow a user which does not have the SaaS Global Admin role to assi
         'pageClass' => EditUser::class,
     ])
         ->mountTableAction(AttachAction::class)
-        ->assertFormFieldExists('recordId', 'mountedTableActionForm', function (Select $select) {
+        ->assertFormFieldExists('recordId', 'mountedActionSchema0', function (Select $select) {
             $options = $select->getSearchResults(Authenticatable::SUPER_ADMIN_ROLE);
 
             return empty($options);

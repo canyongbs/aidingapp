@@ -86,13 +86,13 @@ test('During assignment only Users that are on a Team that is Manager of the Typ
         'pageClass' => ManageAssignments::class,
     ])
         ->mountTableAction('assign-service-request')
-        ->assertFormFieldExists('userId', 'mountedTableActionForm', function (Select $select) use ($user) {
+        ->assertFormFieldExists('userId', 'mountedActionSchema0', function (Select $select) use ($user) {
             $options = $select->getSearchResults($user->name);
 
             return ! empty($options);
         })
         ->assertSuccessful()
-        ->assertFormFieldExists('userId', 'mountedTableActionForm', function (Select $select) use ($userWithoutTeam) {
+        ->assertFormFieldExists('userId', 'mountedActionSchema0', function (Select $select) use ($userWithoutTeam) {
             $options = $select->getSearchResults($userWithoutTeam->name);
 
             return empty($options);
@@ -142,13 +142,13 @@ test('During reassignment current assigned user should not be in options', funct
         'pageClass' => ManageAssignments::class,
     ])
         ->mountTableAction('assign-service-request')
-        ->assertFormFieldExists('userId', 'mountedTableActionForm', function (Select $select) use ($user) {
+        ->assertFormFieldExists('userId', 'mountedActionSchema0', function (Select $select) use ($user) {
             $options = $select->getSearchResults($user->name);
 
             return empty($options);
         })
         ->assertSuccessful()
-        ->assertFormFieldExists('userId', 'mountedTableActionForm', function (Select $select) use ($secondUser) {
+        ->assertFormFieldExists('userId', 'mountedActionSchema0', function (Select $select) use ($secondUser) {
             $options = $select->getSearchResults($secondUser->name);
 
             return ! empty($options);

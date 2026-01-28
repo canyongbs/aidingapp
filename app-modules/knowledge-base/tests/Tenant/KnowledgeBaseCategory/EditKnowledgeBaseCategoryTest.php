@@ -196,7 +196,7 @@ test('exclude already attached subcategories in search', function () {
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])
         ->mountTableAction(AssociateAction::class)
-        ->assertFormFieldExists('recordId', 'mountedTableActionForm', function (Select $select) use ($knowledgeBaseSubCategory, $newknowledgeBaseCategory) {
+        ->assertFormFieldExists('recordId', 'mountedActionSchema0', function (Select $select) use ($knowledgeBaseSubCategory, $newknowledgeBaseCategory) {
             $options = $select->getOptions();
 
             return in_array($newknowledgeBaseCategory->getKey(), array_keys($options)) && ! in_array($knowledgeBaseSubCategory->getKey(), array_keys($options));
