@@ -124,16 +124,16 @@ test('CreateServiceRequest requires valid data', function ($data, $errors, $setu
         'division_id missing' => [CreateServiceRequestRequestFactory::new()->without('division_id'), ['division_id' => 'required'], fn () => Division::factory()->count(2)->create()],
         'division_id does not exist' => [
             CreateServiceRequestRequestFactory::new()->state(['division_id' => fake()->uuid()]),
-            ['division_id' => 'exists'], fn () => Division::factory()->count(2)->create()],
+            ['division_id' => 'in'], fn () => Division::factory()->count(2)->create()],
         'status_id missing' => [CreateServiceRequestRequestFactory::new()->without('status_id'), ['status_id' => 'required']],
         'status_id does not exist' => [
             CreateServiceRequestRequestFactory::new()->state(['status_id' => fake()->uuid()]),
-            ['status_id' => 'exists'],
+            ['status_id' => 'in'],
         ],
         'priority_id missing' => [CreateServiceRequestRequestFactory::new()->without('priority_id'), ['priority_id' => 'required']],
         'priority_id does not exist' => [
             CreateServiceRequestRequestFactory::new()->state(['priority_id' => fake()->uuid(), 'type_id' => fake()->uuid()]),
-            ['priority_id' => 'exists'],
+            ['priority_id' => 'in'],
         ],
         'close_details is not a string' => [CreateServiceRequestRequestFactory::new()->state(['close_details' => 1]), ['close_details' => 'string']],
         'res_details is not a string' => [CreateServiceRequestRequestFactory::new()->state(['res_details' => 1]), ['res_details' => 'string']],

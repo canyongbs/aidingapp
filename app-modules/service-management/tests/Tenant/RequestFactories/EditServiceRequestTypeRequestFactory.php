@@ -44,6 +44,7 @@ class EditServiceRequestTypeRequestFactory extends RequestFactory
     {
         return [
             'name' => $this->faker->name(),
+            'icon' => 'heroicon-o-document-text',
         ];
     }
 }

@@ -164,7 +164,7 @@ test('can create subcategory', function () {
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])
         ->callTableAction(
-            name: CreateAction::class,
+            CreateAction::class,
             data: $knowledgeBaseSubCategory->toArray()
         )
         ->assertHasNoTableActionErrors();

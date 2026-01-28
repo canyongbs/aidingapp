@@ -71,9 +71,9 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
                 $serviceMonitoringTarget->domain,
                 'Frequency',
                 $serviceMonitoringTarget->frequency->getLabel(),
-                'Team',
+                'Teams',
                 $serviceMonitoringTarget->teams()->pluck('name')->join(', '),
-                'User',
+                'Users',
                 $serviceMonitoringTarget->users()->pluck('name')->join(', '),
             ]
         );

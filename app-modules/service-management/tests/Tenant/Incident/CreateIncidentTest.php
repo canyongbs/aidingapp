@@ -115,7 +115,7 @@ test('CreateIncident validates the inputs', function ($data, $errors) {
         ],
         'severity_id does not exist' => [
             IncidentRequestFactory::new()->state(['severity_id' => fake()->uuid()]),
-            ['severity_id' => 'exists'],
+            ['severity_id' => 'in'],
         ],
         'status_id missing' => [
             IncidentRequestFactory::new()->without('status_id'),
@@ -123,11 +123,11 @@ test('CreateIncident validates the inputs', function ($data, $errors) {
         ],
         'status_id does not exist' => [
             IncidentRequestFactory::new()->state(['status_id' => fake()->uuid()]),
-            ['status_id' => 'exists'],
+            ['status_id' => 'in'],
         ],
         'assigned_team_id does not exist' => [
             IncidentRequestFactory::new()->state(['assigned_team_id' => fake()->uuid()]),
-            ['assigned_team_id' => 'exists'],
+            ['assigned_team_id' => 'in'],
         ],
     ]
 );

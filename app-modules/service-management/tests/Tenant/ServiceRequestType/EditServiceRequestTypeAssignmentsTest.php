@@ -68,7 +68,7 @@ test('A successful action on the EditServiceRequestTypeAssignments page', functi
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertFormSet([
-            'assignment_type' => ServiceRequestTypeAssignmentTypes::None->value,
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
         ])
         ->fillForm($editRequest)
         ->call('save')
