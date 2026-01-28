@@ -78,7 +78,7 @@ it('returns service request feedbacks within the given date range', function () 
 
     livewire(ServiceRequestFeedbackTable::class, [
         'cacheTag' => 'report-service-request-feedback',
-        'filters' => $filters,
+        'pageFilters' => $filters,
     ])
         ->assertCanSeeTableRecords(collect([
             $feedbackOne,
@@ -137,7 +137,7 @@ it('filters service request feedbacks by date and type', function () {
 
     livewire(ServiceRequestFeedbackTable::class, [
         'cacheTag' => 'report-service-request-feedback',
-        'filters' => $filters,
+        'pageFilters' => $filters,
     ])
         ->assertSee($feedbackOne->serviceRequest->service_request_number)
         ->assertDontSee($feedbackTwo->serviceRequest->service_request_number)
@@ -150,7 +150,7 @@ it('filters service request feedbacks by date and type', function () {
 
     livewire(ServiceRequestFeedbackTable::class, [
         'cacheTag' => 'report-service-request-feedback',
-        'filters' => $filters,
+        'pageFilters' => $filters,
     ])
         ->assertSee($feedbackOne->serviceRequest->service_request_number)
         ->assertSee($feedbackTwo->serviceRequest->service_request_number)
@@ -158,7 +158,7 @@ it('filters service request feedbacks by date and type', function () {
 
     livewire(ServiceRequestFeedbackTable::class, [
         'cacheTag' => 'report-service-request-feedback',
-        'filters' => [],
+        'pageFilters' => [],
     ])
         ->assertSee($feedbackOne->serviceRequest->service_request_number)
         ->assertSee($feedbackTwo->serviceRequest->service_request_number)

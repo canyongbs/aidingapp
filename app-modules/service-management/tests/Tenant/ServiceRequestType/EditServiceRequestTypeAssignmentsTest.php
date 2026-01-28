@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequest
 use AidingApp\Team\Models\Team;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Validation\Rules\Enum;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -107,7 +106,7 @@ test('A successful action on the EditServiceRequestTypeAssignments page when the
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertEquals($editRequest['assignment_type'], $serviceRequestType->fresh()->assignment_type->value);
+    assertEquals($editRequest['assignment_type'], $serviceRequestType->fresh()->assignment_type);
 });
 
 test('EditServiceRequestTypeAssignments requires valid data', function (EditServiceRequestTypeAssignmentsRequestFactory $data, $errors) {
@@ -126,7 +125,7 @@ test('EditServiceRequestTypeAssignments requires valid data', function (EditServ
 })->with(
     [
         'assignment_type is required' => [EditServiceRequestTypeAssignmentsRequestFactory::new()->state(['assignment_type' => null]), ['assignment_type' => 'required']],
-        'assignment_type is not a valid enum value' => [EditServiceRequestTypeAssignmentsRequestFactory::new()->state(['assignment_type' => 'blah']), ['assignment_type' => Enum::class]],
+        'assignment_type is not a valid enum value' => [EditServiceRequestTypeAssignmentsRequestFactory::new()->state(['assignment_type' => 'blah']), ['assignment_type' => 'in']],
         'assignment_type_individual_id is required when assignment_type is Individual' => [EditServiceRequestTypeAssignmentsRequestFactory::new()->withIndividualType()->state(['assignment_type_individual_id' => null]), ['assignment_type_individual_id' => 'required']],
         'assignment_type_individual_id must be a User in the ServiceRequestTypes managers' => [EditServiceRequestTypeAssignmentsRequestFactory::new()->withIndividualType()->state(['assignment_type_individual_id' => User::factory()]), ['assignment_type_individual_id' => ServiceRequestTypeAssignmentsIndividualUserMustBeAManager::class]],
     ]

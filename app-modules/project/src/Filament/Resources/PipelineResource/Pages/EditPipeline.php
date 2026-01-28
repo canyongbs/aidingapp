@@ -139,21 +139,13 @@ class EditPipeline extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [
-            DeleteAction::make(),
-        ];
-    }
-
-    protected function configureDeleteAction(DeleteAction $action): void
-    {
         $pipeline = $this->getRecord();
 
         assert($pipeline instanceof Pipeline);
 
-        $resource = static::getResource();
-
-        $action
-            ->authorize($resource::canDelete($this->getRecord()))
-            ->successRedirectUrl(ProjectResource::getUrl('manage-pipelines', ['record' => $pipeline->project]));
+        return [
+            DeleteAction::make()
+                ->successRedirectUrl(ProjectResource::getUrl('manage-pipelines', ['record' => $pipeline->project])),
+        ];
     }
 }

@@ -109,7 +109,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->preload()
                             ->required()
                             ->rules(fn (ServiceRequestType $record) => [new ServiceRequestTypeAssignmentsIndividualUserMustBeAManager($record)])
-                            ->visible(fn (Get $get) => $get('assignment_type') === ServiceRequestTypeAssignmentTypes::Individual->value),
+                            ->visible(fn (Get $get) => $get('assignment_type') === ServiceRequestTypeAssignmentTypes::Individual),
                     ]),
             ]);
     }

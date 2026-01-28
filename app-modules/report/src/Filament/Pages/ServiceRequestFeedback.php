@@ -151,7 +151,7 @@ class ServiceRequestFeedback extends Dashboard
     public function getWidgetData(): array
     {
         return [
-            'filters' => $this->filters,
+            'pageFilters' => $this->filters,
         ];
     }
 }

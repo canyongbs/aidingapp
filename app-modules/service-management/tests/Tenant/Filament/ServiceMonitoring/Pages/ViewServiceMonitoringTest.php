@@ -38,6 +38,7 @@ use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ViewServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use AidingApp\Team\Models\Team;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -52,7 +53,10 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
     $user->givePermissionTo('service_monitoring.view-any');
     $user->givePermissionTo('service_monitoring.*.view');
 
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached(Team::factory())
+        ->hasAttached(User::factory())
+        ->create();
 
     asSuperAdmin()
         ->get(
@@ -72,9 +76,9 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
                 'Frequency',
                 $serviceMonitoringTarget->frequency->getLabel(),
                 'Teams',
-                $serviceMonitoringTarget->teams()->pluck('name')->join(', '),
+                ...$serviceMonitoringTarget->teams()->pluck('name')->all(),
                 'Users',
-                $serviceMonitoringTarget->users()->pluck('name')->join(', '),
+                ...$serviceMonitoringTarget->users()->pluck('name')->all(),
             ]
         );
 });
