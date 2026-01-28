@@ -36,7 +36,6 @@
 
 namespace App\Models\Scopes;
 
-use App\Features\ServiceRequestFormAndTypeArchivingFeature;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -103,10 +102,6 @@ class ArchivingScope implements Scope
     protected function addWithArchived(Builder $builder): void
     {
         $builder->macro('withArchived', function (Builder $builder) {
-            if (! ServiceRequestFormAndTypeArchivingFeature::active()) {
-                return;
-            }
-
             return $builder->withoutGlobalScope(ArchivingScope::class);
         });
     }
@@ -117,10 +112,6 @@ class ArchivingScope implements Scope
     protected function addWithoutArchived(Builder $builder): void
     {
         $builder->macro('withoutArchived', function (Builder $builder) {
-            if (! ServiceRequestFormAndTypeArchivingFeature::active()) {
-                return;
-            }
-
             $model = $builder->getModel();
 
             $builder->withoutGlobalScope(ArchivingScope::class)->whereNull(
@@ -137,10 +128,6 @@ class ArchivingScope implements Scope
     protected function addOnlyArchived(Builder $builder): void
     {
         $builder->macro('onlyArchived', function (Builder $builder) {
-            if (! ServiceRequestFormAndTypeArchivingFeature::active()) {
-                return;
-            }
-
             $model = $builder->getModel();
 
             $builder->withoutGlobalScope(ArchivingScope::class)->whereNotNull(
