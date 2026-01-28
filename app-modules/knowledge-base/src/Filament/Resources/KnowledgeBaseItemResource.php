@@ -40,16 +40,18 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\C
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\EditKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\ListKnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use Filament\Forms\Form;
+use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use UnitEnum;
 
 class KnowledgeBaseItemResource extends Resource
 {
     protected static ?string $model = KnowledgeBaseItem::class;
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
 
     protected static ?int $navigationSort = 20;
 
@@ -57,7 +59,7 @@ class KnowledgeBaseItemResource extends Resource
 
     protected static ?string $modelLabel = 'knowledge base article';
 
-    protected static ?string $navigationIcon = 'heroicon-o-book-open';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-book-open';
 
     protected static ?string $navigationLabel = 'Knowledge Base';
 
@@ -89,9 +91,9 @@ class KnowledgeBaseItemResource extends Resource
         return static::getUrl('edit', ['record' => $record]);
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return resolve(CreateKnowledgeBaseItem::class)->form($form);
+        return resolve(CreateKnowledgeBaseItem::class)->form($schema);
     }
 
     public static function getPages(): array

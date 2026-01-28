@@ -38,8 +38,8 @@ namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource
 
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource;
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Concerns\HasAssetCheckInInfolist;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Schema;
 
 class ViewAssetCheckOut extends ViewRecord
 {
@@ -47,8 +47,8 @@ class ViewAssetCheckOut extends ViewRecord
 
     protected static string $resource = AssetCheckInResource::class;
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist($this->renderInfolist());
+        return $schema($this->renderInfolist());
     }
 }

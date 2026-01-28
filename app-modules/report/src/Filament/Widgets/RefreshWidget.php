@@ -45,7 +45,7 @@ class RefreshWidget extends StatsOverviewReportWidget
 {
     public Carbon $lastRefreshTime;
 
-    protected static string $view = 'report::filament.pages.report-refresh-widgets';
+    protected string $view = 'report::filament.pages.report-refresh-widgets';
 
     protected int | string | array $columnSpan = [
         'sm' => 4,

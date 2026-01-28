@@ -56,7 +56,7 @@ class ListServiceRequestTypes extends ListRecords
 {
     protected static string $resource = ServiceRequestTypeResource::class;
 
-    protected static string $view = 'service-management::filament.resources.service-request-type-resource.pages.list-service-request-types';
+    protected string $view = 'service-management::filament.resources.service-request-type-resource.pages.list-service-request-types';
 
     #[Computed]
     public function canEdit(): bool

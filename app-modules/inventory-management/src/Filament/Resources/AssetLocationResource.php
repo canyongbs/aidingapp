@@ -41,15 +41,16 @@ use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages
 use AidingApp\InventoryManagement\Filament\Resources\AssetLocationResource\Pages\ViewAssetLocation;
 use AidingApp\InventoryManagement\Models\AssetLocation;
 use App\Filament\Clusters\AssetManagement;
+use BackedEnum;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 
 class AssetLocationResource extends Resource
 {
     protected static ?string $model = AssetLocation::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-map-pin';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-map-pin';
 
     protected static ?string $navigationLabel = 'Locations';
 
@@ -57,10 +58,10 @@ class AssetLocationResource extends Resource
 
     protected static ?string $cluster = AssetManagement::class;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->autofocus()
                     ->required(),

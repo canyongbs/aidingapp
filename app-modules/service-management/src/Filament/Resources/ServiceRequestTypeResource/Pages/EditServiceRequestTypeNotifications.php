@@ -38,10 +38,10 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResou
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use App\Concerns\EditPageRedirection;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\ViewField;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class EditServiceRequestTypeNotifications extends EditRecord
 {
@@ -57,10 +57,10 @@ class EditServiceRequestTypeNotifications extends EditRecord
         return [];
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Notifications and Alerts')
                     ->description('This page is used to configure notifications and alerts for this service request type.')
                     ->schema([

@@ -42,7 +42,7 @@ use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use Filament\Tables\Actions\ExportAction;
+use Filament\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;

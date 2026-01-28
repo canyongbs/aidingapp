@@ -43,15 +43,16 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages\
 use AidingApp\ServiceManagement\Models\Incident;
 use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use App\Filament\Tables\Columns\IdColumn;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
@@ -61,14 +62,14 @@ class IncidentUpdateResource extends Resource
 {
     protected static ?string $model = IncidentUpdate::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('incident_id')
                     ->relationship('incident', 'id')
                     ->preload()
@@ -107,11 +108,11 @@ class IncidentUpdateResource extends Resource
                 TernaryFilter::make('internal')
                     ->label('Internal'),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

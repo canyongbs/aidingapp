@@ -39,7 +39,7 @@ namespace App\Filament\Widgets;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use App\Filament\Tables\Columns\IdColumn;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -84,7 +84,7 @@ class RecentKnowledgeBaseArticlesList extends BaseWidget
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
                     ->url(fn (KnowledgeBaseItem $record): string => KnowledgeBaseItemResource::getUrl(name: 'view', parameters: ['record' => $record])),
             ])

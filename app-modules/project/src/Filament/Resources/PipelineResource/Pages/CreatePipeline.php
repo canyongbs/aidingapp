@@ -43,8 +43,8 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Js;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
@@ -56,10 +56,10 @@ class CreatePipeline extends CreateRecord
     #[Locked, Url]
     public ?string $project = null;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255),

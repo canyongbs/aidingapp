@@ -47,6 +47,6 @@ class ServiceRequestHistoryViewAction extends ViewAction
     {
         parent::setUp();
 
-        $this->infolist($this->serviceRequestHistoryInfolist());
+        $this->schema($this->serviceRequestHistoryInfolist());
     }
 }

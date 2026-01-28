@@ -41,15 +41,17 @@ use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\EditC
 use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\ListContracts;
 use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\ViewContract;
 use AidingApp\ContractManagement\Models\Contract;
+use BackedEnum;
 use Filament\Resources\Resource;
+use UnitEnum;
 
 class ContractResource extends Resource
 {
     protected static ?string $model = Contract::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-check';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-check';
 
-    protected static ?string $navigationGroup = 'Purchasing';
+    protected static string | UnitEnum | null $navigationGroup = 'Purchasing';
 
     protected static ?string $navigationLabel = 'Contract Management';
 

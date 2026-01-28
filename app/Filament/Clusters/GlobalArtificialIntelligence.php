@@ -36,13 +36,15 @@
 
 namespace App\Filament\Clusters;
 
+use BackedEnum;
 use Filament\Clusters\Cluster;
+use UnitEnum;
 
 class GlobalArtificialIntelligence extends Cluster
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationGroup = 'Global Administration';
+    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
 
     protected static ?string $title = 'Artificial Intelligence';
 

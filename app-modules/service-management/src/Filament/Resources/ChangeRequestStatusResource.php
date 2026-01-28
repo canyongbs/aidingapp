@@ -42,19 +42,21 @@ use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource\P
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource\Pages\ViewChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use App\Filament\Clusters\ServiceManagementAdministration;
+use BackedEnum;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use UnitEnum;
 
 class ChangeRequestStatusResource extends Resource
 {
     protected static ?string $model = ChangeRequestStatus::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-tag';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-tag';
 
     protected static ?int $navigationSort = 50;
 
-    protected static ?string $navigationGroup = 'Change Requests';
+    protected static string | UnitEnum | null $navigationGroup = 'Change Requests';
 
     protected static ?string $navigationLabel = 'Statuses';
 

@@ -33,13 +33,12 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ListIncidents;
 use AidingApp\ServiceManagement\Models\Incident;
 use App\Models\User;
-use Filament\Tables\Actions\DeleteBulkAction;
+use Filament\Actions\DeleteBulkAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertSoftDeleted;

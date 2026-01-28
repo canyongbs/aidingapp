@@ -57,12 +57,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Str;
+use UnitEnum;
 
 class ServiceRequestTypeResource extends Resource
 {
     protected static ?string $model = ServiceRequestType::class;
 
-    protected static ?string $navigationGroup = 'Service Requests';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Requests';
 
     protected static ?string $navigationLabel = 'Types';
 

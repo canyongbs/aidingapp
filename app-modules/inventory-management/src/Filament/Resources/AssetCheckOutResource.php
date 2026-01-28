@@ -38,13 +38,14 @@ namespace AidingApp\InventoryManagement\Filament\Resources;
 
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Pages\ListAssetCheckOuts;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
+use BackedEnum;
 use Filament\Resources\Resource;
 
 class AssetCheckOutResource extends Resource
 {
     protected static ?string $model = AssetCheckOut::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static bool $shouldRegisterNavigation = false;
 

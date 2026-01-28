@@ -42,12 +42,13 @@ use App\Filament\Resources\NotificationSettingResource\Pages\EditNotificationSet
 use App\Filament\Resources\NotificationSettingResource\Pages\ListNotificationSettings;
 use App\Models\NotificationSetting;
 use Filament\Resources\Resource;
+use UnitEnum;
 
 class NotificationSettingResource extends Resource
 {
     protected static ?string $model = NotificationSetting::class;
 
-    protected static ?string $navigationGroup = 'Communication';
+    protected static string | UnitEnum | null $navigationGroup = 'Communication';
 
     protected static ?int $navigationSort = 110;
 

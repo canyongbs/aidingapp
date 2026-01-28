@@ -37,13 +37,16 @@
 namespace AidingApp\ServiceManagement\Livewire;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
-class RenderServiceRequestForm extends Component implements HasForms
+class RenderServiceRequestForm extends Component implements HasForms, HasActions
 {
+    use InteractsWithActions;
     use InteractsWithForms;
 
     public bool $show = true;

@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use App\Models\NotificationSetting;
 use App\Models\User;
-use Filament\Notifications\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;

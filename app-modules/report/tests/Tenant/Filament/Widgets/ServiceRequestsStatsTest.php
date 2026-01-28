@@ -79,7 +79,7 @@ it('returns correct service request statistics within the given date range', fun
 
     $widget = new ServiceRequestsStats();
     $widget->cacheTag = 'test-service-requests-stats';
-    $widget->filters = [
+    $widget->pageFilters = [
         'startDate' => $startDate->toDateString(),
         'endDate' => $endDate->toDateString(),
     ];
@@ -128,7 +128,7 @@ it('returns correct statistics when no date filters are applied', function () {
 
     $widget = new ServiceRequestsStats();
     $widget->cacheTag = 'test-service-requests-stats-no-filters';
-    $widget->filters = [];
+    $widget->pageFilters = [];
 
     $stats = $widget->getStats();
 

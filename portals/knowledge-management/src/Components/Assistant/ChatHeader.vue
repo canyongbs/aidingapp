@@ -39,7 +39,7 @@
 
 <template>
     <div
-        class="bg-gradient-to-r from-brand-600 to-brand-700 text-white px-6 py-4 flex items-center justify-between shadow-md shrink-0"
+        class="bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] text-white px-6 py-4 flex items-center justify-between shadow-md shrink-0"
     >
         <div class="flex items-center gap-3">
             <div class="bg-white/20 p-2 rounded-lg">

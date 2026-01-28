@@ -42,12 +42,13 @@ use AidingApp\Project\Filament\Resources\PipelineResource;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
@@ -59,9 +60,9 @@ class ViewPipelineEntry extends Page
 
     protected static ?string $title = 'Pipeline Entry Details';
 
-    protected static ?string $navigationIcon = 'heroicon-o-eye';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-eye';
 
-    protected static string $view = 'project::filament.pages.view-pipeline-entry';
+    protected string $view = 'project::filament.pages.view-pipeline-entry';
 
     public Pipeline $record;
 
@@ -128,11 +129,11 @@ class ViewPipelineEntry extends Page
         return $breadcrumbs;
     }
 
-    public function entryDetailsInfolist(Infolist $infolist): Infolist
+    public function entryDetailsInfolist(Schema $schema): Schema
     {
-        return $infolist
+        return $schema
             ->record($this->pipelineEntry)
-            ->schema([
+            ->components([
                 Section::make()
                     ->columns(2)
                     ->schema([

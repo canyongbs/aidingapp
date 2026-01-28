@@ -36,15 +36,17 @@
 
 namespace App\Filament\Clusters;
 
+use BackedEnum;
 use Filament\Clusters\Cluster;
+use UnitEnum;
 
 class IncidentManagement extends Cluster
 {
-    protected static ?string $navigationGroup = 'Settings';
+    protected static string | UnitEnum | null $navigationGroup = 'Settings';
 
     protected static ?int $navigationSort = 50;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $title = 'Incident Management';
 }

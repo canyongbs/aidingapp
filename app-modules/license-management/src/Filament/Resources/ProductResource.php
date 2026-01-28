@@ -42,16 +42,18 @@ use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ListPro
 use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ManageProductLicenses;
 use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ViewProduct;
 use AidingApp\LicenseManagement\Models\Product;
+use BackedEnum;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use UnitEnum;
 
 class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Purchasing';
+    protected static string | UnitEnum | null $navigationGroup = 'Purchasing';
 
     protected static ?string $navigationLabel = 'License Management';
 

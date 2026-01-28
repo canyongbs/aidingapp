@@ -88,7 +88,7 @@ test('CreateServiceRequestUpdate requires valid data', function ($data, $errors)
 })->with(
     [
         'service_request missing' => [CreateServiceRequestUpdateRequestFactory::new()->without('service_request_id'), ['service_request_id' => 'required']],
-        'service_request not existing service_request id' => [CreateServiceRequestUpdateRequestFactory::new()->state(['service_request_id' => fake()->uuid()]), ['service_request_id' => 'exists']],
+        'service_request not existing service_request id' => [CreateServiceRequestUpdateRequestFactory::new()->state(['service_request_id' => fake()->uuid()]), ['service_request_id' => 'in']],
         'update missing' => [CreateServiceRequestUpdateRequestFactory::new()->without('update'), ['update' => 'required']],
         'update is not a string' => [CreateServiceRequestUpdateRequestFactory::new()->state(['update' => 99]), ['update' => 'string']],
         'internal not a boolean' => [CreateServiceRequestUpdateRequestFactory::new()->state(['internal' => 'invalid']), ['internal' => 'boolean']],

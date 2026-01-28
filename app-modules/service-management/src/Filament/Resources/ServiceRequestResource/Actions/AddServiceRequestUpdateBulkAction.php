@@ -40,9 +40,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Support\BulkProcessingMachine;
 use Closure;
+use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
-use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Collection;
 
 class AddServiceRequestUpdateBulkAction

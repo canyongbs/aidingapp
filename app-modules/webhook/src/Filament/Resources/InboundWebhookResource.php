@@ -39,17 +39,19 @@ namespace AidingApp\Webhook\Filament\Resources;
 use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ListInboundWebhooks;
 use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ViewInboundWebhook;
 use AidingApp\Webhook\Models\InboundWebhook;
+use BackedEnum;
 use Filament\Resources\Resource;
+use UnitEnum;
 
 class InboundWebhookResource extends Resource
 {
     protected static ?string $model = InboundWebhook::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-signal';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-signal';
 
     protected static ?int $navigationSort = 40;
 
-    protected static ?string $navigationGroup = 'Global Administration';
+    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
 
     public static function getPages(): array
     {

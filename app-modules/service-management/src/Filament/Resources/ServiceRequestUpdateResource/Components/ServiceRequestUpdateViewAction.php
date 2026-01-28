@@ -47,6 +47,6 @@ class ServiceRequestUpdateViewAction extends ViewAction
     {
         parent::setUp();
 
-        $this->infolist($this->serviceRequestUpdateInfolist());
+        $this->schema($this->serviceRequestUpdateInfolist());
     }
 }

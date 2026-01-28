@@ -81,7 +81,7 @@ it('returns correct service request data within the given date range', function 
 
     $widget = new ServiceRequestsOverTimeBarChart();
     $widget->cacheTag = 'test-service-requests-over-time-bar-chart';
-    $widget->filters = [
+    $widget->pageFilters = [
         'startDate' => $startDate->toDateString(),
         'endDate' => $endDate->toDateString(),
     ];
@@ -152,7 +152,7 @@ it('returns correct data when no date filters are applied', function () {
 
     $widget = new ServiceRequestsOverTimeBarChart();
     $widget->cacheTag = 'test-service-requests-over-time-bar-chart-no-filters';
-    $widget->filters = [];
+    $widget->pageFilters = [];
 
     $data = $widget->getData();
 

@@ -38,12 +38,13 @@ namespace AidingApp\InventoryManagement\Database\Factories;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\InventoryManagement\Models\Asset;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\InventoryManagement\Models\AssetCheckOut>
+ * @extends Factory<AssetCheckOut>
  */
 class AssetCheckOutFactory extends Factory
 {

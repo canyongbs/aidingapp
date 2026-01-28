@@ -40,8 +40,8 @@ use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource;
 use AidingApp\ContractManagement\Models\ContractType;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\DB;
 
 class CreateContractType extends CreateRecord
@@ -50,10 +50,10 @@ class CreateContractType extends CreateRecord
 
     protected ?bool $hasDatabaseTransactions = true;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->string()
                     ->required(),

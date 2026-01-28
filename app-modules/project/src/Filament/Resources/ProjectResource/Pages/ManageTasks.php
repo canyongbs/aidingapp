@@ -48,20 +48,20 @@ use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSearch;
 use App\Models\User;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -120,7 +120,7 @@ class ManageTasks extends ManageRelatedRecords
                     ->query(
                         fn (Builder $query) => $query->where('assigned_to', auth()->id())
                     )
-                    ->form([
+                    ->schema([
                         Checkbox::make('isActive')
                             ->label('My Tasks')
                             ->afterStateUpdated(fn (Set $set, $state) => $state ? $set('../my_teams_tasks.isActive', false) : null)
@@ -138,7 +138,7 @@ class ManageTasks extends ManageRelatedRecords
                             return $query->whereIn('assigned_to', $teamUserIds)->get();
                         }
                     )
-                    ->form([
+                    ->schema([
                         Checkbox::make('isActive')
                             ->label("My Team's Tasks")
                             ->afterStateUpdated(function (Set $set, string $state) {
@@ -162,7 +162,7 @@ class ManageTasks extends ManageRelatedRecords
             ->headerActions([
                 CreateAction::make()
                     ->authorize('create', Task::class)
-                    ->form([
+                    ->schema([
                         Fieldset::make('Confidentiality')
                             ->schema([
                                 Checkbox::make('is_confidential')
@@ -209,16 +209,16 @@ class ManageTasks extends ManageRelatedRecords
                     ->modalHeading('Create Task')
                     ->modalSubmitActionLabel('Create Task'),
             ])
-            ->actions([
+            ->recordActions([
                 TaskViewAction::make()
                     ->authorize('view', Task::class),
                 EditAction::make()
-                    ->form(fn () => $this->editFormFields())
+                    ->schema(fn () => $this->editFormFields())
                     ->authorize('update', Task::class),
                 DeleteAction::make()
                     ->authorize('delete', Task::class),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

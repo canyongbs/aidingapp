@@ -39,6 +39,7 @@ namespace AidingApp\Timeline\Filament\Pages;
 use AidingApp\Timeline\Actions\SyncTimelineData;
 use AidingApp\Timeline\Filament\Pages\Concerns\LoadsTimelineRecords;
 use App\Actions\GetRecordFromMorphAndKey;
+use BackedEnum;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
@@ -49,9 +50,9 @@ abstract class TimelinePage extends Page
     use InteractsWithRecord;
     use LoadsTimelineRecords;
 
-    protected static ?string $navigationIcon = 'heroicon-o-queue-list';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-queue-list';
 
-    protected static string $view = 'timeline::page';
+    protected string $view = 'timeline::page';
 
     public string $emptyStateMessage = 'There are no records to show on this timeline.';
 

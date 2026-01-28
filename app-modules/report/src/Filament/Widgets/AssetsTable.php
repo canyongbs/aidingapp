@@ -39,7 +39,7 @@ namespace AidingApp\Report\Filament\Widgets;
 use AidingApp\InventoryManagement\Enums\MaintenanceActivityStatus;
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\Report\Filament\Exports\AssetsExporter;
-use Filament\Tables\Actions\ExportAction;
+use Filament\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;

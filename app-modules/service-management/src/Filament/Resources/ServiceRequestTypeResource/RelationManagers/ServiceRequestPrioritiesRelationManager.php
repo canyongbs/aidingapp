@@ -39,13 +39,13 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResou
 use AidingApp\ServiceManagement\Filament\Resources\SlaResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -55,10 +55,10 @@ class ServiceRequestPrioritiesRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->label('Name')
                     ->required()
@@ -74,7 +74,7 @@ class ServiceRequestPrioritiesRelationManager extends RelationManager
                     ->relationship('sla', 'name')
                     ->searchable()
                     ->preload()
-                    ->createOptionForm(fn (Form $form) => SlaResource::form($form)),
+                    ->createOptionForm(fn (Schema $schema) => SlaResource::form($schema)),
             ]);
     }
 
@@ -105,7 +105,7 @@ class ServiceRequestPrioritiesRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make(),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
             ]);

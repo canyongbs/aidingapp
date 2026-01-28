@@ -42,21 +42,21 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use App\Features\ContactChangesFeature;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class CreateContact extends CreateRecord
 {
     protected static string $resource = ContactResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
         $generateFullName = function (Get $get, Set $set) {
             $title = $get('title') ?? '';
@@ -76,8 +76,8 @@ class CreateContact extends CreateRecord
             $set(Contact::displayNameKey(), "{$title} {$firstName} {$lastName}");
         };
 
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Demographics')->schema([
                     Select::make('title')
                         ->label('Title')

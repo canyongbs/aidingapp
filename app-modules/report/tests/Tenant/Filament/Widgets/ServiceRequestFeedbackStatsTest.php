@@ -77,7 +77,7 @@ it('returns correct service request statistics within the given date range', fun
 
     $widget = new ServiceRequestFeedbackStats();
     $widget->cacheTag = 'report-service-request-feedback';
-    $widget->filters = [
+    $widget->pageFilters = [
         'startDate' => $startDate->toDateString(),
         'endDate' => $endDate->toDateString(),
     ];
@@ -139,7 +139,7 @@ it('returns correct statistics filtered by date range and service request types'
 
     $widget = new ServiceRequestFeedbackStats();
     $widget->cacheTag = 'test-service-request-feedback-stats';
-    $widget->filters = [
+    $widget->pageFilters = [
         'startDate' => $startDate->toDateString(),
         'endDate' => $endDate->toDateString(),
         'serviceRequestTypes' => [$typeA->id],
@@ -155,7 +155,7 @@ it('returns correct statistics filtered by date range and service request types'
 
     $widgetTwo = new ServiceRequestFeedbackStats();
     $widgetTwo->cacheTag = 'test-service-request-feedback-stats-2';
-    $widgetTwo->filters = [
+    $widgetTwo->pageFilters = [
         'startDate' => $startDate->toDateString(),
         'endDate' => $endDate->toDateString(),
     ];
@@ -170,7 +170,7 @@ it('returns correct statistics filtered by date range and service request types'
 
     $widgetThree = new ServiceRequestFeedbackStats();
     $widgetThree->cacheTag = 'test-service-request-feedback-stats-3';
-    $widgetThree->filters = [];
+    $widgetThree->pageFilters = [];
 
     $stats3 = $widgetThree->getStats();
 

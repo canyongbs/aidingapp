@@ -40,18 +40,18 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Resources\EngagementResponseResource;
 use AidingApp\Engagement\Models\EngagementResponse;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class ViewEngagementResponse extends ViewRecord
 {
     protected static string $resource = EngagementResponseResource::class;
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
+        return $schema
             ->schema([
                 Section::make()
                     ->schema([

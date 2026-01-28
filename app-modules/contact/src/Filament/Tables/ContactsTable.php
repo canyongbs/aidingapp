@@ -39,11 +39,12 @@ namespace AidingApp\Contact\Filament\Tables;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use App\Features\ContactChangesFeature;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\QueryBuilder;
 use Filament\Tables\Filters\QueryBuilder\Constraints\BooleanConstraint;
+use Filament\Tables\Filters\QueryBuilder\Constraints\DateConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
 use Filament\Tables\Filters\QueryBuilder\Constraints\TextConstraint;
@@ -106,7 +107,7 @@ class ContactsTable
                         TextConstraint::make('preferred')
                             ->label('Preferred Name')
                             ->icon('heroicon-m-user'),
-                        QueryBuilder\Constraints\DateConstraint::make('created_at')
+                        DateConstraint::make('created_at')
                             ->icon('heroicon-m-calendar'),
                         TextConstraint::make('email')
                             ->label('Email Address')
@@ -148,7 +149,7 @@ class ContactsTable
                     ])
                     ->constraintPickerWidth('7xl'),
             ], layout: FiltersLayout::AboveContent)
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
                     ->authorize('view')
                     ->url(fn (Contact $record) => ContactResource::getUrl('view', ['record' => $record])),

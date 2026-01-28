@@ -36,13 +36,14 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\ServiceManagement\Models\ChangeRequest>
+ * @extends Factory<ChangeRequest>
  */
 class ChangeRequestFactory extends Factory
 {

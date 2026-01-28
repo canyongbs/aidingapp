@@ -41,8 +41,8 @@ use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource;
 use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
 use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -77,7 +77,7 @@ class ListAssetCheckIns extends ListRecords
                         default => 'danger',
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
                     ->modalHeading('View Returned Asset'),
             ]);

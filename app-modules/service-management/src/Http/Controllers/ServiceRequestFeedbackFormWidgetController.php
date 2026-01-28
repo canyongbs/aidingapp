@@ -125,7 +125,10 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
                 'has_enabled_csat' => $serviceRequest->priority?->type?->has_enabled_csat,
                 'has_enabled_nps' => $serviceRequest->priority?->type?->has_enabled_nps,
                 'footer_logo' => Vite::asset('resources/svg/CGBS_Logo_FullColor_Light.svg'),
-                'primary_color' => Color::all()[$portalSettings->knowledge_management_portal_primary_color ?? 'blue'],
+                'primary_color' => collect(Color::all()[$portalSettings->knowledge_management_portal_primary_color ?? 'blue'])
+                    ->map(Color::convertToRgb(...))
+                    ->map(fn (string $value): string => (string) str($value)->after('rgb(')->before(')'))
+                    ->all(),
                 'rounding' => $portalSettings->knowledge_management_portal_rounding,
                 'service_request_title' => $serviceRequest->title,
             ],

@@ -39,14 +39,16 @@ namespace AidingApp\Audit\Filament\Pages;
 use AidingApp\Audit\Actions\Finders\AuditableModels;
 use AidingApp\Audit\Settings\AuditSettings;
 use App\Models\User;
+use BackedEnum;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Schema;
+use UnitEnum;
 
 class ManageAuditSettings extends SettingsPage
 {
-    protected static ?string $navigationIcon = 'heroicon-o-cog-6-tooth';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
 
     protected static ?string $navigationLabel = 'Auditing';
 
@@ -56,7 +58,7 @@ class ManageAuditSettings extends SettingsPage
 
     protected static ?string $title = 'Auditing';
 
-    protected static ?string $navigationGroup = 'Global Administration';
+    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
 
     public static function canAccess(): bool
     {
@@ -66,10 +68,10 @@ class ManageAuditSettings extends SettingsPage
         return $user->isSuperAdmin() && parent::canAccess();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('audited_models_exclude')
                     ->options(AuditableModels::all())
                     ->multiple()

@@ -37,8 +37,8 @@
 namespace AidingApp\Form\Filament\Blocks;
 
 use AidingApp\Form\Models\SubmissibleField;
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\KeyValue;
+use Filament\Schemas\Components\Component;
 
 class RadioFormFieldBlock extends FormFieldBlock
 {

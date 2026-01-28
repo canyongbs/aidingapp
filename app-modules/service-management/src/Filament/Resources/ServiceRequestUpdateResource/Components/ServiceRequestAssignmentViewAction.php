@@ -47,6 +47,6 @@ class ServiceRequestAssignmentViewAction extends ViewAction
     {
         parent::setUp();
 
-        $this->infolist($this->serviceRequestAssignmentInfolist());
+        $this->schema($this->serviceRequestAssignmentInfolist());
     }
 }

@@ -33,14 +33,13 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeAuditors;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Team\Models\Team;
 use App\Models\User;
-use Filament\Tables\Actions\AttachAction;
+use Filament\Actions\AttachAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;

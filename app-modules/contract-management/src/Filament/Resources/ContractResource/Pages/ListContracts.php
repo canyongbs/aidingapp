@@ -38,14 +38,14 @@ namespace AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages
 
 use AidingApp\ContractManagement\Enums\ContractStatus;
 use AidingApp\ContractManagement\Filament\Resources\ContractResource;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -89,7 +89,7 @@ class ListContracts extends ListRecords
                         };
                     }),
                 Filter::make('start_date')
-                    ->form([
+                    ->schema([
                         DatePicker::make('start_date')
                             ->native(false)
                             ->displayFormat('m/d/Y')
@@ -103,7 +103,7 @@ class ListContracts extends ListRecords
                             );
                     }),
                 Filter::make('end_date')
-                    ->form([
+                    ->schema([
                         DatePicker::make('end_date')
                             ->native(false)
                             ->displayFormat('m/d/Y')
@@ -117,12 +117,12 @@ class ListContracts extends ListRecords
                             );
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

@@ -68,14 +68,14 @@
                 class="chat-notifications -mx-6 divide-y divide-gray-200 border-y border-gray-200 dark:divide-white/10 dark:border-white/10">
                 @foreach ($notifications as $notification)
                     <a
-                        class="relative block px-6 py-4 before:absolute before:start-0 before:top-0 before:h-full before:w-0.5 before:bg-primary-600 hover:bg-gray-50 dark:before:bg-primary-500 dark:hover:bg-white/5"
+                        class="before:bg-primary-600 dark:before:bg-primary-500 relative block px-6 py-4 before:absolute before:start-0 before:top-0 before:h-full before:w-0.5 hover:bg-gray-50 dark:hover:bg-white/5"
                         href="{{ $notification['url'] }}"
                     >
                         <div class="flex items-start gap-3">
                             @if ($notification['type'] === ConversationType::Channel)
                                 <div
-                                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30">
-                                    <x-heroicon-o-hashtag class="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                                    class="bg-primary-100 dark:bg-primary-900/30 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+                                    <x-heroicon-o-hashtag class="text-primary-600 dark:text-primary-400 h-5 w-5" />
                                 </div>
                             @else
                                 <img
@@ -92,7 +92,7 @@
                                     </p>
                                     @if ($notification['unread_count'] > 0)
                                         <span
-                                            class="inline-flex items-center justify-center rounded-full bg-primary-600 px-2 py-0.5 text-xs font-medium text-white"
+                                            class="bg-primary-600 inline-flex items-center justify-center rounded-full px-2 py-0.5 text-xs font-medium text-white"
                                         >
                                             {{ $notification['unread_count'] > 99 ? '99+' : $notification['unread_count'] }}
                                         </span>
@@ -121,7 +121,7 @@
         @else
             <div class="flex flex-col px-6">
                 <div class="mb-5 flex items-center justify-center">
-                    <div class="rounded-full bg-gray-100 p-3 dark:bg-gray-500/20">
+                    <div class="dark:bg-gray-500/20 rounded-full bg-gray-100 p-3">
                         <x-heroicon-o-chat-bubble-oval-left-ellipsis class="h-6 w-6 text-gray-500 dark:text-gray-400" />
                     </div>
                 </div>

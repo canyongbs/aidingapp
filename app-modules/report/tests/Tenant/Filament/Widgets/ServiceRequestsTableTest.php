@@ -106,7 +106,7 @@ it('returns all service requests information created in given time range', funct
 
     livewire(ServiceRequestsTable::class, [
         'cacheTag' => 'test-service-requests-table',
-        'filters' => $filters,
+        'pageFilters' => $filters,
     ])
         ->assertCanSeeTableRecords(collect([
             $openRequest,
@@ -148,7 +148,7 @@ it('returns all service requests when no date filters are applied', function () 
 
     livewire(ServiceRequestsTable::class, [
         'cacheTag' => 'test-service-requests-table-no-filters',
-        'filters' => [],
+        'pageFilters' => [],
     ])
         ->assertCanSeeTableRecords(collect([
             $request1,
@@ -160,7 +160,7 @@ it('returns all service requests when no date filters are applied', function () 
 it('has table an export action', function () {
     livewire(ServiceRequestsTable::class, [
         'cacheTag' => 'test-service-requests-table-export',
-        'filters' => [],
+        'pageFilters' => [],
     ])->assertTableActionExists(ExportAction::class);
 });
 
@@ -171,7 +171,7 @@ it('can start an export and send a notification', function () {
 
     livewire(ServiceRequestsTable::class, [
         'cacheTag' => 'test-service-requests-table-export-notification',
-        'filters' => [],
+        'pageFilters' => [],
     ])
         ->callTableAction(ExportAction::class)
         ->assertNotified();

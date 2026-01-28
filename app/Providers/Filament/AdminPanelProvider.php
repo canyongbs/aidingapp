@@ -43,6 +43,7 @@ use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\ProductHealth;
 use App\Models\Tenant;
 use App\Multitenancy\Http\Middleware\NeedsTenant;
+use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
 use Filament\Forms\Components\Field;
@@ -50,7 +51,6 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Infolists\Components\Entry;
-use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -185,13 +185,8 @@ class AdminPanelProvider extends PanelProvider
                 FilamentFullCalendarPlugin::make(),
             ])
             ->userMenuItems([
-                'profile' => MenuItem::make()
-                    ->url(fn () => EditProfile::getUrl()),
-            ])
-            ->renderHook(
-                'panels::scripts.before',
-                fn () => view('filament.scripts.scroll-sidebar-to-active-menu-item'),
-            );
+                'profile' => fn (Action $action) => $action->url(fn () => EditProfile::getUrl()),
+            ]);
     }
 
     public function boot(): void {}

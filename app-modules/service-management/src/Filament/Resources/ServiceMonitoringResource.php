@@ -43,12 +43,13 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pag
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use Filament\Resources\Resource;
+use UnitEnum;
 
 class ServiceMonitoringResource extends Resource
 {
     protected static ?string $model = ServiceMonitoringTarget::class;
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
 
     protected static ?string $pluralModelLabel = 'service monitoring';
 

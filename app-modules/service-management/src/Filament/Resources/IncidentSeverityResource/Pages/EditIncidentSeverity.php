@@ -43,8 +43,8 @@ use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
 class EditIncidentSeverity extends EditRecord
@@ -53,10 +53,10 @@ class EditIncidentSeverity extends EditRecord
 
     protected static string $resource = IncidentSeverityResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->label('Name')
                     ->required()

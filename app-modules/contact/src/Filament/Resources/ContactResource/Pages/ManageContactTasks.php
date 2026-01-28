@@ -45,9 +45,9 @@ use AidingApp\Task\Models\Task;
 use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\HasLicense;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -142,7 +142,7 @@ class ManageContactTasks extends BaseTaskRelationManager
                         return $task;
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 TaskViewAction::make(),
                 EditAction::make(),
                 DeleteAction::make(),

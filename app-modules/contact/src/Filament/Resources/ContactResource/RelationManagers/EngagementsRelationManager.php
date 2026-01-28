@@ -42,16 +42,16 @@ use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Timeline\Models\Timeline;
-use Filament\Infolists\Components\Fieldset as InfolistFieldset;
+use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\Split;
-use Filament\Infolists\Components\Tabs;
-use Filament\Infolists\Components\Tabs\Tab;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Flex;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -65,9 +65,9 @@ class EngagementsRelationManager extends RelationManager
 
     protected static ?string $title = 'Emails';
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist->schema(fn (Timeline $record) => match ($record->timelineable::class) {
+        return $schema->components(fn (Timeline $record) => match ($record->timelineable::class) {
             Engagement::class => [
                 Tabs::make()
                     ->columnSpanFull()
@@ -77,7 +77,7 @@ class EngagementsRelationManager extends RelationManager
                                 TextEntry::make('user.name')
                                     ->label('Created By')
                                     ->getStateUsing(fn (Timeline $record): string => $record->timelineable->user->name),
-                                InfolistFieldset::make('Content')
+                                Fieldset::make('Content')
                                     ->schema([
                                         TextEntry::make('subject')
                                             ->getStateUsing(fn (Timeline $record): ?string => $record->timelineable->subject)
@@ -87,7 +87,7 @@ class EngagementsRelationManager extends RelationManager
                                             ->getStateUsing(fn (Timeline $record): HtmlString => $record->timelineable->getBody())
                                             ->columnSpanFull(),
                                     ]),
-                                InfolistFieldset::make('delivery')
+                                Fieldset::make('delivery')
                                     ->label('Delivery Information')
                                     ->columnSpanFull()
                                     ->schema([
@@ -130,7 +130,7 @@ class EngagementsRelationManager extends RelationManager
                     ]),
             ],
             EngagementResponse::class => [
-                Split::make([
+                Flex::make([
                     Section::make([
                         TextEntry::make('subject')
                             ->getStateUsing(fn (Timeline $record): ?string => $record->timelineable->subject)
@@ -189,7 +189,7 @@ class EngagementsRelationManager extends RelationManager
             ->headerActions([
                 RelationManagerSendEngagementAction::make(),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
                     ->modalHeading(function (Timeline $record) {
                         /** @var HasDeliveryMethod $timelineable */

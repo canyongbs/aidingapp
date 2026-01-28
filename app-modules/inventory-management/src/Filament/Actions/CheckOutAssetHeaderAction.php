@@ -65,7 +65,7 @@ class CheckOutAssetHeaderAction extends Action
 
         $this->successNotificationTitle(__("Successfully checked out {$asset->name}"));
 
-        $this->form([
+        $this->schema([
             Select::make('checked_out_to_id')
                 ->label('Select Contact')
                 ->options(Contact::all()->pluck('full_name', 'id'))

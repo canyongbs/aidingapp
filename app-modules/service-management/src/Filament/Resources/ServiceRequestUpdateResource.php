@@ -43,12 +43,19 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Filament\Tables\Columns\IdColumn;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -56,14 +63,14 @@ class ServiceRequestUpdateResource extends Resource
 {
     protected static ?string $model = ServiceRequestUpdate::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('service_request_id')
                     ->relationship('serviceRequest', 'id')
                     ->preload()
@@ -90,7 +97,7 @@ class ServiceRequestUpdateResource extends Resource
         return $table
             ->columns([
                 IdColumn::make(),
-                Tables\Columns\TextColumn::make('serviceRequest.respondent.full')
+                TextColumn::make('serviceRequest.respondent.full')
                     ->label('Related To')
                     ->sortable(query: function (Builder $query, string $direction, $record): Builder {
                         return $query->join('service_requests', 'service_request_updates.service_request_id', '=', 'service_requests.id')
@@ -100,25 +107,25 @@ class ServiceRequestUpdateResource extends Resource
                             ->orderBy('full', $direction);
                     })
                     ->searchable(),
-                Tables\Columns\TextColumn::make('serviceRequest.service_request_number')
+                TextColumn::make('serviceRequest.service_request_number')
                     ->label('Service Request')
                     ->sortable()
                     ->searchable(),
-                Tables\Columns\IconColumn::make('internal')
+                IconColumn::make('internal')
                     ->boolean()
                     ->label('Internal'),
             ])
             ->filters([
-                Tables\Filters\TernaryFilter::make('internal')
+                TernaryFilter::make('internal')
                     ->label('Internal'),
             ])
-            ->actions([
-                Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }

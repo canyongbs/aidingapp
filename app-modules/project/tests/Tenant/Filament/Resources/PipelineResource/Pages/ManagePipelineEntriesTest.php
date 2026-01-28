@@ -143,7 +143,7 @@ it('can create pipeline entries', function () {
         ->callTableAction('create', data: [
             'name' => 'New Entry',
             'pipeline_stage_id' => $stage->id,
-            'organizable_type' => Contact::class,
+            'organizable_type' => (new Contact())->getMorphClass(),
             'organizable_id' => Contact::factory()->create()->id,
         ])
         ->assertHasNoTableActionErrors();

@@ -40,13 +40,13 @@ use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Models\Scopes\ClassifiedAs;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Resources\Components\Tab;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -104,11 +104,11 @@ class ListAssets extends ListRecords
                     ->multiple()
                     ->preload(),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
                 DeleteAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

@@ -41,18 +41,17 @@ use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Form;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -93,10 +92,10 @@ class ManageContactAlerts extends ManageRelatedRecords
         return [$item];
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
-            ->schema([
+        return $schema
+            ->components([
                 TextEntry::make('description'),
                 TextEntry::make('severity'),
                 TextEntry::make('suggested_intervention'),
@@ -104,10 +103,10 @@ class ManageContactAlerts extends ManageRelatedRecords
             ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Textarea::make('description')
                     ->required()
                     ->string(),
@@ -154,13 +153,13 @@ class ManageContactAlerts extends ManageRelatedRecords
                 CreateAction::make()
                     ->modalHeading('Create Concern'),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
                     ->modalHeading('Edit Concern'),
                 DeleteAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

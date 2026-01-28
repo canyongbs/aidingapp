@@ -39,8 +39,8 @@ namespace AidingApp\Form\Filament\Blocks;
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
 use AidingApp\Form\Models\SubmissibleField;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\TextInput as FilamentTextInput;
+use Filament\Schemas\Components\Component;
 
 class EducatableEmailFormFieldBlock extends FormFieldBlock
 {

@@ -38,13 +38,13 @@ namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderRe
 
 use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource;
 use AidingApp\InventoryManagement\Models\MaintenanceProvider;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Collection;
@@ -65,12 +65,12 @@ class ListMaintenanceProviders extends ListRecords
                     ->default('0')
                     ->counts('maintenanceActivities'),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
                 DeleteAction::make()
                     ->hidden(fn ($record) => $record->maintenanceActivities()->exists()),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->action(function (Collection $records) {

@@ -45,13 +45,13 @@ use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Grid;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -130,7 +130,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
         return Action::make('addEntry')
             ->make('Add pipeline entry')
             ->model(PipelineEntry::class)
-            ->form([
+            ->schema([
                 Grid::make()->schema([
                     TextInput::make('name')
                         ->maxLength(255)

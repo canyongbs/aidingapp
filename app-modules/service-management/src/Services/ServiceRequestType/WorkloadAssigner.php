@@ -61,7 +61,7 @@ class WorkloadAssigner implements ServiceRequestTypeAssigner
                         },
                     ])
                     ->orderBy('service_request_count', 'asc')
-                    ->first()?->service_request_count ?? 0;
+                    ->first()?->getAttributeValue('service_request_count') ?? 0;
 
                 $user = User::query()->whereRelation('team.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
                     ->where(function (QueryBuilder $query) {

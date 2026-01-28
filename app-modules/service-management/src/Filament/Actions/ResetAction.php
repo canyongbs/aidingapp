@@ -46,7 +46,7 @@ class ResetAction extends Action
     {
         parent::setup();
 
-        $this->form([])
+        $this->schema([])
             ->label('Reset Monitoring')
             ->action(fn (ServiceMonitoringTarget $record, ResetMonitoringAction $resetMonitoringAction) => $resetMonitoringAction->execute($record))
             ->requiresConfirmation()

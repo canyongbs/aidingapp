@@ -43,14 +43,13 @@ use App\Concerns\EditPageRedirection;
 use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
 use Filament\Actions\Action as BaseAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\View;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\View;
+use Filament\Schemas\Schema;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Database\Eloquent\Model;
 
@@ -61,10 +60,10 @@ class EditKnowledgeBaseItem extends EditRecord
 
     protected static string $resource = KnowledgeBaseItemResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make()
                     ->schema([
                         TextInput::make('title')
@@ -72,7 +71,7 @@ class EditKnowledgeBaseItem extends EditRecord
                             ->required()
                             ->string()
                             ->suffixAction(
-                                Action::make('saveArticleTitle')
+                                BaseAction::make('saveArticleTitle')
                                     ->icon('heroicon-o-check')
                                     ->action(function (Model $record, $state) {
                                         if ($record->title === $state) {
@@ -135,7 +134,7 @@ class EditKnowledgeBaseItem extends EditRecord
                 ->button()
                 ->outlined()
                 ->record($this->record)
-                ->form(resolve(EditKnowledgeBaseItemMetadata::class)->form())
+                ->schema(resolve(EditKnowledgeBaseItemMetadata::class)->form())
                 ->successNotificationTitle('Article properties successfully updated'),
         ];
     }

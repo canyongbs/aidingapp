@@ -41,11 +41,11 @@ use AidingApp\Contact\Models\OrganizationType;
 use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class EditOrganizationType extends EditRecord
 {
@@ -53,10 +53,10 @@ class EditOrganizationType extends EditRecord
 
     protected static string $resource = OrganizationTypeResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make()
                     ->columns()
                     ->schema([

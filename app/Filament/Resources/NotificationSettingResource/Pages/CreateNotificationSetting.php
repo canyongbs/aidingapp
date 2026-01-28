@@ -38,15 +38,15 @@ namespace App\Filament\Resources\NotificationSettingResource\Pages;
 
 use App\Filament\Resources\NotificationSettingResource;
 use App\Filament\Resources\NotificationSettingResource\Forms\NotificationSettingForm;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
 class CreateNotificationSetting extends CreateRecord
 {
     protected static string $resource = NotificationSettingResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return resolve(NotificationSettingForm::class)->form($form);
+        return resolve(NotificationSettingForm::class)->form($schema);
     }
 }

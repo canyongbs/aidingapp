@@ -74,10 +74,15 @@ test('A successful action on the EditServiceRequest page', function () {
         )
         ->assertSuccessful();
 
+    $newPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $serviceRequest->priority->type_id,
+    ]);
+
     $request = collect(EditServiceRequestRequestFactory::new([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::InProgress,
         ])->id,
+        'priority_id' => $newPriority->id,
     ])->create());
 
     livewire(EditServiceRequest::class, [
@@ -185,16 +190,16 @@ test('EditServiceRequest requires valid data', function ($data, $errors, $setup 
             ['division_id' => 'required'], fn () => Division::factory()->count(2)->create()],
         'division_id does not exist' => [
             EditServiceRequestRequestFactory::new()->state(['division_id' => fake()->uuid()]),
-            ['division_id' => 'exists'], fn () => Division::factory()->count(2)->create()],
+            ['division_id' => 'in'], fn () => Division::factory()->count(2)->create()],
         'status_id missing' => [EditServiceRequestRequestFactory::new()->state(['status_id' => null]), ['status_id' => 'required']],
         'status_id does not exist' => [
             EditServiceRequestRequestFactory::new()->state(['status_id' => fake()->uuid()]),
-            ['status_id' => 'exists'],
+            ['status_id' => 'in'],
         ],
         'priority_id missing' => [EditServiceRequestRequestFactory::new()->state(['priority_id' => null]), ['priority_id' => 'required']],
         'priority_id does not exist' => [
             EditServiceRequestRequestFactory::new()->state(['priority_id' => fake()->uuid()]),
-            ['priority_id' => 'exists'],
+            ['priority_id' => 'in'],
         ],
         'close_details is not a string' => [EditServiceRequestRequestFactory::new()->state(['close_details' => 1]), ['close_details' => 'string']],
         'res_details is not a string' => [EditServiceRequestRequestFactory::new()->state(['res_details' => 1]), ['res_details' => 'string']],
@@ -247,10 +252,15 @@ test('EditServiceRequest is gated with proper access control', function () {
             ])
         )->assertSuccessful();
 
+    $newPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $serviceRequestType->getKey(),
+    ]);
+
     $request = collect(EditServiceRequestRequestFactory::new([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
         ])->id,
+        'priority_id' => $newPriority->id,
     ])->create());
 
     livewire(EditServiceRequest::class, [
@@ -266,7 +276,7 @@ test('EditServiceRequest is gated with proper access control', function () {
             [
                 'division_id',
                 'status_id',
-                'priority',
+                'priority_id',
             ]
         )->toArray()
     );

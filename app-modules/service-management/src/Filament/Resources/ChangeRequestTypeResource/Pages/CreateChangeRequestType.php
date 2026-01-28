@@ -38,20 +38,20 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResour
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource;
 use App\Models\User;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class CreateChangeRequestType extends CreateRecord
 {
     protected static string $resource = ChangeRequestTypeResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make()
                     ->columns()
                     ->schema([

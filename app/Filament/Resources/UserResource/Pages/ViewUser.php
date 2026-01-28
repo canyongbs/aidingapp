@@ -44,24 +44,24 @@ use App\Models\User;
 use App\Rules\EmailNotInUseOrSoftDeleted;
 use Carbon\Carbon;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\ViewRecord;
-use STS\FilamentImpersonate\Pages\Actions\Impersonate;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use STS\FilamentImpersonate\Actions\Impersonate;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class ViewUser extends ViewRecord
 {
     protected static string $resource = UserResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->disabled(false)
-            ->schema([
+            ->components([
                 Section::make()
                     ->columns()
                     ->schema([

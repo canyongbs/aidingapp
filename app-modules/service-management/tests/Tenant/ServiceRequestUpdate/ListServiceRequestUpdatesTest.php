@@ -33,9 +33,9 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\ListServiceRequestUpdates;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\User;
@@ -53,7 +53,7 @@ test('The correct details are displayed on the ListServiceRequestUpdates page', 
 
     asSuperAdmin();
 
-    $component = livewire(ServiceRequestUpdateResource\Pages\ListServiceRequestUpdates::class);
+    $component = livewire(ListServiceRequestUpdates::class);
 
     $component->assertSuccessful()
         ->assertCanSeeTableRecords($serviceRequestUpdates)

@@ -38,13 +38,13 @@ namespace App\Filament\Resources\SystemUserResource\RelationManagers;
 
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\SystemUser;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\AttachAction;
-use Filament\Tables\Actions\DetachAction;
-use Filament\Tables\Actions\DetachBulkAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -56,10 +56,10 @@ class PermissionsRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->required()
                     ->maxLength(125),
@@ -101,10 +101,10 @@ class PermissionsRelationManager extends RelationManager
                     )
                     ->recordSelect(fn (Select $select) => $select->multiple()),
             ])
-            ->actions([
+            ->recordActions([
                 DetachAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 DetachBulkAction::make(),
             ]);
     }

@@ -37,19 +37,21 @@
 namespace App\Filament\Clusters\ServiceManagementAdministration\Pages;
 
 use App\Filament\Clusters\ServiceManagementAdministration;
+use BackedEnum;
 use Filament\Pages\Page;
+use UnitEnum;
 
 class Sequence extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationGroup = 'Service Requests';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Requests';
 
     protected static ?int $navigationSort = 40;
 
     protected static ?string $cluster = ServiceManagementAdministration::class;
 
-    protected static string $view = 'filament.pages.coming-soon';
+    protected string $view = 'filament.pages.coming-soon';
 
     public static function canAccess(): bool
     {

@@ -43,19 +43,19 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
 use App\Features\ContactChangesFeature;
 use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\BulkAction;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\BulkAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -114,11 +114,11 @@ class ListContacts extends ListRecords
                     ->multiple()
                     ->preload(),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     BulkEngagementAction::make(context: 'contacts'),
                     DeleteBulkAction::make(),

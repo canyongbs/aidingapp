@@ -41,14 +41,15 @@ use AidingApp\Project\Filament\Resources\PipelineResource;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use BackedEnum;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteAction;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -68,11 +69,11 @@ class ManagePipelineEntries extends ManageRelatedRecords
     #[Locked, Url]
     public ?string $project = null;
 
-    protected static ?string $navigationIcon = 'heroicon-o-adjustments-vertical';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-adjustments-vertical';
 
     protected static ?string $title = 'Manage Pipeline Entries';
 
-    protected static string $view = 'project::filament.pages.manage-pipeline-entries';
+    protected string $view = 'project::filament.pages.manage-pipeline-entries';
 
     protected static ?string $navigationLabel = 'Pipeline Entries';
 
@@ -141,7 +142,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
                     ->multiple()
                     ->preload(),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
                     ->label('View')
                     ->url(fn (PipelineEntry $record): string => PipelineResource::getUrl('view-pipeline-entry', [
@@ -153,7 +154,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->form([
+                    ->schema([
                         TextInput::make('name')
                             ->required()
                             ->maxLength(255),

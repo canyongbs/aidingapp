@@ -107,7 +107,7 @@
 </script>
 
 <template>
-    <div class="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-gray-50 to-white" ref="messagesContainer">
+    <div class="flex-1 overflow-y-auto p-6 bg-white" ref="messagesContainer">
         <div class="flex gap-3 mb-4">
             <div class="shrink-0">
                 <div class="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center">

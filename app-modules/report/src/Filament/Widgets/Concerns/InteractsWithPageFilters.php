@@ -45,14 +45,14 @@ trait InteractsWithPageFilters
 
     public function getStartDate(): ?Carbon
     {
-        $startDate = $this->filters['startDate'] ?? null;
+        $startDate = $this->pageFilters['startDate'] ?? null;
 
         return filled($startDate) ? Carbon::parse($startDate)->startOfDay() : null;
     }
 
     public function getEndDate(): ?Carbon
     {
-        $endDate = $this->filters['endDate'] ?? null;
+        $endDate = $this->pageFilters['endDate'] ?? null;
 
         return filled($endDate) ? Carbon::parse($endDate)->endOfDay() : null;
     }

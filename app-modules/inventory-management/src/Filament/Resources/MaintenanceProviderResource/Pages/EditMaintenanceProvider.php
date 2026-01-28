@@ -40,8 +40,8 @@ use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource
 use App\Concerns\EditPageRedirection;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Schema;
 
 class EditMaintenanceProvider extends EditRecord
 {
@@ -49,10 +49,10 @@ class EditMaintenanceProvider extends EditRecord
 
     protected static string $resource = MaintenanceProviderResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->autoFocus()
                     ->string()

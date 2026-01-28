@@ -33,9 +33,9 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseStatus\RequestFactories\CreateKnowledgeBaseStatusRequestFactory;
 use App\Models\User;
@@ -61,7 +61,7 @@ test('CreateKnowledgeBaseStatus is gated with proper access control', function (
             KnowledgeBaseStatusResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus::class)
+    livewire(CreateKnowledgeBaseStatus::class)
         ->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
@@ -74,7 +74,7 @@ test('CreateKnowledgeBaseStatus is gated with proper access control', function (
 
     $request = collect(CreateKnowledgeBaseStatusRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus::class)
+    livewire(CreateKnowledgeBaseStatus::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
@@ -101,7 +101,7 @@ test('CreateKnowledgeBaseStatus is gated with proper feature access control', fu
             KnowledgeBaseStatusResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus::class)
+    livewire(CreateKnowledgeBaseStatus::class)
         ->assertForbidden();
 
     $settings->data->addons->knowledgeManagement = true;
@@ -115,7 +115,7 @@ test('CreateKnowledgeBaseStatus is gated with proper feature access control', fu
 
     $request = collect(CreateKnowledgeBaseStatusRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus::class)
+    livewire(CreateKnowledgeBaseStatus::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();

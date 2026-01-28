@@ -81,7 +81,7 @@ abstract class TasksWidget extends BaseWidget
                     ->multiple()
                     ->default([TaskStatus::InProgress->value, TaskStatus::Pending->value]),
             ])
-            ->actions([
+            ->recordActions([
                 TaskViewAction::make(),
             ])
             ->paginated([5]);

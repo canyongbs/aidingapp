@@ -44,9 +44,9 @@ use App\Multitenancy\DataTransferObjects\TenantConfig;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Support\Exceptions\Halt;
 use Filament\Support\Facades\FilamentView;
 
@@ -75,10 +75,10 @@ class ManageAmazonSesSettings extends SettingsPage
         return $user->isSuperAdmin() && parent::canAccess();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Toggle::make('isDemoModeEnabled')
                     ->label('Demo Mode')
                     ->live(),

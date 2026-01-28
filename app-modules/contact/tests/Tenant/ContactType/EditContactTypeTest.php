@@ -65,9 +65,9 @@ test('A successful action on the EditContactType page', function () {
         'record' => $contactType->getRouteKey(),
     ])
         ->assertFormSet([
-            'classification' => $contactType->classification->value,
+            'classification' => $contactType->classification,
             'name' => $contactType->name,
-            'color' => $contactType->color->value,
+            'color' => $contactType->color,
         ])
         ->fillForm($editRequest)
         ->call('save')
@@ -87,9 +87,9 @@ test('EditContactType requires valid data', function (EditContactTypeRequestFact
         'record' => $contactType->getRouteKey(),
     ])
         ->assertFormSet([
-            'classification' => $contactType->classification->value,
+            'classification' => $contactType->classification,
             'name' => $contactType->name,
-            'color' => $contactType->color->value,
+            'color' => $contactType->color,
         ])
         ->fillForm(EditContactTypeRequestFactory::new($data)->create())
         ->call('save')

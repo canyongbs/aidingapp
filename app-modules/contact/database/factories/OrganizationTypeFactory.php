@@ -36,10 +36,11 @@
 
 namespace AidingApp\Contact\Database\Factories;
 
+use AidingApp\Contact\Models\OrganizationType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Contact\Models\OrganizationType>
+ * @extends Factory<OrganizationType>
  */
 class OrganizationTypeFactory extends Factory
 {

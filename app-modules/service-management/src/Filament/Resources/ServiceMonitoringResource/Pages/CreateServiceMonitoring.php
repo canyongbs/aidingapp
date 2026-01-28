@@ -39,22 +39,22 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResour
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use App\Rules\ValidUrl;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class CreateServiceMonitoring extends CreateRecord
 {
     protected static string $resource = ServiceMonitoringResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->label('Name')
                     ->string()

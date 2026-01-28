@@ -45,14 +45,14 @@ use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class EditOrganization extends EditRecord
@@ -63,15 +63,15 @@ class EditOrganization extends EditRecord
 
     protected static ?string $navigationLabel = 'Edit';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
         /**
          * @var Organization $record
          */
         $record = $this->record;
 
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Primary Info')
                     ->columns()
                     ->schema([

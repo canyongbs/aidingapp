@@ -51,7 +51,7 @@
                     </p>
                     <button
                         @click="goHome"
-                        class="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium rounded shadow text-white bg-gradient-to-br from-brand-500 to-brand-800 hover:from-brand-600 hover:to-brand-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
+                        class="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium rounded shadow text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
                     >
                         <HomeIcon class="h-5 w-5 mr-1" />
                         Return to Home

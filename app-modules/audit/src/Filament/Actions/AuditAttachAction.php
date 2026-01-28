@@ -36,7 +36,7 @@
 
 namespace AidingApp\Audit\Filament\Actions;
 
-use Filament\Tables\Actions\AttachAction;
+use Filament\Actions\AttachAction;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use OwenIt\Auditing\Contracts\Auditable;
 

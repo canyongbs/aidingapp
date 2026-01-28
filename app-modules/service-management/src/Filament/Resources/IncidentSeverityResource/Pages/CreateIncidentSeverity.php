@@ -39,17 +39,17 @@ namespace AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResourc
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
 class CreateIncidentSeverity extends CreateRecord
 {
     protected static string $resource = IncidentSeverityResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->label('Name')
                     ->required()

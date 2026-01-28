@@ -33,9 +33,9 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseQuality\RequestFactories\CreateKnowledgeBaseQualityRequestFactory;
 use App\Models\User;
@@ -61,7 +61,7 @@ test('CreateKnowledgeBaseQuality is gated with proper access control', function 
             KnowledgeBaseQualityResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality::class)
+    livewire(CreateKnowledgeBaseQuality::class)
         ->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
@@ -74,7 +74,7 @@ test('CreateKnowledgeBaseQuality is gated with proper access control', function 
 
     $request = collect(CreateKnowledgeBaseQualityRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality::class)
+    livewire(CreateKnowledgeBaseQuality::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
@@ -101,7 +101,7 @@ test('CreateKnowledgeBaseQuality is gated with proper feature ccess control', fu
             KnowledgeBaseQualityResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality::class)
+    livewire(CreateKnowledgeBaseQuality::class)
         ->assertForbidden();
 
     $settings->data->addons->knowledgeManagement = true;
@@ -115,7 +115,7 @@ test('CreateKnowledgeBaseQuality is gated with proper feature ccess control', fu
 
     $request = collect(CreateKnowledgeBaseQualityRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality::class)
+    livewire(CreateKnowledgeBaseQuality::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();

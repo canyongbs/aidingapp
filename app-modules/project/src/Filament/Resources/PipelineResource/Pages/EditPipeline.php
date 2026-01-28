@@ -41,14 +41,14 @@ use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use App\Concerns\EditPageRedirection;
+use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
 class EditPipeline extends EditRecord
@@ -59,10 +59,10 @@ class EditPipeline extends EditRecord
 
     protected static ?string $navigationLabel = 'Edit';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255),
@@ -139,21 +139,13 @@ class EditPipeline extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [
-            DeleteAction::make(),
-        ];
-    }
-
-    protected function configureDeleteAction(DeleteAction $action): void
-    {
         $pipeline = $this->getRecord();
 
         assert($pipeline instanceof Pipeline);
 
-        $resource = static::getResource();
-
-        $action
-            ->authorize($resource::canDelete($this->getRecord()))
-            ->successRedirectUrl(ProjectResource::getUrl('manage-pipelines', ['record' => $pipeline->project]));
+        return [
+            DeleteAction::make()
+                ->successRedirectUrl(ProjectResource::getUrl('manage-pipelines', ['record' => $pipeline->project])),
+        ];
     }
 }

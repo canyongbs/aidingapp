@@ -47,9 +47,9 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
 {
     use InteractsWithPageFilters;
 
-    protected static ?string $heading = 'Request Status Distribution';
+    protected ?string $heading = 'Request Status Distribution';
 
-    protected static ?string $maxHeight = '200px';
+    protected ?string $maxHeight = '200px';
 
     protected int | string | array $columnSpan = 'full';
 

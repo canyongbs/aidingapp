@@ -38,17 +38,19 @@ namespace AidingApp\Theme\Filament\Pages;
 
 use AidingApp\Theme\Settings\ThemeSettings;
 use App\Models\User;
-use Filament\Forms\Components\Section;
+use BackedEnum;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
+use UnitEnum;
 
 class ManageBrandConfigurationSettings extends SettingsPage
 {
-    protected static ?string $navigationIcon = 'heroicon-o-paint-brush';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-paint-brush';
 
     protected static ?string $navigationLabel = 'Branding';
 
@@ -58,7 +60,7 @@ class ManageBrandConfigurationSettings extends SettingsPage
 
     protected static ?string $title = 'Branding';
 
-    protected static ?string $navigationGroup = 'Global Administration';
+    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
 
     public static function canAccess(): bool
     {
@@ -68,10 +70,10 @@ class ManageBrandConfigurationSettings extends SettingsPage
         return $user->isSuperAdmin() && parent::canAccess();
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Favicon')
                     ->aside()
                     ->schema([

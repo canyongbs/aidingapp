@@ -83,7 +83,7 @@ class MyTasks extends BaseWidget
                     ->options(collect(TaskStatus::cases())->mapWithKeys(fn (TaskStatus $direction) => [$direction->value => \Livewire\str($direction->name)->title()->headline()]))
                     ->multiple(),
             ])
-            ->actions([
+            ->recordActions([
                 TaskViewAction::make(),
             ])
             ->paginated([5]);

@@ -38,17 +38,17 @@ namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderRe
 
 use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
 class CreateMaintenanceProvider extends CreateRecord
 {
     protected static string $resource = MaintenanceProviderResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->required()
                     ->string()

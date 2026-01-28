@@ -44,12 +44,13 @@ use App\Filament\Resources\UserResource\RelationManagers\PermissionsRelationMana
 use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
 use App\Models\User;
 use Filament\Resources\Resource;
+use UnitEnum;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static ?string $navigationGroup = 'User Management';
+    protected static string | UnitEnum | null $navigationGroup = 'User Management';
 
     protected static ?int $navigationSort = 10;
 

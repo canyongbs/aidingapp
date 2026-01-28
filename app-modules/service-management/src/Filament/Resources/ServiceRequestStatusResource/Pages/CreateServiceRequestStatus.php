@@ -39,20 +39,20 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusRes
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class CreateServiceRequestStatus extends CreateRecord
 {
     protected static string $resource = ServiceRequestStatusResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make()
                     ->columns()
                     ->schema([

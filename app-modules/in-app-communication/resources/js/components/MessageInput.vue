@@ -254,11 +254,12 @@
 <!-- Placeholder styles require CSS pseudo-elements which cannot be done with Tailwind classes -->
 <style>
     .ProseMirror p.is-editor-empty:first-child::before {
-        @apply text-gray-400 dark:text-gray-500 pointer-events-none;
+        @apply text-[#9f9fa9] dark:text-[#71717b];
         content: attr(data-placeholder);
         position: absolute;
         top: 1px;
         left: 0;
+        pointer-events: none;
     }
 
     .ProseMirror p.is-editor-empty:first-child {
@@ -266,6 +267,6 @@
     }
 
     .ProseMirror p {
-        @apply m-0;
+        margin: 0;
     }
 </style>

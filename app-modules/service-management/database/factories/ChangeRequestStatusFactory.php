@@ -37,10 +37,11 @@
 namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
+use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\ServiceManagement\Models\ChangeRequestStatus>
+ * @extends Factory<ChangeRequestStatus>
  */
 class ChangeRequestStatusFactory extends Factory
 {

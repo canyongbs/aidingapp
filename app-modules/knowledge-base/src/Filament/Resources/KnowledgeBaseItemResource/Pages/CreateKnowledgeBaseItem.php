@@ -43,24 +43,24 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Models\Scopes\TagsForClass;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 
 class CreateKnowledgeBaseItem extends CreateRecord
 {
     protected static string $resource = KnowledgeBaseItemResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make()
                     ->schema([
                         TextInput::make('title')

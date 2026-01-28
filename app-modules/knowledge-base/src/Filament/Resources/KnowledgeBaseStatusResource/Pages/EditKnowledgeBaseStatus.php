@@ -38,10 +38,11 @@ namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
 use App\Concerns\EditPageRedirection;
-use Filament\Actions;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Schema;
 
 class EditKnowledgeBaseStatus extends EditRecord
 {
@@ -49,10 +50,10 @@ class EditKnowledgeBaseStatus extends EditRecord
 
     protected static string $resource = KnowledgeBaseStatusResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->label('Name')
                     ->required()
@@ -63,8 +64,8 @@ class EditKnowledgeBaseStatus extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\ViewAction::make(),
-            Actions\DeleteAction::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

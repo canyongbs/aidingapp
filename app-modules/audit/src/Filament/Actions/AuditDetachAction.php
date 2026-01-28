@@ -37,7 +37,7 @@
 namespace AidingApp\Audit\Filament\Actions;
 
 use AidingApp\Audit\Models\Audit;
-use Filament\Tables\Actions\DetachAction;
+use Filament\Actions\DetachAction;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;

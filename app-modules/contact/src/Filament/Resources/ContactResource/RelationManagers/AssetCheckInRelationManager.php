@@ -38,8 +38,8 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Concerns\HasAssetCheckInInfolist;
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckInResource\Pages\ListAssetCheckIns;
-use Filament\Infolists\Infolist;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 
@@ -54,9 +54,9 @@ class AssetCheckInRelationManager extends RelationManager
         return 'Returned Assets';
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist->schema($this->renderInfolist());
+        return $schema->components($this->renderInfolist());
     }
 
     public function table(Table $table): Table

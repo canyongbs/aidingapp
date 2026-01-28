@@ -160,12 +160,12 @@ test('Only service request types managed by user team are available in type sele
         'pageClass' => ContactServiceManagement::class,
     ])
         ->mountTableAction('create')
-        ->assertFormFieldExists('type_id', 'mountedTableActionForm', function (Select $select) use ($managedType) {
+        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($managedType) {
             $options = $select->getOptions();
 
             return array_key_exists($managedType->getKey(), $options);
         })
-        ->assertFormFieldExists('type_id', 'mountedTableActionForm', function (Select $select) use ($unmanagedType) {
+        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($unmanagedType) {
             $options = $select->getOptions();
 
             return ! array_key_exists($unmanagedType->getKey(), $options);
@@ -190,7 +190,7 @@ test('Super admin can see all service request types', function () {
         'pageClass' => ContactServiceManagement::class,
     ])
         ->mountTableAction('create')
-        ->assertFormFieldExists('type_id', 'mountedTableActionForm', function (Select $select) use ($type1, $type2) {
+        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($type1, $type2) {
             $options = $select->getOptions();
 
             return array_key_exists($type1->getKey(), $options) && array_key_exists($type2->getKey(), $options);
@@ -219,7 +219,7 @@ test('Priority select is populated based on selected type', function () {
         ->setTableActionData([
             'type_id' => $type->getKey(),
         ])
-        ->assertFormFieldExists('priority_id', 'mountedTableActionForm')
+        ->assertFormFieldExists('priority_id', 'mountedActionSchema0')
         ->assertSuccessful();
 });
 
@@ -239,7 +239,7 @@ test('Division field is visible when multiple divisions exist', function () {
         'pageClass' => ContactServiceManagement::class,
     ])
         ->mountTableAction('create')
-        ->assertFormFieldExists('division_id', 'mountedTableActionForm')
+        ->assertFormFieldExists('division_id', 'mountedActionSchema0')
         ->assertSuccessful();
 });
 
@@ -260,7 +260,7 @@ test('Division field is hidden when only one division exists', function () {
         'pageClass' => ContactServiceManagement::class,
     ])
         ->mountTableAction('create')
-        ->assertFormFieldIsHidden('division_id', 'mountedTableActionForm')
+        ->assertFormFieldIsHidden('division_id', 'mountedActionSchema0')
         ->assertSuccessful();
 });
 

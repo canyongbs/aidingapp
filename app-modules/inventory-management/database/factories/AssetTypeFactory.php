@@ -36,10 +36,11 @@
 
 namespace AidingApp\InventoryManagement\Database\Factories;
 
+use AidingApp\InventoryManagement\Models\AssetType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\InventoryManagement\Models\AssetType>
+ * @extends Factory<AssetType>
  */
 class AssetTypeFactory extends Factory
 {

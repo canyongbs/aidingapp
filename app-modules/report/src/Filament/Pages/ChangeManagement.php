@@ -39,12 +39,13 @@ namespace AidingApp\Report\Filament\Pages;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Pages\Dashboard;
+use UnitEnum;
 
 class ChangeManagement extends Dashboard
 {
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
 
     protected static ?string $navigationLabel = 'Change Management';
 
@@ -52,7 +53,7 @@ class ChangeManagement extends Dashboard
 
     protected static string $routePath = 'change-management';
 
-    protected static string $view = 'filament.pages.coming-soon';
+    protected string $view = 'filament.pages.coming-soon';
 
     protected static ?int $navigationSort = 60;
 

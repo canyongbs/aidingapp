@@ -43,9 +43,9 @@ use Illuminate\Support\Facades\Cache;
 
 class ContactGrowthChart extends ChartWidget
 {
-    protected static ?string $heading = 'Contacts (Cumulative)';
+    protected ?string $heading = 'Contacts (Cumulative)';
 
-    protected static ?string $maxHeight = '200px';
+    protected ?string $maxHeight = '200px';
 
     protected int | string | array $columnSpan = 'full';
 

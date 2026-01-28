@@ -114,7 +114,7 @@ test('EditServiceRequestUpdate requires valid data', function ($data, $errors) {
 })->with(
     [
         'service_request missing' => [EditServiceRequestUpdateRequestFactory::new()->state(['service_request_id' => null]), ['service_request_id' => 'required']],
-        'service_request not existing service_request id' => [EditServiceRequestUpdateRequestFactory::new()->state(['service_request_id' => fake()->uuid()]), ['service_request_id' => 'exists']],
+        'service_request not existing service_request id' => [EditServiceRequestUpdateRequestFactory::new()->state(['service_request_id' => fake()->uuid()]), ['service_request_id' => 'in']],
         'update missing' => [EditServiceRequestUpdateRequestFactory::new()->state(['update' => null]), ['update' => 'required']],
         'update is not a string' => [EditServiceRequestUpdateRequestFactory::new()->state(['update' => 99]), ['update' => 'string']],
         'internal not a boolean' => [EditServiceRequestUpdateRequestFactory::new()->state(['internal' => 'invalid']), ['internal' => 'boolean']],

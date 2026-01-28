@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pa
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use Filament\Resources\Resource;
+use UnitEnum;
 
 class ServiceRequestFormResource extends Resource
 {
@@ -49,7 +50,7 @@ class ServiceRequestFormResource extends Resource
 
     protected static ?int $navigationSort = 30;
 
-    protected static ?string $navigationGroup = 'Service Requests';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Requests';
 
     protected static ?string $navigationLabel = 'Forms';
 

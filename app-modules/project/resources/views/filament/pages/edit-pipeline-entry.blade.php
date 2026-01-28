@@ -45,7 +45,7 @@
         {{ $this->form }}
 
         <div class="mt-8">
-            <x-filament-panels::form.actions :actions="$this->getFormActions()" />
+            <x-filament::actions :actions="$this->getFormActions()" />
         </div>
     </form>
 </x-filament-panels::page>

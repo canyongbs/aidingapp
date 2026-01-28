@@ -39,14 +39,14 @@ namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 use AidingApp\Project\Filament\Resources\PipelineResource;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
@@ -70,10 +70,10 @@ class ManagePipelines extends ManageRelatedRecords
         return $user->can('viewAny', [Pipeline::class, $arguments['record']]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255),
@@ -115,7 +115,7 @@ class ManagePipelines extends ManageRelatedRecords
                     ->default()
                     ->query(fn (Builder $query) => $query->where('created_by_id', auth()->id())),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
                     ->url(fn (Pipeline $record): string => PipelineResource::getUrl('view', ['record' => $record])),
                 EditAction::make()

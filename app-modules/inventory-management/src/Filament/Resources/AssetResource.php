@@ -45,14 +45,16 @@ use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Models\AssetLocation;
 use AidingApp\InventoryManagement\Models\AssetStatus;
 use AidingApp\InventoryManagement\Models\AssetType;
+use BackedEnum;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Carbon;
+use UnitEnum;
 
 // TODO: Can delete this and all underlying pages once we fork
 class AssetResource extends Resource
@@ -61,9 +63,9 @@ class AssetResource extends Resource
 
     protected static ?string $navigationLabel = 'Asset Management';
 
-    protected static ?string $navigationIcon = 'heroicon-o-archive-box';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-archive-box';
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
 
     protected static ?int $navigationSort = 30;
 
@@ -78,10 +80,10 @@ class AssetResource extends Resource
         ]);
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->required(),
                 Textarea::make('description')

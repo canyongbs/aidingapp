@@ -64,7 +64,7 @@ class CheckInAssetHeaderAction extends Action
 
         $this->successNotificationTitle(__("Successfully checked in {$asset->name}"));
 
-        $this->form([
+        $this->schema([
             Textarea::make('notes')
                 ->autofocus(),
             Select::make('status_id')

@@ -40,17 +40,17 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
 class CreateIncident extends CreateRecord
 {
     protected static string $resource = IncidentResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('title')
                     ->label('Title')
                     ->required()
