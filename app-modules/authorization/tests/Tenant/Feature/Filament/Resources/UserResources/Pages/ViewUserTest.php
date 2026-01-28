@@ -39,7 +39,7 @@ use App\Models\User;
 
 use function Pest\Livewire\livewire;
 
-use STS\FilamentImpersonate\Pages\Actions\Impersonate;
+use STS\FilamentImpersonate\Actions\Impersonate;
 
 use function Tests\asSuperAdmin;
 

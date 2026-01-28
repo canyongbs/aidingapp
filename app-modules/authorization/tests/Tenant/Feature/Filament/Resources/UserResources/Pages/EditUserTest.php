@@ -47,7 +47,7 @@ use Illuminate\Support\Collection;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use STS\FilamentImpersonate\Pages\Actions\Impersonate;
+use STS\FilamentImpersonate\Actions\Impersonate;
 
 use function Tests\asSuperAdmin;
 
