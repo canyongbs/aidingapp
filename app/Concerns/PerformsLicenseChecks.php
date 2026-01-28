@@ -42,9 +42,9 @@ use Illuminate\Auth\Access\Response;
 
 trait PerformsLicenseChecks
 {
-  /**
-   * @param LicenseType|string|array<LicenseType|string> $licenses 
-   */
+    /**
+     * @param LicenseType|string|array<LicenseType|string> $licenses
+     */
     public function hasLicenses(Authenticatable $authenticatable, LicenseType | string | array $licenses): ?Response
     {
         return $authenticatable->hasLicense($licenses)
@@ -53,7 +53,7 @@ trait PerformsLicenseChecks
     }
 
     /**
-   * @param LicenseType|string|array<LicenseType|string> $licenses 
+   * @param LicenseType|string|array<LicenseType|string> $licenses
    */
     public function hasAnyLicense(Authenticatable $authenticatable, LicenseType | string | array $licenses): ?Response
     {

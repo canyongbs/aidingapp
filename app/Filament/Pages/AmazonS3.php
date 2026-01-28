@@ -290,6 +290,7 @@ class AmazonS3 extends Page implements HasForms
 
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     protected function mutateFormDataBeforeFill(array $data): array
@@ -299,6 +300,7 @@ class AmazonS3 extends Page implements HasForms
 
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     protected function mutateFormDataBeforeSave(array $data): array
