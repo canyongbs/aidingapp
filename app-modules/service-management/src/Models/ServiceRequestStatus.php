@@ -69,6 +69,9 @@ class ServiceRequestStatus extends BaseModel implements Auditable
         'sort',
     ];
 
+    /**
+     * @return HasMany<ServiceRequest, $this>
+     */
     public function serviceRequests(): HasMany
     {
         return $this->hasMany(ServiceRequest::class, 'status_id');

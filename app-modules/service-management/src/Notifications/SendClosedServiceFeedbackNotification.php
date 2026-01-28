@@ -86,11 +86,8 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
     {
         $template = $this->emailTemplate;
 
-        /** @var Educatable $educatable */
-        $educatable = $notifiable;
-
         $name = match ($notifiable::class) {
-            Contact::class => $educatable->first_name,
+            Contact::class => $notifiable->first_name,
             default => '',
         };
 

@@ -125,6 +125,9 @@ class ServiceRequestPriorityPolicy
         );
     }
 
+    /**
+     * @return array<Feature>
+     */
     protected function requiredFeatures(): array
     {
         return [Feature::ServiceManagement];

@@ -43,7 +43,7 @@ class IndividualAssigner implements ServiceRequestTypeAssigner
 {
     public function execute(ServiceRequest $serviceRequest): void
     {
-        $manager = $serviceRequest?->priority->type?->assignmentTypeIndividual;
+        $manager = $serviceRequest->priority->type->assignmentTypeIndividual;
 
         if ($manager) {
             $serviceRequest->assignments()->create([

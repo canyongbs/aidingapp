@@ -122,6 +122,9 @@ class IncidentUpdatePolicy
         );
     }
 
+    /**
+     * @return array<Feature>
+     */
     protected function requiredFeatures(): array
     {
         return [Feature::ServiceManagement];

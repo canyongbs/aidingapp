@@ -65,16 +65,25 @@ class ServiceRequestPriority extends BaseModel implements Auditable
         'sla_id',
     ];
 
+    /**
+     * @return HasMany<ServiceRequest, $this>
+     */
     public function serviceRequests(): HasMany
     {
         return $this->hasMany(ServiceRequest::class, 'priority_id');
     }
 
+    /**
+     * @return BelongsTo<ServiceRequestType, $this>
+     */
     public function type(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestType::class, 'type_id')->withTrashed()->withArchived();
     }
 
+    /**
+     * @return BelongsTo<Sla, $this>
+     */
     public function sla(): BelongsTo
     {
         return $this->belongsTo(Sla::class);
