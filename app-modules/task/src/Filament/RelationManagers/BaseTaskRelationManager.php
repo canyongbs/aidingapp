@@ -115,6 +115,7 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                         'name',
                         function (Builder $query) {
                             assert($this->getOwnerRecord() instanceof Contact);
+
                             return $query->tap(new HasLicense($this->getOwnerRecord()->getLicenseType()));
                         },
                     )
@@ -165,6 +166,7 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                         'name',
                         function (Builder $query) {
                             assert($this->getOwnerRecord() instanceof Contact);
+
                             return $query->tap(new HasLicense($this->getOwnerRecord()->getLicenseType()));
                         },
                     )
