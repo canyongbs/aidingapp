@@ -116,14 +116,3 @@
 .asymetric-grid-right-fourths > .grid-col:last-child {
     @apply md:col-span-3;
 }
-
-.prose {
-    @apply !max-w-none p-16
-           prose-ul:my-0 prose-ol:my-0 prose-li:my-0
-           [&_table]:!w-full [&_table]:my-6 [&_table]:border-separate [&_table]:border-spacing-0 [&_table]:shadow-sm [&_table]:rounded-lg [&_table]:border [&_table]:border-gray-200 [&_table]:overflow-hidden
-           [&_th]:bg-brand-600 [&_th]:text-white [&_th]:py-4 [&_th]:px-6 [&_th]:text-left [&_th]:font-bold [&_th]:border-none
-           [&_td]:py-4 [&_td]:px-6 [&_td]:text-gray-700 [&_td]:border-b [&_td]:border-gray-100 [&_td]:align-middle [&_td]:text-left
-           [&_ul>li>p]:my-1 [&_ol>li>p]:my-1
-           [&_tr:nth-child(even)]:bg-gray-50
-           [&_tr:last-child_td]:!border-b-[3px] [&_tr:last-child_td]:!border-brand-600;
-}
