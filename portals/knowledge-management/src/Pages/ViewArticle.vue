@@ -204,7 +204,7 @@
         </template>
 
         <div
-            class="prose !max-w-none p-16 prose-ul:my-0 prose-ol:my-0 prose-li:my-0 [&_ol>li>p]:my-1 [&_table]:!w-full [&_table]:my-6 [&_table]:border-separate [&_table]:border-spacing-0 [&_table]:rounded-lg [&_table]:border [&_table]:border-gray-200 [&_table]:overflow-hidden [&_table]:shadow-sm [&_td]:border-b [&_td]:border-gray-100 [&_td]:align-middle [&_td]:px-6 [&_td]:py-4 [&_td]:text-left [&_td]:text-gray-700 [&_th]:border-none [&_th]:bg-brand-600 [&_th]:px-6 [&_th]:py-4 [&_th]:text-left [&_th]:font-bold [&_th]:text-white [&_tr:last-child_td]:!border-b-[3px] [&_tr:last-child_td]:!border-brand-600 [&_tr:nth-child(even)]:bg-gray-50 [&_ul>li>p]:my-1"
+            class="prose !max-w-none p-16 prose-ul:my-0 prose-ol:my-0 prose-li:my-0 [&_ol>li>p]:my-0 [&_table]:!w-full [&_table]:my-6 [&_table]:border-separate [&_table]:border-spacing-0 [&_table]:rounded-lg [&_table]:border [&_table]:border-gray-200 [&_table]:overflow-hidden [&_table]:shadow-sm [&_td]:border-b [&_td]:border-gray-100 [&_td]:align-middle [&_td]:px-6 [&_td]:py-2 [&_td]:text-left [&_td]:text-gray-700 [&_th]:border-none [&_th]:bg-brand-600 [&_th]:px-6 [&_th]:py-2 [&_th]:text-left [&_th]:font-bold [&_th]:text-white [&_tr:last-child_td]:!border-b-[3px] [&_tr:last-child_td]:!border-brand-600 [&_tr:nth-child(even)]:bg-gray-50 [&_ul>li>p]:my-0"
         >
             <div v-html="DOMPurify.sanitize(article.content)"></div>
         </div>
