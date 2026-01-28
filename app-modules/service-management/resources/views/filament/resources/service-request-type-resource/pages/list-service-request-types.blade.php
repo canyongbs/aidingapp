@@ -51,7 +51,7 @@
     >
         {{-- Sticky Save Banner --}}
         <div
-            class="sticky top-20 z-50 rounded-lg border border-warning-500 bg-warning-50 p-4 shadow-lg dark:border-warning-400 dark:bg-warning-900"
+            class="border-warning-500 bg-warning-50 dark:border-warning-400 dark:bg-warning-900 sticky top-20 z-50 rounded-lg border p-4 shadow-lg"
             style="display: none;"
             x-show="hasUnsavedChanges && canEdit"
             x-transition:enter="transition ease-out duration-200"
@@ -65,7 +65,7 @@
             <div class="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <div class="flex flex-1 items-start gap-3 sm:items-center">
                     <svg
-                        class="h-6 w-6 text-warning-600 dark:text-warning-400"
+                        class="text-warning-600 dark:text-warning-400 h-6 w-6"
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
                         viewBox="0 0 24 24"
@@ -79,8 +79,8 @@
                         />
                     </svg>
                     <div>
-                        <p class="font-semibold text-warning-900 dark:text-warning-100">You have unsaved changes</p>
-                        <p class="text-sm text-warning-700 dark:text-warning-300">Save your changes or they will be lost
+                        <p class="text-warning-900 dark:text-warning-100 font-semibold">You have unsaved changes</p>
+                        <p class="text-warning-700 dark:text-warning-300 text-sm">Save your changes or they will be lost
                         </p>
                     </div>
                 </div>
@@ -142,7 +142,7 @@
                     >
                         <div class="w-full">
                             <input
-                                class="block h-8 w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
+                                class="focus:border-primary-500 focus:ring-primary-500 block h-8 w-full rounded-lg border-gray-300 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 id="new-category-name"
                                 type="text"
                                 placeholder="Name of new category"
@@ -186,7 +186,7 @@
                     >
                         <div class="w-full">
                             <input
-                                class="block h-8 w-full rounded-lg border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:text-sm"
+                                class="focus:border-primary-500 focus:ring-primary-500 block h-8 w-full rounded-lg border-gray-300 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 id="new-type-name"
                                 type="text"
                                 placeholder="Name of new type"

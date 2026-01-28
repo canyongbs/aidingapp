@@ -126,7 +126,10 @@ class ServiceRequestFormWidgetController extends Controller
                     'recaptcha_site_key' => app(GoogleRecaptchaSettings::class)->site_key,
                 ] : []),
                 'schema' => $generateSchema($serviceRequestForm),
-                'primary_color' => Color::all()[$serviceRequestForm->primary_color ?? 'blue'],
+                'primary_color' => collect(Color::all()[$serviceRequestForm->primary_color ?? 'blue'])
+                    ->map(Color::convertToRgb(...))
+                    ->map(fn (string $value): string => (string) str($value)->after('rgb(')->before(')'))
+                    ->all(),
                 'rounding' => $serviceRequestForm->rounding,
             ],
         );

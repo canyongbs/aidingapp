@@ -1,13 +1,11 @@
 {
     "name": "aiding-app",
     "private": true,
+    "type": "module",
     "scripts": {
-        "build": "npm run build:vite && npm run build:widgets && npm run build:portals",
-        "build:portals": "(cd portals && npm i && npm run build)",
-        "build:vite": "vite build",
-        "build:widgets": "(cd widgets && npm i && npm run build)",
-        "dev": "vite",
-        "postinstall": "node npm-postinstall.cjs"
+        "build": "npm run build:service-request-feedback-form && npm run build:service-request-form",
+        "build:service-request-feedback-form": "(cd service-request-feedback-form && vite build)",
+        "build:service-request-form": "(cd service-request-form && vite build)"
     },
     "devDependencies": {
         "@headlessui/vue": "^1.7.16",
@@ -39,16 +37,17 @@
         "pusher-js": "^7.4.0",
         "resolve-url-loader": "^5.0.0",
         "select2": "^4.0.13",
-        "tailwindcss": "^4.1.18",
+        "tailwindcss": "^3.3.3",
         "vue-signature-pad": "^3.0.2",
         "vue-tsc": "^2.1.10"
     },
-    "type": "module",
     "dependencies": {
+        "@formkit/icons": "^1.2.2",
+        "@formkit/themes": "^1.2.2",
+        "@formkit/vue": "^1.2.2",
         "@heroicons/vue": "^2.1.1",
         "@ryangjchandler/alpine-clipboard": "^2.3.0",
         "@tailwindcss/forms": "^0.5.7",
-        "@tailwindcss/postcss": "^4.0.0",
         "@tailwindcss/typography": "^0.5.13",
         "@vueuse/core": "^10.7.0",
         "alpinejs": "^3.13.2",
@@ -61,7 +60,7 @@
         "filepond-plugin-file-validate-size": "^2.2.8",
         "filepond-plugin-file-validate-type": "^1.2.9",
         "filepond-plugin-image-preview": "^4.6.12",
-        "flowbite": "^3.0.0",
+        "flowbite": "^2.3.0",
         "laravel-vite-plugin": "^2.0.1",
         "lodash": "^4.17.23",
         "marked": "^12.0.0",

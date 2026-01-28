@@ -215,7 +215,7 @@
                     :class="[
                         'px-4 py-2 flex items-center justify-center space-x-1.5 rounded-lg border-2 transition duration-200 focus:outline-none',
                         feedback === true
-                            ? 'bg-gradient-to-br from-brand-500 to-brand-800 text-white border-brand-300'
+                            ? 'bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] text-white border-brand-300'
                             : 'bg-white text-gray-700 border-gray-300',
                     ]"
                 >
@@ -227,7 +227,7 @@
                     :class="[
                         'px-4 py-2 flex items-center justify-center space-x-1.5 rounded-lg border-2 transition duration-200 focus:outline-none',
                         feedback === false
-                            ? 'bg-gradient-to-br from-brand-500 to-brand-800 text-white border-brand-300'
+                            ? 'bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] text-white border-brand-300'
                             : 'bg-white text-gray-700 border-gray-300',
                     ]"
                 >
@@ -250,7 +250,7 @@
             <template #actions>
                 <router-link
                     :to="{ name: 'home' }"
-                    class="inline-block px-4 py-2 text-white bg-gradient-to-br from-brand-500 to-brand-800 rounded"
+                    class="inline-block px-4 py-2 text-white bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] rounded"
                 >
                     Return Home
                 </router-link>

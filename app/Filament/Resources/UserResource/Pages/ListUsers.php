@@ -130,11 +130,11 @@ class ListUsers extends ListRecords
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                     AssignTeamBulkAction::make()
-                        ->visible(function (User $record): bool {
+                        ->visible(function (): bool {
                             /** @var User $user */
                             $user = auth()->user();
 
-                            return $user->can('update', $record);
+                            return $user->can('update', app(User::class));
                         }),
                     AssignLicensesBulkAction::make()
                         ->visible(fn () => auth()->user()->can('create', License::class)),

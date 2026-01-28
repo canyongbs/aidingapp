@@ -380,7 +380,7 @@ class EditProfile extends Page
 
     protected function getSavedNotificationTitle(): ?string
     {
-        return __('filament-panels::pages/auth/edit-profile.notifications.saved.title');
+        return 'Saved';
     }
 
     protected function getRedirectUrl(): ?string
@@ -391,7 +391,7 @@ class EditProfile extends Page
     protected function getNameFormComponent(): Component
     {
         return TextInput::make('name')
-            ->label(__('filament-panels::pages/auth/edit-profile.form.name.label'))
+            ->label('Name')
             ->required()
             ->maxLength(255)
             ->autofocus();
@@ -400,7 +400,7 @@ class EditProfile extends Page
     protected function getEmailFormComponent(): Component
     {
         return TextInput::make('email')
-            ->label(__('filament-panels::pages/auth/edit-profile.form.email.label'))
+            ->label('Email address')
             ->email()
             ->required()
             ->maxLength(255)
@@ -411,7 +411,7 @@ class EditProfile extends Page
     protected function getPasswordFormComponent(): Component
     {
         return TextInput::make('password')
-            ->label(__('filament-panels::pages/auth/edit-profile.form.password.label'))
+            ->label('Password')
             ->password()
             ->rule(Password::default())
             ->autocomplete('new-password')
@@ -424,7 +424,7 @@ class EditProfile extends Page
     protected function getPasswordConfirmationFormComponent(): Component
     {
         return TextInput::make('passwordConfirmation')
-            ->label(__('filament-panels::pages/auth/edit-profile.form.password_confirmation.label'))
+            ->label('Password confirmation')
             ->password()
             ->required()
             ->visible(fn (Get $get): bool => filled($get('password')))
@@ -445,7 +445,7 @@ class EditProfile extends Page
     protected function getCancelFormAction(): Action
     {
         return Action::make('cancel')
-            ->label(__('filament-panels::pages/auth/edit-profile.actions.cancel.label'))
+            ->label('Cancel')
             ->url(filament()->getUrl())
             ->color('gray');
     }
@@ -453,7 +453,7 @@ class EditProfile extends Page
     protected function getSaveFormAction(): Action
     {
         return Action::make('save')
-            ->label(__('filament-panels::pages/auth/edit-profile.form.actions.save.label'))
+            ->label('Save')
             ->submit('save')
             ->keyBindings(['mod+s']);
     }
