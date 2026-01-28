@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
 use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Worksome\RequestFactories\RequestFactory;
 
