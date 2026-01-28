@@ -204,7 +204,7 @@
         </template>
 
         <div
-            class="prose !max-w-none p-16 [&_p]:!leading-snug [&_p]:!my-10 [&_ul]:!my-3 [&_ol]:!my-3 [&_li]:!my-0 [&_li>p]:!my-1 [&_td_p]:!my-3 [&_th_p]:!my-3 [&_table]:!w-full [&_table]:my-6 [&_table]:border-separate [&_table]:border-spacing-0 [&_table]:rounded-lg [&_table]:border [&_table]:border-gray-200 [&_table]:overflow-hidden [&_table]:shadow-sm [&_td]:border-b [&_td]:border-gray-100 [&_td]:align-middle [&_td]:px-6 [&_td]:py-2 [&_td]:text-left [&_td]:text-gray-700 [&_th]:border-none [&_th]:bg-brand-600 [&_th]:px-6 [&_th]:py-2 [&_th]:text-left [&_th]:font-bold [&_th]:text-white [&_tr:last-child_td]:!border-b-[3px] [&_tr:last-child_td]:!border-brand-600 [&_tr:nth-child(even)]:bg-gray-50"
+            class="prose !max-w-none p-16 prose-p:!leading-snug prose-p:!my-10 prose-ul:!my-3 prose-ol:!my-3 prose-li:!my-0 [&_li>p]:!my-1 [&_td_p]:!my-3 [&_th_p]:!my-3 prose-table:!w-full prose-table:my-6 prose-table:border-separate prose-table:border-spacing-0 prose-table:rounded-lg prose-table:border prose-table:border-gray-200 prose-table:overflow-hidden prose-table:shadow-sm prose-td:border-b prose-td:border-gray-100 prose-td:align-middle prose-td:px-6 prose-td:py-2 prose-td:text-left prose-td:text-gray-700 prose-th:border-none prose-th:bg-brand-600 prose-th:px-6 prose-th:py-2 prose-th:text-left prose-th:font-bold prose-th:text-white [&_tr:last-child_td]:!border-b-[3px] [&_tr:last-child_td]:!border-brand-600 prose-tr:even:bg-gray-50"
         >
             <div v-html="DOMPurify.sanitize(article.content)"></div>
         </div>
