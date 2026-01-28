@@ -92,6 +92,8 @@ test('CreateKnowledgeBaseItem is gated with proper access control', function () 
 test('CreateKnowledgeBaseItem is gated with proper feature access control', function () {
     $settings = app(LicenseSettings::class);
 
+    Division::factory(3)->create();
+
     $settings->data->addons->knowledgeManagement = false;
 
     $settings->save();
