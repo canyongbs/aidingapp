@@ -53,6 +53,9 @@ class RecentContactsList extends BaseWidget
         'lg' => 2,
     ];
 
+    /**
+     * @return int | string | array<string,int>
+     */
     public function getColumns(): int | string | array
     {
         return [

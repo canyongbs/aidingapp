@@ -50,7 +50,7 @@ class ChunkIterator
     {
         $chunk = [];
 
-        for ($i = 0; $this->iterator->valid(); $i++) {
+        for ($iter = 0; $this->iterator->valid(); $iter++) {
             $chunk[] = $this->iterator->current();
 
             $this->iterator->next();

@@ -61,8 +61,8 @@ class UtilizationMetricsApiController extends Controller
                     'tasks' => Task::count(),
                 ],
             ], 200);
-        } catch (Exception $e) {
-            report($e);
+        } catch (Exception $exception) {
+            report($exception);
 
             return response()->json([
             ], 500);

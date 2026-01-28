@@ -76,6 +76,9 @@ class TaskAssignedToUserNotification extends Notification implements ShouldQueue
             ->line("\"{$truncatedTaskDescription}\"");
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toDatabase(object $notifiable): array
     {
         $url = match (true) {
@@ -93,9 +96,9 @@ class TaskAssignedToUserNotification extends Notification implements ShouldQueue
         $message = match (true) {
             is_null($this->task->concern) => $baseMessage,
 
-            is_null($this->task->concern->organization) => "{$baseMessage} related to Contact <a href='" . ContactResource::getUrl('view', ['record' => $this->task->concern]) . "' target='_blank' class='underline'>{$this->task->concern?->full_name}</a>",
+            is_null($this->task->concern->organization) => "{$baseMessage} related to Contact <a href='" . ContactResource::getUrl('view', ['record' => $this->task->concern]) . "' target='_blank' class='underline'>{$this->task->concern->full_name}</a>",
 
-            ! is_null($this->task->concern->organization) => "{$baseMessage} related to Contact <a href='" . ContactResource::getUrl('view', ['record' => $this->task->concern]) . "' target='_blank' class='underline'>{$this->task->concern?->full_name}</a><a href='" . OrganizationResource::getUrl('view', ['record' => $this->task->concern->organization]) . "' target='_blank' class='underline'>({$this->task->concern->organization?->name})</a>",
+            ! is_null($this->task->concern->organization) => "{$baseMessage} related to Contact <a href='" . ContactResource::getUrl('view', ['record' => $this->task->concern]) . "' target='_blank' class='underline'>{$this->task->concern->full_name}</a><a href='" . OrganizationResource::getUrl('view', ['record' => $this->task->concern->organization]) . "' target='_blank' class='underline'>({$this->task->concern->organization->name})</a>",
         };
 
         return FilamentNotification::make()
