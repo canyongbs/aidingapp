@@ -52,6 +52,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\ValidationException;
 
 class CreateKnowledgeBaseItem extends CreateRecord
 {
@@ -121,6 +122,9 @@ class CreateKnowledgeBaseItem extends CreateRecord
                             ->relationship('division', 'name')
                             ->searchable(['name', 'code'])
                             ->preload()
+                            ->default(fn () => Division::count() === 1 ? Division::query()->first()?->getKey() : null)
+                            ->visible(fn (): bool => Division::count() > 1)
+                            ->dehydratedWhenHidden()
                             ->exists((new Division())->getTable(), (new Division())->getKeyName()),
                     ]),
             ]);
