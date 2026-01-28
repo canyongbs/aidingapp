@@ -74,6 +74,9 @@ class AmazonS3 extends Page implements HasForms
 
     protected static ?int $navigationSort = 100;
 
+    /**
+     * @var array<string, mixed> $data
+     */
     public ?array $data = [];
 
     public static function canAccess(): bool
@@ -285,11 +288,19 @@ class AmazonS3 extends Page implements HasForms
         }
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     protected function mutateFormDataBeforeFill(array $data): array
     {
         return $data;
     }
 
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
     protected function mutateFormDataBeforeSave(array $data): array
     {
         return $data;

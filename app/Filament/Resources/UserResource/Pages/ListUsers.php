@@ -109,10 +109,10 @@ class ListUsers extends ListRecords
                                 return;
                             }
 
-                            $query->when(in_array('no_assigned_license', $data['values']), function ($query) {
+                            $query->when(in_array('no_assigned_license', $data['values']), function (Builder $query) {
                                 $query->whereDoesntHave('licenses');
                             })
-                                ->{in_array('no_assigned_license', $data['values']) ? 'orWhereHas' : 'whereHas'}('licenses', function ($query) use ($data) {
+                                ->{in_array('no_assigned_license', $data['values']) ? 'orWhereHas' : 'whereHas'}('licenses', function (Builder $query) use ($data) {
                                     $query->whereIn('type', array_filter($data['values'], fn ($value) => $value !== 'no_assigned_license'));
                                 });
                         }
