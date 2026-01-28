@@ -87,7 +87,7 @@ test('CreateKnowledgeBaseItem is gated with proper access control', function () 
     $knowledgeBaseItem = KnowledgeBaseItem::first();
 
     expect($knowledgeBaseItem->division->pluck('id')->toArray())->toEqual($request['division']);
-})->only()->repeat(10);
+});
 
 test('CreateKnowledgeBaseItem is gated with proper feature access control', function () {
     $settings = app(LicenseSettings::class);
