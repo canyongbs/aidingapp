@@ -34,45 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages;
+namespace App\Filament\Support;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
-class ListServiceRequestForms extends ListRecords
+/**
+ * This is used in the `modifyQueryUsing` argument of a `Select` `relationship()` method,
+ * usually for a `BelongsTo` relationship, to hide soft-deleted records from the select
+ * options, while also ensuring that if the currently-selected record is soft-deleted,
+ * it is still loaded and shown as an option.
+ */
+class HideDeletedExceptSelectedFromSelectOptions
 {
-    protected static string $resource = ServiceRequestFormResource::class;
-
-    public function table(Table $table): Table
+    /**
+     * @param Builder<Model> $query
+     *
+     * @return Builder<Model>
+     */
+    public function __invoke(Builder $query, ?Model $record, Select $component): Builder
     {
-        return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->whereHas('type', fn (Builder $query) => $query->withoutTrashed()->withoutArchived())) /** @phpstan-ignore method.notFound */
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name'),
-            ])
-            ->recordActions([
-                Action::make('Respond')
-                    ->url(fn (ServiceRequestForm $form) => route('service-request-forms.show', ['serviceRequestForm' => $form]))
-                    ->icon('heroicon-m-arrow-top-right-on-square')
-                    ->openUrlInNewTab()
-                    ->color('gray'),
-                EditAction::make(),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make(),
-        ];
+        return $query->where(
+            fn (Builder $query) => $query /** @phpstan-ignore method.notFound */
+                ->withoutTrashed()
+                ->orWhere(
+                    $component->getRelationship()->getQualifiedOwnerKeyName(),
+                    $record?->getAttributeValue($component->getRelationship()->getForeignKeyName()),
+                ),
+        );
     }
 }

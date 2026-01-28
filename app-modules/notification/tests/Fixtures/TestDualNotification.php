@@ -34,28 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Support;
+namespace AidingApp\Notification\Tests\Fixtures;
 
-use Filament\Forms\Components\Select;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
+use Filament\Notifications\Notification as FilamentNotification;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
 
-class ModifySoftDeletableSelectQuery
+class TestDualNotification extends Notification implements ShouldQueue
 {
+    use Queueable;
+
     /**
-     * @param Builder<Model> $query
-     *
-     * @return Builder<Model>
+     * @return array<int, string>
      */
-    public function __invoke(Builder $query, ?Model $record, Select $component): Builder
+    public function via(object $notifiable): array
     {
-        return $query->where(
-            fn (Builder $query) => $query /** @phpstan-ignore method.notFound */
-                ->withoutTrashed()
-                ->orWhere(
-                    $component->getRelationship()->getQualifiedOwnerKeyName(),
-                    $record?->getAttributeValue($component->getRelationship()->getForeignKeyName()),
-                ),
-        );
+        return ['mail', 'database'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return MailMessage::make()
+            ->subject('Test Subject')
+            ->greeting('Test Greeting')
+            ->content('This is a test email');
+    }
+
+    public function toDatabase(object $notifiable): array
+    {
+        return FilamentNotification::make()
+            ->success()
+            ->title('Test Title')
+            ->body('This is a test.')
+            ->getDatabaseMessage();
     }
 }

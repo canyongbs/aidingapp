@@ -321,17 +321,19 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
     public function failed(?Throwable $exception): void
     {
         if ($exception === null) {
+            report(new Exception('ProcessSesS3InboundEmail job failed with null exception.'));
+
             $this->moveFile('/failed');
 
             return;
         }
 
+        report($exception);
+
         match ($exception::class) {
             SesS3InboundSpamOrVirusDetected::class => $this->moveFile('/spam-or-virus-detected'),
             default => $this->moveFile('/failed'),
         };
-
-        report($exception);
     }
 
     protected function getContent(): string

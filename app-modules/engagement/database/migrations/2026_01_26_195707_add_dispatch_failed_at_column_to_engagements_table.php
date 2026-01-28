@@ -34,45 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages;
+use App\Features\EngagementDispatchFailedAtFeature;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-
-class ListServiceRequestForms extends ListRecords
-{
-    protected static string $resource = ServiceRequestFormResource::class;
-
-    public function table(Table $table): Table
+return new class () extends Migration {
+    public function up(): void
     {
-        return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->whereHas('type', fn (Builder $query) => $query->withoutTrashed()->withoutArchived())) /** @phpstan-ignore method.notFound */
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name'),
-            ])
-            ->recordActions([
-                Action::make('Respond')
-                    ->url(fn (ServiceRequestForm $form) => route('service-request-forms.show', ['serviceRequestForm' => $form]))
-                    ->icon('heroicon-m-arrow-top-right-on-square')
-                    ->openUrlInNewTab()
-                    ->color('gray'),
-                EditAction::make(),
-            ]);
+        DB::transaction(function () {
+            Schema::table('engagements', function (Blueprint $table) {
+                $table->timestamp('dispatch_failed_at')->nullable();
+            });
+
+            EngagementDispatchFailedAtFeature::activate();
+        });
     }
 
-    protected function getHeaderActions(): array
+    public function down(): void
     {
-        return [
-            CreateAction::make(),
-        ];
+        DB::transaction(function () {
+            EngagementDispatchFailedAtFeature::deactivate();
+
+            Schema::table('engagements', function (Blueprint $table) {
+                $table->dropColumn('dispatch_failed_at');
+            });
+        });
     }
-}
+};

@@ -1,6 +1,4 @@
-<?php
-
-/*
+{{--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
@@ -32,16 +30,21 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+--}}
+<x-mail::message>
+**This is an automated message from Aiding App.**
 
-namespace App\Features;
+We attempted to deliver the following message but were unsuccessful due to an internal system failure:
 
-use App\Support\AbstractFeatureFlag;
+**From:** {{ $from }}
 
-class ServiceRequestFormAndTypeArchivingFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
-    }
-}
+**Date:** {{ $date }}
+
+**To:** {{ $to }}
+
+**Subject:** {{ $subject }}
+
+The status of the message in sent items has been updated to **System Failed**.
+
+Please try again and if this issue continues, report the problem to your system administrator.
+</x-mail::message>

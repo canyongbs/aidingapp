@@ -40,6 +40,7 @@ use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementBatch;
 use AidingApp\Engagement\Notifications\EngagementNotification;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\RateLimiter;
 
 use function Pest\Laravel\assertDatabaseCount;
 
@@ -105,4 +106,26 @@ it('will create but not dispatch a scheduled engagement', function () {
         $recipient,
         EngagementNotification::class
     );
+});
+
+it('has the notification rate limiting applied properly for email batched engagements', function () {
+    $engagementBatch = EngagementBatch::factory()->email()->create();
+    $recipient = Contact::factory()->create();
+
+    $job = new CreateBatchedEngagement(
+        $engagementBatch,
+        $recipient
+    );
+
+    $limiter = RateLimiter::limiter('notifications');
+
+    $limits = $limiter($job);
+
+    /** @phpstan-ignore property.notFound */
+    expect($limits)
+        ->toHaveCount(1)
+        ->and($limits[0])
+        ->key->toEqual('mail')
+        ->maxAttempts->toEqual(14)
+        ->decaySeconds->toEqual(1);
 });

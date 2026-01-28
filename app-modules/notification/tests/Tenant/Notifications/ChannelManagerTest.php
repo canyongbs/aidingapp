@@ -34,45 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Notification\Tests\Fixtures\TestEmailNotification;
+use Carbon\Carbon;
+use Illuminate\Notifications\SendQueuedNotifications;
+use Illuminate\Support\Facades\Queue;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use function Pest\Laravel\freezeTime;
 
-class ListServiceRequestForms extends ListRecords
-{
-    protected static string $resource = ServiceRequestFormResource::class;
+it('modifies the SendQueuedNotifications job properly', function () {
+    Queue::fake();
 
-    public function table(Table $table): Table
-    {
-        return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->whereHas('type', fn (Builder $query) => $query->withoutTrashed()->withoutArchived())) /** @phpstan-ignore method.notFound */
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name'),
-            ])
-            ->recordActions([
-                Action::make('Respond')
-                    ->url(fn (ServiceRequestForm $form) => route('service-request-forms.show', ['serviceRequestForm' => $form]))
-                    ->icon('heroicon-m-arrow-top-right-on-square')
-                    ->openUrlInNewTab()
-                    ->color('gray'),
-                EditAction::make(),
-            ]);
-    }
+    $recipient = Contact::factory()->create();
+    $notification = new TestEmailNotification();
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make(),
-        ];
-    }
-}
+    freezeTime(function () use ($recipient, $notification) {
+        $recipient->notify($notification);
+
+        Queue::assertPushed(SendQueuedNotifications::class, function ($job) use ($recipient, $notification) {
+            return $job->notification::class === $notification::class
+                && $job->notifiables->count() === 1
+                && $job->notifiables->first()->is($recipient)
+                && $job->channels === ['mail']
+                && $job->retryUntil() instanceof Carbon && $job->retryUntil()->equalTo(now()->addHours(2))
+                && $job->maxExceptions === 5;
+        });
+    });
+});

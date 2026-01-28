@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\Concerns\HasSharedFormConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Concerns\EditPageRedirection;
+use App\Filament\Actions\ArchiveAction;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Infolists\Components\TextEntry;
@@ -63,6 +64,7 @@ class EditServiceRequestForm extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            ArchiveAction::make(),
             Action::make('view')
                 ->url(fn (ServiceRequestForm $serviceRequestForm) => route('service-request-forms.show', ['serviceRequestForm' => $serviceRequestForm]))
                 ->icon('heroicon-m-arrow-top-right-on-square')

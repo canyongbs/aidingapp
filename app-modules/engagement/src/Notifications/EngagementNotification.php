@@ -47,6 +47,7 @@ use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Notification\Notifications\Messages\TwilioMessage;
+use App\Features\EngagementDispatchFailedAtFeature;
 use App\Models\NotificationSetting;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
@@ -63,6 +64,14 @@ class EngagementNotification extends Notification implements ShouldQueue, HasBef
     public function __construct(
         public Engagement $engagement
     ) {}
+
+    /**
+     * @return array<int, int>
+     */
+    public function backoff(): array
+    {
+        return [5, 30, 60, 300];
+    }
 
     /**
      * @return array<int, string>
@@ -97,6 +106,16 @@ class EngagementNotification extends Notification implements ShouldQueue, HasBef
 
     public function failed(?Throwable $exception): void
     {
+        if (app()->bound('sentry')) {
+            app('sentry')->captureException($exception);
+        }
+
+        if (EngagementDispatchFailedAtFeature::active()) {
+            $this->engagement->update([
+                'dispatch_failed_at' => now(),
+            ]);
+        }
+
         if (is_null($this->engagement->engagement_batch_id)) {
             $this->engagement->user->notify(new EngagementFailedNotification($this->engagement));
         }

@@ -36,17 +36,23 @@
 
 namespace App\Providers;
 
+use AidingApp\Engagement\Jobs\CreateBatchedEngagement;
+use AidingApp\Notification\Enums\NotificationChannel;
 use App\Models\SystemUser;
 use App\Models\Tenant;
 use App\Overrides\Filament\Actions\Imports\Jobs\ImportCsvOverride;
 use App\Overrides\Filament\Actions\Imports\Jobs\PrepareCsvExportOverride;
 use App\Overrides\Laravel\PermissionMigrationCreator;
+use Exception;
 use Filament\Actions\Exports\Jobs\PrepareCsvExport;
 use Filament\Actions\Imports\Jobs\ImportCsv;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Pennant\Feature;
@@ -119,5 +125,25 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Feature::discover();
+
+        RateLimiter::for('notifications', function (object $job) {
+            $channels = match (true) {
+                $job instanceof CreateBatchedEngagement => [$job->engagementBatch->channel],
+                $job instanceof SendQueuedNotifications => $job->channels,
+                default => throw new Exception('Invalid job type'),
+            };
+
+            return collect($channels)->map(function (string|NotificationChannel $channel) {
+                if ($channel instanceof NotificationChannel) {
+                    $channel = $channel->value;
+                }
+
+                return match ($channel) {
+                    'mail', 'email' => Limit::perSecond(14)->by('mail'),
+                    default => Limit::none()->by($channel),
+                };
+            })
+                ->toArray();
+        });
     }
 }

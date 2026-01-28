@@ -11,3 +11,4 @@ resources/lang/**/*.php
 **/vendor
 .composer/
 app-modules/service-management/resources/views/mail/service-monitoring-mail.blade.php
+app-modules/**/resources/views/mail/**/*.blade.php
