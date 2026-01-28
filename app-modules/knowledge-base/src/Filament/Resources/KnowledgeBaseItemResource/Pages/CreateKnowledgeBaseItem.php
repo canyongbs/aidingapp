@@ -52,7 +52,6 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Validation\ValidationException;
 
 class CreateKnowledgeBaseItem extends CreateRecord
 {
