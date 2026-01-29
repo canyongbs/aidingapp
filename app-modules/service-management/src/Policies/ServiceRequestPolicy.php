@@ -79,7 +79,7 @@ class ServiceRequestPolicy
         if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->team;
 
-            if (! $serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey()) && ! $serviceRequest?->priority?->type?->auditors?->contains('id', $team?->getKey())) {
+            if (! $serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey()) && ! $serviceRequest->priority?->type?->auditors?->contains('id', $team?->getKey())) {
                 return Response::deny("You don't have permission to view this service request because you're not an auditor or manager.");
             }
         }
@@ -112,14 +112,14 @@ class ServiceRequestPolicy
             return Response::deny('You do not have permission to update this service request.');
         }
 
-        if ($serviceRequest?->status?->classification === SystemServiceRequestClassification::Closed) {
+        if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Closed) {
             return Response::deny('Closed service request cannot be edited.');
         }
 
         if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->team;
 
-            if (! $serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
+            if (! $serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey())) {
                 return Response::deny("You don't have permission to update this service request because you're not a manager of it's type.");
             }
         }
@@ -139,7 +139,7 @@ class ServiceRequestPolicy
         if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->team;
 
-            if (! $serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
+            if (! $serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey())) {
                 return Response::deny("You don't have permission to delete this service request because you're not a manager of it's type.");
             }
         }
@@ -159,7 +159,7 @@ class ServiceRequestPolicy
         if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->team;
 
-            if (! $serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
+            if (! $serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey())) {
                 return Response::deny("You don't have permission to restore this service request because you're not a manager of it's type.");
             }
         }
@@ -179,7 +179,7 @@ class ServiceRequestPolicy
         if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->team;
 
-            if (! $serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
+            if (! $serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey())) {
                 return Response::deny("You don't have permission to permanently delete this service request because you're not a manager of it's type.");
             }
         }
@@ -190,6 +190,9 @@ class ServiceRequestPolicy
         );
     }
 
+    /**
+     * @return array<Feature>
+     */
     protected function requiredFeatures(): array
     {
         return [Feature::ServiceManagement];

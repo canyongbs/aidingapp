@@ -47,7 +47,6 @@ use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
-use App\Models\Contracts\Educatable;
 use App\Models\NotificationSetting;
 use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
@@ -86,11 +85,8 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
     {
         $template = $this->emailTemplate;
 
-        /** @var Educatable $educatable */
-        $educatable = $notifiable;
-
         $name = match ($notifiable::class) {
-            Contact::class => $educatable->first_name,
+            Contact::class => $notifiable->first_name,
             default => '',
         };
 

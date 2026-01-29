@@ -64,14 +64,14 @@ class TaskFactory extends Factory
     public function concerningContact(?Contact $contact = null): self
     {
         return $this->state([
-            'concern_id' => $contact?->id ?? Contact::factory(),
+            'concern_id' => $contact->id ?? Contact::factory(),
         ]);
     }
 
     public function assigned(?User $user = null): self
     {
         return $this->state([
-            'assigned_to' => $user?->id ?? User::factory(),
+            'assigned_to' => $user->id ?? User::factory(),
         ]);
     }
 

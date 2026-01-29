@@ -2868,12 +2868,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestResource/Pages/ViewServiceRequest.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\:\\:withTrashed\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestResource/Pages/ViewServiceRequest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Match expression does not handle remaining value\\: class\\-string\\<AidingApp\\\\Contact\\\\Models\\\\Contact\\>&literal\\-string$#',
     'identifier' => 'match.unhandled',
     'count' => 2,
@@ -3516,54 +3510,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestHistory.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestPriority\\:\\:serviceRequests\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestPriority.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestPriority\\:\\:sla\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestPriority.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestPriority\\:\\:type\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestPriority.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestStatus\\:\\:serviceRequests\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\:\\:assignmentTypeIndividual\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestType.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\:\\:form\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasOne does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestType.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\:\\:lastAssignedUser\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestType.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\:\\:priorities\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestType.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\:\\:serviceRequests\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasManyThrough does not specify its types\\: TRelatedModel, TIntermediateModel, TDeclaringModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -3594,74 +3540,14 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestUpdate.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestUpdate\\:\\:serviceRequest\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestUpdate.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property App\\\\Models\\\\Contracts\\\\Educatable\\:\\:\\$first_name\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendClosedServiceFeedbackNotification.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendClosedServiceFeedbackNotification.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendEducatableServiceRequestAssignedNotification.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendEducatableServiceRequestClosedNotification.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendEducatableServiceRequestOpenedNotification.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendEducatableServiceRequestStatusChangeNotification.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/SendEducatableServiceRequestUpdatedNotification.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Match expression does not handle remaining value\\: class\\-string$#',
     'identifier' => 'match.unhandled',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestAssigned.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestAssigned.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Match expression does not handle remaining value\\: class\\-string$#',
     'identifier' => 'match.unhandled',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestClosed.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestClosed.php',
 ];
@@ -3678,12 +3564,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestCreated.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestCreated.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Match expression does not handle remaining value\\: class\\-string$#',
     'identifier' => 'match.unhandled',
     'count' => 1,
@@ -3692,12 +3572,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Notifications\\\\ServiceRequestStatusChanged\\:\\:toDatabase\\(\\) return type has no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestStatusChanged.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestStatusChanged.php',
 ];
@@ -3714,22 +3588,10 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestUpdated.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$block of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Notifications/ServiceRequestUpdated.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to function is_null\\(\\) with string will always evaluate to false\\.$#',
     'identifier' => 'function.impossibleType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Observers/ChangeRequestObserver.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Using nullsafe property access on non\\-nullable type AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Observers/ServiceRequestAssignmentObserver.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Property AidingApp\\\\ServiceManagement\\\\Models\\\\IdeHelperServiceRequest\\:\\:\\$status_updated_at \\(Carbon\\\\CarbonImmutable\\|null\\) does not accept Illuminate\\\\Support\\\\Carbon\\.$#',
@@ -3742,72 +3604,6 @@ $ignoreErrors[] = [
     'identifier' => 'assign.propertyType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Observers/ServiceRequestObserver.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\:\\:restore\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Observers/ServiceRequestTypeObserver.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Policies\\\\IncidentUpdatePolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Policies/IncidentUpdatePolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Policies\\\\ServiceRequestAssignmentPolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Policies/ServiceRequestAssignmentPolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Policies\\\\ServiceRequestHistoryPolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Policies/ServiceRequestHistoryPolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Policies\\\\ServiceRequestPolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Policies/ServiceRequestPolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Using nullsafe property access on non\\-nullable type AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 7,
-    'path' => __DIR__ . '/app-modules/service-management/src/Policies/ServiceRequestPolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Policies\\\\ServiceRequestPriorityPolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Policies/ServiceRequestPriorityPolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Policies\\\\ServiceRequestStatusPolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Policies/ServiceRequestStatusPolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Policies\\\\ServiceRequestTypePolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Policies/ServiceRequestTypePolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Policies\\\\ServiceRequestUpdatePolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Policies/ServiceRequestUpdatePolicy.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Policies\\\\SlaPolicy\\:\\:requiredFeatures\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Policies/SlaPolicy.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^PHPDoc tag @param for parameter \\$fail with type Illuminate\\\\Translation\\\\PotentiallyTranslatedString is incompatible with native type Closure\\.$#',
@@ -3834,30 +3630,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Rules/ServiceRequestTypeAssignmentsIndividualUserMustBeAManager.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Services\\\\ServiceRequestNumber\\\\SqidPlusSixServiceRequestNumberGenerator\\:\\:generateRandomString\\(\\) has parameter \\$length with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Services/ServiceRequestNumber/SqidPlusSixServiceRequestNumberGenerator.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Variable name "\\$i" is shorter than minimum length of 3 characters\\.$#',
-    'identifier' => 'MeliorStan.shortVariable',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Services/ServiceRequestNumber/SqidPlusSixServiceRequestNumberGenerator.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Using nullsafe property access on non\\-nullable type AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Services/ServiceRequestType/IndividualAssigner.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Using nullsafe property access on non\\-nullable type AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Services/ServiceRequestType/IndividualAssigner.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to function is_null\\(\\) with AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType will always evaluate to false\\.$#',
     'identifier' => 'function.impossibleType',
     'count' => 1,
@@ -3874,24 +3646,6 @@ $ignoreErrors[] = [
     'identifier' => 'nullsafe.neverNull',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Services/ServiceRequestType/WorkloadAssigner.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Using nullsafe property access "\\?\\-\\>id" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/task/database/factories/TaskFactory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:getLicenseType\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/task/src/Filament/RelationManagers/BaseTaskRelationManager.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Using nullsafe method call on non\\-nullable type Illuminate\\\\Auth\\\\AuthManager\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 3,
-    'path' => __DIR__ . '/app-modules/task/src/Filament/Resources/TaskResource/Components/TaskViewAction.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Match expression does not handle remaining value\\: string$#',

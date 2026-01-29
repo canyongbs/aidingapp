@@ -113,7 +113,11 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                     ->relationship(
                         'assignedTo',
                         'name',
-                        fn (Builder $query) => $query->tap(new HasLicense($this->getOwnerRecord()->getLicenseType())),
+                        function (Builder $query) {
+                            assert($this->getOwnerRecord() instanceof Contact);
+
+                            return $query->tap(new HasLicense($this->getOwnerRecord()->getLicenseType()));
+                        },
                     )
                     ->nullable()
                     ->searchable(['name', 'email'])
@@ -160,7 +164,11 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                     ->relationship(
                         'assignedTo',
                         'name',
-                        fn (Builder $query) => $query->tap(new HasLicense($this->getOwnerRecord()->getLicenseType())),
+                        function (Builder $query) {
+                            assert($this->getOwnerRecord() instanceof Contact);
+
+                            return $query->tap(new HasLicense($this->getOwnerRecord()->getLicenseType()));
+                        },
                     )
                     ->searchable()
                     ->multiple(),

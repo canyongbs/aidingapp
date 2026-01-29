@@ -112,7 +112,7 @@ trait HandlesServiceRequestTemplateContent
             return $content;
         }
 
-        $content['content'] = array_map(function ($block) use ($urlType) {
+        $content['content'] = array_map(function (array $block) use ($urlType) {
             if (
                 $block['type'] === 'tiptapBlock' &&
                 ($block['attrs']['type'] ?? null) === 'serviceRequestTypeEmailTemplateButtonBlock'
