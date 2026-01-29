@@ -52,6 +52,5 @@ class LicenseAddonsData extends Data
         public bool $changeManagement = false,
         public bool $assetManagement = false,
         public bool $feedbackManagement = false,
-        public bool $experimentalReporting = false,
     ) {}
 }
