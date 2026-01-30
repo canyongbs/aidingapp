@@ -33,7 +33,7 @@
 
 </COPYRIGHT>
 */
-
+use Illuminate\Support\Facades\DB;
 use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
 

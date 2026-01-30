@@ -33,7 +33,7 @@
 
 </COPYRIGHT>
 */
-
+use Illuminate\Support\Facades\DB;
 use App\Features\ContactChangesFeature;
 use Illuminate\Database\Migrations\Migration;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
