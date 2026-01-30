@@ -39,7 +39,6 @@ namespace App\Filament\Pages;
 use App\DataTransferObjects\LicenseManagement\LicenseData;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
@@ -143,22 +142,9 @@ class ManageLicenseSettings extends SettingsPage
                                 ->label('Asset Management'),
                             Toggle::make('data.addons.feedbackManagement')
                                 ->label('Feedback Management'),
-                            Toggle::make('data.addons.experimentalReporting')
-                                ->label('Experimental Reporting')
-                                ->live()
-                                ->afterStateUpdated(fn (Toggle $component, $state) => $state ? $component->state(false) && $this->mountAction('enableExperimentalReporting') : null),
                         ]
                     ),
             ]);
-    }
-
-    public function enableExperimentalReporting(): Action
-    {
-        return Action::make('enableExperimentalReporting')
-            ->color('danger')
-            ->requiresConfirmation()
-            ->modalDescription('Experimental reporting is not currently a reliable method to explore your data, but is representative of a capability in research and development at Canyon GBS to innovatively extend AI to allow you to explore your data through natural language processing. This feature should be used for educational purposes only, and should not be be relied upon for decision making at your institution.')
-            ->action(fn () => $this->data['data']['addons']['experimentalReporting'] = true);
     }
 
     protected function mutateFormDataBeforeSave(array $data): array

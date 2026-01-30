@@ -61,7 +61,6 @@ class SyncTenantRequest extends FormRequest
             'addons.changeManagement' => ['required', 'boolean'],
             'addons.assetManagement' => ['required', 'boolean'],
             'addons.feedbackManagement' => ['required', 'boolean'],
-            'addons.experimentalReporting' => ['required', 'boolean'],
         ];
     }
 }

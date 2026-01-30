@@ -195,7 +195,6 @@ abstract class TestCase extends BaseTestCase
                     changeManagement: true,
                     assetManagement: true,
                     feedbackManagement: true,
-                    experimentalReporting: true,
                 )
             ),
             false,
@@ -253,7 +252,6 @@ abstract class TestCase extends BaseTestCase
                         changeManagement: true,
                         assetManagement: true,
                         feedbackManagement: true,
-                        experimentalReporting: true,
                     )
                 )
             ));
