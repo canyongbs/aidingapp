@@ -57,8 +57,6 @@ enum Feature: string
 
     case FeedbackManagement = 'feedback-management';
 
-    case ExperimentalReporting = 'experimental-reporting';
-
     public function generateGate(): void
     {
         // If features are added that are not based on a License Addon we will need to update this
