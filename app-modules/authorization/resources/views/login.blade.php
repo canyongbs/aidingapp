@@ -48,7 +48,7 @@
             {{ $this->form }}
 
             <x-filament::actions
-                :actions="$this->getCachedFormActions()"
+                :actions="$this->getFormActions()"
                 :full-width="$this->hasFullWidthFormActions()"
             />
             @if (count($this->getSsoFormActions()) > 0)
