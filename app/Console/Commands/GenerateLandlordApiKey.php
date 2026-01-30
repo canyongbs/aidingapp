@@ -76,7 +76,7 @@ class GenerateLandlordApiKey extends Command
         return $this->writeNewEnvironmentFileWith($key);
     }
 
-    protected function writeNewEnvironmentFileWith($key): bool
+    protected function writeNewEnvironmentFileWith(mixed $key): bool
     {
         $replaced = preg_replace(
             $this->keyReplacementPattern(),

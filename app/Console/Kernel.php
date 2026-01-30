@@ -185,13 +185,13 @@ class Kernel extends ConsoleKernel
                         ->name("health:schedule-check-heartbeat-{$tenant->id}")
                         ->everyMinute()
                         ->onOneServer();
-                } catch (Throwable $th) {
+                } catch (Throwable $throw) {
                     Log::error('Error scheduling tenant commands.', [
                         'tenant' => $tenant->id,
-                        'exception' => $th,
+                        'exception' => $throw,
                     ]);
 
-                    report($th);
+                    report($throw);
                 }
             });
     }

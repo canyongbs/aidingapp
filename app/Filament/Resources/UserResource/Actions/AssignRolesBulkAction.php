@@ -65,6 +65,7 @@ class AssignRolesBulkAction extends BulkAction
                     ->multiple(),
             ])
             ->action(function (array $data, Collection $records) {
+                /** @var Collection<int, User> $records */
                 $records->each(function (User $record) use ($data) {
                     if ($data['replace']) {
                         $record->syncRoles($data['roles']);

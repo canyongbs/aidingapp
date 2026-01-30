@@ -167,11 +167,17 @@ class ServiceRequestType extends BaseModel implements Auditable
         return $this->through('priorities')->has('serviceRequests');
     }
 
+    /**
+     * @return HasMany<ServiceRequestPriority, $this>
+     */
     public function priorities(): HasMany
     {
         return $this->hasMany(ServiceRequestPriority::class, 'type_id');
     }
 
+    /**
+     * @return HasOne<ServiceRequestForm, $this>
+     */
     public function form(): HasOne
     {
         return $this->hasOne(ServiceRequestForm::class, 'service_request_type_id');
@@ -197,6 +203,9 @@ class ServiceRequestType extends BaseModel implements Auditable
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function assignmentTypeIndividual(): BelongsTo
     {
         return $this->belongsTo(
@@ -206,6 +215,9 @@ class ServiceRequestType extends BaseModel implements Auditable
         );
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function lastAssignedUser(): BelongsTo
     {
         return $this->belongsTo(User::class, 'last_assigned_id', 'id');

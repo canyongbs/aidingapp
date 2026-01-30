@@ -56,12 +56,12 @@ class SqidPlusSixServiceRequestNumberGenerator implements ServiceRequestNumberGe
         return $encode . $this->generateRandomString($remainingLength);
     }
 
-    public function generateRandomString($length): string
+    public function generateRandomString(int $length): string
     {
         $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         $randomString = '';
 
-        for ($i = 0; $i < $length; $i++) {
+        for ($iter = 0; $iter < $length; $iter++) {
             $randomString .= $characters[rand(0, strlen($characters) - 1)];
         }
 

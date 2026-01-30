@@ -82,6 +82,9 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
         'update_type' => ServiceRequestUpdateType::class,
     ];
 
+    /**
+     * @return BelongsTo<ServiceRequest, $this>
+     */
     public function serviceRequest(): BelongsTo
     {
         return $this->belongsTo(ServiceRequest::class);

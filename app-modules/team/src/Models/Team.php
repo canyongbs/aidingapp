@@ -104,6 +104,9 @@ class Team extends BaseModel
             ->withTimestamps();
     }
 
+    /**
+     * @return BelongsTo<Division, $this>
+     */
     public function division(): BelongsTo
     {
         return $this->belongsTo(Division::class);

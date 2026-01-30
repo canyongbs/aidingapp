@@ -52,6 +52,9 @@ use Illuminate\Database\Eloquent\Collection;
 
 class AssignLicensesBulkAction extends BulkAction
 {
+    /**
+     * @var array<LicenseType>
+     */
     protected array $licenseTypes = [
         LicenseType::RecruitmentCrm,
     ];
@@ -79,6 +82,7 @@ class AssignLicensesBulkAction extends BulkAction
                     ->map(fn (LicenseType $licenseType): Toggle => $this->getToggleForLicenseType($licenseType)),
             ])
             ->action(function (array $data, Collection $records) {
+                /** @var Collection<int, User> $records */
                 $records->each(function (User $record) use ($data) {
                     collect($this->licenseTypes)->each(function (LicenseType $licenseType) use ($record, $data) {
                         if ($data[$licenseType->value]) {
@@ -109,7 +113,7 @@ class AssignLicensesBulkAction extends BulkAction
             ->hintColor(fn (Get $get): array => $get("{$licenseType->value}_count") > 0 ? Color::Green : Color::Red)
             ->afterStateUpdated($this->getAfterStateUpdatedCallbackForLicenseType($licenseType))
             ->rules([
-                fn (Get $get): Closure => function (string $attribute, $value, Closure $fail) use ($licenseType, $get) {
+                fn (Get $get): Closure => function (string $attribute, string $value, Closure $fail) use ($licenseType, $get) {
                     if ($get("{$licenseType->value}_count") < 0) {
                         $fail("You do not have enough seats for {$licenseType->getLabel()}");
                     }

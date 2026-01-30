@@ -134,7 +134,7 @@ function isolatedMigration(string $migrationName, callable $callback): void
 
     try {
         Artisan::call('migrate:fresh');
-    } catch (StopMigration $e) { // @phpstan-ignore catch.neverThrown
+    } catch (StopMigration $exception) { // @phpstan-ignore catch.neverThrown
         $stopped = true;
     }
 
