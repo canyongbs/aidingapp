@@ -34,10 +34,12 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ListProjects;
 use AidingApp\Project\Models\Project;
 use AidingApp\Team\Models\Team;
 use App\Models\User;
+use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -65,6 +67,32 @@ it('can render with proper permission.', function () {
 
     get(ListProjects::getUrl())
         ->assertSuccessful();
+});
+
+it('is gated with proper access control', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->projectManagement = false;
+    $settings->save();
+
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $user->givePermissionTo('project.view-any');
+
+    actingAs($user);
+
+    get(ListProjects::getUrl())->assertForbidden();
+
+    $settings->data->addons->projectManagement = true;
+    $settings->save();
+
+    $user->revokePermissionTo('project.view-any');
+
+    get(ListProjects::getUrl())->assertForbidden();
+
+    $user->givePermissionTo('project.view-any');
+
+    get(ListProjects::getUrl())->assertSuccessful();
 });
 
 it('can list records', function () {

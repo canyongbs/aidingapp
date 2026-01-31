@@ -38,11 +38,25 @@ namespace AidingApp\Project\Policies;
 
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectFile;
+use App\Enums\Feature;
 use App\Models\Authenticatable;
+use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Gate;
 
 class ProjectFilePolicy
 {
+    public function before(Authenticatable $authenticatable): ?Response
+    {
+        if (! Gate::check(
+            collect($this->requiredFeatures())->map(fn (Feature $feature) => $feature->getGateName())
+        )) {
+            return FeatureAccessResponse::deny();
+        }
+
+        return null;
+    }
+    
     public function viewAny(Authenticatable $authenticatable, Project $project): Response
     {
         if ($authenticatable->cannot('view', $project)) {
@@ -86,5 +100,13 @@ class ProjectFilePolicy
         }
 
         return Response::allow();
+    }
+
+    /**
+     * @return array<Feature>
+     */
+    protected function requiredFeatures(): array
+    {
+        return [Feature::ProjectManagement];
     }
 }

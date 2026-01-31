@@ -38,8 +38,11 @@ namespace AidingApp\ServiceManagement\Policies;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\Incident;
+use App\Enums\Feature;
 use App\Models\Authenticatable;
+use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Gate;
 
 class IncidentPolicy
 {
@@ -47,6 +50,12 @@ class IncidentPolicy
     {
         if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
             return Response::deny('You are not licensed for the Recruitment CRM.');
+        }
+
+        if (! Gate::check(
+            collect($this->requiredFeatures())->map(fn (Feature $feature) => $feature->getGateName())
+        )) {
+            return FeatureAccessResponse::deny();
         }
 
         return null;
@@ -106,5 +115,13 @@ class IncidentPolicy
             abilities: ["incident.{$incident->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to permanently delete this incident.'
         );
+    }
+
+    /**
+     * @return array<Feature>
+     */
+    protected function requiredFeatures(): array
+    {
+        return [Feature::IncidentManagement];
     }
 }

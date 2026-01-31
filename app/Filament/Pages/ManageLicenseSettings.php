@@ -144,6 +144,14 @@ class ManageLicenseSettings extends SettingsPage
                                 ->label('Asset Management'),
                             Toggle::make('data.addons.feedbackManagement')
                                 ->label('Feedback Management'),
+                            Toggle::make('data.addons.contractManagement')
+                                ->label('Contract Management'),
+                            Toggle::make('data.addons.licenseManagement')
+                                ->label('License Management'),
+                            Toggle::make('data.addons.projectManagement')
+                                ->label('Project Management'),
+                            Toggle::make('data.addons.incidentManagement')
+                                ->label('Incident Management'),
                         ]
                     ),
             ]);

@@ -42,6 +42,7 @@ use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
 use App\Models\User;
+use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -72,6 +73,37 @@ it('can render with proper permission.', function () {
         'record' => $project->getRouteKey(),
     ]))
         ->assertSuccessful();
+});
+
+it('is gated with proper access control', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->projectManagement = false;
+    $settings->save();
+
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+
+    get(ManageMilestones::getUrl(['record' => $project]))->assertForbidden();
+
+    $settings->data->addons->projectManagement = true;
+    $settings->save();
+
+    $user->revokePermissionTo('project.view-any');
+    $user->revokePermissionTo('project.*.view');
+
+    get(ManageMilestones::getUrl(['record' => $project]))->assertForbidden();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+
+    get(ManageMilestones::getUrl(['record' => $project]))->assertSuccessful();
 });
 
 it('can list milestones', function () {

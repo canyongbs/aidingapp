@@ -38,8 +38,11 @@ namespace AidingApp\LicenseManagement\Policies;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\LicenseManagement\Models\ProductLicense;
+use App\Enums\Feature;
 use App\Models\Authenticatable;
+use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Gate;
 
 class ProductLicensePolicy
 {
@@ -47,6 +50,12 @@ class ProductLicensePolicy
     {
         if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
             return Response::deny('You are not licensed for the Recruitment CRM.');
+        }
+
+        if (! Gate::check(
+            collect($this->requiredFeatures())->map(fn (Feature $feature) => $feature->getGateName())
+        )) {
+            return FeatureAccessResponse::deny();
         }
 
         return null;
@@ -106,5 +115,13 @@ class ProductLicensePolicy
             abilities: ["product_license.{$productLicense->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to force delete this product license.'
         );
+    }
+
+    /**
+     * @return array<Feature>
+     */
+    protected function requiredFeatures(): array
+    {
+        return [Feature::LicenseManagement];
     }
 }

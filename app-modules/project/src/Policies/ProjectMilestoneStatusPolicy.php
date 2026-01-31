@@ -37,11 +37,25 @@
 namespace AidingApp\Project\Policies;
 
 use AidingApp\Project\Models\ProjectMilestoneStatus;
+use App\Enums\Feature;
 use App\Models\Authenticatable;
+use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Support\Facades\Gate;
 
 class ProjectMilestoneStatusPolicy
 {
+    public function before(Authenticatable $authenticatable): ?Response
+    {
+        if (! Gate::check(
+            collect($this->requiredFeatures())->map(fn (Feature $feature) => $feature->getGateName())
+        )) {
+            return FeatureAccessResponse::deny();
+        }
+
+        return null;
+    }
+    
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -104,5 +118,13 @@ class ProjectMilestoneStatusPolicy
             abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permissions to force delete this project milestone status.'
         );
+    }
+
+    /**
+     * @return array<Feature>
+     */
+    protected function requiredFeatures(): array
+    {
+        return [Feature::ProjectManagement];
     }
 }
