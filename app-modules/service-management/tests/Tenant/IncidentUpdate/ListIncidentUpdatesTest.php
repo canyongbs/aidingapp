@@ -116,14 +116,14 @@ test('ListIncidentUpdates is gated with proper feature access control', function
     $settings->save();
 
     get(IncidentUpdateResource::getUrl())->assertForbidden();
-    
+
     //Service management true, incident management false, incident permissions
     $settings->data->addons->serviceManagement = true;
     $settings->data->addons->incidentManagement = false;
     $settings->save();
 
     get(IncidentUpdateResource::getUrl())->assertForbidden();
-    
+
     //Service management false, incident management true, incident permissions
     $settings->data->addons->serviceManagement = false;
     $settings->data->addons->incidentManagement = true;

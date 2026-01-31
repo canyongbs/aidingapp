@@ -56,7 +56,7 @@ class ProjectMilestonePolicy
 
         return null;
     }
-    
+
     public function viewAny(Authenticatable $authenticatable, Project $project): Response
     {
         if ($authenticatable->cannot('view', $project)) {
