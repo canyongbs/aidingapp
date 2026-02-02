@@ -55,7 +55,7 @@ class ContractPolicy
 
         if (! is_null($response = $this->hasFeatures())) {
             return $response;
-        }
+        } 
 
         return null;
     }
