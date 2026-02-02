@@ -82,15 +82,6 @@ class Stream extends BaseStream
         ]));
 
         try {
-            file_put_contents(
-                storage_path('logs/azure_openai_stream/' . now()->toDateTimeString() . '_' . now()->getTimestampMs()) . '.json',
-                json_encode([
-                    ...$requestBody,
-                    'instructions' => explode(PHP_EOL, $requestBody['instructions']),
-                ], flags: JSON_PRETTY_PRINT),
-            );
-            usleep(1000);
-
             return $this
                 ->client
                 ->withOptions(['stream' => true])
