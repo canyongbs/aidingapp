@@ -258,7 +258,7 @@
                         :class="
                             serviceRequestUpdate.created_by_type === 'contact'
                                 ? 'mb-4 p-4 bg-gray-50 border border-gray-200 rounded'
-                                : 'mb-4 p-4 border border-blue-200 rounded bg-gradient-to-br from-brand-500 to-brand-800 text-white'
+                                : 'mb-4 p-4 border border-blue-200 rounded bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] text-white'
                         "
                         v-for="serviceRequestUpdate in serviceRequestUpdates"
                         :key="serviceRequestUpdate.id"

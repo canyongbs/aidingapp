@@ -38,8 +38,8 @@ namespace AidingApp\Report\Filament\Widgets;
 
 use AidingApp\Report\Filament\Exports\ServiceMonitoringTargetExporter;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use Filament\Actions\ExportAction;
 use Filament\Actions\Exports\Enums\ExportFormat;
-use Filament\Tables\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;

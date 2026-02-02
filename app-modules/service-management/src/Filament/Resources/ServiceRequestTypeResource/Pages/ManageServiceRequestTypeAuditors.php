@@ -37,11 +37,11 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use Filament\Actions\AttachAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Actions\AttachAction;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DetachAction;
-use Filament\Tables\Actions\DetachBulkAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -67,10 +67,10 @@ class ManageServiceRequestTypeAuditors extends ManageRelatedRecords
             ->headerActions([
                 AttachAction::make(),
             ])
-            ->actions([
+            ->recordActions([
                 DetachAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DetachBulkAction::make(),
                 ]),

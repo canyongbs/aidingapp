@@ -49,20 +49,19 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Filament\Tables\Columns\IdColumn;
-use Filament\Forms\Components\Component;
-use Filament\Forms\Components\Grid;
-use Filament\Forms\Components\Section;
+use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Filament\Infolists\Infolist;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -76,10 +75,10 @@ class ServiceRequestsRelationManager extends RelationManager
 {
     protected static string $relationship = 'serviceRequests';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Select::make('division_id')
                     ->relationship('division', 'name')
                     ->label('Division')
@@ -141,7 +140,7 @@ class ServiceRequestsRelationManager extends RelationManager
                                     ->getParentComponent()
                                     ->getContainer()
                                     ->getComponent('dynamicTypeFields')
-                                    ?->getChildComponentContainer()
+                                    ?->getChildSchema()
                                     ->fill();
                             })
                             ->label('Type')
@@ -182,9 +181,9 @@ class ServiceRequestsRelationManager extends RelationManager
             ]);
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return (resolve(ViewServiceRequest::class))->infolist($infolist);
+        return (resolve(ViewServiceRequest::class))->infolist($schema);
     }
 
     public function table(Table $table): Table
@@ -239,7 +238,7 @@ class ServiceRequestsRelationManager extends RelationManager
                     ->modalHeading('Create new service request')
                     ->using(fn (array $data): Model => $this->handleRecordCreation($data)),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
                     ->mutateRecordDataUsing(function (array $data, $record) {
@@ -248,7 +247,7 @@ class ServiceRequestsRelationManager extends RelationManager
                         return $data;
                     }),
             ])
-            ->bulkActions([])
+            ->toolbarActions([])
             ->defaultSort('created_at', 'desc');
     }
 

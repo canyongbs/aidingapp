@@ -41,21 +41,19 @@ use AidingApp\Engagement\DataTransferObjects\EngagementCreationData;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Notification\Enums\NotificationChannel;
-use Filament\Actions\StaticAction;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action as FormComponentAction;
+use Filament\Actions\Action;
+use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Fieldset;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\CreateAction;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Schema;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
@@ -77,7 +75,7 @@ class RelationManagerSendEngagementAction extends CreateAction
 
                 return auth()->user()->can('create', [Engagement::class, null]);
             })
-            ->form(fn (Form $form) => $form->schema([
+            ->form(fn (Schema $schema) => $schema->components([
                 Select::make('channel')
                     ->label('What would you like to send?')
                     ->options(NotificationChannel::getEngagementOptions())
@@ -101,8 +99,8 @@ class RelationManagerSendEngagementAction extends CreateAction
                             ])
                             ->profile('email')
                             ->required()
-                            ->hintAction(fn (TiptapEditor $component) => FormComponentAction::make('loadEmailTemplate')
-                                ->form([
+                            ->hintAction(fn (TiptapEditor $component) => Action::make('loadEmailTemplate')
+                                ->schema([
                                     Select::make('emailTemplate')
                                         ->searchable()
                                         ->options(function (Get $get): array {
@@ -169,7 +167,7 @@ class RelationManagerSendEngagementAction extends CreateAction
                             ->visible(fn (Get $get) => $get('send_later')),
                     ]),
             ]))
-            ->action(function (array $data, Form $form, RelationManager $livewire) {
+            ->action(function (array $data, Schema $schema, RelationManager $livewire) {
                 $engagement = app(CreateEngagement::class)->execute(new EngagementCreationData(
                     user: auth()->user(),
                     recipient: $livewire->getOwnerRecord(),
@@ -181,12 +179,12 @@ class RelationManagerSendEngagementAction extends CreateAction
                             'extension' => $file->getClientOriginalExtension(),
                             'path' => (fn () => $this->path)->call($file),
                         ],
-                        $form->getFlatFields()['body']->getTemporaryImages(),
+                        $schema->getFlatFields()['body']->getTemporaryImages(),
                     ),
                     scheduledAt: ($data['send_later'] ?? false) ? Carbon::parse($data['scheduled_at'] ?? null) : null,
                 ));
 
-                $form->model($engagement)->saveRelationships();
+                $schema->model($engagement)->saveRelationships();
             })
             ->modalSubmitActionLabel('Send')
             ->modalCloseButton(false)
@@ -200,7 +198,7 @@ class RelationManagerSendEngagementAction extends CreateAction
                     ->cancelParentActions()
                     ->requiresConfirmation()
                     ->action(fn () => null)
-                    ->modalSubmitAction(fn (StaticAction $action) => $action->color('danger')),
+                    ->modalSubmitAction(fn (Action $action) => $action->color('danger')),
             ]);
     }
 

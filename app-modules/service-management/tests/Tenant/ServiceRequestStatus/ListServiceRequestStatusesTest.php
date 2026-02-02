@@ -33,9 +33,9 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages\ListServiceRequestStatuses;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Models\User;
@@ -55,7 +55,7 @@ test('The correct details are displayed on the ListServiceRequestStatuses page',
 
     asSuperAdmin();
 
-    $component = livewire(ServiceRequestStatusResource\Pages\ListServiceRequestStatuses::class);
+    $component = livewire(ListServiceRequestStatuses::class);
 
     $component
         ->assertSuccessful()

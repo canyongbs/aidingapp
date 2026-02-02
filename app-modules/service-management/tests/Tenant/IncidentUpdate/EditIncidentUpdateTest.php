@@ -114,7 +114,7 @@ test('EditIncidentUpdate requires valid data', function ($data, $errors) {
 })->with(
     [
         'incident missing' => [EditIncidentUpdateRequestFactory::new()->state(['incident_id' => null]), ['incident_id' => 'required']],
-        'incident not existing incident_id id' => [EditIncidentUpdateRequestFactory::new()->state(['incident_id' => fake()->uuid()]), ['incident_id' => 'exists']],
+        'incident not existing incident_id id' => [EditIncidentUpdateRequestFactory::new()->state(['incident_id' => fake()->uuid()]), ['incident_id' => 'in']],
         'update missing' => [EditIncidentUpdateRequestFactory::new()->state(['update' => null]), ['update' => 'required']],
         'update is not a string' => [EditIncidentUpdateRequestFactory::new()->state(['update' => 99]), ['update' => 'string']],
         'internal not a boolean' => [EditIncidentUpdateRequestFactory::new()->state(['internal' => 'invalid']), ['internal' => 'boolean']],

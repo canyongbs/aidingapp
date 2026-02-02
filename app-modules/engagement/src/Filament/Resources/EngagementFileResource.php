@@ -41,19 +41,21 @@ use AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages\EditEng
 use AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages\ListEngagementFiles;
 use AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages\ViewEngagementFile;
 use AidingApp\Engagement\Models\EngagementFile;
+use BackedEnum;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use UnitEnum;
 
 class EngagementFileResource extends Resource
 {
     protected static ?string $model = EngagementFile::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-document-duplicate';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-duplicate';
 
-    protected static ?string $navigationGroup = 'Engagement Features';
+    protected static string | UnitEnum | null $navigationGroup = 'Engagement Features';
 
     protected static ?int $navigationSort = 7;
 
@@ -68,10 +70,10 @@ class EngagementFileResource extends Resource
     // TODO: Look into whether or not we should just delete this resource
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('description')
                     ->required()
                     ->maxLength(255),

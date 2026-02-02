@@ -41,8 +41,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Support\BulkProcessingMachine;
 use Closure;
+use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Select;
-use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Collection;
 
 class ChangeServiceRequestStatusBulkAction

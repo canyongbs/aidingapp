@@ -42,13 +42,14 @@ use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource
 use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviderResource\Pages\ViewMaintenanceProvider;
 use AidingApp\InventoryManagement\Models\MaintenanceProvider;
 use App\Filament\Clusters\AssetManagement;
+use BackedEnum;
 use Filament\Resources\Resource;
 
 class MaintenanceProviderResource extends Resource
 {
     protected static ?string $model = MaintenanceProvider::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static ?string $navigationLabel = 'Maintenance Providers';
 

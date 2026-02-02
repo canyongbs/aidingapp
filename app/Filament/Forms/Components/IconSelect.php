@@ -68,28 +68,16 @@ class IconSelect extends Select
 
                             $name = (string) str($id)->after('o-')->headline();
 
-                            $options[] = [
-                                'customProperties' => [
-                                    'name' => $name,
-                                ],
-                                'label' => view('filament.forms.components.icon-select.option', [
-                                    'icon' => $icon,
-                                    'label' => $name,
-                                ])->render(),
-                                'value' => $icon,
-                            ];
+                            $options[$icon] = view('filament.forms.components.icon-select.option', [
+                                'icon' => $icon,
+                                'label' => $name,
+                            ])->render();
                         }
                     }
 
                     return $options;
                 });
             })
-            ->transformOptionsForJsUsing(fn (array $options): array => $options)
             ->optionsLimit(1000);
-    }
-
-    public function getSearchableOptionFields(): array
-    {
-        return ['customProperties.name'];
     }
 }

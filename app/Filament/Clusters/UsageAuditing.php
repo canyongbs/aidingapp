@@ -36,13 +36,15 @@
 
 namespace App\Filament\Clusters;
 
+use BackedEnum;
 use Filament\Clusters\Cluster;
+use UnitEnum;
 
 class UsageAuditing extends Cluster
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $navigationGroup = 'Analytics';
+    protected static string | UnitEnum | null $navigationGroup = 'Analytics';
 
     protected static ?int $navigationSort = 2;
 }

@@ -33,7 +33,6 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory;
@@ -42,9 +41,9 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseCategory\RequestFactories\EditKnowledgeBaseCategoryRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\AssociateAction;
+use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Select;
-use Filament\Tables\Actions\AssociateAction;
-use Filament\Tables\Actions\CreateAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -165,7 +164,7 @@ test('can create subcategory', function () {
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])
         ->callTableAction(
-            name: CreateAction::class,
+            CreateAction::class,
             data: $knowledgeBaseSubCategory->toArray()
         )
         ->assertHasNoTableActionErrors();
@@ -197,7 +196,7 @@ test('exclude already attached subcategories in search', function () {
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])
         ->mountTableAction(AssociateAction::class)
-        ->assertFormFieldExists('recordId', 'mountedTableActionForm', function (Select $select) use ($knowledgeBaseSubCategory, $newknowledgeBaseCategory) {
+        ->assertFormFieldExists('recordId', 'mountedActionSchema0', function (Select $select) use ($knowledgeBaseSubCategory, $newknowledgeBaseCategory) {
             $options = $select->getOptions();
 
             return in_array($newknowledgeBaseCategory->getKey(), array_keys($options)) && ! in_array($knowledgeBaseSubCategory->getKey(), array_keys($options));

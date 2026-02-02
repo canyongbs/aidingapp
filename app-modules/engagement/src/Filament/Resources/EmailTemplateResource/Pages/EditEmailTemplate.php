@@ -41,8 +41,8 @@ use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Schema;
 use FilamentTiptapEditor\TiptapEditor;
 
 class EditEmailTemplate extends EditRecord
@@ -51,11 +51,11 @@ class EditEmailTemplate extends EditRecord
 
     protected static string $resource = EmailTemplateResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->columns(1)
-            ->schema([
+            ->components([
                 TextInput::make('name')
                     ->string()
                     ->required()

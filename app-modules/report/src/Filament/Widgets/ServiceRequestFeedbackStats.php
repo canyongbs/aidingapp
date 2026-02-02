@@ -54,7 +54,7 @@ class ServiceRequestFeedbackStats extends StatsOverviewReportWidget
     /** @return list<string>|null */
     public function getServiceRequestTypes(): ?array
     {
-        $types = $this->filters['serviceRequestTypes'] ?? null;
+        $types = $this->pageFilters['serviceRequestTypes'] ?? null;
 
         return filled($types) ? (array) $types : null;
     }

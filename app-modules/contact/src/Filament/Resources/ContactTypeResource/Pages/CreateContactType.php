@@ -41,17 +41,17 @@ use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
 class CreateContactType extends CreateRecord
 {
     protected static string $resource = ContactTypeResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->label('Name')
                     ->required()

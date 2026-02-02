@@ -41,21 +41,24 @@
             </x-slot>
         @endif
 
-        <x-filament-panels::form wire:submit="authenticate">
+        <form
+            class="flex flex-col gap-6"
+            wire:submit="authenticate"
+        >
             {{ $this->form }}
 
-            <x-filament-panels::form.actions
-                :actions="$this->getCachedFormActions()"
+            <x-filament::actions
+                :actions="$this->getFormActions()"
                 :full-width="$this->hasFullWidthFormActions()"
             />
             @if (count($this->getSsoFormActions()) > 0)
                 <small class="text-gray-800 dark:text-gray-300">or log in with single sign-on</small>
             @endif
-            <x-filament-panels::form.actions
+            <x-filament::actions
                 :actions="$this->getSsoFormActions()"
                 :full-width="$this->hasFullWidthFormActions()"
             />
-        </x-filament-panels::form>
+        </form>
     </div>
 
     <div class="flex w-full flex-col gap-6 lg:w-1/2">

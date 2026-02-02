@@ -41,10 +41,10 @@ use AidingApp\Contact\Models\Contact;
 use App\Features\ContactChangesFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class ViewContact extends ViewRecord
 {
@@ -53,9 +53,9 @@ class ViewContact extends ViewRecord
     // TODO: Automatically set from Filament
     protected static ?string $navigationLabel = 'View';
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
+        return $schema
             ->schema([
                 Section::make('Demographics')
                     ->schema([

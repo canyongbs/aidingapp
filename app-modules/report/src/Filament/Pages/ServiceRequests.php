@@ -45,11 +45,12 @@ use AidingApp\Report\Filament\Widgets\ServiceRequestTypesTable;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Section;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use UnitEnum;
 
 class ServiceRequests extends Dashboard
 {
@@ -57,7 +58,7 @@ class ServiceRequests extends Dashboard
 
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static ?string $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
 
     protected static ?string $navigationLabel = 'Service Requests';
 
@@ -69,7 +70,7 @@ class ServiceRequests extends Dashboard
 
     protected $cacheTag = 'report-service-requests';
 
-    protected static string $view = 'report::filament.pages.report';
+    protected string $view = 'report::filament.pages.report';
 
     public static function canAccess(): bool
     {
@@ -79,9 +80,9 @@ class ServiceRequests extends Dashboard
         return $user->can('report-library.view-any');
     }
 
-    public function filtersForm(Form $form): Form
+    public function filtersForm(Schema $schema): Schema
     {
-        return $form->schema([
+        return $schema->components([
             Section::make()
                 ->schema([
                     DatePicker::make('startDate')
@@ -120,7 +121,7 @@ class ServiceRequests extends Dashboard
         ];
     }
 
-    public function getColumns(): int | string | array
+    public function getColumns(): int|array
     {
         return [
             'sm' => 2,
@@ -132,7 +133,7 @@ class ServiceRequests extends Dashboard
     public function getWidgetData(): array
     {
         return [
-            'filters' => $this->filters,
+            'pageFilters' => $this->filters,
         ];
     }
 }

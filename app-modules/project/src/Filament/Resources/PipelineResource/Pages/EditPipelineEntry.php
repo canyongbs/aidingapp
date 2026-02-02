@@ -42,15 +42,15 @@ use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Resources\Pages\Page;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -58,7 +58,7 @@ use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 
 /**
- * @property Form $form
+ * @property Schema $form
  */
 class EditPipelineEntry extends Page
 {
@@ -68,7 +68,7 @@ class EditPipelineEntry extends Page
 
     protected static ?string $title = 'Edit Pipeline Entry';
 
-    protected static string $view = 'project::filament.pages.edit-pipeline-entry';
+    protected string $view = 'project::filament.pages.edit-pipeline-entry';
 
     public Pipeline $record;
 
@@ -136,10 +136,10 @@ class EditPipelineEntry extends Page
         return $breadcrumbs;
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Grid::make()->schema([
                     Select::make('pipeline_stage_id')
                         ->label('Stage')

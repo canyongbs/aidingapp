@@ -117,89 +117,91 @@
 </script>
 
 <template>
-    <button
-        type="button"
-        class="group w-full px-4 py-3 text-left transition-all duration-150"
-        :class="[
-            isSelected
-                ? 'bg-primary-50 dark:bg-primary-900/20 border-l-2 border-primary-600'
-                : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 border-l-2 border-transparent',
-        ]"
-        @click="$emit('click')"
-        @mouseenter="isHovered = true"
-        @mouseleave="isHovered = false"
-    >
-        <div class="flex items-center gap-3">
-            <!-- Avatar -->
-            <div class="relative flex-shrink-0">
-                <template v-if="conversation.type === 'channel'">
-                    <div
-                        class="relative flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30"
-                    >
-                        <HashtagIcon class="h-5 w-5 text-primary-600 dark:text-primary-400" />
-                        <LockClosedIcon
-                            v-if="conversation.is_private"
-                            class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 text-gray-500 dark:text-gray-400"
-                        />
-                    </div>
-                </template>
-                <template v-else>
-                    <Avatar :src="avatarUrl" :name="displayName" size="md" ring />
-                </template>
+    <div>
+        <button
+            type="button"
+            class="group w-full px-4 py-3 text-left transition-all duration-150"
+            :class="[
+                isSelected
+                    ? 'bg-primary-50 dark:bg-primary-900/20 border-l-2 border-primary-600'
+                    : 'hover:bg-gray-50 dark:hover:bg-gray-800/50 border-l-2 border-transparent',
+            ]"
+            @click="$emit('click')"
+            @mouseenter="isHovered = true"
+            @mouseleave="isHovered = false"
+        >
+            <div class="flex items-center gap-3">
+                <!-- Avatar -->
+                <div class="relative flex-shrink-0">
+                    <template v-if="conversation.type === 'channel'">
+                        <div
+                            class="relative flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30"
+                        >
+                            <HashtagIcon class="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                            <LockClosedIcon
+                                v-if="conversation.is_private"
+                                class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 text-gray-500 dark:text-gray-400"
+                            />
+                        </div>
+                    </template>
+                    <template v-else>
+                        <Avatar :src="avatarUrl" :name="displayName" size="md" ring />
+                    </template>
 
-                <!-- Unread Badge -->
-                <span
-                    v-if="unreadCount > 0"
-                    class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary-600 px-1.5 text-xs font-medium text-white shadow-sm"
-                >
-                    {{ unreadCount > 99 ? '99+' : unreadCount }}
-                </span>
-            </div>
-
-            <!-- Content -->
-            <div class="min-w-0 flex-1">
-                <div class="flex items-center justify-between">
+                    <!-- Unread Badge -->
                     <span
-                        class="truncate font-medium"
+                        v-if="unreadCount > 0"
+                        class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary-600 px-1.5 text-xs font-medium text-white shadow-sm"
+                    >
+                        {{ unreadCount > 99 ? '99+' : unreadCount }}
+                    </span>
+                </div>
+
+                <!-- Content -->
+                <div class="min-w-0 flex-1">
+                    <div class="flex items-center justify-between">
+                        <span
+                            class="truncate font-medium"
+                            :class="[
+                                unreadCount > 0 ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300',
+                            ]"
+                        >
+                            {{ displayName }}
+                        </span>
+                        <div class="ml-2 flex items-center gap-1.5 flex-shrink-0">
+                            <!-- Pin Button -->
+                            <button
+                                v-if="isHovered || conversation.is_pinned"
+                                type="button"
+                                class="p-0.5 rounded transition-colors"
+                                :class="[
+                                    conversation.is_pinned
+                                        ? 'text-primary-600 dark:text-primary-400'
+                                        : 'text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 opacity-0 group-hover:opacity-100',
+                                ]"
+                                :title="conversation.is_pinned ? 'Unpin conversation' : 'Pin conversation'"
+                                :disabled="isPinning"
+                                @click="handlePin"
+                            >
+                                <MapPinIcon class="w-3.5 h-3.5" />
+                            </button>
+                            <span class="text-xs text-gray-500 dark:text-gray-500">
+                                {{ timeAgo }}
+                            </span>
+                        </div>
+                    </div>
+                    <p
+                        class="mt-0.5 truncate text-sm leading-relaxed"
                         :class="[
-                            unreadCount > 0 ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300',
+                            unreadCount > 0
+                                ? 'font-medium text-gray-700 dark:text-gray-300'
+                                : 'text-gray-500 dark:text-gray-400',
                         ]"
                     >
-                        {{ displayName }}
-                    </span>
-                    <div class="ml-2 flex items-center gap-1.5 flex-shrink-0">
-                        <!-- Pin Button -->
-                        <button
-                            v-if="isHovered || conversation.is_pinned"
-                            type="button"
-                            class="p-0.5 rounded transition-colors"
-                            :class="[
-                                conversation.is_pinned
-                                    ? 'text-primary-600 dark:text-primary-400'
-                                    : 'text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 opacity-0 group-hover:opacity-100',
-                            ]"
-                            :title="conversation.is_pinned ? 'Unpin conversation' : 'Pin conversation'"
-                            :disabled="isPinning"
-                            @click="handlePin"
-                        >
-                            <MapPinIcon class="w-3.5 h-3.5" />
-                        </button>
-                        <span class="text-xs text-gray-500 dark:text-gray-500">
-                            {{ timeAgo }}
-                        </span>
-                    </div>
+                        {{ lastMessagePreview }}
+                    </p>
                 </div>
-                <p
-                    class="mt-0.5 truncate text-sm leading-relaxed"
-                    :class="[
-                        unreadCount > 0
-                            ? 'font-medium text-gray-700 dark:text-gray-300'
-                            : 'text-gray-500 dark:text-gray-400',
-                    ]"
-                >
-                    {{ lastMessagePreview }}
-                </p>
             </div>
-        </div>
-    </button>
+        </button>
+    </div>
 </template>

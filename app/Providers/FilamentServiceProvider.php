@@ -48,13 +48,19 @@ use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Fieldset;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentView;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -186,10 +192,21 @@ class FilamentServiceProvider extends ServiceProvider
             ],
         ]);
 
+        Table::configureUsing(fn (Table $table) => $table->defaultDateTimeDisplayFormat('M j, Y g:ia'));
+        Schema::configureUsing(fn (Schema $infolist) => $infolist->defaultDateTimeDisplayFormat('M j, Y g:ia'));
+
         FilamentView::registerRenderHook(
             'panels::footer',
             fn (): View => view('filament.footer'),
         );
+
+        Select::configureUsing(function (Select $component) {
+            $component->native(false);
+        });
+
+        SelectFilter::configureUsing(function (SelectFilter $component) {
+            $component->native(false);
+        });
 
         DateTimePicker::configureUsing(function (DateTimePicker $component) {
             if ($component instanceof DatePicker) {
@@ -210,13 +227,19 @@ class FilamentServiceProvider extends ServiceProvider
             $timezoneLabel = app(DisplaySettings::class)->getTimezoneLabel();
 
             $column
-                ->timezone($timezone)
-                ->tooltip(function (TextColumn $column) use ($timezoneLabel): ?string {
-                    if (! ($column->isTime() || $column->isDateTime())) {
-                        return null;
+                ->timezone(function (TextColumn $column) use ($timezone): ?string {
+                    if ($column->isDateTime()) {
+                        return $timezone;
                     }
 
-                    return "This time is set in {$timezoneLabel}.";
+                    return null;
+                })
+                ->tooltip(function (TextColumn $column, mixed $state) use ($timezoneLabel): ?string {
+                    if ($column->isDateTime() && ! blank($state)) {
+                        return "This time is set in {$timezoneLabel}.";
+                    }
+
+                    return null;
                 });
         });
 
@@ -225,29 +248,27 @@ class FilamentServiceProvider extends ServiceProvider
             $timezoneLabel = app(DisplaySettings::class)->getTimezoneLabel();
 
             $entry
-                ->timezone($timezone)
-                ->hintIcon(function (TextEntry $entry): ?string {
-                    if (! ($entry->isTime() || $entry->isDateTime())) {
-                        return null;
+                ->timezone(function (TextEntry $column) use ($timezone): ?string {
+                    if ($column->isDateTime()) {
+                        return $timezone;
                     }
 
-                    return 'heroicon-m-clock';
+                    return null;
                 })
-                ->hintIconTooltip(function (TextEntry $entry) use ($timezoneLabel): ?string {
-                    if (! ($entry->isTime() || $entry->isDateTime())) {
-                        return null;
+                ->hintIcon(function (TextEntry $entry, mixed $state): ?string {
+                    if ($entry->isDateTime() && ! blank($state)) {
+                        return 'heroicon-m-clock';
                     }
 
-                    return "This time is set in {$timezoneLabel}.";
+                    return null;
+                })
+                ->hintIconTooltip(function (TextEntry $entry, mixed $state) use ($timezoneLabel): ?string {
+                    if ($entry->isDateTime() && ! blank($state)) {
+                        return "This time is set in {$timezoneLabel}.";
+                    }
+
+                    return null;
                 });
-        });
-
-        Select::configureUsing(function (Select $select): void {
-            $select->native(false);
-        });
-
-        SelectFilter::configureUsing(function (SelectFilter $selectFilter): void {
-            $selectFilter->native(false);
         });
 
         Toggle::macro('lockedWithoutAnyLicenses', function (User $user, array $licenses) {
@@ -276,6 +297,25 @@ class FilamentServiceProvider extends ServiceProvider
 
         PhoneEntry::configureUsing(function (PhoneEntry $phoneEntry): void {
             $phoneEntry->displayFormat(PhoneInputNumberType::INTERNATIONAL);
+        });
+
+        Table::configureUsing(function (Table $table): void {
+            $table
+                ->deferFilters(false)
+                ->paginationPageOptions([5, 10, 20]);
+        });
+
+        Fieldset::configureUsing(fn (Fieldset $fieldset) => $fieldset
+            ->columnSpanFull());
+
+        Grid::configureUsing(fn (Grid $grid) => $grid
+            ->columnSpanFull());
+
+        Section::configureUsing(fn (Section $section) => $section
+            ->columnSpanFull());
+
+        Textarea::configureUsing(function (Textarea $textarea): void {
+            $textarea->disableGrammarly();
         });
     }
 }

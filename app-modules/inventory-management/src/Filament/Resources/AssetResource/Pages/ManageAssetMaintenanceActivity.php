@@ -38,6 +38,7 @@ namespace AidingApp\InventoryManagement\Filament\Resources\AssetResource\Pages;
 
 use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
 use AidingApp\InventoryManagement\Filament\Resources\AssetResource\RelationManagers\MaintenanceActivitiesRelationManager;
+use BackedEnum;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
@@ -53,7 +54,7 @@ class ManageAssetMaintenanceActivity extends ManageRelatedRecords
 
     protected static ?string $breadcrumb = 'Maintenance';
 
-    protected static ?string $navigationIcon = 'heroicon-o-wrench-screwdriver';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-wrench-screwdriver';
 
     public function getTitle(): string | Htmlable
     {

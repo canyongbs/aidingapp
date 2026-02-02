@@ -40,7 +40,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use App\Features\ContactChangesFeature;
 use App\Filament\Tables\Columns\IdColumn;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
@@ -97,7 +97,7 @@ class RecentContactsList extends BaseWidget
                     ->dateTime('g:ia - M j, Y ')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
                     ->url(fn (Contact $record): string => ContactResource::getUrl(name: 'view', parameters: ['record' => $record])),
             ])

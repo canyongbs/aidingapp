@@ -36,10 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\ServiceManagement\Models\ServiceRequestHistory>
+ * @extends Factory<ServiceRequestHistory>
  */
 class ServiceRequestHistoryFactory extends Factory
 {

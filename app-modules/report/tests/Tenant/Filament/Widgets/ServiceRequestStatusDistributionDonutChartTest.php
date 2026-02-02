@@ -89,7 +89,7 @@ it('returns correct service request status distribution within the given date ra
 
     $widget = new ServiceRequestStatusDistributionDonutChart();
     $widget->cacheTag = 'test-service-request-status-distribution';
-    $widget->filters = [
+    $widget->pageFilters = [
         'startDate' => $startDate->toDateString(),
         'endDate' => $endDate->toDateString(),
     ];
@@ -146,7 +146,7 @@ it('returns correct distribution when no date filters are applied', function () 
 
     $widget = new ServiceRequestStatusDistributionDonutChart();
     $widget->cacheTag = 'test-service-request-status-distribution-no-filters';
-    $widget->filters = [];
+    $widget->pageFilters = [];
 
     $data = $widget->getData();
 

@@ -38,17 +38,17 @@ namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
 class CreateKnowledgeBaseStatus extends CreateRecord
 {
     protected static string $resource = KnowledgeBaseStatusResource::class;
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->label('Name')
                     ->required()

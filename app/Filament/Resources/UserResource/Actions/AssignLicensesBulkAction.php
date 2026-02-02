@@ -40,14 +40,14 @@ use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\License;
 use App\Models\User;
 use Closure;
+use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Colors\Color;
-use Filament\Support\Enums\MaxWidth;
-use Filament\Tables\Actions\BulkAction;
+use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Collection;
 
 class AssignLicensesBulkAction extends BulkAction
@@ -64,7 +64,7 @@ class AssignLicensesBulkAction extends BulkAction
         parent::setUp();
 
         $this->icon('heroicon-s-wrench-screwdriver')
-            ->modalWidth(MaxWidth::Small)
+            ->modalWidth(Width::Small)
             ->fillForm(fn (Collection $records): array => [
                 'records' => $records,
                 ...collect($this->licenseTypes)

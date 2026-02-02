@@ -43,6 +43,7 @@ use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ManagePipelineEn
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ViewPipeline;
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ViewPipelineEntry;
 use AidingApp\Project\Models\Pipeline;
+use BackedEnum;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 
@@ -50,7 +51,7 @@ class PipelineResource extends Resource
 {
     protected static ?string $model = Pipeline::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static bool $shouldRegisterNavigation = false;
 

@@ -42,7 +42,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSearch;
 use App\Models\Scopes\EducatableSort;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -91,7 +91,7 @@ class MyServiceRequests extends BaseWidget
                     ->multiple()
                     ->preload(),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
                     ->url(fn (ServiceRequest $record): string => ServiceRequestResource::getUrl(name: 'view', parameters: ['record' => $record->service_request_id])),
             ])

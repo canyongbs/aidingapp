@@ -42,15 +42,15 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
 use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\CreateAction;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -67,10 +67,10 @@ class ManageIncidentUpdate extends ManageRelatedRecords
 
     protected static ?string $breadcrumb = 'Updates';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Textarea::make('update')
                     ->label('Update')
                     ->rows(3)
@@ -118,11 +118,11 @@ class ManageIncidentUpdate extends ManageRelatedRecords
                         $incidentUpdate->incident->update(['status_id' => $data['status_id']]);
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
                     ->url(fn (IncidentUpdate $incidentUpdate) => IncidentUpdateResource::getUrl('view', ['record' => $incidentUpdate])),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

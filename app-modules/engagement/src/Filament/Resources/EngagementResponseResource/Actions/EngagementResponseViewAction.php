@@ -38,9 +38,9 @@ namespace AidingApp\Engagement\Filament\Resources\EngagementResponseResource\Act
 
 use AidingApp\Engagement\Models\EngagementResponse;
 use Filament\Actions\ViewAction;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\Split;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Flex;
+use Filament\Schemas\Components\Section;
 use Illuminate\Support\HtmlString;
 
 class EngagementResponseViewAction
@@ -48,8 +48,8 @@ class EngagementResponseViewAction
     public static function make(): ViewAction
     {
         return ViewAction::make()
-            ->infolist([
-                Split::make([
+            ->schema([
+                Flex::make([
                     Section::make([
                         TextEntry::make('subject')
                             ->getStateUsing(fn (EngagementResponse $record): ?string => $record->subject)

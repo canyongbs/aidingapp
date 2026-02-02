@@ -36,10 +36,11 @@
 
 namespace AidingApp\Portal\Database\Factories;
 
+use AidingApp\Portal\Models\PortalAuthentication;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\AidingApp\Portal\Models\PortalAuthentication>
+ * @extends Factory<PortalAuthentication>
  */
 class PortalAuthenticationFactory extends Factory
 {

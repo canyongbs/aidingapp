@@ -49,6 +49,6 @@ class AssetCheckInViewAction extends ViewAction
 
         $this->modalHeading('View Asset Check In');
 
-        $this->infolist($this->renderInfolist());
+        $this->schema($this->renderInfolist());
     }
 }

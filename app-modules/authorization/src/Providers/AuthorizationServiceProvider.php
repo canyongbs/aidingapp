@@ -41,7 +41,6 @@ use AidingApp\Authorization\Http\Controllers\Auth\LogoutController;
 use AidingApp\Authorization\Models\License;
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\Role;
-use Filament\Http\Controllers\Auth\LogoutController as FilamentLogoutController;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Event;
@@ -56,7 +55,7 @@ class AuthorizationServiceProvider extends ServiceProvider
     {
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new AuthorizationPlugin()));
 
-        $this->app->bind(FilamentLogoutController::class, function ($app) {
+        $this->app->bind(\Filament\Auth\Http\Controllers\LogoutController::class, function ($app) {
             return new LogoutController();
         });
 

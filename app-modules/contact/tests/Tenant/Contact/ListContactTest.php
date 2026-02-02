@@ -33,10 +33,10 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ListContacts;
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementsRelationManager;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
@@ -82,7 +82,7 @@ test('ListContacts can bulk update characteristics', function () {
 
     $contacts = Contact::factory()->count(3)->create();
 
-    $component = livewire(ContactResource\Pages\ListContacts::class);
+    $component = livewire(ListContacts::class);
 
     $component->assertCanSeeTableRecords($contacts)
         ->assertCountTableRecords($contacts->count())

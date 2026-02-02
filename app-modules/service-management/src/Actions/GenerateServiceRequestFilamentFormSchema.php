@@ -42,16 +42,17 @@ use AidingApp\Form\Models\SubmissibleStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
-use Filament\Forms\Components\View;
-use Filament\Forms\Components\Wizard;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\View;
+use Filament\Schemas\Components\Wizard;
+use Filament\Schemas\Components\Wizard\Step;
 use Illuminate\Database\Eloquent\Collection;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
@@ -371,7 +372,7 @@ class GenerateServiceRequestFilamentFormSchema
             /** @var array{content?: array<string, mixed>} $content */
             $content = $step->content ?? [];
 
-            return Wizard\Step::make($step->label)
+            return Step::make($step->label)
                 ->schema($this->content($blocks, $content['content'] ?? [], $step->fields->keyBy('id')));
         })->toArray();
 

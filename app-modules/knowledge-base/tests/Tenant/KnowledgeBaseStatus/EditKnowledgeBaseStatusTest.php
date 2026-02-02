@@ -33,9 +33,9 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseStatus\RequestFactories\EditKnowledgeBaseStatusRequestFactory;
 use App\Models\User;
@@ -64,7 +64,7 @@ test('EditKnowledgeBaseStatus is gated with proper access control', function () 
             ])
         )->assertForbidden();
 
-    livewire(KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus::class, [
+    livewire(EditKnowledgeBaseStatus::class, [
         'record' => $knowledgeBaseStatus->getRouteKey(),
     ])
         ->assertForbidden();
@@ -81,7 +81,7 @@ test('EditKnowledgeBaseStatus is gated with proper access control', function () 
 
     $request = collect(EditKnowledgeBaseStatusRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus::class, [
+    livewire(EditKnowledgeBaseStatus::class, [
         'record' => $knowledgeBaseStatus->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -112,7 +112,7 @@ test('EditKnowledgeBaseStatus is gated with proper feature access control', func
             ])
         )->assertForbidden();
 
-    livewire(KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus::class, [
+    livewire(EditKnowledgeBaseStatus::class, [
         'record' => $knowledgeBaseStatus->getRouteKey(),
     ])
         ->assertForbidden();
@@ -130,7 +130,7 @@ test('EditKnowledgeBaseStatus is gated with proper feature access control', func
 
     $request = collect(EditKnowledgeBaseStatusRequestFactory::new()->create());
 
-    livewire(KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus::class, [
+    livewire(EditKnowledgeBaseStatus::class, [
         'record' => $knowledgeBaseStatus->getRouteKey(),
     ])
         ->fillForm($request->toArray())

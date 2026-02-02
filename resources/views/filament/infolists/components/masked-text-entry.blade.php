@@ -49,7 +49,7 @@
         </button>
 
         <button
-            class="flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 outline-none transition duration-75 hover:text-gray-500 focus-visible:ring-2 focus-visible:ring-primary-600 dark:text-gray-500 dark:hover:text-gray-400 dark:focus-visible:ring-primary-500"
+            class="focus-visible:ring-primary-600 dark:focus-visible:ring-primary-500 flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 outline-none transition duration-75 hover:text-gray-500 focus-visible:ring-2 dark:text-gray-500 dark:hover:text-gray-400"
             type="button"
             x-on:click="isRevealed = ! isRevealed"
             x-bind:class="{ 'blur-sm': !isRevealed }"

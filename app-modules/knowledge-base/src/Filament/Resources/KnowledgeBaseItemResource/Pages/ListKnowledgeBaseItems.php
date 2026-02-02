@@ -44,18 +44,18 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\TagsForClass;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ReplicateAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ReplicateAction;
+use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
@@ -126,7 +126,7 @@ class ListKnowledgeBaseItems extends ListRecords
                 TernaryFilter::make('public'),
                 Filter::make('created_at')
                     ->label('Created After')
-                    ->form([
+                    ->schema([
                         DatePicker::make('created_after')
                             ->native(false)
                             ->format('d-m-Y'),
@@ -140,7 +140,7 @@ class ListKnowledgeBaseItems extends ListRecords
                     }),
                 Filter::make('updated_at')
                     ->label('Updated After')
-                    ->form([
+                    ->schema([
                         DatePicker::make('updated_after')
                             ->native(false)
                             ->format('d-m-Y'),
@@ -153,10 +153,10 @@ class ListKnowledgeBaseItems extends ListRecords
                             );
                     }),
             ])
-            ->actions([
+            ->recordActions([
                 EditAction::make(),
                 ReplicateAction::make()
-                    ->form([
+                    ->schema([
                         Section::make()
                             ->schema([
                                 TextInput::make('title')
@@ -238,7 +238,7 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->excludeAttributes(['views_count', 'upvotes_count', 'my_upvotes_count', 'search_vector'])
                     ->successNotificationTitle('Article duplicated successfully!'),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),

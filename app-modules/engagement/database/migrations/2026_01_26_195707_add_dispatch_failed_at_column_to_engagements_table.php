@@ -33,9 +33,9 @@
 
 </COPYRIGHT>
 */
-
 use App\Features\EngagementDispatchFailedAtFeature;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 

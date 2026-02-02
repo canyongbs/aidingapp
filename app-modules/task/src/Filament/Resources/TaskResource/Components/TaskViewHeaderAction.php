@@ -69,6 +69,6 @@ class TaskViewHeaderAction extends Action
             ->modalCancelAction(function (Action $action) {
                 $action->label('Close');
             })
-            ->infolist($this->taskInfoList());
+            ->schema($this->taskInfoList());
     }
 }

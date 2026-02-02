@@ -38,13 +38,13 @@ namespace AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResourc
 
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
+use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Actions\BulkActionGroup;
-use Filament\Tables\Actions\DeleteBulkAction;
-use Filament\Tables\Actions\EditAction;
-use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -64,11 +64,11 @@ class ListIncidentSeverities extends ListRecords
                 ColorColumn::make('rgb_color')
                     ->label('Color'),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
             ])
-            ->bulkActions([
+            ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->action(function ($records) {

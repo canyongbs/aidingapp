@@ -122,7 +122,7 @@
             <template #actions>
                 <router-link
                     :to="{ name: 'create-service-request' }"
-                    class="inline-block px-4 py-2 text-white bg-gradient-to-br from-brand-500 to-brand-800 rounded"
+                    class="inline-block px-4 py-2 text-white bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] rounded"
                 >
                     New Request
                 </router-link>

@@ -45,8 +45,9 @@ use App\Filament\Clusters\ServiceManagementAdministration;
 use App\Filament\Forms\Components\SecondsDurationInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use UnitEnum;
 
 class SlaResource extends Resource
 {
@@ -58,16 +59,16 @@ class SlaResource extends Resource
 
     protected static ?string $pluralModelLabel = 'SLAs';
 
-    protected static ?string $navigationGroup = 'Service Levels';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Levels';
 
     protected static ?string $navigationLabel = 'SLAs';
 
     protected static ?string $cluster = ServiceManagementAdministration::class;
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255)

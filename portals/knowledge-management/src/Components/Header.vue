@@ -165,7 +165,7 @@
                                 v-if="user"
                                 @click="logout"
                                 type="button"
-                                class="flex items-center bg-gradient-to-br from-brand-500 to-brand-800 text-white text-sm font-medium px-3 py-2 rounded"
+                                class="flex items-center bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] text-white text-sm font-medium px-3 py-2 rounded"
                             >
                                 <ArrowRightStartOnRectangleIcon class="h-5 w-5 mr-1" />
                                 <span class="mr-2">Sign out</span>
@@ -174,7 +174,7 @@
                                 v-else
                                 @click="$emit('showLogin')"
                                 type="button"
-                                class="flex items-center bg-gradient-to-br from-brand-500 to-brand-800 text-white text-sm font-medium px-3 py-2 rounded"
+                                class="flex items-center bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] text-white text-sm font-medium px-3 py-2 rounded"
                             >
                                 <ArrowRightEndOnRectangleIcon class="h-5 w-5 mr-1" />
                                 <span>Sign in</span>

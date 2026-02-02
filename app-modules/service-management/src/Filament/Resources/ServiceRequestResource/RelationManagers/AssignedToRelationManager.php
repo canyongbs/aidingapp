@@ -43,12 +43,12 @@ use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\HasLicense;
 use App\Models\User;
+use Filament\Actions\Action;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Form;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Actions\Action;
-use Filament\Tables\Actions\ViewAction;
+use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Query\Expression;
@@ -59,10 +59,10 @@ class AssignedToRelationManager extends RelationManager
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 TextInput::make('user.full')
                     ->required()
                     ->maxLength(255),
@@ -103,7 +103,7 @@ class AssignedToRelationManager extends RelationManager
                         'assigned_at' => now(),
                         'status' => ServiceRequestAssignmentStatus::Active,
                     ]))
-                    ->form([
+                    ->schema([
                         Select::make('userId')
                             ->label(fn () => $this->getOwnerRecord()->assignedTo ? 'Reassign' : 'Assign')
                             ->searchable()
@@ -121,7 +121,7 @@ class AssignedToRelationManager extends RelationManager
                             ->required(),
                     ]),
             ])
-            ->actions([
+            ->recordActions([
                 ViewAction::make()
                     ->url(fn (ServiceRequestAssignment $assignment) => UserResource::getUrl('view', ['record' => $assignment->user])),
             ]);

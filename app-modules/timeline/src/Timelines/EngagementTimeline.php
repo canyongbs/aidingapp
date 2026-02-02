@@ -40,8 +40,8 @@ use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Timeline\Models\CustomTimeline;
 use Filament\Actions\ViewAction;
-use Filament\Infolists\Components\Fieldset;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Fieldset;
 use Illuminate\Support\HtmlString;
 
 // TODO Decide where these belong - might want to keep these in the context of the original module
@@ -77,7 +77,7 @@ class EngagementTimeline extends CustomTimeline
     public function modalViewAction(): ViewAction
     {
         return ViewAction::make()
-            ->infolist([
+            ->schema([
                 TextEntry::make('user.name')
                     ->label('Created By'),
                 Fieldset::make('Content')

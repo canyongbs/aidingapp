@@ -47,7 +47,7 @@ class Dashboard extends BasePage
 
     protected ?string $heading = '';
 
-    protected static string $view = 'filament.pages.dashboard';
+    protected string $view = 'filament.pages.dashboard';
 
     public function mount(): void
     {

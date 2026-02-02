@@ -41,18 +41,18 @@ use AidingApp\InventoryManagement\Filament\Actions\CheckOutAssetHeaderAction;
 use AidingApp\InventoryManagement\Filament\Resources\AssetResource;
 use AidingApp\InventoryManagement\Models\Asset;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 class ViewAsset extends ViewRecord
 {
     protected static string $resource = AssetResource::class;
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
+        return $schema
             ->schema([
                 Section::make()
                     ->schema([

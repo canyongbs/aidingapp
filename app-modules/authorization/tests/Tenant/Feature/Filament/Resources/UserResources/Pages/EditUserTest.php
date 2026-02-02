@@ -33,22 +33,21 @@
 
 </COPYRIGHT>
 */
-
 use AidingApp\Authorization\Enums\LicenseType;
 use App\Filament\Resources\UserResource;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
 use App\Models\Authenticatable;
 use App\Models\User;
+use Filament\Actions\AttachAction;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
-use Filament\Tables\Actions\AttachAction;
 use Illuminate\Support\Collection;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-use STS\FilamentImpersonate\Pages\Actions\Impersonate;
+use STS\FilamentImpersonate\Actions\Impersonate;
 
 use function Tests\asSuperAdmin;
 
@@ -147,7 +146,7 @@ it('does not allow a user which does not have the SaaS Global Admin role to assi
         'pageClass' => EditUser::class,
     ])
         ->mountTableAction(AttachAction::class)
-        ->assertFormFieldExists('recordId', 'mountedTableActionForm', function (Select $select) {
+        ->assertFormFieldExists('recordId', 'mountedActionSchema0', function (Select $select) {
             $options = $select->getSearchResults(Authenticatable::SUPER_ADMIN_ROLE);
 
             return empty($options);

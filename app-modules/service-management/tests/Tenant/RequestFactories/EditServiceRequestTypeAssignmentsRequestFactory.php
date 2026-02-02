@@ -46,7 +46,7 @@ class EditServiceRequestTypeAssignmentsRequestFactory extends RequestFactory
     public function definition(): array
     {
         return [
-            'assignment_type' => fake()->randomElement(ServiceRequestTypeAssignmentTypes::cases())->value,
+            'assignment_type' => fake()->randomElement(ServiceRequestTypeAssignmentTypes::cases()),
         ];
     }
 
@@ -60,7 +60,7 @@ class EditServiceRequestTypeAssignmentsRequestFactory extends RequestFactory
     public function withIndividualType(): static
     {
         return $this->state([
-            'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual->value,
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
         ]);
     }
 

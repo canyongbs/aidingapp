@@ -44,11 +44,11 @@ use App\Concerns\EditPageRedirection;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
 
@@ -66,10 +66,10 @@ class EditServiceRequestTypeAssignments extends EditRecord
         return [];
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make()
                     ->columns()
                     ->schema([
@@ -109,7 +109,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->preload()
                             ->required()
                             ->rules(fn (ServiceRequestType $record) => [new ServiceRequestTypeAssignmentsIndividualUserMustBeAManager($record)])
-                            ->visible(fn (Get $get) => $get('assignment_type') === ServiceRequestTypeAssignmentTypes::Individual->value),
+                            ->visible(fn (Get $get) => $get('assignment_type') === ServiceRequestTypeAssignmentTypes::Individual),
                     ]),
             ]);
     }

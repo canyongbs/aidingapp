@@ -40,18 +40,18 @@ use AidingApp\Engagement\Actions\CreateEngagementBatch;
 use AidingApp\Engagement\DataTransferObjects\EngagementCreationData;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Notification\Enums\NotificationChannel;
-use Filament\Forms\Components\Actions;
-use Filament\Forms\Components\Actions\Action;
+use Filament\Actions\Action;
+use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Components\Wizard\Step;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
-use Filament\Tables\Actions\BulkAction;
+use Filament\Schemas\Components\Actions;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Wizard\Step;
+use Filament\Schemas\Schema;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
@@ -97,7 +97,7 @@ class BulkEngagementAction
                             ->profile('email')
                             ->required()
                             ->hintAction(fn (TiptapEditor $component) => Action::make('loadEmailTemplate')
-                                ->form([
+                                ->schema([
                                     Select::make('emailTemplate')
                                         ->searchable()
                                         ->options(function (Get $get): array {
@@ -165,7 +165,7 @@ class BulkEngagementAction
                             ->visible(fn (Get $get) => $get('send_later')),
                     ]),
             ])
-            ->action(function (Collection $records, array $data, Form $form) {
+            ->action(function (Collection $records, array $data, Schema $schema) {
                 $channel = NotificationChannel::parse($data['channel']);
 
                 app(CreateEngagementBatch::class)->execute(new EngagementCreationData(
@@ -179,7 +179,7 @@ class BulkEngagementAction
                             'extension' => $file->getClientOriginalExtension(),
                             'path' => (fn () => $this->path)->call($file),
                         ],
-                        $form->getFlatFields()['body']->getTemporaryImages(),
+                        $schema->getFlatFields()['body']->getTemporaryImages(),
                     ),
                     scheduledAt: ($data['send_later'] ?? false) ? Carbon::parse($data['scheduled_at'] ?? null) : null,
                 ));

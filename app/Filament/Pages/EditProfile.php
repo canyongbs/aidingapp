@@ -43,24 +43,23 @@ use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\Component;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Forms\Components\Toggle;
-use Filament\Forms\Form;
-use Filament\Forms\Get;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
+use Filament\Schemas\Components\Component;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -70,13 +69,13 @@ use Illuminate\Validation\Rules\Password;
 use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 
 /**
- * @property Form $form
+ * @property Schema $form
  */
 class EditProfile extends Page
 {
     use InteractsWithFormActions;
 
-    protected static string $view = 'filament.pages.edit-profile';
+    protected string $view = 'filament.pages.edit-profile';
 
     protected static ?string $slug = 'profile';
 
@@ -85,13 +84,13 @@ class EditProfile extends Page
     public ?array $data = [];
 
     //TODO: I feel like a lot of these could be refactored into a settings file instead of adding them directly to the user migration.
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
         /** @var User $user */
         $user = auth()->user();
 
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Section::make('Public Profile')
                     ->aside()
                     ->schema([
@@ -110,7 +109,7 @@ class EditProfile extends Page
                             //The id doesn't matter because we're just using it to generate a piece of a url
                             ->prefix(str(route('users.profile.view.public', ['user' => -1]))->beforeLast('/')->append('/'))
                             ->suffixAction(
-                                FormAction::make('viewPublicProfile')
+                                Action::make('viewPublicProfile')
                                     ->url(fn () => route('users.profile.view.public', ['user' => $user->public_profile_slug]))
                                     ->icon('heroicon-m-arrow-top-right-on-square')
                                     ->openUrlInNewTab()
@@ -262,7 +261,8 @@ class EditProfile extends Page
                                     ->visible(fn (Get $get) => $get('out_of_office_is_enabled')),
                             ]),
                     ]),
-            ]);
+            ])
+            ->model($this->getUser());
     }
 
     public function mount(): void
@@ -380,7 +380,7 @@ class EditProfile extends Page
 
     protected function getSavedNotificationTitle(): ?string
     {
-        return __('filament-panels::pages/auth/edit-profile.notifications.saved.title');
+        return 'Saved';
     }
 
     protected function getRedirectUrl(): ?string
@@ -391,7 +391,7 @@ class EditProfile extends Page
     protected function getNameFormComponent(): Component
     {
         return TextInput::make('name')
-            ->label(__('filament-panels::pages/auth/edit-profile.form.name.label'))
+            ->label('Name')
             ->required()
             ->maxLength(255)
             ->autofocus();
@@ -400,7 +400,7 @@ class EditProfile extends Page
     protected function getEmailFormComponent(): Component
     {
         return TextInput::make('email')
-            ->label(__('filament-panels::pages/auth/edit-profile.form.email.label'))
+            ->label('Email address')
             ->email()
             ->required()
             ->maxLength(255)
@@ -411,7 +411,7 @@ class EditProfile extends Page
     protected function getPasswordFormComponent(): Component
     {
         return TextInput::make('password')
-            ->label(__('filament-panels::pages/auth/edit-profile.form.password.label'))
+            ->label('Password')
             ->password()
             ->rule(Password::default())
             ->autocomplete('new-password')
@@ -424,32 +424,11 @@ class EditProfile extends Page
     protected function getPasswordConfirmationFormComponent(): Component
     {
         return TextInput::make('passwordConfirmation')
-            ->label(__('filament-panels::pages/auth/edit-profile.form.password_confirmation.label'))
+            ->label('Password confirmation')
             ->password()
             ->required()
             ->visible(fn (Get $get): bool => filled($get('password')))
             ->dehydrated(false);
-    }
-
-    /**
-     * @return array<int | string, string | Form>
-     */
-    protected function getForms(): array
-    {
-        return [
-            'form' => $this->form(
-                $this->makeForm()
-                    ->schema([
-                        $this->getNameFormComponent(),
-                        $this->getEmailFormComponent(),
-                        $this->getPasswordFormComponent(),
-                        $this->getPasswordConfirmationFormComponent(),
-                    ])
-                    ->operation('edit')
-                    ->model($this->getUser())
-                    ->statePath('data'),
-            ),
-        ];
     }
 
     /**
@@ -466,7 +445,7 @@ class EditProfile extends Page
     protected function getCancelFormAction(): Action
     {
         return Action::make('cancel')
-            ->label(__('filament-panels::pages/auth/edit-profile.actions.cancel.label'))
+            ->label('Cancel')
             ->url(filament()->getUrl())
             ->color('gray');
     }
@@ -474,7 +453,7 @@ class EditProfile extends Page
     protected function getSaveFormAction(): Action
     {
         return Action::make('save')
-            ->label(__('filament-panels::pages/auth/edit-profile.form.actions.save.label'))
+            ->label('Save')
             ->submit('save')
             ->keyBindings(['mod+s']);
     }
