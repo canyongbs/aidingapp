@@ -51,6 +51,7 @@
         "canyongbs/filament-tiptap-editor": "^2.0.0",
         "canyongbs/model-state-machine": "^2.0.3",
         "cknow/laravel-money": "^8.1",
+        "codewithdennis/filament-select-tree": "^4.0",
         "composer/composer": "^2.7",
         "defectivecode/laravel-sqs-extended": "^1.1.0",
         "fakerphp/faker": "^1.23",

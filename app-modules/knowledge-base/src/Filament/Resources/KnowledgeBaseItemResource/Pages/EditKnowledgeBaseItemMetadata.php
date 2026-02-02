@@ -42,6 +42,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Models\Scopes\TagsForClass;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -112,12 +113,18 @@ class EditKnowledgeBaseItemMetadata
                         ->searchable()
                         ->preload()
                         ->exists((new KnowledgeBaseStatus())->getTable(), (new KnowledgeBaseStatus())->getKeyName()),
-                    Select::make('category_id')
+                    SelectTree::make('category_id')
                         ->label('Category')
                         ->required()
-                        ->relationship('category', 'name')
+                        ->relationship(
+                            'category',
+                            'name',
+                            'parent_id',
+                            modifyQueryUsing: fn (Builder $query) => $query->orderBy('name'),
+                            modifyChildQueryUsing: fn (Builder $query) => $query->orderBy('name'),
+                        )
+                        ->enableBranchNode()
                         ->searchable()
-                        ->preload()
                         ->exists((new KnowledgeBaseCategory())->getTable(), (new KnowledgeBaseCategory())->getKeyName()),
                     Select::make('division')
                         ->label('Division')

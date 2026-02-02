@@ -192,3 +192,8 @@ li[data-group-label=''] > ul > .fi-sidebar-item > .fi-sidebar-item-button > .fi-
 .fi-page-sub-navigation-sidebar .fi-sidebar-item-grouped-border {
     @apply hidden;
 }
+
+/* Fixes a bug where the background color of `codewithdennis/filament-select-tree` dropdowns is transparent. */
+.treeselect-list {
+    @apply bg-white dark:bg-gray-900;
+}
