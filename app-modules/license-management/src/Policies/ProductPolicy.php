@@ -38,24 +38,23 @@ namespace AidingApp\LicenseManagement\Policies;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\LicenseManagement\Models\Product;
+use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
 use App\Models\Authenticatable;
-use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
-use Illuminate\Support\Facades\Gate;
 
 class ProductPolicy
 {
+    use PerformsFeatureChecks;
+
     public function before(Authenticatable $authenticatable): ?Response
     {
         if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
             return Response::deny('You are not licensed for the Recruitment CRM.');
         }
 
-        if (! Gate::check(
-            collect($this->requiredFeatures())->map(fn (Feature $feature) => $feature->getGateName())
-        )) {
-            return FeatureAccessResponse::deny();
+        if (! is_null($response = $this->hasFeatures())) {
+            return $response;
         }
 
         return null;

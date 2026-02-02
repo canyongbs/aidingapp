@@ -38,20 +38,19 @@ namespace AidingApp\Project\Policies;
 
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
 use App\Models\Authenticatable;
-use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
-use Illuminate\Support\Facades\Gate;
 
 class ProjectMilestonePolicy
 {
+    use PerformsFeatureChecks;
+
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! Gate::check(
-            collect($this->requiredFeatures())->map(fn (Feature $feature) => $feature->getGateName())
-        )) {
-            return FeatureAccessResponse::deny();
+        if (! is_null($response = $this->hasFeatures())) {
+            return $response;
         }
 
         return null;
