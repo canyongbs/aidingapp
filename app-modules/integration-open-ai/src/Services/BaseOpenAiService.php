@@ -352,14 +352,6 @@ abstract class BaseOpenAiService implements AiService
                     $stream = $request->asStream();
 
                     foreach ($stream as $chunk) {
-                        if ($chunk->chunkType !== ChunkType::Text) {
-                            file_put_contents(
-                                storage_path('logs/azure_openai_stream/' . now()->toDateTimeString() . '_' . now()->getTimestampMs()) . '_' . $chunk->chunkType->value . '_RESPONSE_CHUNK.json',
-                                serialize($chunk),
-                            );
-                            usleep(1000);
-                        }
-
                         if ($chunk->chunkType === ChunkType::Meta) {
                             if (filled($chunk->meta?->id)) {
                                 yield new Meta(
