@@ -63,6 +63,7 @@ public static function canAccess(): bool
 Several other files will need to be updated as well.
 
 `app/DataTransferObjects/LicenseManagement/LicenseAddonsData.php`: The constructor will need to have the new key added:
+
 ```php
 public function __construct(
         // ...
@@ -71,11 +72,13 @@ public function __construct(
 ```
 
 `app/Enums/Feature.php`: A new case will need to be added to the enum:
+
 ```php
 case ExampleFeature = 'example-feature';
 ```
 
 `app/Filament/Pages/ManageLicenseSettings.php`: A new Toggle will need to be added to the `Enabled Features` Section:
+
 ```php
 Section::make('Enabled Features')
     ->columns()
@@ -89,6 +92,7 @@ Section::make('Enabled Features')
 ```
 
 `tests/TestCase.php`: Both the `createTenant` function and the `refreshTenantTestingEnvironment` will need to be updated:
+
 ```php
 new LicenseAddonsData(
         // ...
