@@ -1,8 +1,18 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-    "extends": ["config:recommended"],
+    "branchPrefix": "renovate-updates/",
+    "extends": ["config:recommended", ":disableDependencyDashboard"],
+    "username": "renovate-release",
+    "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+    "onboarding": false,
+    "requireConfig": "ignored",
+    "platform": "github",
+    "repositories": ["canyongbs/aidingapp"],
     "enabledManagers": ["custom.regex"],
     "reviewers": ["Orrison"],
+    "vulnerabilityAlerts": {
+        "enabled": false
+    },
     "customManagers": [
         {
             "customType": "regex",
