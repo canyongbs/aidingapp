@@ -38,11 +38,24 @@ namespace AidingApp\Project\Policies;
 
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Concerns\PerformsFeatureChecks;
+use App\Enums\Feature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
 class ProjectMilestonePolicy
 {
+    use PerformsFeatureChecks;
+
+    public function before(Authenticatable $authenticatable): ?Response
+    {
+        if (! is_null($response = $this->hasFeatures())) {
+            return $response;
+        }
+
+        return null;
+    }
+
     public function viewAny(Authenticatable $authenticatable, Project $project): Response
     {
         if ($authenticatable->cannot('view', $project)) {
@@ -86,5 +99,13 @@ class ProjectMilestonePolicy
         }
 
         return Response::allow();
+    }
+
+    /**
+     * @return array<Feature>
+     */
+    protected function requiredFeatures(): array
+    {
+        return [Feature::ProjectManagement];
     }
 }

@@ -39,11 +39,13 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Page
 use AidingApp\ServiceManagement\Models\Incident;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
 use App\Models\User;
+use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteBulkAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertNotSoftDeleted;
 use function Pest\Laravel\assertSoftDeleted;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 test('ListIncidentSeverities is gated with proper access control', function () {
@@ -60,6 +62,32 @@ test('ListIncidentSeverities is gated with proper access control', function () {
         ->get(
             IncidentSeverityResource::getUrl('index')
         )->assertSuccessful();
+});
+
+test('it is gated with proper feature access control', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->incidentManagement = false;
+    $settings->save();
+
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $user->givePermissionTo('settings.view-any');
+
+    actingAs($user);
+
+    get(ListIncidentSeverities::getUrl())->assertForbidden();
+
+    $settings->data->addons->incidentManagement = true;
+    $settings->save();
+
+    $user->revokePermissionTo('settings.view-any');
+
+    get(ListIncidentSeverities::getUrl())->assertForbidden();
+
+    $user->givePermissionTo('settings.view-any');
+
+    get(ListIncidentSeverities::getUrl())->assertSuccessful();
 });
 
 test('can list records', function () {

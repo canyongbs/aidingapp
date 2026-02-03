@@ -34,37 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Requests\Tenants;
+use AidingApp\Authorization\Enums\LicenseType;
+use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ManageProductLicenses;
+use AidingApp\LicenseManagement\Models\Product;
+use App\Models\User;
+use App\Settings\LicenseSettings;
 
-use Illuminate\Foundation\Http\FormRequest;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
-class SyncTenantRequest extends FormRequest
-{
-    /**
-     * @return array<string, array<string>>
-     */
-    public function rules(): array
-    {
-        return [
-            'limits' => ['required', 'array'],
-            'limits.recruitmentCrmSeats' => ['required', 'integer', 'min:0'],
-            'limits.emails' => ['required', 'integer', 'min:0'],
-            'limits.sms' => ['required', 'integer', 'min:0'],
-            'limits.resetDate' => ['required', 'string', 'date_format:m-d'],
-            'addons' => ['required', 'array'],
-            'addons.onlineForms' => ['required', 'boolean'],
-            'addons.onlineSurveys' => ['required', 'boolean'],
-            'addons.serviceManagement' => ['required', 'boolean'],
-            'addons.knowledgeManagement' => ['required', 'boolean'],
-            'addons.realtimeChat' => ['required', 'boolean'],
-            'addons.mobileApps' => ['required', 'boolean'],
-            'addons.changeManagement' => ['required', 'boolean'],
-            'addons.assetManagement' => ['required', 'boolean'],
-            'addons.feedbackManagement' => ['required', 'boolean'],
-            'addons.contractManagement' => ['required', 'boolean'],
-            'addons.licenseManagement' => ['required', 'boolean'],
-            'addons.projectManagement' => ['required', 'boolean'],
-            'addons.incidentManagement' => ['required', 'boolean'],
-        ];
-    }
-}
+it('is gated with proper access control', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->licenseManagement = false;
+    $settings->save();
+
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $product = Product::factory()->create();
+
+    $user->givePermissionTo('product.view-any');
+    $user->givePermissionTo('product.*.view');
+    $user->givePermissionTo('product_license.view-any');
+
+    actingAs($user);
+
+    get(ManageProductLicenses::getUrl(['record' => $product]))->assertForbidden();
+
+    $settings->data->addons->licenseManagement = true;
+    $settings->save();
+
+    $user->revokePermissionTo('product.view-any');
+    $user->revokePermissionTo('product.*.view');
+    $user->revokePermissionTo('product_license.view-any');
+
+    get(ManageProductLicenses::getUrl(['record' => $product]))->assertForbidden();
+
+    $user->givePermissionTo('product.view-any');
+    $user->givePermissionTo('product.*.view');
+    $user->givePermissionTo('product_license.view-any');
+
+    get(ManageProductLicenses::getUrl(['record' => $product]))->assertSuccessful();
+});

@@ -38,10 +38,12 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ListIncidents;
 use AidingApp\ServiceManagement\Models\Incident;
 use App\Models\User;
+use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteBulkAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertSoftDeleted;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 test('ListIncidents is gated with proper access control', function () {
@@ -58,6 +60,32 @@ test('ListIncidents is gated with proper access control', function () {
         ->get(
             IncidentResource::getUrl('index')
         )->assertSuccessful();
+});
+
+it('is gated with proper access control', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->incidentManagement = false;
+    $settings->save();
+
+    $user = User::factory()->licensed(LicenseType::cases())->create();
+
+    $user->givePermissionTo('incident.view-any');
+
+    actingAs($user);
+
+    get(ListIncidents::getUrl())->assertForbidden();
+
+    $settings->data->addons->incidentManagement = true;
+    $settings->save();
+
+    $user->revokePermissionTo('incident.view-any');
+
+    get(ListIncidents::getUrl())->assertForbidden();
+
+    $user->givePermissionTo('incident.view-any');
+
+    get(ListIncidents::getUrl())->assertSuccessful();
 });
 
 test('can list records', function () {

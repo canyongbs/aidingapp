@@ -38,15 +38,23 @@ namespace AidingApp\ServiceManagement\Policies;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\Incident;
+use App\Concerns\PerformsFeatureChecks;
+use App\Enums\Feature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
 class IncidentPolicy
 {
+    use PerformsFeatureChecks;
+
     public function before(Authenticatable $authenticatable): ?Response
     {
         if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
             return Response::deny('You are not licensed for the Recruitment CRM.');
+        }
+
+        if (! is_null($response = $this->hasFeatures())) {
+            return $response;
         }
 
         return null;
@@ -106,5 +114,13 @@ class IncidentPolicy
             abilities: ["incident.{$incident->getKey()}.force-delete"],
             denyResponse: 'You do not have permission to permanently delete this incident.'
         );
+    }
+
+    /**
+     * @return array<Feature>
+     */
+    protected function requiredFeatures(): array
+    {
+        return [Feature::IncidentManagement];
     }
 }

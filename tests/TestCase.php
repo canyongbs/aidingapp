@@ -195,6 +195,10 @@ abstract class TestCase extends BaseTestCase
                     changeManagement: true,
                     assetManagement: true,
                     feedbackManagement: true,
+                    contractManagement: true,
+                    licenseManagement: true,
+                    projectManagement: true,
+                    incidentManagement: true,
                 )
             ),
             false,
@@ -252,6 +256,10 @@ abstract class TestCase extends BaseTestCase
                         changeManagement: true,
                         assetManagement: true,
                         feedbackManagement: true,
+                        contractManagement: true,
+                        licenseManagement: true,
+                        projectManagement: true,
+                        incidentManagement: true,
                     )
                 )
             ));

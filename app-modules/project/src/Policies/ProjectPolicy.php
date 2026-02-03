@@ -37,11 +37,24 @@
 namespace AidingApp\Project\Policies;
 
 use AidingApp\Project\Models\Project;
+use App\Concerns\PerformsFeatureChecks;
+use App\Enums\Feature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
 class ProjectPolicy
 {
+    use PerformsFeatureChecks;
+
+    public function before(Authenticatable $authenticatable): ?Response
+    {
+        if (! is_null($response = $this->hasFeatures())) {
+            return $response;
+        }
+
+        return null;
+    }
+
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -140,5 +153,13 @@ class ProjectPolicy
             abilities: 'project.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete this project.'
         );
+    }
+
+    /**
+     * @return array<Feature>
+     */
+    protected function requiredFeatures(): array
+    {
+        return [Feature::ProjectManagement];
     }
 }

@@ -37,11 +37,24 @@
 namespace AidingApp\ServiceManagement\Policies;
 
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
+use App\Concerns\PerformsFeatureChecks;
+use App\Enums\Feature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
 class IncidentSeverityPolicy
 {
+    use PerformsFeatureChecks;
+
+    public function before(Authenticatable $authenticatable): ?Response
+    {
+        if (! is_null($response = $this->hasFeatures())) {
+            return $response;
+        }
+
+        return null;
+    }
+
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -104,5 +117,13 @@ class IncidentSeverityPolicy
             abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete this incident severity.'
         );
+    }
+
+    /**
+     * @return array<Feature>
+     */
+    protected function requiredFeatures(): array
+    {
+        return [Feature::IncidentManagement];
     }
 }

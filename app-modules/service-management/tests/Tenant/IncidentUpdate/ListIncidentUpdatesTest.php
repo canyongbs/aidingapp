@@ -43,6 +43,7 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
@@ -83,24 +84,56 @@ test('ListIncidentUpdates is gated with proper feature access control', function
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
+    $settings->data->addons->incidentManagement = false;
 
     $settings->save();
 
     $user = User::factory()->licensed([Contact::getLicenseType()])->create();
 
-    $user->givePermissionTo('incident_update.view-any');
+    actingAs($user);
 
-    actingAs($user)
-        ->get(
-            IncidentUpdateResource::getUrl()
-        )->assertForbidden();
+    //Service management false, incident management false, no incident permissions
+    get(IncidentUpdateResource::getUrl())->assertForbidden();
 
+    //Service management true, incident management false, no incident permissions
     $settings->data->addons->serviceManagement = true;
-
     $settings->save();
 
-    actingAs($user)
-        ->get(
-            IncidentUpdateResource::getUrl()
-        )->assertSuccessful();
+    get(IncidentUpdateResource::getUrl())->assertForbidden();
+
+    //Service management false, incident management true, no incident permissions
+    $settings->data->addons->serviceManagement = false;
+    $settings->data->addons->incidentManagement = true;
+    $settings->save();
+
+    get(IncidentUpdateResource::getUrl())->assertForbidden();
+
+    //Service management false, incident management false, incident permissions
+    $user->givePermissionTo('incident_update.view-any');
+
+    $settings->data->addons->serviceManagement = false;
+    $settings->data->addons->incidentManagement = false;
+    $settings->save();
+
+    get(IncidentUpdateResource::getUrl())->assertForbidden();
+
+    //Service management true, incident management false, incident permissions
+    $settings->data->addons->serviceManagement = true;
+    $settings->data->addons->incidentManagement = false;
+    $settings->save();
+
+    get(IncidentUpdateResource::getUrl())->assertForbidden();
+
+    //Service management false, incident management true, incident permissions
+    $settings->data->addons->serviceManagement = false;
+    $settings->data->addons->incidentManagement = true;
+    $settings->save();
+
+    get(IncidentUpdateResource::getUrl())->assertForbidden();
+
+    //Service management true, incident management true, incident permissions
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    get(IncidentUpdateResource::getUrl())->assertSuccessful();
 });

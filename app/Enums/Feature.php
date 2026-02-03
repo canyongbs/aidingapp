@@ -57,6 +57,14 @@ enum Feature: string
 
     case FeedbackManagement = 'feedback-management';
 
+    case ContractManagement = 'contract-management';
+
+    case LicenseManagement = 'license-management';
+
+    case ProjectManagement = 'project-management';
+
+    case IncidentManagement = 'incident-management';
+
     public function generateGate(): void
     {
         // If features are added that are not based on a License Addon we will need to update this

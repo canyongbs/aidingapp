@@ -65,6 +65,10 @@ class CreateTenantRequest extends FormRequest
             'addons.changeManagement' => ['required', 'boolean'],
             'addons.assetManagement' => ['required', 'boolean'],
             'addons.feedbackManagement' => ['required', 'boolean'],
+            'addons.contractManagement' => ['required', 'boolean'],
+            'addons.licenseManagement' => ['required', 'boolean'],
+            'addons.projectManagement' => ['required', 'boolean'],
+            'addons.incidentManagement' => ['required', 'boolean'],
         ];
     }
 }
