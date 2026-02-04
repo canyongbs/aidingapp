@@ -204,7 +204,7 @@
         </template>
 
         <div
-            class="prose !max-w-none p-16 prose-p:!leading-snug prose-p:!my-10 prose-ul:!my-3 prose-ol:!my-3 prose-li:!my-0 [&_li>p]:!my-1 [&_td_p]:!my-3 [&_th_p]:!my-3 prose-table:!w-full prose-table:my-6 prose-table:border-separate prose-table:border-spacing-0 prose-table:rounded-lg prose-table:border prose-table:border-gray-200 prose-table:overflow-hidden prose-table:shadow-sm prose-td:border-b prose-td:border-gray-100 prose-td:align-middle prose-td:px-6 prose-td:py-2 prose-td:text-left prose-td:text-gray-700 prose-th:border-none prose-th:bg-brand-600 prose-th:px-6 prose-th:py-2 prose-th:text-left prose-th:font-bold prose-th:text-white [&_tr:last-child_td]:!border-b-[3px] [&_tr:last-child_td]:!border-brand-600 prose-tr:even:bg-gray-50"
+            class="prose !max-w-none p-16 prose-p:!leading-snug prose-p:!my-2.5 prose-headings:!my-4 prose-hr:!my-5 prose-ul:!my-3 prose-ol:!my-3 prose-li:!my-0 [&_li>p]:!my-1 [&_td_p]:!my-3 [&_th_p]:!my-3 prose-table:!w-full prose-table:my-6 prose-table:border-separate prose-table:border-spacing-0 prose-table:rounded-lg prose-table:border prose-table:border-gray-200 prose-table:overflow-hidden prose-table:shadow-sm prose-td:border-b prose-td:border-gray-100 prose-td:align-middle prose-td:px-6 prose-td:py-2 prose-td:text-left prose-td:text-gray-700 prose-th:border-none prose-th:bg-brand-600 prose-th:px-6 prose-th:py-2 prose-th:text-left prose-th:font-bold prose-th:text-white [&_tr:last-child_td]:!border-b-[3px] [&_tr:last-child_td]:!border-brand-600 prose-tr:even:bg-gray-50"
         >
             <div v-html="DOMPurify.sanitize(article.content)"></div>
         </div>
