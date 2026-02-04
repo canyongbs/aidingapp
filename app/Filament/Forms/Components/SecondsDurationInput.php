@@ -36,11 +36,10 @@
 
 namespace App\Filament\Forms\Components;
 
-use Filament\Forms\Components\Field;
 use Filament\Forms\Components\TextInput;
 use Filament\Support\Concerns\CanBeContained;
 
-class SecondsDurationInput extends Field
+class SecondsDurationInput extends Fieldset
 {
     use CanBeContained;
 

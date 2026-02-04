@@ -79,8 +79,6 @@ test('The correct details are displayed on the ViewServiceRequest page', functio
                 $serviceRequest->priority->type->name,
                 'Description',
                 $serviceRequest->close_details,
-                'Internal Details',
-                $serviceRequest->res_details,
             ]
         );
 });

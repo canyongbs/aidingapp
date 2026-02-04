@@ -53,6 +53,7 @@ use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -70,45 +71,62 @@ class ViewServiceRequest extends ViewRecord
     public function infolist(Schema $schema): Schema
     {
         $formatSecondsAsInterval = fn (?int $state): ?string => $state ? CarbonInterval::seconds($state)->cascade()->forHumans(short: true) : null;
-
+        $serviceRequest = $this->getRecord();
+        assert($serviceRequest instanceof ServiceRequest);
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
 
         return $schema
             ->schema([
-                Section::make()
+                Section::make('Service Request: ' . $serviceRequest->service_request_number)
+                    // ->headerActions([
+                    //     Action::make('copy_service_request_number')
+                    //         ->label('Copy')
+                    //         ->icon('heroicon-o-clipboard-document')
+                    //         ->color('gray')
+                    //         ->extraAttributes([
+                    //             'x-on:click' => 'window.navigator.clipboard.writeText(\'' . $this->record->service_request_number . '\'); $tooltip(\'Copied to clipboard\', { timeout: 1500 });',
+                    //         ])
+                    //         ->action(fn () => null),
+                    // ])
                     ->schema([
                         TextEntry::make('service_request_number')
-                            ->label('Service Request Number'),
+                            ->label('Service Request Number')
+                            ->copyable()
+                            ->copyMessage('Service request number copied')
+                            ->copyMessageDuration(1500)
+                            ->icon('heroicon-o-clipboard-document')
+                            ->iconPosition('after'),
                         TextEntry::make('division.name')
                             ->visible(fn (): bool => Division::count() > 1)
                             ->label('Division'),
-                        TextEntry::make('status.name')
-                            ->label('Status')
-                            ->badge()
-                            ->color(fn (ServiceRequest $record): string => $record->status->color->value),
+                        Grid::make(3)
+                            ->schema([
+                                TextEntry::make('status.name')
+                                    ->label('Status')
+                                    ->badge()
+                                    ->color(fn (ServiceRequest $record): string => $record->status->color->value),
+                                TextEntry::make('priority.type.name')
+                                    ->state(
+                                        fn (ServiceRequest $record) => $record->priority->type()->withTrashed()->first()?->name
+                                    )
+                                    ->label('Type'),
+                                TextEntry::make('priority.name')
+                                    ->label('Priority'),
+                            ])->columns(3),
                         TextEntry::make('title'),
-                        TextEntry::make('priority.name')
-                            ->label('Priority'),
-                        TextEntry::make('priority.type.name')
-                            ->state(
-                                fn (ServiceRequest $record) => $record->priority->type()->withTrashed()->first()?->name
-                            )
-                            ->label('Type'),
                         TextEntry::make('close_details')
                             ->label('Description')
                             ->columnSpanFull(),
-                        TextEntry::make('res_details')
-                            ->label('Internal Details')
-                            ->columnSpanFull(),
                         TextEntry::make('respondent')
-                            ->label('Related To')
+                            ->label('Customer Contact')
                             ->color('primary')
+                            ->html()
                             ->state(function (ServiceRequest $record): string {
                                 /** @var Contact $respondent */
                                 $respondent = $record->respondent;
 
                                 return match ($respondent::class) {
-                                    Contact::class => "{$respondent->{Contact::displayNameKey()}} (Contact)",
+                                    Contact::class => "{$respondent->{Contact::displayNameKey()}} ({$respondent->type->name})<br>{$respondent->organization->name}",
                                 };
                             })
                             ->url(function (ServiceRequest $record) {
@@ -177,6 +195,15 @@ class ViewServiceRequest extends ViewRecord
                             })
                             ->toArray()
                     ),
+                Section::make('Form Details')
+                    ->collapsed()
+                    ->visible(fn (ServiceRequest $record): bool => ! is_null($record->serviceRequestFormSubmission))
+                    ->schema([
+                        TextEntry::make('serviceRequestFormSubmission.submitted_at')
+                            ->dateTime(),
+                        ViewEntry::make('serviceRequestFormSubmission')
+                            ->view('filament.infolists.components.submission-entry'),
+                    ]),
                 Section::make('SLA Management')
                     ->visible(fn (ServiceRequest $record): bool => $record->priority?->sla !== null)
                     ->schema([
@@ -226,15 +253,6 @@ class ViewServiceRequest extends ViewRecord
                             ->badge(),
                     ])
                     ->columns(),
-                Section::make('Form Submission Details')
-                    ->collapsed()
-                    ->visible(fn (ServiceRequest $record): bool => ! is_null($record->serviceRequestFormSubmission))
-                    ->schema([
-                        TextEntry::make('serviceRequestFormSubmission.submitted_at')
-                            ->dateTime(),
-                        ViewEntry::make('serviceRequestFormSubmission')
-                            ->view('filament.infolists.components.submission-entry'),
-                    ]),
             ]);
     }
 

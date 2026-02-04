@@ -168,11 +168,6 @@ class ServiceRequestsRelationManager extends RelationManager
                     ->nullable()
                     ->string()
                     ->columnSpan(1),
-                Textarea::make('res_details')
-                    ->label('Internal Details')
-                    ->nullable()
-                    ->string()
-                    ->columnSpan(1),
                 Section::make('Additional Information')
                     ->schema(fn (Get $get): array => $this->getDynamicFields($get('type_id')))
                     ->statePath('dynamic_fields')

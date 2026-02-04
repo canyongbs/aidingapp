@@ -69,6 +69,8 @@ class CreateServiceRequest extends CreateRecord
 {
     protected static string $resource = ServiceRequestResource::class;
 
+    protected ?string $heading = 'New Service Request';
+
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -86,20 +88,21 @@ class CreateServiceRequest extends CreateRecord
                                         ->first()
                                         ?->getKey()) : null
                     ),
-                Select::make('status_id')
-                    ->relationship('status', 'name')
-                    ->label('Status')
-                    ->allowHtml()
-                    ->options(fn () => ServiceRequestStatus::orderBy('sort')
-                        ->get(['id', 'name', 'classification', 'color'])
-                        ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
-                        ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [
-                            $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
-                        ])))
-                    ->required()
-                    ->exists((new ServiceRequestStatus())->getTable(), 'id'),
-                Grid::make()
+                Grid::make(6)
                     ->schema([
+                        Select::make('status_id')
+                            ->relationship('status', 'name')
+                            ->label('Status')
+                            ->allowHtml()
+                            ->options(fn () => ServiceRequestStatus::orderBy('sort')
+                                ->get(['id', 'name', 'classification', 'color'])
+                                ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
+                                ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [
+                                    $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
+                                ])))
+                            ->required()
+                            ->exists((new ServiceRequestStatus())->getTable(), 'id')
+                            ->columnSpan(fn (Get $get): int => filled($get('type_id')) ? 2 : 3),
                         Select::make('type_id')
                             ->options(ServiceRequestType::when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                 $query->whereHas('managers', function (Builder $query): void {
@@ -121,7 +124,8 @@ class CreateServiceRequest extends CreateRecord
                             ->label('Type')
                             ->required()
                             ->live()
-                            ->exists(ServiceRequestType::class, 'id'),
+                            ->exists(ServiceRequestType::class, 'id')
+                            ->columnSpan(fn (Get $get): int => filled($get('type_id')) ? 2 : 3),
                         Select::make('priority_id')
                             ->relationship(
                                 name: 'priority',
@@ -131,7 +135,8 @@ class CreateServiceRequest extends CreateRecord
                             ->label('Priority')
                             ->required()
                             ->exists(ServiceRequestPriority::class, 'id')
-                            ->visible(fn (Get $get): bool => filled($get('type_id'))),
+                            ->visible(fn (Get $get): bool => filled($get('type_id')))
+                            ->columnSpan(2),
                     ]),
                 TextInput::make('title')
                     ->required()
@@ -143,22 +148,17 @@ class CreateServiceRequest extends CreateRecord
                     ->nullable()
                     ->string()
                     ->columnSpan(1),
-                Textarea::make('res_details')
-                    ->label('Internal Details')
-                    ->nullable()
-                    ->string()
-                    ->columnSpan(1),
                 Select::make('respondent_id')
                     ->relationship(
                         name: 'respondent',
                         titleAttribute: 'full_name',
                         modifyQueryUsing: fn (Builder $query) => $query->with('type')->orderBy('first_name')
                     )
-                    ->label('Related To')
+                    ->label('Choose Customer Contact')
                     ->required()
                     ->searchable()
                     ->preload()
-                    ->getOptionLabelFromRecordUsing(fn (Contact $record) => $record->full_name . ' (' . ($record->status->name ?? 'N/A') . ")\n" . ($record->organization->name ?? 'Unaffiliated'))
+                    ->getOptionLabelFromRecordUsing(fn (Contact $record) => $record->full_name . ' (' . ($record->type->name ?? 'N/A') . ")\n" . ($record->organization->name ?? 'Unaffiliated'))
                     ->exists((new Contact())->getTable(), 'id'),
                 Section::make('Additional Information')
                     ->schema(fn (Get $get): array => $this->getDynamicFields($get('type_id')))

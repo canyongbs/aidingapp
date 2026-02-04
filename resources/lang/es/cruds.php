@@ -197,8 +197,6 @@ return [
             'id_helper' => ' ',
             'close_details' => 'Close Details/Description',
             'close_details_helper' => ' ',
-            'res_details' => 'Internal Service Request Details',
-            'res_details_helper' => ' ',
             'created_by' => 'Created By',
             'created_by_helper' => ' ',
             'created_at' => 'Created at',

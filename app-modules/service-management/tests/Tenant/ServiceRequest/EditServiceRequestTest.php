@@ -202,7 +202,6 @@ test('EditServiceRequest requires valid data', function ($data, $errors, $setup 
             ['priority_id' => 'in'],
         ],
         'close_details is not a string' => [EditServiceRequestRequestFactory::new()->state(['close_details' => 1]), ['close_details' => 'string']],
-        'res_details is not a string' => [EditServiceRequestRequestFactory::new()->state(['res_details' => 1]), ['res_details' => 'string']],
     ]
 );
 

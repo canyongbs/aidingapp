@@ -136,7 +136,6 @@ test('CreateServiceRequest requires valid data', function ($data, $errors, $setu
             ['priority_id' => 'in'],
         ],
         'close_details is not a string' => [CreateServiceRequestRequestFactory::new()->state(['close_details' => 1]), ['close_details' => 'string']],
-        'res_details is not a string' => [CreateServiceRequestRequestFactory::new()->state(['res_details' => 1]), ['res_details' => 'string']],
     ]
 );
 

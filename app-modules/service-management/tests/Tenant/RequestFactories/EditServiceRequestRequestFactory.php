@@ -48,7 +48,6 @@ class EditServiceRequestRequestFactory extends RequestFactory
             'division_id' => Division::inRandomOrder()->first()?->id ?? Division::factory()->create()->id,
             'status_id' => ServiceRequestStatus::factory()->create()->id,
             'close_details' => $this->faker->sentence,
-            'res_details' => $this->faker->sentence,
         ];
     }
 }

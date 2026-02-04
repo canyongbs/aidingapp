@@ -92,7 +92,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'priority_id',
         'assigned_to_id',
         'close_details',
-        'res_details',
         'created_by_id',
         'status_updated_at',
         'title',
