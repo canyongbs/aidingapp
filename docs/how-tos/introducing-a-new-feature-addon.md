@@ -4,7 +4,7 @@ This guide covers gating features behind addon toggles tied to the account subsc
 
 ---
 
-## Applying restrictions
+## Creating the New Feature
 
 1. Adding New Case to Enum
 
@@ -25,9 +25,9 @@ This guide covers gating features behind addon toggles tied to the account subsc
         ) {}
     ```
 
-3. Listening For Features
+3. Modify Tenant Requests
 
-    Because this feature is now toggled externally, the rules for requests relating to tenants will also need to be updated to listen for this feature.
+    Because this feature is toggled externally via API, the rules for requests relating to tenants will also need to be updated to listen for this feature.
 
     `app/Http/Requests/Tenants/CreateTenantRequest.php` and `app/Http/Requests/Tenants/SyncTenantRequest.php` will both need an additional rule in their `rules()` functions:
 
@@ -57,7 +57,9 @@ This guide covers gating features behind addon toggles tied to the account subsc
         ),
     ```
 
-5. Restricting The Front End
+## Applying Restrictions
+
+5. Restricting The Frontend
 
     ### Filament Resources
 
@@ -95,7 +97,7 @@ This guide covers gating features behind addon toggles tied to the account subsc
 
     ### Other Filament Pages
 
-    Some pages, such as a relationship manager, may need a more explicit check in their `canAccess` method. Make sure to check all pages relating to the feature in question and verify that they are properly restricted.
+    Some pages, such as a relationship manager or standalone Pages, may need a more explicit check in their `canAccess` method. Make sure to check all pages relating to the feature in question and verify that they are properly restricted. And check with leadership if you are unsure which areas need to be gated.
 
     ```php
     use App\Enums\Feature;
@@ -113,7 +115,7 @@ This guide covers gating features behind addon toggles tied to the account subsc
 
 6. Tests
 
-    Additionally, access control tests should be modified or created for the affected pages and/or resources (one page in a resource, e.g. the list page, is acceptable; but make sure to seprately test relationship managers in other resources).
+    Additionally, access control tests should be modified or created for the affected pages and/or resources (one page in a resource, e.g. the list page, is acceptable; but make sure to separately test relationship managers in other resources).
 
     ```php
     use App\Models\User;
