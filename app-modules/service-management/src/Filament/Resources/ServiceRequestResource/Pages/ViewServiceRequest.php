@@ -58,6 +58,7 @@ use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\IconSize;
+use Illuminate\Support\HtmlString;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ViewServiceRequest extends ViewRecord
@@ -77,25 +78,12 @@ class ViewServiceRequest extends ViewRecord
 
         return $schema
             ->schema([
-                Section::make('Service Request: ' . $serviceRequest->service_request_number)
-                    // ->headerActions([
-                    //     Action::make('copy_service_request_number')
-                    //         ->label('Copy')
-                    //         ->icon('heroicon-o-clipboard-document')
-                    //         ->color('gray')
-                    //         ->extraAttributes([
-                    //             'x-on:click' => 'window.navigator.clipboard.writeText(\'' . $this->record->service_request_number . '\'); $tooltip(\'Copied to clipboard\', { timeout: 1500 });',
-                    //         ])
-                    //         ->action(fn () => null),
-                    // ])
+                Section::make()
+                    ->heading(new HtmlString(
+                        'Service Request: ' . e($serviceRequest->service_request_number) . 
+                        ' <button type="button" x-on:click="window.navigator.clipboard.writeText(\'' . e($serviceRequest->service_request_number) . '\'); $tooltip(\'Copied!\', { timeout: 1500 })" class="text-gray-400 hover:text-gray-500 cursor-pointer align-middle relative -top-0.5"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline"><path stroke-linecap="round" stroke-linejoin="round" d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9.75a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184" /></svg></button>'
+                    ))
                     ->schema([
-                        TextEntry::make('service_request_number')
-                            ->label('Service Request Number')
-                            ->copyable()
-                            ->copyMessage('Service request number copied')
-                            ->copyMessageDuration(1500)
-                            ->icon('heroicon-o-clipboard-document')
-                            ->iconPosition('after'),
                         TextEntry::make('division.name')
                             ->visible(fn (): bool => Division::count() > 1)
                             ->label('Division'),
@@ -137,17 +125,6 @@ class ViewServiceRequest extends ViewRecord
                                     Contact::class => ContactResource::getUrl('view', ['record' => $respondent->id]),
                                 };
                             }),
-                        TextEntry::make('time_to_resolution')
-                            ->label('Time to Resolution')
-                            ->formatStateUsing(function ($state) {
-                                $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
-                                $days = $interval->d;
-                                $hours = $interval->h;
-                                $minutes = $interval->i;
-
-                                return "{$days}d {$hours}h {$minutes}m";
-                            })
-                            ->columnSpan(1),
                     ])
                     ->columns(),
                 Section::make('Uploads')
@@ -222,6 +199,16 @@ class ViewServiceRequest extends ViewRecord
                                 ->label('Response compliance')
                                 ->badge()
                                 ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResponseSlaComplianceStatus()),
+                            TextEntry::make('time_to_resolution')
+                                ->label('Time to Resolution')
+                                ->formatStateUsing(function ($state) {
+                                    $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
+                                    $days = $interval->d;
+                                    $hours = $interval->h;
+                                    $minutes = $interval->i;
+
+                                    return "{$days}d {$hours}h {$minutes}m";
+                                }),
                         ]),
                         Group::make([
                             TextEntry::make('sla_resolution_seconds')
@@ -237,7 +224,7 @@ class ViewServiceRequest extends ViewRecord
                             TextEntry::make('resolution_sla_compliance')
                                 ->label('Resolution compliance')
                                 ->badge()
-                                ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResolutionSlaComplianceStatus()),
+                                ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResolutionSlaComplianceStatus()),                           
                         ]),
                     ])
                     ->columns(),
