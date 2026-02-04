@@ -148,9 +148,9 @@ class CreateServiceRequest extends CreateRecord
                             ->nullable()
                             ->string()
                             ->columnSpan(1),
-                    ]), 
+                    ]),
                 Section::make('Contact Details')
-                    ->schema([                        
+                    ->schema([
                         Select::make('respondent_id')
                             ->relationship(
                                 name: 'respondent',
@@ -163,7 +163,7 @@ class CreateServiceRequest extends CreateRecord
                             ->preload()
                             ->getOptionLabelFromRecordUsing(fn (Contact $record) => $record->full_name . ' (' . ($record->type->name ?? 'N/A') . ")\n" . ($record->organization->name ?? 'Unaffiliated'))
                             ->exists((new Contact())->getTable(), 'id'),
-                    ]),               
+                    ]),
                 Section::make('Additional Information')
                     ->schema(fn (Get $get): array => $this->getDynamicFields($get('type_id')))
                     ->statePath('dynamic_fields')
