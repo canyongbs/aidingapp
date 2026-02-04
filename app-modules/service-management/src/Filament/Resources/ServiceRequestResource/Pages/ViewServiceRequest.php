@@ -112,9 +112,10 @@ class ViewServiceRequest extends ViewRecord
                             ->state(function (ServiceRequest $record): string {
                                 /** @var Contact $respondent */
                                 $respondent = $record->respondent;
+                                $organizationName = $respondent->organization->name ?? 'Unaffiliated';
 
                                 return match ($respondent::class) {
-                                    Contact::class => "{$respondent->{Contact::displayNameKey()}} ({$respondent->type->name})<br>{$respondent->organization->name}",
+                                    Contact::class => "{$respondent->{Contact::displayNameKey()}} ({$respondent->type->name})<br>{$organizationName}",
                                 };
                             })
                             ->url(function (ServiceRequest $record) {

@@ -47,6 +47,8 @@ class Feedback extends ViewRecord
 {
     protected static string $resource = ServiceRequestResource::class;
 
+    protected static ?string $navigationLabel = 'Feedback';
+
     protected ?string $heading = 'Feedback';
 
     protected static ?string $breadcrumb = 'Feedback';
