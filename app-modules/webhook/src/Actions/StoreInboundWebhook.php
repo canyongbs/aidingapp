@@ -41,9 +41,9 @@ use AidingApp\Webhook\Models\InboundWebhook;
 
 class StoreInboundWebhook
 {
-  /**
-   * @param array<mixed>|string $payload
-   */
+    /**
+     * @param array<mixed>|string $payload
+     */
     public function handle(InboundWebhookSource $source, string $event, string $url, array|string $payload): void
     {
         InboundWebhook::create([

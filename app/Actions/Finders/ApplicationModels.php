@@ -46,9 +46,9 @@ use Symfony\Component\Finder\SplFileInfo;
 
 class ApplicationModels
 {
-  /**
-   * @return Collection<int, non-falsy-string>
-   */
+    /**
+     * @return Collection<int, non-falsy-string>
+     */
     public function all(): Collection
     {
         return collect(File::allFiles(app_path()))
