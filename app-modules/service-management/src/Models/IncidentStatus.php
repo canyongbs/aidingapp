@@ -65,6 +65,9 @@ class IncidentStatus extends BaseModel implements Auditable
         'classification' => SystemIncidentStatusClassification::class,
     ];
 
+    /**
+     * @return HasMany<Incident, $this>
+     */
     public function incidents(): HasMany
     {
         return $this->hasMany(Incident::class, 'status_id');

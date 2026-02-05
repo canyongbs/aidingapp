@@ -132,6 +132,9 @@ class ServiceRequestWidget extends BaseWidget
         return false;
     }
 
+    /**
+     * @return array<mixed>
+     */
     private function calculateUnassignedServiceRequestStats(Carbon $intervalStart): array
     {
         $currentUnassignedServiceRequests = ServiceRequest::doesntHave('assignments')->count();

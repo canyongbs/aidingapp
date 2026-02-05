@@ -64,7 +64,7 @@ abstract class TimelinePage extends Page
 
     public Model $recordModel;
 
-    public function mount($record): void
+    public function mount(Model $record): void
     {
         $this->recordModel = $this->record = $this->resolveRecord($record);
 

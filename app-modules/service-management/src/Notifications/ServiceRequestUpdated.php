@@ -54,6 +54,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification as BaseNotification;
+use InvalidArgumentException;
 
 class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, HasBeforeSendHook
 {
@@ -82,6 +83,9 @@ class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, Has
         return [match ($this->channel) {
             DatabaseChannel::class => 'database',
             MailChannel::class => 'mail',
+            default => throw new InvalidArgumentException(
+                "Unsupported notification channel: {$this->channel}"
+            ),
         }];
     }
 
@@ -106,6 +110,9 @@ class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, Has
             ->content($body);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toDatabase(object $notifiable): array
     {
         return Notification::make()

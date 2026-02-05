@@ -60,11 +60,17 @@ class ServiceRequestFormField extends SubmissibleField
         'is_required' => 'bool',
     ];
 
+    /**
+     * @return BelongsTo<ServiceRequestForm, $this>
+     */
     public function submissible(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestForm::class, 'service_request_form_id')->withTrashed()->withArchived();
     }
 
+    /**
+     * @return BelongsTo<ServiceRequestFormStep, $this>
+     */
     public function step(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestFormStep::class, 'service_request_form_step_id');

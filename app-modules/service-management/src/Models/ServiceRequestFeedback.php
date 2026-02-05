@@ -60,11 +60,17 @@ class ServiceRequestFeedback extends BaseModel
         'contact_id',
     ];
 
+    /**
+     * @return BelongsTo<ServiceRequest, $this>
+     */
     public function serviceRequest(): BelongsTo
     {
         return $this->belongsTo(ServiceRequest::class);
     }
 
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);

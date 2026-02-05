@@ -65,6 +65,9 @@ class ChangeRequestStatus extends BaseModel implements Auditable
         'classification' => SystemChangeRequestClassification::class,
     ];
 
+    /**
+     * @return HasMany<ChangeRequest, $this>
+     */
     public function changeRequests(): HasMany
     {
         return $this->hasMany(ChangeRequest::class);

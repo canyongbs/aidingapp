@@ -70,6 +70,9 @@ class ChangeRequestType extends BaseModel implements Auditable
         return $this->belongsToMany(User::class);
     }
 
+    /**
+     * @return HasMany<ChangeRequest, $this>
+     */
     public function changeRequests(): HasMany
     {
         return $this->hasMany(ChangeRequest::class);

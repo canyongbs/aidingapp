@@ -66,6 +66,9 @@ class IncidentSeverity extends BaseModel implements Auditable
         'rgb_color',
     ];
 
+    /**
+     * @return HasMany<Incident, $this>
+     */
     public function incidents(): HasMany
     {
         return $this->hasMany(Incident::class, 'severity_id');

@@ -65,21 +65,33 @@ class Incident extends BaseModel implements Auditable
         'assigned_team_id',
     ];
 
+    /**
+     * @return BelongsTo<Team, $this>
+     */
     public function assignedTeam(): BelongsTo
     {
         return $this->belongsTo(Team::class, 'assigned_team_id', 'id');
     }
 
+    /**
+     * @return BelongsTo<IncidentStatus, $this>
+     */
     public function status(): BelongsTo
     {
         return $this->belongsTo(IncidentStatus::class);
     }
 
+    /**
+     * @return BelongsTo<IncidentSeverity, $this>
+     */
     public function severity(): BelongsTo
     {
         return $this->belongsTo(IncidentSeverity::class);
     }
 
+    /**
+     * @return HasMany<IncidentUpdate, $this>
+     */
     public function incidentUpdates(): HasMany
     {
         return $this->hasMany(IncidentUpdate::class, 'incident_id');

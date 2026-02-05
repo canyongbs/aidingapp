@@ -46,6 +46,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 #[NoPermissions]
 class ServiceRequestFormAuthentication extends SubmissibleAuthentication
 {
+    /**
+     * @return BelongsTo<ServiceRequestForm, $this>
+     */
     public function submissible(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestForm::class, 'service_request_form_id')->withTrashed()->withArchived();

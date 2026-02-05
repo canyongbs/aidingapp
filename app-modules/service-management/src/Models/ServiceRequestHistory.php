@@ -74,6 +74,9 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
         'new_values',
     ];
 
+    /**
+     * @return BelongsTo<ServiceRequest, $this>
+     */
     public function serviceRequest(): BelongsTo
     {
         return $this->belongsTo(ServiceRequest::class);
@@ -89,6 +92,9 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
         return $forModel->histories()->get();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getUpdates(): array
     {
         $updates = [];
@@ -143,7 +149,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
                         // This is to overcome an issue that comes from an incorrect type when trying to find a contact with the wrong data type
                         try {
                             $found = $educatableClass::find($value[$key]);
-                        } catch (Exception $e) {
+                        } catch (Exception $exception) {
                         }
 
                         if (! is_null($found)) {
