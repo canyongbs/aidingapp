@@ -31,12 +31,21 @@
 
 </COPYRIGHT>
 --}}
+@use('App\Features\ReorderableFormFieldOptionsFeature')
+
 <x-form::blocks.field-wrapper
     class="py-3"
     :$label
     :$isRequired
 >
-    {{ $options[$response ?? null] ?? null }}
+    @php
+        $normalizedOptions =
+            ReorderableFormFieldOptionsFeature::active() && array_is_list($options)
+                ? collect($options)->pluck('label', 'value')->all()
+                : $options;
+    @endphp
+
+    {{ $normalizedOptions[$response ?? null] ?? null }}
 
     @if (blank($response ?? null))
         <span class="text-gray-500">No response</span>
