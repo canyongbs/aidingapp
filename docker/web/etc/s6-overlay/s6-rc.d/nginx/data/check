@@ -12,7 +12,7 @@ while [ $attempt -le $max_attempts ]; do
 	fi
 	
 	if [ $attempt -lt $max_attempts ]; then
-        echo "⚠️  Web server not responding correctly (HTTP $response). Retrying... ($attempt/$max_attempts)"
+        echo "⚠️ Web server not responding correctly (HTTP $response). Retrying... ($attempt/$max_attempts)"
 		sleep 1
 	fi
 	((attempt++))
