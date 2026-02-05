@@ -36,11 +36,19 @@
 
 namespace App\Filament\Forms\Components;
 
+use Filament\Forms\Components\Field;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Fieldset;
+use Filament\Support\Concerns\CanBeContained;
 
-class SecondsDurationInput extends Fieldset
+class SecondsDurationInput extends Field
 {
+    use CanBeContained;
+
+    /**
+     * @var view-string
+     */
+    protected string $view = 'filament-schemas::components.fieldset';
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -53,26 +61,22 @@ class SecondsDurationInput extends Fieldset
             TextInput::make('days')
                 ->default(0)
                 ->integer()
-                ->minValue(0)
-                ->dehydrated(false),
+                ->minValue(0),
             TextInput::make('hours')
                 ->default(0)
                 ->integer()
                 ->minValue(0)
-                ->maxValue(24)
-                ->dehydrated(false),
+                ->maxValue(24),
             TextInput::make('minutes')
                 ->default(0)
                 ->integer()
                 ->minValue(0)
-                ->maxValue(60)
-                ->dehydrated(false),
+                ->maxValue(60),
             TextInput::make('seconds')
                 ->default(0)
                 ->integer()
                 ->minValue(0)
-                ->maxValue(60)
-                ->dehydrated(false),
+                ->maxValue(60),
         ]);
 
         $this->formatStateUsing(function (int | array | null $state): array {
