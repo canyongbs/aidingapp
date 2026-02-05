@@ -83,7 +83,7 @@ services:
             - 'traefik.http.services.aidingapp-mailpit.loadbalancer.server.scheme=http'
 
     aidingapp-pgsql:
-        image: 'postgres:15'
+        image: 'postgres:16.8'
         ports:
             - '${FORWARD_DB_PORT:-5434}:5432'
         environment:
