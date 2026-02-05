@@ -38,14 +38,10 @@ namespace App\Filament\Forms\Components;
 
 use Filament\Forms\Components\Field;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Fieldset;
 
-class SecondsDurationInput extends Field
+class SecondsDurationInput extends Fieldset
 {
-    /**
-     * @var view-string
-     */
-    protected string $view = 'filament-schemas::components.fieldset';
-
     protected function setUp(): void
     {
         parent::setUp();
