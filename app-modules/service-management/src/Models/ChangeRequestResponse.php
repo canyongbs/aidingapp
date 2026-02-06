@@ -63,11 +63,17 @@ class ChangeRequestResponse extends BaseModel implements Auditable
         'approved' => 'boolean',
     ];
 
+    /**
+     * @return BelongsTo<ChangeRequest, $this>
+     */
     public function changeRequest(): BelongsTo
     {
         return $this->belongsTo(ChangeRequest::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

@@ -44,7 +44,7 @@ trait BreadcrumbCharacterLimit
     {
         $breadcrumbs = parent::getBreadcrumbs();
 
-        return array_map(function ($breadcrumb) {
+        return array_map(function (string $breadcrumb) {
             $breadcrumb = Str::limit($breadcrumb, 16);
 
             return $breadcrumb;

@@ -48,6 +48,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification as BaseNotification;
+use InvalidArgumentException;
 
 class ServiceRequestStatusChanged extends BaseNotification implements ShouldQueue
 {
@@ -71,6 +72,9 @@ class ServiceRequestStatusChanged extends BaseNotification implements ShouldQueu
         return [match ($this->channel) {
             DatabaseChannel::class => 'database',
             MailChannel::class => 'mail',
+            default => throw new InvalidArgumentException(
+                "Unsupported notification channel: {$this->channel}"
+            ),
         }];
     }
 
@@ -96,6 +100,9 @@ class ServiceRequestStatusChanged extends BaseNotification implements ShouldQueu
             ->content($body);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function toDatabase(object $notifiable): array
     {
         return Notification::make()

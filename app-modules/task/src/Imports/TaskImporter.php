@@ -86,7 +86,7 @@ class TaskImporter extends Importer
                         ->first(),
                 )
                 ->requiredMapping()
-                ->example(fn (): ?string => auth()->user()?->email ?? User::query()->value('email')),
+                ->example(fn (): ?string => auth()->user()->email ?? User::query()->value('email')),
             ImportColumn::make('concern')
                 ->label('Related To')
                 ->relationship(
@@ -102,6 +102,7 @@ class TaskImporter extends Importer
                         if (str($state)->contains(':')) {
                             return $resolveFromModel(match ((string) str($state)->before(':')) {
                                 'contact' => Contact::class,
+                                default => null,
                             }, (string) str($state)->after(':'));
                         }
 

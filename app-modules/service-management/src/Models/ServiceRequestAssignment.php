@@ -76,16 +76,25 @@ class ServiceRequestAssignment extends BaseModel implements Auditable, ProvidesA
         'status',
     ];
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function assignedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_by_id');
     }
 
+    /**
+     * @return BelongsTo<ServiceRequest, $this>
+     */
     public function serviceRequest(): BelongsTo
     {
         return $this->belongsTo(ServiceRequest::class);

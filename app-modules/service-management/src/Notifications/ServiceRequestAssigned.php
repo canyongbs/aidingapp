@@ -48,6 +48,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification as BaseNotification;
+use InvalidArgumentException;
 
 class ServiceRequestAssigned extends BaseNotification implements ShouldQueue
 {
@@ -71,6 +72,9 @@ class ServiceRequestAssigned extends BaseNotification implements ShouldQueue
         return [match ($this->channel) {
             DatabaseChannel::class => 'database',
             MailChannel::class => 'mail',
+            default => throw new InvalidArgumentException(
+                "Unsupported notification channel: {$this->channel}"
+            ),
         }];
     }
 

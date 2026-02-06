@@ -93,6 +93,9 @@ class ServiceRequestForm extends Submissible
         return $this->hasMany(ServiceRequestFormSubmission::class, 'service_request_form_id');
     }
 
+    /**
+     * @return BelongsTo<ServiceRequestType, $this>
+     */
     public function type(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestType::class, 'service_request_type_id')->withTrashed()->withArchived();

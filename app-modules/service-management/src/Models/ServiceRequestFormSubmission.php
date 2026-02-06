@@ -69,26 +69,41 @@ class ServiceRequestFormSubmission extends Submission
         'submitted_at' => 'immutable_datetime',
     ];
 
+    /**
+     * @return HasOne<ServiceRequest, $this>
+     */
     public function serviceRequest(): HasOne
     {
         return $this->hasOne(ServiceRequest::class, 'service_request_form_submission_id');
     }
 
+    /**
+     * @return BelongsTo<ServiceRequestForm, $this>
+     */
     public function submissible(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestForm::class, 'service_request_form_id')->withTrashed()->withArchived();
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function requester(): BelongsTo
     {
         return $this->belongsTo(User::class, 'requester_id');
     }
 
+    /**
+     * @return BelongsTo<ServiceRequestPriority, $this>
+     */
     public function priority(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestPriority::class, 'service_request_priority_id')->withTrashed();
     }
 
+    /**
+     * @return BelongsToMany<ServiceRequestFormField, $this>
+     */
     public function fields(): BelongsToMany
     {
         return $this->belongsToMany(

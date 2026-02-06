@@ -57,12 +57,15 @@ class Timeline extends BaseModel
         'record_sortable_date',
     ];
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function timelineable(): MorphTo
     {
         return $this->morphTo();
     }
 
-    public function scopeForEntity(Builder $query, Model $entity)
+    public function scopeForEntity(Builder $query, Model $entity): Builder
     {
         return $query->where('entity_type', $entity->getMorphClass())
             ->where('entity_id', $entity->getKey());

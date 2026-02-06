@@ -63,6 +63,9 @@ class IncidentUpdate extends BaseModel implements Auditable
         'internal' => 'boolean',
     ];
 
+    /**
+     * @return BelongsTo<Incident, $this>
+     */
     public function incident(): BelongsTo
     {
         return $this->belongsTo(Incident::class);
