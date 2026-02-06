@@ -53,8 +53,6 @@ class Feedback extends ViewRecord
 
     protected static ?string $breadcrumb = 'Feedback';
 
-    protected static ?string $navigationLabel = 'Feedback';
-
     public function infolist(Schema $schema): Schema
     {
         $serviceRequest = $this->record;
