@@ -41,7 +41,6 @@ use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
-use App\Features\ContactChangesFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -92,15 +91,9 @@ class ListContacts extends ListRecords
                         return $record->type->color->value;
                     })
                     ->sortable(query: function (Builder $query, string $direction): Builder {
-                        if (! ContactChangesFeature::active()) {
-                            return $query
-                                ->join('contact_statuses', 'contacts.status_id', '=', 'contact_statuses.id')
-                                ->orderBy('contact_statuses.name', $direction);
-                        }
-
                         return $query
-                            ->join('contact_types', 'contacts.type_id', '=', 'contact_types.id')
-                            ->orderBy('contact_types.name', $direction);
+                            ->join('contact_statuses', 'contacts.status_id', '=', 'contact_statuses.id')
+                            ->orderBy('contact_statuses.name', $direction);
                     }),
                 TextColumn::make('created_at')
                     ->label('Created')
@@ -108,8 +101,8 @@ class ListContacts extends ListRecords
                     ->sortable(),
             ])
             ->filters([
-                SelectFilter::make(ContactChangesFeature::active() ? 'type_id' : 'status_id')
-                    ->label(ContactChangesFeature::active() ? 'Type' : 'Status')
+                SelectFilter::make('type_id')
+                    ->label('Type')
                     ->relationship('type', 'name')
                     ->multiple()
                     ->preload(),
@@ -130,7 +123,7 @@ class ListContacts extends ListRecords
                                     'description' => 'Description',
                                     'email_bounce' => 'Email Bounce',
                                     'sms_opt_out' => 'SMS Opt Out',
-                                    (ContactChangesFeature::active() ? 'type_id' : 'status_id') => 'Type',
+                                    ('type_id') => 'Type',
                                 ])
                                 ->required()
                                 ->live(),
@@ -148,7 +141,7 @@ class ListContacts extends ListRecords
                                 ->boolean()
                                 ->required()
                                 ->visible(fn (Get $get) => $get('field') === 'sms_opt_out'),
-                            Select::make(ContactChangesFeature::active() ? 'type_id' : 'status_id')
+                            Select::make('type_id')
                                 ->label('Type')
                                 ->relationship('type', 'name')
                                 ->exists(
@@ -156,7 +149,7 @@ class ListContacts extends ListRecords
                                     column: (new ContactType())->getKeyName()
                                 )
                                 ->required()
-                                ->visible(fn (Get $get) => ContactChangesFeature::active() ? $get('field') === 'type_id' : $get('field') === 'status_id'),
+                                ->visible(fn (Get $get) => $get('field') === 'type_id'),
                         ])
                         ->action(function (Collection $records, array $data) {
                             $records->each(

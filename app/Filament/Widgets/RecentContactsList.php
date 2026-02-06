@@ -38,7 +38,6 @@ namespace App\Filament\Widgets;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
-use App\Features\ContactChangesFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
@@ -91,7 +90,7 @@ class RecentContactsList extends BaseWidget
                 TextColumn::make('source.name')
                     ->label('Source')
                     ->toggleable(isToggledHiddenByDefault: true)
-                    ->hidden(ContactChangesFeature::active()),
+                    ->hidden(),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime('g:ia - M j, Y ')

@@ -40,7 +40,6 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\ContactTypeFactory;
 use AidingApp\Contact\Enums\ContactTypeColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
-use App\Features\ContactChangesFeature;
 use App\Models\BaseModel;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -75,12 +74,12 @@ class ContactType extends BaseModel implements Auditable
      */
     public function contacts(): HasMany
     {
-        return ContactChangesFeature::active() ? $this->hasMany(Contact::class, 'type_id') : $this->hasMany(Contact::class, 'status_id');
+        return $this->hasMany(Contact::class, 'type_id');
     }
 
     public function getTable()
     {
-        return ContactChangesFeature::active() ? 'contact_types' : 'contact_statuses';
+        return 'contact_types';
     }
 
     protected function serializeDate(DateTimeInterface $date): string

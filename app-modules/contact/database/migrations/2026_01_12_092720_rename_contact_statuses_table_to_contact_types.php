@@ -33,7 +33,6 @@
 
 </COPYRIGHT>
 */
-use App\Features\ContactChangesFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -48,16 +47,12 @@ return new class () extends Migration {
             Schema::table('contacts', function (Blueprint $table) {
                 $table->renameColumn('status_id', 'type_id');
             });
-
-            ContactChangesFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            ContactChangesFeature::deactivate();
-
             Schema::table('contacts', function (Blueprint $table) {
                 $table->renameColumn('type_id', 'status_id');
             });

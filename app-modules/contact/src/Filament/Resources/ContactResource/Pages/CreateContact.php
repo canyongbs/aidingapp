@@ -40,7 +40,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
-use App\Features\ContactChangesFeature;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -143,8 +142,8 @@ class CreateContact extends CreateRecord
                 ])->columns(2),
 
                 Section::make('Classification')->schema([
-                    Select::make(ContactChangesFeature::active() ? 'type_id' : 'status_id')
-                        ->label(ContactChangesFeature::active() ? 'Type' : 'Status')
+                    Select::make('type_id')
+                        ->label('Type')
                         ->required()
                         ->relationship('type', 'name')
                         ->exists(
