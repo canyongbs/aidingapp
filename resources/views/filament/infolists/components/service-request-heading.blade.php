@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -37,10 +37,10 @@
 <span>
     Service Request: {{ $serviceRequestNumber }}
     <button
+        class="relative -top-0.5 cursor-pointer align-middle text-gray-400 hover:text-gray-500"
         type="button"
         x-on:click="window.navigator.clipboard.writeText('{{ $serviceRequestNumber }}'); $tooltip('Copied!', { timeout: 1500 })"
-        class="text-gray-400 hover:text-gray-500 cursor-pointer align-middle relative -top-0.5"
     >
-        <x-heroicon-o-clipboard-document class="w-4 h-4 inline" />
+        <x-heroicon-o-clipboard-document class="inline h-4 w-4" />
     </button>
 </span>
