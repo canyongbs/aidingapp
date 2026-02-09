@@ -39,13 +39,14 @@ namespace App\Multitenancy\Http\Middleware;
 use App\Settings\OlympusSettings;
 use Closure;
 use Illuminate\Http\Request;
+use Spatie\Multitenancy\Landlord;
 use Symfony\Component\HttpFoundation\Response;
 
 class CheckOlympusKey
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $key = app(OlympusSettings::class)->key;
+        $key = Landlord::execute(fn (): ?string => app(OlympusSettings::class)->key);
 
         if (is_null($key) || $request->bearerToken() !== $key) {
             if ($request->expectsJson()) {
