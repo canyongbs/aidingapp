@@ -87,10 +87,6 @@ class RecentContactsList extends BaseWidget
                         return $record->type->color->value;
                     })
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('source.name')
-                    ->label('Source')
-                    ->toggleable(isToggledHiddenByDefault: true)
-                    ->hidden(),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime('g:ia - M j, Y ')

@@ -76,13 +76,9 @@ class ContactsTable
                     })
                     ->sortable(query: function (Builder $query, string $direction): Builder {
                         return $query
-                            ->join('contact_statuses', 'contacts.status_id', '=', 'contact_statuses.id')
-                            ->orderBy('contact_statuses.name', $direction);
+                            ->join('contact_types', 'contacts.type_id', '=', 'contact_types.id')
+                            ->orderBy('contact_types.name', $direction);
                     }),
-                TextColumn::make('source.name')
-                    ->label('Source')
-                    ->sortable()
-                    ->hidden(),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime('g:ia - M j, Y ')
