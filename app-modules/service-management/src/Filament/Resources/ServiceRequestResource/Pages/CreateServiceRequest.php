@@ -111,15 +111,9 @@ class CreateServiceRequest extends CreateRecord
                                     })
                                         ->pluck('name', 'id'))
                                     ->rule(new ManagedServiceRequestType())
-                                    ->afterStateUpdated(function (Set $set, Select $component) {
+                                    ->afterStateUpdated(function (Set $set, CreateServiceRequest $livewire) {
                                         $set('priority_id', null);
-                                        $component
-                                            ->getContainer()
-                                            ->getParentComponent()
-                                            ->getContainer()
-                                            ->getComponent('dynamicTypeFields')
-                                            ?->getChildSchema()
-                                            ->fill();
+                                        $livewire->form->getComponent('dynamicTypeFields')?->getChildSchema()->fill();
                                     })
                                     ->label('Type')
                                     ->required()
