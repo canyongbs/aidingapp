@@ -40,7 +40,6 @@ use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Notification\Enums\EmailMessageEventType;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\EmailMessageEvent;
-use App\Features\EngagementDispatchFailedAtFeature;
 use Exception;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
@@ -101,7 +100,7 @@ enum EngagementDisplayStatus implements HasLabel, HasColor
 
     protected static function parseEmailStatus(Engagement $engagement): self
     {
-        if (EngagementDispatchFailedAtFeature::active() && ! is_null($engagement->dispatch_failed_at)) {
+        if (! is_null($engagement->dispatch_failed_at)) {
             return self::SystemFailed;
         }
 

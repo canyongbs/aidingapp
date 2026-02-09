@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Imports;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
-use App\Features\ContactChangesFeature;
 use App\Models\User;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -78,7 +77,7 @@ class ContactImporter extends Importer
                         )
                         ->first(),
                 )
-                ->guess(ContactChangesFeature::active() ? ['type_id', 'type_name'] : ['status_id', 'status_name'])
+                ->guess(['type_id', 'type_name'])
                 ->requiredMapping()
                 ->example(fn (): ?string => ContactType::query()->value('name')),
             ImportColumn::make('description')

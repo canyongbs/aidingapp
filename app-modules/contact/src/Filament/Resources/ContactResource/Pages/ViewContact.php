@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
-use App\Features\ContactChangesFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -98,7 +97,7 @@ class ViewContact extends ViewRecord
                 Section::make('Classification')
                     ->schema([
                         TextEntry::make('type.name')
-                            ->label(ContactChangesFeature::active() ? 'Type' : 'Status'),
+                            ->label('Type'),
                         TextEntry::make('organization.name')
                             ->label('Organization'),
                         TextEntry::make('description')
