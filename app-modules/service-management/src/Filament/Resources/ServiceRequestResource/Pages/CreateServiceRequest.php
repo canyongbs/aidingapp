@@ -69,97 +69,95 @@ class CreateServiceRequest extends CreateRecord
 {
     protected static string $resource = ServiceRequestResource::class;
 
+    protected ?string $heading = '';
+
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Select::make('division_id')
-                    ->relationship('division', 'name')
-                    ->label('Division')
-                    ->required()
-                    ->exists((new Division())->getTable(), 'id')
-                    ->visible(fn (): bool => Division::count() > 1)
-                    ->saveRelationshipsWhenHidden()
-                    ->default(
-                        fn () => Division::count() === 1 ? (auth()->user()->team?->division?->getKey()
-                                    ?? Division::query()
-                                        ->first()
-                                        ?->getKey()) : null
-                    ),
-                Select::make('status_id')
-                    ->relationship('status', 'name')
-                    ->label('Status')
-                    ->allowHtml()
-                    ->options(fn () => ServiceRequestStatus::orderBy('sort')
-                        ->get(['id', 'name', 'classification', 'color'])
-                        ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
-                        ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [
-                            $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
-                        ])))
-                    ->required()
-                    ->exists((new ServiceRequestStatus())->getTable(), 'id'),
-                Grid::make()
+                Section::make('New Service Request')
                     ->schema([
-                        Select::make('type_id')
-                            ->options(ServiceRequestType::when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                                $query->whereHas('managers', function (Builder $query): void {
-                                    $query->where('teams.id', auth()->user()->team?->getKey());
-                                });
-                            })
-                                ->pluck('name', 'id'))
-                            ->rule(new ManagedServiceRequestType())
-                            ->afterStateUpdated(function (Set $set, Select $component) {
-                                $set('priority_id', null);
-                                $component
-                                    ->getContainer()
-                                    ->getParentComponent()
-                                    ->getContainer()
-                                    ->getComponent('dynamicTypeFields')
-                                    ?->getChildSchema()
-                                    ->fill();
-                            })
-                            ->label('Type')
+                        Select::make('division_id')
+                            ->relationship('division', 'name')
+                            ->label('Division')
                             ->required()
-                            ->live()
-                            ->exists(ServiceRequestType::class, 'id'),
-                        Select::make('priority_id')
-                            ->relationship(
-                                name: 'priority',
-                                titleAttribute: 'name',
-                                modifyQueryUsing: fn (Get $get, Builder $query) => $query->where('type_id', $get('type_id'))->orderBy('order'),
-                            )
-                            ->label('Priority')
+                            ->exists((new Division())->getTable(), 'id')
+                            ->visible(fn (): bool => Division::count() > 1)
+                            ->saveRelationshipsWhenHidden()
+                            ->default(
+                                fn () => Division::count() === 1 ? (auth()->user()->team?->division?->getKey()
+                                            ?? Division::query()->first()?->getKey()) : null
+                            ),
+                        Grid::make(6)
+                            ->schema([
+                                Select::make('status_id')
+                                    ->relationship('status', 'name')
+                                    ->label('Status')
+                                    ->allowHtml()
+                                    ->options(fn () => ServiceRequestStatus::orderBy('sort')
+                                        ->get(['id', 'name', 'classification', 'color'])
+                                        ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
+                                        ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [
+                                            $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
+                                        ])))
+                                    ->required()
+                                    ->exists((new ServiceRequestStatus())->getTable(), 'id')
+                                    ->columnSpan(fn (Get $get): int => filled($get('type_id')) ? 2 : 3),
+                                Select::make('type_id')
+                                    ->options(ServiceRequestType::when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
+                                        $query->whereHas('managers', function (Builder $query): void {
+                                            $query->where('teams.id', auth()->user()->team?->getKey());
+                                        });
+                                    })
+                                        ->pluck('name', 'id'))
+                                    ->rule(new ManagedServiceRequestType())
+                                    ->afterStateUpdated(function (Set $set, CreateServiceRequest $livewire) {
+                                        $set('priority_id', null);
+                                        $livewire->form->getComponent('dynamicTypeFields')?->getChildSchema()->fill();
+                                    })
+                                    ->label('Type')
+                                    ->required()
+                                    ->live()
+                                    ->exists(ServiceRequestType::class, 'id')
+                                    ->columnSpan(fn (Get $get): int => filled($get('type_id')) ? 2 : 3),
+                                Select::make('priority_id')
+                                    ->relationship(
+                                        name: 'priority',
+                                        titleAttribute: 'name',
+                                        modifyQueryUsing: fn (Get $get, Builder $query) => $query->where('type_id', $get('type_id'))->orderBy('order'),
+                                    )
+                                    ->label('Priority')
+                                    ->required()
+                                    ->exists(ServiceRequestPriority::class, 'id')
+                                    ->visible(fn (Get $get): bool => filled($get('type_id')))
+                                    ->columnSpan(2),
+                            ]),
+                        TextInput::make('title')
                             ->required()
-                            ->exists(ServiceRequestPriority::class, 'id')
-                            ->visible(fn (Get $get): bool => filled($get('type_id'))),
+                            ->string()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                        Textarea::make('close_details')
+                            ->label('Description')
+                            ->nullable()
+                            ->string()
+                            ->columnSpan(1),
                     ]),
-                TextInput::make('title')
-                    ->required()
-                    ->string()
-                    ->maxLength(255)
-                    ->columnSpanFull(),
-                Textarea::make('close_details')
-                    ->label('Description')
-                    ->nullable()
-                    ->string()
-                    ->columnSpan(1),
-                Textarea::make('res_details')
-                    ->label('Internal Details')
-                    ->nullable()
-                    ->string()
-                    ->columnSpan(1),
-                Select::make('respondent_id')
-                    ->relationship(
-                        name: 'respondent',
-                        titleAttribute: 'full_name',
-                        modifyQueryUsing: fn (Builder $query) => $query->with('type')->orderBy('first_name')
-                    )
-                    ->label('Related To')
-                    ->required()
-                    ->searchable()
-                    ->preload()
-                    ->getOptionLabelFromRecordUsing(fn (Contact $record) => $record->full_name . ' (' . ($record->status->name ?? 'N/A') . ")\n" . ($record->organization->name ?? 'Unaffiliated'))
-                    ->exists((new Contact())->getTable(), 'id'),
+                Section::make('Contact Details')
+                    ->schema([
+                        Select::make('respondent_id')
+                            ->relationship(
+                                name: 'respondent',
+                                titleAttribute: 'full_name',
+                                modifyQueryUsing: fn (Builder $query) => $query->with('type')->orderBy('first_name')
+                            )
+                            ->label('Choose Customer Contact')
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->getOptionLabelFromRecordUsing(fn (Contact $record) => $record->full_name . ' (' . ($record->type->name ?? 'N/A') . ")\n" . ($record->organization->name ?? 'Unaffiliated'))
+                            ->exists((new Contact())->getTable(), 'id'),
+                    ]),
                 Section::make('Additional Information')
                     ->schema(fn (Get $get): array => $this->getDynamicFields($get('type_id')))
                     ->statePath('dynamic_fields')

@@ -56,7 +56,6 @@ class CreateServiceRequestRequestFactory extends RequestFactory
             'priority_id' => ServiceRequestPriority::factory()->create()->getKey(),
             'respondent_id' => Contact::factory()->create()->getKey(),
             'close_details' => fake()->sentence(),
-            'res_details' => fake()->sentence(),
         ];
     }
 }

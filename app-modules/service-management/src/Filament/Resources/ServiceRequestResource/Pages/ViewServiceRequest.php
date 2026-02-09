@@ -53,10 +53,12 @@ use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\IconSize;
+use Illuminate\Support\HtmlString;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ViewServiceRequest extends ViewRecord
@@ -76,39 +78,44 @@ class ViewServiceRequest extends ViewRecord
         return $schema
             ->schema([
                 Section::make()
+                    ->heading(fn (ServiceRequest $record): HtmlString => new HtmlString(
+                        view('filament.infolists.components.service-request-heading', [
+                            'serviceRequestNumber' => $record->service_request_number,
+                        ])->render()
+                    ))
                     ->schema([
-                        TextEntry::make('service_request_number')
-                            ->label('Service Request Number'),
                         TextEntry::make('division.name')
                             ->visible(fn (): bool => Division::count() > 1)
                             ->label('Division'),
-                        TextEntry::make('status.name')
-                            ->label('Status')
-                            ->badge()
-                            ->color(fn (ServiceRequest $record): string => $record->status->color->value),
+                        Grid::make(3)
+                            ->schema([
+                                TextEntry::make('status.name')
+                                    ->label('Status')
+                                    ->badge()
+                                    ->color(fn (ServiceRequest $record): string => $record->status->color->value),
+                                TextEntry::make('priority.type.name')
+                                    ->state(
+                                        fn (ServiceRequest $record) => $record->priority->type()->withTrashed()->first()?->name
+                                    )
+                                    ->label('Type'),
+                                TextEntry::make('priority.name')
+                                    ->label('Priority'),
+                            ])->columns(3),
                         TextEntry::make('title'),
-                        TextEntry::make('priority.name')
-                            ->label('Priority'),
-                        TextEntry::make('priority.type.name')
-                            ->state(
-                                fn (ServiceRequest $record) => $record->priority->type()->withTrashed()->first()?->name
-                            )
-                            ->label('Type'),
                         TextEntry::make('close_details')
                             ->label('Description')
                             ->columnSpanFull(),
-                        TextEntry::make('res_details')
-                            ->label('Internal Details')
-                            ->columnSpanFull(),
                         TextEntry::make('respondent')
-                            ->label('Related To')
+                            ->label('Customer Contact')
                             ->color('primary')
+                            ->html()
                             ->state(function (ServiceRequest $record): string {
                                 /** @var Contact $respondent */
                                 $respondent = $record->respondent;
+                                $organizationName = $respondent->organization->name ?? 'Unaffiliated';
 
                                 return match ($respondent::class) {
-                                    Contact::class => "{$respondent->{Contact::displayNameKey()}} (Contact)",
+                                    Contact::class => "{$respondent->{Contact::displayNameKey()}} ({$respondent->type->name})<br>{$organizationName}",
                                 };
                             })
                             ->url(function (ServiceRequest $record) {
@@ -119,17 +126,6 @@ class ViewServiceRequest extends ViewRecord
                                     Contact::class => ContactResource::getUrl('view', ['record' => $respondent->id]),
                                 };
                             }),
-                        TextEntry::make('time_to_resolution')
-                            ->label('Time to Resolution')
-                            ->formatStateUsing(function ($state) {
-                                $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
-                                $days = $interval->d;
-                                $hours = $interval->h;
-                                $minutes = $interval->i;
-
-                                return "{$days}d {$hours}h {$minutes}m";
-                            })
-                            ->columnSpan(1),
                     ])
                     ->columns(),
                 Section::make('Uploads')
@@ -177,6 +173,15 @@ class ViewServiceRequest extends ViewRecord
                             })
                             ->toArray()
                     ),
+                Section::make('Form Details')
+                    ->collapsed()
+                    ->visible(fn (ServiceRequest $record): bool => ! is_null($record->serviceRequestFormSubmission))
+                    ->schema([
+                        TextEntry::make('serviceRequestFormSubmission.submitted_at')
+                            ->dateTime(),
+                        ViewEntry::make('serviceRequestFormSubmission')
+                            ->view('filament.infolists.components.submission-entry'),
+                    ]),
                 Section::make('SLA Management')
                     ->visible(fn (ServiceRequest $record): bool => $record->priority?->sla !== null)
                     ->schema([
@@ -195,6 +200,16 @@ class ViewServiceRequest extends ViewRecord
                                 ->label('Response compliance')
                                 ->badge()
                                 ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResponseSlaComplianceStatus()),
+                            TextEntry::make('time_to_resolution')
+                                ->label('Time to Resolution')
+                                ->formatStateUsing(function ($state) {
+                                    $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
+                                    $days = $interval->d;
+                                    $hours = $interval->h;
+                                    $minutes = $interval->i;
+
+                                    return "{$days}d {$hours}h {$minutes}m";
+                                }),
                         ]),
                         Group::make([
                             TextEntry::make('sla_resolution_seconds')
@@ -226,15 +241,6 @@ class ViewServiceRequest extends ViewRecord
                             ->badge(),
                     ])
                     ->columns(),
-                Section::make('Form Submission Details')
-                    ->collapsed()
-                    ->visible(fn (ServiceRequest $record): bool => ! is_null($record->serviceRequestFormSubmission))
-                    ->schema([
-                        TextEntry::make('serviceRequestFormSubmission.submitted_at')
-                            ->dateTime(),
-                        ViewEntry::make('serviceRequestFormSubmission')
-                            ->view('filament.infolists.components.submission-entry'),
-                    ]),
             ]);
     }
 

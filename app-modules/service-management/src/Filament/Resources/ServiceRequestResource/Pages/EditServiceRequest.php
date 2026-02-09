@@ -74,12 +74,14 @@ class EditServiceRequest extends EditRecord
     {
         $disabledStatuses = ServiceRequestStatus::onlyTrashed()->pluck('id');
         $disabledTypes = ServiceRequestType::onlyTrashed()->pluck('id');
+        $serviceRequest = $this->getRecord();
+        assert($serviceRequest instanceof ServiceRequest);
 
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
 
         return $schema
             ->components([
-                Section::make()
+                Section::make('Service Request: ' . $serviceRequest->service_request_number)
                     ->schema([
                         Select::make('division_id')
                             ->relationship('division', 'name')
@@ -87,24 +89,24 @@ class EditServiceRequest extends EditRecord
                             ->required()
                             ->visible(fn (): bool => Division::count() > 1)
                             ->exists((new Division())->getTable(), 'id'),
-                        Select::make('status_id')
-                            ->relationship('status', 'name')
-                            ->label('Status')
-                            ->allowHtml()
-                            ->options(fn (ServiceRequest $record) => ServiceRequestStatus::withTrashed()
-                                ->whereKey($record->status_id)
-                                ->orWhereNull('deleted_at')
-                                ->orderBy('sort')
-                                ->get(['id', 'name', 'classification', 'color'])
-                                ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
-                                ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [
-                                    $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
-                                ])))
-                            ->required()
-                            ->exists((new ServiceRequestStatus())->getTable(), 'id')
-                            ->disableOptionWhen(fn (string $value) => $disabledStatuses->contains($value)),
-                        Grid::make()
+                        Grid::make(3)
                             ->schema([
+                                Select::make('status_id')
+                                    ->relationship('status', 'name')
+                                    ->label('Status')
+                                    ->allowHtml()
+                                    ->options(fn (ServiceRequest $record) => ServiceRequestStatus::withTrashed()
+                                        ->whereKey($record->status_id)
+                                        ->orWhereNull('deleted_at')
+                                        ->orderBy('sort')
+                                        ->get(['id', 'name', 'classification', 'color'])
+                                        ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
+                                        ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [
+                                            $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
+                                        ])))
+                                    ->required()
+                                    ->exists((new ServiceRequestStatus())->getTable(), 'id')
+                                    ->disableOptionWhen(fn (string $value) => $disabledStatuses->contains($value)),
                                 Select::make('type_id')
                                     ->options(
                                         fn (ServiceRequest $record) => ServiceRequestType::query() // @phpstan-ignore method.notFound
@@ -153,22 +155,17 @@ class EditServiceRequest extends EditRecord
                             ->nullable()
                             ->string()
                             ->columnSpan(1),
-                        Textarea::make('res_details')
-                            ->label('Internal Details')
-                            ->nullable()
-                            ->string()
-                            ->columnSpan(1),
                         Select::make('respondent_id')
                             ->relationship(
                                 name: 'respondent',
                                 titleAttribute: 'full_name',
                                 modifyQueryUsing: fn (Builder $query) => $query->with('type')->orderBy('first_name')
                             )
-                            ->label('Related To')
+                            ->label('Customer Contact')
                             ->required()
                             ->searchable()
                             ->preload()
-                            ->getOptionLabelFromRecordUsing(fn (Contact $record) => $record->full_name . ' (' . ($record->status->name ?? 'N/A') . ")\n" . ($record->organization->name ?? 'Unaffiliated'))
+                            ->getOptionLabelFromRecordUsing(fn (Contact $record) => $record->full_name . ' (' . ($record->type->name ?? 'N/A') . ")\n" . ($record->organization->name ?? 'Unaffiliated'))
                             ->exists((new Contact())->getTable(), 'id'),
                     ]),
                 Section::make('Uploads')

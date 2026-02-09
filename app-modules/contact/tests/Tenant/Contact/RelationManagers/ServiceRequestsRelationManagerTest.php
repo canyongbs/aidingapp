@@ -288,7 +288,6 @@ test('Can create a service request for a contact', function () {
             'priority_id' => $priority->getKey(),
             'title' => 'Test Service Request',
             'close_details' => 'Description details',
-            'res_details' => 'Internal details',
         ])
         ->assertSuccessful();
 

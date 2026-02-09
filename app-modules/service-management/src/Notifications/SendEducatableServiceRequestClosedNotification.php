@@ -87,7 +87,7 @@ class SendEducatableServiceRequestClosedNotification extends Notification implem
                 ->line(__('We wanted to update you that the issue you reported in Ticket #:ticketNo regarding :shortDescription has been :status.', [
                     'ticketNo' => $this->serviceRequest->service_request_number,
                     'status' => $status->name,
-                    'shortDescription' => Str::limit($this->serviceRequest->res_details, 10, '...'),
+                    'shortDescription' => Str::limit($this->serviceRequest->title, 10, '...'),
                 ]))
                 ->line('If you experience any further issues or have additional questions, please do not hesitate to open a new ticket.')
                 ->salutation('Thank you for giving us a chance to help you with your issue.');
