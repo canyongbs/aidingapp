@@ -120,9 +120,9 @@ abstract class TestCase extends BaseTestCase
     protected function createTenant(string $name, string $domain, string $database): Tenant
     {
         $tenant = app(CreateTenant::class)(
-            $name,
-            $domain,
-            new TenantConfig(
+            name: $name,
+            domain: $domain,
+            config: new TenantConfig(
                 database: new TenantDatabaseConfig(
                     host: config('database.connections.landlord.host'),
                     port: config('database.connections.landlord.port'),
@@ -169,8 +169,7 @@ abstract class TestCase extends BaseTestCase
                     fromName: config('mail.from.name')
                 ),
             ),
-            null,
-            new LicenseData(
+            licenseData: new LicenseData(
                 updatedAt: now(),
                 subscription: new LicenseSubscriptionData(
                     clientName: 'Jane Smith',
@@ -201,7 +200,7 @@ abstract class TestCase extends BaseTestCase
                     incidentManagement: true,
                 )
             ),
-            false,
+            seedTenantDatabase: false,
         );
 
         $tenant->execute(function () {

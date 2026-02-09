@@ -48,9 +48,6 @@ class CreateTenantRequest extends FormRequest
         return [
             'domain' => ['required', 'string', 'max:255', 'unique:landlord.tenants,domain', 'regex:/^((?:[a-zA-Z0-9-]*?\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,})$/i'],
             'database' => ['required', 'string', 'max:255'],
-            'user.name' => ['required', 'string', 'max:255'],
-            'user.email' => ['required', 'email', 'max:255'],
-            'user.password' => ['required', 'string'],
             'limits' => ['required', 'array'],
             'limits.recruitmentCrmSeats' => ['required', 'integer', 'min:0'],
             'limits.emails' => ['required', 'integer', 'min:0'],
