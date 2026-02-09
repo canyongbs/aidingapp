@@ -1,4 +1,6 @@
-{{--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
@@ -30,24 +32,16 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
---}}
-@use('App\Features\ReorderableFormFieldOptionsFeature')
+*/
 
-<x-form::blocks.field-wrapper
-    class="py-3"
-    :$label
-    :$isRequired
->
-    @php
-        $normalizedOptions =
-            ReorderableFormFieldOptionsFeature::active() && array_is_list($options)
-                ? collect($options)->pluck('label', 'value')->all()
-                : $options;
-    @endphp
+namespace App\Features;
 
-    {{ $normalizedOptions[$response ?? null] ?? null }}
+use App\Support\AbstractFeatureFlag;
 
-    @if (blank($response ?? null))
-        <span class="text-gray-500">No response</span>
-    @endif
-</x-form::blocks.field-wrapper>
+class ReorderableFormFieldOptionsFeature extends AbstractFeatureFlag
+{
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
+}

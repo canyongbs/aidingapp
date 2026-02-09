@@ -37,7 +37,10 @@
 namespace AidingApp\Form\Filament\Blocks;
 
 use AidingApp\Form\Models\SubmissibleField;
+use App\Features\ReorderableFormFieldOptionsFeature;
 use Filament\Forms\Components\KeyValue;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 
 class RadioFormFieldBlock extends FormFieldBlock
@@ -58,10 +61,23 @@ class RadioFormFieldBlock extends FormFieldBlock
      */
     public function fields(): array
     {
+        if (! ReorderableFormFieldOptionsFeature::active()) {
+            return [
+                KeyValue::make('options')
+                    ->keyLabel('Value')
+                    ->valueLabel('Label'),
+            ];
+        }
+
         return [
-            KeyValue::make('options')
-                ->keyLabel('Value')
-                ->valueLabel('Label'),
+            Repeater::make('options')
+                ->schema([
+                    TextInput::make('value')->required(),
+                    TextInput::make('label')->required(),
+                ])
+                ->columns(2)
+                ->reorderable()
+                ->addActionLabel('Add option'),
         ];
     }
 
@@ -84,9 +100,28 @@ class RadioFormFieldBlock extends FormFieldBlock
      */
     public static function getValidationRules(SubmissibleField $field): array
     {
+        if (! ReorderableFormFieldOptionsFeature::active()) {
+            /** @var array<string, string> $options */
+            $options = $field->config['options'] ?? [];
+
+            return [
+                'string',
+                'in:' . implode(',', array_keys($options)),
+            ];
+        }
+
+        /** @var array<array-key, mixed> $options */
+        $options = $field->config['options'] ?? [];
+
+        if (array_is_list($options)) {
+            $values = array_column($options, 'value');
+        } else {
+            $values = array_keys($options);
+        }
+
         return [
             'string',
-            'in:' . collect((array) $field->config['options'])->keys()->join(','),
+            'in:' . implode(',', $values),
         ];
     }
 }
