@@ -37,6 +37,7 @@
 namespace App\Jobs;
 
 use App\DataTransferObjects\LicenseManagement\LicenseData;
+use App\Jobs\Concerns\UsedDuringNewTenantSetup;
 use App\Models\Tenant;
 use App\Settings\LicenseSettings;
 use Illuminate\Bus\Batchable;
@@ -54,6 +55,7 @@ class UpdateTenantLicenseData implements ShouldQueue, NotTenantAware
     use Queueable;
     use SerializesModels;
     use Batchable;
+    use UsedDuringNewTenantSetup;
 
     public function __construct(
         public Tenant $tenant,

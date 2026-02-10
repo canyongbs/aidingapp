@@ -36,6 +36,7 @@
 
 namespace App\Jobs;
 
+use App\Jobs\Concerns\UsedDuringNewTenantSetup;
 use App\Models\Tenant;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
@@ -54,6 +55,7 @@ class SeedTenantDatabase implements ShouldQueue, NotTenantAware
     use InteractsWithQueue;
     use Queueable;
     use SerializesModels;
+    use UsedDuringNewTenantSetup;
 
     public int $timeout = 1200;
 
