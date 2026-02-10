@@ -39,6 +39,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Http\Controllers\Controller;
+use App\Settings\LicenseSettings;
 use Filament\Support\Colors\Color;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\URL;
@@ -74,7 +75,7 @@ class KnowledgeManagementPortalController extends Controller
                 ->all(),
             'rounding' => $settings->knowledge_management_portal_rounding,
             'requires_authentication' => $settings->knowledge_management_portal_requires_authentication,
-            'service_management_enabled' => $settings->knowledge_management_portal_service_management,
+            'service_management_enabled' => $settings->knowledge_management_portal_service_management && resolve(LicenseSettings::class)->data?->addons?->serviceManagement,
             'has_assets' => auth()->guard('contact')->user()?->assetCheckIns()->exists() || auth()->guard('contact')->user()?->assetCheckOuts()->exists() ?: false,
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
             'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,

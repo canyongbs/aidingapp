@@ -32,7 +32,12 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ChatBubbleLeftRightIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+    import { ChatBubbleLeftRightIcon, PlusIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+    import { useAuthStore } from '../../Stores/auth.js';
+    import { useFeatureStore } from '../../Stores/feature.js';
+
+    const { user } = useAuthStore();
+    const { hasServiceManagement } = useFeatureStore();
 
     defineEmits(['close', 'new-request']);
 </script>
@@ -47,6 +52,17 @@
             </div>
             <div class="flex flex-col">
                 <h2 class="text-lg font-semibold tracking-tight">Support Assistant</h2>
+                <div v-if="hasServiceManagement && user" class="mt-1">
+                    <router-link :to="{ name: 'create-service-request' }">
+                        <button
+                            @click="$emit('close')"
+                            class="flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm transition-all shadow-sm"
+                        >
+                            <PlusIcon class="w-3.5 h-3.5" />
+                            Open Service Request
+                        </button>
+                    </router-link>
+                </div>
             </div>
         </div>
         <button
