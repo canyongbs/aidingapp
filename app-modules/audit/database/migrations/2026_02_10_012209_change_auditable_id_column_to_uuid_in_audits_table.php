@@ -35,15 +35,23 @@
 */
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::unprepared('ALTER TYPE uuid OWNER TO CURRENT_USER;');
+        DB::statement('
+            ALTER TABLE audits
+            ALTER COLUMN auditable_id TYPE uuid
+            USING auditable_id::uuid
+        ');
+    }
 
-        DB::unprepared('DROP CAST IF EXISTS (VARCHAR AS uuid)');
-
-        DB::unprepared('CREATE CAST (VARCHAR AS uuid) WITH INOUT AS IMPLICIT');
+    public function down(): void
+    {
+        DB::statement('
+            ALTER TABLE audits
+            ALTER COLUMN auditable_id TYPE varchar(255)
+            USING auditable_id::varchar(255)
+        ');
     }
 };

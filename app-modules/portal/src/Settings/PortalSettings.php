@@ -36,10 +36,12 @@
 
 namespace AidingApp\Portal\Settings;
 
+use AidingApp\Form\Enums\Rounding;
 use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
 use App\Settings\SettingsWithMedia;
+use CanyonGBS\Common\Enums\Color;
 
 class PortalSettings extends SettingsWithMedia
 {
@@ -60,9 +62,9 @@ class PortalSettings extends SettingsWithMedia
 
     public bool $ai_assistant_service_requests = false;
 
-    public ?string $knowledge_management_portal_primary_color = null;
+    public ?Color $knowledge_management_portal_primary_color = null;
 
-    public ?string $knowledge_management_portal_rounding = null;
+    public ?Rounding $knowledge_management_portal_rounding = null;
 
     public string|array $gdpr_banner_text = "We use cookies to personalize content, to provide social media features, and to analyze our traffic. We also share information about your use of our site with our partners who may combine it with other information that you've provided to them or that they've collected from your use of their services.";
 

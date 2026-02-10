@@ -125,6 +125,7 @@ class ManagePortalSettings extends SettingsPage
                             ->columnSpanFull(),
                         Toggle::make('ai_support_assistant')
                             ->label('AI Support Assistant')
+                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled'))
                             ->live(),
                         Grid::make()->schema([
                             TextInput::make('page_title')

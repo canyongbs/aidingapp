@@ -34,53 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace App\Jobs;
+namespace App\Jobs\Concerns;
 
-use App\Jobs\Concerns\UsedDuringNewTenantSetup;
-use App\Models\Tenant;
-use Illuminate\Bus\Batchable;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Artisan;
-use Spatie\Multitenancy\Jobs\NotTenantAware;
+use App\Multitenancy\Events\NewTenantSetupFailure;
+use Illuminate\Support\Facades\Event;
+use Throwable;
 
-class SeedTenantDatabase implements ShouldQueue, NotTenantAware
+trait UsedDuringNewTenantSetup
 {
-    use Batchable;
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-    use UsedDuringNewTenantSetup;
-
-    public int $timeout = 1200;
-
-    public function __construct(public Tenant $tenant) {}
-
-    /**
-     * @return array<int, SkipIfBatchCancelled>
-     */
-    public function middleware(): array
+    public function failed(?Throwable $exception): void
     {
-        return [new SkipIfBatchCancelled()];
-    }
+        Event::dispatch(new NewTenantSetupFailure($this->tenant, $exception));
 
-    public function handle(): void
-    {
-        $this->tenant->execute(function () {
-            $currentQueueFailedConnection = config('queue.failed.database');
-
-            config(['queue.failed.database' => 'landlord']);
-
-            Artisan::call(
-                command: 'db:seed --class=NewTenantSeeder --force'
-            );
-
-            config(['queue.failed.database' => $currentQueueFailedConnection]);
-        });
+        if (app()->bound('sentry')) {
+            app('sentry')->captureException($exception);
+        }
     }
 }

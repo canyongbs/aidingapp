@@ -37,19 +37,15 @@
 namespace App\Multitenancy\Actions;
 
 use App\DataTransferObjects\LicenseManagement\LicenseData;
-use App\Jobs\CreateTenantUser;
-use App\Jobs\DispatchTenantSetupCompleteEvent;
 use App\Jobs\MigrateTenantDatabase;
 use App\Jobs\SeedTenantDatabase;
 use App\Jobs\UpdateTenantLicenseData;
 use App\Models\Tenant;
 use App\Multitenancy\DataTransferObjects\TenantConfig;
-use App\Multitenancy\DataTransferObjects\TenantUser;
-use App\Multitenancy\Events\NewTenantSetupFailure;
+use App\Multitenancy\Events\NewTenantSetupComplete;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Event;
-use Throwable;
 
 class CreateTenant
 {
@@ -57,7 +53,6 @@ class CreateTenant
         string $name,
         string $domain,
         TenantConfig $config,
-        ?TenantUser $user = null,
         ?LicenseData $licenseData = null,
         bool $seedTenantDatabase = true
     ): ?Tenant {
@@ -76,14 +71,13 @@ class CreateTenant
                 new MigrateTenantDatabase($tenant),
                 ...($seedTenantDatabase ? [new SeedTenantDatabase($tenant)] : []),
                 ...($licenseData ? [new UpdateTenantLicenseData($tenant, $licenseData)] : []),
-                ...($user ? [new CreateTenantUser($tenant, $user)] : []),
-                new DispatchTenantSetupCompleteEvent($tenant),
             ],
         ])
             ->name("deploy-tenant-{$tenant->getKey()}-{$domain}")
             ->onQueue(config('queue.landlord_queue'))
-            ->catch(function (Throwable $exception) use ($tenant) {
-                Event::dispatch(new NewTenantSetupFailure($tenant, $exception));
+            ->then(function () use ($tenant) {
+                $tenant->update(['setup_complete' => true]);
+                Event::dispatch(new NewTenantSetupComplete($tenant));
             })
             ->dispatch();
 

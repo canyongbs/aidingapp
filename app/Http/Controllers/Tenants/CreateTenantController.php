@@ -49,7 +49,6 @@ use App\Multitenancy\DataTransferObjects\TenantMailConfig;
 use App\Multitenancy\DataTransferObjects\TenantMailersConfig;
 use App\Multitenancy\DataTransferObjects\TenantS3FilesystemConfig;
 use App\Multitenancy\DataTransferObjects\TenantSmtpMailerConfig;
-use App\Multitenancy\DataTransferObjects\TenantUser;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Str;
 use Sqids\Sqids;
@@ -61,9 +60,9 @@ class CreateTenantController extends Controller
         $rootName = Str::snake($request->validated('domain')) . '_' . (new Sqids())->encode([time()]);
 
         $tenant = app(CreateTenant::class)(
-            $request->validated('domain'),
-            $request->validated('domain'),
-            new TenantConfig(
+            name: $request->validated('domain'),
+            domain: $request->validated('domain'),
+            config: new TenantConfig(
                 database: new TenantDatabaseConfig(
                     host: config('database.connections.landlord.host'),
                     port: config('database.connections.landlord.port'),
@@ -109,12 +108,7 @@ class CreateTenantController extends Controller
                     fromName: config('mail.from.name')
                 ),
             ),
-            new TenantUser(
-                name: $request->validated('user.name'),
-                email: $request->validated('user.email'),
-                password: $request->validated('user.password'),
-            ),
-            new LicenseData(
+            licenseData: new LicenseData(
                 updatedAt: now(),
                 subscription: new LicenseSubscriptionData(
                     clientName: 'Jane Smith',

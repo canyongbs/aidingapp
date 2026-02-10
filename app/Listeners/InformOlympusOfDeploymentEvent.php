@@ -34,53 +34,48 @@
 </COPYRIGHT>
 */
 
-namespace App\Jobs;
+namespace App\Listeners;
 
-use App\Jobs\Concerns\UsedDuringNewTenantSetup;
-use App\Models\Tenant;
-use Illuminate\Bus\Batchable;
-use Illuminate\Bus\Queueable;
+use App\Multitenancy\Events\NewTenantSetupComplete;
+use App\Multitenancy\Events\NewTenantSetupFailure;
+use App\Services\Olympus;
+use App\Settings\OlympusSettings;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Artisan;
 use Spatie\Multitenancy\Jobs\NotTenantAware;
+use Spatie\Multitenancy\Landlord;
 
-class SeedTenantDatabase implements ShouldQueue, NotTenantAware
+class InformOlympusOfDeploymentEvent implements ShouldQueue, NotTenantAware
 {
-    use Batchable;
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-    use UsedDuringNewTenantSetup;
-
-    public int $timeout = 1200;
-
-    public function __construct(public Tenant $tenant) {}
-
-    /**
-     * @return array<int, SkipIfBatchCancelled>
-     */
-    public function middleware(): array
+    public function handle(NewTenantSetupComplete|NewTenantSetupFailure $event): void
     {
-        return [new SkipIfBatchCancelled()];
-    }
+        $isConfigured = Landlord::execute(function (): bool {
+            $settings = app(OlympusSettings::class);
 
-    public function handle(): void
-    {
-        $this->tenant->execute(function () {
-            $currentQueueFailedConnection = config('queue.failed.database');
-
-            config(['queue.failed.database' => 'landlord']);
-
-            Artisan::call(
-                command: 'db:seed --class=NewTenantSeeder --force'
-            );
-
-            config(['queue.failed.database' => $currentQueueFailedConnection]);
+            return ! is_null($settings->key);
         });
+
+        if (! $isConfigured) {
+            return;
+        }
+
+        $tenantId = $event->tenant->getKey();
+
+        app(Olympus::class)->makeRequest()
+            ->asJson()
+            ->post(
+                url: "/api/deployment/{$tenantId}/report-event",
+                data: match (true) {
+                    $event instanceof NewTenantSetupComplete => [
+                        'type' => 'complete',
+                        'occurred_at' => now()->toDateTimeString('millisecond'),
+                    ],
+                    $event instanceof NewTenantSetupFailure => [
+                        'type' => 'error',
+                        'occurred_at' => now()->toDateTimeString('millisecond'),
+                        'message' => $event->exception->getMessage(),
+                    ],
+                }
+            )
+            ->throw();
     }
 }
