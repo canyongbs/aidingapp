@@ -68,7 +68,7 @@ class KnowledgeManagementPortalController extends Controller
                 conversionName: 'portal_favicon',
             ),
             'app_name' => config('app.name'),
-            'primary_color' => collect(Color::all()[$settings->knowledge_management_portal_primary_color ?? 'blue'])
+            'primary_color' => collect(Color::all()[$settings->knowledge_management_portal_primary_color->value ?? 'blue'])
                 ->map(Color::convertToRgb(...))
                 ->map(fn (string $value): string => (string) str($value)->after('rgb(')->before(')'))
                 ->all(),

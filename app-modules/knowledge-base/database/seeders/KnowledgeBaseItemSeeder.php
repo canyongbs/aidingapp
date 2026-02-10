@@ -41,6 +41,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Models\Scopes\TagsForClass;
 use App\Models\Tag;
+use CanyonGBS\Common\Enums\Color;
 use Illuminate\Database\Seeder;
 
 class KnowledgeBaseItemSeeder extends Seeder
@@ -67,8 +68,8 @@ class KnowledgeBaseItemSeeder extends Seeder
 
         $settings = app(PortalSettings::class);
         $settings->knowledge_management_portal_enabled = true;
-        $settings->knowledge_management_portal_primary_color = 'emerald';
-        $settings->knowledge_management_portal_rounding = Rounding::None->value;
+        $settings->knowledge_management_portal_primary_color = Color::Emerald;
+        $settings->knowledge_management_portal_rounding = Rounding::None;
         $settings->knowledge_management_portal_service_management = true;
         $settings->save();
     }
