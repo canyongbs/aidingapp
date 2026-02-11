@@ -56,6 +56,7 @@ use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Gate;
 
 class ServiceRequestObserver
@@ -130,7 +131,7 @@ class ServiceRequestObserver
     public function saving(ServiceRequest $serviceRequest): void
     {
         if ($serviceRequest->isDirty('status_id')) {
-            $serviceRequest->status_updated_at = now();
+            $serviceRequest->status_updated_at = CarbonImmutable::now();
 
             if (
                 $serviceRequest->status->classification === SystemServiceRequestClassification::Closed &&
@@ -140,7 +141,7 @@ class ServiceRequestObserver
                 $currentTime = Carbon::now();
 
                 // Calculate the difference in seconds
-                $secondsDifference = $createdTime ? round($createdTime->diffInSeconds($currentTime)) : null;
+                $secondsDifference = $createdTime ? (int) round($createdTime->diffInSeconds($currentTime)) : null;
                 $serviceRequest->time_to_resolution = $secondsDifference;
             }
         }

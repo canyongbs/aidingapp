@@ -120,7 +120,7 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
                     expiration: now()->addMinutes(5),
                     conversionName: 'logo-height-250px',
                 ),
-                'feedback_submitted' => $serviceRequest?->feedback()->exists() ? true : false,
+                'feedback_submitted' => $serviceRequest->feedback()->exists() ? true : false,
                 'app_name' => config('app.name'),
                 'has_enabled_csat' => $serviceRequest->priority?->type?->has_enabled_csat,
                 'has_enabled_nps' => $serviceRequest->priority?->type?->has_enabled_nps,
@@ -144,8 +144,8 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
         abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
 
         $validator = Validator::make($request->all(), [
-            'csat' => [Rule::requiredIf($serviceRequest?->priority?->type?->has_enabled_csat), 'between:1,5'],
-            'nps' => [Rule::requiredIf($serviceRequest?->priority?->type?->has_enabled_nps), 'between:1,5'],
+            'csat' => [Rule::requiredIf($serviceRequest->priority?->type?->has_enabled_csat), 'between:1,5'],
+            'nps' => [Rule::requiredIf($serviceRequest->priority?->type?->has_enabled_nps), 'between:1,5'],
         ]);
 
         if ($validator->fails()) {

@@ -124,6 +124,10 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
         );
     }
 
+    /**
+     * @param array $value
+     * @return array<string, mixed>
+     */
     protected function formatValues(array $value): array
     {
         $relationsMap = [

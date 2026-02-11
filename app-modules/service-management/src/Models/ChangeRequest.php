@@ -90,21 +90,33 @@ class ChangeRequest extends BaseModel implements Auditable
         ];
     }
 
+    /**
+     * @return BelongsTo<User, $this>
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    /**
+     * @return BelongsTo<ChangeRequestType, $this>
+     */
     public function type(): BelongsTo
     {
         return $this->belongsTo(ChangeRequestType::class, 'change_request_type_id');
     }
 
+    /**
+     * @return BelongsTo<ChangeRequestStatus, $this>
+     */
     public function status(): BelongsTo
     {
         return $this->belongsTo(ChangeRequestStatus::class, 'change_request_status_id');
     }
 
+    /**
+     * @return HasMany<ChangeRequestResponse, $this>
+     */
     public function responses(): HasMany
     {
         return $this->hasMany(ChangeRequestResponse::class, 'change_request_id');

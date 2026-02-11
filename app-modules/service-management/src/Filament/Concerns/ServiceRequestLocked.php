@@ -42,7 +42,7 @@ use Illuminate\Contracts\View\View;
 
 trait ServiceRequestLocked
 {
-    public function bootServiceRequestLocked()
+    public function bootServiceRequestLocked(): void
     {
         FilamentView::registerRenderHook(
             PanelsRenderHook::PAGE_HEADER_ACTIONS_AFTER,

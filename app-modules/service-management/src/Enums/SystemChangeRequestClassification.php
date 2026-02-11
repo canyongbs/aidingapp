@@ -63,7 +63,7 @@ enum SystemChangeRequestClassification: string implements HasLabel, Classificati
     #[AllowTransitionTo(self::FailedOrReverted)]
     case Custom = 'custom';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             SystemChangeRequestClassification::InProgress => 'In Progress',

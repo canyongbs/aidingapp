@@ -44,5 +44,8 @@ interface ProvidesATimeline
 {
     public function timeline(): CustomTimeline;
 
+    /**
+     * @return Collection<int, mixed>
+     */
     public static function getTimelineData(Model $forModel): Collection;
 }

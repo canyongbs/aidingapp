@@ -89,9 +89,9 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
                 ->get($this->serviceMonitoringTarget->domain);
 
             $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $response->status() === 200);
-        } catch (ConnectionException $e) {
-            if (Str::doesntContain($e->getMessage(), 'Could not resolve host')) {
-                report($e);
+        } catch (ConnectionException $exception) {
+            if (Str::doesntContain($exception->getMessage(), 'Could not resolve host')) {
+                report($exception);
             }
             $this->handleResponses(523, 0, false);
         }

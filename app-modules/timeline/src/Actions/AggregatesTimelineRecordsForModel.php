@@ -44,8 +44,13 @@ use Illuminate\Support\Collection;
 
 class AggregatesTimelineRecordsForModel
 {
+    /** @var Collection<int, Model> $aggregateRecords */
     public Collection $aggregateRecords;
 
+    /**
+     * @param array<Model> $modelsToTimeline
+     * @return Collection<int, Model>
+     */
     public function handle(Model $record, array $modelsToTimeline): Collection
     {
         $aggregateRecords = collect();
@@ -58,7 +63,7 @@ class AggregatesTimelineRecordsForModel
             $aggregateRecords = $aggregateRecords->concat($model::getTimelineData($record));
         }
 
-        return $aggregateRecords->sortByDesc(function ($record) {
+        return $aggregateRecords->sortByDesc(function (Model $record) {
             return Carbon::parse($record->timeline()->sortableBy())->timestamp;
         });
     }
