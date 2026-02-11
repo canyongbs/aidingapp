@@ -44,6 +44,7 @@ use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class ServiceRequestWidget extends BaseWidget
@@ -115,7 +116,10 @@ class ServiceRequestWidget extends BaseWidget
         ];
     }
 
-    private function wasOpenAtIntervalStart(ServiceRequest $serviceRequest, $openStatusIds): bool
+    /**
+     * @param Collection<int|string, mixed> $openStatusIds
+     */
+    private function wasOpenAtIntervalStart(ServiceRequest $serviceRequest, Collection $openStatusIds): bool
     {
         // If the service request has no history and it is open, it was open at interval date
         if ($serviceRequest->histories->isEmpty()) {

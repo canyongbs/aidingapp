@@ -44,12 +44,11 @@ enum SystemIncidentStatusClassification: string implements HasLabel
 
     case Resolved = 'resolved';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             self::Open => 'Open',
             self::Resolved => 'Resolved',
-            default => $this->name,
         };
     }
 }

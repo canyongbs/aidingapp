@@ -70,7 +70,7 @@ enum SystemServiceRequestClassification: string implements HasLabel, Classificat
     #[AllowTransitionTo(self::Waiting)]
     case Custom = 'custom';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             SystemServiceRequestClassification::InProgress => 'In Progress',

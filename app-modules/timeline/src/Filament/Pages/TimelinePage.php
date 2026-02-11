@@ -75,7 +75,7 @@ abstract class TimelinePage extends Page
         $this->loadTimelineRecords();
     }
 
-    public function viewRecord($key, $morphReference)
+    public function viewRecord(string $key, string $morphReference): void
     {
         $this->currentRecordToView = resolve(GetRecordFromMorphAndKey::class)->via($morphReference, $key);
 

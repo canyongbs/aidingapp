@@ -48,6 +48,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Collection;
 
 class ListIncidentSeverities extends ListRecords
 {
@@ -71,7 +72,8 @@ class ListIncidentSeverities extends ListRecords
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->action(function ($records) {
+                        ->action(function (Collection $records) {
+                            /** @var Collection<int, IncidentSeverity> $records */
                             $deletedIncidentSeveritiesCount = IncidentSeverity::query()
                                 ->whereKey($records)
                                 ->whereDoesntHave('incidents')
