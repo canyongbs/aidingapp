@@ -32,25 +32,29 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed } from 'vue';
-    import { useAssistantChat } from '../../Composables/assistant/useAssistantChat.js';
-    import { useAuthStore } from '../../Stores/auth.js';
+    import { useAssistantChat } from '../composables/useAssistantChat.js';
     import ChatHeader from './ChatHeader.vue';
     import ChatInput from './ChatInput.vue';
     import ChatMessages from './ChatMessages.vue';
 
     const props = defineProps({
         isOpen: { type: Boolean, default: false },
+        sendMessageUrl: { type: String, required: true },
+        websocketsConfig: { type: Object, required: true },
+        isAuthenticated: { type: Boolean, default: false },
+        guestTokenEnabled: { type: Boolean, default: true },
     });
 
     const emit = defineEmits(['close']);
 
-    const { messages, isSending, isAssistantResponding, sendMessage } = useAssistantChat();
+    const { messages, isSending, isAssistantResponding, sendMessage } = useAssistantChat(
+        props.sendMessageUrl,
+        props.websocketsConfig,
+        props.isAuthenticated,
+        props.guestTokenEnabled
+    );
 
-    const authStore = useAuthStore();
-    const welcomeMessage = computed(() => {
-        return `Hi ${authStore.user?.first_name || 'there'}, I am your support assistant. I can help you find information and troubleshoot issues. How can I assist you today?`;
-    });
+    const welcomeMessage = 'Hi there, I am your support assistant. I can help you find information and troubleshoot issues. How can I assist you today?';
 </script>
 
 <template>

@@ -40,7 +40,7 @@ if (typeof window !== 'undefined') {
     window.Pusher = Pusher;
 }
 
-export function useAssistantConnection(websocketsConfig, getToken) {
+export function useAssistantConnection(websocketsConfig, getToken, guestToken) {
     const echo = ref(null);
     const currentThread = ref(null);
 
@@ -52,26 +52,29 @@ export function useAssistantConnection(websocketsConfig, getToken) {
         }
 
         if (!echo.value) {
-            const token = await getToken();
-
             echo.value = new Echo({
                 ...websocketsConfig,
                 authorizer: (channel, options) => {
                     return {
                         authorize: async (socketId, callback) => {
+                            const token = getToken ? await getToken() : null;
+                            const headers = {
+                                'Content-Type': 'application/json',
+                            };
+
+                            if (token) {
+                                headers['Authorization'] = `Bearer ${token}`;
+                            }
+
                             axios
                                 .post(
                                     '/api/broadcasting/auth',
                                     {
                                         socket_id: socketId,
                                         channel_name: channel.name,
+                                        guest_token: guestToken,
                                     },
-                                    {
-                                        headers: {
-                                            'Content-Type': 'application/json',
-                                            Authorization: `Bearer ${token}`,
-                                        },
-                                    },
+                                    { headers }
                                 )
                                 .then((response) => {
                                     callback(false, response.data);
@@ -86,7 +89,6 @@ export function useAssistantConnection(websocketsConfig, getToken) {
 
             if (echo.value.connector?.pusher) {
                 echo.value.connector.pusher.connection.bind('connected', () => {
-                    // Disable activity timeout to prevent throttling when page is not visible
                     echo.value.connector.pusher.config.activityTimeout = 120000;
                     echo.value.connector.pusher.config.pongTimeout = 30000;
                 });

@@ -31,26 +31,46 @@
 
 </COPYRIGHT>
 */
-import DOMPurify from 'dompurify';
-import { marked } from 'marked';
+import vue from '@vitejs/plugin-vue';
+import { resolve } from 'path';
+import { defineConfig } from 'vite';
 
-marked.setOptions({
-    breaks: true,
-    gfm: true,
+export default defineConfig({
+    plugins: [vue()],
+    experimental: {
+        renderBuiltUrl(filename) {
+            return {
+                runtime: `window.__VITE_ASSISTANT_WIDGET_ASSET_URL__ + ${JSON.stringify(filename)}`,
+            };
+        },
+    },
+    build: {
+        manifest: true,
+        rollupOptions: {
+            input: {
+                widget: resolve(__dirname, './src/widget.js'),
+                loader: resolve(__dirname, './src/loader.js'),
+            },
+            output: {
+                entryFileNames: (chunkInfo) => {
+                    return chunkInfo.name === 'loader'
+                        ? 'aiding-app-assistant-widget.js'
+                        : 'aiding-app-assistant-widget-app-[hash].js';
+                },
+                assetFileNames: (assetInfo) => {
+                    return '[name]-[hash][extname]';
+                },
+                chunkFileNames: '[name]-[hash].js',
+            },
+        },
+        outDir: resolve(__dirname, '../../storage/app/public/widgets/assistant'),
+        emptyOutDir: true,
+        sourcemap: true,
+    },
+    resolve: {
+        alias: {
+            '@': resolve(__dirname, 'src'),
+        },
+    },
+    define: { 'process.env.NODE_ENV': '"production"' },
 });
-
-export function useMarkdown() {
-    const renderMarkdown = (content) => {
-        if (!content) return '';
-        try {
-            const cleanedContent = content.replace(/【[^】]*】/g, ''); // Remove citations
-            const html = marked.parse(cleanedContent, { async: false });
-            return DOMPurify.sanitize(html);
-        } catch (error) {
-            console.error('Error rendering markdown:', error);
-            return DOMPurify.sanitize(content);
-        }
-    };
-
-    return { renderMarkdown };
-}

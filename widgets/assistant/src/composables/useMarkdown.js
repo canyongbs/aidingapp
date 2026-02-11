@@ -1,4 +1,4 @@
-<!--
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
@@ -30,28 +30,27 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    import { ref } from 'vue';
-    import { useAssistantStore } from '../Stores/assistant.js';
-    import ChatPanel from './Assistant/ChatPanel.vue';
-    import ChatToggleButton from './Assistant/ChatToggleButton.vue';
+*/
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
 
-    const isOpen = ref(false);
-    const { assistantSendMessageUrl } = useAssistantStore();
+marked.setOptions({
+    breaks: true,
+    gfm: true,
+});
 
-    const toggleChat = () => {
-        isOpen.value = !isOpen.value;
+export function useMarkdown() {
+    const renderMarkdown = (content) => {
+        if (!content) return '';
+        try {
+            const cleanedContent = content.replace(/【[^】]*】/g, '');
+            const html = marked.parse(cleanedContent, { async: false });
+            return DOMPurify.sanitize(html);
+        } catch (error) {
+            console.error('Error rendering markdown:', error);
+            return DOMPurify.sanitize(content);
+        }
     };
-</script>
 
-<template>
-    <div
-        v-show="assistantSendMessageUrl"
-        class="fixed bottom-4 end-4 z-50 flex flex-col items-end max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)]"
-    >
-        <ChatPanel :is-open="isOpen" @close="toggleChat" />
-
-        <ChatToggleButton :is-open="isOpen" @toggle="toggleChat" />
-    </div>
-</template>
+    return { renderMarkdown };
+}

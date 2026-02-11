@@ -33,20 +33,24 @@
 */
 import axios from 'axios';
 import { computed, onUnmounted, ref, watch } from 'vue';
-import { useAssistantStore } from '../../Stores/assistant.js';
-import { useTokenStore } from '../../Stores/token.js';
 import { useAssistantConnection } from './useAssistantConnection.js';
 
-export function useAssistantChat() {
-    const { assistantSendMessageUrl, selectTypeUrl, updateFieldUrl, getTypesUrl, websocketsConfig } =
-        useAssistantStore();
-    const { getToken } = useTokenStore();
-
+export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticated = false, guestTokenEnabled = true) {
     const messages = ref([]);
     const threadId = ref(null);
+    const guestToken = ref(null);
     const isSending = ref(false);
     const wordQueue = ref([]);
     const isTyping = ref(false);
+
+    // Only use guest token for unauthenticated users when feature is enabled
+    if (!isAuthenticated && guestTokenEnabled) {
+        guestToken.value = localStorage.getItem('assistantGuestToken') || null;
+        if (!guestToken.value) {
+            guestToken.value = crypto.randomUUID();
+            localStorage.setItem('assistantGuestToken', guestToken.value);
+        }
+    }
 
     const isAssistantResponding = computed(() => {
         return messages.value.some((m) => m.author === 'assistant' && !m.isComplete);
@@ -112,12 +116,16 @@ export function useAssistantChat() {
 
         addUserMessage(content);
 
-        const payload = { content, thread_id: threadId.value };
+        const payload = { content, thread_id: threadId.value, guest_token: guestToken.value };
 
         try {
-            const response = await axios.post(assistantSendMessageUrl, payload);
+            const response = await axios.post(sendMessageUrl, payload);
             if (response.data.thread_id) {
                 threadId.value = response.data.thread_id;
+            }
+            if (response.data.guest_token) {
+                guestToken.value = response.data.guest_token;
+                localStorage.setItem('assistantGuestToken', guestToken.value);
             }
             addAssistantMessage();
         } catch (error) {
@@ -128,7 +136,11 @@ export function useAssistantChat() {
         }
     };
 
-    const connection = useAssistantConnection(websocketsConfig, getToken);
+    const getToken = () => {
+        return localStorage.getItem('token') || null;
+    };
+
+    const connection = useAssistantConnection(websocketsConfig, getToken, guestToken.value);
 
     const connectToThread = async (id) => {
         if (!id) return;

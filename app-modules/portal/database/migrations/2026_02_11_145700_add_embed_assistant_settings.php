@@ -34,52 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Http\Controllers\PortalAssistant;
+use App\Features\EmbeddableSupportAssistantFeature;
+use Illuminate\Support\Facades\DB;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use AidingApp\Ai\Jobs\PortalAssistant\SendMessage;
-use AidingApp\Ai\Models\PortalAssistantThread;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
-use Symfony\Component\HttpFoundation\StreamedResponse;
-
-class SendMessageController
-{
-    public function __invoke(Request $request): StreamedResponse | JsonResponse
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        $data = $request->validate([
-            'content' => ['required', 'string', 'max:25000'],
-            'thread_id' => ['nullable', 'uuid'],
-        ]);
+        DB::transaction(function () {
+            $this->migrator->add('portal.embed_assistant', false);
+            $this->migrator->add('portal.embed_assistant_allowed_domains', []);
 
-        $author = auth('contact')->user();
-
-        if (filled($data['thread_id'] ?? null)) {
-            $thread = PortalAssistantThread::query()
-                ->whereKey($data['thread_id'])
-                ->whereMorphedTo('author', $author)
-                ->firstOrFail();
-        } else {
-            $thread = new PortalAssistantThread();
-            $thread->author()->associate($author);
-            $thread->save();
-        }
-
-        dispatch(new SendMessage(
-            $thread,
-            $data['content'],
-            request: [
-                'headers' => Arr::only(
-                    request()->headers->all(),
-                    ['host', 'sec-ch-ua', 'user-agent', 'sec-ch-ua-platform', 'origin', 'referer', 'accept-language'],
-                ),
-                'ip' => request()->ip(),
-            ],
-        ));
-
-        return response()->json([
-            'message' => 'Message dispatched for processing via websockets.',
-            'thread_id' => $thread->getKey(),
-        ]);
+            EmbeddableSupportAssistantFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            EmbeddableSupportAssistantFeature::purge();
+
+            $this->migrator->delete('portal.embed_assistant');
+            $this->migrator->delete('portal.embed_assistant_allowed_domains');
+        });
+    }
+};

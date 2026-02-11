@@ -34,63 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Models;
+namespace AidingApp\Ai\Actions;
 
-use AidingApp\Ai\Database\Factories\PortalAssistantThreadFactory;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Exception;
+use Illuminate\Support\Facades\Storage;
 
-/**
- * @mixin IdeHelperPortalAssistantThread
- */
-class PortalAssistantThread extends BaseModel
+class GenerateAssistantEmbedCode
 {
-    /** @use HasFactory<PortalAssistantThreadFactory> */
-    use HasFactory;
-
-    public $fillable = [
-        'author_type',
-        'author_id',
-        'current_service_request_draft_id',
-        'guest_token',
-    ];
-
-    /**
-     * @return HasMany<PortalAssistantMessage, $this>
-     */
-    public function messages(): HasMany
+    public function handle(): string
     {
-        return $this->hasMany(PortalAssistantMessage::class, 'thread_id');
-    }
+        $manifestPath = Storage::disk('public')->get('widgets/assistant/.vite/manifest.json');
 
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function author(): MorphTo
-    {
-        return $this->morphTo('author');
-    }
+        if (is_null($manifestPath)) {
+            throw new Exception('Vite manifest file not found.');
+        }
 
-    /**
-     * @return HasMany<ServiceRequest, $this>
-     */
-    public function serviceRequests(): HasMany
-    {
-        return $this->hasMany(ServiceRequest::class, 'portal_assistant_thread_id')
-            ->withoutGlobalScope('excludeDrafts');
-    }
+        /** @var array<string, array{file: string, name: string, src: string, isEntry: bool}> $manifest */
+        $manifest = json_decode($manifestPath, true, 512, JSON_THROW_ON_ERROR);
 
-    /**
-     * @return BelongsTo<ServiceRequest, $this>
-     */
-    public function currentServiceRequestDraft(): BelongsTo
-    {
-        return $this->belongsTo(ServiceRequest::class, 'current_service_request_draft_id')
-            ->withoutGlobalScope('excludeDrafts');
+        $loaderScriptUrl = url("widgets/assistant/{$manifest['src/loader.js']['file']}");
+
+        $configUrl = route('widgets.assistant.api.config');
+
+        return <<<EOD
+        <script src="{$loaderScriptUrl}" data-config="{$configUrl}"></script>
+        EOD;
     }
 }

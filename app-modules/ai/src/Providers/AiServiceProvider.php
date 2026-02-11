@@ -66,5 +66,7 @@ class AiServiceProvider extends ServiceProvider
             'ai_message_file' => AiMessageFile::class,
             'ai_thread' => AiThread::class,
         ]);
+
+        $this->loadRoutesFrom(__DIR__ . '/../../routes/widgets.php');
     }
 }

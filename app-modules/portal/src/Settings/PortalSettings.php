@@ -62,6 +62,10 @@ class PortalSettings extends SettingsWithMedia
 
     public bool $ai_assistant_service_requests = false;
 
+    public bool $embed_assistant = false;
+
+    public array $embed_assistant_allowed_domains = [];
+
     public ?Color $knowledge_management_portal_primary_color = null;
 
     public ?Rounding $knowledge_management_portal_rounding = null;

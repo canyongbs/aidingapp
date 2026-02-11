@@ -36,7 +36,6 @@
     import { onMounted, ref, watch } from 'vue';
     import { RouterView, useRoute } from 'vue-router';
     import AppLoading from './Components/AppLoading.vue';
-    import Assistant from './Components/Assistant.vue';
     import Footer from './Components/Footer.vue';
     import Header from './Components/Header.vue';
     import axios from './Globals/Axios.js';
@@ -166,10 +165,6 @@
 
                 const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
-                const { setAssistantSendMessageUrl, setWebsocketsConfig, setApiUrl } = useAssistantStore();
-
-                setApiUrl(props.apiUrl);
-
                 portalPrimaryColor.value = response.data.primary_color;
 
                 headerLogo.value = response.data.header_logo;
@@ -200,8 +195,12 @@
                     hasTasks.value = response.data.has_tasks;
                 });
 
-                setAssistantSendMessageUrl(response.data.assistant_send_message_url);
-                setWebsocketsConfig(response.data.websockets_config);
+                if (response.data.assistant_widget_loader_url && response.data.assistant_widget_config_url) {
+                    const script = document.createElement('script');
+                    script.src = response.data.assistant_widget_loader_url;
+                    script.setAttribute('data-config', response.data.assistant_widget_config_url);
+                    document.body.appendChild(script);
+                }
 
                 authentication.value.requestUrl = response.data.authentication_url ?? null;
 
@@ -594,8 +593,6 @@
                 />
 
                 <Footer :logo="footerLogo"></Footer>
-
-                <Assistant />
             </div>
         </div>
     </div>

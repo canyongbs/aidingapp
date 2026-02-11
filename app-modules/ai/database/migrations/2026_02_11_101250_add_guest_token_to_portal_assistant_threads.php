@@ -34,63 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Models;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Ai\Database\Factories\PortalAssistantThreadFactory;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-
-/**
- * @mixin IdeHelperPortalAssistantThread
- */
-class PortalAssistantThread extends BaseModel
-{
-    /** @use HasFactory<PortalAssistantThreadFactory> */
-    use HasFactory;
-
-    public $fillable = [
-        'author_type',
-        'author_id',
-        'current_service_request_draft_id',
-        'guest_token',
-    ];
-
-    /**
-     * @return HasMany<PortalAssistantMessage, $this>
-     */
-    public function messages(): HasMany
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->hasMany(PortalAssistantMessage::class, 'thread_id');
+        Schema::table('portal_assistant_threads', function (Blueprint $table) {
+            $table->uuid('guest_token')->nullable()->after('author_id');
+        });
     }
 
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function author(): MorphTo
+    public function down(): void
     {
-        return $this->morphTo('author');
+        Schema::table('portal_assistant_threads', function (Blueprint $table) {
+            $table->dropColumn('guest_token');
+        });
     }
-
-    /**
-     * @return HasMany<ServiceRequest, $this>
-     */
-    public function serviceRequests(): HasMany
-    {
-        return $this->hasMany(ServiceRequest::class, 'portal_assistant_thread_id')
-            ->withoutGlobalScope('excludeDrafts');
-    }
-
-    /**
-     * @return BelongsTo<ServiceRequest, $this>
-     */
-    public function currentServiceRequestDraft(): BelongsTo
-    {
-        return $this->belongsTo(ServiceRequest::class, 'current_service_request_draft_id')
-            ->withoutGlobalScope('excludeDrafts');
-    }
-}
+};

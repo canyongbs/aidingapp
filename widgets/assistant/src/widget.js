@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,3 +31,39 @@
 
 </COPYRIGHT>
 */
+import { createApp } from 'vue';
+import App from './App.vue';
+import styles from './widget.css?inline';
+
+const config = window.__ASSISTANT_WIDGET_CONFIG__;
+
+if (!config || !config.send_message_url || !config.websockets_config) {
+    console.error('Assistant widget: Configuration is missing or incomplete.');
+} else {
+    const widgetRoot = document.createElement('div');
+    widgetRoot.id = 'assistant-widget-root';
+    document.body.appendChild(widgetRoot);
+
+    const shadowHost = document.createElement('div');
+    widgetRoot.appendChild(shadowHost);
+
+    const shadowRoot = shadowHost.attachShadow({ mode: 'open' });
+
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = styles;
+    shadowRoot.appendChild(styleSheet);
+
+    const appContainer = document.createElement('div');
+    shadowRoot.appendChild(appContainer);
+
+    const app = createApp(App, {
+        sendMessageUrl: config.send_message_url,
+        websocketsConfig: config.websockets_config,
+        primaryColor: config.primary_color,
+        rounding: config.rounding,
+        isAuthenticated: config.is_authenticated || false,
+        guestTokenEnabled: config.guest_token_enabled || false,
+    });
+
+    app.mount(appContainer);
+}
