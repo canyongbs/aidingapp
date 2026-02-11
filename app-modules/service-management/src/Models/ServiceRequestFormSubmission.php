@@ -40,7 +40,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Form\Enums\FormSubmissionRequestDeliveryMethod;
 use AidingApp\Form\Enums\FormSubmissionStatus;
 use AidingApp\Form\Models\Submission;
-use App\Models\Scopes\LicensedToEducatable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -159,10 +158,4 @@ class ServiceRequestFormSubmission extends Submission
         return FormSubmissionStatus::Requested;
     }
 
-    protected static function booted(): void
-    {
-        static::addGlobalScope('licensed', function (Builder $builder) {
-            $builder->tap(new LicensedToEducatable('author'));
-        });
-    }
 }

@@ -36,7 +36,6 @@
 
 namespace App\Models;
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\Concerns\HasRolesWithPivot;
 use App\Models\Concerns\CanOrElse;
 use Illuminate\Foundation\Auth\User as BaseAuthenticatable;
@@ -49,16 +48,6 @@ abstract class Authenticatable extends BaseAuthenticatable
     use UsesTenantConnection;
 
     public const SUPER_ADMIN_ROLE = 'SaaS Global Admin';
-
-    /**
-     * @param LicenseType | string | array<LicenseType | string> | null $type
-     */
-    abstract public function hasLicense(LicenseType | string | array | null $type): bool;
-
-    /**
-     * @param LicenseType | string | array<LicenseType | string> | null $type
-     */
-    abstract public function hasAnyLicense(LicenseType | string | array | null $type): bool;
 
     abstract public function isSuperAdmin(): bool;
 }

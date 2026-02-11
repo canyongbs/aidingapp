@@ -50,7 +50,6 @@ use AidingApp\Timeline\Timelines\EngagementTimeline;
 use App\Models\BaseModel;
 use App\Models\Concerns\BelongsToEducatable;
 use App\Models\Contracts\Educatable;
-use App\Models\Scopes\LicensedToEducatable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -76,7 +75,6 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasDeliveryMethod, HasMedia
 {
     use AuditableTrait;
-    use BelongsToEducatable;
     use InteractsWithMedia;
     use SoftDeletes;
 
@@ -256,10 +254,4 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
         return $this->channel;
     }
 
-    protected static function booted(): void
-    {
-        static::addGlobalScope('licensed', function (Builder $builder) {
-            $builder->tap(new LicensedToEducatable('recipient'));
-        });
-    }
 }

@@ -37,10 +37,8 @@
 namespace App\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Authorization\Enums\LicenseType;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Arr;
 use Laravel\Sanctum\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -57,50 +55,6 @@ class SystemUser extends Authenticatable implements Auditable
     protected $fillable = [
         'name',
     ];
-
-    /**
-     * @param LicenseType | string | array<LicenseType | string>| null $type
-     */
-    public function hasLicense(LicenseType | string | array | null $type): bool
-    {
-        if (blank($type)) {
-            return true;
-        }
-
-        foreach (Arr::wrap($type) as $type) {
-            if (! ($type instanceof LicenseType)) {
-                $type = LicenseType::from($type);
-            }
-
-            if (! $type->isLicensable()) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * @param LicenseType | string | array<LicenseType | string> | null $type
-     */
-    public function hasAnyLicense(LicenseType | string | array | null $type): bool
-    {
-        if (blank($type)) {
-            return true;
-        }
-
-        foreach (Arr::wrap($type) as $type) {
-            if (! ($type instanceof LicenseType)) {
-                $type = LicenseType::from($type);
-            }
-
-            if ($type->isLicensable()) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     public function isSuperAdmin(): bool
     {

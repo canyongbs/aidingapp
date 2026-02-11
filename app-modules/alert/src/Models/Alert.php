@@ -42,9 +42,7 @@ use AidingApp\Alert\Enums\AlertStatus;
 use AidingApp\Alert\Observers\AlertObserver;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
-use App\Models\Authenticatable;
 use App\Models\BaseModel;
-use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -62,7 +60,6 @@ class Alert extends BaseModel implements Auditable
 {
     use SoftDeletes;
     use AuditableTrait;
-    use BelongsToEducatable;
 
     /** @use HasFactory<AlertFactory> */
     use HasFactory;
@@ -96,19 +93,4 @@ class Alert extends BaseModel implements Auditable
         $query->where('status', $status);
     }
 
-    protected static function booted(): void
-    {
-        static::addGlobalScope('licensed', function (Builder $builder) {
-            if (! auth()->guard('web')->check()) {
-                return;
-            }
-
-            /** @var Authenticatable $user */
-            $user = auth()->guard('web')->user();
-
-            if (! $user->hasLicense(Contact::getLicenseType())) {
-                $builder->whereRaw('1 = 0');
-            }
-        });
-    }
 }

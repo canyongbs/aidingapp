@@ -37,8 +37,6 @@
 namespace App\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Authorization\Models\License;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
@@ -74,7 +72,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Arr;
 use Lab404\Impersonate\Models\Impersonate;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
@@ -189,14 +186,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public function canRecieveSms(): bool
     {
         return false;
-    }
-
-    /**
-     * @return HasMany<License, $this>
-     */
-    public function licenses(): HasMany
-    {
-        return $this->hasMany(License::class, 'user_id');
     }
 
     /**
@@ -323,50 +312,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this->avatar_url ?: $this->getFirstTemporaryUrl(now()->addMinutes(5), 'avatar', 'avatar-height-250px');
     }
 
-    /**
-     * @param LicenseType | string | array<LicenseType | string> | null $type
-     */
-    public function hasLicense(LicenseType | string | array | null $type): bool
-    {
-        if (blank($type)) {
-            return true;
-        }
-
-        foreach (Arr::wrap($type) as $type) {
-            if (! ($type instanceof LicenseType)) {
-                $type = LicenseType::from($type);
-            }
-
-            if ($this->licenses->doesntContain('type', $type)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /**
-     * @param LicenseType | string | array<LicenseType | string> | null $type
-     */
-    public function hasAnyLicense(LicenseType | string | array | null $type): bool
-    {
-        if (blank($type)) {
-            return true;
-        }
-
-        foreach (Arr::wrap($type) as $type) {
-            if (! ($type instanceof LicenseType)) {
-                $type = LicenseType::from($type);
-            }
-
-            if ($this->licenses->contains('type', $type)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public static function filamentResource(): string
     {
         return UserResource::class;
@@ -375,28 +320,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public static function displayNameKey(): string
     {
         return 'name';
-    }
-
-    public function grantLicense(LicenseType $type): bool
-    {
-        if ($this->hasLicense($type)) {
-            return false;
-        }
-
-        return cache()
-            ->lock('licenses', 5)
-            ->get(function () use ($type) {
-                if (! $type->hasAvailableLicenses()) {
-                    return false;
-                }
-
-                return (bool) $this->licenses()->create(['type' => $type]);
-            });
-    }
-
-    public function revokeLicense(LicenseType $type): bool
-    {
-        return (bool) $this->licenses()->where('type', $type)->delete();
     }
 
     public function getDynamicContext(): string

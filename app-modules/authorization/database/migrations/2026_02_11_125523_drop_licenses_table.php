@@ -34,40 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Models;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableConcern;
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Authorization\Observers\LicenseObserver;
-use App\Models\BaseModel;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
-
-/**
- * @mixin IdeHelperLicense
- */
-#[ObservedBy([LicenseObserver::class])]
-class License extends BaseModel implements Auditable
-{
-    use AuditableConcern;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'type',
-    ];
-
-    protected $casts = [
-        'type' => LicenseType::class,
-    ];
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(User::class, 'user_id');
+        Schema::dropIfExists('licenses');
     }
-}
+};

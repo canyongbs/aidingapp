@@ -36,8 +36,6 @@
 
 namespace App\Models\Contracts;
 
-use AidingApp\Authorization\Enums\LicenseType;
-
 /**
  * @property string $email
  */
@@ -46,8 +44,6 @@ interface Educatable
     public static function displayNameKey(): string;
 
     public static function displayEmailKey(): string;
-
-    public static function getLicenseType(): LicenseType;
 
     public static function getLabel(): string;
 }
