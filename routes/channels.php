@@ -54,7 +54,7 @@ use Illuminate\Support\Facades\Broadcast;
 
 Broadcast::channel('portal-assistant-thread-{threadId}', function (?Contact $user, string $threadId): bool {
     $thread = PortalAssistantThread::find($threadId);
-    
+
     if (! $thread) {
         return false;
     }
@@ -67,6 +67,7 @@ Broadcast::channel('portal-assistant-thread-{threadId}', function (?Contact $use
     // If user is not authenticated but thread has no author, check guest token (only if feature is active)
     if (! $user && ! $thread->author_type && ! $thread->author_id && EmbeddableSupportAssistantFeature::active()) {
         $guestToken = request()->input('guest_token');
+
         return $guestToken && $thread->guest_token === $guestToken;
     }
 

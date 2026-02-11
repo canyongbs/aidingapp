@@ -51,10 +51,11 @@
         props.sendMessageUrl,
         props.websocketsConfig,
         props.isAuthenticated,
-        props.guestTokenEnabled
+        props.guestTokenEnabled,
     );
 
-    const welcomeMessage = 'Hi there, I am your support assistant. I can help you find information and troubleshoot issues. How can I assist you today?';
+    const welcomeMessage =
+        'Hi there, I am your support assistant. I can help you find information and troubleshoot issues. How can I assist you today?';
 </script>
 
 <template>

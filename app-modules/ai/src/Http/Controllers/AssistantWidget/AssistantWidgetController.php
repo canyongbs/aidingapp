@@ -130,14 +130,15 @@ class AssistantWidgetController extends Controller
             $thread = $query->firstOrFail();
         } else {
             $thread = new PortalAssistantThread();
+
             if ($author) {
                 $thread->author()->associate($author);
             }
-            
+
             if ($featureActive) {
                 $thread->guest_token = $data['guest_token'] ?? Str::uuid()->toString();
             }
-            
+
             $thread->save();
         }
 

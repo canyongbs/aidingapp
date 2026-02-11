@@ -54,18 +54,25 @@
     const setPrimaryColor = () => {
         const [r, g, b] = props.primaryColor;
         document.documentElement.style.setProperty('--primary-500', `${r}, ${g}, ${b}`);
-        document.documentElement.style.setProperty('--primary-600', `${Math.max(0, r - 20)}, ${Math.max(0, g - 20)}, ${Math.max(0, b - 20)}`);
-        document.documentElement.style.setProperty('--primary-800', `${Math.max(0, r - 60)}, ${Math.max(0, g - 60)}, ${Math.max(0, b - 60)}`);
-        document.documentElement.style.setProperty('--primary-900', `${Math.max(0, r - 80)}, ${Math.max(0, g - 80)}, ${Math.max(0, b - 80)}`);
+        document.documentElement.style.setProperty(
+            '--primary-600',
+            `${Math.max(0, r - 20)}, ${Math.max(0, g - 20)}, ${Math.max(0, b - 20)}`,
+        );
+        document.documentElement.style.setProperty(
+            '--primary-800',
+            `${Math.max(0, r - 60)}, ${Math.max(0, g - 60)}, ${Math.max(0, b - 60)}`,
+        );
+        document.documentElement.style.setProperty(
+            '--primary-900',
+            `${Math.max(0, r - 80)}, ${Math.max(0, g - 80)}, ${Math.max(0, b - 80)}`,
+        );
     };
 
     setPrimaryColor();
 </script>
 
 <template>
-    <div
-        class="fixed bottom-4 end-4 z-50 flex flex-col items-end max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)]"
-    >
+    <div class="fixed bottom-4 end-4 z-50 flex flex-col items-end max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)]">
         <ChatPanel
             :is-open="isOpen"
             :send-message-url="sendMessageUrl"

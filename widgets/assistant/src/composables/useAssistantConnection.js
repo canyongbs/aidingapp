@@ -74,7 +74,7 @@ export function useAssistantConnection(websocketsConfig, getToken, guestToken) {
                                         channel_name: channel.name,
                                         guest_token: guestToken,
                                     },
-                                    { headers }
+                                    { headers },
                                 )
                                 .then((response) => {
                                     callback(false, response.data);
