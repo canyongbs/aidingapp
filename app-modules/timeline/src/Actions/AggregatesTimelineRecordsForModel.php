@@ -49,6 +49,7 @@ class AggregatesTimelineRecordsForModel
 
     /**
      * @param array<Model> $modelsToTimeline
+     *
      * @return Collection<int, Model>
      */
     public function handle(Model $record, array $modelsToTimeline): Collection

@@ -44,9 +44,9 @@ use Filament\Infolists\Components\TextEntry;
 // TODO Re-use this trait across other places where infolist is rendered
 trait ServiceRequestAssignmentInfolist
 {
-  /**
-   * @return array<TextEntry>
-   */
+    /**
+     * @return array<TextEntry>
+     */
     public function serviceRequestAssignmentInfolist(): array
     {
         return [
