@@ -1,5 +1,10 @@
 # Outlook Calendar
 
+<!-- TODO: Update this documentation for how to properly setup local Outlook Calendar connection -->
+
+> [!WARNING]
+> This article is out of date and does not properly reflect how to setup Outlook calendar integrations locally. It will be updated soon.
+
 ## Outlook Setup
 
 An application must be registered with Microsoft to use the Outlook Calendar API. This is a one time setup and can be done at https://apps.dev.microsoft.com/.
