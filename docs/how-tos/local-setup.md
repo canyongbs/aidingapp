@@ -63,7 +63,7 @@ folder so that it can be used like a regular command `pls`. This documentation w
 #### 1. Initial setup
 
 The following instructions use a combination of commands run on the host and commands run in helper containers to
-faciliate the initial setup of the project.
+facilitate the initial setup of the project.
 
 Typically, these commands only need to be run when first setting up the project. All further work can be done while
 within a shell of the `app` container.
