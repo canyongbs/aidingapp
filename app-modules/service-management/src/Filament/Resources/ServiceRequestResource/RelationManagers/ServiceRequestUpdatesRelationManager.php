@@ -96,7 +96,10 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                             $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
                         ])))
                     ->exists((new ServiceRequestStatus())->getTable(), 'id')
-                    ->default($this->getOwnerRecord()->status->getKey()),
+                    ->default(function () {
+                        assert($this->getOwnerRecord() instanceof ServiceRequest);
+                        return $this->getOwnerRecord()->status->getKey();
+                    }),
             ]);
     }
 
@@ -134,8 +137,11 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->visible($this->getOwnerRecord()?->status?->classification == SystemServiceRequestClassification::Closed ? false : true)
-                    ->after(function ($data, ServiceRequestUpdate $serviceRequestUpdate) {
+                    ->visible(function () {
+                        assert($this->getOwnerRecord() instanceof ServiceRequest);
+                        return $this->getOwnerRecord()->status?->classification == SystemServiceRequestClassification::Closed ? false : true;
+                    })
+                    ->after(function (array $data, ServiceRequestUpdate $serviceRequestUpdate) {
                         $serviceRequestUpdate->serviceRequest->update(['status_id' => $data['status_id']]);
                     }),
             ])

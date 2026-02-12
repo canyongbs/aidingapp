@@ -109,8 +109,8 @@ class ListServiceRequestStatuses extends ListRecords
                                         $record->delete();
 
                                         $totalDeleted++;
-                                    } catch (QueryException $e) {
-                                        if (str_contains($e->getMessage(), 'Cannot modify system protected rows')) {
+                                    } catch (QueryException $exception) {
+                                        if (str_contains($exception->getMessage(), 'Cannot modify system protected rows')) {
                                             Notification::make()
                                                 ->title('Cannot Delete System Protected record')
                                                 ->body('A system protected record cannot be deleted.')

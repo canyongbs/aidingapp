@@ -97,7 +97,7 @@ class AddServiceRequestUpdateBulkAction
 
                         $team = $user->team;
 
-                        if ($serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
+                        if ($serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey())) {
                             return null;
                         }
 

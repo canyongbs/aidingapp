@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers;
 
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\TextEntry;
@@ -73,16 +74,19 @@ class ServiceRequestFormSubmissionRelationManager extends RelationManager
             ->recordActions([
                 ViewAction::make()
                     ->modalHeading(fn (ServiceRequestFormSubmission $record) => 'Submission Details: ' . $record->submitted_at->format('M j, Y H:i:s'))
-                    ->schema(fn (ServiceRequestFormSubmission $record): ?array => ($record->author && $record->submissible->is_authenticated) ? [
-                        Section::make('Submitted By')
-                            ->schema([
-                                TextEntry::make('author.' . $record->author::displayNameKey())
-                                    ->label('Name'),
-                                TextEntry::make('author.email')
-                                    ->label('Email address'),
-                            ])
-                            ->columns(2),
-                    ] : null)
+                    ->schema(function (ServiceRequestFormSubmission $record): ?array {
+                        assert($record->submissible instanceof ServiceRequestForm);
+                        return ($record->author && $record->submissible->is_authenticated) ? [
+                            Section::make('Submitted By')
+                                ->schema([
+                                    TextEntry::make('author.' . $record->author::displayNameKey())
+                                        ->label('Name'),
+                                    TextEntry::make('author.email')
+                                        ->label('Email address'),
+                                ])
+                                ->columns(2),
+                        ] : null;
+                    } )
                     ->modalContent(fn (ServiceRequestFormSubmission $record) => view('service-management::submission', ['submission' => $record]))
                     ->visible(fn (ServiceRequestFormSubmission $record) => $record->submitted_at),
             ])

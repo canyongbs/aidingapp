@@ -51,6 +51,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
 
 class AssignedToRelationManager extends RelationManager
@@ -80,7 +81,7 @@ class AssignedToRelationManager extends RelationManager
             ->paginated(false)
             ->headerActions([
                 Action::make('assign-to-me')
-                    ->visible(fn () => auth()->user()->can('update', $this->getOwnerRecord()) && is_null($this->getOwnerRecord()->assignedTo) && in_array(auth()->user()?->getKey(), $this->getOwnerRecord()->priority->type?->managers
+                    ->visible(fn () => auth()->user()->can('update', $this->getOwnerRecord()) && is_null($this->getOwnerRecord()->assignedTo) && in_array(auth()->user()?->getKey(), $this->getOwnerRecord()->priority->type->managers
                         ->flatMap(fn ($managers) => $managers->users)
                         ->pluck('id')
                         ->toArray()))
@@ -110,8 +111,8 @@ class AssignedToRelationManager extends RelationManager
                             ->getSearchResultsUsing(fn (string $search): array => User::query()
                                 ->tap(new HasLicense($this->getOwnerRecord()->respondent->getLicenseType()))
                                 ->where(new Expression('lower(name)'), 'like', '%' . str($search)->lower() . '%')
-                                ->whereHas('team.manageableServiceRequestTypes', function ($query) {
-                                    $query->where('service_request_type_id', $this->getOwnerRecord()?->priority?->type_id ?? null);
+                                ->whereHas('team.manageableServiceRequestTypes', function (Builder $query) {
+                                    $query->where('service_request_type_id', $this->getOwnerRecord()?->priority->type_id ?? null);
                                 })
                                 ->where('id', '!=', $this->getOwnerRecord()->assignedTo?->user_id)
                                 ->pluck('name', 'id')
