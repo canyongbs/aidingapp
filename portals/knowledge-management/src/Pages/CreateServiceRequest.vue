@@ -231,7 +231,7 @@
                 return;
             }
 
-            if (hasGeneratedQuestions.value && !showAiResolutionStep.value && !aiResolutionData.value) {
+            if (!showAiResolutionStep.value && !aiResolutionData.value) {
                 const shouldShowAiResolution = await evaluateAiResolution();
                 if (shouldShowAiResolution) {
                     return;

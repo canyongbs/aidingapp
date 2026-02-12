@@ -36,11 +36,13 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticateRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\AiFeatureTogglesFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -85,8 +87,8 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
             'has_assets' => auth()->guard('contact')->user()?->assetCheckIns()->exists() || auth()->guard('contact')->user()?->assetCheckOuts()->exists() ?: false,
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
             'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,
-            'assistant_send_message_url' => app(PortalSettings::class)->ai_support_assistant ? URL::signedRoute('ai.portal-assistants.messages.send') : null,
-            'websockets_config' => app(PortalSettings::class)->ai_support_assistant ? config('filament.broadcasting.echo') : [],
+            'assistant_send_message_url' => (AiFeatureTogglesFeature::active() && app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant) ? URL::signedRoute('ai.portal-assistants.messages.send') : null,
+            'websockets_config' => (AiFeatureTogglesFeature::active() && app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant) ? config('filament.broadcasting.echo') : [],
         ]);
     }
 }
