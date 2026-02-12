@@ -76,6 +76,7 @@ class ServiceRequestFormSubmissionRelationManager extends RelationManager
                     ->modalHeading(fn (ServiceRequestFormSubmission $record) => 'Submission Details: ' . $record->submitted_at->format('M j, Y H:i:s'))
                     ->schema(function (ServiceRequestFormSubmission $record): ?array {
                         assert($record->submissible instanceof ServiceRequestForm);
+
                         return ($record->author && $record->submissible->is_authenticated) ? [
                             Section::make('Submitted By')
                                 ->schema([
@@ -86,7 +87,7 @@ class ServiceRequestFormSubmissionRelationManager extends RelationManager
                                 ])
                                 ->columns(2),
                         ] : null;
-                    } )
+                    })
                     ->modalContent(fn (ServiceRequestFormSubmission $record) => view('service-management::submission', ['submission' => $record]))
                     ->visible(fn (ServiceRequestFormSubmission $record) => $record->submitted_at),
             ])

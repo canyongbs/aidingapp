@@ -98,6 +98,7 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                     ->exists((new ServiceRequestStatus())->getTable(), 'id')
                     ->default(function () {
                         assert($this->getOwnerRecord() instanceof ServiceRequest);
+
                         return $this->getOwnerRecord()->status->getKey();
                     }),
             ]);
@@ -139,6 +140,7 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                 CreateAction::make()
                     ->visible(function () {
                         assert($this->getOwnerRecord() instanceof ServiceRequest);
+
                         return $this->getOwnerRecord()->status?->classification == SystemServiceRequestClassification::Closed ? false : true;
                     })
                     ->after(function (array $data, ServiceRequestUpdate $serviceRequestUpdate) {

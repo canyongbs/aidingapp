@@ -77,6 +77,7 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->expandableLimitedList()
                                     ->visible(function () {
                                         assert($this->getRecord() instanceof ServiceMonitoringTarget);
+
                                         return $this->getRecord()->teams()->count();
                                     }),
                                 TextEntry::make('users.name')
@@ -86,6 +87,7 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->expandableLimitedList()
                                     ->visible(function () {
                                         assert($this->getRecord() instanceof ServiceMonitoringTarget);
+
                                         return $this->getRecord()->users()->count();
                                     }),
                                 IconEntry::make('is_notified_via_database')
@@ -97,6 +99,7 @@ class ViewServiceMonitoring extends ViewRecord
                             ])
                             ->visible(function (): bool {
                                 assert($this->getRecord() instanceof ServiceMonitoringTarget);
+
                                 return $this->getRecord()->teams()->count() || $this->getRecord()->users()->count();
                             })
                             ->columns(),
