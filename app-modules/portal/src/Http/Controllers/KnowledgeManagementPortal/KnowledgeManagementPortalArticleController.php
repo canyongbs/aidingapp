@@ -70,6 +70,12 @@ class KnowledgeManagementPortalArticleController extends Controller
             return response()->json([], 401);
         }
 
+        $content = $article->article_details ? tiptap_converter()->record($article, attribute: 'article_details')->asHTML($article->article_details) : '';
+
+        if ($article->has_table_of_contents) {
+            $content = '<h2>Table of Contents</h2><div class="prose-toc">' . tiptap_converter()->asTOC($article->article_details) . '</div>' . $content;
+        }
+
         return response()->json([
             'category' => KnowledgeBaseCategoryData::from([
                 'slug' => $category->slug,
@@ -86,7 +92,7 @@ class KnowledgeManagementPortalArticleController extends Controller
                 'categorySlug' => $article->category->slug,
                 'name' => $article->title,
                 'lastUpdated' => $article->updated_at->format('M d Y, h:m a'),
-                'content' => $article->article_details ? tiptap_converter()->record($article, attribute: 'article_details')->asHTML($article->article_details) : '',
+                'content' => $content,
                 'tags' => $article->tags()
                     ->orderBy('name')
                     ->select([

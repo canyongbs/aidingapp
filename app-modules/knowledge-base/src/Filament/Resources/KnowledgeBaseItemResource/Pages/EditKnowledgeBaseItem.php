@@ -39,10 +39,12 @@ namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\P
 use AidingApp\KnowledgeBase\Filament\Resources\Actions\DraftKnowledgeBaseItemWithAiAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 use App\Concerns\EditPageRedirection;
+use App\Features\KnowledgeBaseArticleTableOfContents;
 use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
 use Filament\Actions\Action as BaseAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Actions;
@@ -90,6 +92,12 @@ class EditKnowledgeBaseItem extends EditRecord
                                         }
                                     }),
                             ),
+                        Toggle::make('has_table_of_contents')
+                            ->label('Table of Contents')
+                            ->default(false)
+                            ->onColor('success')
+                            ->offColor('gray')
+                            ->visible(fn (): bool => KnowledgeBaseArticleTableOfContents::active()),
                     ]),
                 View::make('knowledge-base::filament.pages.badges'),
                 TiptapEditor::make('article_details')
