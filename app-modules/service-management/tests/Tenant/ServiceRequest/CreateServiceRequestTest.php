@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\License;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
@@ -142,7 +141,7 @@ test('CreateServiceRequest requires valid data', function ($data, $errors, $setu
 // Permission Tests
 
 test('CreateServiceRequest is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -218,7 +217,7 @@ test('CreateServiceRequest is gated with proper feature access control', functio
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $team = Team::factory()->create();
 
@@ -280,7 +279,7 @@ test('cannot create service requests if user is manager of any service request t
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -316,7 +315,7 @@ test('displays only service request types managed by the current user', function
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $team = Team::factory()->create();
 
@@ -351,7 +350,7 @@ test('create service requests if user is manager of any service request type', f
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $team = Team::factory()->create();
 
@@ -400,7 +399,7 @@ test('validate service requests type if user is manager of any service request t
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $team = Team::factory()->create();
 
@@ -438,7 +437,7 @@ test('validate service requests type if user is manager of any service request t
 });
 
 test('assignment type individual manager will auto assign to new service requests', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
@@ -488,7 +487,7 @@ test('assignment type round robin will auto-assign to new service requests', fun
     asSuperAdmin();
 
     $team = Team::factory()
-        ->has(User::factory()->licensed(LicenseType::cases())->count(3), 'users')->create();
+        ->has(User::factory()->count(3), 'users')->create();
 
     $serviceRequestTypeWithManager = ServiceRequestType::factory()
         ->hasAttached(
@@ -555,7 +554,7 @@ test('assignment type workload will auto-assign to new service requests', functi
     asSuperAdmin();
 
     $team = Team::factory()
-        ->has(User::factory()->licensed(LicenseType::cases())->count(5), 'users')->create();
+        ->has(User::factory()->count(5), 'users')->create();
 
     $factoryUsers = $team->users;
     $factoryUsers->each(fn ($user) => $user->givePermissionTo('service_request.*.update'));

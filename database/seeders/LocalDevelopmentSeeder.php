@@ -36,7 +36,6 @@
 
 namespace Database\Seeders;
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Contact\Models\Contact;
 use App\Models\Authenticatable;
@@ -66,9 +65,7 @@ class LocalDevelopmentSeeder extends Seeder
             $user = User::where('email', $email)->first();
 
             if (is_null($user)) {
-                $user = User::factory()
-                    ->licensed(LicenseType::cases())
-                    ->create([
+                $user = User::factory()->create([
                         'name' => str($email)->replace('.', ' ')->before('@')->title(),
                         'email' => $email,
                         'password' => Hash::make('password'),

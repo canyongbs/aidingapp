@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\ListKnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
@@ -69,7 +68,7 @@ test('ListKnowledgeBaseItems is gated with proper feature access control', funct
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('knowledge_base_item.view-any');
 
@@ -108,7 +107,6 @@ test('ListKnowledgeBaseItems is gated with proper license access control', funct
         KnowledgeBaseItemResource::getUrl('index')
     )->assertForbidden();
 
-    $user->grantLicense(LicenseType::RecruitmentCrm);
 
     $user->refresh();
 
@@ -153,7 +151,6 @@ test('Filter ListKnowledgeBaseItems with `quality` filter', function () {
 
     $badQualityKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($badQuality, 'quality')->create();
 
-    $user->grantLicense(LicenseType::RecruitmentCrm);
 
     $user->refresh();
 
@@ -200,7 +197,6 @@ test('Filter ListKnowledgeBaseItems with `status` filter', function () {
 
     $archivedKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($archived, 'status')->create();
 
-    $user->grantLicense(LicenseType::RecruitmentCrm);
 
     $user->refresh();
 
@@ -247,7 +243,6 @@ test('Filter ListKnowledgeBaseItems with `category` filter', function () {
 
     $networkTroubleshootingKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($networkTroubleshooting, 'category')->create();
 
-    $user->grantLicense(LicenseType::RecruitmentCrm);
 
     $user->refresh();
 
@@ -287,7 +282,6 @@ test('Filter ListKnowledgeBaseItems with `public` filter', function () {
 
     $isPublic = true;
 
-    $user->grantLicense(LicenseType::RecruitmentCrm);
 
     $user->refresh();
 
@@ -316,7 +310,6 @@ test('Filter ListKnowledgeBaseItems with `created after` filter', function () {
     // They should not be able to access the resource
     actingAs($user);
 
-    $user->grantLicense(LicenseType::RecruitmentCrm);
 
     $user->refresh();
 
@@ -359,7 +352,6 @@ test('Filter ListKnowledgeBaseItems with `updated after` filter', function () {
     // They should not be able to access the resource
     actingAs($user);
 
-    $user->grantLicense(LicenseType::RecruitmentCrm);
 
     $user->refresh();
 

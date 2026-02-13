@@ -134,7 +134,7 @@ test('EditServiceRequestTypeAssignments requires valid data', function (EditServ
 // Permission Tests
 
 test('EditServiceRequestTypeAssignments is gated with proper access control', function () {
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
@@ -179,7 +179,7 @@ test('EditServiceRequestTypeAssignments is gated with proper feature access cont
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.update');

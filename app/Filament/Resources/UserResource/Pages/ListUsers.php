@@ -36,11 +36,8 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Authorization\Models\License;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\UserResource;
-use App\Filament\Resources\UserResource\Actions\AssignLicensesBulkAction;
 use App\Filament\Resources\UserResource\Actions\AssignRolesBulkAction;
 use App\Filament\Resources\UserResource\Actions\AssignTeamBulkAction;
 use App\Filament\Tables\Columns\IdColumn;
@@ -56,7 +53,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Builder;
 use STS\FilamentImpersonate\Actions\Impersonate;
 
 class ListUsers extends ListRecords
@@ -90,36 +86,6 @@ class ListUsers extends ListRecords
                     ->multiple()
                     ->searchable()
                     ->preload(),
-                SelectFilter::make('licenses')
-                    ->label('License')
-                    ->options(
-                        fn (): array => [
-                            '' => [
-                                'no_assigned_license' => 'No Assigned License',
-                            ],
-                            'Licenses' => collect(LicenseType::cases())
-                                ->mapWithKeys(fn ($case) => [$case->value => $case->name])
-                                ->toArray(),
-                        ]
-                    )
-                    ->getSearchResultsUsing(fn (string $search): array => ['Licenses' => collect(LicenseType::cases())->filter(fn ($case) => str_contains(strtolower($case->name), strtolower($search)))->mapWithKeys(fn ($case) => [$case->value => $case->name])->toArray()])
-                    ->query(
-                        function (Builder $query, array $data) {
-                            if (empty($data['values'])) {
-                                return;
-                            }
-
-                            $query->when(in_array('no_assigned_license', $data['values']), function (Builder $query) {
-                                $query->whereDoesntHave('licenses');
-                            })
-                                ->{in_array('no_assigned_license', $data['values']) ? 'orWhereHas' : 'whereHas'}('licenses', function (Builder $query) use ($data) {
-                                    $query->whereIn('type', array_filter($data['values'], fn ($value) => $value !== 'no_assigned_license'));
-                                });
-                        }
-                    )
-                    ->multiple()
-                    ->searchable()
-                    ->preload(),
             ])
             ->recordActions([
                 Impersonate::make(),
@@ -136,8 +102,6 @@ class ListUsers extends ListRecords
 
                             return $user->can('update', app(User::class));
                         }),
-                    AssignLicensesBulkAction::make()
-                        ->visible(fn () => auth()->user()->can('create', License::class)),
                     AssignRolesBulkAction::make()
                         ->visible(fn () => auth()->user()->can('user.*.update', User::class)),
                 ]),

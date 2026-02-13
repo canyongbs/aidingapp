@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\CreateIncident;
 use AidingApp\ServiceManagement\Models\Incident;
@@ -48,7 +47,7 @@ use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
 test('CreateIncident is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(

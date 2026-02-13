@@ -36,8 +36,6 @@
 
 namespace App\Filament\Clusters;
 
-use AidingApp\Authorization\Enums\LicenseType;
-use App\Models\User;
 use BackedEnum;
 use Filament\Clusters\Cluster;
 use UnitEnum;
@@ -49,13 +47,4 @@ class ServiceManagement extends Cluster
     protected static string | UnitEnum | null $navigationGroup = 'Premium Features';
 
     protected static ?int $navigationSort = 30;
-
-    // TODO Move into policy once created...
-    public static function canAccess(): bool
-    {
-        /** @var User $user */
-        $user = auth()->user();
-
-        return $user->hasAnyLicense([LicenseType::RecruitmentCrm]);
-    }
 }

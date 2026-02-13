@@ -33,7 +33,6 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
 use AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages\EditEngagementFile;
 use AidingApp\Engagement\Models\EngagementFile;
@@ -50,7 +49,7 @@ use function Pest\Livewire\livewire;
 // Permission Tests
 
 test('EditEngagementFile is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $engagementFile = EngagementFile::factory()->create();
 

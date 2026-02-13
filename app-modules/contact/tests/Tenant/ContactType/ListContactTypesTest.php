@@ -92,7 +92,7 @@ test('The correct details are displayed on the ListContactTypes page', function 
 // Permission Tests
 
 test('ListContactTypes is gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(

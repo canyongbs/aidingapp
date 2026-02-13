@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use App\Models\User;
@@ -48,7 +47,7 @@ use function Pest\Laravel\actingAs;
 // Permission Tests
 
 test('ViewKnowledgeBaseQuality is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $knowledgeBaseQuality = KnowledgeBaseQuality::factory()->create();
 
@@ -77,7 +76,7 @@ test('ViewKnowledgeBaseQuality is gated with proper feature access control', fun
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.view');

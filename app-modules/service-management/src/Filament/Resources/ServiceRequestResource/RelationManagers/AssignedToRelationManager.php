@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
-use App\Models\Scopes\HasLicense;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
@@ -109,7 +108,6 @@ class AssignedToRelationManager extends RelationManager
                             ->label(fn () => $this->getOwnerRecord()->assignedTo ? 'Reassign' : 'Assign')
                             ->searchable()
                             ->getSearchResultsUsing(fn (string $search): array => User::query()
-                                ->tap(new HasLicense($this->getOwnerRecord()->respondent->getLicenseType()))
                                 ->where(new Expression('lower(name)'), 'like', '%' . str($search)->lower() . '%')
                                 ->whereHas('team.manageableServiceRequestTypes', function (Builder $query) {
                                     $query->where('service_request_type_id', $this->getOwnerRecord()?->priority->type_id ?? null);

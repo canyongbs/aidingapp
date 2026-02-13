@@ -36,7 +36,6 @@
 
 namespace Database\Seeders;
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\Role;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -50,7 +49,7 @@ class SampleSuperAdminUserSeeder extends Seeder
         if (app()->environment('local')) {
             $superAdminRole = Role::where('name', Authenticatable::SUPER_ADMIN_ROLE)->firstOrFail();
 
-            $superAdmin = User::factory()->licensed(LicenseType::cases())->create([
+            $superAdmin = User::factory()->create([
                 'name' => 'Super Admin',
                 'email' => config('local_development.super_admin.email'),
                 'password' => Hash::make('password'),

@@ -33,7 +33,6 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ListIncidents;
 use AidingApp\ServiceManagement\Models\Incident;
@@ -47,7 +46,7 @@ use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 test('ListIncidents is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -68,7 +67,7 @@ it('is gated with proper access control', function () {
     $settings->data->addons->incidentManagement = false;
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('incident.view-any');
 
@@ -89,7 +88,7 @@ it('is gated with proper access control', function () {
 });
 
 test('can list records', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -107,7 +106,7 @@ test('can list records', function () {
 });
 
 test('bulk delete Incidents', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 

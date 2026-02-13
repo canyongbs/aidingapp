@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ManageProductLicenses;
 use AidingApp\LicenseManagement\Models\Product;
 use App\Models\User;
@@ -49,7 +48,7 @@ it('is gated with proper access control', function () {
     $settings->data->addons->licenseManagement = false;
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
     $product = Product::factory()->create();
 
     $user->givePermissionTo('product.view-any');

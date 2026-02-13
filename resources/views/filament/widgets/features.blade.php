@@ -31,10 +31,6 @@
 
 </COPYRIGHT>
 --}}
-@php
-    use AidingApp\Authorization\Enums\LicenseType;
-@endphp
-
 <x-filament-widgets::widget>
     <div class="grid gap-6 md:grid-cols-3">
     </div>

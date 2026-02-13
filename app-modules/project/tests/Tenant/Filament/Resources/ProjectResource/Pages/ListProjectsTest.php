@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ListProjects;
 use AidingApp\Project\Models\Project;
 use AidingApp\Team\Models\Team;
@@ -75,7 +74,7 @@ it('is gated with proper access control', function () {
     $settings->data->addons->projectManagement = false;
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('project.view-any');
 

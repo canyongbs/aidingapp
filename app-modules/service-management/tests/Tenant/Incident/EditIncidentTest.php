@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\EditIncident;
 use AidingApp\ServiceManagement\Models\Incident;
@@ -46,7 +45,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 test('EditIncident is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $incident = Incident::factory()->create();
 
@@ -89,7 +88,7 @@ test('EditIncident is gated with proper access control', function () {
 });
 
 test('EditIncident validates the inputs', function ($data, $errors) {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
@@ -152,7 +151,7 @@ test('EditIncident validates the inputs', function ($data, $errors) {
 );
 
 test('delete action visible with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $incident = Incident::factory()->create();
 

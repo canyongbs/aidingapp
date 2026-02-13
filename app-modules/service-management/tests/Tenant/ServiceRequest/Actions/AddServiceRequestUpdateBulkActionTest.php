@@ -77,7 +77,7 @@ test('it can add updates to multiple service requests as super admin', function 
 });
 
 test('it can add updates to multiple service requests for user with update permission', function () {
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $team = Team::factory()->create();
 

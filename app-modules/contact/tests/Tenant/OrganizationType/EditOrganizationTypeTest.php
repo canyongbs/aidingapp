@@ -45,7 +45,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 test('Edit Organization Type is gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
     $organizationType = OrganizationType::factory()->create();
 
     actingAs($user)
@@ -76,7 +76,7 @@ test('Edit Organization Type is gated with proper access control', function () {
 });
 
 test('Edit Organization Type Record', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
     $organizationType = OrganizationType::factory()->create();
 
     $user->givePermissionTo('settings.view-any');

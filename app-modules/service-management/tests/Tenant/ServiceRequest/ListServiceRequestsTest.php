@@ -126,7 +126,7 @@ test('The correct details are displayed on the ListServiceRequests page', functi
 // Permission Tests
 
 test('ListServiceRequests is gated with proper access control', function () {
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -148,7 +148,7 @@ test('ListServiceRequests is gated with proper feature access control', function
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
 
@@ -199,7 +199,7 @@ test('service requests only visible to service request type managers', function 
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
 
@@ -241,7 +241,7 @@ test('service requests only visible to service request type auditors', function 
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
 
@@ -277,7 +277,7 @@ test('service requests only visible to service request type auditors', function 
 });
 
 test('can list audit member to service request type', function () {
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
     $team = Team::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();

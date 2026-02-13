@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -49,7 +48,7 @@ use function Pest\Laravel\actingAs;
 // Permission Tests
 
 test('ListKnowledgeBaseStatuses is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -71,7 +70,7 @@ test('ListKnowledgeBaseStatuses is gated with proper feature access control', fu
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
 
@@ -110,7 +109,6 @@ test('ListKnowledgeBaseStatus is gated with proper license access control', func
             KnowledgeBaseStatusResource::getUrl('index')
         )->assertForbidden();
 
-    $user->grantLicense(LicenseType::RecruitmentCrm);
 
     $user->refresh();
 

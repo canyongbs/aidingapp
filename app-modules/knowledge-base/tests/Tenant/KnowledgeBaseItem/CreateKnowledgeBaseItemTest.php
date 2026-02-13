@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\ListKnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
@@ -55,7 +54,7 @@ use function PHPUnit\Framework\assertCount;
 // Permission Tests
 
 test('CreateKnowledgeBaseItem is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     Division::factory(3)->create();
 
@@ -98,7 +97,7 @@ test('CreateKnowledgeBaseItem is gated with proper feature access control', func
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 

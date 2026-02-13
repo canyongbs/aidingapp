@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
 use App\Models\User;
 
@@ -48,7 +47,7 @@ use function Pest\Laravel\actingAs;
 // Permission Tests
 
 test('ListEngagementFiles is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(

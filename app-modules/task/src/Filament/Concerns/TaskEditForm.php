@@ -47,8 +47,6 @@ use Filament\Schemas\Components\Utilities\Get;
 
 trait TaskEditForm
 {
-    use TaskForm;
-
     /**
      * @return array<Component>
      */
@@ -88,15 +86,14 @@ trait TaskEditForm
                 ->native(false),
             Select::make('assigned_to')
                 ->label('Assigned To')
-                ->relationship('assignedTo', 'name', $this->scopeAssignmentRelationshipBasedOnConcern())
+                ->relationship('assignedTo', 'name')
                 ->nullable()
                 ->searchable(['name', 'email'])
                 ->default(auth()->id()),
             Select::make('concern_id')
                 ->label('Related To')
                 ->relationship('concern', 'first_name')
-                ->nullable()
-                ->afterStateUpdated($this->updateAssignmentAfterConcernSelected()),
+                ->nullable(),
         ];
     }
 }

@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages\EditIncidentSeverity;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
@@ -46,7 +45,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 test('EditIncidentSeverity is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $incidentSeverity = IncidentSeverity::factory()->create();
 
@@ -85,7 +84,7 @@ test('EditIncidentSeverity is gated with proper access control', function () {
 });
 
 test('EditIncidentSeverity validates the inputs', function ($data, $errors) {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
@@ -124,7 +123,7 @@ test('EditIncidentSeverity validates the inputs', function ($data, $errors) {
 );
 
 test('delete action visible with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $incidentSeverity = IncidentSeverity::factory()->create();
 

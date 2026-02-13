@@ -33,7 +33,6 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\RelationManagers\SubCategoriesRelationManager;
@@ -57,7 +56,7 @@ use function PHPUnit\Framework\assertEquals;
 // Permission Tests
 
 test('EditKnowledgeBaseCategory is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
 
@@ -102,7 +101,7 @@ test('EditKnowledgeBaseCategory is gated with proper feature access control', fu
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.update');
@@ -145,7 +144,7 @@ test('EditKnowledgeBaseCategory is gated with proper feature access control', fu
 });
 
 test('can create subcategory', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.create');
@@ -174,7 +173,7 @@ test('can create subcategory', function () {
 });
 
 test('exclude already attached subcategories in search', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.update');
@@ -204,7 +203,7 @@ test('exclude already attached subcategories in search', function () {
 });
 
 test('can attach subcategories into categories', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.update');

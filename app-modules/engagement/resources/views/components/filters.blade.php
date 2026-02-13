@@ -31,25 +31,18 @@
 
 </COPYRIGHT>
 --}}
-@php
-    use AidingApp\Authorization\Enums\LicenseType;
-    use AidingApp\Contact\Models\Contact;
-@endphp
-
 <div
     class="flex flex-col items-start justify-start space-y-4 bg-white p-4 text-sm font-normal text-gray-700 dark:bg-gray-800 dark:text-gray-400"
     x-show="showFilters"
 >
-    @if (auth()->user()->hasLicense([Contact::getLicenseType()]))
-        <span>Filter Engagements by:</span>
+    <span>Filter Engagements by:</span>
 
-        <x-filament::input.wrapper>
-            <x-filament::input.select wire:model.live="filterPeopleType">
-                <option value="all">All</option>
-                <option value="contacts">Contacts</option>
-            </x-filament::input.select>
-        </x-filament::input.wrapper>
-    @endif
+    <x-filament::input.wrapper>
+        <x-filament::input.select wire:model.live="filterPeopleType">
+            <option value="all">All</option>
+            <option value="contacts">Contacts</option>
+        </x-filament::input.select>
+    </x-filament::input.wrapper>
 
     <div class="flex w-full flex-col space-y-2">
         <span>Date Range</span>

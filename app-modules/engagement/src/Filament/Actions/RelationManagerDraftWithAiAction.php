@@ -40,7 +40,6 @@ use AidingApp\Ai\Actions\CompletePrompt;
 use AidingApp\Ai\Exceptions\MessageResponseException;
 use AidingApp\Ai\Models\AiAssistant;
 use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
-use AidingApp\Authorization\Enums\LicenseType;
 use App\Models\Contracts\Educatable;
 use App\Settings\LicenseSettings;
 use Closure;
@@ -147,10 +146,7 @@ class RelationManagerDraftWithAiAction extends Action
                     ->trim());
 
                 $set('body', (string) str($content)->after("\n")->markdown());
-            })
-            ->visible(
-                auth()->user()->hasLicense(LicenseType::RecruitmentCrm)
-            );
+            });
     }
 
     public static function getDefaultName(): ?string

@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\CreateServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
@@ -103,7 +102,7 @@ test('CreateServiceRequestUpdate is gated with proper access control', function 
     // Postgres prevents any further actions from happening during a transaction when there is an error like this
     // Preventing the Subscription creation for now
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -140,7 +139,7 @@ test('CreateServiceRequestUpdate is gated with proper feature access control', f
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request_update.view-any');
     $user->givePermissionTo('service_request_update.create');

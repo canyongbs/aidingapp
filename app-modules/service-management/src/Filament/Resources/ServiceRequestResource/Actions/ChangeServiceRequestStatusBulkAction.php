@@ -72,12 +72,7 @@ class ChangeServiceRequestStatusBulkAction
 
                 BulkProcessingMachine::make($records->all())
                     ->check(function (ServiceRequest $serviceRequest) use ($user, $canUserUpdateServiceRequest): ?Closure {
-                        $user = auth()->user();
-
-                        if (
-                            $user->hasLicense($serviceRequest->respondent->getLicenseType()) &&
-                            $canUserUpdateServiceRequest
-                        ) {
+                        if ($canUserUpdateServiceRequest) {
                             return null;
                         }
 

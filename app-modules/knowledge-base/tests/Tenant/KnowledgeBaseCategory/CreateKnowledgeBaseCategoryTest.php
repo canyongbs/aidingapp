@@ -33,7 +33,6 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\CreateKnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
@@ -54,7 +53,7 @@ use function PHPUnit\Framework\assertCount;
 // Permission Tests
 
 test('CreateKnowledgeBaseCategory is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -91,7 +90,7 @@ test('CreateKnowledgeBaseCategory is gated with proper feature access control', 
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.create');

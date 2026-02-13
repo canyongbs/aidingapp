@@ -33,7 +33,6 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
@@ -53,7 +52,7 @@ use function PHPUnit\Framework\assertEquals;
 // Permission Tests
 
 test('EditKnowledgeBaseStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $knowledgeBaseStatus = KnowledgeBaseStatus::factory()->create();
 
@@ -98,7 +97,7 @@ test('EditKnowledgeBaseStatus is gated with proper feature access control', func
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.update');

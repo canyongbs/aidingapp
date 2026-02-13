@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\User;
@@ -68,7 +67,7 @@ test('The correct details are displayed on the ViewServiceRequestUpdate page', f
 // Permission Tests
 
 test('ViewServiceRequestUpdate is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
 
@@ -97,7 +96,7 @@ test('ViewServiceRequestUpdate is gated with proper feature access control', fun
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request_update.view-any');
     $user->givePermissionTo('service_request_update.*.view');
