@@ -34,7 +34,9 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Ai\Http\Controllers\AssistantWidget\AssistantBroadcastController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\AssistantWidgetController;
+use AidingApp\Ai\Http\Middleware\AssistantWidgetAuthorization;
 use AidingApp\Ai\Http\Middleware\AssistantWidgetCors;
 use AidingApp\Ai\Http\Middleware\EnsureAssistantWidgetIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
@@ -66,6 +68,14 @@ Route::middleware([
 
                         Route::post('messages', [AssistantWidgetController::class, 'sendMessage'])
                             ->name('messages');
+
+                        Route::match(
+                            ['GET', 'POST', 'HEAD'],
+                            '/broadcasting/auth',
+                            [AssistantBroadcastController::class, 'auth']
+                        )
+                            ->middleware([AssistantWidgetAuthorization::class])
+                            ->name('broadcasting.auth');
 
                         Route::options('/{any}', function () {
                             return response()->noContent();

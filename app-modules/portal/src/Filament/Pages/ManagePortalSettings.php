@@ -135,10 +135,38 @@ class ManagePortalSettings extends SettingsPage
                             ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && AiFeatureTogglesFeature::active() && app(AiSupportAssistantSettings::class)->is_enabled)
                             ->live(),
                         Toggle::make('embed_assistant')
-                            ->label('Embed Assistant')
+                            ->label('Embed Support Assistant')
                             ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && EmbeddableSupportAssistantFeature::active())
                             ->live()
-                            ->helperText('If enabled, the assistant can be embedded on other websites.'),
+                            ->helperText('If enabled, the assistant can be embedded on other websites.')
+                            ->hintAction(
+                                Action::make('embed_snippet')
+                                    ->label('Embed Snippet')
+                                    ->schema([
+                                        TextEntry::make('snippet')
+                                            ->label('Click to Copy')
+                                            ->state(function () {
+                                                $code = resolve(GenerateAssistantEmbedCode::class)->handle();
+
+                                                $state = <<<EOD
+                                                ```
+                                                {$code}
+                                                ```
+                                                EOD;
+
+                                                return str($state)->markdown()->toHtmlString();
+                                            })
+                                            ->copyable()
+                                            ->copyableState(fn () => resolve(GenerateAssistantEmbedCode::class)->handle())
+                                            ->copyMessage('Copied!')
+                                            ->copyMessageDuration(1500)
+                                            ->extraAttributes(['class' => 'embed-code-snippet']),
+                                    ])
+                                    ->modalSubmitAction(false)
+                                    ->modalCancelActionLabel('Close')
+                                    ->hidden(fn (Get $get) => ! $get('embed_assistant'))
+                            )
+                            ->columnStart(1),
                         TagsInput::make('embed_assistant_allowed_domains')
                             ->label('Allowed Domains')
                             ->helperText('Only these domains will be allowed to embed the assistant.')
@@ -267,32 +295,6 @@ class ManagePortalSettings extends SettingsPage
 
     protected function getHeaderActions(): array
     {
-        return [
-            Action::make('embed_snippet')
-                ->label('Embed Snippet')
-                ->schema([
-                    TextEntry::make('snippet')
-                        ->label('Click to Copy')
-                        ->state(function () {
-                            $code = resolve(GenerateAssistantEmbedCode::class)->handle();
-
-                            $state = <<<EOD
-                            ```
-                            {$code}
-                            ```
-                            EOD;
-
-                            return str($state)->markdown()->toHtmlString();
-                        })
-                        ->copyable()
-                        ->copyableState(fn () => resolve(GenerateAssistantEmbedCode::class)->handle())
-                        ->copyMessage('Copied!')
-                        ->copyMessageDuration(1500)
-                        ->extraAttributes(['class' => 'embed-code-snippet']),
-                ])
-                ->modalSubmitAction(false)
-                ->modalCancelActionLabel('Close')
-                ->hidden(fn () => ! EmbeddableSupportAssistantFeature::active() || ! app(PortalSettings::class)->embed_assistant),
-        ];
+        return [];
     }
 }

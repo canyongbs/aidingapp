@@ -46,7 +46,7 @@ use App\Features\AiFeatureTogglesFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Storage;
 
 class KnowledgeManagementPortalAuthenticateController extends Controller
 {
@@ -79,6 +79,8 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
             $request->session()->regenerate();
         }
 
+        $assistantEnabled = AiFeatureTogglesFeature::active() && app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant;
+
         return response()->json([
             'success' => true,
             'token' => $token->plainTextToken,
@@ -87,8 +89,13 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
             'has_assets' => auth()->guard('contact')->user()?->assetCheckIns()->exists() || auth()->guard('contact')->user()?->assetCheckOuts()->exists() ?: false,
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
             'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,
-            'assistant_send_message_url' => (AiFeatureTogglesFeature::active() && app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant) ? URL::signedRoute('ai.portal-assistants.messages.send') : null,
-            'websockets_config' => (AiFeatureTogglesFeature::active() && app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant) ? config('filament.broadcasting.echo') : [],
+            'assistant_enabled' => $assistantEnabled,
+            'assistant_widget_loader_url' => $assistantEnabled
+                ? url('widgets/assistant/' . json_decode(Storage::disk('public')->get('widgets/assistant/.vite/manifest.json'), true)['src/loader.js']['file'])
+                : null,
+            'assistant_widget_config_url' => $assistantEnabled
+                ? route('widgets.assistant.api.config')
+                : null,
         ]);
     }
 }

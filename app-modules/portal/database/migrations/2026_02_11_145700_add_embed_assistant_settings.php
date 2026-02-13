@@ -52,7 +52,7 @@ return new class () extends SettingsMigration {
     public function down(): void
     {
         DB::transaction(function () {
-            EmbeddableSupportAssistantFeature::purge();
+            EmbeddableSupportAssistantFeature::deactivate();
 
             $this->migrator->delete('portal.embed_assistant');
             $this->migrator->delete('portal.embed_assistant_allowed_domains');

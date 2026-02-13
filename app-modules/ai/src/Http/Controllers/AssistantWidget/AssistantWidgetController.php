@@ -62,18 +62,20 @@ class AssistantWidgetController extends Controller
 
         $settings = app(PortalSettings::class);
 
+        $websocketsConfig = config('filament.broadcasting.echo');
+
         return response()->json([
             'asset_url' => route('widgets.assistant.asset'),
             'js' => route('widgets.assistant.asset', ['file' => $widgetEntry['file']]),
             'send_message_url' => route('widgets.assistant.api.messages'),
-            'websockets_config' => config('filament.broadcasting.echo'),
-            'primary_color' => collect(Color::all()[$settings->knowledge_management_portal_primary_color?->value ?? 'blue'])
+            'websockets_config' => $websocketsConfig,
+            'auth_endpoint' => route('widgets.assistant.api.broadcasting.auth'),
+            'primary_color' => collect(Color::all()[$settings->knowledge_management_portal_primary_color->value ?? 'blue'])
                 ->map(Color::convertToRgb(...))
                 ->map(fn (string $value): string => (string) str($value)->after('rgb(')->before(')'))
                 ->all(),
-            'rounding' => $settings->knowledge_management_portal_rounding?->value ?? 'md',
+            'rounding' => $settings->knowledge_management_portal_rounding->value ?? 'md',
             'is_authenticated' => (bool) auth('contact')->user(),
-            'guest_token_enabled' => EmbeddableSupportAssistantFeature::active(),
         ]);
     }
 
@@ -110,24 +112,37 @@ class AssistantWidgetController extends Controller
         ]);
 
         $author = auth('contact')->user();
-        $featureActive = EmbeddableSupportAssistantFeature::active();
 
         if (filled($data['thread_id'] ?? null)) {
-            $query = PortalAssistantThread::query()
-                ->whereKey($data['thread_id']);
+            $thread = PortalAssistantThread::query()
+                ->whereKey($data['thread_id'])
+                ->firstOrFail();
 
             if ($author) {
-                $query->whereMorphedTo('author', $author);
+                // Allow if the authenticated user owns the thread
+                if ($thread->author_type && $thread->author_id) {
+                    if (! $thread->author()->is($author)) {
+                        abort(403, 'You do not have access to this thread.');
+                    }
+                } else {
+                    // Guest thread: claim ownership for the now-authenticated user
+                    $thread->author()->associate($author);
+                    $thread->save();
+                }
             } else {
-                $query->whereNull('author_type')
-                    ->whereNull('author_id');
+                // Guest access: thread must have no author and matching guest_token
+                if ($thread->author_type || $thread->author_id) {
+                    abort(403, 'You do not have access to this thread.');
+                }
 
-                if ($featureActive && filled($data['guest_token'] ?? null)) {
-                    $query->where('guest_token', $data['guest_token']);
+                if (EmbeddableSupportAssistantFeature::active() && filled($data['guest_token'] ?? null)) {
+                    if ($thread->guest_token !== $data['guest_token']) {
+                        abort(403, 'Invalid guest token.');
+                    }
+                } else {
+                    abort(403, 'You do not have access to this thread.');
                 }
             }
-
-            $thread = $query->firstOrFail();
         } else {
             $thread = new PortalAssistantThread();
 
@@ -135,7 +150,7 @@ class AssistantWidgetController extends Controller
                 $thread->author()->associate($author);
             }
 
-            if ($featureActive) {
+            if (EmbeddableSupportAssistantFeature::active()) {
                 $thread->guest_token = $data['guest_token'] ?? Str::uuid()->toString();
             }
 
@@ -157,7 +172,7 @@ class AssistantWidgetController extends Controller
         return response()->json([
             'message' => 'Message dispatched for processing via websockets.',
             'thread_id' => $thread->getKey(),
-            'guest_token' => $thread->guest_token,
+            'guest_token' => EmbeddableSupportAssistantFeature::active() ? $thread->guest_token : null,
         ]);
     }
 }

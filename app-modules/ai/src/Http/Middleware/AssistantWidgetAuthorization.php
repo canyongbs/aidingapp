@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -36,41 +36,27 @@
 
 namespace AidingApp\Ai\Http\Middleware;
 
-use AidingApp\Portal\Settings\PortalSettings;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class EnsureAssistantWidgetIsEmbeddableAndAuthorized
+class AssistantWidgetAuthorization
 {
+    /**
+     * Handle an incoming request.
+     *
+     * @param  Closure(Request): (Response)  $next
+     */
     public function handle(Request $request, Closure $next): Response
     {
-        $settings = app(PortalSettings::class);
-
-        if (! $settings->ai_support_assistant) {
-            return response()->json(['error' => 'The support assistant is not enabled.'], 403);
+        // If user is authenticated via contact session, allow the request
+        if (Auth::guard('contact')->check()) {
+            return $next($request);
         }
 
-        $requestingUrlHeader = $request->headers->get('origin') ?? $request->headers->get('referer');
-
-        if (! $requestingUrlHeader) {
-            return response()->json(['error' => 'Missing origin/referer header.'], 400);
-        }
-
-        $requestingUrlHeader = parse_url($requestingUrlHeader)['host'];
-
-        if ($requestingUrlHeader != parse_url(config('app.url'))['host']) {
-            if (! $settings->embed_assistant) {
-                return response()->json(['error' => 'Embedding is not enabled for the assistant.'], 403);
-            }
-
-            $allowedDomains = collect($settings->embed_assistant_allowed_domains ?? []);
-
-            if (! $allowedDomains->contains($requestingUrlHeader)) {
-                return response()->json(['error' => 'Origin/Referer not allowed. Domain must be added to allowed domains list'], 403);
-            }
-        }
-
+        // For unauthenticated requests, the channel callback will handle
+        // authorization via guest_token validation
         return $next($request);
     }
 }
