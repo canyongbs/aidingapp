@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Forms\Components\Textarea;
@@ -94,6 +95,7 @@ class CreateServiceRequestType extends CreateRecord
 
     protected function afterCreate(): void
     {
+        assert($this->getRecord() instanceof ServiceRequestType);
         $this->getRecord()->priorities()->createMany(
             [
                 ['name' => 'High', 'order' => 1],

@@ -83,6 +83,9 @@ class ChangeRequest extends BaseModel implements Auditable
         'start_time' => 'datetime',
     ];
 
+    /**
+     * @return array<string>
+     */
     public function getStateMachineFields(): array
     {
         return [
@@ -122,6 +125,9 @@ class ChangeRequest extends BaseModel implements Auditable
         return $this->hasMany(ChangeRequestResponse::class, 'change_request_id');
     }
 
+    /**
+     * @return HasMany<ChangeRequestResponse, $this>
+     */
     public function approvals(): HasMany
     {
         return $this->responses()->where('approved', '=', true);

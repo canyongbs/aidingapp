@@ -90,7 +90,7 @@ class ChangeServiceRequestStatusBulkAction
                         };
                     })
                     ->check(function (ServiceRequest $serviceRequest): ?Closure {
-                        if ($serviceRequest?->status?->classification !== SystemServiceRequestClassification::Closed) {
+                        if ($serviceRequest->status?->classification !== SystemServiceRequestClassification::Closed) {
                             return null;
                         }
 
@@ -109,7 +109,7 @@ class ChangeServiceRequestStatusBulkAction
 
                         $team = $user->team;
 
-                        if ($serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
+                        if ($serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey())) {
                             return null;
                         }
 

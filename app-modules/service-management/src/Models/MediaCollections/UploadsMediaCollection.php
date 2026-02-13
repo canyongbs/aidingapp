@@ -60,7 +60,10 @@ class UploadsMediaCollection extends MediaCollection
         parent::__construct($name);
     }
 
-    public static function create($name = 'uploads'): static
+    /**
+     * @param string $name
+     */
+    public static function create($name = 'uploads'): UploadsMediaCollection
     {
         return new self($name);
     }
@@ -110,7 +113,7 @@ class UploadsMediaCollection extends MediaCollection
     }
 
     /**
-     * @param $mimes array<string, array<string>>
+     * @param array<string, array<string>> $mimes
      */
     public function mimes(array $mimes): static
     {
@@ -120,6 +123,9 @@ class UploadsMediaCollection extends MediaCollection
         return $this;
     }
 
+    /**
+     * @return array<string, array<string>>
+     */
     public function getMimes(): array
     {
         return collect($this->mimes)
@@ -129,6 +135,9 @@ class UploadsMediaCollection extends MediaCollection
             ->toArray();
     }
 
+    /**
+     * @return array<string, array<string>>
+     */
     public function getExtensions(): array
     {
         return collect($this->mimes)
@@ -144,6 +153,9 @@ class UploadsMediaCollection extends MediaCollection
             ->toArray();
     }
 
+    /**
+     * @return array<string, array<string>>
+     */
     public function getExtensionsFull(): array
     {
         return collect($this->mimes)

@@ -81,6 +81,7 @@ class EditProfile extends Page
 
     protected static bool $shouldRegisterNavigation = false;
 
+    /** @var array<string, mixed>|null $data */
     public ?array $data = [];
 
     //TODO: I feel like a lot of these could be refactored into a settings file instead of adding them directly to the user migration.
@@ -463,6 +464,17 @@ class EditProfile extends Page
         return false;
     }
 
+    /**
+     * @return array{
+     *  sunday: Grid,
+     *  monday: Grid,
+     *  tuesday: Grid,
+     *  wednesday: Grid,
+     *  thursday: Grid,
+     *  friday: Grid,
+     *  saturday: Grid,
+     * }
+     */
     private function getHoursForDays(string $key): array
     {
         return collect([
