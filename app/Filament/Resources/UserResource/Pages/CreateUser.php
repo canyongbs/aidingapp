@@ -36,8 +36,6 @@
 
 namespace App\Filament\Resources\UserResource\Pages;
 
-use AidingApp\Authorization\Models\License;
-use App\Filament\Forms\Components\Licenses;
 use App\Filament\Resources\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -103,14 +101,6 @@ class CreateUser extends CreateRecord
                             ->relationship('team', 'name'),
                     ])
                     ->hidden(fn (?User $record) => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
-                Licenses::make()
-                    ->hidden(fn (?User $record) => is_null($record))
-                    ->disabled(function () {
-                        /** @var User $user */
-                        $user = auth()->user();
-
-                        return $user->cannot('create', License::class);
-                    }),
             ]);
     }
 

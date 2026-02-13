@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Models\License;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
