@@ -34,48 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Jobs;
+namespace App\Features;
 
-use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
-use AidingApp\Ai\Settings\AiSupportAssistantSettings;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
-use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\AiFeatureTogglesFeature;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use App\Support\AbstractFeatureFlag;
 
-class PrepareKnowledgeBaseVectorStore implements ShouldQueue, ShouldBeUnique
+class AiFeatureTogglesFeature extends AbstractFeatureFlag
 {
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-
-    public int $timeout = 600;
-
-    public int $tries = 2;
-
-    public int $uniqueFor = 600;
-
-    public function handle(): void
+    public function resolve(mixed $scope): mixed
     {
-        if (! AiFeatureTogglesFeature::active() || ! app(AiSupportAssistantSettings::class)->is_enabled || ! app(PortalSettings::class)->ai_support_assistant) {
-            return;
-        }
-
-        $aiService = app(AiIntegratedAssistantSettings::class)->getDefaultModel()->getService();
-
-        $files = KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id', 'updated_at'])->all();
-
-        if (! $aiService->areFilesReady($files)) {
-            if ($this->attempts() < $this->tries) {
-                $this->release(150);
-            }
-        }
+        return false;
     }
 }

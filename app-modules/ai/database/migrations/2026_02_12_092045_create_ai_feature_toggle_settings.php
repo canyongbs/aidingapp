@@ -34,48 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Jobs;
-
-use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
-use AidingApp\Ai\Settings\AiSupportAssistantSettings;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
-use AidingApp\Portal\Settings\PortalSettings;
 use App\Features\AiFeatureTogglesFeature;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\DB;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-class PrepareKnowledgeBaseVectorStore implements ShouldQueue, ShouldBeUnique
-{
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-
-    public int $timeout = 600;
-
-    public int $tries = 2;
-
-    public int $uniqueFor = 600;
-
-    public function handle(): void
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        if (! AiFeatureTogglesFeature::active() || ! app(AiSupportAssistantSettings::class)->is_enabled || ! app(PortalSettings::class)->ai_support_assistant) {
-            return;
-        }
-
-        $aiService = app(AiIntegratedAssistantSettings::class)->getDefaultModel()->getService();
-
-        $files = KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id', 'updated_at'])->all();
-
-        if (! $aiService->areFilesReady($files)) {
-            if ($this->attempts() < $this->tries) {
-                $this->release(150);
+        DB::transaction(function () {
+            try {
+                $this->migrator->add('ai-clarification.is_enabled', false);
+            } catch (SettingAlreadyExists $exception) {
+                // do nothing
             }
-        }
+
+            try {
+                $this->migrator->add('ai-support-assistant.is_enabled', false);
+            } catch (SettingAlreadyExists $exception) {
+                // do nothing
+            }
+
+            AiFeatureTogglesFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            AiFeatureTogglesFeature::deactivate();
+
+            $this->migrator->deleteIfExists('ai-clarification.is_enabled');
+            $this->migrator->deleteIfExists('ai-support-assistant.is_enabled');
+        });
+    }
+};

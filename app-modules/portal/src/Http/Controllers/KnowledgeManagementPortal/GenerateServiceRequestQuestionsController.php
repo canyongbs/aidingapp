@@ -36,11 +36,13 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use AidingApp\Portal\Actions\GenerateServiceRequestQuestionsAiPrompt;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\AiFeatureTogglesFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -54,6 +56,12 @@ class GenerateServiceRequestQuestionsController extends Controller
         $contact = auth('contact')->user();
 
         abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
+
+        if (! AiFeatureTogglesFeature::active() || ! app(AiClarificationSettings::class)->is_enabled) {
+            return response()->json([
+                'fields' => [],
+            ]);
+        }
 
         $formData = $request->input('formData', []);
 

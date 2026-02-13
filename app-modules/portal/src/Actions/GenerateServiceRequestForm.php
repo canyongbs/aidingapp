@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Actions;
 
+use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\Form\Filament\Blocks\SelectFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\TextAreaFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
@@ -45,6 +46,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\AiFeatureTogglesFeature;
 use Illuminate\Support\Collection;
 
 class GenerateServiceRequestForm
@@ -85,8 +87,10 @@ class GenerateServiceRequestForm
 
         $form->steps->prepend($this->formatStep('Main', -1, $content));
 
-        $maxOrder = $form->steps->max('order') ?? 0;
-        $form->steps->push($this->formatStep('Questions', $maxOrder + 1, collect([])));
+        if (AiFeatureTogglesFeature::active() && app(AiClarificationSettings::class)->is_enabled) {
+            $maxOrder = $form->steps->max('order') ?? 0;
+            $form->steps->push($this->formatStep('Questions', $maxOrder + 1, collect([])));
+        }
 
         return $form;
     }
