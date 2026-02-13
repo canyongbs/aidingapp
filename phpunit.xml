@@ -29,6 +29,5 @@
         <env name="TENANT_DB_USERNAME" value="aidingapp"/>
         <env name="TENANT_DB_PASSWORD" value="password"/>
         <env name="AZURE_OPEN_AI_ENABLE_TEST_MODE" value="true"/>
-        <env name="TWILIO_ENABLE_TEST_SENDER" value="true"/>
     </php>
 </phpunit>

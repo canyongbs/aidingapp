@@ -46,7 +46,6 @@ use AidingApp\Notification\Models\Contracts\Message;
 use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\Notification\Notifications\Messages\TwilioMessage;
 use App\Models\NotificationSetting;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
@@ -95,12 +94,6 @@ class EngagementNotification extends Notification implements ShouldQueue, HasBef
         }
 
         return $mail;
-    }
-
-    public function toSms(object $notifiable): TwilioMessage
-    {
-        return TwilioMessage::make($notifiable)
-            ->content($this->engagement->getBodyMarkdown());
     }
 
     public function failed(?Throwable $exception): void

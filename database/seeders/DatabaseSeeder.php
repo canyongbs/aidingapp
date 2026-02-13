@@ -85,7 +85,6 @@ class DatabaseSeeder extends Seeder
             TaskSeeder::class,
             AlertSeeder::class,
             TeamSeeder::class,
-            TwilioContactSeeder::class,
 
             // InventoryManagement
             ...AssetSeeder::metadataSeeders(),

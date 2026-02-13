@@ -34,72 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Notifications\Messages;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use AidingApp\IntegrationTwilio\Settings\TwilioSettings;
-
-class TwilioMessage
-{
-    public function __construct(
-        protected object $notifiable,
-        protected ?string $recipientPhoneNumber = null,
-        protected ?string $content = null,
-        protected ?string $from = null,
-    ) {
-        $settings = app(TwilioSettings::class);
-
-        $this->from ??= $settings->from_number;
-    }
-
-    public static function make(object $notifiable): static
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return app()->makeWith(static::class, [
-            'notifiable' => $notifiable,
-        ]);
+        $this->migrator->deleteIfExists('twilio.is_enabled');
+        $this->migrator->deleteIfExists('twilio.account_sid');
+        $this->migrator->deleteIfExists('twilio.auth_token');
+        $this->migrator->deleteIfExists('twilio.from_number');
     }
-
-    public function to(string $recipientPhoneNumber): self
-    {
-        $this->recipientPhoneNumber = $recipientPhoneNumber;
-
-        return $this;
-    }
-
-    public function getRecipientPhoneNumber(): string
-    {
-        return $this->recipientPhoneNumber ?? $this->notifiable->routeNotificationForSms();
-    }
-
-    public function content(string $content): self
-    {
-        $this->content = $content;
-
-        return $this;
-    }
-
-    public function getContent(): string
-    {
-        return $this->content;
-    }
-
-    public function from(string $from): self
-    {
-        $this->from = $from;
-
-        return $this;
-    }
-
-    public function getFrom(): string
-    {
-        return $this->from;
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'recipient_phone_number' => $this->getRecipientPhoneNumber(),
-            'content' => $this->getContent(),
-            'from' => $this->getFrom(),
-        ];
-    }
-}
+};
