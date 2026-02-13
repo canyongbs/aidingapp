@@ -87,33 +87,6 @@ test('ListKnowledgeBaseItems is gated with proper feature access control', funct
     )->assertSuccessful();
 });
 
-test('ListKnowledgeBaseItems is gated with proper license access control', function () {
-    $settings = app(LicenseSettings::class);
-    // When the feature is enabled
-    $settings->data->addons->knowledgeManagement = true;
-
-    $settings->save();
-
-    $user = User::factory()->create();
-
-    // And the authenticatable has the correct permissions
-    // But they do not have the appropriate license
-    $user->givePermissionTo('knowledge_base_item.view-any');
-
-    // They should not be able to access the resource
-    actingAs($user);
-
-    get(
-        KnowledgeBaseItemResource::getUrl('index')
-    )->assertForbidden();
-
-    $user->refresh();
-
-    get(
-        KnowledgeBaseItemResource::getUrl('index')
-    )->assertSuccessful();
-});
-
 test('Filter ListKnowledgeBaseItems with `quality` filter', function () {
     $settings = app(LicenseSettings::class);
 

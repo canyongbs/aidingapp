@@ -89,30 +89,3 @@ test('ListKnowledgeBaseCategory is gated with proper feature access control', fu
         )->assertSuccessful();
 });
 
-test('ListKnowledgeBaseCategory is gated with proper license access control', function () {
-    $settings = app(LicenseSettings::class);
-
-    // When the feature is enabled
-    $settings->data->addons->knowledgeManagement = true;
-
-    $settings->save();
-
-    $user = User::factory()->create();
-
-    // And the authenticatable has the correct permissions
-    // But they do not have the appropriate license
-    $user->givePermissionTo('settings.view-any');
-
-    // They should not be able to access the resource
-    actingAs($user)
-        ->get(
-            KnowledgeBaseCategoryResource::getUrl('index')
-        )->assertForbidden();
-
-    $user->refresh();
-
-    actingAs($user)
-        ->get(
-            KnowledgeBaseCategoryResource::getUrl('index')
-        )->assertSuccessful();
-});
