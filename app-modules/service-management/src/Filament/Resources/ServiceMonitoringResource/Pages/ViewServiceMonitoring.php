@@ -75,21 +75,13 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->listWithLineBreaks()
                                     ->limitList(3)
                                     ->expandableLimitedList()
-                                    ->visible(function () {
-                                        assert($this->getRecord() instanceof ServiceMonitoringTarget);
-
-                                        return $this->getRecord()->teams()->count();
-                                    }),
+                                     ->visible(fn (ServiceMonitoringTarget $record) => $record->teams()->count()),
                                 TextEntry::make('users.name')
                                     ->label('Users')
                                     ->listWithLineBreaks()
                                     ->limitList(3)
                                     ->expandableLimitedList()
-                                    ->visible(function () {
-                                        assert($this->getRecord() instanceof ServiceMonitoringTarget);
-
-                                        return $this->getRecord()->users()->count();
-                                    }),
+                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->users()->count()),
                                 IconEntry::make('is_notified_via_database')
                                     ->label('In Product notifications')
                                     ->boolean(),
@@ -97,11 +89,7 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->label('Email Notifications')
                                     ->boolean(),
                             ])
-                            ->visible(function (): bool {
-                                assert($this->getRecord() instanceof ServiceMonitoringTarget);
-
-                                return $this->getRecord()->teams()->count() || $this->getRecord()->users()->count();
-                            })
+                            ->visible(fn (ServiceMonitoringTarget $record): bool => $record->teams()->count() || $record->users()->count())
                             ->columns(),
                     ])
                     ->columns(),
