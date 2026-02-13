@@ -88,4 +88,3 @@ test('ListKnowledgeBaseCategory is gated with proper feature access control', fu
             KnowledgeBaseCategoryResource::getUrl('index')
         )->assertSuccessful();
 });
-

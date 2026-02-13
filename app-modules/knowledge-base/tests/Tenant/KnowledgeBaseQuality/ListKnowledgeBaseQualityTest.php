@@ -88,4 +88,3 @@ test('ListKnowledgeBaseQuality is gated with proper feature access control', fun
             KnowledgeBaseQualityResource::getUrl('index')
         )->assertSuccessful();
 });
-

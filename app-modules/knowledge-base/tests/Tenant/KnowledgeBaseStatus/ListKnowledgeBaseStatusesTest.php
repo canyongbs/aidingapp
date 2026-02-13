@@ -88,4 +88,3 @@ test('ListKnowledgeBaseStatuses is gated with proper feature access control', fu
             KnowledgeBaseStatusResource::getUrl('index')
         )->assertSuccessful();
 });
-
