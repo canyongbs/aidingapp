@@ -75,7 +75,7 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->listWithLineBreaks()
                                     ->limitList(3)
                                     ->expandableLimitedList()
-                                     ->visible(fn (ServiceMonitoringTarget $record) => $record->teams()->count()),
+                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->teams()->count()),
                                 TextEntry::make('users.name')
                                     ->label('Users')
                                     ->listWithLineBreaks()
