@@ -176,4 +176,3 @@ it('can filter users by teams', function () {
         ->assertCanSeeTableRecords($userWithTeam1->merge($userWithTeam2))
         ->assertCanNotSeeTableRecords($userWithoutTeam);
 });
-

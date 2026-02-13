@@ -80,5 +80,4 @@ class UserFactory extends Factory
             'is_external' => true,
         ]);
     }
-
 }

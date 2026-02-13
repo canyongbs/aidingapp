@@ -92,5 +92,4 @@ class Alert extends BaseModel implements Auditable
     {
         $query->where('status', $status);
     }
-
 }

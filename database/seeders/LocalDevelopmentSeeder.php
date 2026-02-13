@@ -66,11 +66,11 @@ class LocalDevelopmentSeeder extends Seeder
 
             if (is_null($user)) {
                 $user = User::factory()->create([
-                        'name' => str($email)->replace('.', ' ')->before('@')->title(),
-                        'email' => $email,
-                        'password' => Hash::make('password'),
-                        'is_external' => true,
-                    ]);
+                    'name' => str($email)->replace('.', ' ')->before('@')->title(),
+                    'email' => $email,
+                    'password' => Hash::make('password'),
+                    'is_external' => true,
+                ]);
             }
 
             $user->roles()->sync($superAdminRole);

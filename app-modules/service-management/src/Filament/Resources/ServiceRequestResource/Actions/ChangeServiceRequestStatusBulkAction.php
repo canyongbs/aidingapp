@@ -71,7 +71,7 @@ class ChangeServiceRequestStatusBulkAction
                 $canUserUpdateServiceRequest = $user->can('service_request.*.update');
 
                 BulkProcessingMachine::make($records->all())
-                    ->check(function (ServiceRequest $serviceRequest) use ($user, $canUserUpdateServiceRequest): ?Closure {
+                    ->check(function (ServiceRequest $serviceRequest) use ($canUserUpdateServiceRequest): ?Closure {
                         if ($canUserUpdateServiceRequest) {
                             return null;
                         }

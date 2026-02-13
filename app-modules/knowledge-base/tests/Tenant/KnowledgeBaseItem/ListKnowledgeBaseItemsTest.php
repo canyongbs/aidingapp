@@ -107,7 +107,6 @@ test('ListKnowledgeBaseItems is gated with proper license access control', funct
         KnowledgeBaseItemResource::getUrl('index')
     )->assertForbidden();
 
-
     $user->refresh();
 
     get(
@@ -150,7 +149,6 @@ test('Filter ListKnowledgeBaseItems with `quality` filter', function () {
     $reviewNeededKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($reviewQuality, 'quality')->create();
 
     $badQualityKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($badQuality, 'quality')->create();
-
 
     $user->refresh();
 
@@ -197,7 +195,6 @@ test('Filter ListKnowledgeBaseItems with `status` filter', function () {
 
     $archivedKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($archived, 'status')->create();
 
-
     $user->refresh();
 
     livewire(ListKnowledgeBaseItems::class)
@@ -243,7 +240,6 @@ test('Filter ListKnowledgeBaseItems with `category` filter', function () {
 
     $networkTroubleshootingKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($networkTroubleshooting, 'category')->create();
 
-
     $user->refresh();
 
     livewire(ListKnowledgeBaseItems::class)
@@ -282,7 +278,6 @@ test('Filter ListKnowledgeBaseItems with `public` filter', function () {
 
     $isPublic = true;
 
-
     $user->refresh();
 
     livewire(ListKnowledgeBaseItems::class)
@@ -309,7 +304,6 @@ test('Filter ListKnowledgeBaseItems with `created after` filter', function () {
 
     // They should not be able to access the resource
     actingAs($user);
-
 
     $user->refresh();
 
@@ -351,7 +345,6 @@ test('Filter ListKnowledgeBaseItems with `updated after` filter', function () {
 
     // They should not be able to access the resource
     actingAs($user);
-
 
     $user->refresh();
 

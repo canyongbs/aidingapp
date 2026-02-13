@@ -109,7 +109,6 @@ test('ListKnowledgeBaseCategory is gated with proper license access control', fu
             KnowledgeBaseCategoryResource::getUrl('index')
         )->assertForbidden();
 
-
     $user->refresh();
 
     actingAs($user)

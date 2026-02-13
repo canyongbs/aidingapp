@@ -109,7 +109,6 @@ test('ListKnowledgeBaseQuality is gated with proper license access control', fun
             KnowledgeBaseQualityResource::getUrl('index')
         )->assertForbidden();
 
-
     $user->refresh();
 
     actingAs($user)

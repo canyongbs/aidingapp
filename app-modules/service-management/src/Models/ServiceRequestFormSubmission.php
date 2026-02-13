@@ -157,5 +157,4 @@ class ServiceRequestFormSubmission extends Submission
 
         return FormSubmissionStatus::Requested;
     }
-
 }

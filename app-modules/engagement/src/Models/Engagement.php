@@ -48,7 +48,6 @@ use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\EngagementTimeline;
 use App\Models\BaseModel;
-use App\Models\Concerns\BelongsToEducatable;
 use App\Models\Contracts\Educatable;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -253,5 +252,4 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
     {
         return $this->channel;
     }
-
 }

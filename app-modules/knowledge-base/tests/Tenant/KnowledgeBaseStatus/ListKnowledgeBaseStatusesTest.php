@@ -109,7 +109,6 @@ test('ListKnowledgeBaseStatus is gated with proper license access control', func
             KnowledgeBaseStatusResource::getUrl('index')
         )->assertForbidden();
 
-
     $user->refresh();
 
     actingAs($user)
