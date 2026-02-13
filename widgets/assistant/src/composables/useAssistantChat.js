@@ -35,16 +35,17 @@ import axios from 'axios';
 import { computed, onUnmounted, ref, watch } from 'vue';
 import { useAssistantConnection } from './useAssistantConnection.js';
 
-export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticated = false, guestTokenEnabled = true) {
+export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticated = false) {
     const messages = ref([]);
     const threadId = ref(null);
     const guestToken = ref(null);
     const isSending = ref(false);
     const wordQueue = ref([]);
     const isTyping = ref(false);
+    const authEndpoint = ref(websocketsConfig.authEndpoint || '/api/broadcasting/auth');
 
-    // Only use guest token for unauthenticated users when feature is enabled
-    if (!isAuthenticated && guestTokenEnabled) {
+    // Guests use a token to identify their session
+    if (!isAuthenticated) {
         guestToken.value = localStorage.getItem('assistantGuestToken') || null;
         if (!guestToken.value) {
             guestToken.value = crypto.randomUUID();
@@ -116,14 +117,18 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
 
         addUserMessage(content);
 
-        const payload = { content, thread_id: threadId.value, guest_token: guestToken.value };
+        const payload = { content, thread_id: threadId.value };
+
+        if (guestToken.value) {
+            payload.guest_token = guestToken.value;
+        }
 
         try {
             const response = await axios.post(sendMessageUrl, payload);
             if (response.data.thread_id) {
                 threadId.value = response.data.thread_id;
             }
-            if (response.data.guest_token) {
+            if (response.data.guest_token && !isAuthenticated) {
                 guestToken.value = response.data.guest_token;
                 localStorage.setItem('assistantGuestToken', guestToken.value);
             }
@@ -140,7 +145,7 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
         return localStorage.getItem('token') || null;
     };
 
-    const connection = useAssistantConnection(websocketsConfig, getToken, guestToken.value);
+    const connection = useAssistantConnection(websocketsConfig, getToken, guestToken.value, authEndpoint.value);
 
     const connectToThread = async (id) => {
         if (!id) return;

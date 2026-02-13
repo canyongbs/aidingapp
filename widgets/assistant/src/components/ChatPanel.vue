@@ -42,7 +42,6 @@
         sendMessageUrl: { type: String, required: true },
         websocketsConfig: { type: Object, required: true },
         isAuthenticated: { type: Boolean, default: false },
-        guestTokenEnabled: { type: Boolean, default: true },
     });
 
     const emit = defineEmits(['close']);
@@ -51,7 +50,6 @@
         props.sendMessageUrl,
         props.websocketsConfig,
         props.isAuthenticated,
-        props.guestTokenEnabled,
     );
 
     const welcomeMessage =

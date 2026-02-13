@@ -40,7 +40,12 @@ if (typeof window !== 'undefined') {
     window.Pusher = Pusher;
 }
 
-export function useAssistantConnection(websocketsConfig, getToken, guestToken) {
+export function useAssistantConnection(
+    websocketsConfig,
+    getToken,
+    guestToken,
+    authEndpoint = '/api/broadcasting/auth',
+) {
     const echo = ref(null);
     const currentThread = ref(null);
 
@@ -66,16 +71,17 @@ export function useAssistantConnection(websocketsConfig, getToken, guestToken) {
                                 headers['Authorization'] = `Bearer ${token}`;
                             }
 
+                            const body = {
+                                socket_id: socketId,
+                                channel_name: channel.name,
+                            };
+
+                            if (guestToken) {
+                                body.guest_token = guestToken;
+                            }
+
                             axios
-                                .post(
-                                    '/api/broadcasting/auth',
-                                    {
-                                        socket_id: socketId,
-                                        channel_name: channel.name,
-                                        guest_token: guestToken,
-                                    },
-                                    { headers },
-                                )
+                                .post(authEndpoint, body, { headers })
                                 .then((response) => {
                                     callback(false, response.data);
                                 })

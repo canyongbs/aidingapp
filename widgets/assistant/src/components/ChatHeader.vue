@@ -38,9 +38,7 @@
 </script>
 
 <template>
-    <div
-        class="bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] text-white px-6 py-4 flex items-center justify-between shadow-md shrink-0"
-    >
+    <div class="bg-brand-500 text-white px-6 py-4 flex items-center justify-between shadow-md shrink-0">
         <div class="flex items-center gap-3">
             <div class="bg-white/20 p-2 rounded-lg">
                 <ChatBubbleLeftRightIcon class="w-5 h-5" />

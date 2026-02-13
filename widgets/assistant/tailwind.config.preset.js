@@ -1,4 +1,4 @@
-<!--
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -30,24 +30,33 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    import { ChatBubbleLeftRightIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
-
-    const props = defineProps({
-        isOpen: { type: Boolean, default: false },
-    });
-
-    const emit = defineEmits(['toggle']);
-</script>
-
-<template>
-    <button
-        @click="emit('toggle')"
-        class="bg-brand-500 hover:bg-brand-600 text-white rounded-full p-4 shadow-xl hover:shadow-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-500/50 hover:scale-105 active:scale-95"
-        aria-label="Toggle chat assistant"
-    >
-        <ChatBubbleLeftRightIcon v-if="!props.isOpen" class="w-6 h-6" />
-        <ChevronDownIcon v-else class="w-6 h-6" />
-    </button>
-</template>
+*/
+export default {
+    theme: {
+        extend: {
+            colors: {
+                brand: {
+                    50: 'rgba(var(--primary-50), <alpha-value>)',
+                    100: 'rgba(var(--primary-100), <alpha-value>)',
+                    200: 'rgba(var(--primary-200), <alpha-value>)',
+                    300: 'rgba(var(--primary-300), <alpha-value>)',
+                    400: 'rgba(var(--primary-400), <alpha-value>)',
+                    500: 'rgba(var(--primary-500), <alpha-value>)',
+                    600: 'rgba(var(--primary-600), <alpha-value>)',
+                    700: 'rgba(var(--primary-700), <alpha-value>)',
+                    800: 'rgba(var(--primary-800), <alpha-value>)',
+                    900: 'rgba(var(--primary-900), <alpha-value>)',
+                    950: 'rgba(var(--primary-950), <alpha-value>)',
+                },
+            },
+            borderRadius: {
+                sm: 'var(--rounding-sm)',
+                DEFAULT: 'var(--rounding)',
+                md: 'var(--rounding-md)',
+                lg: 'var(--rounding-lg)',
+                full: 'var(--rounding-full)',
+            },
+        },
+    },
+    plugins: [],
+};

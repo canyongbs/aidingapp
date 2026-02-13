@@ -39,10 +39,9 @@
     const props = defineProps({
         sendMessageUrl: { type: String, required: true },
         websocketsConfig: { type: Object, required: true },
-        primaryColor: { type: Array, required: true },
+        primaryColor: { type: Object, required: true },
         rounding: { type: String, default: 'md' },
         isAuthenticated: { type: Boolean, default: false },
-        guestTokenEnabled: { type: Boolean, default: true },
     });
 
     const isOpen = ref(false);
@@ -52,23 +51,66 @@
     };
 
     const setPrimaryColor = () => {
-        const [r, g, b] = props.primaryColor;
-        document.documentElement.style.setProperty('--primary-500', `${r}, ${g}, ${b}`);
-        document.documentElement.style.setProperty(
-            '--primary-600',
-            `${Math.max(0, r - 20)}, ${Math.max(0, g - 20)}, ${Math.max(0, b - 20)}`,
-        );
-        document.documentElement.style.setProperty(
-            '--primary-800',
-            `${Math.max(0, r - 60)}, ${Math.max(0, g - 60)}, ${Math.max(0, b - 60)}`,
-        );
-        document.documentElement.style.setProperty(
-            '--primary-900',
-            `${Math.max(0, r - 80)}, ${Math.max(0, g - 80)}, ${Math.max(0, b - 80)}`,
-        );
+        if (!props.primaryColor || typeof props.primaryColor !== 'object') {
+            return;
+        }
+
+        // Set all shades from the color palette
+        Object.entries(props.primaryColor).forEach(([shade, value]) => {
+            document.documentElement.style.setProperty(`--primary-${shade}`, value);
+        });
+    };
+
+    const setRounding = () => {
+        const roundingValues = {
+            none: {
+                sm: '0px',
+                default: '0px',
+                md: '0px',
+                lg: '0px',
+                full: '0px',
+            },
+            sm: {
+                sm: '0.125rem',
+                default: '0.25rem',
+                md: '0.375rem',
+                lg: '0.5rem',
+                full: '9999px',
+            },
+            md: {
+                sm: '0.25rem',
+                default: '0.375rem',
+                md: '0.5rem',
+                lg: '0.75rem',
+                full: '9999px',
+            },
+            lg: {
+                sm: '0.375rem',
+                default: '0.5rem',
+                md: '0.75rem',
+                lg: '1rem',
+                full: '9999px',
+            },
+            full: {
+                sm: '9999px',
+                default: '9999px',
+                md: '9999px',
+                lg: '9999px',
+                full: '9999px',
+            },
+        };
+
+        const selectedRounding = roundingValues[props.rounding] || roundingValues.md;
+
+        document.documentElement.style.setProperty('--rounding-sm', selectedRounding.sm);
+        document.documentElement.style.setProperty('--rounding', selectedRounding.default);
+        document.documentElement.style.setProperty('--rounding-md', selectedRounding.md);
+        document.documentElement.style.setProperty('--rounding-lg', selectedRounding.lg);
+        document.documentElement.style.setProperty('--rounding-full', selectedRounding.full);
     };
 
     setPrimaryColor();
+    setRounding();
 </script>
 
 <template>
@@ -78,7 +120,6 @@
             :send-message-url="sendMessageUrl"
             :websockets-config="websocketsConfig"
             :is-authenticated="isAuthenticated"
-            :guest-token-enabled="guestTokenEnabled"
             @close="toggleChat"
         />
 

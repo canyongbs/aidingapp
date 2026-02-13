@@ -58,11 +58,10 @@ if (!config || !config.send_message_url || !config.websockets_config) {
 
     const app = createApp(App, {
         sendMessageUrl: config.send_message_url,
-        websocketsConfig: config.websockets_config,
+        websocketsConfig: { ...config.websockets_config, authEndpoint: config.auth_endpoint },
         primaryColor: config.primary_color,
         rounding: config.rounding,
         isAuthenticated: config.is_authenticated || false,
-        guestTokenEnabled: config.guest_token_enabled || false,
     });
 
     app.mount(appContainer);
