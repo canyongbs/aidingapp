@@ -33,7 +33,7 @@
 -->
 <script setup>
     import { FormKit } from '@formkit/vue';
-    import { onMounted, ref, watch } from 'vue';
+    import { computed, onMounted, ref, watch } from 'vue';
     import { RouterView, useRoute } from 'vue-router';
     import AppLoading from './Components/AppLoading.vue';
     import Footer from './Components/Footer.vue';
@@ -41,7 +41,6 @@
     import axios from './Globals/Axios.js';
     import { consumer } from './Services/Consumer.js';
     import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
-    import { useAssistantStore } from './Stores/assistant.js';
     import { useAuthStore } from './Stores/auth.js';
     import { useFeatureStore } from './Stores/feature.js';
     import { useTokenStore } from './Stores/token.js';
@@ -114,6 +113,46 @@
 
     const route = useRoute();
 
+    const assistantWidgetLoaderUrl = ref(null);
+    const assistantWidgetConfigUrl = ref(null);
+
+    const showSignIn = computed(() => {
+        return (
+            !userIsAuthenticated.value && (requiresAuthentication.value || showLogin.value || route.meta?.requiresAuth)
+        );
+    });
+
+    function loadAssistantWidget() {
+        if (!assistantWidgetLoaderUrl.value || !assistantWidgetConfigUrl.value) {
+            return;
+        }
+
+        if (document.getElementById('assistant-widget-root')) {
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = assistantWidgetLoaderUrl.value;
+        script.setAttribute('data-config', assistantWidgetConfigUrl.value);
+        document.body.appendChild(script);
+    }
+
+    watch([showSignIn, assistantWidgetLoaderUrl], ([isSignIn]) => {
+        if (isSignIn) {
+            const widgetRoot = document.getElementById('assistant-widget-root');
+            if (widgetRoot) {
+                widgetRoot.style.display = 'none';
+            }
+        } else {
+            const widgetRoot = document.getElementById('assistant-widget-root');
+            if (widgetRoot) {
+                widgetRoot.style.display = '';
+            } else {
+                loadAssistantWidget();
+            }
+        }
+    });
+
     onMounted(async () => {
         await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
             userIsAuthenticated.value = response;
@@ -177,6 +216,11 @@
 
                 setRequiresAuthentication(response.data.requires_authentication).then(() => {
                     requiresAuthentication.value = response.data.requires_authentication;
+
+                    if (response.data.assistant_widget_loader_url && response.data.assistant_widget_config_url) {
+                        assistantWidgetLoaderUrl.value = response.data.assistant_widget_loader_url;
+                        assistantWidgetConfigUrl.value = response.data.assistant_widget_config_url;
+                    }
                 });
 
                 setHasServiceManagement(response.data.service_management_enabled).then(() => {
@@ -194,13 +238,6 @@
                 setHasTasks(response.data.has_tasks).then(() => {
                     hasTasks.value = response.data.has_tasks;
                 });
-
-                if (response.data.assistant_widget_loader_url && response.data.assistant_widget_config_url) {
-                    const script = document.createElement('script');
-                    script.src = response.data.assistant_widget_loader_url;
-                    script.setAttribute('data-config', response.data.assistant_widget_config_url);
-                    document.body.appendChild(script);
-                }
 
                 authentication.value.requestUrl = response.data.authentication_url ?? null;
 
@@ -320,10 +357,6 @@
 
         const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
-        const { setAssistantSendMessageUrl, setWebsocketsConfig, setApiUrl } = useAssistantStore();
-
-        setApiUrl(props.apiUrl);
-
         if (authentication.value.isRequested) {
             const data = {
                 code: formData.code,
@@ -382,8 +415,10 @@
                             hasTasks.value = response.data.has_tasks;
                         });
 
-                        setAssistantSendMessageUrl(response.data.assistant_send_message_url);
-                        setWebsocketsConfig(response.data.websockets_config);
+                        if (response.data.assistant_widget_loader_url && response.data.assistant_widget_config_url) {
+                            assistantWidgetLoaderUrl.value = response.data.assistant_widget_loader_url;
+                            assistantWidgetConfigUrl.value = response.data.assistant_widget_config_url;
+                        }
 
                         const { hasServiceManagement, hasAssets, hasLicense, hasTasks } = useFeatureStore();
 
