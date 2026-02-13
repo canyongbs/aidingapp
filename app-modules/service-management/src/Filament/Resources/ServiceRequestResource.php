@@ -66,7 +66,6 @@ class ServiceRequestResource extends Resource
 
     protected static ?int $globalSearchSort = 1;
 
-
     protected static ?string $recordTitleAttribute = 'service_request_number';
 
     public static function getGloballySearchableAttributes(): array
