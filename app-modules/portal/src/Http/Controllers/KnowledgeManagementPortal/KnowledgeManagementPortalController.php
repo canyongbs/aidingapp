@@ -89,7 +89,7 @@ class KnowledgeManagementPortalController extends Controller
                 )
             ),
             'footer_logo' => Vite::asset('resources/svg/CGBS_Logo_FullColor_Light.svg'),
-            'assistant_widget_loader_url' => (AiFeatureTogglesFeature::active() && app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant && auth()->guard('contact')->user()) 
+            'assistant_widget_loader_url' => (AiFeatureTogglesFeature::active() && app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant && auth()->guard('contact')->user())
                 ? url('widgets/assistant/' . json_decode(Storage::disk('public')->get('widgets/assistant/.vite/manifest.json'), true)['src/loader.js']['file'])
                 : null,
             'assistant_widget_config_url' => (AiFeatureTogglesFeature::active() && app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant && auth()->guard('contact')->user())
