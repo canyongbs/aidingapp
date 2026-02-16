@@ -64,6 +64,8 @@ class ContactResource extends Resource
 
     protected static ?int $navigationSort = 20;
 
+    protected static ?int $globalSearchSort = 3;
+
     protected static ?string $recordTitleAttribute = 'full_name';
 
     public static function getRecordSubNavigation(Page $page): array
