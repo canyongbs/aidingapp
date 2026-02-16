@@ -74,10 +74,10 @@ class KnowledgeManagementPortalArticleController extends Controller
 
         if ($article->has_table_of_contents) {
             $tableOfContents = tiptap_converter()->asTOC($article->article_details);
-            
-            if(filled($tableOfContents)) {
+
+            if (filled($tableOfContents)) {
                 $content = '<h2>Table of Contents</h2><div class="prose-toc">' . $tableOfContents . '</div>' . $content;
-            }            
+            }
         }
 
         return response()->json([
