@@ -36,10 +36,14 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
+use AidingApp\Ai\Settings\AiClarificationSettings;
+use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
+use App\Features\AiFeatureTogglesFeature;
+use App\Features\ServiceRequestTypeAiFeatureTogglesFeature;
 use App\Filament\Actions\ArchiveAction;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Actions\Action;
@@ -108,6 +112,18 @@ class EditServiceRequestType extends EditRecord
                             ->string()
                             ->columnSpanFull(),
                     ]),
+                Section::make('AI Features')
+                    ->schema([
+                        Toggle::make('is_ai_clarification_enabled')
+                            ->label('AI Clarification')
+                            ->visible(fn (): bool => app(AiClarificationSettings::class)->is_enabled),
+                        Toggle::make('is_ai_resolution_enabled')
+                            ->label('AI Resolution')
+                            ->visible(fn (): bool => app(AiResolutionSettings::class)->is_enabled),
+                    ])
+                    ->visible(fn (): bool => ServiceRequestTypeAiFeatureTogglesFeature::active()
+                        && AiFeatureTogglesFeature::active()
+                        && (app(AiClarificationSettings::class)->is_enabled || app(AiResolutionSettings::class)->is_enabled)),
             ])
             ->disabled(fn (ServiceRequestType $record) => $record->trashed());
     }
