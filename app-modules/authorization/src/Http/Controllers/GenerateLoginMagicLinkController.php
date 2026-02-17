@@ -36,7 +36,6 @@
 
 namespace AidingApp\Authorization\Http\Controllers;
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Http\Requests\GenerateLoginMagicLinkRequest;
 use AidingApp\Authorization\Models\LoginMagicLink;
 use App\Models\User;
@@ -85,10 +84,6 @@ class GenerateLoginMagicLinkController
 
             if ($user->isDirty()) {
                 $user->saveOrFail();
-            }
-
-            foreach (LicenseType::cases() as $license) {
-                $user->grantLicense($license);
             }
 
             $user->syncRoles($data['type']);

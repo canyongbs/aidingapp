@@ -45,7 +45,6 @@
 |
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Events\MigrationStarted;
@@ -86,14 +85,13 @@ uses(TenantMigrationTestCase::class)->in('../tests/TenantMigrationTests.php');
 */
 
 /**
- * @param LicenseType|array<LicenseType>|null $licenses
  * @param array<string>|string|null $roles
  * @param array<string>|string|null $permissions
  * @param string $guard
  *
  * @return User
  */
-function user(LicenseType | array | null $licenses = null, array | null | string $roles = null, array | null | string $permissions = null, string $guard = 'web'): User
+function user(array | null | string $roles = null, array | null | string $permissions = null, string $guard = 'web'): User
 {
     $user = User::factory()->create();
 
@@ -109,10 +107,6 @@ function user(LicenseType | array | null $licenses = null, array | null | string
 
     collect($permissions)
         ->each(fn ($permission) => $user->givePermissionTo($permission));
-
-    collect($licenses)
-        ->each(fn (LicenseType $licenseType) => $user->grantLicense($licenseType))
-        ->whenNotEmpty(fn () => $user->refresh());
 
     return $user;
 }

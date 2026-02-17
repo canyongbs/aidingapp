@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages\CreateIncidentSeverity;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
@@ -48,7 +47,7 @@ use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
 test('CreateIncidentSeverity is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(

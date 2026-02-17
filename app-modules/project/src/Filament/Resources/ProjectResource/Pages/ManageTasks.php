@@ -196,15 +196,14 @@ class ManageTasks extends ManageRelatedRecords
                             ->native(false),
                         Select::make('assigned_to')
                             ->label('Assigned To')
-                            ->relationship('assignedTo', 'name', $this->scopeAssignmentRelationshipBasedOnConcern())
+                            ->relationship('assignedTo', 'name')
                             ->nullable()
                             ->searchable(['name', 'email'])
                             ->default(auth()->id()),
                         Select::make('concern_id')
                             ->label('Related To')
                             ->relationship('concern', 'first_name')
-                            ->nullable()
-                            ->afterStateUpdated($this->updateAssignmentAfterConcernSelected()),
+                            ->nullable(),
                     ])
                     ->modalHeading('Create Task')
                     ->modalSubmitActionLabel('Create Task'),

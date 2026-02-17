@@ -36,7 +36,6 @@
 
 namespace App\Jobs;
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\Role;
 use App\Models\Authenticatable;
 use App\Models\Tenant;
@@ -49,7 +48,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\Middleware\SkipIfBatchCancelled;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Arr;
 use Spatie\Multitenancy\Jobs\NotTenantAware;
 
 class CreateTenantUser implements ShouldQueue, NotTenantAware
@@ -79,13 +77,6 @@ class CreateTenantUser implements ShouldQueue, NotTenantAware
     {
         $this->tenant->execute(function () {
             $user = User::create($this->data->toArray());
-
-            foreach (Arr::wrap(LicenseType::cases()) as $licenseType) {
-                /** @var LicenseType $licenseType */
-                if ($licenseType->hasAvailableLicenses()) {
-                    $user->licenses()->create(['type' => $licenseType]);
-                }
-            }
 
             $user->roles()->sync(Role::where('name', Authenticatable::SUPER_ADMIN_ROLE)->firstOrFail());
         });

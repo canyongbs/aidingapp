@@ -30,7 +30,6 @@
         "canyon-gbs/aiding-app-integration-google-analytics": "*",
         "canyon-gbs/aiding-app-integration-google-recaptcha": "*",
         "canyon-gbs/aiding-app-integration-microsoft-clarity": "*",
-        "canyon-gbs/aiding-app-integration-twilio": "*",
         "canyon-gbs/aiding-app-inventory-management": "*",
         "canyon-gbs/aiding-app-knowledge-base": "*",
         "canyon-gbs/aiding-app-notification": "*",
@@ -96,7 +95,6 @@
         "stechstudio/filament-impersonate": "^4.0",
         "tapp/filament-timezone-field": "^3.0",
         "tpetry/laravel-postgresql-enhanced": "^3.0",
-        "twilio/sdk": "^8.5.0",
         "ysfkaya/filament-phone-input": "^4.0"
     },
     "require-dev": {

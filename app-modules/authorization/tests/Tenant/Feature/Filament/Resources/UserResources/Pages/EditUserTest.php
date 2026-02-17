@@ -33,7 +33,6 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Authorization\Enums\LicenseType;
 use App\Filament\Resources\UserResource;
 use App\Filament\Resources\UserResource\Pages\EditUser;
 use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
@@ -154,7 +153,7 @@ it('does not allow a user which does not have the SaaS Global Admin role to assi
 });
 
 test('EditUser is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $anotherUser = User::factory()->create();
 
@@ -194,7 +193,7 @@ test('EditUser is gated with proper access control', function () {
 });
 
 test('delete action visible with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $anotherUser = User::factory()->create();
 
@@ -217,7 +216,7 @@ test('delete action visible with proper access control', function () {
 });
 
 test('EditUser validates the inputs', function ($data, $errors) {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 

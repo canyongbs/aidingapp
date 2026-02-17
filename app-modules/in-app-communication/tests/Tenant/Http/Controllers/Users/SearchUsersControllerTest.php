@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -48,7 +47,7 @@ beforeEach(function () {
 });
 
 it('returns users matching the search query by name', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
+    $user = User::factory()->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
 
     User::factory()->create(['name' => 'John Doe', 'email' => 'johndoe@example.com']);
     User::factory()->create(['name' => 'Jane Smith', 'email' => 'janesmith@example.com']);
@@ -61,7 +60,7 @@ it('returns users matching the search query by name', function () {
 });
 
 it('searches users case insensitively by name', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
+    $user = User::factory()->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
 
     User::factory()->create(['name' => 'John Doe', 'email' => 'johndoe@example.com']);
 
@@ -73,7 +72,7 @@ it('searches users case insensitively by name', function () {
 });
 
 it('searches users case insensitively by email', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
+    $user = User::factory()->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
 
     User::factory()->create(['name' => 'Target User', 'email' => 'John.Doe@Example.com']);
 
@@ -85,7 +84,7 @@ it('searches users case insensitively by email', function () {
 });
 
 it('returns users matching the search query by email', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
+    $user = User::factory()->create(['name' => 'Searcher', 'email' => 'searcher@example.com']);
 
     $matchingUser = User::factory()->create(['name' => 'Matching User', 'email' => 'john@example.com']);
     $nonMatchingUser = User::factory()->create(['name' => 'Non Matching User', 'email' => 'jane@example.com']);
@@ -98,7 +97,7 @@ it('returns users matching the search query by email', function () {
 });
 
 it('excludes the current user from search results', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create(['name' => 'Current User', 'email' => 'current@example.com']);
+    $user = User::factory()->create(['name' => 'Current User', 'email' => 'current@example.com']);
     $otherUser = User::factory()->create(['name' => 'Other User', 'email' => 'other@example.com']);
 
     actingAs($user)
@@ -109,7 +108,7 @@ it('excludes the current user from search results', function () {
 });
 
 it('returns all users when no search query is provided', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     User::factory()->count(5)->create();
 
@@ -120,7 +119,7 @@ it('returns all users when no search query is provided', function () {
 });
 
 it('limits results to 25 users', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     User::factory()->count(30)->create();
 
@@ -131,7 +130,7 @@ it('limits results to 25 users', function () {
 });
 
 it('returns user data with correct structure', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $searchUser = User::factory()->create([
         'name' => 'Test User',
@@ -151,7 +150,7 @@ it('returns user data with correct structure', function () {
 });
 
 it('validates request', function (array $data, array $expectedErrors) {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->getJson(route('in-app-communication.users.search', $data))
@@ -174,7 +173,7 @@ it('requires the realtime chat feature to be enabled', function () {
     $settings->data->addons->realtimeChat = false;
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->getJson(route('in-app-communication.users.search'))

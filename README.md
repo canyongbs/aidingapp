@@ -93,7 +93,6 @@ _Note: We recommend that the solution be deployed as serverless technology using
 
 - [Azure Cognitive Services](./docs/integrations/azure_open_ai.md)
 - [SES Event Tracking](./docs/integrations/ses_event_tracking.md)
-- [Integrations: Twilio](./docs/integrations/twilio.md)
 
 ## Feature Requests & Issues
 

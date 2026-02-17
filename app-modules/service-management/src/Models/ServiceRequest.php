@@ -48,9 +48,7 @@ use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsEx
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use App\Models\Authenticatable;
 use App\Models\BaseModel;
-use App\Models\Concerns\BelongsToEducatable;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use DateTimeInterface;
@@ -76,7 +74,6 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 #[ObservedBy([ServiceRequestObserver::class])]
 class ServiceRequest extends BaseModel implements Auditable, HasMedia
 {
-    use BelongsToEducatable;
     use SoftDeletes;
     use AuditableTrait;
     use HasRelationships;
@@ -419,19 +416,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
     protected static function booted(): void
     {
-        static::addGlobalScope('licensed', function (Builder $builder) {
-            if (! auth()->guard('web')->check()) {
-                return;
-            }
-
-            /** @var Authenticatable $user */
-            $user = auth()->guard('web')->user();
-
-            if (! $user->hasLicense(Contact::getLicenseType())) {
-                $builder->whereRaw('1 = 0');
-            }
-        });
-
         static::addGlobalScope('excludeDrafts', function (Builder $builder) {
             $builder->where('is_draft', false);
         });

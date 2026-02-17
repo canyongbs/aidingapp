@@ -36,26 +36,18 @@
 
 namespace AidingApp\ServiceManagement\Policies;
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use App\Concerns\PerformsFeatureChecks;
-use App\Concerns\PerformsLicenseChecks;
 use App\Enums\Feature;
 use App\Models\Authenticatable;
-use App\Policies\Contracts\PerformsChecksBeforeAuthorization;
 use Illuminate\Auth\Access\Response;
 
-class ChangeRequestTypePolicy implements PerformsChecksBeforeAuthorization
+class ChangeRequestTypePolicy
 {
     use PerformsFeatureChecks;
-    use PerformsLicenseChecks;
 
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! is_null($response = $this->hasAnyLicense($authenticatable, [LicenseType::RecruitmentCrm]))) {
-            return $response;
-        }
-
         if (! is_null($response = $this->hasFeatures())) {
             return $response;
         }

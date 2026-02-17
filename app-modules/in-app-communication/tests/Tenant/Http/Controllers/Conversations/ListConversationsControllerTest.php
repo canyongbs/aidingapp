@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use AidingApp\InAppCommunication\Models\Message;
@@ -54,7 +53,7 @@ beforeEach(function () {
 });
 
 it('returns conversations for the authenticated user', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
@@ -72,7 +71,7 @@ it('returns conversations for the authenticated user', function () {
 });
 
 it('sorts conversations by last activity date', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $olderConversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
@@ -96,7 +95,7 @@ it('sorts conversations by last activity date', function () {
 });
 
 it('sorts newly joined conversations at the top', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $olderJoinConversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
@@ -129,7 +128,7 @@ it('requires the realtime chat feature to be enabled', function () {
     $settings->data->addons->realtimeChat = false;
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->getJson(route('in-app-communication.conversations.index'))
@@ -137,7 +136,7 @@ it('requires the realtime chat feature to be enabled', function () {
 });
 
 it('returns pagination metadata', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
@@ -157,7 +156,7 @@ it('returns pagination metadata', function () {
 });
 
 it('respects the limit parameter', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversations = Conversation::factory()->channel()->count(5)->create();
 
@@ -176,7 +175,7 @@ it('respects the limit parameter', function () {
 });
 
 it('can paginate through conversations using cursor', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     for ($i = 0; $i < 5; $i++) {
         $conversation = Conversation::factory()->channel()->create();
@@ -213,8 +212,8 @@ it('can paginate through conversations using cursor', function () {
 });
 
 it('returns correct conversation data structure', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
-    $otherUser = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create([
         'name' => 'Test Channel',

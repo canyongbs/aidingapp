@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages\CreateIncidentUpdate;
@@ -94,7 +93,7 @@ test('CreateIncidentUpdate requires valid data', function ($data, $errors) {
 // Permission Tests
 
 test('CreateIncidentUpdate is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -131,7 +130,7 @@ test('CreateIncidentUpdate is gated with proper feature access control', functio
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('incident_update.view-any');
     $user->givePermissionTo('incident_update.create');

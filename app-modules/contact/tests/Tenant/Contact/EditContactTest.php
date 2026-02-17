@@ -50,7 +50,7 @@ use function Pest\Livewire\livewire;
 // Permission Tests
 
 test('EditContact is gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
 
     $contact = Contact::factory()->create();
 

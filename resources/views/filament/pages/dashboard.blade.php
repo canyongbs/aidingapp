@@ -32,7 +32,6 @@
 </COPYRIGHT>
 --}}
 @php
-    use AidingApp\Authorization\Filament\Widgets\UnlicensedNotice;
     use App\Filament\Widgets\Notifications;
     use App\Settings\DisplaySettings;
     use Carbon\Carbon;
@@ -64,15 +63,11 @@
         </div>
 
         <div class="col-span-full flex flex-col gap-3 lg:col-span-5">
-            @if (UnlicensedNotice::canView())
-                @livewire(UnlicensedNotice::class)
-            @else
-                <div class="grid w-full gap-2 md:grid-cols-2">
-                    <x-filament-panels::login-version-card />
-                    <x-filament-panels::login-resource-portal-card />
-                </div>
-                @livewire(Notifications::class)
-            @endif
+            <div class="grid w-full gap-2 md:grid-cols-2">
+                <x-filament-panels::login-version-card />
+                <x-filament-panels::login-resource-portal-card />
+            </div>
+            @livewire(Notifications::class)
         </div>
     </div>
 </x-filament-panels::page>

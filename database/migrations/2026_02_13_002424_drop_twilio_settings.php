@@ -34,40 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Models;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableConcern;
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Authorization\Observers\LicenseObserver;
-use App\Models\BaseModel;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
-
-/**
- * @mixin IdeHelperLicense
- */
-#[ObservedBy([LicenseObserver::class])]
-class License extends BaseModel implements Auditable
-{
-    use AuditableConcern;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'type',
-    ];
-
-    protected $casts = [
-        'type' => LicenseType::class,
-    ];
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return $this->belongsTo(User::class, 'user_id');
+        $this->migrator->deleteIfExists('twilio.is_enabled');
+        $this->migrator->deleteIfExists('twilio.account_sid');
+        $this->migrator->deleteIfExists('twilio.auth_token');
+        $this->migrator->deleteIfExists('twilio.from_number');
     }
-}
+};

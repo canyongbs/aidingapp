@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Project\Filament\Resources\PipelineResource;
 use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ViewPipeline;
 use AidingApp\Project\Models\Pipeline;
@@ -48,7 +47,7 @@ use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can render with proper permission', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 

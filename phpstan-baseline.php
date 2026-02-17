@@ -774,12 +774,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/engagement/src/Models/Engagement.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$callback of method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<static\\(AidingApp\\\\Engagement\\\\Models\\\\Engagement\\)\\>\\:\\:tap\\(\\) expects callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<static\\>\\)\\: mixed, App\\\\Models\\\\Scopes\\\\LicensedToEducatable given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/src/Models/Engagement.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Engagement\\\\Models\\\\EngagementFile\\:\\:prunable\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -1884,12 +1878,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/notification/src/Notifications/Messages/MailMessage.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Notification\\\\Notifications\\\\Messages\\\\TwilioMessage\\:\\:toArray\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/notification/src/Notifications/Messages/TwilioMessage.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Variable name "\\$oldGDPRBannerText" is not in camelCase\\.$#',
     'identifier' => 'MeliorStan.variableNameNotCamelCase',
     'count' => 1,
@@ -2113,12 +2101,6 @@ $ignoreErrors[] = [
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to method can\\(\\) on an unknown class AidingApp\\\\Report\\\\Abstract\\\\User\\.$#',
-    'identifier' => 'class.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/report/src/Abstract/EngagementReport.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to method hasLicense\\(\\) on an unknown class AidingApp\\\\Report\\\\Abstract\\\\User\\.$#',
     'identifier' => 'class.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/report/src/Abstract/EngagementReport.php',
@@ -2886,12 +2868,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestFormSubmission.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$callback of method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<static\\(AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormSubmission\\)\\>\\:\\:tap\\(\\) expects callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<static\\>\\)\\: mixed, App\\\\Models\\\\Scopes\\\\LicensedToEducatable given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestFormSubmission.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:histories\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
@@ -3138,22 +3114,10 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/DataTransferObjects/Casts/DataCast.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Filament\\\\Forms\\\\Components\\\\Checkbox\\:\\:lockedWithoutAnyLicenses\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 4,
-    'path' => __DIR__ . '/app/Filament/Pages/EditProfile.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Filament\\\\Forms\\\\Components\\\\Toggle\\:\\:lockedWithoutAnyLicenses\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 3,
-    'path' => __DIR__ . '/app/Filament/Pages/EditProfile.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Negated boolean expression is always true\\.$#',
-    'identifier' => 'booleanNot.alwaysTrue',
+    'message' => '#^Property App\\\\Filament\\\\Pages\\\\EditProfile\\:\\:\\$data type has no value type specified in iterable type array\\.$#',
+    'identifier' => 'missingType.iterableValue',
     'count' => 1,
-    'path' => __DIR__ . '/app/Filament/Resources/UserResource/Actions/AssignLicensesBulkAction.php',
+    'path' => __DIR__ . '/app/Filament/Pages/EditProfile.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\:\\:\\$service_request_id\\.$#',

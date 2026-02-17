@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use AidingApp\InAppCommunication\Models\Message;
@@ -56,7 +55,7 @@ beforeEach(function () {
 });
 
 it('returns messages for a conversation', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
@@ -78,7 +77,7 @@ it('returns messages for a conversation', function () {
 });
 
 it('returns messages in descending order by default', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
@@ -106,7 +105,7 @@ it('returns messages in descending order by default', function () {
 });
 
 it('limits messages by the limit parameter', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
@@ -127,7 +126,7 @@ it('limits messages by the limit parameter', function () {
 });
 
 it('returns messages before a specific message', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
@@ -162,7 +161,7 @@ it('returns messages before a specific message', function () {
 });
 
 it('returns messages after a specific message', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
@@ -197,7 +196,7 @@ it('returns messages after a specific message', function () {
 });
 
 it('indicates when there are more messages available', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
@@ -217,7 +216,7 @@ it('indicates when there are more messages available', function () {
 });
 
 it('indicates when there are no more messages', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
@@ -237,7 +236,7 @@ it('indicates when there are no more messages', function () {
 });
 
 it('validates request', function (array $data, array $expectedErrors) {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
@@ -273,7 +272,7 @@ it('validates request', function (array $data, array $expectedErrors) {
 ]);
 
 it('requires participant to view messages', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create(['is_private' => true]);
 
@@ -294,7 +293,7 @@ it('requires the realtime chat feature to be enabled', function () {
     $settings->data->addons->realtimeChat = false;
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([

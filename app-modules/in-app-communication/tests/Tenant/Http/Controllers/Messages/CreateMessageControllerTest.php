@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
@@ -54,7 +53,7 @@ beforeEach(function () {
 });
 
 it('validates request', function (array $data, array $expectedErrors) {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
@@ -78,7 +77,7 @@ it('validates request', function (array $data, array $expectedErrors) {
 ]);
 
 it('requires participant to send messages', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
 

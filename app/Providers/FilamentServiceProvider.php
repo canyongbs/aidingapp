@@ -39,17 +39,14 @@ namespace App\Providers;
 use App\Models\Export;
 use App\Models\FailedImportRow;
 use App\Models\Import;
-use App\Models\User;
 use App\Settings\DisplaySettings;
 use Filament\Actions\Exports\Models\Export as BaseExport;
 use Filament\Actions\Imports\Models\FailedImportRow as BaseFailedImportRow;
 use Filament\Actions\Imports\Models\Import as BaseImport;
-use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
@@ -269,20 +266,6 @@ class FilamentServiceProvider extends ServiceProvider
 
                     return null;
                 });
-        });
-
-        Toggle::macro('lockedWithoutAnyLicenses', function (User $user, array $licenses) {
-            /** @var Toggle $this */
-            return $this->disabled(! $user->hasAnyLicense($licenses))
-                ->hintIcon(fn (Toggle $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
-                ->hintIconTooltip('A CRM license is required for our public profile features.');
-        });
-
-        Checkbox::macro('lockedWithoutAnyLicenses', function (User $user, array $licenses) {
-            /** @var Checkbox $this */
-            return $this->disabled(! $user->hasAnyLicense($licenses))
-                ->hintIcon(fn (Checkbox $component) => $component->isDisabled() ? 'heroicon-m-lock-closed' : null)
-                ->hintIconTooltip('A CRM license is required for our public profile features.');
         });
 
         PhoneInput::configureUsing(function (PhoneInput $phoneInput): void {

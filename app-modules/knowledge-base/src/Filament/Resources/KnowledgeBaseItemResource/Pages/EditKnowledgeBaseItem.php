@@ -36,7 +36,6 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\Actions\DraftKnowledgeBaseItemWithAiAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 use App\Concerns\EditPageRedirection;
@@ -102,10 +101,7 @@ class EditKnowledgeBaseItem extends EditRecord
                     ]),
                 Actions::make([
                     DraftKnowledgeBaseItemWithAiAction::make(),
-                ])
-                    ->visible(
-                        auth()->user()->hasLicense(LicenseType::RecruitmentCrm)
-                    ),
+                ]),
             ]);
     }
 

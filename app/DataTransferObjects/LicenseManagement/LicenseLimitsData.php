@@ -45,9 +45,7 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 class LicenseLimitsData extends Data
 {
     public function __construct(
-        public int $recruitmentCrmSeats,
         public int $emails,
-        public int $sms,
         public string $resetDate,
     ) {}
 

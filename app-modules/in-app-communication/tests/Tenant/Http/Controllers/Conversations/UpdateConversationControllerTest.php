@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
@@ -52,7 +51,7 @@ beforeEach(function () {
 });
 
 it('updates a channel conversation', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create(['name' => 'Old Name']);
     ConversationParticipant::factory()->manager()->create([
@@ -69,7 +68,7 @@ it('updates a channel conversation', function () {
 });
 
 it('only allows managers to update conversations', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->create([
@@ -86,7 +85,7 @@ it('only allows managers to update conversations', function () {
 });
 
 it('validates request', function (array $data, array $expectedErrors) {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
     ConversationParticipant::factory()->manager()->create([

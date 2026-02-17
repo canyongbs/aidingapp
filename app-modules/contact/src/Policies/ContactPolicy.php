@@ -42,15 +42,6 @@ use Illuminate\Auth\Access\Response;
 
 class ContactPolicy
 {
-    public function before(Authenticatable $authenticatable): ?Response
-    {
-        if (! $authenticatable->hasLicense(Contact::getLicenseType())) {
-            return Response::deny('You are not licensed for the Recruitment CRM.');
-        }
-
-        return null;
-    }
-
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

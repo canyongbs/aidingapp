@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
@@ -52,7 +51,7 @@ beforeEach(function () {
 });
 
 it('returns public channels the user is not a member of', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $publicChannel = Conversation::factory()->channel()->create([
         'name' => 'Public Channel',
@@ -81,7 +80,7 @@ it('returns public channels the user is not a member of', function () {
 });
 
 it('searches public channels by name', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     Conversation::factory()->channel()->create([
         'name' => 'Engineering Team',
@@ -101,7 +100,7 @@ it('searches public channels by name', function () {
 });
 
 it('searches public channels case insensitively', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     Conversation::factory()->channel()->create([
         'name' => 'Engineering Team',

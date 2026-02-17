@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Event;
@@ -50,7 +49,7 @@ beforeEach(function () {
 });
 
 it('creates a channel conversation', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
     $participant = User::factory()->create();
 
     actingAs($user)
@@ -67,7 +66,7 @@ it('creates a channel conversation', function () {
 });
 
 it('creates a direct message conversation', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
     $participant = User::factory()->create();
 
     actingAs($user)
@@ -80,7 +79,7 @@ it('creates a direct message conversation', function () {
 });
 
 it('requires exactly one participant for direct messages', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
     $participant1 = User::factory()->create();
     $participant2 = User::factory()->create();
 
@@ -93,7 +92,7 @@ it('requires exactly one participant for direct messages', function () {
 });
 
 it('requires at least one participant for direct messages', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->postJson(route('in-app-communication.conversations.store'), [
@@ -104,7 +103,7 @@ it('requires at least one participant for direct messages', function () {
 });
 
 it('validates request', function (array $data, array $expectedErrors) {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->postJson(route('in-app-communication.conversations.store'), $data)

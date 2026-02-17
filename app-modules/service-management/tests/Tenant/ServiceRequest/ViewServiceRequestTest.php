@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -84,7 +83,7 @@ test('The correct details are displayed on the ViewServiceRequest page', functio
 // Permission Tests
 
 test('ViewServiceRequest is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $serviceRequest = ServiceRequest::factory()->create();
 
@@ -105,7 +104,7 @@ test('ViewServiceRequest is gated with proper feature access control', function 
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $serviceRequest = ServiceRequest::factory()->create();
 
@@ -129,7 +128,7 @@ test('ViewServiceRequest is gated with proper feature access control', function 
 });
 
 test('service request lock icon is shown when status classification closed', function (string $pages) {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     asSuperAdmin($user);
 
@@ -157,7 +156,7 @@ test('service requests not authorized if user is not an auditor or manager of th
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
@@ -182,7 +181,7 @@ test('view service request page visible if the user is an auditor of the service
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
@@ -219,7 +218,7 @@ test('view service request page visible if the user is a manager of the service 
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');

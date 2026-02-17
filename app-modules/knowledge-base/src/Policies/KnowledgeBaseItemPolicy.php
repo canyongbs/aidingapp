@@ -36,26 +36,18 @@
 
 namespace AidingApp\KnowledgeBase\Policies;
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use App\Concerns\PerformsFeatureChecks;
-use App\Concerns\PerformsLicenseChecks;
 use App\Enums\Feature;
 use App\Models\Authenticatable;
-use App\Policies\Contracts\PerformsChecksBeforeAuthorization;
 use Illuminate\Auth\Access\Response;
 
-class KnowledgeBaseItemPolicy implements PerformsChecksBeforeAuthorization
+class KnowledgeBaseItemPolicy
 {
-    use PerformsLicenseChecks;
     use PerformsFeatureChecks;
 
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! is_null($response = $this->hasAnyLicense($authenticatable, [LicenseType::RecruitmentCrm]))) {
-            return $response;
-        }
-
         if (! is_null($response = $this->hasFeatures())) {
             return $response;
         }

@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ViewServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -46,7 +45,7 @@ use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewServiceMonitoring page', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
@@ -84,7 +83,7 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
 });
 
 test('ViewServiceMonitoring is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
@@ -99,7 +98,7 @@ test('ViewServiceMonitoring is gated with proper access control', function () {
 });
 
 test('Reset Monitoring button resets monitoring', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     asSuperAdmin($user);
 

@@ -41,7 +41,7 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 
 test('List Organization is gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(

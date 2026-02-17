@@ -33,7 +33,6 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
 use AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages\CreateEngagementFile;
 use App\Models\User;
@@ -49,7 +48,7 @@ use function Pest\Livewire\livewire;
 // Permission Tests
 
 test('CreateEngagementFile is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(

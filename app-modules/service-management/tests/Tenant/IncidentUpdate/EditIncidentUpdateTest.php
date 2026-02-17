@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages\EditIncidentUpdate;
@@ -124,7 +123,7 @@ test('EditIncidentUpdate requires valid data', function ($data, $errors) {
 // Permission Tests
 
 test('EditIncidentUpdate is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $incident = Incident::factory([
         'status_id' => IncidentStatus::factory()->create([
@@ -180,7 +179,7 @@ test('EditIncidentUpdate is gated with proper feature access control', function 
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('incident_update.view-any');
     $user->givePermissionTo('incident_update.*.update');

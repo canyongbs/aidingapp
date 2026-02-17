@@ -36,7 +36,6 @@
 
 namespace Tests;
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Authorization\Models\Role;
 use App\Actions\Paths\ModulePath;
 use App\Models\User;
@@ -46,9 +45,7 @@ use function Pest\Laravel\actingAs;
 
 function asSuperAdmin(?User $user = null): TestCase
 {
-    $superAdmin = $user ?? User::factory()
-        ->licensed(LicenseType::cases())
-        ->create();
+    $superAdmin = $user ?? User::factory()->create();
 
     $superAdminRoles = Role::superAdmin()->get();
 

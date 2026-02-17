@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages\EditIncidentStatus;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
@@ -47,7 +46,7 @@ use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('EditIncidentStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $incidentStatus = IncidentStatus::factory()->create();
 
@@ -121,7 +120,7 @@ test('EditIncidentStatus validates the inputs', function ($data, $errors) {
 );
 
 test('delete action visible with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $incidentStatus = IncidentStatus::factory()->create();
 

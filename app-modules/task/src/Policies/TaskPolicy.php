@@ -36,26 +36,12 @@
 
 namespace AidingApp\Task\Policies;
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Task\Models\Task;
-use App\Concerns\PerformsLicenseChecks;
 use App\Models\Authenticatable;
-use App\Policies\Contracts\PerformsChecksBeforeAuthorization;
 use Illuminate\Auth\Access\Response;
 
-class TaskPolicy implements PerformsChecksBeforeAuthorization
+class TaskPolicy
 {
-    use PerformsLicenseChecks;
-
-    public function before(Authenticatable $authenticatable): ?Response
-    {
-        if (! is_null($response = $this->hasAnyLicense($authenticatable, [LicenseType::RecruitmentCrm]))) {
-            return $response;
-        }
-
-        return null;
-    }
-
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -66,10 +52,6 @@ class TaskPolicy implements PerformsChecksBeforeAuthorization
 
     public function view(Authenticatable $authenticatable, Task $task): Response
     {
-        if (! $authenticatable->hasLicense($task->concern?->getLicenseType())) {
-            return Response::deny('You do not have permission to view this task.');
-        }
-
         return $authenticatable->canOrElse(
             abilities: ['task.*.view', "task.{$task->id}.view"],
             denyResponse: 'You do not have permission to view this task.'
@@ -86,10 +68,6 @@ class TaskPolicy implements PerformsChecksBeforeAuthorization
 
     public function update(Authenticatable $authenticatable, Task $task): Response
     {
-        if (! $authenticatable->hasLicense($task->concern?->getLicenseType())) {
-            return Response::deny('You do not have permission to update this task.');
-        }
-
         if ($authenticatable->getKey() !== $task->assigned_to && $authenticatable->getKey() !== $task->created_by) {
             return Response::deny('You do not have permission to update this task.');
         }
@@ -102,10 +80,6 @@ class TaskPolicy implements PerformsChecksBeforeAuthorization
 
     public function delete(Authenticatable $authenticatable, Task $task): Response
     {
-        if (! $authenticatable->hasLicense($task->concern?->getLicenseType())) {
-            return Response::deny('You do not have permission to delete this task.');
-        }
-
         return $authenticatable->canOrElse(
             abilities: ['task.*.delete', "task.{$task->id}.delete"],
             denyResponse: 'You do not have permission to delete this task.'
@@ -114,10 +88,6 @@ class TaskPolicy implements PerformsChecksBeforeAuthorization
 
     public function restore(Authenticatable $authenticatable, Task $task): Response
     {
-        if (! $authenticatable->hasLicense($task->concern?->getLicenseType())) {
-            return Response::deny('You do not have permission to restore this task.');
-        }
-
         return $authenticatable->canOrElse(
             abilities: ['task.*.restore', "task.{$task->id}.restore"],
             denyResponse: 'You do not have permission to restore this task.'
@@ -126,10 +96,6 @@ class TaskPolicy implements PerformsChecksBeforeAuthorization
 
     public function forceDelete(Authenticatable $authenticatable, Task $task): Response
     {
-        if (! $authenticatable->hasLicense($task->concern?->getLicenseType())) {
-            return Response::deny('You do not have permission to permanently delete this task.');
-        }
-
         return $authenticatable->canOrElse(
             abilities: ['task.*.force-delete', "task.{$task->id}.force-delete"],
             denyResponse: 'You do not have permission to permanently delete this task.'

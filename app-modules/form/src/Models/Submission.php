@@ -38,7 +38,6 @@ namespace AidingApp\Form\Models;
 
 use AidingApp\Contact\Models\Contact;
 use App\Models\BaseModel;
-use App\Models\Concerns\BelongsToEducatable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -51,7 +50,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 abstract class Submission extends BaseModel
 {
-    use BelongsToEducatable;
     use SoftDeletes;
 
     abstract public function submissible(): BelongsTo;

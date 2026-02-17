@@ -36,7 +36,6 @@
 
 namespace AidingApp\InAppCommunication\Filament\Pages;
 
-use AidingApp\Authorization\Enums\LicenseType;
 use App\Enums\Feature;
 use App\Models\User;
 use BackedEnum;
@@ -69,10 +68,6 @@ class UserChat extends Page
         $user = auth()->user();
 
         if (! $user instanceof User) {
-            return false;
-        }
-
-        if (! $user->hasLicense(LicenseType::RecruitmentCrm)) {
             return false;
         }
 

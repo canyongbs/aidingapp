@@ -76,7 +76,6 @@ class AddServiceRequestUpdateBulkAction
                         $user = auth()->user();
 
                         if (
-                            $user->hasLicense($serviceRequest->respondent->getLicenseType()) &&
                             $user->can('service_request.*.update') && $user->can('service_request_update.create')
                         ) {
                             return null;

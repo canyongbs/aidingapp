@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Models;
 
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Contact\Database\Factories\ContactFactory;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Observers\ContactObserver;
@@ -62,7 +61,6 @@ use App\Models\Contracts\Educatable;
 use App\Models\User;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -127,16 +125,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'sms_opt_out' => 'boolean',
         'email_bounce' => 'boolean',
     ];
-
-    public function hasLicense(LicenseType|string|array|null $type): bool
-    {
-        return false;
-    }
-
-    public function hasAnyLicense(LicenseType|string|array|null $type): bool
-    {
-        return false;
-    }
 
     public function isSuperAdmin(): bool
     {
@@ -252,11 +240,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         return $this->hasMany(AssetCheckOut::class, 'checked_out_to_id');
     }
 
-    public static function getLicenseType(): LicenseType
-    {
-        return LicenseType::RecruitmentCrm;
-    }
-
     /**
      * @return BelongsTo<Organization, $this>
      */
@@ -296,22 +279,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public static function getLabel(): string
     {
         return 'contact';
-    }
-
-    protected static function booted(): void
-    {
-        static::addGlobalScope('licensed', function (Builder $builder) {
-            if (! auth()->guard('web')->check()) {
-                return;
-            }
-
-            /** @var Authenticatable $user */
-            $user = auth()->guard('web')->user();
-
-            if (! $user->hasLicense(Contact::getLicenseType())) {
-                $builder->whereRaw('1 = 0');
-            }
-        });
     }
 
     protected function serializeDate(DateTimeInterface $date): string

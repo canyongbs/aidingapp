@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Project\Database\Factories\ProjectMilestoneFactory;
 use AidingApp\Project\Database\Seeders\ProjectMilestoneStatusSeeder;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageMilestones;
@@ -54,7 +53,7 @@ use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
 it('can render with proper permission.', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
@@ -81,7 +80,7 @@ it('is gated with proper access control', function () {
     $settings->data->addons->projectManagement = false;
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');

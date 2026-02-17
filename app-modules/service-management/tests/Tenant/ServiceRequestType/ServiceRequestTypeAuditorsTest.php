@@ -45,7 +45,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 it('can attach audit member to service request type', function () {
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 

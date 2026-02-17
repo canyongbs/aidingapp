@@ -43,7 +43,6 @@ use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 use AidingApp\Task\Models\Task;
 use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
-use App\Models\Scopes\HasLicense;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DetachAction;
@@ -61,7 +60,6 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseTaskRelationManager extends ManageRelatedRecords
@@ -113,11 +111,6 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                     ->relationship(
                         'assignedTo',
                         'name',
-                        function (Builder $query) {
-                            assert($this->getOwnerRecord() instanceof Contact);
-
-                            return $query->tap(new HasLicense($this->getOwnerRecord()->getLicenseType()));
-                        },
                     )
                     ->nullable()
                     ->searchable(['name', 'email'])
@@ -164,11 +157,6 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                     ->relationship(
                         'assignedTo',
                         'name',
-                        function (Builder $query) {
-                            assert($this->getOwnerRecord() instanceof Contact);
-
-                            return $query->tap(new HasLicense($this->getOwnerRecord()->getLicenseType()));
-                        },
                     )
                     ->searchable()
                     ->multiple(),

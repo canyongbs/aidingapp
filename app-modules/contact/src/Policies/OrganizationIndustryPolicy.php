@@ -36,22 +36,12 @@
 
 namespace AidingApp\Contact\Policies;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
 class OrganizationIndustryPolicy
 {
-    public function before(Authenticatable $authenticatable): ?Response
-    {
-        if (! $authenticatable->hasLicense(Contact::getLicenseType())) {
-            return Response::deny('You are not licensed for the Recruitment CRM.');
-        }
-
-        return null;
-    }
-
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\CreateServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -49,7 +48,7 @@ use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
 test('CreateServiceMonitoring is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(

@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\EditKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
@@ -53,7 +52,7 @@ use function Pest\Livewire\livewire;
 // Permission Tests
 
 test('EditKnowledgeBaseItem is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
@@ -89,7 +88,7 @@ test('EditKnowledgeBaseItem is gated with proper feature access control', functi
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
