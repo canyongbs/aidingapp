@@ -56,7 +56,6 @@ use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use UnitEnum;
 
 class ServiceRequestTypeResource extends Resource
