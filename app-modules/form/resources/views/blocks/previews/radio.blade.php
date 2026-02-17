@@ -31,10 +31,9 @@
 
 </COPYRIGHT>
 --}}
-@use('App\Features\ReorderableFormFieldOptionsFeature')
 @php
     $optionsData =
-        ReorderableFormFieldOptionsFeature::active() && array_is_list($options)
+        array_is_list($options)
             ? collect($options)->pluck('label')
             : $options;
 @endphp
