@@ -34,23 +34,8 @@
 </COPYRIGHT>
 */
 
-use App\Http\Controllers\AllUsersController;
-use App\Http\Controllers\Tenants\CreateTenantController;
-use App\Http\Controllers\Tenants\DeleteTenantController;
-use App\Http\Controllers\Tenants\SyncTenantController;
-use Illuminate\Support\Facades\Route;
+describe('AllUsersControllerTest', function () {
+    it('is protected by the landlord-api middleware', function () {})->todo('To be implemented at a later date');
 
-Route::post('tenants', CreateTenantController::class)
-    ->name('tenants.create');
-
-Route::delete('tenants/{tenant}', DeleteTenantController::class)
-    ->name('tenants.delete');
-
-Route::post('tenants/{tenant}/sync', SyncTenantController::class)
-    ->name('tenants.sync');
-
-Route::post('test', fn () => true)
-    ->name('test');
-
-Route::post('all-users', AllUsersController::class)
-    ->name('all-users');
+    it('returns a list of all users across all tenants', function () {})->todo('To be implemented at a later date');
+});
