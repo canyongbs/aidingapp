@@ -47,6 +47,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\AiFeatureTogglesFeature;
+use App\Features\ServiceRequestTypeAiFeatureTogglesFeature;
 use Illuminate\Support\Collection;
 
 class GenerateServiceRequestForm
@@ -87,7 +88,8 @@ class GenerateServiceRequestForm
 
         $form->steps->prepend($this->formatStep('Main', -1, $content));
 
-        if (AiFeatureTogglesFeature::active() && app(AiClarificationSettings::class)->is_enabled) {
+        if (AiFeatureTogglesFeature::active() && app(AiClarificationSettings::class)->is_enabled
+            && (! ServiceRequestTypeAiFeatureTogglesFeature::active() || $type->is_ai_clarification_enabled)) {
             $maxOrder = $form->steps->max('order') ?? 0;
             $form->steps->push($this->formatStep('Questions', $maxOrder + 1, collect([])));
         }
