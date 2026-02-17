@@ -37,8 +37,6 @@
 namespace AidingApp\Form\Filament\Blocks;
 
 use AidingApp\Form\Models\SubmissibleField;
-use App\Features\ReorderableFormFieldOptionsFeature;
-use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
@@ -61,14 +59,6 @@ class RadioFormFieldBlock extends FormFieldBlock
      */
     public function fields(): array
     {
-        if (! ReorderableFormFieldOptionsFeature::active()) {
-            return [
-                KeyValue::make('options')
-                    ->keyLabel('Value')
-                    ->valueLabel('Label'),
-            ];
-        }
-
         return [
             Repeater::make('options')
                 ->schema([
@@ -100,16 +90,6 @@ class RadioFormFieldBlock extends FormFieldBlock
      */
     public static function getValidationRules(SubmissibleField $field): array
     {
-        if (! ReorderableFormFieldOptionsFeature::active()) {
-            /** @var array<string, string> $options */
-            $options = $field->config['options'] ?? [];
-
-            return [
-                'string',
-                'in:' . implode(',', array_keys($options)),
-            ];
-        }
-
         /** @var array<array-key, mixed> $options */
         $options = $field->config['options'] ?? [];
 

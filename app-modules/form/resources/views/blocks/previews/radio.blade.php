@@ -31,12 +31,8 @@
 
 </COPYRIGHT>
 --}}
-@use('App\Features\ReorderableFormFieldOptionsFeature')
 @php
-    $optionsData =
-        ReorderableFormFieldOptionsFeature::active() && array_is_list($options)
-            ? collect($options)->pluck('label')
-            : $options;
+    $optionsData = array_is_list($options) ? collect($options)->pluck('label') : $options;
 @endphp
 
 <x-form::blocks.field-wrapper
