@@ -5,7 +5,8 @@
     "scripts": {
         "build": "npm run build:service-request-feedback-form && npm run build:service-request-form",
         "build:service-request-feedback-form": "(cd service-request-feedback-form && vite build)",
-        "build:service-request-form": "(cd service-request-form && vite build)"
+        "build:service-request-form": "(cd service-request-form && vite build)",
+        "postinstall": "node ../npm-postinstall.cjs"
     },
     "devDependencies": {
         "@headlessui/vue": "^1.7.16",

@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "npm run build:knowledge-management",
-        "build:knowledge-management": "(cd knowledge-management && vite build)"
+        "build:knowledge-management": "(cd knowledge-management && vite build)",
+        "postinstall": "node ../npm-postinstall.cjs"
     },
     "devDependencies": {
         "@headlessui/vue": "^1.7.16",
