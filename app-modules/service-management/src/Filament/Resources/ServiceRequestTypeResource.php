@@ -101,7 +101,7 @@ class ServiceRequestTypeResource extends Resource
             ...(array_map(
                 fn (ServiceRequestEmailTemplateType $type): NavigationItem => Arr::first(ServiceRequestTypeEmailTemplatePage::getNavigationItems(['record' => $page->record, 'type' => $type]))
                     ->label($type->getLabel())
-                    ->isActiveWhen(fn (): bool => Str::endsWith(request()->path(), $type)),
+                    ->isActiveWhen(fn (): bool => $page->type->value === $type->value),
                 ServiceRequestEmailTemplateType::cases(),
             )),
         ];
