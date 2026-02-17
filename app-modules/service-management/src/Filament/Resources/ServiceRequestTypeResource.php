@@ -100,7 +100,7 @@ class ServiceRequestTypeResource extends Resource
             ...(array_map(
                 fn (ServiceRequestEmailTemplateType $type): NavigationItem => Arr::first(ServiceRequestTypeEmailTemplatePage::getNavigationItems(['record' => $page->record, 'type' => $type]))
                     ->label($type->getLabel())
-                    ->isActiveWhen(fn (): bool => $page->type->value === $type->value),
+                    ->isActiveWhen(fn (): bool => $page->type->value === $type->value), // @phpstan-ignore-line
                 ServiceRequestEmailTemplateType::cases(),
             )),
         ];
