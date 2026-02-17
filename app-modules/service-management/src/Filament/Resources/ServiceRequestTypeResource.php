@@ -56,7 +56,6 @@ use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Str;
 use UnitEnum;
 
 class ServiceRequestTypeResource extends Resource
@@ -101,7 +100,7 @@ class ServiceRequestTypeResource extends Resource
             ...(array_map(
                 fn (ServiceRequestEmailTemplateType $type): NavigationItem => Arr::first(ServiceRequestTypeEmailTemplatePage::getNavigationItems(['record' => $page->record, 'type' => $type]))
                     ->label($type->getLabel())
-                    ->isActiveWhen(fn (): bool => Str::endsWith(request()->path(), $type)),
+                    ->isActiveWhen(fn (): bool => $page instanceof ServiceRequestTypeEmailTemplatePage && $page->type->value === $type->value),
                 ServiceRequestEmailTemplateType::cases(),
             )),
         ];
