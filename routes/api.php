@@ -40,6 +40,7 @@ use App\Http\Controllers\UtilizationMetricsApiController;
 use App\Multitenancy\Http\Middleware\CheckOlympusKey;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
+use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
 
 Route::group(['prefix' => 'v1', 'as' => 'api.', 'middleware' => ['auth:sanctum']], function () {});
 
@@ -49,6 +50,9 @@ Route::middleware([
 ])->group(function () {
     Route::post('/azure-sso/update', SetAzureSsoSettingController::class)
         ->name('azure-sso.update');
+
+    Route::get('/health', HealthCheckJsonResultsController::class)
+        ->name('health');
 
     Route::get('/utilization-metrics', UtilizationMetricsApiController::class)
         ->name('utilization-metrics');
