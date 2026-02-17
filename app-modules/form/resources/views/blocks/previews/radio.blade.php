@@ -32,10 +32,7 @@
 </COPYRIGHT>
 --}}
 @php
-    $optionsData =
-        array_is_list($options)
-            ? collect($options)->pluck('label')
-            : $options;
+    $optionsData = array_is_list($options) ? collect($options)->pluck('label') : $options;
 @endphp
 
 <x-form::blocks.field-wrapper
