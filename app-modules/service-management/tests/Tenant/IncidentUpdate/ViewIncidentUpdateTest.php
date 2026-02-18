@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
 use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use App\Models\User;
@@ -68,7 +67,7 @@ test('The correct details are displayed on the ViewIncidentUpdate page', functio
 // Permission Tests
 
 test('ViewIncidentUpdate is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $incidentUpdate = IncidentUpdate::factory()->create();
 
@@ -97,7 +96,7 @@ test('ViewIncidentUpdate is gated with proper feature access control', function 
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('incident_update.view-any');
     $user->givePermissionTo('incident_update.*.view');

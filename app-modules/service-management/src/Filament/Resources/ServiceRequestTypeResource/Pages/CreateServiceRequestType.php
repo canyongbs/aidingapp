@@ -36,8 +36,13 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
+use AidingApp\Ai\Settings\AiClarificationSettings;
+use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
+use App\Features\AiFeatureTogglesFeature;
+use App\Features\ServiceRequestTypeAiFeatureTogglesFeature;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -89,11 +94,24 @@ class CreateServiceRequestType extends CreateRecord
                             ->string()
                             ->columnSpanFull(),
                     ]),
+                Section::make('AI Features')
+                    ->schema([
+                        Toggle::make('is_ai_clarification_enabled')
+                            ->label('AI Clarification')
+                            ->visible(fn (): bool => app(AiClarificationSettings::class)->is_enabled),
+                        Toggle::make('is_ai_resolution_enabled')
+                            ->label('AI Resolution')
+                            ->visible(fn (): bool => app(AiResolutionSettings::class)->is_enabled),
+                    ])
+                    ->visible(fn (): bool => ServiceRequestTypeAiFeatureTogglesFeature::active()
+                        && AiFeatureTogglesFeature::active()
+                        && (app(AiClarificationSettings::class)->is_enabled || app(AiResolutionSettings::class)->is_enabled)),
             ]);
     }
 
     protected function afterCreate(): void
     {
+        assert($this->getRecord() instanceof ServiceRequestType);
         $this->getRecord()->priorities()->createMany(
             [
                 ['name' => 'High', 'order' => 1],

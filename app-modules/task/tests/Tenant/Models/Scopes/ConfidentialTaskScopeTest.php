@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Project\Models\Project;
 use AidingApp\Task\Models\Scopes\ConfidentialTaskScope;
 use AidingApp\Task\Models\Task;
@@ -51,7 +50,7 @@ test('is applied as a global scope to the `Task` model', function () {
 });
 
 test('users can access public tasks and confidential tasks that they have created', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
@@ -83,7 +82,7 @@ test('users can access public tasks and confidential tasks that they have create
 });
 
 test('users can access confidential tasks if they belong to a team with access', function () {
-    $teamUser = User::factory()->licensed(LicenseType::cases())->create();
+    $teamUser = User::factory()->create();
 
     $team = Team::factory()->create();
 
@@ -121,7 +120,7 @@ test('users can access confidential tasks if they belong to a team with access',
 });
 
 test('users can access confidential tasks if they are designated access', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
@@ -172,7 +171,7 @@ test('super admin users can access all confidential tasks', function () {
 });
 
 test('users can access confidential tasks if they are the creator of the project', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
@@ -204,7 +203,7 @@ test('users can access confidential tasks if they are the creator of the project
 });
 
 test('users can access confidential tasks if they are a project manager user', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
@@ -238,7 +237,7 @@ test('users can access confidential tasks if they are a project manager user', f
 });
 
 test('users can access confidential tasks if their team is a project manager team', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
     $team = Team::factory()->create();
     $user->team()->associate($team)->save();
 
@@ -274,7 +273,7 @@ test('users can access confidential tasks if their team is a project manager tea
 });
 
 test('users can access confidential tasks if they are a project auditor user', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
@@ -308,7 +307,7 @@ test('users can access confidential tasks if they are a project auditor user', f
 });
 
 test('users can access confidential tasks if their team is a project auditor team', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
     $team = Team::factory()->create();
     $user->team()->associate($team)->save();
 

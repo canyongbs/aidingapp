@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use App\Http\Controllers\AllUsersController;
 use App\Http\Controllers\Tenants\CreateTenantController;
 use App\Http\Controllers\Tenants\DeleteTenantController;
 use App\Http\Controllers\Tenants\SyncTenantController;
@@ -50,3 +51,6 @@ Route::post('tenants/{tenant}/sync', SyncTenantController::class)
 
 Route::post('test', fn () => true)
     ->name('test');
+
+Route::post('all-users', AllUsersController::class)
+    ->name('all-users');

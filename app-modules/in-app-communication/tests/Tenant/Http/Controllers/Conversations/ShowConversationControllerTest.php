@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
@@ -52,7 +51,7 @@ beforeEach(function () {
 });
 
 it('returns conversation details for a participant', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create(['name' => 'Test Channel']);
     ConversationParticipant::factory()->create([
@@ -69,7 +68,7 @@ it('returns conversation details for a participant', function () {
 });
 
 it('allows viewing public channels without being a participant', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create([
         'name' => 'Public Channel',
@@ -83,7 +82,7 @@ it('allows viewing public channels without being a participant', function () {
 });
 
 it('denies viewing private channels without being a participant', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,

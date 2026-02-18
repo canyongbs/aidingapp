@@ -74,6 +74,9 @@ class IncidentSeverity extends BaseModel implements Auditable
         return $this->hasMany(Incident::class, 'severity_id');
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function rgbColor(): Attribute
     {
         return new Attribute(

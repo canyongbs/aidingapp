@@ -141,7 +141,7 @@ test('Only service request types managed by user team are available in type sele
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
     $team = Team::factory()->create();
     $user->team()->associate($team)->save();
     $user->givePermissionTo('service_request.create');
@@ -350,7 +350,7 @@ test('Non-super admin can only see service requests from managed or audited type
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
     $team = Team::factory()->create();
     $user->team()->associate($team)->save();
     $user->givePermissionTo('service_request.view-any');

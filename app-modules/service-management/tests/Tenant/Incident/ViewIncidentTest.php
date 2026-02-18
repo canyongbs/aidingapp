@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
 use AidingApp\ServiceManagement\Models\Incident;
 use App\Models\User;
@@ -43,7 +42,7 @@ use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewIncident page', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
@@ -76,7 +75,7 @@ test('The correct details are displayed on the ViewIncident page', function () {
 });
 
 test('ViewIncident is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $incident = Incident::factory()->create();
 

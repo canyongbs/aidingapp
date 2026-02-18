@@ -33,13 +33,12 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Authorization\Enums\LicenseType;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 
 test('the sequences list page can not be rendered without permissions', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get('service-management-administration/sequence')
@@ -47,7 +46,7 @@ test('the sequences list page can not be rendered without permissions', function
 });
 
 test('the sequences list page can be rendered with auth', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
 

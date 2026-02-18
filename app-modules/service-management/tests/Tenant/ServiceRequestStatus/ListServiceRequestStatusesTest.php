@@ -94,7 +94,7 @@ test('The correct details are displayed on the ListServiceRequestStatuses page',
 // Permission Tests
 
 test('ListServiceRequestStatuses is gated with proper access control', function () {
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -116,7 +116,7 @@ test('ListServiceRequestStatuses is gated with proper feature access control', f
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
 

@@ -70,7 +70,7 @@ test('The correct details are displayed on the ViewServiceRequestStatus page', f
 // Permission Tests
 
 test('ViewServiceRequestStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $contactSource = ServiceRequestStatus::factory()->create();
 
@@ -99,7 +99,7 @@ test('ViewServiceRequestStatus is gated with proper feature access control', fun
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.view');

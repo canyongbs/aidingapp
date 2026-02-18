@@ -33,7 +33,6 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\ListServiceMonitorings;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -45,7 +44,7 @@ use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Livewire\livewire;
 
 test('ListServiceMonitorings is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -61,7 +60,7 @@ test('ListServiceMonitorings is gated with proper access control', function () {
 });
 
 test('can list records', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -79,7 +78,7 @@ test('can list records', function () {
 });
 
 test('bulk delete ServiceMonitorings', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 

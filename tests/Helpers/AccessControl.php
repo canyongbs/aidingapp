@@ -36,7 +36,6 @@
 
 namespace Tests\Helpers;
 
-use AidingApp\Authorization\Enums\LicenseType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Arr;
@@ -58,7 +57,7 @@ function testResourceRequiresPermissionForAccess(string $resource, string|array 
             $settings->save();
         }
 
-        $user = User::factory()->licensed(LicenseType::cases())->create();
+        $user = User::factory()->create();
 
         actingAs($user)
             ->get(

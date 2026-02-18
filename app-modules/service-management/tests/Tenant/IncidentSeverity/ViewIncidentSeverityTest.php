@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
 use App\Models\User;
@@ -43,7 +42,7 @@ use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewIncidentSeverity page', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
@@ -70,7 +69,7 @@ test('The correct details are displayed on the ViewIncidentSeverity page', funct
 });
 
 test('ViewIncidentSeverity is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $incidentSeverity = IncidentSeverity::factory()->create();
 

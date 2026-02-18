@@ -34,43 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace App\Models\Concerns;
+use App\Features\ServiceRequestTypeAiFeatureTogglesFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\Contact\Models\Contact;
-use App\Models\Authenticatable;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-
-trait BelongsToEducatable
-{
-    /**
-     * @param Builder<static> $query
-     *
-     * @return Builder<static>
-     */
-    public function scopeLicensedToEducatable(Builder $query, string $relationship): Builder
+return new class () extends Migration {
+    public function up(): void
     {
-        if (! auth()->check()) {
-            return $query;
-        }
+        DB::transaction(function () {
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->boolean('is_ai_clarification_enabled')->default(false);
+                $table->boolean('is_ai_resolution_enabled')->default(false);
+            });
 
-        /** @var Authenticatable $user */
-        $user = auth()->user();
-
-        if (
-            (! method_exists($this, $relationship)) ||
-            (! ($this->{$relationship}() instanceof MorphTo))
-        ) {
-            throw new Exception('The [' . static::class . "] model does not have a [{$relationship}] [" . MorphTo::class . '] relationship where educatables can be assigned.');
-        }
-
-        $typeColumn = $this->{$relationship}()->getMorphType();
-
-        return $query
-            ->when(
-                ! $user->hasLicense(Contact::getLicenseType()),
-                fn (Builder $query) => $query->where($typeColumn, '!=', app(Contact::class)->getMorphClass()),
-            );
+            ServiceRequestTypeAiFeatureTogglesFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            ServiceRequestTypeAiFeatureTogglesFeature::deactivate();
+
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->dropColumn([
+                    'is_ai_clarification_enabled',
+                    'is_ai_resolution_enabled',
+                ]);
+            });
+        });
+    }
+};

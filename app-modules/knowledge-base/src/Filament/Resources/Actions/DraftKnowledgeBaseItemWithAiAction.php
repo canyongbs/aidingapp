@@ -40,7 +40,6 @@ use AidingApp\Ai\Actions\CompletePrompt;
 use AidingApp\Ai\Exceptions\MessageResponseException;
 use AidingApp\Ai\Models\AiAssistant;
 use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
-use AidingApp\Authorization\Enums\LicenseType;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
@@ -123,10 +122,7 @@ class DraftKnowledgeBaseItemWithAiAction extends Action
                     ->trim());
 
                 $set('article_details', (string) str($content)->after("\n")->markdown());
-            })
-            ->visible(
-                auth()->user()->hasLicense(LicenseType::RecruitmentCrm)
-            );
+            });
     }
 
     public static function getDefaultName(): ?string

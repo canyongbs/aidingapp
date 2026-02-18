@@ -42,6 +42,7 @@
     >
         <button
             class="font-mono text-sm font-medium text-gray-950 focus:outline-none dark:text-white"
+            type="button"
             x-on:click="isRevealed = true"
             x-bind:class="{ 'blur-sm': !isRevealed }"
         >
@@ -52,9 +53,13 @@
             class="focus-visible:ring-primary-600 dark:focus-visible:ring-primary-500 flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 outline-none transition duration-75 hover:text-gray-500 focus-visible:ring-2 dark:text-gray-500 dark:hover:text-gray-400"
             type="button"
             x-on:click="isRevealed = ! isRevealed"
-            x-bind:class="{ 'blur-sm': !isRevealed }"
         >
-            @svg('heroicon-c-eye-slash', 'w-4 h-4')
+            <template x-if="isRevealed">
+                @svg('heroicon-c-eye-slash', 'w-4 h-4')
+            </template>
+            <template x-if="! isRevealed">
+                @svg('heroicon-c-eye', 'w-4 h-4')
+            </template>
         </button>
     </div>
 </x-dynamic-component>

@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
 use AidingApp\Project\Models\Project;
 use AidingApp\Task\Models\Task;
@@ -59,7 +58,7 @@ it('cannot render without proper permission.', function () {
 });
 
 it('can render with proper permission.', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');

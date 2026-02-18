@@ -36,7 +36,6 @@
 
 namespace AidingApp\LicenseManagement\Policies;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\LicenseManagement\Models\Product;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
@@ -49,10 +48,6 @@ class ProductPolicy
 
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
-            return Response::deny('You are not licensed for the Recruitment CRM.');
-        }
-
         if (! is_null($response = $this->hasFeatures())) {
             return $response;
         }

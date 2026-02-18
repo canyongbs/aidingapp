@@ -65,7 +65,7 @@ test('The records are displayed on the ListIncidentUpdates page', function () {
 // Permission Tests
 
 test('ListIncidentUpdates is gated with proper access control', function () {
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -88,7 +88,7 @@ test('ListIncidentUpdates is gated with proper feature access control', function
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 

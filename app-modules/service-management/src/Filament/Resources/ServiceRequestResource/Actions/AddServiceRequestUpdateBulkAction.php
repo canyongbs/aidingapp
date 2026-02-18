@@ -76,7 +76,6 @@ class AddServiceRequestUpdateBulkAction
                         $user = auth()->user();
 
                         if (
-                            $user->hasLicense($serviceRequest->respondent->getLicenseType()) &&
                             $user->can('service_request.*.update') && $user->can('service_request_update.create')
                         ) {
                             return null;
@@ -97,7 +96,7 @@ class AddServiceRequestUpdateBulkAction
 
                         $team = $user->team;
 
-                        if ($serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
+                        if ($serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey())) {
                             return null;
                         }
 

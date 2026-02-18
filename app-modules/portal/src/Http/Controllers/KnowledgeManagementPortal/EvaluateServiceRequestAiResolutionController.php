@@ -43,6 +43,7 @@ use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use AidingApp\Portal\Actions\GenerateAiResolutionPrompt;
 use AidingApp\Portal\DataTransferObjects\AiResolutionEvaluation;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestTypeAiFeatureTogglesFeature;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -59,7 +60,8 @@ class EvaluateServiceRequestAiResolutionController extends Controller
 
         $settings = app(AiResolutionSettings::class);
 
-        if (! $settings->is_enabled) {
+        if (! $settings->is_enabled
+            || (ServiceRequestTypeAiFeatureTogglesFeature::active() && ! $type->is_ai_resolution_enabled)) {
             return response()->json([
                 'is_ai_resolution_available' => false,
             ]);

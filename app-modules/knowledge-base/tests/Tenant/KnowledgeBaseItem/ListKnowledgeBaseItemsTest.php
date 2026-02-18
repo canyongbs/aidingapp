@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\ListKnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
@@ -69,48 +68,19 @@ test('ListKnowledgeBaseItems is gated with proper feature access control', funct
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
-
-    $user->givePermissionTo('knowledge_base_item.view-any');
-
-    actingAs($user);
-
-    get(
-        KnowledgeBaseItemResource::getUrl('index')
-    )->assertForbidden();
-
-    $settings->data->addons->knowledgeManagement = true;
-
-    $settings->save();
-
-    get(
-        KnowledgeBaseItemResource::getUrl('index')
-    )->assertSuccessful();
-});
-
-test('ListKnowledgeBaseItems is gated with proper license access control', function () {
-    $settings = app(LicenseSettings::class);
-    // When the feature is enabled
-    $settings->data->addons->knowledgeManagement = true;
-
-    $settings->save();
-
     $user = User::factory()->create();
 
-    // And the authenticatable has the correct permissions
-    // But they do not have the appropriate license
     $user->givePermissionTo('knowledge_base_item.view-any');
 
-    // They should not be able to access the resource
     actingAs($user);
 
     get(
         KnowledgeBaseItemResource::getUrl('index')
     )->assertForbidden();
 
-    $user->grantLicense(LicenseType::RecruitmentCrm);
+    $settings->data->addons->knowledgeManagement = true;
 
-    $user->refresh();
+    $settings->save();
 
     get(
         KnowledgeBaseItemResource::getUrl('index')
@@ -152,8 +122,6 @@ test('Filter ListKnowledgeBaseItems with `quality` filter', function () {
     $reviewNeededKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($reviewQuality, 'quality')->create();
 
     $badQualityKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($badQuality, 'quality')->create();
-
-    $user->grantLicense(LicenseType::RecruitmentCrm);
 
     $user->refresh();
 
@@ -200,8 +168,6 @@ test('Filter ListKnowledgeBaseItems with `status` filter', function () {
 
     $archivedKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($archived, 'status')->create();
 
-    $user->grantLicense(LicenseType::RecruitmentCrm);
-
     $user->refresh();
 
     livewire(ListKnowledgeBaseItems::class)
@@ -247,8 +213,6 @@ test('Filter ListKnowledgeBaseItems with `category` filter', function () {
 
     $networkTroubleshootingKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($networkTroubleshooting, 'category')->create();
 
-    $user->grantLicense(LicenseType::RecruitmentCrm);
-
     $user->refresh();
 
     livewire(ListKnowledgeBaseItems::class)
@@ -287,8 +251,6 @@ test('Filter ListKnowledgeBaseItems with `public` filter', function () {
 
     $isPublic = true;
 
-    $user->grantLicense(LicenseType::RecruitmentCrm);
-
     $user->refresh();
 
     livewire(ListKnowledgeBaseItems::class)
@@ -315,8 +277,6 @@ test('Filter ListKnowledgeBaseItems with `created after` filter', function () {
 
     // They should not be able to access the resource
     actingAs($user);
-
-    $user->grantLicense(LicenseType::RecruitmentCrm);
 
     $user->refresh();
 
@@ -358,8 +318,6 @@ test('Filter ListKnowledgeBaseItems with `updated after` filter', function () {
 
     // They should not be able to access the resource
     actingAs($user);
-
-    $user->grantLicense(LicenseType::RecruitmentCrm);
 
     $user->refresh();
 

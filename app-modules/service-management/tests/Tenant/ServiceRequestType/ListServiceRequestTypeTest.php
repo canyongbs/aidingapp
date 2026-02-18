@@ -51,7 +51,7 @@ use function Tests\asSuperAdmin;
 // Permission Tests
 
 test('ListServiceRequestTypes is gated with proper access control', function () {
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -73,7 +73,7 @@ test('ListServiceRequestTypes is gated with proper feature access control', func
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
 

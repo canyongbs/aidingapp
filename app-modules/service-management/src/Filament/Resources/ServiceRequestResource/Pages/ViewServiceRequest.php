@@ -114,17 +114,13 @@ class ViewServiceRequest extends ViewRecord
                                 $respondent = $record->respondent;
                                 $organizationName = $respondent->organization->name ?? 'Unaffiliated';
 
-                                return match ($respondent::class) {
-                                    Contact::class => "{$respondent->{Contact::displayNameKey()}} ({$respondent->type->name})<br>{$organizationName}",
-                                };
+                                return "{$respondent->{Contact::displayNameKey()}} ({$respondent->type->name})<br>{$organizationName}";
                             })
                             ->url(function (ServiceRequest $record) {
                                 /** @var Contact $respondent */
                                 $respondent = $record->respondent;
 
-                                return match ($respondent::class) {
-                                    Contact::class => ContactResource::getUrl('view', ['record' => $respondent->id]),
-                                };
+                                return ContactResource::getUrl('view', ['record' => $respondent->id]);
                             }),
                     ])
                     ->columns(),
@@ -193,7 +189,7 @@ class ViewServiceRequest extends ViewRecord
                                 ->placeholder('-'),
                             TextEntry::make('response_age')
                                 ->label('Response age')
-                                ->state(fn (ServiceRequest $record): ?int => $record->getLatestResponseSeconds())
+                                ->state(fn (ServiceRequest $record): int => $record->getLatestResponseSeconds())
                                 ->formatStateUsing($formatSecondsAsInterval)
                                 ->placeholder('-'),
                             TextEntry::make('response_sla_compliance')
@@ -202,7 +198,7 @@ class ViewServiceRequest extends ViewRecord
                                 ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResponseSlaComplianceStatus()),
                             TextEntry::make('time_to_resolution')
                                 ->label('Time to Resolution')
-                                ->formatStateUsing(function ($state) {
+                                ->formatStateUsing(function (int $state) {
                                     $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
                                     $days = $interval->d;
                                     $hours = $interval->h;

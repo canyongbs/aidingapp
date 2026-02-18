@@ -38,7 +38,6 @@ namespace AidingApp\Authorization\Providers;
 
 use AidingApp\Authorization\AuthorizationPlugin;
 use AidingApp\Authorization\Http\Controllers\Auth\LogoutController;
-use AidingApp\Authorization\Models\License;
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\Role;
 use Filament\Panel;
@@ -67,7 +66,6 @@ class AuthorizationServiceProvider extends ServiceProvider
         Relation::morphMap([
             'role' => Role::class,
             'permission' => Permission::class,
-            'license' => License::class,
         ]);
 
         Event::listen(

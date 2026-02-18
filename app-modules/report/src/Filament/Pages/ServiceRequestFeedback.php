@@ -36,7 +36,6 @@
 
 namespace AidingApp\Report\Filament\Pages;
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Report\Filament\Widgets\RefreshWidget;
 use AidingApp\Report\Filament\Widgets\ServiceRequestFeedbackStats;
 use AidingApp\Report\Filament\Widgets\ServiceRequestFeedbackTable;
@@ -77,7 +76,7 @@ class ServiceRequestFeedback extends Dashboard
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->hasLicense(LicenseType::RecruitmentCrm) && $user->can('report-library.view-any');
+        return $user->can('report-library.view-any');
     }
 
     /** @return list<string>|null */

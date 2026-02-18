@@ -52,6 +52,7 @@ class ServiceRequestTimeline extends TimelinePage
 
     public string $noMoreRecordsMessage = "You have reached the end of this service request's timeline.";
 
+    /** @var array<class-string> */
     public array $modelsToTimeline = [
         ServiceRequestUpdate::class,
         ServiceRequestAssignment::class,

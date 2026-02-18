@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -208,7 +207,7 @@ test('EditServiceRequest requires valid data', function ($data, $errors, $setup 
 // Permission Tests
 
 test('EditServiceRequest is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $team = Team::factory()->create();
 
@@ -297,7 +296,7 @@ test('EditServiceRequest is gated with proper feature access control', function 
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $team = Team::factory()->create();
 
@@ -367,7 +366,7 @@ test('send feedback email if service request is closed', function () {
 
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $team = Team::factory()->create();
 
@@ -445,7 +444,7 @@ test('service requests not authorized if user is not manager of the service requ
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
@@ -476,7 +475,7 @@ test('service requests not authorized if user is auditor of the service request 
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');

@@ -106,31 +106,12 @@ class TaskImporter extends Importer
                             }, (string) str($state)->after(':'));
                         }
 
-                        $user = $importer->getImport()->user;
-
-                        $model = match (true) {
-                            $user->hasLicense(Contact::getLicenseType()) => Contact::class,
-                            default => null,
-                        };
-
-                        return filled($model) ? $resolveFromModel($model, $state) : null;
+                        return $resolveFromModel(Contact::class, $state);
                     },
                 )
                 ->requiredMapping()
-                ->rules(function (TaskImporter $importer) {
-                    if (! $importer->getImport()->user->hasLicense([Contact::getLicenseType()])) {
-                        return [];
-                    }
-
-                    return ['starts_with:contact:'];
-                })
-                ->example(function () {
-                    if (auth()->user()?->hasLicense([Contact::getLicenseType()]) ?? true) {
-                        return 'contact:johnsmith@gmail.com';
-                    }
-
-                    return 'johnsmith@gmail.com';
-                }),
+                ->rules(['starts_with:contact:'])
+                ->example('contact:johnsmith@gmail.com'),
         ];
     }
 

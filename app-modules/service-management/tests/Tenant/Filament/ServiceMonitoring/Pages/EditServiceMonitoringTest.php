@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages\EditServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -46,7 +45,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 test('EditServiceMonitoring is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
@@ -90,7 +89,7 @@ test('EditServiceMonitoring is gated with proper access control', function () {
 });
 
 test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
@@ -142,7 +141,7 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
 );
 
 test('delete action visible with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
@@ -165,7 +164,7 @@ test('delete action visible with proper access control', function () {
 });
 
 test('it will validate multiple valid forms of URL and IP Address', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 

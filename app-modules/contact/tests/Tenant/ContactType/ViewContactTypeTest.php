@@ -67,7 +67,7 @@ test('The correct details are displayed on the ViewContactType page', function (
 // Permission Tests
 
 test('ViewContactType is gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
 
     $contactType = ContactType::factory()->create();
 

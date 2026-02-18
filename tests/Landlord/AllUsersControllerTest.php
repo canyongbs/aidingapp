@@ -34,40 +34,8 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Models;
+describe('AllUsersControllerTest', function () {
+    it('is protected by the landlord-api middleware', function () {})->todo('To be implemented at a later date');
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableConcern;
-use AidingApp\Authorization\Enums\LicenseType;
-use AidingApp\Authorization\Observers\LicenseObserver;
-use App\Models\BaseModel;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
-
-/**
- * @mixin IdeHelperLicense
- */
-#[ObservedBy([LicenseObserver::class])]
-class License extends BaseModel implements Auditable
-{
-    use AuditableConcern;
-    use SoftDeletes;
-
-    protected $fillable = [
-        'type',
-    ];
-
-    protected $casts = [
-        'type' => LicenseType::class,
-    ];
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-}
+    it('returns a list of all users across all tenants', function () {})->todo('To be implemented at a later date');
+});

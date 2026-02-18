@@ -61,8 +61,8 @@ test('During assignment only Users that are on a Team that is Manager of the Typ
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
-    $userWithoutTeam = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
+    $userWithoutTeam = User::factory()->create();
 
     $team = Team::factory()->create();
 
@@ -109,8 +109,8 @@ test('During reassignment current assigned user should not be in options', funct
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
-    $secondUser = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
+    $secondUser = User::factory()->create();
 
     $team = Team::factory()->create();
 
@@ -163,7 +163,7 @@ test('Assign To Me action visible when the Service Request is unassigned and the
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.*.update');
 
@@ -203,7 +203,7 @@ test('Assign To Me action is not visible when the Service Request is already ass
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.*.update');
 
@@ -246,7 +246,7 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $team = Team::factory()->create();
 
@@ -277,7 +277,7 @@ test('Assign Service Request action visible when the Service Request is unassign
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.*.update');
 
@@ -317,7 +317,7 @@ test('Assign Service Request action is not visible when the Service Request is u
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $team = Team::factory()->create();
 
@@ -348,7 +348,7 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.*.update');
 
@@ -388,7 +388,7 @@ test('Assign Service Request action is not visible when the Service Request is C
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $team = Team::factory()->create();
 

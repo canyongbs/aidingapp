@@ -63,6 +63,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 class ListServiceRequests extends ListRecords
@@ -82,8 +83,8 @@ class ListServiceRequests extends ListRecords
                 ],
                 'status',
             ])
-                ->when(! auth()->user()->isSuperAdmin(), function (Builder $q) {
-                    return $q->where(function (Builder $query) {
+                ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
+                    return $query->where(function (Builder $query) {
                         $query->whereHas('priority.type.managers', function (Builder $query): void {
                             $query->where('teams.id', auth()->user()->team?->getKey());
                         })->orWhereHas('priority.type.auditors', function (Builder $query): void {
@@ -212,7 +213,7 @@ class ListServiceRequests extends ListRecords
                     ChangeServiceRequestStatusBulkAction::make(),
                     AddServiceRequestUpdateBulkAction::make(),
                     DeleteBulkAction::make()
-                        ->action(function ($records) {
+                        ->action(function (Collection $records) {
                             $deletedRecordsCount = ServiceRequest::query()
                                 ->whereKey($records)
                                 ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {

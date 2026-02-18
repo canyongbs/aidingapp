@@ -180,9 +180,7 @@ abstract class TestCase extends BaseTestCase
                     endDate: now()->addYear(),
                 ),
                 limits: new LicenseLimitsData(
-                    recruitmentCrmSeats: 10,
                     emails: 1000,
-                    sms: 1000,
                     resetDate: now()->format('m-d'),
                 ),
                 addons: new LicenseAddonsData(
@@ -241,9 +239,7 @@ abstract class TestCase extends BaseTestCase
                         endDate: now()->addYear(),
                     ),
                     limits: new LicenseLimitsData(
-                        recruitmentCrmSeats: 10,
                         emails: 1000,
-                        sms: 1000,
                         resetDate: now()->format('m-d'),
                     ),
                     addons: new LicenseAddonsData(

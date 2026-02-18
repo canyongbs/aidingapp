@@ -46,7 +46,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 test('Create Organization is gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -68,7 +68,7 @@ test('Create Organization is gated with proper access control', function () {
 test('validating that domain is required', function () {
     $undoRepeaterFake = Repeater::fake();
 
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.create');
@@ -93,7 +93,7 @@ test('validating that domain is required', function () {
 test('validating that distinct domain is allowed', function () {
     $undoRepeaterFake = Repeater::fake();
 
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.create');
@@ -119,7 +119,7 @@ test('validating that distinct domain is allowed', function () {
 test('if the domain is already in use then not be used second time.', function () {
     $undoRepeaterFake = Repeater::fake();
 
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.create');
@@ -154,7 +154,7 @@ test('if the domain is already in use then not be used second time.', function (
 test('check if the provided domain is invalid', function (string $domain) {
     $undoRepeaterFake = Repeater::fake();
 
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('organization.view-any');
     $user->givePermissionTo('organization.create');

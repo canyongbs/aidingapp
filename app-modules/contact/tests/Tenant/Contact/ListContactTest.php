@@ -33,7 +33,6 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ListContacts;
@@ -58,7 +57,7 @@ use function Pest\Livewire\livewire;
 // Permission Tests
 
 test('ListContacts is gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -74,7 +73,7 @@ test('ListContacts is gated with proper access control', function () {
 });
 
 test('ListContacts can bulk update characteristics', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('contact.view-any');
 
@@ -127,7 +126,7 @@ test('ListContacts can bulk update characteristics', function () {
 
 test('can list records of engagements timelineable', function () {
     Queue::fake();
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $contact = Contact::factory()->create();
 
@@ -179,7 +178,7 @@ test('can list records of engagements timelineable', function () {
 
 test('can filter engagements timelineable', function () {
     Queue::fake();
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $contact = Contact::factory()->create();
 

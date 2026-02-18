@@ -47,7 +47,7 @@ use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 
 test('Create Organization Industry is gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -66,7 +66,7 @@ test('Create Organization Industry is gated with proper access control', functio
         )->assertSuccessful();
 });
 test('Create New Organization Industry', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.create');

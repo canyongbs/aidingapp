@@ -87,7 +87,7 @@ test('CreateServiceRequestType requires valid data', function ($data, $errors) {
 // Permission Tests
 
 test('CreateServiceRequestType is gated with proper access control', function () {
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -124,7 +124,7 @@ test('CreateServiceRequestType is gated with proper feature access control', fun
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.create');

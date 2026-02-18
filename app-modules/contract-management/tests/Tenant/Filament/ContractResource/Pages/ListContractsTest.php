@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\ListContracts;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -48,7 +47,7 @@ it('is gated with proper access control', function () {
     $settings->data->addons->contractManagement = false;
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('contract.view-any');
 

@@ -100,7 +100,7 @@ test('EditServiceRequestType requires valid data', function ($data, $errors) {
 // Permission Tests
 
 test('EditServiceRequestType is gated with proper access control', function () {
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
@@ -145,7 +145,7 @@ test('EditServiceRequestType is gated with proper feature access control', funct
 
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.update');

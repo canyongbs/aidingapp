@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Policies;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
 use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use App\Concerns\PerformsFeatureChecks;
@@ -50,10 +49,6 @@ class IncidentUpdatePolicy
 
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
-            return Response::deny('You are not licsensed for the Recruitment CRM.');
-        }
-
         if (! is_null($response = $this->hasFeatures())) {
             return $response;
         }

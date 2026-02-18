@@ -40,7 +40,6 @@ use AidingApp\Ai\Actions\CompletePrompt;
 use AidingApp\Ai\Exceptions\MessageResponseException;
 use AidingApp\Ai\Models\AiAssistant;
 use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
@@ -150,10 +149,7 @@ class DraftServiceRequestUpdateWithAiAction extends Action
                 }
 
                 $set('update', $content);
-            })
-            ->visible(
-                auth()->user()->hasLicense(LicenseType::RecruitmentCrm)
-            );
+            });
     }
 
     public static function getDefaultName(): ?string

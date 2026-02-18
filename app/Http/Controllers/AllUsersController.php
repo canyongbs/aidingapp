@@ -34,25 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\IntegrationTwilio;
+namespace App\Http\Controllers;
 
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use App\Models\Tenant;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
-class IntegrationTwilioPlugin implements Plugin
+class AllUsersController extends Controller
 {
-    public function getId(): string
+    public function __invoke(Request $request): JsonResponse
     {
-        return 'integration-twilio';
-    }
+        $users = [];
 
-    public function register(Panel $panel): void
-    {
-        $panel->discoverPages(
-            in: __DIR__ . '/Filament/Pages',
-            for: 'AidingApp\\IntegrationTwilio\\Filament\\Pages'
-        );
-    }
+        Tenant::query()
+            ->where('setup_complete', true)
+            ->get()
+            ->eachCurrent(function (Tenant $tenant) use (&$users) {
+                User::query()
+                    ->cursor()
+                    ->each(function (User $user) use (&$users, $tenant) {
+                        $users[] = [
+                            'id' => $user->id,
+                            'tenant_id' => $tenant->getKey(),
+                            'name' => $user->name,
+                            'job_title' => $user->job_title,
+                            'team' => $user->team->name ?? null,
+                            'email' => $user->email,
+                            'timezone' => $user->timezone,
+                            'updated_at' => $user->updated_at,
+                            'created_at' => $user->created_at,
+                        ];
+                    });
+            });
 
-    public function boot(Panel $panel): void {}
+        return response()->json([
+            'data' => $users,
+            'meta' => [
+                'total_users' => count($users),
+            ],
+        ]);
+    }
 }

@@ -33,7 +33,6 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages\ListIncidentSeverities;
 use AidingApp\ServiceManagement\Models\Incident;
@@ -49,7 +48,7 @@ use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 test('ListIncidentSeverities is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -70,7 +69,7 @@ test('it is gated with proper feature access control', function () {
     $settings->data->addons->incidentManagement = false;
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
 
@@ -91,7 +90,7 @@ test('it is gated with proper feature access control', function () {
 });
 
 test('can list records', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(
@@ -109,7 +108,7 @@ test('can list records', function () {
 });
 
 test('bulk delete IncidentSeverities', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 
@@ -127,7 +126,7 @@ test('bulk delete IncidentSeverities', function () {
 });
 
 test('prevent deletion of IncidentSeverity if it has associated Incidents', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user);
 

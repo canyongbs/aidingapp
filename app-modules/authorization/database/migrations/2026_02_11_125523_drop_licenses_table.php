@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace App\Policies\Contracts;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use App\Models\Authenticatable;
-use Illuminate\Auth\Access\Response;
-
-interface PerformsChecksBeforeAuthorization
-{
-    public function before(Authenticatable $authenticatable): ?Response;
-}
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::dropIfExists('licenses');
+    }
+};

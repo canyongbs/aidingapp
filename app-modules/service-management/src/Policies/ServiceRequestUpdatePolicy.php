@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Policies;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Enums\Feature;
@@ -49,10 +48,6 @@ class ServiceRequestUpdatePolicy
 {
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
-            return Response::deny('You are not licensed for the Recruitment CRM.');
-        }
-
         if (! Gate::check(
             collect($this->requiredFeatures())->map(fn (Feature $feature) => $feature->getGateName())
         )) {

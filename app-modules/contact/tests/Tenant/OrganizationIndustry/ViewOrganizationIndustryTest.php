@@ -42,7 +42,7 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 
 test('View OrganizationIndustry is gated with proper access control', function () {
-    $user = User::factory()->licensed(Contact::getLicenseType())->create();
+    $user = User::factory()->create();
 
     $organizationIndustry = OrganizationIndustry::factory()->create();
 

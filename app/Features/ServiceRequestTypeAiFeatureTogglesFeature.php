@@ -34,48 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace App\Models\Scopes;
+namespace App\Features;
 
-use AidingApp\Contact\Models\Contact;
-use App\Models\Authenticatable;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use App\Support\AbstractFeatureFlag;
 
-class LicensedToEducatable
+class ServiceRequestTypeAiFeatureTogglesFeature extends AbstractFeatureFlag
 {
-    public function __construct(
-        protected string $relationship,
-    ) {}
-
-    /**
-     * @param Builder<Model> $query
-     */
-    public function __invoke(Builder $query): void
+    public function resolve(mixed $scope): mixed
     {
-        /** @var ?Authenticatable $user */
-        $user = auth('api')->user() ?? auth('web')->user();
-
-        if (! $user) {
-            return;
-        }
-
-        $model = $query->getModel();
-
-        if (
-            (! method_exists($model, $this->relationship)) ||
-            (! ($model->{$this->relationship}() instanceof MorphTo))
-        ) {
-            throw new Exception('The [' . static::class . "] model does not have a [{$this->relationship}] [" . MorphTo::class . '] relationship where educatables can be assigned.');
-        }
-
-        $typeColumn = $model->{$this->relationship}()->getMorphType();
-
-        $query
-            ->when(
-                ! $user->hasLicense(Contact::getLicenseType()),
-                fn (Builder $query) => $query->where($typeColumn, '!=', app(Contact::class)->getMorphClass()),
-            );
+        return false;
     }
 }

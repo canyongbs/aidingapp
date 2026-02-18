@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages\CreateIncidentStatus;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
@@ -78,7 +77,7 @@ test('CreateIncidentStatus requires valid data', function ($data, $errors) {
 );
 
 test('CreateIncidentStatus is gated with proper access control', function () {
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
 
     actingAs($user)
         ->get(

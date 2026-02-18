@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Enums\LicenseType;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -53,7 +52,7 @@ test('global search is gated with proper feature access control', function () {
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    $user = User::factory()->licensed(LicenseType::cases())->create();
+    $user = User::factory()->create();
     $team = Team::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
@@ -84,7 +83,7 @@ test('global search returns service requests for managers of service request typ
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
     $team = Team::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
@@ -114,7 +113,7 @@ test('global search returns service requests for auditors of service request typ
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
     $team = Team::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
@@ -144,7 +143,7 @@ test('global search does not return service requests for non-managers/auditors',
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
     $team = Team::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
@@ -172,7 +171,7 @@ test('global search returns all service requests for super admin', function () {
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    $superAdmin = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -201,7 +200,7 @@ test('global search returns no results for user without team', function () {
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create([
@@ -225,7 +224,7 @@ test('global search details are correctly formatted', function () {
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
     $team = Team::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
@@ -266,7 +265,7 @@ test('global search URL points to view page', function () {
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    $user = User::factory()->licensed([Contact::getLicenseType()])->create();
+    $user = User::factory()->create();
     $team = Team::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();

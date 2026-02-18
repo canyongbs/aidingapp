@@ -51,6 +51,7 @@ use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -59,6 +60,9 @@ use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
 trait HasSharedFormConfiguration
 {
+    /**
+     * @return array<Component>
+     */
     public function fields(): array
     {
         return [
@@ -163,6 +167,8 @@ trait HasSharedFormConfiguration
 
                 $serviceRequestForm = $record instanceof ServiceRequestForm ? $record : $record->submissible;
                 $serviceRequestFormStep = $record instanceof ServiceRequestFormStep ? $record : null;
+
+                assert($serviceRequestForm instanceof ServiceRequestForm);
 
                 ServiceRequestFormField::query()
                     ->whereBelongsTo($serviceRequestForm, 'submissible')

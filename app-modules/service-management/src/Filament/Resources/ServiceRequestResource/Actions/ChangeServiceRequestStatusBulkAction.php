@@ -71,13 +71,8 @@ class ChangeServiceRequestStatusBulkAction
                 $canUserUpdateServiceRequest = $user->can('service_request.*.update');
 
                 BulkProcessingMachine::make($records->all())
-                    ->check(function (ServiceRequest $serviceRequest) use ($user, $canUserUpdateServiceRequest): ?Closure {
-                        $user = auth()->user();
-
-                        if (
-                            $user->hasLicense($serviceRequest->respondent->getLicenseType()) &&
-                            $canUserUpdateServiceRequest
-                        ) {
+                    ->check(function (ServiceRequest $serviceRequest) use ($canUserUpdateServiceRequest): ?Closure {
+                        if ($canUserUpdateServiceRequest) {
                             return null;
                         }
 
@@ -90,7 +85,7 @@ class ChangeServiceRequestStatusBulkAction
                         };
                     })
                     ->check(function (ServiceRequest $serviceRequest): ?Closure {
-                        if ($serviceRequest?->status?->classification !== SystemServiceRequestClassification::Closed) {
+                        if ($serviceRequest->status?->classification !== SystemServiceRequestClassification::Closed) {
                             return null;
                         }
 
@@ -109,7 +104,7 @@ class ChangeServiceRequestStatusBulkAction
 
                         $team = $user->team;
 
-                        if ($serviceRequest?->priority?->type?->managers?->contains('id', $team?->getKey())) {
+                        if ($serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey())) {
                             return null;
                         }
 

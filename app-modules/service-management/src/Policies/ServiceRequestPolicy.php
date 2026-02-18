@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Policies;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
@@ -49,10 +48,6 @@ class ServiceRequestPolicy
 {
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! $authenticatable->hasAnyLicense([Contact::getLicenseType()])) {
-            return Response::deny('You are not licensed for the Recruitment CRM.');
-        }
-
         if (! Gate::check(
             collect($this->requiredFeatures())->map(fn (Feature $feature) => $feature->getGateName())
         )) {
@@ -72,10 +67,6 @@ class ServiceRequestPolicy
 
     public function view(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        if (! $authenticatable->hasLicense($serviceRequest->respondent->getLicenseType())) {
-            return Response::deny('You do not have permission to view this service request.');
-        }
-
         if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->team;
 
@@ -108,10 +99,6 @@ class ServiceRequestPolicy
 
     public function update(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        if (! $authenticatable->hasLicense($serviceRequest->respondent->getLicenseType())) {
-            return Response::deny('You do not have permission to update this service request.');
-        }
-
         if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Closed) {
             return Response::deny('Closed service request cannot be edited.');
         }
@@ -132,10 +119,6 @@ class ServiceRequestPolicy
 
     public function delete(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        if (! $authenticatable->hasLicense($serviceRequest->respondent->getLicenseType())) {
-            return Response::deny('You do not have permission to delete this service request.');
-        }
-
         if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->team;
 
@@ -152,10 +135,6 @@ class ServiceRequestPolicy
 
     public function restore(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        if (! $authenticatable->hasLicense($serviceRequest->respondent->getLicenseType())) {
-            return Response::deny('You do not have permission to restore this service request.');
-        }
-
         if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->team;
 
@@ -172,10 +151,6 @@ class ServiceRequestPolicy
 
     public function forceDelete(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        if (! $authenticatable->hasLicense($serviceRequest->respondent->getLicenseType())) {
-            return Response::deny('You do not have permission to permanently delete this service request.');
-        }
-
         if (! auth()->user()->isSuperAdmin()) {
             $team = auth()->user()->team;
 
