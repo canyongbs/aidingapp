@@ -42,7 +42,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('portal_assistant_threads', function (Blueprint $table) {
-            $table->uuid('guest_token')->nullable()->after('author_id');
+            $table->uuid('guest_token')->nullable();
         });
     }
 
