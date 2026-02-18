@@ -120,3 +120,7 @@ li[data-message-type='success'] {
         --p-text-hover-muted-color: var(--p-surface-300);
     }
 }
+
+.prose-toc {
+    @apply mb-16;
+}
