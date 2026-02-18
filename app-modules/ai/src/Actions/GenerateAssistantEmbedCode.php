@@ -34,52 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Http\Controllers\PortalAssistant;
+namespace AidingApp\Ai\Actions;
 
-use AidingApp\Ai\Jobs\PortalAssistant\SendMessage;
-use AidingApp\Ai\Models\PortalAssistantThread;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Exception;
+use Illuminate\Support\Facades\Storage;
 
-class SendMessageController
+class GenerateAssistantEmbedCode
 {
-    public function __invoke(Request $request): StreamedResponse | JsonResponse
+    public function handle(): string
     {
-        $data = $request->validate([
-            'content' => ['required', 'string', 'max:25000'],
-            'thread_id' => ['nullable', 'uuid'],
-        ]);
+        $manifestPath = Storage::disk('public')->get('widgets/assistant/.vite/manifest.json');
 
-        $author = auth('contact')->user();
-
-        if (filled($data['thread_id'] ?? null)) {
-            $thread = PortalAssistantThread::query()
-                ->whereKey($data['thread_id'])
-                ->whereMorphedTo('author', $author)
-                ->firstOrFail();
-        } else {
-            $thread = new PortalAssistantThread();
-            $thread->author()->associate($author);
-            $thread->save();
+        if (is_null($manifestPath)) {
+            throw new Exception('Vite manifest file not found.');
         }
 
-        dispatch(new SendMessage(
-            $thread,
-            $data['content'],
-            request: [
-                'headers' => Arr::only(
-                    request()->headers->all(),
-                    ['host', 'sec-ch-ua', 'user-agent', 'sec-ch-ua-platform', 'origin', 'referer', 'accept-language'],
-                ),
-                'ip' => request()->ip(),
-            ],
-        ));
+        /** @var array<string, array{file: string, name: string, src: string, isEntry: bool}> $manifest */
+        $manifest = json_decode($manifestPath, true, 512, JSON_THROW_ON_ERROR);
 
-        return response()->json([
-            'message' => 'Message dispatched for processing via websockets.',
-            'thread_id' => $thread->getKey(),
-        ]);
+        $loaderScriptUrl = url("widgets/assistant/{$manifest['src/loader.js']['file']}");
+
+        $configUrl = route('widgets.assistant.api.config');
+
+        return <<<EOD
+        <script src="{$loaderScriptUrl}" data-config="{$configUrl}"></script>
+        EOD;
     }
 }

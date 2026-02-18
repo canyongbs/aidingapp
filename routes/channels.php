@@ -37,6 +37,7 @@
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
+use App\Features\EmbeddableSupportAssistantFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -51,8 +52,26 @@ use Illuminate\Support\Facades\Broadcast;
 |
 */
 
-Broadcast::channel('portal-assistant-thread-{threadId}', function (Contact $user, string $threadId): bool {
-    return PortalAssistantThread::find($threadId)?->author()->is($user) ?? false;
+Broadcast::channel('portal-assistant-thread-{threadId}', function (?Contact $user, string $threadId): bool {
+    $thread = PortalAssistantThread::find($threadId);
+
+    if (! $thread) {
+        return false;
+    }
+
+    // If user is authenticated, check if they own the thread
+    if ($user && $thread->author()->is($user)) {
+        return true;
+    }
+
+    // If user is not authenticated but thread has no author, check guest token (only if feature is active)
+    if (! $user && ! $thread->author_type && ! $thread->author_id && EmbeddableSupportAssistantFeature::active()) {
+        $guestToken = request()->input('guest_token');
+
+        return $guestToken && $thread->guest_token === $guestToken;
+    }
+
+    return false;
 });
 
 Broadcast::channel('conversation.{conversationId}', function (User $user, string $conversationId): array|bool {

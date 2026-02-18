@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,3 +31,40 @@
 
 </COPYRIGHT>
 */
+import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
+import App from './App.ce.vue';
+import styles from './widget.css?inline';
+
+const config = window.__ASSISTANT_WIDGET_CONFIG__;
+
+if (!config || !config.send_message_url || !config.websockets_config) {
+    console.error('Assistant widget: Configuration is missing or incomplete.');
+} else {
+    customElements.define(
+        'assistant-widget-embed',
+        defineCustomElement({
+            styles: [styles],
+            setup(props) {
+                const app = createApp();
+                app.config.devtools = true;
+
+                const inst = getCurrentInstance();
+                Object.assign(inst.appContext, app._context);
+                Object.assign(inst.provides, app._context.provides);
+
+                return () =>
+                    h(App, {
+                        ...props,
+                        sendMessageUrl: config.send_message_url,
+                        websocketsConfig: { ...config.websockets_config, authEndpoint: config.auth_endpoint },
+                        primaryColor: config.primary_color,
+                        rounding: config.rounding,
+                        isAuthenticated: config.is_authenticated || false,
+                    });
+            },
+            props: {
+                portalServiceManagement: { type: Boolean, default: false },
+            },
+        }),
+    );
+}

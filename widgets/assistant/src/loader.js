@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,3 +31,35 @@
 
 </COPYRIGHT>
 */
+(function () {
+    const scriptTag = document.currentScript;
+    if (!scriptTag) throw new Error('Could not find script tag');
+
+    const configUrl = scriptTag.getAttribute('data-config');
+    if (!configUrl) throw new Error('Config URL not found in script tag');
+
+    fetch(configUrl)
+        .then((response) => response.json())
+        .then((config) => {
+            if (!config || !config.asset_url || !config.js) {
+                throw Error('Config is missing or incomplete.');
+            }
+
+            window.__VITE_ASSISTANT_WIDGET_ASSET_URL__ = config.asset_url;
+            window.__ASSISTANT_WIDGET_CONFIG__ = config;
+
+            if (!document.querySelector('assistant-widget-embed')) {
+                const embedElement = document.createElement('assistant-widget-embed');
+                embedElement.id = 'assistant-widget-root';
+                document.body.appendChild(embedElement);
+            }
+
+            const scriptElement = document.createElement('script');
+            scriptElement.src = config.js;
+            scriptElement.type = 'module';
+            document.body.appendChild(scriptElement);
+        })
+        .catch((error) => {
+            console.error('Failed to load assistant widget:', error);
+        });
+})();

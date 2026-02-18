@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
@@ -30,28 +32,16 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    import { ref } from 'vue';
-    import { useAssistantStore } from '../Stores/assistant.js';
-    import ChatPanel from './Assistant/ChatPanel.vue';
-    import ChatToggleButton from './Assistant/ChatToggleButton.vue';
+*/
 
-    const isOpen = ref(false);
-    const { assistantSendMessageUrl } = useAssistantStore();
+namespace App\Features;
 
-    const toggleChat = () => {
-        isOpen.value = !isOpen.value;
-    };
-</script>
+use App\Support\AbstractFeatureFlag;
 
-<template>
-    <div
-        v-show="assistantSendMessageUrl"
-        class="fixed bottom-4 end-4 z-50 flex flex-col items-end max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)]"
-    >
-        <ChatPanel :is-open="isOpen" @close="toggleChat" />
-
-        <ChatToggleButton :is-open="isOpen" @toggle="toggleChat" />
-    </div>
-</template>
+class EmbeddableSupportAssistantFeature extends AbstractFeatureFlag
+{
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
+}

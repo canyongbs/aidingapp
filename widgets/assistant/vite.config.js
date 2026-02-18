@@ -31,42 +31,46 @@
 
 </COPYRIGHT>
 */
-import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import vue from '@vitejs/plugin-vue';
+import { resolve } from 'path';
+import { defineConfig } from 'vite';
 
-export const useAssistantStore = defineStore('assistant', () => {
-    const assistantSendMessageUrl = ref(null);
-    const websocketsConfig = ref(null);
-    const apiUrl = ref(null);
-
-    async function setAssistantSendMessageUrl(url) {
-        assistantSendMessageUrl.value = url;
-    }
-
-    async function setWebsocketsConfig(config) {
-        websocketsConfig.value = config;
-    }
-
-    async function setApiUrl(url) {
-        apiUrl.value = url;
-    }
-
-    async function getAssistantSendMessageUrl() {
-        return assistantSendMessageUrl.value;
-    }
-
-    async function getWebsocketsConfig() {
-        return websocketsConfig.value;
-    }
-
-    return {
-        assistantSendMessageUrl,
-        getAssistantSendMessageUrl,
-        setAssistantSendMessageUrl,
-        websocketsConfig,
-        getWebsocketsConfig,
-        setWebsocketsConfig,
-        apiUrl,
-        setApiUrl,
-    };
+export default defineConfig({
+    plugins: [vue()],
+    experimental: {
+        renderBuiltUrl(filename) {
+            return {
+                runtime: `window.__VITE_ASSISTANT_WIDGET_ASSET_URL__ + ${JSON.stringify(filename)}`,
+            };
+        },
+    },
+    build: {
+        manifest: true,
+        rollupOptions: {
+            input: {
+                widget: resolve(__dirname, './src/widget.js'),
+                loader: resolve(__dirname, './src/loader.js'),
+            },
+            output: {
+                entryFileNames: (chunkInfo) => {
+                    return chunkInfo.name === 'loader'
+                        ? 'aiding-app-assistant-widget.js'
+                        : 'aiding-app-assistant-widget-app-[hash].js';
+                },
+                assetFileNames: (assetInfo) => {
+                    return '[name]-[hash][extname]';
+                },
+                chunkFileNames: '[name]-[hash].js',
+            },
+        },
+        outDir: resolve(__dirname, '../../storage/app/public/widgets/assistant'),
+        emptyOutDir: true,
+        sourcemap: true,
+    },
+    resolve: {
+        alias: {
+            '@': resolve(__dirname, 'src'),
+        },
+    },
+    define: { 'process.env.NODE_ENV': '"production"' },
 });

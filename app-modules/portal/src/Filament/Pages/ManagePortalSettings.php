@@ -36,14 +36,17 @@
 
 namespace AidingApp\Portal\Filament\Pages;
 
+use AidingApp\Ai\Actions\GenerateAssistantEmbedCode;
 use AidingApp\Ai\Jobs\PrepareKnowledgeBaseVectorStore;
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Form\Enums\Rounding;
+use AidingApp\Form\Rules\IsDomain;
 use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
 use App\Features\AiFeatureTogglesFeature;
+use App\Features\EmbeddableSupportAssistantFeature;
 use App\Models\User;
 use App\Rules\ValidUrl;
 use BackedEnum;
@@ -51,8 +54,10 @@ use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
@@ -129,6 +134,48 @@ class ManagePortalSettings extends SettingsPage
                             ->label('AI Support Assistant')
                             ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && AiFeatureTogglesFeature::active() && app(AiSupportAssistantSettings::class)->is_enabled)
                             ->live(),
+                        Toggle::make('embed_assistant')
+                            ->label('Embed Support Assistant')
+                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && EmbeddableSupportAssistantFeature::active())
+                            ->live()
+                            ->helperText('If enabled, the assistant can be embedded on other websites.')
+                            ->hintAction(
+                                Action::make('embed_snippet')
+                                    ->label('Embed Snippet')
+                                    ->schema([
+                                        TextEntry::make('snippet')
+                                            ->label('Click to Copy')
+                                            ->state(function () {
+                                                $code = resolve(GenerateAssistantEmbedCode::class)->handle();
+
+                                                $state = <<<EOD
+                                                ```
+                                                {$code}
+                                                ```
+                                                EOD;
+
+                                                return str($state)->markdown()->toHtmlString();
+                                            })
+                                            ->copyable()
+                                            ->copyableState(fn () => resolve(GenerateAssistantEmbedCode::class)->handle())
+                                            ->copyMessage('Copied!')
+                                            ->copyMessageDuration(1500)
+                                            ->extraAttributes(['class' => 'embed-code-snippet']),
+                                    ])
+                                    ->modalSubmitAction(false)
+                                    ->modalCancelActionLabel('Close')
+                                    ->hidden(fn (Get $get) => ! $get('embed_assistant'))
+                            )
+                            ->columnStart(1),
+                        TagsInput::make('embed_assistant_allowed_domains')
+                            ->label('Allowed Domains')
+                            ->helperText('Only these domains will be allowed to embed the assistant.')
+                            ->placeholder('example.com')
+                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && $get('embed_assistant') && EmbeddableSupportAssistantFeature::active())
+                            ->disabled(fn (Get $get) => ! $get('embed_assistant'))
+                            ->nestedRecursiveRules([
+                                new IsDomain(),
+                            ]),
                         Grid::make()->schema([
                             TextInput::make('page_title')
                                 ->label('Page Title')
@@ -244,5 +291,10 @@ class ManagePortalSettings extends SettingsPage
         }
 
         return parent::getFormActions();
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [];
     }
 }

@@ -33,7 +33,7 @@
 -->
 <script setup>
     import { ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/16/solid';
-    import { useMarkdown } from '../../Composables/assistant/useMarkdown.js';
+    import { useMarkdown } from '../composables/useMarkdown.js';
 
     const props = defineProps({
         message: { type: Object, required: true },
@@ -61,7 +61,7 @@
             >
                 <div
                     v-if="props.message.author === 'assistant'"
-                    class="prose prose-sm max-w-none text-gray-800 leading-relaxed prose-p:my-0 prose-p:first:mt-0 prose-p:last:mb-0 prose-ul:my-1 prose-ol:my-1 prose-li:my-0"
+                    class="prose prose-sm max-w-none text-sm text-gray-800 leading-relaxed prose-p:my-0 prose-p:first:mt-0 prose-p:last:mb-0 prose-ul:my-1 prose-ol:my-1 prose-li:my-0"
                     v-html="renderMarkdown(props.message.content)"
                 ></div>
                 <p v-else class="text-sm text-gray-800 leading-relaxed whitespace-pre-line">

@@ -1,4 +1,4 @@
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
@@ -30,27 +30,24 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-import DOMPurify from 'dompurify';
-import { marked } from 'marked';
+-->
+<script setup>
+    import { ChatBubbleLeftRightIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
 
-marked.setOptions({
-    breaks: true,
-    gfm: true,
-});
+    const props = defineProps({
+        isOpen: { type: Boolean, default: false },
+    });
 
-export function useMarkdown() {
-    const renderMarkdown = (content) => {
-        if (!content) return '';
-        try {
-            const cleanedContent = content.replace(/【[^】]*】/g, ''); // Remove citations
-            const html = marked.parse(cleanedContent, { async: false });
-            return DOMPurify.sanitize(html);
-        } catch (error) {
-            console.error('Error rendering markdown:', error);
-            return DOMPurify.sanitize(content);
-        }
-    };
+    const emit = defineEmits(['toggle']);
+</script>
 
-    return { renderMarkdown };
-}
+<template>
+    <button
+        @click="emit('toggle')"
+        class="bg-brand-500 hover:bg-brand-600 text-white rounded-full p-4 shadow-xl hover:shadow-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-500/50 hover:scale-105 active:scale-95"
+        aria-label="Toggle chat assistant"
+    >
+        <ChatBubbleLeftRightIcon v-if="!props.isOpen" class="w-6 h-6" />
+        <ChevronDownIcon v-else class="w-6 h-6" />
+    </button>
+</template>

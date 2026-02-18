@@ -34,63 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Models;
+namespace AidingApp\Ai\Http\Middleware;
 
-use AidingApp\Ai\Database\Factories\PortalAssistantThreadFactory;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use AidingApp\Portal\Settings\PortalSettings;
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
-/**
- * @mixin IdeHelperPortalAssistantThread
- */
-class PortalAssistantThread extends BaseModel
+class EnsureAssistantWidgetIsEmbeddableAndAuthorized
 {
-    /** @use HasFactory<PortalAssistantThreadFactory> */
-    use HasFactory;
-
-    public $fillable = [
-        'author_type',
-        'author_id',
-        'current_service_request_draft_id',
-        'guest_token',
-    ];
-
-    /**
-     * @return HasMany<PortalAssistantMessage, $this>
-     */
-    public function messages(): HasMany
+    public function handle(Request $request, Closure $next): Response
     {
-        return $this->hasMany(PortalAssistantMessage::class, 'thread_id');
-    }
+        $settings = app(PortalSettings::class);
 
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function author(): MorphTo
-    {
-        return $this->morphTo('author');
-    }
+        if (! $settings->ai_support_assistant) {
+            return response()->json(['error' => 'The support assistant is not enabled.'], 403);
+        }
 
-    /**
-     * @return HasMany<ServiceRequest, $this>
-     */
-    public function serviceRequests(): HasMany
-    {
-        return $this->hasMany(ServiceRequest::class, 'portal_assistant_thread_id')
-            ->withoutGlobalScope('excludeDrafts');
-    }
+        $requestingUrlHeader = $request->headers->get('origin') ?? $request->headers->get('referer');
 
-    /**
-     * @return BelongsTo<ServiceRequest, $this>
-     */
-    public function currentServiceRequestDraft(): BelongsTo
-    {
-        return $this->belongsTo(ServiceRequest::class, 'current_service_request_draft_id')
-            ->withoutGlobalScope('excludeDrafts');
+        if (! $requestingUrlHeader) {
+            return response()->json(['error' => 'Missing origin/referer header.'], 400);
+        }
+
+        $requestingUrlHeader = parse_url($requestingUrlHeader)['host'];
+
+        if ($requestingUrlHeader != parse_url(config('app.url'))['host']) {
+            if (! $settings->embed_assistant) {
+                return response()->json(['error' => 'Embedding is not enabled for the assistant.'], 403);
+            }
+
+            $allowedDomains = collect($settings->embed_assistant_allowed_domains ?? []);
+
+            if (! $allowedDomains->contains($requestingUrlHeader)) {
+                return response()->json(['error' => 'Origin/Referer not allowed. Domain must be added to allowed domains list'], 403);
+            }
+        }
+
+        return $next($request);
     }
 }

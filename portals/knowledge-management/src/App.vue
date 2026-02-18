@@ -33,16 +33,14 @@
 -->
 <script setup>
     import { FormKit } from '@formkit/vue';
-    import { onMounted, ref, watch } from 'vue';
-    import { RouterView, useRoute } from 'vue-router';
+    import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+    import { RouterView, useRoute, useRouter } from 'vue-router';
     import AppLoading from './Components/AppLoading.vue';
-    import Assistant from './Components/Assistant.vue';
     import Footer from './Components/Footer.vue';
     import Header from './Components/Header.vue';
     import axios from './Globals/Axios.js';
     import { consumer } from './Services/Consumer.js';
     import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
-    import { useAssistantStore } from './Stores/assistant.js';
     import { useAuthStore } from './Stores/auth.js';
     import { useFeatureStore } from './Stores/feature.js';
     import { useTokenStore } from './Stores/token.js';
@@ -114,6 +112,83 @@
     });
 
     const route = useRoute();
+    const router = useRouter();
+
+    const assistantWidgetLoaderUrl = ref(null);
+    const assistantWidgetConfigUrl = ref(null);
+
+    const showSignIn = computed(() => {
+        return (
+            !userIsAuthenticated.value && (requiresAuthentication.value || showLogin.value || route.meta?.requiresAuth)
+        );
+    });
+
+    function loadAssistantWidget() {
+        if (!assistantWidgetLoaderUrl.value || !assistantWidgetConfigUrl.value) {
+            return;
+        }
+
+        if (document.getElementById('assistant-widget-root')) {
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = assistantWidgetLoaderUrl.value;
+        script.setAttribute('data-config', assistantWidgetConfigUrl.value);
+        document.body.appendChild(script);
+
+        const observer = new MutationObserver(() => {
+            if (document.querySelector('assistant-widget-embed')) {
+                observer.disconnect();
+                updateWidgetServiceManagement();
+            }
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    function updateWidgetServiceManagement() {
+        const widget = document.querySelector('assistant-widget-embed');
+        if (!widget) return;
+
+        if (hasServiceManagement.value && userIsAuthenticated.value) {
+            widget.setAttribute('portal-service-management', '');
+        } else {
+            widget.removeAttribute('portal-service-management');
+        }
+    }
+
+    watch([() => hasServiceManagement.value, () => userIsAuthenticated.value], updateWidgetServiceManagement, {
+        immediate: true,
+    });
+
+    function handleOpenServiceRequest() {
+        window.dispatchEvent(new CustomEvent('assistant:close'));
+        router.push({ name: 'create-service-request' });
+    }
+
+    window.addEventListener('assistant:open-service-request', handleOpenServiceRequest);
+
+    onUnmounted(() => {
+        window.removeEventListener('assistant:open-service-request', handleOpenServiceRequest);
+    });
+
+    watch([showSignIn, assistantWidgetLoaderUrl], ([isSignIn]) => {
+        if (isSignIn) {
+            const widgetRoot = document.getElementById('assistant-widget-root');
+            if (widgetRoot) {
+                widgetRoot.style.display = 'none';
+            }
+        } else {
+            const widgetRoot = document.getElementById('assistant-widget-root');
+            if (widgetRoot) {
+                widgetRoot.style.display = '';
+                updateWidgetServiceManagement();
+            } else {
+                loadAssistantWidget();
+            }
+        }
+    });
 
     onMounted(async () => {
         await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
@@ -166,10 +241,6 @@
 
                 const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
-                const { setAssistantSendMessageUrl, setWebsocketsConfig, setApiUrl } = useAssistantStore();
-
-                setApiUrl(props.apiUrl);
-
                 portalPrimaryColor.value = response.data.primary_color;
 
                 headerLogo.value = response.data.header_logo;
@@ -182,6 +253,11 @@
 
                 setRequiresAuthentication(response.data.requires_authentication).then(() => {
                     requiresAuthentication.value = response.data.requires_authentication;
+
+                    if (response.data.assistant_widget_loader_url && response.data.assistant_widget_config_url) {
+                        assistantWidgetLoaderUrl.value = response.data.assistant_widget_loader_url;
+                        assistantWidgetConfigUrl.value = response.data.assistant_widget_config_url;
+                    }
                 });
 
                 setHasServiceManagement(response.data.service_management_enabled).then(() => {
@@ -199,9 +275,6 @@
                 setHasTasks(response.data.has_tasks).then(() => {
                     hasTasks.value = response.data.has_tasks;
                 });
-
-                setAssistantSendMessageUrl(response.data.assistant_send_message_url);
-                setWebsocketsConfig(response.data.websockets_config);
 
                 authentication.value.requestUrl = response.data.authentication_url ?? null;
 
@@ -321,10 +394,6 @@
 
         const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
-        const { setAssistantSendMessageUrl, setWebsocketsConfig, setApiUrl } = useAssistantStore();
-
-        setApiUrl(props.apiUrl);
-
         if (authentication.value.isRequested) {
             const data = {
                 code: formData.code,
@@ -383,8 +452,10 @@
                             hasTasks.value = response.data.has_tasks;
                         });
 
-                        setAssistantSendMessageUrl(response.data.assistant_send_message_url);
-                        setWebsocketsConfig(response.data.websockets_config);
+                        if (response.data.assistant_widget_loader_url && response.data.assistant_widget_config_url) {
+                            assistantWidgetLoaderUrl.value = response.data.assistant_widget_loader_url;
+                            assistantWidgetConfigUrl.value = response.data.assistant_widget_config_url;
+                        }
 
                         const { hasServiceManagement, hasAssets, hasLicense, hasTasks } = useFeatureStore();
 
@@ -594,8 +665,6 @@
                 />
 
                 <Footer :logo="footerLogo"></Footer>
-
-                <Assistant />
             </div>
         </div>
     </div>

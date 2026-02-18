@@ -3,9 +3,10 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "build": "npm run build:service-request-feedback-form && npm run build:service-request-form",
+        "build": "npm run build:service-request-feedback-form && npm run build:service-request-form && npm run build:assistant",
         "build:service-request-feedback-form": "(cd service-request-feedback-form && vite build)",
         "build:service-request-form": "(cd service-request-form && vite build)",
+        "build:assistant": "(cd assistant && vite build)",
         "postinstall": "node ../npm-postinstall.cjs"
     },
     "devDependencies": {

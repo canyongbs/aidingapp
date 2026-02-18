@@ -34,63 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Models;
+use App\Features\EmbeddableSupportAssistantFeature;
+use Illuminate\Support\Facades\DB;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use AidingApp\Ai\Database\Factories\PortalAssistantThreadFactory;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-
-/**
- * @mixin IdeHelperPortalAssistantThread
- */
-class PortalAssistantThread extends BaseModel
-{
-    /** @use HasFactory<PortalAssistantThreadFactory> */
-    use HasFactory;
-
-    public $fillable = [
-        'author_type',
-        'author_id',
-        'current_service_request_draft_id',
-        'guest_token',
-    ];
-
-    /**
-     * @return HasMany<PortalAssistantMessage, $this>
-     */
-    public function messages(): HasMany
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return $this->hasMany(PortalAssistantMessage::class, 'thread_id');
+        DB::transaction(function () {
+            try {
+                $this->migrator->add('portal.embed_assistant', false);
+                $this->migrator->add('portal.embed_assistant_allowed_domains', []);
+            } catch (SettingAlreadyExists $exception) {
+                // do nothing
+            }
+
+            EmbeddableSupportAssistantFeature::activate();
+        });
     }
 
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function author(): MorphTo
+    public function down(): void
     {
-        return $this->morphTo('author');
-    }
+        DB::transaction(function () {
+            EmbeddableSupportAssistantFeature::deactivate();
 
-    /**
-     * @return HasMany<ServiceRequest, $this>
-     */
-    public function serviceRequests(): HasMany
-    {
-        return $this->hasMany(ServiceRequest::class, 'portal_assistant_thread_id')
-            ->withoutGlobalScope('excludeDrafts');
+            $this->migrator->delete('portal.embed_assistant');
+            $this->migrator->delete('portal.embed_assistant_allowed_domains');
+        });
     }
-
-    /**
-     * @return BelongsTo<ServiceRequest, $this>
-     */
-    public function currentServiceRequestDraft(): BelongsTo
-    {
-        return $this->belongsTo(ServiceRequest::class, 'current_service_request_draft_id')
-            ->withoutGlobalScope('excludeDrafts');
-    }
-}
+};

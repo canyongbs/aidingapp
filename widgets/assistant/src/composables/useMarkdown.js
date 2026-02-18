@@ -1,4 +1,4 @@
-<!--
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
@@ -30,24 +30,27 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    import { ChatBubbleLeftRightIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
+*/
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
 
-    const props = defineProps({
-        isOpen: { type: Boolean, default: false },
-    });
+marked.setOptions({
+    breaks: true,
+    gfm: true,
+});
 
-    const emit = defineEmits(['toggle']);
-</script>
+export function useMarkdown() {
+    const renderMarkdown = (content) => {
+        if (!content) return '';
+        try {
+            const cleanedContent = content.replace(/【[^】]*】/g, '');
+            const html = marked.parse(cleanedContent, { async: false });
+            return DOMPurify.sanitize(html);
+        } catch (error) {
+            console.error('Error rendering markdown:', error);
+            return DOMPurify.sanitize(content);
+        }
+    };
 
-<template>
-    <button
-        @click="emit('toggle')"
-        class="bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] hover:bg-[linear-gradient(to_right_bottom,rgba(var(--primary-600),1),rgba(var(--primary-900),1))] text-white rounded-full p-4 shadow-xl hover:shadow-2xl transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-brand-500/50 hover:scale-105 active:scale-95"
-        aria-label="Toggle chat assistant"
-    >
-        <ChatBubbleLeftRightIcon v-if="!props.isOpen" class="w-6 h-6" />
-        <ChevronDownIcon v-else class="w-6 h-6" />
-    </button>
-</template>
+    return { renderMarkdown };
+}

@@ -32,25 +32,29 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed } from 'vue';
-    import { useAssistantChat } from '../../Composables/assistant/useAssistantChat.js';
-    import { useAuthStore } from '../../Stores/auth.js';
+    import { useAssistantChat } from '../composables/useAssistantChat.js';
     import ChatHeader from './ChatHeader.vue';
     import ChatInput from './ChatInput.vue';
     import ChatMessages from './ChatMessages.vue';
 
     const props = defineProps({
         isOpen: { type: Boolean, default: false },
+        sendMessageUrl: { type: String, required: true },
+        websocketsConfig: { type: Object, required: true },
+        isAuthenticated: { type: Boolean, default: false },
+        portalServiceManagement: { type: Boolean, default: false },
     });
 
     const emit = defineEmits(['close']);
 
-    const { messages, isSending, isAssistantResponding, sendMessage } = useAssistantChat();
+    const { messages, isSending, isAssistantResponding, sendMessage } = useAssistantChat(
+        props.sendMessageUrl,
+        props.websocketsConfig,
+        props.isAuthenticated,
+    );
 
-    const authStore = useAuthStore();
-    const welcomeMessage = computed(() => {
-        return `Hi ${authStore.user?.first_name || 'there'}, I am your support assistant. I can help you find information and troubleshoot issues. How can I assist you today?`;
-    });
+    const welcomeMessage =
+        'Hi there, I am your support assistant. I can help you find information and troubleshoot issues. How can I assist you today?';
 </script>
 
 <template>
@@ -66,7 +70,7 @@
             v-if="props.isOpen"
             class="mb-4 w-[400px] max-w-full h-[650px] max-h-full bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden ring-1 ring-brand-950/5 backdrop-blur-sm origin-bottom-right"
         >
-            <ChatHeader @close="emit('close')" />
+            <ChatHeader :portal-service-management="portalServiceManagement" @close="emit('close')" />
 
             <ChatMessages :messages="messages" :welcome-message="welcomeMessage" :is-open="props.isOpen" />
 
