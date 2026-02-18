@@ -158,11 +158,9 @@
         }
     }
 
-    watch(
-        [() => hasServiceManagement.value, () => userIsAuthenticated.value],
-        updateWidgetServiceManagement,
-        { immediate: true },
-    );
+    watch([() => hasServiceManagement.value, () => userIsAuthenticated.value], updateWidgetServiceManagement, {
+        immediate: true,
+    });
 
     function handleOpenServiceRequest() {
         window.dispatchEvent(new CustomEvent('assistant:close'));
