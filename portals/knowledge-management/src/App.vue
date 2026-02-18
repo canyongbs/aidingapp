@@ -135,20 +135,32 @@
         const script = document.createElement('script');
         script.src = assistantWidgetLoaderUrl.value;
         script.setAttribute('data-config', assistantWidgetConfigUrl.value);
+        document.body.appendChild(script);
+
+        const observer = new MutationObserver(() => {
+            if (document.querySelector('assistant-widget-embed')) {
+                observer.disconnect();
+                updateWidgetServiceManagement();
+            }
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
+
+    function updateWidgetServiceManagement() {
+        const widget = document.querySelector('assistant-widget-embed');
+        if (!widget) return;
 
         if (hasServiceManagement.value && userIsAuthenticated.value) {
-            script.setAttribute('data-portal-service-management', 'true');
+            widget.setAttribute('portal-service-management', '');
+        } else {
+            widget.removeAttribute('portal-service-management');
         }
-
-        document.body.appendChild(script);
     }
 
     watch(
         [() => hasServiceManagement.value, () => userIsAuthenticated.value],
-        ([sm, auth]) => {
-            window.__ASSISTANT_PORTAL_SERVICE_MANAGEMENT__ = !!(sm && auth);
-            window.dispatchEvent(new CustomEvent('assistant:update-service-management'));
-        },
+        updateWidgetServiceManagement,
         { immediate: true },
     );
 
@@ -173,6 +185,7 @@
             const widgetRoot = document.getElementById('assistant-widget-root');
             if (widgetRoot) {
                 widgetRoot.style.display = '';
+                updateWidgetServiceManagement();
             } else {
                 loadAssistantWidget();
             }

@@ -46,26 +46,13 @@
     });
 
     const isOpen = ref(false);
-    const portalServiceManagementEnabled = ref(
-        props.portalServiceManagement || !!window.__ASSISTANT_PORTAL_SERVICE_MANAGEMENT__,
-    );
 
     const toggleChat = () => {
         isOpen.value = !isOpen.value;
-
-        if (isOpen.value) {
-            portalServiceManagementEnabled.value =
-                props.portalServiceManagement || !!window.__ASSISTANT_PORTAL_SERVICE_MANAGEMENT__;
-        }
     };
 
     window.addEventListener('assistant:close', () => {
         isOpen.value = false;
-    });
-
-    window.addEventListener('assistant:update-service-management', () => {
-        portalServiceManagementEnabled.value =
-            props.portalServiceManagement || !!window.__ASSISTANT_PORTAL_SERVICE_MANAGEMENT__;
     });
 
     const setPrimaryColor = () => {
@@ -138,7 +125,7 @@
             :send-message-url="sendMessageUrl"
             :websockets-config="websocketsConfig"
             :is-authenticated="isAuthenticated"
-            :portal-service-management="portalServiceManagementEnabled"
+            :portal-service-management="portalServiceManagement"
             @close="toggleChat"
         />
 

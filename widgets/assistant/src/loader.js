@@ -38,8 +38,6 @@
     const configUrl = scriptTag.getAttribute('data-config');
     if (!configUrl) throw new Error('Config URL not found in script tag');
 
-    const portalServiceManagement = scriptTag.getAttribute('data-portal-service-management') === 'true';
-
     fetch(configUrl)
         .then((response) => response.json())
         .then((config) => {
@@ -48,10 +46,13 @@
             }
 
             window.__VITE_ASSISTANT_WIDGET_ASSET_URL__ = config.asset_url;
-            window.__ASSISTANT_WIDGET_CONFIG__ = {
-                ...config,
-                portal_service_management: portalServiceManagement,
-            };
+            window.__ASSISTANT_WIDGET_CONFIG__ = config;
+
+            if (!document.querySelector('assistant-widget-embed')) {
+                const embedElement = document.createElement('assistant-widget-embed');
+                embedElement.id = 'assistant-widget-root';
+                document.body.appendChild(embedElement);
+            }
 
             const scriptElement = document.createElement('script');
             scriptElement.src = config.js;
