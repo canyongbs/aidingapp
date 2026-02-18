@@ -32,9 +32,17 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ChatBubbleLeftRightIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+    import { ChatBubbleLeftRightIcon, PlusIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+
+    defineProps({
+        portalServiceManagement: { type: Boolean, default: false },
+    });
 
     defineEmits(['close']);
+
+    function openServiceRequest() {
+        window.dispatchEvent(new CustomEvent('assistant:open-service-request'));
+    }
 </script>
 
 <template>
@@ -43,7 +51,18 @@
             <div class="bg-white/20 p-2 rounded-lg">
                 <ChatBubbleLeftRightIcon class="w-5 h-5" />
             </div>
-            <h2 class="text-lg font-semibold tracking-tight">Support Assistant</h2>
+            <div class="flex flex-col">
+                <h2 class="text-lg font-semibold tracking-tight">Support Assistant</h2>
+                <div v-if="portalServiceManagement" class="mt-1">
+                    <button
+                        @click="openServiceRequest"
+                        class="flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm transition-all shadow-sm"
+                    >
+                        <PlusIcon class="w-3.5 h-3.5" />
+                        Open Service Request
+                    </button>
+                </div>
+            </div>
         </div>
         <button
             @click="$emit('close')"

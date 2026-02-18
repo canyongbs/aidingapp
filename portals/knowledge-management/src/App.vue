@@ -33,8 +33,8 @@
 -->
 <script setup>
     import { FormKit } from '@formkit/vue';
-    import { computed, onMounted, ref, watch } from 'vue';
-    import { RouterView, useRoute } from 'vue-router';
+    import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+    import { RouterView, useRoute, useRouter } from 'vue-router';
     import AppLoading from './Components/AppLoading.vue';
     import Footer from './Components/Footer.vue';
     import Header from './Components/Header.vue';
@@ -112,6 +112,7 @@
     });
 
     const route = useRoute();
+    const router = useRouter();
 
     const assistantWidgetLoaderUrl = ref(null);
     const assistantWidgetConfigUrl = ref(null);
@@ -134,8 +135,33 @@
         const script = document.createElement('script');
         script.src = assistantWidgetLoaderUrl.value;
         script.setAttribute('data-config', assistantWidgetConfigUrl.value);
+
+        if (hasServiceManagement.value && userIsAuthenticated.value) {
+            script.setAttribute('data-portal-service-management', 'true');
+        }
+
         document.body.appendChild(script);
     }
+
+    watch(
+        [() => hasServiceManagement.value, () => userIsAuthenticated.value],
+        ([sm, auth]) => {
+            window.__ASSISTANT_PORTAL_SERVICE_MANAGEMENT__ = !!(sm && auth);
+            window.dispatchEvent(new CustomEvent('assistant:update-service-management'));
+        },
+        { immediate: true },
+    );
+
+    function handleOpenServiceRequest() {
+        window.dispatchEvent(new CustomEvent('assistant:close'));
+        router.push({ name: 'create-service-request' });
+    }
+
+    window.addEventListener('assistant:open-service-request', handleOpenServiceRequest);
+
+    onUnmounted(() => {
+        window.removeEventListener('assistant:open-service-request', handleOpenServiceRequest);
+    });
 
     watch([showSignIn, assistantWidgetLoaderUrl], ([isSignIn]) => {
         if (isSignIn) {

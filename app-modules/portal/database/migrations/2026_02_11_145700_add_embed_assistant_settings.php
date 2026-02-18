@@ -36,14 +36,19 @@
 
 use App\Features\EmbeddableSupportAssistantFeature;
 use Illuminate\Support\Facades\DB;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
 return new class () extends SettingsMigration {
     public function up(): void
     {
         DB::transaction(function () {
-            $this->migrator->add('portal.embed_assistant', false);
-            $this->migrator->add('portal.embed_assistant_allowed_domains', []);
+            try {
+                $this->migrator->add('portal.embed_assistant', false);
+                $this->migrator->add('portal.embed_assistant_allowed_domains', []);
+            } catch (SettingAlreadyExists $exception) {
+                // do nothing
+            }
 
             EmbeddableSupportAssistantFeature::activate();
         });

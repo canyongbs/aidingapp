@@ -62,6 +62,7 @@ if (!config || !config.send_message_url || !config.websockets_config) {
         primaryColor: config.primary_color,
         rounding: config.rounding,
         isAuthenticated: config.is_authenticated || false,
+        portalServiceManagement: config.portal_service_management || false,
     });
 
     app.mount(appContainer);
