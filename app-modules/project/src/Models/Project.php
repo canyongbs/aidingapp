@@ -40,6 +40,7 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Project\Database\Factories\ProjectFactory;
 use AidingApp\Project\Models\Scopes\ProjectVisibilityScope;
 use AidingApp\Project\Observers\ProjectObserver;
+use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
 use App\Models\BaseModel;
@@ -88,6 +89,14 @@ class Project extends BaseModel implements Auditable
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class, 'project_id');
+    }
+
+    /**
+     * @return HasMany<Task, $this>
+     */
+    public function activeTasks(): HasMany
+    {
+        return $this->tasks()->whereIn('status', [TaskStatus::Pending, TaskStatus::InProgress]);
     }
 
     /**
