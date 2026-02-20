@@ -37,6 +37,7 @@
 namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
 use AidingApp\Project\Filament\Resources\ProjectResource;
+use AidingApp\Project\Models\Project;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -57,8 +58,21 @@ class ListProjects extends ListRecords
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('name')
+                    ->description(fn (Project $record): ?string => $record->description)
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('active_tasks_count')
+                    ->counts('activeTasks')
+                    ->label('Active Tasks'),
+                TextColumn::make('files_count')
+                    ->counts('files')
+                    ->label('Files'),
+                TextColumn::make('pipelines_count')
+                    ->counts('pipelines')
+                    ->label('Pipelines'),
+                TextColumn::make('milestones_count')
+                    ->counts('milestones')
+                    ->label('Milestones'),
             ])
             ->recordActions([
                 ViewAction::make(),
