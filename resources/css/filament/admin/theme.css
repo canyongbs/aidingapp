@@ -197,3 +197,7 @@ li[data-group-label=''] > ul > .fi-sidebar-item > .fi-sidebar-item-button > .fi-
 .treeselect-list {
     @apply bg-white dark:bg-gray-900;
 }
+
+span[data-type='mergeTag'] {
+    @apply mx-0 px-0;
+}
