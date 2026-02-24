@@ -5,7 +5,7 @@
     "wrapAttributes": "force-expand-multiline",
     "sortTailwindcssClasses": true,
     "sortHtmlAttributes": "code-guide",
-    "plugins": ["@shufo/prettier-plugin-blade", "prettier-plugin-organize-imports"],
+    "plugins": ["prettier-plugin-blade", "prettier-plugin-organize-imports"],
     "overrides": [
         {
             "files": ["*.blade.php"],
