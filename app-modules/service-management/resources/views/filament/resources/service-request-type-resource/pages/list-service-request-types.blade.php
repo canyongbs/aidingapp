@@ -1,58 +1,57 @@
 {{--
-<COPYRIGHT>
-
+    <COPYRIGHT>
+    
     Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
-
+    
     Aiding App™ is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
-
+    
     Notice:
-
+    
     - You may not provide the software to third parties as a hosted or managed
-      service, where the service provides users with access to any substantial set of
-      the features or functionality of the software.
+    service, where the service provides users with access to any substantial set of
+    the features or functionality of the software.
     - You may not move, change, disable, or circumvent the license key functionality
-      in the software, and you may not remove or obscure any functionality in the
-      software that is protected by the license key.
+    in the software, and you may not remove or obscure any functionality in the
+    software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
-      to applicable law.
+    of the licensor in the software. Any use of the licensor’s trademarks is subject
+    to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
-      vigorously.
+    same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
+    Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+    Software as a Service (SaaS) by Canyon GBS LLC.
     - Use of this software implies agreement to the license terms and conditions as stated
-      in the Elastic License 2.0.
-
+    in the Elastic License 2.0.
+    
     For more information or inquiries please visit our website at
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
-
-</COPYRIGHT>
+    
+    </COPYRIGHT>
 --}}
 @php
     use Filament\Support\Facades\FilamentAsset;
 @endphp
 
-<x-filament-panels::page @class([
-    'fi-resource-list-records-page',
-    'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
-])>
+<x-filament-panels::page
+    @class(['fi-resource-list-records-page', 'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug())])
+>
     <div
         class="flex flex-col gap-6"
         id="service-request-type-manager"
         wire:ignore
         x-data="serviceRequestTypeManager({
-            originalTreeData: @js($this->hierarchicalData),
-            treeData: @js($this->hierarchicalData),
-            canEdit: @js($this->canEdit),
-        })"
+                    originalTreeData: @js($this->hierarchicalData),
+                    treeData: @js($this->hierarchicalData),
+                    canEdit: @js($this->canEdit),
+                })"
     >
         {{-- Sticky Save Banner --}}
         <div
             class="border-warning-500 bg-warning-50 dark:border-warning-400 dark:bg-warning-900 sticky top-20 z-50 rounded-lg border p-4 shadow-lg"
-            style="display: none;"
+            style="display: none"
             x-show="hasUnsavedChanges && canEdit"
             x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0 -translate-y-2"
@@ -80,17 +79,15 @@
                     </svg>
                     <div>
                         <p class="text-warning-900 dark:text-warning-100 font-semibold">You have unsaved changes</p>
-                        <p class="text-warning-700 dark:text-warning-300 text-sm">Save your changes or they will be lost
+                        <p class="text-warning-700 dark:text-warning-300 text-sm">
+                            Save your changes or they will be lost
                         </p>
                     </div>
                 </div>
                 <!-- Buttons: full-width and centered on mobile, aligned to right on sm+ -->
                 <div class="mt-3 w-full sm:mt-0 sm:w-auto">
                     <div class="flex w-full justify-center gap-2 sm:w-auto sm:justify-end">
-                        <div
-                            x-data="{ saving: false }"
-                            x-init="$watch('isSaving', value => saving = value)"
-                        >
+                        <div x-data="{ saving: false }" x-init="$watch('isSaving', (value) => (saving = value))">
                             <x-filament::button
                                 @click="saveChanges()"
                                 x-bind:disabled="isSaving"
@@ -118,27 +115,18 @@
         </div>
 
         {{-- Top Action Buttons --}}
-        <div
-            class="flex flex-col items-center justify-end gap-4 sm:flex-row sm:items-center"
-            x-show="canEdit"
-        >
+        <div class="flex flex-col items-center justify-end gap-4 sm:flex-row sm:items-center" x-show="canEdit">
             {{-- Add Category/Type Buttons (Right) --}}
             <div class="flex w-full justify-end gap-3 sm:w-auto">
                 {{-- Add Category Button --}}
                 <div id="show-category-wrapper">
-                    <x-filament::button
-                        id="show-category-btn"
-                        type="button"
-                        color="gray"
-                        outlined="true"
-                        size="sm"
-                    >
+                    <x-filament::button id="show-category-btn" type="button" color="gray" outlined="true" size="sm">
                         Add Category
                     </x-filament::button>
                     <div
                         class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"
                         id="category-input-form"
-                        style="display: none;"
+                        style="display: none"
                     >
                         <div class="w-full">
                             <input
@@ -149,19 +137,10 @@
                             />
                         </div>
                         <div class="flex gap-2">
-                            <x-filament::button
-                                id="create-category-btn"
-                                type="button"
-                                size="sm"
-                            >
+                            <x-filament::button id="create-category-btn" type="button" size="sm">
                                 Add
                             </x-filament::button>
-                            <x-filament::button
-                                id="cancel-category-btn"
-                                type="button"
-                                color="gray"
-                                size="sm"
-                            >
+                            <x-filament::button id="cancel-category-btn" type="button" color="gray" size="sm">
                                 Cancel
                             </x-filament::button>
                         </div>
@@ -170,19 +149,13 @@
 
                 {{-- Add Type Button --}}
                 <div id="show-type-wrapper">
-                    <x-filament::button
-                        id="show-type-btn"
-                        type="button"
-                        color="gray"
-                        outlined="true"
-                        size="sm"
-                    >
+                    <x-filament::button id="show-type-btn" type="button" color="gray" outlined="true" size="sm">
                         Add Type
                     </x-filament::button>
                     <div
                         class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"
                         id="type-input-form"
-                        style="display: none;"
+                        style="display: none"
                     >
                         <div class="w-full">
                             <input
@@ -193,19 +166,8 @@
                             />
                         </div>
                         <div class="flex gap-2">
-                            <x-filament::button
-                                id="create-type-btn"
-                                type="button"
-                                size="sm"
-                            >
-                                Add
-                            </x-filament::button>
-                            <x-filament::button
-                                id="cancel-type-btn"
-                                type="button"
-                                color="gray"
-                                size="sm"
-                            >
+                            <x-filament::button id="create-type-btn" type="button" size="sm">Add</x-filament::button>
+                            <x-filament::button id="cancel-type-btn" type="button" color="gray" size="sm">
                                 Cancel
                             </x-filament::button>
                         </div>
@@ -236,9 +198,12 @@
                 {{-- Empty state: show when there are no categories and no types --}}
                 <div
                     class="flex flex-col items-center justify-center gap-3 py-12 text-center"
-                    style="min-height: 120px;"
+                    style="min-height: 120px"
                     x-cloak
-                    x-show="(!treeData.categories || treeData.categories.length === 0) && (!treeData.uncategorized_types || treeData.uncategorized_types.length === 0)"
+                    x-show="
+                        (! treeData.categories || treeData.categories.length === 0) &&
+                            (! treeData.uncategorized_types || treeData.uncategorized_types.length === 0)
+                    "
                 >
                     {{-- Icon rendered server-side via @svg helper, pass heroicon name --}}
                     <div class="flex items-center justify-center">
@@ -246,17 +211,15 @@
                     </div>
 
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">No types or categories yet</h3>
-                    <p class="max-w-xl text-sm text-gray-600 dark:text-gray-400">Create a category or add a type to get
-                        started. Use the buttons below to add your first items.</p>
+                    <p class="max-w-xl text-sm text-gray-600 dark:text-gray-400">
+                        Create a category or add a type to get started. Use the buttons below to add your first items.
+                    </p>
                 </div>
             </div>
         </div>
 
         {{-- Bottom Action Buttons --}}
-        <div
-            class="flex flex-col items-center justify-between gap-4 sm:flex-row sm:items-center"
-            x-show="canEdit"
-        >
+        <div class="flex flex-col items-center justify-between gap-4 sm:flex-row sm:items-center" x-show="canEdit">
             {{-- Save/Discard Buttons --}}
             <div class="flex w-full justify-start gap-3 sm:w-auto">
                 <x-filament::button
@@ -350,8 +313,8 @@
                 z-index: 10;
             }
 
-            [data-sortable="categories"],
-            [data-sortable="types"] {
+            [data-sortable='categories'],
+            [data-sortable='types'] {
                 position: relative;
             }
         </style>
