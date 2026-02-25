@@ -134,13 +134,11 @@
             "@php artisan filament:upgrade"
         ],
         "post-install-cmd": [
-            "@php -r \"if (file_exists('vendor/ysfkaya/filament-phone-input/yarn.lock')) { unlink('vendor/ysfkaya/filament-phone-input/yarn.lock'); }\"",
             "@php -r \"if (file_exists('vendor/phpdocumentor/reflection/composer.lock')) { unlink('vendor/phpdocumentor/reflection/composer.lock'); }\"",
             "@php -r \"if (file_exists('vendor/spatie/laravel-health/yarn.lock')) { unlink('vendor/spatie/laravel-health/yarn.lock'); }\""
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
-            "@php -r \"if (file_exists('vendor/ysfkaya/filament-phone-input/yarn.lock')) { unlink('vendor/ysfkaya/filament-phone-input/yarn.lock'); }\"",
             "@php -r \"if (file_exists('vendor/phpdocumentor/reflection/composer.lock')) { unlink('vendor/phpdocumentor/reflection/composer.lock'); }\"",
             "@php -r \"if (file_exists('vendor/spatie/laravel-health/yarn.lock')) { unlink('vendor/spatie/laravel-health/yarn.lock'); }\""
         ],
