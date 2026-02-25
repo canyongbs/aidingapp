@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "eb6854d6287f571b0fa6976c0722d5c3",
+    "content-hash": "d2a2e4e02818144fa860d0e8cb28aea0",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -18016,16 +18016,16 @@
         },
         {
             "name": "ysfkaya/filament-phone-input",
-            "version": "v4.1.0",
+            "version": "v4.1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ysfkaya/filament-phone-input.git",
-                "reference": "7e1e2bdabe59a88f94e64303fea02b5d99607287"
+                "reference": "416fc765f611fde7c4e11140ceff336f48bd3090"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ysfkaya/filament-phone-input/zipball/7e1e2bdabe59a88f94e64303fea02b5d99607287",
-                "reference": "7e1e2bdabe59a88f94e64303fea02b5d99607287",
+                "url": "https://api.github.com/repos/ysfkaya/filament-phone-input/zipball/416fc765f611fde7c4e11140ceff336f48bd3090",
+                "reference": "416fc765f611fde7c4e11140ceff336f48bd3090",
                 "shasum": ""
             },
             "require": {
@@ -18074,9 +18074,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ysfkaya/filament-phone-input/issues",
-                "source": "https://github.com/ysfkaya/filament-phone-input/tree/v4.1.0"
+                "source": "https://github.com/ysfkaya/filament-phone-input/tree/v4.1.1"
             },
-            "time": "2026-01-23T20:02:18+00:00"
+            "time": "2026-02-25T11:14:02+00:00"
         }
     ],
     "packages-dev": [
