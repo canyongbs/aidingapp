@@ -60,7 +60,8 @@ class AssistantBroadcastController extends Controller
             throw new AccessDeniedHttpException();
         }
 
-        $normalizedName = $broadcaster->normalizeChannelName($channelName);
+        // @phpstan-ignore function.alreadyNarrowedType
+        $normalizedName = method_exists($broadcaster, 'normalizeChannelName') ? $broadcaster->normalizeChannelName($channelName) : $channelName;
 
         if (! Str::startsWith($normalizedName, 'portal-assistant-thread-')) {
             throw new AccessDeniedHttpException();
