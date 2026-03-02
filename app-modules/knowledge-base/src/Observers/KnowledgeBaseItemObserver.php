@@ -52,7 +52,7 @@ class KnowledgeBaseItemObserver
 
     public function saved(): void
     {
-      if (app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant) {
+        if (app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant) {
             PrepareKnowledgeBaseVectorStore::dispatch();
         }
     }
