@@ -48,7 +48,6 @@ return new class () extends SettingsMigration {
             } catch (SettingAlreadyExists $exception) {
                 // do nothing
             }
-
         });
     }
 
