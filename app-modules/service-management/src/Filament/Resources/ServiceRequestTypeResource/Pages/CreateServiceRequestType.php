@@ -41,7 +41,6 @@ use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
-use App\Features\AiFeatureTogglesFeature;
 use App\Features\ServiceRequestTypeAiFeatureTogglesFeature;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Forms\Components\Textarea;
@@ -104,7 +103,6 @@ class CreateServiceRequestType extends CreateRecord
                             ->visible(fn (): bool => app(AiResolutionSettings::class)->is_enabled),
                     ])
                     ->visible(fn (): bool => ServiceRequestTypeAiFeatureTogglesFeature::active()
-                        && AiFeatureTogglesFeature::active()
                         && (app(AiClarificationSettings::class)->is_enabled || app(AiResolutionSettings::class)->is_enabled)),
             ]);
     }

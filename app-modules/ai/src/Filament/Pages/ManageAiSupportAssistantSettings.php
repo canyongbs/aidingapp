@@ -38,7 +38,6 @@ namespace AidingApp\Ai\Filament\Pages;
 
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\AiFeatureTogglesFeature;
 use App\Filament\Clusters\GlobalArtificialIntelligence;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -63,10 +62,6 @@ class ManageAiSupportAssistantSettings extends SettingsPage
 
     public static function canAccess(): bool
     {
-        if (! AiFeatureTogglesFeature::active()) {
-            return false;
-        }
-
         $user = auth()->user();
         assert($user instanceof User);
 

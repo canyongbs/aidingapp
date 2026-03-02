@@ -42,7 +42,6 @@ use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticateRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\AiFeatureTogglesFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -79,7 +78,7 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
             $request->session()->regenerate();
         }
 
-        $assistantEnabled = AiFeatureTogglesFeature::active() && app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant;
+        $assistantEnabled = app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant;
 
         return response()->json([
             'success' => true,

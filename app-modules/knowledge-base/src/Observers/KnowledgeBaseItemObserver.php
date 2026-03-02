@@ -40,7 +40,6 @@ use AidingApp\Ai\Jobs\PrepareKnowledgeBaseVectorStore;
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\AiFeatureTogglesFeature;
 
 class KnowledgeBaseItemObserver
 {
@@ -53,7 +52,7 @@ class KnowledgeBaseItemObserver
 
     public function saved(): void
     {
-        if (AiFeatureTogglesFeature::active() && app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant) {
+      if (app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant) {
             PrepareKnowledgeBaseVectorStore::dispatch();
         }
     }
