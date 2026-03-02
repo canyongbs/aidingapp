@@ -38,7 +38,6 @@ namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
-use App\Features\EmbeddableSupportAssistantFeature;
 use Illuminate\Contracts\Broadcasting\Broadcaster;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -85,7 +84,6 @@ class AssistantBroadcastController extends Controller
             ! $user
             && ! $thread->author_type
             && ! $thread->author_id
-            && EmbeddableSupportAssistantFeature::active()
         ) {
             $guestToken = $request->input('guest_token');
 

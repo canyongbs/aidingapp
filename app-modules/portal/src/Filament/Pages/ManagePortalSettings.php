@@ -46,7 +46,6 @@ use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
 use App\Features\AiFeatureTogglesFeature;
-use App\Features\EmbeddableSupportAssistantFeature;
 use App\Models\User;
 use App\Rules\ValidUrl;
 use BackedEnum;
@@ -136,7 +135,7 @@ class ManagePortalSettings extends SettingsPage
                             ->live(),
                         Toggle::make('embed_assistant')
                             ->label('Embed Support Assistant')
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && EmbeddableSupportAssistantFeature::active())
+                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant'))
                             ->live()
                             ->helperText('If enabled, the assistant can be embedded on other websites.')
                             ->hintAction(
@@ -171,7 +170,7 @@ class ManagePortalSettings extends SettingsPage
                             ->label('Allowed Domains')
                             ->helperText('Only these domains will be allowed to embed the assistant.')
                             ->placeholder('example.com')
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && $get('embed_assistant') && EmbeddableSupportAssistantFeature::active())
+                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && $get('ai_support_assistant') && $get('embed_assistant'))
                             ->disabled(fn (Get $get) => ! $get('embed_assistant'))
                             ->nestedRecursiveRules([
                                 new IsDomain(),
