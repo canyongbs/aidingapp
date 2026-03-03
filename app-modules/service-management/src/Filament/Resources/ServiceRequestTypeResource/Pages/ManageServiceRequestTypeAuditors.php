@@ -47,6 +47,10 @@ class ManageServiceRequestTypeAuditors extends EditRecord
 {
     use EditPageRedirection;
 
+    protected static ?string $title = 'Auditors';
+
+    protected static ?string $breadcrumb = 'Auditors';
+
     protected static string $resource = ServiceRequestTypeResource::class;
 
     public static function getNavigationLabel(): string
@@ -67,12 +71,12 @@ class ManageServiceRequestTypeAuditors extends EditRecord
                 Section::make()
                     ->schema([
                         Select::make('auditorUsers')
-                            ->label('Auditor Users')
+                            ->label('Users')
                             ->multiple()
                             ->relationship('auditorUsers', 'name')
                             ->preload(),
                         Select::make('auditorTeams')
-                            ->label('Auditor Teams')
+                            ->label('Teams')
                             ->multiple()
                             ->relationship('auditorTeams', 'name')
                             ->preload(),

@@ -47,6 +47,10 @@ class ManageServiceRequestTypeManagers extends EditRecord
 {
     use EditPageRedirection;
 
+    protected static ?string $title = 'Managers';
+
+    protected static ?string $breadcrumb = 'Managers';
+
     protected static string $resource = ServiceRequestTypeResource::class;
 
     public static function getNavigationLabel(): string
@@ -67,12 +71,12 @@ class ManageServiceRequestTypeManagers extends EditRecord
                 Section::make()
                     ->schema([
                         Select::make('managerUsers')
-                            ->label('Manager Users')
+                            ->label('Users')
                             ->multiple()
                             ->relationship('managerUsers', 'name')
                             ->preload(),
                         Select::make('managerTeams')
-                            ->label('Manager Teams')
+                            ->label('Teams')
                             ->multiple()
                             ->relationship('managerTeams', 'name')
                             ->preload(),
