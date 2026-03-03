@@ -41,7 +41,6 @@ use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\AiFeatureTogglesFeature;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -64,7 +63,7 @@ class PrepareKnowledgeBaseVectorStore implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        if (! AiFeatureTogglesFeature::active() || ! app(AiSupportAssistantSettings::class)->is_enabled || ! app(PortalSettings::class)->ai_support_assistant) {
+        if (! app(AiSupportAssistantSettings::class)->is_enabled || ! app(PortalSettings::class)->ai_support_assistant) {
             return;
         }
 
