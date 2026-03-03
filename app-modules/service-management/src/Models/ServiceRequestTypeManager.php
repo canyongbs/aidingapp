@@ -37,16 +37,17 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeManagerFactory;
-use AidingApp\Team\Models\Team;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Relations\MorphPivot;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @mixin IdeHelperServiceRequestTypeManager
  */
-class ServiceRequestTypeManager extends Pivot
+class ServiceRequestTypeManager extends MorphPivot
 {
     /** @use HasFactory<ServiceRequestTypeManagerFactory> */
     use HasFactory;
@@ -56,18 +57,18 @@ class ServiceRequestTypeManager extends Pivot
     protected $table = 'service_request_type_managers';
 
     /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class);
-    }
-
-    /**
      * @return BelongsTo<ServiceRequestType, $this>
      */
     public function serviceRequestType(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestType::class)->withTrashed()->withArchived();
+    }
+
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function managerable(): MorphTo
+    {
+        return $this->morphTo();
     }
 }

@@ -37,7 +37,7 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Audit\Overrides\BelongsToMany;
+use AidingApp\Audit\Overrides\MorphToMany;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
@@ -188,22 +188,62 @@ class ServiceRequestType extends BaseModel implements Auditable
     }
 
     /**
-     * @return BelongsToMany<Team, $this, covariant ServiceRequestTypeManager>
+     * @return MorphToMany<User, $this, covariant ServiceRequestTypeManager>
      */
-    public function managers(): BelongsToMany
+    public function managerUsers(): MorphToMany
     {
-        return $this->belongsToMany(Team::class, 'service_request_type_managers')
+        return $this->morphedByMany(
+            related: User::class,
+            name: 'managerable',
+            table: 'service_request_type_managers'
+        )
             ->using(ServiceRequestTypeManager::class)
+            ->withPivot('id')
             ->withTimestamps();
     }
 
     /**
-     * @return BelongsToMany<Team, $this, covariant ServiceRequestTypeAuditor>
+     * @return MorphToMany<Team, $this, covariant ServiceRequestTypeManager>
      */
-    public function auditors(): BelongsToMany
+    public function managerTeams(): MorphToMany
     {
-        return $this->belongsToMany(Team::class, 'service_request_type_auditors')
+        return $this->morphedByMany(
+            related: Team::class,
+            name: 'managerable',
+            table: 'service_request_type_managers'
+        )
+            ->using(ServiceRequestTypeManager::class)
+            ->withPivot('id')
+            ->withTimestamps();
+    }
+
+    /**
+     * @return MorphToMany<User, $this, covariant ServiceRequestTypeAuditor>
+     */
+    public function auditorUsers(): MorphToMany
+    {
+        return $this->morphedByMany(
+            related: User::class,
+            name: 'auditorable',
+            table: 'service_request_type_auditors'
+        )
             ->using(ServiceRequestTypeAuditor::class)
+            ->withPivot('id')
+            ->withTimestamps();
+    }
+
+    /**
+    * @return MorphToMany<Team, $this, covariant ServiceRequestTypeAuditor>
+    */
+    public function auditorTeams(): MorphToMany
+    {
+        return $this->morphedByMany(
+            related: Team::class,
+            name: 'auditorable',
+            table: 'service_request_type_auditors'
+        )
+            ->using(ServiceRequestTypeAuditor::class)
+            ->withPivot('id')
             ->withTimestamps();
     }
 

@@ -37,16 +37,17 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeAuditorFactory;
-use AidingApp\Team\Models\Team;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Relations\MorphPivot;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
  * @mixin IdeHelperServiceRequestTypeAuditor
  */
-class ServiceRequestTypeAuditor extends Pivot
+class ServiceRequestTypeAuditor extends MorphPivot
 {
     /** @use HasFactory<ServiceRequestTypeAuditorFactory> */
     use HasFactory;
@@ -56,11 +57,11 @@ class ServiceRequestTypeAuditor extends Pivot
     protected $table = 'service_request_type_auditors';
 
     /**
-     * @return BelongsTo<Team, $this>
+     * @return MorphTo<Model, $this>
      */
-    public function team(): BelongsTo
+    public function auditorable(): MorphTo
     {
-        return $this->belongsTo(Team::class);
+        return $this->morphTo();
     }
 
     /**

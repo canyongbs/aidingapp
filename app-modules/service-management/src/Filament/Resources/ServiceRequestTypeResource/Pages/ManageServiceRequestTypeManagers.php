@@ -37,44 +37,47 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use Filament\Actions\AttachAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DetachAction;
-use Filament\Actions\DetachBulkAction;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use App\Concerns\EditPageRedirection;
+use Filament\Forms\Components\Select;
+use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
-class ManageServiceRequestTypeManagers extends ManageRelatedRecords
+class ManageServiceRequestTypeManagers extends EditRecord
 {
-    protected static string $resource = ServiceRequestTypeResource::class;
+    use EditPageRedirection;
 
-    protected static string $relationship = 'managers';
+    protected static string $resource = ServiceRequestTypeResource::class;
 
     public static function getNavigationLabel(): string
     {
         return 'Managers';
     }
 
-    public function table(Table $table): Table
+    public function getRelationManagers(): array
     {
-        return $table
-            ->recordTitleAttribute('name')
-            ->inverseRelationship('manageableServiceRequestTypes')
-            ->columns([
-                TextColumn::make('name')
-                    ->label('Team'),
-            ])
-            ->headerActions([
-                AttachAction::make(),
-            ])
-            ->recordActions([
-                DetachAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DetachBulkAction::make(),
-                ]),
+        // Needed to prevent Filament from loading the relation managers on this page.
+        return [];
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make()
+                    ->schema([
+                        Select::make('managerUsers')
+                            ->label('Manager Users')
+                            ->multiple()
+                            ->relationship('managerUsers', 'name')
+                            ->preload(),
+                        Select::make('managerTeams')
+                            ->label('Manager Teams')
+                            ->multiple()
+                            ->relationship('managerTeams', 'name')
+                            ->preload(),
+                    ])
+                    ->columns(2),
             ]);
     }
 }

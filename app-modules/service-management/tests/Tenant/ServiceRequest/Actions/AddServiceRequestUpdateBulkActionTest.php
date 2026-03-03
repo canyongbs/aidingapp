@@ -85,7 +85,8 @@ test('it can add updates to multiple service requests for user with update permi
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managers()->attach($team);
+    $serviceRequestType->managerUsers()->attach($user);
+    $serviceRequestType->managerTeams()->attach($team);
 
     $serviceRequests = ServiceRequest::factory()
         ->has(

@@ -33,23 +33,99 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeAuditors;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Team\Models\Team;
 use App\Models\User;
-use Filament\Actions\AttachAction;
+use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
-it('can attach audit member to service request type', function () {
+test('A successful action on the ManageServiceRequestTypeAuditors page', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    asSuperAdmin()
+        ->get(
+            ServiceRequestTypeResource::getUrl('service-request-type-auditors', [
+                'record' => $serviceRequestType->getRouteKey(),
+            ])
+        )
+        ->assertSuccessful();
+});
+
+it('can attach auditor users to a service request type', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
     $user = User::factory()->create();
 
+    asSuperAdmin();
+
+    livewire(ManageServiceRequestTypeAuditors::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->fillForm([
+            'auditorUsers' => [$user->getKey()],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceRequestType->refresh()->auditorUsers->pluck('id'))
+        ->toContain($user->getKey());
+});
+
+it('can attach auditor teams to a service request type', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $team = Team::factory()->create();
+
+    asSuperAdmin();
+
+    livewire(ManageServiceRequestTypeAuditors::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->fillForm([
+            'auditorTeams' => [$team->getKey()],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceRequestType->refresh()->auditorTeams->pluck('id'))
+        ->toContain($team->getKey());
+});
+
+it('can attach both auditor users and auditor teams to a service request type', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $user = User::factory()->create();
+    $team = Team::factory()->create();
+
+    asSuperAdmin();
+
+    livewire(ManageServiceRequestTypeAuditors::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->fillForm([
+            'auditorUsers' => [$user->getKey()],
+            'auditorTeams' => [$team->getKey()],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $serviceRequestType->refresh();
+
+    expect($serviceRequestType->auditorUsers->pluck('id'))->toContain($user->getKey());
+    expect($serviceRequestType->auditorTeams->pluck('id'))->toContain($team->getKey());
+});
+
+// Permission Tests
+
+test('ManageServiceRequestTypeAuditors is gated with proper access control', function () {
+    $user = User::factory()->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
 
     actingAs($user)
         ->get(
@@ -58,19 +134,86 @@ it('can attach audit member to service request type', function () {
             ])
         )->assertForbidden();
 
+    livewire(ManageServiceRequestTypeAuditors::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->assertForbidden();
+
     $user->givePermissionTo('settings.view-any');
-    $user->givePermissionTo('team.view-any');
+    $user->givePermissionTo('settings.*.update');
+
+    actingAs($user)
+        ->get(
+            ServiceRequestTypeResource::getUrl('service-request-type-auditors', [
+                'record' => $serviceRequestType->getRouteKey(),
+            ])
+        )->assertSuccessful();
+
+    $auditorUser = User::factory()->create();
 
     livewire(ManageServiceRequestTypeAuditors::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
-        ->callTableAction(
-            AttachAction::class,
-            data: ['recordId' => $team->getKey()]
+        ->fillForm([
+            'auditorUsers' => [$auditorUser->getKey()],
+            'auditorTeams' => [],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceRequestType->refresh()->auditorUsers->pluck('id'))
+        ->toContain($auditorUser->getKey());
+});
+
+test('ManageServiceRequestTypeAuditors is gated with proper feature access control', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = false;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.update');
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    actingAs($user)
+        ->get(
+            ServiceRequestTypeResource::getUrl('service-request-type-auditors', [
+                'record' => $serviceRequestType->getRouteKey(),
+            ])
+        )->assertForbidden();
+
+    livewire(ManageServiceRequestTypeAuditors::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->assertForbidden();
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    actingAs($user)
+        ->get(
+            ServiceRequestTypeResource::getUrl('service-request-type-auditors', [
+                'record' => $serviceRequestType->getRouteKey(),
+            ])
         )->assertSuccessful();
 
-    expect($serviceRequestType->refresh())
-        ->auditors
-        ->pluck('id')
-        ->toContain($team->getKey());
+    $auditorTeam = Team::factory()->create();
+
+    livewire(ManageServiceRequestTypeAuditors::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->fillForm([
+            'auditorUsers' => [],
+            'auditorTeams' => [$auditorTeam->getKey()],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceRequestType->refresh()->auditorTeams->pluck('id'))
+        ->toContain($auditorTeam->getKey());
 });
