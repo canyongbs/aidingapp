@@ -123,6 +123,39 @@ it('can list files', function () {
         ->assertCanSeeTableRecords($project->files);
 });
 
+it('can sort files by created by', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $firstUser = User::factory()->create();
+    $secondUser = User::factory()->create();
+    $thirdUser = User::factory()->create();
+
+    $firstFile = ProjectFile::factory()->for($project)->create([
+        'created_by_id' => $secondUser->getKey(),
+        'last_updated_by_id' => $secondUser->getKey(),
+    ]);
+    $secondFile = ProjectFile::factory()->for($project)->create([
+        'created_by_id' => $thirdUser->getKey(),
+        'last_updated_by_id' => $thirdUser->getKey(),
+    ]);
+    $thirdFile = ProjectFile::factory()->for($project)->create([
+        'created_by_id' => $firstUser->getKey(),
+        'last_updated_by_id' => $firstUser->getKey(),
+    ]);
+
+    $expectedOrder = collect([$firstFile, $secondFile, $thirdFile])
+        ->sortBy('created_by_id')
+        ->values();
+
+    livewire(ManageFiles::class, [
+        'record' => $project->getRouteKey(),
+    ])
+        ->sortTable('createdBy.name', 'asc')
+        ->assertCanSeeTableRecords($expectedOrder, inOrder: true);
+});
+
 it('can validate create files inputs', function ($data, $errors) {
     asSuperAdmin();
     Storage::fake('s3');
