@@ -34,33 +34,28 @@
 </COPYRIGHT>
 */
 
-use App\Features\EmbeddableSupportAssistantFeature;
-use Illuminate\Support\Facades\DB;
 use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
 return new class () extends SettingsMigration {
     public function up(): void
     {
-        DB::transaction(function () {
-            try {
-                $this->migrator->add('portal.embed_assistant', false);
-                $this->migrator->add('portal.embed_assistant_allowed_domains', []);
-            } catch (SettingAlreadyExists $exception) {
-                // do nothing
-            }
+        try {
+            $this->migrator->add('portal.embed_assistant', false);
+        } catch (SettingAlreadyExists $exception) {
+            // do nothing
+        }
 
-            EmbeddableSupportAssistantFeature::activate();
-        });
+        try {
+            $this->migrator->add('portal.embed_assistant_allowed_domains', []);
+        } catch (SettingAlreadyExists $exception) {
+            // do nothing
+        }
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            EmbeddableSupportAssistantFeature::deactivate();
-
-            $this->migrator->delete('portal.embed_assistant');
-            $this->migrator->delete('portal.embed_assistant_allowed_domains');
-        });
+        $this->migrator->delete('portal.embed_assistant');
+        $this->migrator->delete('portal.embed_assistant_allowed_domains');
     }
 };

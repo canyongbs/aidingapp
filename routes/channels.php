@@ -37,7 +37,6 @@
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
-use App\Features\EmbeddableSupportAssistantFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -64,8 +63,8 @@ Broadcast::channel('portal-assistant-thread-{threadId}', function (?Contact $use
         return true;
     }
 
-    // If user is not authenticated but thread has no author, check guest token (only if feature is active)
-    if (! $user && ! $thread->author_type && ! $thread->author_id && EmbeddableSupportAssistantFeature::active()) {
+    // If user is not authenticated but thread has no author, check guest token
+    if (! $user && ! $thread->author_type && ! $thread->author_id) {
         $guestToken = request()->input('guest_token');
 
         return $guestToken && $thread->guest_token === $guestToken;

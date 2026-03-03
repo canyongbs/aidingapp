@@ -39,7 +39,6 @@ namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 use AidingApp\Ai\Jobs\PortalAssistant\SendMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\EmbeddableSupportAssistantFeature;
 use App\Http\Controllers\Controller;
 use Filament\Support\Colors\Color;
 use Illuminate\Http\JsonResponse;
@@ -135,7 +134,7 @@ class AssistantWidgetController extends Controller
                     abort(403, 'You do not have access to this thread.');
                 }
 
-                if (EmbeddableSupportAssistantFeature::active() && filled($data['guest_token'] ?? null)) {
+                if (filled($data['guest_token'] ?? null)) {
                     if ($thread->guest_token !== $data['guest_token']) {
                         abort(403, 'Invalid guest token.');
                     }
@@ -150,9 +149,7 @@ class AssistantWidgetController extends Controller
                 $thread->author()->associate($author);
             }
 
-            if (EmbeddableSupportAssistantFeature::active()) {
-                $thread->guest_token = $data['guest_token'] ?? Str::uuid()->toString();
-            }
+            $thread->guest_token = $data['guest_token'] ?? Str::uuid()->toString();
 
             $thread->save();
         }
@@ -172,7 +169,7 @@ class AssistantWidgetController extends Controller
         return response()->json([
             'message' => 'Message dispatched for processing via websockets.',
             'thread_id' => $thread->getKey(),
-            'guest_token' => EmbeddableSupportAssistantFeature::active() ? $thread->guest_token : null,
+            'guest_token' => $thread->guest_token,
         ]);
     }
 }
