@@ -81,11 +81,9 @@ composer lint
 2. Configure Extension, in `Settings as JSON`
     ```
     "phpstan.singleFileMode": false,
-    "phpstan.binPath": "./vendor/bin/phpstan",
+    "phpstan.binPath": "./docker/bin/phpstan",
     "phpstan.binCommand": [],
     "phpstan.configFile": "phpstan.neon.dist",
-    "phpstan.dockerContainerName": "advisingapp-app-1",
-    "phpstan.rootDir": "",
     "phpstan.options": [],
     "phpstan.enableStatusBar": true,
     "phpstan.memoryLimit": "1G",
@@ -98,11 +96,12 @@ composer lint
     "phpstan.ignoreErrors": [],
     "phpstan.suppressWorkspaceMessage": false,
     "phpstan.pro": false,
-    "phpstan.tmpDir": "",
     "phpstan.checkValidity": false,
     "phpstan.paths": {
         "": "/var/www/html"
     },
+    "phpstan.dockerContainerName": "aidingapp-app-1",
+    "phpstan.rootDir": "",
     ```
 
 ---

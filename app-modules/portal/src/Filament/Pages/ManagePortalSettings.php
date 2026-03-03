@@ -45,7 +45,6 @@ use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
-use App\Features\AiFeatureTogglesFeature;
 use App\Models\User;
 use App\Rules\ValidUrl;
 use BackedEnum;
@@ -131,7 +130,7 @@ class ManagePortalSettings extends SettingsPage
                             ->columnSpanFull(),
                         Toggle::make('ai_support_assistant')
                             ->label('AI Support Assistant')
-                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && AiFeatureTogglesFeature::active() && app(AiSupportAssistantSettings::class)->is_enabled)
+                            ->visible(fn (Get $get) => $get('knowledge_management_portal_enabled') && app(AiSupportAssistantSettings::class)->is_enabled)
                             ->live(),
                         Toggle::make('embed_assistant')
                             ->label('Embed Support Assistant')
@@ -275,7 +274,7 @@ class ManagePortalSettings extends SettingsPage
 
         parent::save();
 
-        if (AiFeatureTogglesFeature::active() && app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant) {
+        if (app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant) {
             PrepareKnowledgeBaseVectorStore::dispatch();
         }
     }
