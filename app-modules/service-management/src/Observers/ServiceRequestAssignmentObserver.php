@@ -56,10 +56,12 @@ class ServiceRequestAssignmentObserver
 
     public function creating(ServiceRequestAssignment $serviceRequestAssignment): void
     {
-        throw_if(! in_array($serviceRequestAssignment->user_id, $serviceRequestAssignment->serviceRequest->priority->type->managers
-            ->flatMap(fn ($managers) => $managers->users)
-            ->pluck('id')
-            ->toArray()), new AttemptedToAssignNonManagerToServiceRequest());
+        $type = $serviceRequestAssignment->serviceRequest->priority->type;
+
+        $isManager = $type->managerUsers()->where('users.id', $serviceRequestAssignment->user_id)->exists() ||
+            $type->managerTeams()->whereRelation('users', 'users.id', $serviceRequestAssignment->user_id)->exists();
+
+        throw_if(! $isManager, new AttemptedToAssignNonManagerToServiceRequest());
     }
 
     public function created(ServiceRequestAssignment $serviceRequestAssignment): void

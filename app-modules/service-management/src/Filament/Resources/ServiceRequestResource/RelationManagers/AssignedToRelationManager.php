@@ -80,10 +80,17 @@ class AssignedToRelationManager extends RelationManager
             ->paginated(false)
             ->headerActions([
                 Action::make('assign-to-me')
-                    ->visible(fn () => auth()->user()->can('update', $this->getOwnerRecord()) && is_null($this->getOwnerRecord()->assignedTo) && in_array(auth()->user()?->getKey(), $this->getOwnerRecord()->priority->type->managers
-                        ->flatMap(fn ($managers) => $managers->users)
-                        ->pluck('id')
-                        ->toArray()))
+                    ->visible(function () {
+                        $user = auth()->user();
+                        $type = $this->getOwnerRecord()->priority->type;
+
+                        return $user->can('update', $this->getOwnerRecord())
+                            && is_null($this->getOwnerRecord()->assignedTo)
+                            && (
+                                $type->managerUsers->contains('id', $user?->getKey()) ||
+                                $type->managerTeams->contains('id', $user?->team?->getKey())
+                            );
+                    })
                     ->label('Assign To Me')
                     ->color('gray')
                     ->requiresConfirmation()
@@ -109,8 +116,14 @@ class AssignedToRelationManager extends RelationManager
                             ->searchable()
                             ->getSearchResultsUsing(fn (string $search): array => User::query()
                                 ->where(new Expression('lower(name)'), 'like', '%' . str($search)->lower() . '%')
-                                ->whereHas('team.manageableServiceRequestTypes', function (Builder $query) {
-                                    $query->where('service_request_type_id', $this->getOwnerRecord()?->priority->type_id ?? null);
+                                ->where(function (Builder $query) {
+                                    $typeId = $this->getOwnerRecord()?->priority->type_id ?? null;
+                                    $query->whereHas('team.manageableServiceRequestTypes', function (Builder $query) use ($typeId) {
+                                        $query->where('service_request_type_id', $typeId);
+                                    })
+                                        ->orWhereHas('manageableServiceRequestTypes', function (Builder $query) use ($typeId) {
+                                            $query->where('service_request_type_id', $typeId);
+                                        });
                                 })
                                 ->where('id', '!=', $this->getOwnerRecord()->assignedTo?->user_id)
                                 ->pluck('name', 'id')

@@ -64,7 +64,7 @@ class ChangeServiceRequestStatusBulkAction
                     ->required(),
             ])
             ->action(function (array $data, Collection $records) {
-                $records->loadMissing(['priority.type.managers', 'respondent', 'status']);
+                $records->loadMissing(['priority.type.managerUsers', 'priority.type.managerTeams', 'respondent', 'status']);
 
                 $user = auth()->user();
                 $isUserSuperAdmin = $user->isSuperAdmin();
@@ -104,7 +104,8 @@ class ChangeServiceRequestStatusBulkAction
 
                         $team = $user->team;
 
-                        if ($serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey())) {
+                        if ($serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey()) ||
+                            $serviceRequest->priority?->type?->managerTeams?->contains('id', $team?->getKey())) {
                             return null;
                         }
 

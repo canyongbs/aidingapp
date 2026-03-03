@@ -70,7 +70,67 @@ test('The correct details are displayed on the ListServiceRequests page', functi
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managers()->attach($team);
+    $serviceRequestType->managerTeams()->attach($team);
+
+    $serviceRequests = ServiceRequest::factory()
+        ->has(
+            factory: ServiceRequestAssignment::factory()
+                ->state([
+                    'user_id' => $user->getKey(),
+                ])
+                ->count(1)
+                ->active(),
+            relationship: 'assignments'
+        )
+        ->state([
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestType->getKey(),
+            ])->getKey(),
+        ])
+        ->count(10)
+        ->create();
+
+    $component = livewire(ListServiceRequests::class);
+
+    $component->assertSuccessful()
+        ->assertCanSeeTableRecords($serviceRequests)
+        ->assertCountTableRecords(10);
+
+    $serviceRequests->each(
+        fn (ServiceRequest $serviceRequest) => $component
+            ->assertTableColumnStateSet(
+                'service_request_number',
+                $serviceRequest->service_request_number,
+                $serviceRequest
+            )
+            ->assertTableColumnStateSet(
+                'respondent.display_name',
+                $serviceRequest->respondent->full_name,
+                $serviceRequest
+            )
+            ->assertTableColumnStateSet(
+                'division.name',
+                $serviceRequest->division->name,
+                $serviceRequest
+            )
+            ->assertTableColumnStateSet(
+                'assignedTo.user.name',
+                $serviceRequest->assignedTo->user->name,
+                $serviceRequest
+            )
+    );
+});
+
+test('The correct details are displayed on the ListServiceRequests page via direct user manager', function () {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.*.update');
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managerUsers()->attach($user);
 
     $serviceRequests = ServiceRequest::factory()
         ->has(
@@ -217,7 +277,43 @@ test('service requests only visible to service request type managers', function 
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managers()->attach($team);
+    $serviceRequestType->managerTeams()->attach($team);
+
+    $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])
+        ->count(3)
+        ->create();
+
+    livewire(ListServiceRequests::class)
+        ->assertCanSeeTableRecords(
+            $serviceRequestsWithManager
+        )
+        ->assertCanNotSeeTableRecords($serviceRequests);
+});
+
+test('service requests only visible to direct user service request type managers', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.view-any');
+
+    actingAs($user);
+
+    $serviceRequests = ServiceRequest::factory()
+        ->count(3)
+        ->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managerUsers()->attach($user);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
@@ -259,7 +355,43 @@ test('service requests only visible to service request type auditors', function 
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->auditors()->attach($team);
+    $serviceRequestType->auditorTeams()->attach($team);
+
+    $serviceRequestsWithAuditors = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])
+        ->count(3)
+        ->create();
+
+    livewire(ListServiceRequests::class)
+        ->assertCanSeeTableRecords(
+            $serviceRequestsWithAuditors
+        )
+        ->assertCanNotSeeTableRecords($serviceRequests);
+});
+
+test('service requests only visible to direct user service request type auditors', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.view-any');
+
+    actingAs($user);
+
+    $serviceRequests = ServiceRequest::factory()
+        ->count(3)
+        ->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->auditorUsers()->attach($user);
 
     $serviceRequestsWithAuditors = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
@@ -291,7 +423,47 @@ test('can list audit member to service request type', function () {
 
     $serviceRequests = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
-            ->hasAttached($team, [], 'managers'), 'type'),
+            ->hasAttached($team, [], 'managerTeams'), 'type'),
+    ])
+        ->for($contact, 'respondent')
+        ->count(3)
+        ->create();
+
+    actingAs($user)
+        ->get(
+            ContactResource::getUrl('service-management', [
+                'record' => $contact->getRouteKey(),
+            ])
+        )->assertForbidden();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+    $user->givePermissionTo('team.view-any');
+    $user->givePermissionTo('contact.view-any');
+
+    actingAs($user);
+
+    livewire(ServiceRequestsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ContactServiceManagement::class,
+    ])
+        ->assertCanSeeTableRecords($serviceRequests)
+        ->assertCanNotSeeTableRecords($serviceRequestsWithoutManager);
+});
+
+test('can list direct user manager to service request type', function () {
+    $user = User::factory()->create();
+
+    $contact = Contact::factory()->create();
+
+    $serviceRequestsWithoutManager = ServiceRequest::factory()
+        ->for($contact, 'respondent')
+        ->count(3)
+        ->create();
+
+    $serviceRequests = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
+            ->hasAttached($user, [], 'managerUsers'), 'type'),
     ])
         ->for($contact, 'respondent')
         ->count(3)
@@ -340,7 +512,7 @@ it('can filter service requests by assigned to with unassigned option', function
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managers()->attach($team);
+    $serviceRequestType->managerTeams()->attach($team);
 
     asSuperAdmin();
 
@@ -406,6 +578,60 @@ it('can filter service requests by assigned to with unassigned option', function
             $unassignedRequest,
             $assignedRequest,
             $assignedSecondRequest,
+        ]);
+});
+
+it('can filter service requests by assigned to with unassigned option via direct user manager', function () {
+    $unassignedRequest = ServiceRequest::factory()->create();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.*.update');
+
+    $user->refresh();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managerUsers()->attach($user);
+
+    asSuperAdmin();
+
+    $assignedRequest = ServiceRequest::factory()
+        ->has(
+            factory: ServiceRequestAssignment::factory()
+                ->state([
+                    'user_id' => $user->getKey(),
+                ])
+                ->active(),
+            relationship: 'assignments'
+        )
+        ->state([
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestType->getKey(),
+            ])->getKey(),
+        ])
+        ->create();
+
+    livewire(ListServiceRequests::class)
+        ->assertCanSeeTableRecords([
+            $unassignedRequest,
+            $assignedRequest,
+        ])
+        ->filterTable('assignedTo', 'unassigned')
+        ->assertCanSeeTableRecords([$unassignedRequest])
+        ->assertCanNotSeeTableRecords([
+            $assignedRequest,
+        ])
+        ->removeTableFilter('assignedTo')
+        ->filterTable('assignedTo', $user->getKey())
+        ->assertCanSeeTableRecords([$assignedRequest])
+        ->assertCanNotSeeTableRecords([
+            $unassignedRequest,
+        ])
+        ->removeTableFilter('assignedTo')
+        ->assertCanSeeTableRecords([
+            $unassignedRequest,
+            $assignedRequest,
         ]);
 });
 

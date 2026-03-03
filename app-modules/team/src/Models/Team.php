@@ -52,6 +52,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 /**
  * @mixin IdeHelperTeam
@@ -85,22 +86,24 @@ class Team extends BaseModel
     }
 
     /**
-     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeManager>
+     * @return MorphToMany<ServiceRequestType, $this, covariant ServiceRequestTypeManager>
      */
-    public function manageableServiceRequestTypes(): BelongsToMany
+    public function manageableServiceRequestTypes(): MorphToMany
     {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
+        return $this->morphToMany(ServiceRequestType::class, 'managerable', 'service_request_type_managers')
             ->using(ServiceRequestTypeManager::class)
+            ->withPivot('id')
             ->withTimestamps();
     }
 
     /**
-     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeAuditor>
+     * @return MorphToMany<ServiceRequestType, $this, covariant ServiceRequestTypeAuditor>
      */
-    public function auditableServiceRequestTypes(): BelongsToMany
+    public function auditableServiceRequestTypes(): MorphToMany
     {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')
+        return $this->morphToMany(ServiceRequestType::class, 'auditorable', 'service_request_type_auditors')
             ->using(ServiceRequestTypeAuditor::class)
+            ->withPivot('id')
             ->withTimestamps();
     }
 

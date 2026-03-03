@@ -161,7 +161,71 @@ test('CreateServiceRequest is gated with proper access control', function () {
 
     $serviceRequestTypesWithManager = ServiceRequestType::factory()->create();
 
-    $serviceRequestTypesWithManager->managers()->attach($team);
+    $serviceRequestTypesWithManager->managerTeams()->attach($team);
+
+    $serviceRequestTypesWithManager->save();
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('create')
+        )->assertSuccessful();
+
+    $request = collect(CreateServiceRequestRequestFactory::new()->create([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestTypesWithManager->getKey(),
+        ])->getKey(),
+    ]));
+
+    livewire(CreateServiceRequest::class)
+        ->fillForm($request->toArray())
+        ->fillForm([
+            'respondent_id' => Contact::factory()->create()->getKey(),
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    assertCount(1, ServiceRequest::all());
+
+    assertDatabaseHas(
+        ServiceRequest::class,
+        $request->except(
+            [
+                'division_id',
+                'status_id',
+                'priority_id',
+                'respondent_id',
+                'type_id',
+            ]
+        )->toArray()
+    );
+
+    $serviceRequest = ServiceRequest::first();
+
+    expect($serviceRequest->division->id)
+        ->toEqual($request->get('division_id'))
+        ->and($serviceRequest->status->id)
+        ->toEqual($request->get('status_id'))
+        ->and($serviceRequest->priority->id)
+        ->toEqual($request->get('priority_id'));
+});
+
+test('CreateServiceRequest is gated with proper access control via direct user manager', function () {
+    $user = User::factory()->create();
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('create')
+        )->assertForbidden();
+
+    livewire(CreateServiceRequest::class)
+        ->assertForbidden();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+
+    $serviceRequestTypesWithManager = ServiceRequestType::factory()->create();
+
+    $serviceRequestTypesWithManager->managerUsers()->attach($user);
 
     $serviceRequestTypesWithManager->save();
 
@@ -241,7 +305,63 @@ test('CreateServiceRequest is gated with proper feature access control', functio
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managers()->attach($team);
+    $serviceRequestType->managerTeams()->attach($team);
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('create')
+        )->assertSuccessful();
+
+    $request = collect(CreateServiceRequestRequestFactory::new()->create([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ]));
+
+    livewire(CreateServiceRequest::class)
+        ->fillForm($request->toArray())
+        ->fillForm([
+            'respondent_id' => Contact::factory()->create()->getKey(),
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    assertCount(1, ServiceRequest::all());
+
+    assertDatabaseHas(ServiceRequest::class, $request->except(['division_id', 'respondent_id', 'type_id'])->toArray());
+
+    $serviceRequest = ServiceRequest::first();
+
+    expect($serviceRequest->division->id)->toEqual($request['division_id']);
+});
+
+test('CreateServiceRequest is gated with proper feature access control via direct user manager', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = false;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('create')
+        )->assertForbidden();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+
+    livewire(CreateServiceRequest::class)
+        ->assertForbidden();
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managerUsers()->attach($user);
 
     actingAs($user)
         ->get(
@@ -328,7 +448,36 @@ test('displays only service request types managed by the current user', function
     actingAs($user);
 
     $serviceRequestTypesWithManagers = ServiceRequestType::factory()
-        ->hasAttached($team, [], 'managers')
+        ->hasAttached($team, [], 'managerTeams')
+        ->create();
+
+    $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->create();
+
+    livewire(CreateServiceRequest::class)
+        ->assertFormFieldExists('type_id', function (Select $field) use ($serviceRequestTypesWithManagers, $serviceRequestTypesWithoutManagers): bool {
+            $options = $field->getOptions();
+
+            return in_array($serviceRequestTypesWithManagers->getKey(), array_keys($options)) &&
+                ! in_array($serviceRequestTypesWithoutManagers->getKey(), array_keys($options));
+        });
+});
+
+test('displays only service request types where current user is a direct manager', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+
+    actingAs($user);
+
+    $serviceRequestTypesWithManagers = ServiceRequestType::factory()
+        ->hasAttached($user, [], 'managerUsers')
         ->create();
 
     $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->create();
@@ -364,7 +513,50 @@ test('create service requests if user is manager of any service request type', f
 
     $serviceRequestTypesWithManager = ServiceRequestType::factory()->create();
 
-    $serviceRequestTypesWithManager->managers()->attach($team);
+    $serviceRequestTypesWithManager->managerTeams()->attach($team);
+
+    $serviceRequestTypesWithManager->save();
+
+    $request = collect(CreateServiceRequestRequestFactory::new()->create([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestTypesWithManager->getKey(),
+        ])->getKey(),
+    ]));
+
+    livewire(CreateServiceRequest::class)
+        ->fillForm($request->toArray())
+        ->fillForm([
+            'respondent_id' => Contact::factory()->create()->getKey(),
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    assertCount(1, ServiceRequest::all());
+
+    assertDatabaseHas(ServiceRequest::class, $request->except(['division_id', 'respondent_id', 'type_id'])->toArray());
+
+    $serviceRequest = ServiceRequest::first();
+
+    expect($serviceRequest->division->id)->toEqual($request['division_id']);
+});
+
+test('create service requests if user is direct manager of any service request type', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+
+    actingAs($user);
+
+    $serviceRequestTypesWithManager = ServiceRequestType::factory()->create();
+
+    $serviceRequestTypesWithManager->managerUsers()->attach($user);
 
     $serviceRequestTypesWithManager->save();
 
@@ -418,7 +610,45 @@ test('validate service requests type if user is manager of any service request t
     $serviceRequestTypesWithManagers = ServiceRequestType::factory()->count(2)->create();
 
     $serviceRequestTypesWithManagers->each(function ($serviceRequest) use ($team) {
-        $serviceRequest->managers()->attach($team);
+        $serviceRequest->managerTeams()->attach($team);
+    });
+
+    $serviceRequestTypes = $serviceRequestTypesWithoutManagers->toBase()->merge($serviceRequestTypesWithManagers);
+
+    livewire(CreateServiceRequest::class)
+        ->fillForm($request->toArray())
+        ->fillForm([
+            'respondent_id' => Contact::factory()->create()->getKey(),
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestTypes->first()->getKey(),
+            ])->getKey(),
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['type_id']);
+});
+
+test('validate service requests type if user is direct manager of any service request type', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+
+    actingAs($user);
+
+    $request = collect(CreateServiceRequestRequestFactory::new()->create());
+
+    $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->count(2)->create();
+
+    $serviceRequestTypesWithManagers = ServiceRequestType::factory()->count(2)->create();
+
+    $serviceRequestTypesWithManagers->each(function ($serviceRequest) use ($user) {
+        $serviceRequest->managerUsers()->attach($user);
     });
 
     $serviceRequestTypes = $serviceRequestTypesWithoutManagers->toBase()->merge($serviceRequestTypesWithManagers);
@@ -453,7 +683,48 @@ test('assignment type individual manager will auto assign to new service request
     $serviceRequestTypesWithManager = ServiceRequestType::factory()
         ->hasAttached(
             factory: $team,
-            relationship: 'managers'
+            relationship: 'managerTeams'
+        )
+        ->state([
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
+            'assignment_type_individual_id' => $user->getKey(),
+        ])
+        ->create();
+
+    $request = collect(CreateServiceRequestRequestFactory::new()->create([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestTypesWithManager->getKey(),
+        ])->getKey(),
+    ]));
+
+    livewire(CreateServiceRequest::class)
+        ->fillForm($request->toArray())
+        ->fillForm([
+            'respondent_id' => Contact::factory()->create()->getKey(),
+        ])
+        ->call('create');
+
+    $serviceRequest = ServiceRequest::first();
+
+    expect($serviceRequest->assignments()->first())->user->id->toBe($user->getKey());
+});
+
+test('assignment type individual direct user manager will auto assign to new service requests', function () {
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.create');
+    $user->givePermissionTo('service_request.*.update');
+
+    actingAs($user);
+
+    $serviceRequestTypesWithManager = ServiceRequestType::factory()
+        ->hasAttached(
+            factory: $user,
+            relationship: 'managerUsers'
         )
         ->state([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
@@ -491,7 +762,7 @@ test('assignment type round robin will auto-assign to new service requests', fun
     $serviceRequestTypeWithManager = ServiceRequestType::factory()
         ->hasAttached(
             factory: $team,
-            relationship: 'managers'
+            relationship: 'managerTeams'
         )
         ->state([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin,
@@ -561,7 +832,7 @@ test('assignment type workload will auto-assign to new service requests', functi
     $serviceRequestTypeWithManager = ServiceRequestType::factory()
         ->hasAttached(
             factory: $team,
-            relationship: 'managers'
+            relationship: 'managerTeams'
         )
         ->state([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::Workload,

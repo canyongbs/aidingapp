@@ -76,24 +76,17 @@ test('it can add updates to multiple service requests as super admin', function 
     });
 });
 
-test('it can add updates to multiple service requests for user with update permission', function () {
+test('it can add updates to multiple service requests for user directly assigned as manager user', function () {
     $user = User::factory()->create();
-
-    $team = Team::factory()->create();
-
-    $user->team()->associate($team)->save();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->managerUsers()->attach($user);
-    $serviceRequestType->managerTeams()->attach($team);
 
     $serviceRequests = ServiceRequest::factory()
         ->has(
             factory: ServiceRequestAssignment::factory()
-                ->state([
-                    'user_id' => $user->getKey(),
-                ])
+                ->state(['user_id' => $user->getKey()])
                 ->count(1)
                 ->active(),
             relationship: 'assignments'
@@ -107,8 +100,7 @@ test('it can add updates to multiple service requests for user with update permi
         ->create();
 
     $serviceRequests->each(function (ServiceRequest $serviceRequest) {
-        $serviceRequest->refresh();
-        assertCount(0, $serviceRequest->serviceRequestUpdates);
+        assertCount(0, $serviceRequest->refresh()->serviceRequestUpdates);
     });
 
     $user->givePermissionTo('service_request.view-any');
@@ -128,7 +120,122 @@ test('it can add updates to multiple service requests for user with update permi
         ->assertHasNoTableBulkActionErrors();
 
     $serviceRequests->each(function (ServiceRequest $serviceRequest) {
-        $serviceRequest->refresh();
-        assertCount(1, $serviceRequest->serviceRequestUpdates);
+        assertCount(1, $serviceRequest->refresh()->serviceRequestUpdates);
+    });
+});
+
+test('it can add updates to multiple service requests for user belonging to a manager team', function () {
+    $user = User::factory()->create();
+
+    $team = Team::factory()->create();
+
+    $user->team()->associate($team)->save();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managerTeams()->attach($team);
+
+    $serviceRequests = ServiceRequest::factory()
+        ->has(
+            factory: ServiceRequestAssignment::factory()
+                ->state(['user_id' => $user->getKey()])
+                ->count(1)
+                ->active(),
+            relationship: 'assignments'
+        )
+        ->state([
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestType->getKey(),
+            ])->getKey(),
+        ])
+        ->count(10)
+        ->create();
+
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
+        assertCount(0, $serviceRequest->refresh()->serviceRequestUpdates);
+    });
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo('service_request_update.create');
+
+    actingAs($user->refresh());
+
+    livewire(ListServiceRequests::class)
+        ->assertSuccessful()
+        ->assertCountTableRecords($serviceRequests->count())
+        ->assertTableBulkActionExists('addServiceRequestUpdate')
+        ->callTableBulkAction('addServiceRequestUpdate', $serviceRequests, [
+            'update' => 'Test Update',
+            'internal' => true,
+        ])
+        ->assertHasNoTableBulkActionErrors();
+
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
+        assertCount(1, $serviceRequest->refresh()->serviceRequestUpdates);
+    });
+});
+
+test('it cannot add updates to service requests for user who is not a manager', function () {
+    $user = User::factory()->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequests = ServiceRequest::factory()
+        ->state([
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestType->getKey(),
+            ])->getKey(),
+        ])
+        ->count(3)
+        ->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo('service_request_update.create');
+
+    actingAs($user->refresh());
+
+    livewire(ListServiceRequests::class)
+        ->assertSuccessful()
+        ->callTableBulkAction('addServiceRequestUpdate', $serviceRequests, [
+            'update' => 'Test Update',
+            'internal' => true,
+        ]);
+
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
+        assertCount(0, $serviceRequest->refresh()->serviceRequestUpdates);
+    });
+});
+
+test('it cannot add updates to service requests for user without required permissions', function () {
+    $user = User::factory()->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managerUsers()->attach($user);
+
+    $serviceRequests = ServiceRequest::factory()
+        ->state([
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestType->getKey(),
+            ])->getKey(),
+        ])
+        ->count(3)
+        ->create();
+
+    $user->givePermissionTo('service_request.view-any');
+
+    actingAs($user->refresh());
+
+    livewire(ListServiceRequests::class)
+        ->assertSuccessful()
+        ->callTableBulkAction('addServiceRequestUpdate', $serviceRequests, [
+            'update' => 'Test Update',
+            'internal' => true,
+        ]);
+
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
+        assertCount(0, $serviceRequest->refresh()->serviceRequestUpdates);
     });
 });

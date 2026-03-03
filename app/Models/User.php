@@ -52,6 +52,7 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
@@ -70,6 +71,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Lab404\Impersonate\Models\Impersonate;
@@ -367,6 +369,17 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this
             ->belongsToMany(Project::class, 'project_auditor_users', 'user_id', 'project_id')
             ->using(ProjectAuditorUser::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return MorphToMany<ServiceRequestType, $this, covariant ServiceRequestTypeManager>
+     */
+    public function manageableServiceRequestTypes(): MorphToMany
+    {
+        return $this->morphToMany(ServiceRequestType::class, 'managerable', 'service_request_type_managers')
+            ->using(ServiceRequestTypeManager::class)
+            ->withPivot('id')
             ->withTimestamps();
     }
 

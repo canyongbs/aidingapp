@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Rules;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Translation\PotentiallyTranslatedString;
 
 class ManagedServiceRequestType implements ValidationRule
@@ -50,15 +51,19 @@ class ManagedServiceRequestType implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (auth()->user()->isSuperAdmin()) {
+        $user = auth()->user();
+
+        if ($user->isSuperAdmin()) {
             return;
         }
 
-        $team = auth()->user()->team;
+        $team = $user->team;
 
         $isManager = ServiceRequestType::where('id', $value)
-            ->whereHas('managers', function ($query) use ($team) {
+            ->whereHas('managerTeams', function (Builder $query) use ($team) {
                 $query->where('teams.id', $team?->getKey());
+            })->orWhereHas('managerUsers', function (Builder $query) use ($user) {
+                $query->where('users.id', $user->getKey());
             })
             ->exists();
 

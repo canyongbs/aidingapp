@@ -85,10 +85,14 @@ class ListServiceRequests extends ListRecords
             ])
                 ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                     return $query->where(function (Builder $query) {
-                        $query->whereHas('priority.type.managers', function (Builder $query): void {
+                        $query->whereHas('priority.type.managerTeams', function (Builder $query): void {
                             $query->where('teams.id', auth()->user()->team?->getKey());
-                        })->orWhereHas('priority.type.auditors', function (Builder $query): void {
+                        })->orWhereHas('priority.type.managerUsers', function (Builder $query): void {
+                            $query->where('users.id', auth()->user()->getKey());
+                        })->orWhereHas('priority.type.auditorTeams', function (Builder $query): void {
                             $query->where('teams.id', auth()->user()->team?->getKey());
+                        })->orWhereHas('priority.type.auditorUsers', function (Builder $query): void {
+                            $query->where('users.id', auth()->user()->getKey());
                         });
                     });
                 }))
@@ -217,8 +221,12 @@ class ListServiceRequests extends ListRecords
                             $deletedRecordsCount = ServiceRequest::query()
                                 ->whereKey($records)
                                 ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                                    $query->whereHas('priority.type.managers', function (Builder $query): void {
-                                        $query->where('teams.id', auth()->user()->team?->getKey());
+                                    $query->where(function (Builder $query): void {
+                                        $query->whereHas('priority.type.managerUsers', function (Builder $query): void {
+                                            $query->where('users.id', auth()->user()->getKey());
+                                        })->orWhereHas('priority.type.managerTeams', function (Builder $query): void {
+                                            $query->where('teams.id', auth()->user()->team?->getKey());
+                                        });
                                     });
                                 })
                                 ->delete();
