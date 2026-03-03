@@ -117,9 +117,9 @@ class EditServiceRequest extends EditRecord
                                                     ->withoutTrashed()
                                                     ->withoutArchived()
                                                     ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                                                        $query->where(function (Builder $q) {
-                                                            $q->whereHas('managerUsers', fn (Builder $q) => $q->where('users.id', auth()->user()->getKey()))
-                                                                ->orWhereHas('managerTeams', fn (Builder $q) => $q->where('teams.id', auth()->user()->team?->getKey()));
+                                                        $query->where(function (Builder $query) {
+                                                            $query->whereHas('managerUsers', fn (Builder $query) => $query->where('users.id', auth()->user()->getKey()))
+                                                                ->orWhereHas('managerTeams', fn (Builder $query) => $query->where('teams.id', auth()->user()->team?->getKey()));
                                                         });
                                                     }),
                                             )
