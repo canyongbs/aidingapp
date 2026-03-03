@@ -82,7 +82,7 @@ test('A successful action on the EditServiceRequestTypeAssignments page when the
     $serviceRequestType = ServiceRequestType::factory()
         ->hasAttached(
             factory: $managerTeam,
-            relationship: 'managers'
+            relationship: 'managerTeams'
         )
         ->create();
 
