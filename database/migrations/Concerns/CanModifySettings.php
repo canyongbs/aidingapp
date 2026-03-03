@@ -39,6 +39,7 @@ namespace Database\Migrations\Concerns;
 use Closure;
 use Illuminate\Support\Facades\DB;
 
+/* @phpstan-ignore trait.unused */
 trait CanModifySettings
 {
     /**

@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\AiFeatureTogglesFeature;
 use Illuminate\Support\Facades\DB;
 use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
@@ -54,16 +53,12 @@ return new class () extends SettingsMigration {
             } catch (SettingAlreadyExists $exception) {
                 // do nothing
             }
-
-            AiFeatureTogglesFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            AiFeatureTogglesFeature::deactivate();
-
             $this->migrator->deleteIfExists('ai-clarification.is_enabled');
             $this->migrator->deleteIfExists('ai-support-assistant.is_enabled');
         });
