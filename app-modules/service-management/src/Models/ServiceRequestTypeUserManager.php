@@ -36,32 +36,24 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeManagerFactory;
-use AidingApp\Team\Models\Team;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeUserManagerFactory;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
- * @mixin IdeHelperServiceRequestTypeManager
+ * @mixin IdeHelperServiceRequestTypeUserManager
  */
-class ServiceRequestTypeManager extends Pivot
+class ServiceRequestTypeUserManager extends Pivot
 {
-    /** @use HasFactory<ServiceRequestTypeManagerFactory> */
+    /** @use HasFactory<ServiceRequestTypeUserManagerFactory> */
     use HasFactory;
 
     use HasUuids;
 
-    protected $table = 'service_request_type_managers';
-
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
-    {
-        return $this->belongsTo(Team::class);
-    }
+    protected $table = 'service_request_type_manager_users';
 
     /**
      * @return BelongsTo<ServiceRequestType, $this>
@@ -69,5 +61,13 @@ class ServiceRequestTypeManager extends Pivot
     public function serviceRequestType(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestType::class)->withTrashed()->withArchived();
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }

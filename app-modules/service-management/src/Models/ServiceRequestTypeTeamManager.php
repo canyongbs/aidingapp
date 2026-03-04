@@ -34,32 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Rules;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeTeamManagerFactory;
+use AidingApp\Team\Models\Team;
 use App\Features\ServiceRequestTypeDirectUserManagersFeature;
-use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ServiceRequestTypeAssignmentsIndividualUserMustBeAManager implements ValidationRule
+/**
+ * @mixin IdeHelperServiceRequestTypeTeamManager
+ */
+class ServiceRequestTypeTeamManager extends Pivot
 {
-    public function __construct(
-        protected ServiceRequestType $serviceRequestType
-    ) {}
+    /** @use HasFactory<ServiceRequestTypeTeamManagerFactory> */
+    use HasFactory;
+
+    use HasUuids;
+
+    public function getTable(): string
+    {
+        return ServiceRequestTypeDirectUserManagersFeature::active()
+            ? 'service_request_type_manager_teams'
+            : 'service_request_type_managers';
+    }
 
     /**
-     * Run the validation rule.
-     *
-     * @param Closure(string): PotentiallyTranslatedString $fail
+     * @return BelongsTo<ServiceRequestType, $this>
      */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    public function serviceRequestType(): BelongsTo
     {
-        $isManager = (ServiceRequestTypeDirectUserManagersFeature::active() && $this->serviceRequestType->managerUsers()->where('users.id', $value)->exists()) ||
-            $this->serviceRequestType->managerTeams()->whereRelation('users', 'users.id', $value)->exists();
+        return $this->belongsTo(ServiceRequestType::class)->withTrashed()->withArchived();
+    }
 
-        if (! $isManager) {
-            $fail('The selected user must be a manager user or belong to a team designated as managers of this Service Request Type.');
-        }
+    /**
+     * @return BelongsTo<Team, $this>
+     */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
 }

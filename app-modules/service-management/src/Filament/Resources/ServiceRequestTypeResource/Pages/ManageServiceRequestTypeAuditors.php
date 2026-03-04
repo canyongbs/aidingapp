@@ -37,43 +37,54 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use Filament\Actions\AttachAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DetachAction;
-use Filament\Actions\DetachBulkAction;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use App\Concerns\EditPageRedirection;
+use App\Features\ServiceRequestTypeDirectUserManagersFeature;
+use Filament\Forms\Components\Select;
+use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
-class ManageServiceRequestTypeAuditors extends ManageRelatedRecords
+class ManageServiceRequestTypeAuditors extends EditRecord
 {
-    protected static string $resource = ServiceRequestTypeResource::class;
+    use EditPageRedirection;
 
-    protected static string $relationship = 'auditors';
+    protected static ?string $title = 'Auditors';
+
+    protected static ?string $breadcrumb = 'Auditors';
+
+    protected static string $resource = ServiceRequestTypeResource::class;
 
     public static function getNavigationLabel(): string
     {
         return 'Auditors';
     }
 
-    public function table(Table $table): Table
+    public function getRelationManagers(): array
     {
-        return $table
-            ->recordTitleAttribute('name')
-            ->inverseRelationship('auditableServiceRequestTypes')
-            ->columns([
-                TextColumn::make('name'),
-            ])
-            ->headerActions([
-                AttachAction::make(),
-            ])
-            ->recordActions([
-                DetachAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DetachBulkAction::make(),
-                ]),
+        // Needed to prevent Filament from loading the relation managers on this page.
+        return [];
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make()
+                    ->schema(array_filter([
+                        ServiceRequestTypeDirectUserManagersFeature::active()
+                            ? Select::make('auditorUsers')
+                                ->label('Users')
+                                ->multiple()
+                                ->relationship('auditorUsers', 'name')
+                                ->preload()
+                            : null,
+                        Select::make('auditorTeams')
+                            ->label('Teams')
+                            ->multiple()
+                            ->relationship('auditorTeams', 'name')
+                            ->preload(),
+                    ]))
+                    ->columns(2),
             ]);
     }
 }

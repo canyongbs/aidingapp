@@ -37,14 +37,14 @@
 namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeTeamAuditor;
 use AidingApp\Team\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<ServiceRequestTypeAuditor>
+ * @extends Factory<ServiceRequestTypeTeamAuditor>
  */
-class ServiceRequestTypeAuditorFactory extends Factory
+class ServiceRequestTypeTeamAuditorFactory extends Factory
 {
     /**
      * Define the model's default state.

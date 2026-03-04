@@ -147,7 +147,42 @@ test('Only service request types managed by user team are available in type sele
     $user->givePermissionTo('service_request.create');
 
     $managedType = ServiceRequestType::factory()->create();
-    $managedType->managers()->attach($team);
+    $managedType->managerTeams()->attach($team);
+
+    $unmanagedType = ServiceRequestType::factory()->create();
+
+    $contact = Contact::factory()->create();
+
+    actingAs($user);
+
+    livewire(ServiceRequestsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ContactServiceManagement::class,
+    ])
+        ->mountTableAction('create')
+        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($managedType) {
+            $options = $select->getOptions();
+
+            return array_key_exists($managedType->getKey(), $options);
+        })
+        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($unmanagedType) {
+            $options = $select->getOptions();
+
+            return ! array_key_exists($unmanagedType->getKey(), $options);
+        })
+        ->assertSuccessful();
+});
+
+test('Only service request types where user is a direct manager are available in type select', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('service_request.create');
+
+    $managedType = ServiceRequestType::factory()->create();
+    $managedType->managerUsers()->attach($user);
 
     $unmanagedType = ServiceRequestType::factory()->create();
 
@@ -357,10 +392,54 @@ test('Non-super admin can only see service requests from managed or audited type
     $user->givePermissionTo('service_request.*.view');
 
     $managedType = ServiceRequestType::factory()->create();
-    $managedType->managers()->attach($team);
+    $managedType->managerTeams()->attach($team);
 
     $auditedType = ServiceRequestType::factory()->create();
-    $auditedType->auditors()->attach($team);
+    $auditedType->auditorTeams()->attach($team);
+
+    $unmanagedType = ServiceRequestType::factory()->create();
+
+    $contact = Contact::factory()->create();
+
+    $managedServiceRequest = ServiceRequest::factory()->state([
+        'respondent_id' => $contact->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->state(['type_id' => $managedType->getKey()]),
+    ])->create();
+
+    $auditedServiceRequest = ServiceRequest::factory()->state([
+        'respondent_id' => $contact->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->state(['type_id' => $auditedType->getKey()]),
+    ])->create();
+
+    $unmanagedServiceRequest = ServiceRequest::factory()->state([
+        'respondent_id' => $contact->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->state(['type_id' => $unmanagedType->getKey()]),
+    ])->create();
+
+    actingAs($user);
+
+    livewire(ServiceRequestsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ContactServiceManagement::class,
+    ])
+        ->assertCanSeeTableRecords([$managedServiceRequest, $auditedServiceRequest])
+        ->assertCanNotSeeTableRecords([$unmanagedServiceRequest]);
+});
+
+test('Non-super admin can only see service requests from directly managed or directly audited types', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
+
+    $managedType = ServiceRequestType::factory()->create();
+    $managedType->managerUsers()->attach($user);
+
+    $auditedType = ServiceRequestType::factory()->create();
+    $auditedType->auditorUsers()->attach($user);
 
     $unmanagedType = ServiceRequestType::factory()->create();
 

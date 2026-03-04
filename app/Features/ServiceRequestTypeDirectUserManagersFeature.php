@@ -34,32 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Rules;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeDirectUserManagersFeature;
-use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use App\Support\AbstractFeatureFlag;
 
-class ServiceRequestTypeAssignmentsIndividualUserMustBeAManager implements ValidationRule
+class ServiceRequestTypeDirectUserManagersFeature extends AbstractFeatureFlag
 {
-    public function __construct(
-        protected ServiceRequestType $serviceRequestType
-    ) {}
-
-    /**
-     * Run the validation rule.
-     *
-     * @param Closure(string): PotentiallyTranslatedString $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    public function resolve(mixed $scope): mixed
     {
-        $isManager = (ServiceRequestTypeDirectUserManagersFeature::active() && $this->serviceRequestType->managerUsers()->where('users.id', $value)->exists()) ||
-            $this->serviceRequestType->managerTeams()->whereRelation('users', 'users.id', $value)->exists();
-
-        if (! $isManager) {
-            $fail('The selected user must be a manager user or belong to a team designated as managers of this Service Request Type.');
-        }
+        return false;
     }
 }

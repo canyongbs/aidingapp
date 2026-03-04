@@ -289,3 +289,117 @@ it('does not notify a user twice if they belong to a team managing and auditing 
     Notification::assertSentToTimes($firstTeam->users[1], ServiceRequestCreated::class, 1);
     Notification::assertNotSentTo($secondTeam->users, ServiceRequestCreated::class);
 });
+
+it('can notify a direct user manager of a service request type', function () {
+    Notification::fake();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestTypeEmailTemplate = ServiceRequestTypeEmailTemplate::factory()
+        ->state([
+            'type' => ServiceRequestEmailTemplateType::Created,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ])
+        ->for($serviceRequestType, 'serviceRequestType')
+        ->create();
+
+    $directManager = User::factory()->create();
+    $serviceRequestType->managerUsers()->attach($directManager);
+
+    $nonManager = User::factory()->create();
+
+    $serviceRequestPriority = ServiceRequestPriority::factory()
+        ->for($serviceRequestType, 'type')
+        ->create();
+
+    $serviceRequest = ServiceRequest::factory()
+        ->for($serviceRequestPriority, 'priority')
+        ->create();
+
+    app(NotifyServiceRequestUsers::class)->execute(
+        $serviceRequest,
+        new ServiceRequestCreated($serviceRequest, $serviceRequestTypeEmailTemplate, MailChannel::class),
+        true,
+        false,
+    );
+
+    Notification::assertSentTo($directManager, ServiceRequestCreated::class);
+    Notification::assertNotSentTo($nonManager, ServiceRequestCreated::class);
+});
+
+it('can notify a direct user auditor of a service request type', function () {
+    Notification::fake();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestTypeEmailTemplate = ServiceRequestTypeEmailTemplate::factory()
+        ->state([
+            'type' => ServiceRequestEmailTemplateType::Created,
+            'role' => ServiceRequestTypeEmailTemplateRole::Auditor,
+        ])
+        ->for($serviceRequestType, 'serviceRequestType')
+        ->create();
+
+    $directAuditor = User::factory()->create();
+    $serviceRequestType->auditorUsers()->attach($directAuditor);
+
+    $nonAuditor = User::factory()->create();
+
+    $serviceRequestPriority = ServiceRequestPriority::factory()
+        ->for($serviceRequestType, 'type')
+        ->create();
+
+    $serviceRequest = ServiceRequest::factory()
+        ->for($serviceRequestPriority, 'priority')
+        ->create();
+
+    app(NotifyServiceRequestUsers::class)->execute(
+        $serviceRequest,
+        new ServiceRequestCreated($serviceRequest, $serviceRequestTypeEmailTemplate, MailChannel::class),
+        false,
+        true,
+    );
+
+    Notification::assertSentTo($directAuditor, ServiceRequestCreated::class);
+    Notification::assertNotSentTo($nonAuditor, ServiceRequestCreated::class);
+});
+
+it('does not notify a direct user manager twice if they are also on a managing team', function () {
+    Notification::fake();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestTypeEmailTemplate = ServiceRequestTypeEmailTemplate::factory()
+        ->state([
+            'type' => ServiceRequestEmailTemplateType::Created,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ])
+        ->for($serviceRequestType, 'serviceRequestType')
+        ->create();
+
+    $user = User::factory()->create();
+    $serviceRequestType->managerUsers()->attach($user);
+
+    $team = Team::factory()
+        ->hasAttached($serviceRequestType, [], 'manageableServiceRequestTypes')
+        ->create();
+
+    $user->team()->associate($team)->save();
+
+    $serviceRequestPriority = ServiceRequestPriority::factory()
+        ->for($serviceRequestType, 'type')
+        ->create();
+
+    $serviceRequest = ServiceRequest::factory()
+        ->for($serviceRequestPriority, 'priority')
+        ->create();
+
+    app(NotifyServiceRequestUsers::class)->execute(
+        $serviceRequest,
+        new ServiceRequestCreated($serviceRequest, $serviceRequestTypeEmailTemplate, MailChannel::class),
+        true,
+        false,
+    );
+
+    Notification::assertSentToTimes($user, ServiceRequestCreated::class, 1);
+});

@@ -49,6 +49,7 @@ use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestAssign
 use AidingApp\ServiceManagement\Notifications\ServiceRequestAssigned;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
+use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 
 class ServiceRequestAssignmentObserver
 {
@@ -56,10 +57,12 @@ class ServiceRequestAssignmentObserver
 
     public function creating(ServiceRequestAssignment $serviceRequestAssignment): void
     {
-        throw_if(! in_array($serviceRequestAssignment->user_id, $serviceRequestAssignment->serviceRequest->priority->type->managers
-            ->flatMap(fn ($managers) => $managers->users)
-            ->pluck('id')
-            ->toArray()), new AttemptedToAssignNonManagerToServiceRequest());
+        $type = $serviceRequestAssignment->serviceRequest->priority->type;
+
+        $isManager = (ServiceRequestTypeDirectUserManagersFeature::active() && $type->managerUsers()->where('users.id', $serviceRequestAssignment->user_id)->exists()) ||
+            $type->managerTeams()->whereRelation('users', 'users.id', $serviceRequestAssignment->user_id)->exists();
+
+        throw_if(! $isManager, new AttemptedToAssignNonManagerToServiceRequest());
     }
 
     public function created(ServiceRequestAssignment $serviceRequestAssignment): void

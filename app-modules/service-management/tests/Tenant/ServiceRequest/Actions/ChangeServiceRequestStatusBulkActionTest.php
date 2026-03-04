@@ -34,97 +34,80 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Team\Models\Team;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-test('it can add updates to multiple service requests as super admin', function () {
+test('it can change status of multiple service requests as super admin', function () {
     asSuperAdmin();
 
-    $serviceRequests = ServiceRequest::factory()
-        ->count(10)
-        ->create();
+    $newStatus = ServiceRequestStatus::factory()->open()->create();
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
-        $serviceRequest->refresh();
-        assertCount(0, $serviceRequest->serviceRequestUpdates);
-    });
+    $serviceRequests = ServiceRequest::factory()
+        ->count(3)
+        ->create();
 
     livewire(ListServiceRequests::class)
         ->assertSuccessful()
         ->assertCountTableRecords($serviceRequests->count())
-        ->assertTableBulkActionExists('addServiceRequestUpdate')
-        ->callTableBulkAction('addServiceRequestUpdate', $serviceRequests, [
-            'update' => 'Test Update',
-            'internal' => true,
+        ->assertTableBulkActionExists('changeServiceRequestStatus')
+        ->callTableBulkAction('changeServiceRequestStatus', $serviceRequests, [
+            'statusId' => $newStatus->getKey(),
         ])
         ->assertHasNoTableBulkActionErrors();
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
-        $serviceRequest->refresh();
-        assertCount(1, $serviceRequest->serviceRequestUpdates);
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($newStatus) {
+        expect($serviceRequest->refresh()->status_id)->toBe($newStatus->getKey());
     });
 });
 
-test('it can add updates to multiple service requests for user directly assigned as manager user', function () {
+test('it can change status of multiple service requests for user directly assigned as manager user', function () {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->managerUsers()->attach($user);
 
+    $newStatus = ServiceRequestStatus::factory()->open()->create();
+
     $serviceRequests = ServiceRequest::factory()
-        ->has(
-            factory: ServiceRequestAssignment::factory()
-                ->state(['user_id' => $user->getKey()])
-                ->count(1)
-                ->active(),
-            relationship: 'assignments'
-        )
         ->state([
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
         ])
-        ->count(10)
+        ->count(3)
         ->create();
-
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
-        assertCount(0, $serviceRequest->refresh()->serviceRequestUpdates);
-    });
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
-    $user->givePermissionTo('service_request_update.create');
 
     actingAs($user->refresh());
 
     livewire(ListServiceRequests::class)
         ->assertSuccessful()
         ->assertCountTableRecords($serviceRequests->count())
-        ->assertTableBulkActionExists('addServiceRequestUpdate')
-        ->callTableBulkAction('addServiceRequestUpdate', $serviceRequests, [
-            'update' => 'Test Update',
-            'internal' => true,
+        ->assertTableBulkActionExists('changeServiceRequestStatus')
+        ->callTableBulkAction('changeServiceRequestStatus', $serviceRequests, [
+            'statusId' => $newStatus->getKey(),
         ])
         ->assertHasNoTableBulkActionErrors();
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
-        assertCount(1, $serviceRequest->refresh()->serviceRequestUpdates);
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($newStatus) {
+        expect($serviceRequest->refresh()->status_id)->toBe($newStatus->getKey());
     });
 });
 
-test('it can add updates to multiple service requests for user belonging to a manager team', function () {
+test('it can change status of multiple service requests for user belonging to a manager team', function () {
     $user = User::factory()->create();
 
     $team = Team::factory()->create();
@@ -135,54 +118,47 @@ test('it can add updates to multiple service requests for user belonging to a ma
 
     $serviceRequestType->managerTeams()->attach($team);
 
+    $newStatus = ServiceRequestStatus::factory()->open()->create();
+
     $serviceRequests = ServiceRequest::factory()
-        ->has(
-            factory: ServiceRequestAssignment::factory()
-                ->state(['user_id' => $user->getKey()])
-                ->count(1)
-                ->active(),
-            relationship: 'assignments'
-        )
         ->state([
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
         ])
-        ->count(10)
+        ->count(3)
         ->create();
-
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
-        assertCount(0, $serviceRequest->refresh()->serviceRequestUpdates);
-    });
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
-    $user->givePermissionTo('service_request_update.create');
 
     actingAs($user->refresh());
 
     livewire(ListServiceRequests::class)
         ->assertSuccessful()
         ->assertCountTableRecords($serviceRequests->count())
-        ->assertTableBulkActionExists('addServiceRequestUpdate')
-        ->callTableBulkAction('addServiceRequestUpdate', $serviceRequests, [
-            'update' => 'Test Update',
-            'internal' => true,
+        ->assertTableBulkActionExists('changeServiceRequestStatus')
+        ->callTableBulkAction('changeServiceRequestStatus', $serviceRequests, [
+            'statusId' => $newStatus->getKey(),
         ])
         ->assertHasNoTableBulkActionErrors();
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
-        assertCount(1, $serviceRequest->refresh()->serviceRequestUpdates);
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($newStatus) {
+        expect($serviceRequest->refresh()->status_id)->toBe($newStatus->getKey());
     });
 });
 
-test('it cannot add updates to service requests for user who is not a manager', function () {
+test('it cannot change status of service requests for user who is not a manager', function () {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
+    $originalStatus = ServiceRequestStatus::factory()->open()->create();
+    $newStatus = ServiceRequestStatus::factory()->open()->create();
+
     $serviceRequests = ServiceRequest::factory()
         ->state([
+            'status_id' => $originalStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -192,31 +168,60 @@ test('it cannot add updates to service requests for user who is not a manager', 
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
-    $user->givePermissionTo('service_request_update.create');
 
     actingAs($user->refresh());
 
     livewire(ListServiceRequests::class)
         ->assertSuccessful()
-        ->callTableBulkAction('addServiceRequestUpdate', $serviceRequests, [
-            'update' => 'Test Update',
-            'internal' => true,
+        ->callTableBulkAction('changeServiceRequestStatus', $serviceRequests, [
+            'statusId' => $newStatus->getKey(),
         ]);
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
-        assertCount(0, $serviceRequest->refresh()->serviceRequestUpdates);
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($originalStatus) {
+        expect($serviceRequest->refresh()->status_id)->toBe($originalStatus->getKey());
     });
 });
 
-test('it cannot add updates to service requests for user without required permissions', function () {
+test('it cannot change status of closed service requests', function () {
+    asSuperAdmin();
+
+    $closedStatus = ServiceRequestStatus::factory()
+        ->state(['classification' => SystemServiceRequestClassification::Closed])
+        ->create();
+
+    $newStatus = ServiceRequestStatus::factory()->open()->create();
+
+    $serviceRequests = ServiceRequest::factory()
+        ->state([
+            'status_id' => $closedStatus->getKey(),
+        ])
+        ->count(3)
+        ->create();
+
+    livewire(ListServiceRequests::class)
+        ->assertSuccessful()
+        ->callTableBulkAction('changeServiceRequestStatus', $serviceRequests, [
+            'statusId' => $newStatus->getKey(),
+        ]);
+
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($closedStatus) {
+        expect($serviceRequest->refresh()->status_id)->toBe($closedStatus->getKey());
+    });
+});
+
+test('it cannot change status of service requests without required permissions', function () {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->managerUsers()->attach($user);
 
+    $originalStatus = ServiceRequestStatus::factory()->open()->create();
+    $newStatus = ServiceRequestStatus::factory()->open()->create();
+
     $serviceRequests = ServiceRequest::factory()
         ->state([
+            'status_id' => $originalStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -230,12 +235,11 @@ test('it cannot add updates to service requests for user without required permis
 
     livewire(ListServiceRequests::class)
         ->assertSuccessful()
-        ->callTableBulkAction('addServiceRequestUpdate', $serviceRequests, [
-            'update' => 'Test Update',
-            'internal' => true,
+        ->callTableBulkAction('changeServiceRequestStatus', $serviceRequests, [
+            'statusId' => $newStatus->getKey(),
         ]);
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
-        assertCount(0, $serviceRequest->refresh()->serviceRequestUpdates);
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($originalStatus) {
+        expect($serviceRequest->refresh()->status_id)->toBe($originalStatus->getKey());
     });
 });

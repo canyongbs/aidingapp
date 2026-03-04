@@ -196,7 +196,38 @@ test('view service request page visible if the user is an auditor of the service
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->auditors()->attach($team);
+    $serviceRequestType->auditorTeams()->attach($team);
+
+    $serviceRequestsWithAuditor = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])
+        ->create();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequestsWithAuditor->getRouteKey(),
+    ])
+        ->assertSuccessful();
+});
+
+test('view service request page visible if the user is a direct auditorUser of the service request type', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
+
+    actingAs($user);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->auditorUsers()->attach($user);
 
     $serviceRequestsWithAuditor = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
@@ -233,7 +264,38 @@ test('view service request page visible if the user is a manager of the service 
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managers()->attach($team);
+    $serviceRequestType->managerTeams()->attach($team);
+
+    $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])
+        ->create();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequestsWithManager->getRouteKey(),
+    ])
+        ->assertSuccessful();
+});
+
+test('view service request page visible if the user is a direct managerUser of the service request type', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
+
+    actingAs($user);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managerUsers()->attach($user);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([

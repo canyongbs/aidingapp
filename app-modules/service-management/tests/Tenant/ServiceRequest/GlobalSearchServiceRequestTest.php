@@ -58,7 +58,7 @@ test('global search is gated with proper feature access control', function () {
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
-    $serviceRequestType->managers()->attach($team);
+    $serviceRequestType->managerTeams()->attach($team);
 
     $priority = ServiceRequestPriority::factory()->create([
         'type_id' => $serviceRequestType->id,
@@ -78,6 +78,34 @@ test('global search is gated with proper feature access control', function () {
     expect($results->first()->service_request_number)->toBe('SR-FEATURE');
 });
 
+test('global search is gated with proper feature access control for direct user manager', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $serviceRequestType->managerUsers()->attach($user);
+
+    $priority = ServiceRequestPriority::factory()->create([
+        'type_id' => $serviceRequestType->id,
+    ]);
+
+    ServiceRequest::factory()->create([
+        'priority_id' => $priority->id,
+        'service_request_number' => 'SR-FEATURE-USER',
+    ]);
+
+    actingAs($user);
+
+    $query = ServiceRequestResource::getGlobalSearchEloquentQuery();
+    $results = $query->get();
+
+    expect($results)->toHaveCount(1);
+    expect($results->first()->service_request_number)->toBe('SR-FEATURE-USER');
+});
+
 test('global search returns service requests for managers of service request type', function () {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
@@ -89,7 +117,34 @@ test('global search returns service requests for managers of service request typ
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
-    $serviceRequestType->managers()->attach($team);
+    $serviceRequestType->managerTeams()->attach($team);
+
+    $priority = ServiceRequestPriority::factory()->create([
+        'type_id' => $serviceRequestType->id,
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->create([
+        'priority_id' => $priority->id,
+    ]);
+
+    actingAs($user);
+
+    $query = ServiceRequestResource::getGlobalSearchEloquentQuery();
+    $results = $query->get();
+
+    expect($results)->toHaveCount(1);
+    expect($results->first()->service_request_number)->toBe($serviceRequest->service_request_number);
+});
+
+test('global search returns service requests for direct user managers of service request type', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $serviceRequestType->managerUsers()->attach($user);
 
     $priority = ServiceRequestPriority::factory()->create([
         'type_id' => $serviceRequestType->id,
@@ -119,7 +174,34 @@ test('global search returns service requests for auditors of service request typ
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
-    $serviceRequestType->auditors()->attach($team);
+    $serviceRequestType->auditorTeams()->attach($team);
+
+    $priority = ServiceRequestPriority::factory()->create([
+        'type_id' => $serviceRequestType->id,
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->create([
+        'priority_id' => $priority->id,
+    ]);
+
+    actingAs($user);
+
+    $query = ServiceRequestResource::getGlobalSearchEloquentQuery();
+    $results = $query->get();
+
+    expect($results)->toHaveCount(1);
+    expect($results->first()->service_request_number)->toBe($serviceRequest->service_request_number);
+});
+
+test('global search returns service requests for direct user auditors of service request type', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $serviceRequestType->auditorUsers()->attach($user);
 
     $priority = ServiceRequestPriority::factory()->create([
         'type_id' => $serviceRequestType->id,
@@ -230,7 +312,45 @@ test('global search details are correctly formatted', function () {
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create(['name' => 'Test Type']);
-    $serviceRequestType->managers()->attach($team);
+    $serviceRequestType->managerTeams()->attach($team);
+
+    $priority = ServiceRequestPriority::factory()->create([
+        'name' => 'High Priority',
+        'type_id' => $serviceRequestType->id,
+    ]);
+
+    $status = ServiceRequestStatus::factory()->create(['name' => 'Open']);
+    $contact = Contact::factory()->create();
+
+    $serviceRequest = ServiceRequest::factory()->create([
+        'priority_id' => $priority->id,
+        'status_id' => $status->id,
+        'respondent_id' => $contact->id,
+    ]);
+
+    actingAs($user);
+
+    $details = ServiceRequestResource::getGlobalSearchResultDetails($serviceRequest);
+
+    expect($details)->toHaveKey('Status');
+    expect($details)->toHaveKey('Type');
+    expect($details)->toHaveKey('Priority');
+    expect($details)->toHaveKey('Related To');
+
+    expect($details['Type'])->toBe('Test Type');
+    expect($details['Priority'])->toBe('High Priority');
+    expect($details['Status'])->toBe('Open');
+});
+
+test('global search details are correctly formatted for direct user manager', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create(['name' => 'Test Type']);
+    $serviceRequestType->managerUsers()->attach($user);
 
     $priority = ServiceRequestPriority::factory()->create([
         'name' => 'High Priority',
@@ -271,7 +391,33 @@ test('global search URL points to view page', function () {
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
-    $serviceRequestType->managers()->attach($team);
+    $serviceRequestType->managerTeams()->attach($team);
+
+    $priority = ServiceRequestPriority::factory()->create([
+        'type_id' => $serviceRequestType->id,
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->create([
+        'priority_id' => $priority->id,
+    ]);
+
+    actingAs($user);
+
+    $url = ServiceRequestResource::getGlobalSearchResultUrl($serviceRequest);
+
+    expect($url)->toContain('/service-requests/' . $serviceRequest->getKey());
+    expect($url)->not->toContain('/edit');
+});
+
+test('global search URL points to view page for direct user manager', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $serviceRequestType->managerUsers()->attach($user);
 
     $priority = ServiceRequestPriority::factory()->create([
         'type_id' => $serviceRequestType->id,

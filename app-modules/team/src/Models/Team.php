@@ -43,8 +43,8 @@ use AidingApp\Project\Models\ProjectManagerTeam;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeTeamAuditor;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeTeamManager;
 use AidingApp\Team\Database\Factories\TeamFactory;
 use App\Models\BaseModel;
 use App\Models\User;
@@ -85,22 +85,24 @@ class Team extends BaseModel
     }
 
     /**
-     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeManager>
+     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeTeamManager>
      */
     public function manageableServiceRequestTypes(): BelongsToMany
     {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_managers')
-            ->using(ServiceRequestTypeManager::class)
+        return $this->belongsToMany(ServiceRequestType::class, (new ServiceRequestTypeTeamManager())->getTable())
+            ->using(ServiceRequestTypeTeamManager::class)
+            ->withPivot('id')
             ->withTimestamps();
     }
 
     /**
-     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeAuditor>
+     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeTeamAuditor>
      */
     public function auditableServiceRequestTypes(): BelongsToMany
     {
-        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditors')
-            ->using(ServiceRequestTypeAuditor::class)
+        return $this->belongsToMany(ServiceRequestType::class, (new ServiceRequestTypeTeamAuditor())->getTable())
+            ->using(ServiceRequestTypeTeamAuditor::class)
+            ->withPivot('id')
             ->withTimestamps();
     }
 
