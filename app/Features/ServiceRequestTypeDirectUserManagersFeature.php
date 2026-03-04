@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,41 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeAuditorFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphPivot;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperServiceRequestTypeAuditor
- */
-class ServiceRequestTypeAuditor extends MorphPivot
+class ServiceRequestTypeDirectUserManagersFeature extends AbstractFeatureFlag
 {
-    /** @use HasFactory<ServiceRequestTypeAuditorFactory> */
-    use HasFactory;
-
-    use HasUuids;
-
-    protected $table = 'service_request_type_auditors';
-
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function auditorable(): MorphTo
+    public function resolve(mixed $scope): mixed
     {
-        return $this->morphTo();
-    }
-
-    /**
-     * @return BelongsTo<ServiceRequestType, $this>
-     */
-    public function serviceRequestType(): BelongsTo
-    {
-        return $this->belongsTo(ServiceRequestType::class)->withTrashed()->withArchived();
+        return false;
     }
 }

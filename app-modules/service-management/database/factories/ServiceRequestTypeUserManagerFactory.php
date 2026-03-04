@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,32 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Rules;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeDirectUserManagersFeature;
-use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserManager;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ServiceRequestTypeAssignmentsIndividualUserMustBeAManager implements ValidationRule
+/**
+ * @extends Factory<ServiceRequestTypeUserManager>
+ */
+class ServiceRequestTypeUserManagerFactory extends Factory
 {
-    public function __construct(
-        protected ServiceRequestType $serviceRequestType
-    ) {}
-
     /**
-     * Run the validation rule.
+     * Define the model's default state.
      *
-     * @param Closure(string): PotentiallyTranslatedString $fail
+     * @return array<string, mixed>
      */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    public function definition(): array
     {
-        $isManager = (ServiceRequestTypeDirectUserManagersFeature::active() && $this->serviceRequestType->managerUsers()->where('users.id', $value)->exists()) ||
-            $this->serviceRequestType->managerTeams()->whereRelation('users', 'users.id', $value)->exists();
-
-        if (! $isManager) {
-            $fail('The selected user must be a manager user or belong to a team designated as managers of this Service Request Type.');
-        }
+        return [
+            'service_request_type_id' => ServiceRequestType::factory(),
+            'user_id' => User::factory(),
+        ];
     }
 }

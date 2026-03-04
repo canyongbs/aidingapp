@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Rules;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Builder;
@@ -60,10 +61,16 @@ class ManagedServiceRequestType implements ValidationRule
         $team = $user->team;
 
         $isManager = ServiceRequestType::where('id', $value)
-            ->whereHas('managerTeams', function (Builder $query) use ($team) {
-                $query->where('teams.id', $team?->getKey());
-            })->orWhereHas('managerUsers', function (Builder $query) use ($user) {
-                $query->where('users.id', $user->getKey());
+            ->where(function (Builder $query) use ($team, $user) {
+                $query->whereHas('managerTeams', function (Builder $query) use ($team) {
+                    $query->where('teams.id', $team?->getKey());
+                });
+
+                if (ServiceRequestTypeDirectUserManagersFeature::active()) {
+                    $query->orWhereHas('managerUsers', function (Builder $query) use ($user) {
+                        $query->where('users.id', $user->getKey());
+                    });
+                }
             })
             ->exists();
 

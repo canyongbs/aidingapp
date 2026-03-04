@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,41 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeManagerFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphPivot;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeTeamAuditor;
+use AidingApp\Team\Models\Team;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @mixin IdeHelperServiceRequestTypeManager
+ * @extends Factory<ServiceRequestTypeTeamAuditor>
  */
-class ServiceRequestTypeManager extends MorphPivot
+class ServiceRequestTypeTeamAuditorFactory extends Factory
 {
-    /** @use HasFactory<ServiceRequestTypeManagerFactory> */
-    use HasFactory;
-
-    use HasUuids;
-
-    protected $table = 'service_request_type_managers';
-
     /**
-     * @return BelongsTo<ServiceRequestType, $this>
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
-    public function serviceRequestType(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(ServiceRequestType::class)->withTrashed()->withArchived();
-    }
-
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function managerable(): MorphTo
-    {
-        return $this->morphTo();
+        return [
+            'service_request_type_id' => ServiceRequestType::factory(),
+            'team_id' => Team::factory(),
+        ];
     }
 }

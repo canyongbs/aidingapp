@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -52,7 +53,14 @@ class RoundRobinAssigner implements ServiceRequestTypeAssigner
             $user = null;
 
             if ($lastAssignee) {
-                $user = User::query()->whereRelation('team.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
+                $user = User::query()
+                    ->where(function (Builder $query) use ($serviceRequestType) {
+                        $query->whereRelation('team.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+
+                        if (ServiceRequestTypeDirectUserManagersFeature::active()) {
+                            $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                        }
+                    })
                     ->where('name', '>=', $lastAssignee->name)
                     ->where(fn (Builder $query) => $query
                         ->where('name', '!=', $lastAssignee->name)
@@ -61,7 +69,14 @@ class RoundRobinAssigner implements ServiceRequestTypeAssigner
             }
 
             if ($user === null) {
-                $user = User::query()->whereRelation('team.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey())
+                $user = User::query()
+                    ->where(function (Builder $query) use ($serviceRequestType) {
+                        $query->whereRelation('team.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+
+                        if (ServiceRequestTypeDirectUserManagersFeature::active()) {
+                            $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                        }
+                    })
                     ->orderBy('name')->orderBy('id')->first();
             }
 

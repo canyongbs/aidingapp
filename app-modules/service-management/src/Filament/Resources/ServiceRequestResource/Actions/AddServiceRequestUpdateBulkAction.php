@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use App\Support\BulkProcessingMachine;
 use Closure;
 use Filament\Actions\BulkAction;
@@ -67,7 +68,11 @@ class AddServiceRequestUpdateBulkAction
                     ->rule(['boolean']),
             ])
             ->action(function (array $data, Collection $records) {
-                $records->loadMissing(['priority.type.managerUsers', 'priority.type.managerTeams', 'serviceRequestUpdates']);
+                $records->loadMissing(array_filter([
+                    ServiceRequestTypeDirectUserManagersFeature::active() ? 'priority.type.managerUsers' : null,
+                    'priority.type.managerTeams',
+                    'serviceRequestUpdates',
+                ]));
 
                 $user = auth()->user();
 
@@ -97,7 +102,7 @@ class AddServiceRequestUpdateBulkAction
                         $team = $user->team;
 
                         if (
-                            $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey()) ||
+                            (ServiceRequestTypeDirectUserManagersFeature::active() && $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey())) ||
                             $serviceRequest->priority?->type?->managerTeams?->contains('id', $team?->getKey())
                         ) {
                             return null;

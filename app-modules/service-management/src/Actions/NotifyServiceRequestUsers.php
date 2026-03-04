@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notification;
@@ -49,19 +50,32 @@ class NotifyServiceRequestUsers
             return;
         }
 
+        $directUserManagersActive = ServiceRequestTypeDirectUserManagersFeature::active();
+        $typeKey = $serviceRequest->priority->type->getKey();
+
         $user = User::query()
-            ->where(function (Builder $query) use ($serviceRequest, $shouldSendToManagers, $shouldSendToAuditors) {
+            ->where(function (Builder $query) use ($serviceRequest, $shouldSendToManagers, $shouldSendToAuditors, $directUserManagersActive, $typeKey) {
                 if ($shouldSendToManagers) {
                     $query->whereHas(
                         'team',
                         fn (Builder $query) => $query->whereHas(
                             'manageableServiceRequestTypes',
-                            fn (Builder $query) => $query->where('service_request_type_id', $serviceRequest->priority->type->getKey())->whereHas(
+                            fn (Builder $query) => $query->where('service_request_type_id', $typeKey)->whereHas(
                                 'serviceRequests',
                                 fn (Builder $query) => $query->whereKey($serviceRequest),
                             ),
                         ),
                     );
+
+                    if ($directUserManagersActive) {
+                        $query->orWhereHas(
+                            'manageableServiceRequestTypes',
+                            fn (Builder $query) => $query->where('service_request_type_id', $typeKey)->whereHas(
+                                'serviceRequests',
+                                fn (Builder $query) => $query->whereKey($serviceRequest),
+                            ),
+                        );
+                    }
                 }
 
                 if ($shouldSendToAuditors) {
@@ -69,18 +83,28 @@ class NotifyServiceRequestUsers
                         'team',
                         fn (Builder $query) => $query->whereHas(
                             'auditableServiceRequestTypes',
-                            fn (Builder $query) => $query->where('service_request_type_id', $serviceRequest->priority->type->getKey())->whereHas(
+                            fn (Builder $query) => $query->where('service_request_type_id', $typeKey)->whereHas(
                                 'serviceRequests',
                                 fn (Builder $query) => $query->whereKey($serviceRequest),
                             ),
                         )->whereDoesntHave(
                             'manageableServiceRequestTypes',
-                            fn (Builder $query) => $query->where('service_request_type_id', $serviceRequest->priority->type->getKey())->whereHas(
+                            fn (Builder $query) => $query->where('service_request_type_id', $typeKey)->whereHas(
                                 'serviceRequests',
                                 fn (Builder $query) => $query->whereKey($serviceRequest),
                             ),
                         ),
                     );
+
+                    if ($directUserManagersActive) {
+                        $query->orWhereHas(
+                            'auditableServiceRequestTypes',
+                            fn (Builder $query) => $query->where('service_request_type_id', $typeKey)->whereHas(
+                                'serviceRequests',
+                                fn (Builder $query) => $query->whereKey($serviceRequest),
+                            ),
+                        );
+                    }
                 }
             })
             ->get()

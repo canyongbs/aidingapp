@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -37,14 +37,14 @@
 namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditor;
-use AidingApp\Team\Models\Team;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserAuditor;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<ServiceRequestTypeAuditor>
+ * @extends Factory<ServiceRequestTypeUserAuditor>
  */
-class ServiceRequestTypeAuditorFactory extends Factory
+class ServiceRequestTypeUserAuditorFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -55,7 +55,7 @@ class ServiceRequestTypeAuditorFactory extends Factory
     {
         return [
             'service_request_type_id' => ServiceRequestType::factory(),
-            'team_id' => Team::factory(),
+            'user_id' => User::factory(),
         ];
     }
 }

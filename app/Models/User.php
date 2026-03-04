@@ -52,7 +52,8 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserAuditor;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserManager;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
@@ -71,7 +72,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Lab404\Impersonate\Models\Impersonate;
@@ -373,12 +373,23 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     }
 
     /**
-     * @return MorphToMany<ServiceRequestType, $this, covariant ServiceRequestTypeManager>
+     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeUserManager>
      */
-    public function manageableServiceRequestTypes(): MorphToMany
+    public function manageableServiceRequestTypes(): BelongsToMany
     {
-        return $this->morphToMany(ServiceRequestType::class, 'managerable', 'service_request_type_managers')
-            ->using(ServiceRequestTypeManager::class)
+        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_manager_users')
+            ->using(ServiceRequestTypeUserManager::class)
+            ->withPivot('id')
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeUserAuditor>
+     */
+    public function auditableServiceRequestTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditor_users')
+            ->using(ServiceRequestTypeUserAuditor::class)
             ->withPivot('id')
             ->withTimestamps();
     }

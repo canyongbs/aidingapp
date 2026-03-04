@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,28 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManager;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeTeamAuditorFactory;
 use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Features\ServiceRequestTypeDirectUserManagersFeature;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-/**
- * @extends Factory<ServiceRequestTypeManager>
- */
-class ServiceRequestTypeManagerFactory extends Factory
+class ServiceRequestTypeTeamAuditor extends Pivot
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    /** @use HasFactory<ServiceRequestTypeTeamAuditorFactory> */
+    use HasFactory;
+
+    use HasUuids;
+
+    public function getTable(): string
     {
-        return [
-            'service_request_type_id' => ServiceRequestType::factory(),
-            'team_id' => Team::factory(),
-        ];
+        return ServiceRequestTypeDirectUserManagersFeature::active()
+            ? 'service_request_type_auditor_teams'
+            : 'service_request_type_auditors';
+    }
+
+    /**
+     * @return BelongsTo<ServiceRequestType, $this>
+     */
+    public function serviceRequestType(): BelongsTo
+    {
+        return $this->belongsTo(ServiceRequestType::class)->withTrashed()->withArchived();
+    }
+
+    /**
+     * @return BelongsTo<Team, $this>
+     */
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class);
     }
 }

@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
 use App\Concerns\EditPageRedirection;
+use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
 use Filament\Forms\Components\Radio;
@@ -103,11 +104,21 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->relationship(
                                 name: 'assignmentTypeIndividual',
                                 titleAttribute: 'name',
-                                modifyQueryUsing: fn (Builder $query) => $query->whereRelation(
-                                    'team.manageableServiceRequestTypes',
-                                    'service_request_types.id',
-                                    $this->record->getKey(),
-                                )
+                                modifyQueryUsing: function (Builder $query) {
+                                    $query->whereRelation(
+                                        'team.manageableServiceRequestTypes',
+                                        'service_request_types.id',
+                                        $this->record->getKey(),
+                                    );
+
+                                    if (ServiceRequestTypeDirectUserManagersFeature::active()) {
+                                        $query->orWhereRelation(
+                                            'manageableServiceRequestTypes',
+                                            'service_request_types.id',
+                                            $this->record->getKey(),
+                                        );
+                                    }
+                                }
                             )
                             ->searchable(['name', 'email'])
                             ->preload()

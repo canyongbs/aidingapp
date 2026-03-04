@@ -47,6 +47,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Action
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
 use App\Models\User;
@@ -84,15 +85,21 @@ class ListServiceRequests extends ListRecords
                 'status',
             ])
                 ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                    return $query->where(function (Builder $query) {
-                        $query->whereHas('priority.type.managerTeams', function (Builder $query): void {
+                    $directUserManagersActive = ServiceRequestTypeDirectUserManagersFeature::active();
+
+                    return $query->where(function (Builder $query) use ($directUserManagersActive) {
+                        if ($directUserManagersActive) {
+                            $query->whereHas('priority.type.managerUsers', function (Builder $query): void {
+                                $query->where('users.id', auth()->user()->getKey());
+                            })->orWhereHas('priority.type.auditorUsers', function (Builder $query): void {
+                                $query->where('users.id', auth()->user()->getKey());
+                            });
+                        }
+
+                        $query->{$directUserManagersActive ? 'orWhereHas' : 'whereHas'}('priority.type.managerTeams', function (Builder $query): void {
                             $query->where('teams.id', auth()->user()->team?->getKey());
-                        })->orWhereHas('priority.type.managerUsers', function (Builder $query): void {
-                            $query->where('users.id', auth()->user()->getKey());
                         })->orWhereHas('priority.type.auditorTeams', function (Builder $query): void {
                             $query->where('teams.id', auth()->user()->team?->getKey());
-                        })->orWhereHas('priority.type.auditorUsers', function (Builder $query): void {
-                            $query->where('users.id', auth()->user()->getKey());
                         });
                     });
                 }))
@@ -221,10 +228,16 @@ class ListServiceRequests extends ListRecords
                             $deletedRecordsCount = ServiceRequest::query()
                                 ->whereKey($records)
                                 ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                                    $query->where(function (Builder $query): void {
-                                        $query->whereHas('priority.type.managerUsers', function (Builder $query): void {
-                                            $query->where('users.id', auth()->user()->getKey());
-                                        })->orWhereHas('priority.type.managerTeams', function (Builder $query): void {
+                                    $directUserManagersActive = ServiceRequestTypeDirectUserManagersFeature::active();
+
+                                    $query->where(function (Builder $query) use ($directUserManagersActive): void {
+                                        if ($directUserManagersActive) {
+                                            $query->whereHas('priority.type.managerUsers', function (Builder $query): void {
+                                                $query->where('users.id', auth()->user()->getKey());
+                                            });
+                                        }
+
+                                        $query->{$directUserManagersActive ? 'orWhereHas' : 'whereHas'}('priority.type.managerTeams', function (Builder $query): void {
                                             $query->where('teams.id', auth()->user()->team?->getKey());
                                         });
                                     });

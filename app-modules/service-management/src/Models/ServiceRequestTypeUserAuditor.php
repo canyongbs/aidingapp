@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,24 +34,37 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
+namespace AidingApp\ServiceManagement\Models;
 
-return new class () extends Migration {
-    public function up(): void
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeUserAuditorFactory;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
+
+class ServiceRequestTypeUserAuditor extends Pivot
+{
+    /** @use HasFactory<ServiceRequestTypeUserAuditorFactory> */
+    use HasFactory;
+
+    use HasUuids;
+
+    protected $table = 'service_request_type_auditor_users';
+
+    /**
+     * @return BelongsTo<ServiceRequestType, $this>
+     */
+    public function serviceRequestType(): BelongsTo
     {
-        Schema::table('service_request_type_managers', function (Blueprint $table) {
-            $table->dropConstrainedForeignId('team_id');
-            $table->uuidMorphs('managerable');
-        });
+        return $this->belongsTo(ServiceRequestType::class)->withTrashed()->withArchived();
     }
 
-    public function down(): void
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
     {
-        Schema::table('service_request_type_managers', function (Blueprint $table) {
-            $table->dropMorphs('managerable');
-            $table->foreignUuid('team_id')->constrained('teams')->cascadeOnDelete();
-        });
+        return $this->belongsTo(User::class);
     }
-};
+}
