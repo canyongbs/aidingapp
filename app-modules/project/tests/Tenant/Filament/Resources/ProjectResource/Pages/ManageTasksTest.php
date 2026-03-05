@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
 use AidingApp\Project\Models\Project;
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Task\Models\Task;
 use App\Models\User;
 

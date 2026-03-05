@@ -79,12 +79,12 @@ class EducatableSearch
         $column = $relatedModel::displayNameKey();
 
         $query->whereHas(
-          $this->relationship,
-          fn (Builder $query) => $query->where(
-            DB::raw("LOWER({$column})"),
-            'like',
-            "%{$search}%"
-          )
+            $this->relationship,
+            fn (Builder $query) => $query->where(
+                DB::raw("LOWER({$column})"),
+                'like',
+                "%{$search}%"
+            )
         );
     }
 }
