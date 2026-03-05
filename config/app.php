@@ -282,4 +282,6 @@ return [
     'landlord_api_key' => env('LANDLORD_API_KEY'),
 
     'allow_super_admin_creation' => env('ALLOW_SUPER_ADMIN_CREATION', false),
+
+    'allow_license_settings_editing' => env('ALLOW_LICENSE_SETTINGS_EDITING', false),
 ];
