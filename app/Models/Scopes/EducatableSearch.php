@@ -55,27 +55,7 @@ class EducatableSearch
     {
         $search = strtolower($this->search);
 
-        $relation = $query->getModel()->{$this->relationship}();
-
-        if ($relation instanceof MorphTo) {
-            $query->whereHasMorph(
-                $this->relationship,
-                [Contact::class],
-                function (Builder $query, string $type) use ($search) {
-                    $column = app($type)::displayNameKey();
-
-                    $query->where(
-                        DB::raw("LOWER({$column})"),
-                        'like',
-                        "%{$search}%"
-                    );
-                }
-            );
-
-            return;
-        }
-
-        $relatedModel = $relation->getRelated();
+        $relatedModel = $query->getModel()->{$this->relationship}()->getRelated();
         $column = $relatedModel::displayNameKey();
 
         $query->whereHas(
