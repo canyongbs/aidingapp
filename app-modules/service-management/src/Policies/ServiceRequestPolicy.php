@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Policies;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
+use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use App\Models\Authenticatable;
 use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
@@ -67,10 +68,16 @@ class ServiceRequestPolicy
 
     public function view(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        if (! auth()->user()->isSuperAdmin()) {
-            $team = auth()->user()->team;
+        $user = auth()->user();
 
-            if (! $serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey()) && ! $serviceRequest->priority?->type?->auditors?->contains('id', $team?->getKey())) {
+        if (! $user->isSuperAdmin()) {
+            $team = $user->team;
+            $directUserManagersActive = ServiceRequestTypeDirectUserManagersFeature::active();
+
+            if (! ($serviceRequest->priority?->type?->managerTeams?->contains('id', $team?->getKey()) ||
+                 ($directUserManagersActive && $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey())))
+                 && ! ($serviceRequest->priority?->type?->auditorTeams?->contains('id', $team?->getKey()) ||
+                      ($directUserManagersActive && $serviceRequest->priority?->type?->auditorUsers?->contains('id', $user->getKey())))) {
                 return Response::deny("You don't have permission to view this service request because you're not an auditor or manager.");
             }
         }
@@ -83,10 +90,12 @@ class ServiceRequestPolicy
 
     public function create(Authenticatable $authenticatable): Response
     {
-        if (! auth()->user()->isSuperAdmin()) {
-            $team = auth()->user()->team;
+        $user = auth()->user();
 
-            if (! $team?->manageableServiceRequestTypes()->exists()) {
+        if (! $user->isSuperAdmin()) {
+            $team = $user->team;
+
+            if (! ($team?->manageableServiceRequestTypes()->exists() || (ServiceRequestTypeDirectUserManagersFeature::active() && $user->manageableServiceRequestTypes()->exists()))) {
                 return Response::deny("You don't have permission to create service requests because you're not a manager of any service request types.");
             }
         }
@@ -102,11 +111,12 @@ class ServiceRequestPolicy
         if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Closed) {
             return Response::deny('Closed service request cannot be edited.');
         }
+        $user = auth()->user();
 
-        if (! auth()->user()->isSuperAdmin()) {
-            $team = auth()->user()->team;
+        if (! $user->isSuperAdmin()) {
+            $team = $user->team;
 
-            if (! $serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey())) {
+            if (! ($serviceRequest->priority?->type?->managerTeams?->contains('id', $team?->getKey()) || (ServiceRequestTypeDirectUserManagersFeature::active() && $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey())))) {
                 return Response::deny("You don't have permission to update this service request because you're not a manager of it's type.");
             }
         }
@@ -119,10 +129,12 @@ class ServiceRequestPolicy
 
     public function delete(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        if (! auth()->user()->isSuperAdmin()) {
-            $team = auth()->user()->team;
+        $user = auth()->user();
 
-            if (! $serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey())) {
+        if (! $user->isSuperAdmin()) {
+            $team = $user->team;
+
+            if (! ($serviceRequest->priority?->type?->managerTeams?->contains('id', $team?->getKey()) || (ServiceRequestTypeDirectUserManagersFeature::active() && $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey())))) {
                 return Response::deny("You don't have permission to delete this service request because you're not a manager of it's type.");
             }
         }
@@ -135,10 +147,12 @@ class ServiceRequestPolicy
 
     public function restore(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        if (! auth()->user()->isSuperAdmin()) {
-            $team = auth()->user()->team;
+        $user = auth()->user();
 
-            if (! $serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey())) {
+        if (! $user->isSuperAdmin()) {
+            $team = $user->team;
+
+            if (! ($serviceRequest->priority?->type?->managerTeams?->contains('id', $team?->getKey()) || (ServiceRequestTypeDirectUserManagersFeature::active() && $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey())))) {
                 return Response::deny("You don't have permission to restore this service request because you're not a manager of it's type.");
             }
         }
@@ -151,10 +165,12 @@ class ServiceRequestPolicy
 
     public function forceDelete(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        if (! auth()->user()->isSuperAdmin()) {
-            $team = auth()->user()->team;
+        $user = auth()->user();
 
-            if (! $serviceRequest->priority?->type?->managers?->contains('id', $team?->getKey())) {
+        if (! $user->isSuperAdmin()) {
+            $team = $user->team;
+
+            if (! ($serviceRequest->priority?->type?->managerTeams?->contains('id', $team?->getKey()) || (ServiceRequestTypeDirectUserManagersFeature::active() && $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey())))) {
                 return Response::deny("You don't have permission to permanently delete this service request because you're not a manager of it's type.");
             }
         }

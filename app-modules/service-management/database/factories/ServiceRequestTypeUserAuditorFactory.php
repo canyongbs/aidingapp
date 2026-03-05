@@ -34,40 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeAuditorFactory;
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserAuditor;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @mixin IdeHelperServiceRequestTypeAuditor
+ * @extends Factory<ServiceRequestTypeUserAuditor>
  */
-class ServiceRequestTypeAuditor extends Pivot
+class ServiceRequestTypeUserAuditorFactory extends Factory
 {
-    /** @use HasFactory<ServiceRequestTypeAuditorFactory> */
-    use HasFactory;
-
-    use HasUuids;
-
-    protected $table = 'service_request_type_auditors';
-
     /**
-     * @return BelongsTo<Team, $this>
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
-    public function team(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(Team::class);
-    }
-
-    /**
-     * @return BelongsTo<ServiceRequestType, $this>
-     */
-    public function serviceRequestType(): BelongsTo
-    {
-        return $this->belongsTo(ServiceRequestType::class)->withTrashed()->withArchived();
+        return [
+            'service_request_type_id' => ServiceRequestType::factory(),
+            'user_id' => User::factory(),
+        ];
     }
 }

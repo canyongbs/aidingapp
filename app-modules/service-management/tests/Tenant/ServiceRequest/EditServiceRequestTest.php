@@ -217,7 +217,84 @@ test('EditServiceRequest is gated with proper access control', function () {
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managers()->attach($team);
+    $serviceRequestType->managerTeams()->attach($team);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('edit', [
+                'record' => $serviceRequest,
+            ])
+        )->assertForbidden();
+
+    livewire(EditServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->assertForbidden();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.update');
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('edit', [
+                'record' => $serviceRequest,
+            ])
+        )->assertSuccessful();
+
+    $newPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $serviceRequestType->getKey(),
+    ]);
+
+    $request = collect(EditServiceRequestRequestFactory::new([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->id,
+        'priority_id' => $newPriority->id,
+    ])->create());
+
+    livewire(EditServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(
+        ServiceRequest::class,
+        $request->except(
+            [
+                'division_id',
+                'status_id',
+                'priority_id',
+            ]
+        )->toArray()
+    );
+
+    $serviceRequest->refresh();
+
+    expect($serviceRequest->division->id)
+        ->toEqual($request->get('division_id'))
+        ->and($serviceRequest->status->id)
+        ->toEqual($request->get('status_id'))
+        ->and($serviceRequest->priority->id)
+        ->toEqual($request->get('priority_id'));
+});
+
+test('EditServiceRequest is gated with proper access control for direct user manager', function () {
+    $user = User::factory()->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managerUsers()->attach($user);
 
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -309,7 +386,69 @@ test('EditServiceRequest is gated with proper feature access control', function 
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managers()->attach($team);
+    $serviceRequestType->managerTeams()->attach($team);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('edit', [
+                'record' => $serviceRequest,
+            ])
+        )->assertForbidden();
+
+    livewire(EditServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->assertForbidden();
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('edit', [
+                'record' => $serviceRequest,
+            ])
+        )->assertSuccessful();
+
+    $request = collect(EditServiceRequestRequestFactory::new()->create());
+
+    livewire(EditServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceRequest->fresh()->only($request->except('division_id')->keys()->toArray()))
+        ->toEqual($request->except('division_id')->toArray())
+        ->and($serviceRequest->fresh()->division->id)->toEqual($request['division_id']);
+});
+
+test('EditServiceRequest is gated with proper feature access control for direct user manager', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = false;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.update');
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managerUsers()->attach($user);
 
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -381,7 +520,81 @@ test('send feedback email if service request is closed', function () {
         'is_customers_survey_response_email_enabled' => true,
     ]);
 
-    $serviceRequestType->managers()->attach($team);
+    $serviceRequestType->managerTeams()->attach($team);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.update');
+
+    actingAs($user);
+
+    $request = collect(EditServiceRequestRequestFactory::new([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Closed,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create());
+
+    livewire(EditServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(
+        ServiceRequest::class,
+        $request->except(
+            [
+                'division_id',
+                'status_id',
+                'priority',
+            ]
+        )->toArray()
+    );
+
+    $serviceRequest->refresh();
+
+    Notification::assertSentTo(
+        $serviceRequest->respondent,
+        SendClosedServiceFeedbackNotification::class
+    );
+
+    Notification::assertNotSentTo(
+        [$user],
+        SendClosedServiceFeedbackNotification::class
+    );
+});
+
+test('send feedback email if service request is closed for direct user manager', function () {
+    Notification::fake();
+
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->feedbackManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create([
+        'has_enabled_feedback_collection' => true,
+        'has_enabled_csat' => true,
+        'has_enabled_nps' => true,
+        'is_customers_survey_response_email_enabled' => true,
+    ]);
+
+    $serviceRequestType->managerUsers()->attach($user);
 
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -459,7 +672,34 @@ test('service requests not authorized if user is not manager of the service requ
 
     $serviceRequest = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
-            ->hasAttached(Team::factory(), [], 'managers'), 'type'),
+            ->hasAttached(Team::factory(), [], 'managerTeams'), 'type'),
+    ])
+        ->create();
+
+    livewire(EditServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])->assertForbidden();
+});
+
+test('service requests not authorized if user is not a direct managerUser of the service request type', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.update');
+
+    actingAs($user);
+
+    $otherUser = User::factory()->create();
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
+            ->hasAttached($otherUser, [], 'managerUsers'), 'type'),
     ])
         ->create();
 
@@ -490,7 +730,32 @@ test('service requests not authorized if user is auditor of the service request 
 
     $serviceRequest = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
-            ->hasAttached(Team::factory(), [], 'auditors'), 'type'),
+            ->hasAttached(Team::factory(), [], 'auditorTeams'), 'type'),
+    ])
+        ->create();
+
+    livewire(EditServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])->assertForbidden();
+});
+
+test('service requests not authorized if user is a direct auditorUser of the service request type', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.update');
+
+    actingAs($user);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
+            ->hasAttached($user, [], 'auditorUsers'), 'type'),
     ])
         ->create();
 

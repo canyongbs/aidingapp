@@ -118,7 +118,10 @@ class ServiceRequestsRelationManager extends RelationManager
                                             ->withoutTrashed()
                                             ->withoutArchived()
                                             ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                                                $query->whereRelation('managers', 'teams.id', auth()->user()->team?->getKey());
+                                                $query->where(function (Builder $query) {
+                                                    $query->whereHas('managerUsers', fn (Builder $query) => $query->where('users.id', auth()->user()->getKey()))
+                                                        ->orWhereHas('managerTeams', fn (Builder $query) => $query->where('teams.id', auth()->user()->team?->getKey()));
+                                                });
                                             }),
                                     )
                                     ->when(
@@ -186,13 +189,21 @@ class ServiceRequestsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('id')
             ->modifyQueryUsing(function ($query) {
-                $query->when(! auth()->user()->isSuperAdmin(), function (Builder $q) {
-                    return $q->whereHas('priority.type.managers', function (Builder $query): void {
-                        $query->where('teams.id', auth()->user()->team?->getKey());
-                    })
-                        ->orWhereHas('priority.type.auditors', function (Builder $query): void {
+                $query->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
+                    return $query->where(function (Builder $query) {
+                        $query->whereHas('priority.type.managerTeams', function (Builder $query): void {
                             $query->where('teams.id', auth()->user()->team?->getKey());
                         })
+                            ->orWhereHas('priority.type.managerUsers', function (Builder $query): void {
+                                $query->where('users.id', auth()->user()->getKey());
+                            })
+                            ->orWhereHas('priority.type.auditorTeams', function (Builder $query): void {
+                                $query->where('teams.id', auth()->user()->team?->getKey());
+                            })
+                            ->orWhereHas('priority.type.auditorUsers', function (Builder $query): void {
+                                $query->where('users.id', auth()->user()->getKey());
+                            });
+                    })
                         ->whereHas('respondent', fn (Builder $query) => $query->where('respondent_id', $this->getOwnerRecord()->getKey()));
                 });
             })

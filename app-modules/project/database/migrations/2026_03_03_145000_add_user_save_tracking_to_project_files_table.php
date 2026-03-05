@@ -34,40 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeManagerFactory;
-use AidingApp\Team\Models\Team;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
-
-/**
- * @mixin IdeHelperServiceRequestTypeManager
- */
-class ServiceRequestTypeManager extends Pivot
-{
-    /** @use HasFactory<ServiceRequestTypeManagerFactory> */
-    use HasFactory;
-
-    use HasUuids;
-
-    protected $table = 'service_request_type_managers';
-
-    /**
-     * @return BelongsTo<Team, $this>
-     */
-    public function team(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(Team::class);
+        Schema::table('project_files', function (Blueprint $table) {
+            $table->foreignUuid('created_by_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('last_updated_by_id')->nullable()->constrained('users')->nullOnDelete();
+        });
     }
 
-    /**
-     * @return BelongsTo<ServiceRequestType, $this>
-     */
-    public function serviceRequestType(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(ServiceRequestType::class)->withTrashed()->withArchived();
+        Schema::table('project_files', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('created_by_id');
+            $table->dropConstrainedForeignId('last_updated_by_id');
+        });
     }
-}
+};

@@ -46,6 +46,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ServiceRequestTimeline;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Pages\Page;
@@ -85,17 +86,24 @@ class ServiceRequestResource extends Resource
             ->with(['status', 'priority.type', 'respondent'])
             ->when(! $user->isSuperAdmin(), function (Builder $query) use ($user) {
                 $userTeamId = $user->team?->getKey();
+                $directUserManagersActive = ServiceRequestTypeDirectUserManagersFeature::active();
 
-                if (! $userTeamId) {
-                    return $query->whereRaw('0 = 1');
-                }
+                return $query->where(function (Builder $query) use ($userTeamId, $user, $directUserManagersActive) {
+                    if ($directUserManagersActive) {
+                        $query->whereHas('priority.type.managerUsers', function (Builder $query) use ($user) {
+                            $query->where('users.id', $user->getKey());
+                        })->orWhereHas('priority.type.auditorUsers', function (Builder $query) use ($user) {
+                            $query->where('users.id', $user->getKey());
+                        });
+                    }
 
-                return $query->where(function (Builder $query) use ($userTeamId) {
-                    $query->whereHas('priority.type.managers', function (Builder $query) use ($userTeamId) {
-                        $query->where('teams.id', $userTeamId);
-                    })->orWhereHas('priority.type.auditors', function (Builder $query) use ($userTeamId) {
-                        $query->where('teams.id', $userTeamId);
-                    });
+                    if ($userTeamId) {
+                        $query->{$directUserManagersActive ? 'orWhereHas' : 'whereHas'}('priority.type.managerTeams', function (Builder $query) use ($userTeamId) {
+                            $query->where('teams.id', $userTeamId);
+                        })->orWhereHas('priority.type.auditorTeams', function (Builder $query) use ($userTeamId) {
+                            $query->where('teams.id', $userTeamId);
+                        });
+                    }
                 });
             });
     }

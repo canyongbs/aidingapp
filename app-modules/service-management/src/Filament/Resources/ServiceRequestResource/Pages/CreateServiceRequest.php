@@ -105,7 +105,9 @@ class CreateServiceRequest extends CreateRecord
                                     ->columnSpan(fn (Get $get): int => filled($get('type_id')) ? 2 : 3),
                                 Select::make('type_id')
                                     ->options(ServiceRequestType::when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                                        $query->whereHas('managers', function (Builder $query): void {
+                                        $query->whereHas('managerUsers', function (Builder $query): void {
+                                            $query->where('users.id', auth()->user()->getKey());
+                                        })->orWhereHas('managerTeams', function (Builder $query): void {
                                             $query->where('teams.id', auth()->user()->team?->getKey());
                                         });
                                     })

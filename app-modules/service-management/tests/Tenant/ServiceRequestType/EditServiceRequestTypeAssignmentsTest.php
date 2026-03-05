@@ -82,7 +82,7 @@ test('A successful action on the EditServiceRequestTypeAssignments page when the
     $serviceRequestType = ServiceRequestType::factory()
         ->hasAttached(
             factory: $managerTeam,
-            relationship: 'managers'
+            relationship: 'managerTeams'
         )
         ->create();
 
@@ -107,6 +107,34 @@ test('A successful action on the EditServiceRequestTypeAssignments page when the
         ->assertHasNoFormErrors();
 
     assertEquals($editRequest['assignment_type'], $serviceRequestType->fresh()->assignment_type);
+});
+
+test('A successful action on the EditServiceRequestTypeAssignments page when the type selected is Individual and user is a direct manager', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $directManager = User::factory()->create();
+    $serviceRequestType->managerUsers()->attach($directManager);
+
+    asSuperAdmin()
+        ->get(
+            EditServiceRequestTypeAssignments::getUrl([
+                'record' => $serviceRequestType->getRouteKey(),
+            ])
+        )
+        ->assertSuccessful();
+
+    livewire(EditServiceRequestTypeAssignments::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->fillForm([
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
+            'assignment_type_individual_id' => $directManager->getKey(),
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    assertEquals(ServiceRequestTypeAssignmentTypes::Individual->value, $serviceRequestType->fresh()->assignment_type->value);
+    assertEquals($directManager->getKey(), $serviceRequestType->fresh()->assignment_type_individual_id);
 });
 
 test('EditServiceRequestTypeAssignments requires valid data', function (EditServiceRequestTypeAssignmentsRequestFactory $data, $errors) {

@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Audit\Overrides\BelongsToMany;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
@@ -50,6 +49,7 @@ use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -188,22 +188,58 @@ class ServiceRequestType extends BaseModel implements Auditable
     }
 
     /**
-     * @return BelongsToMany<Team, $this, covariant ServiceRequestTypeManager>
+     * @return BelongsToMany<User, $this, covariant ServiceRequestTypeUserManager>
      */
-    public function managers(): BelongsToMany
+    public function managerUsers(): BelongsToMany
     {
-        return $this->belongsToMany(Team::class, 'service_request_type_managers')
-            ->using(ServiceRequestTypeManager::class)
+        return $this->belongsToMany(
+            related: User::class,
+            table: 'service_request_type_manager_users',
+        )
+            ->using(ServiceRequestTypeUserManager::class)
+            ->withPivot('id')
             ->withTimestamps();
     }
 
     /**
-     * @return BelongsToMany<Team, $this, covariant ServiceRequestTypeAuditor>
+     * @return BelongsToMany<Team, $this, covariant ServiceRequestTypeTeamManager>
      */
-    public function auditors(): BelongsToMany
+    public function managerTeams(): BelongsToMany
     {
-        return $this->belongsToMany(Team::class, 'service_request_type_auditors')
-            ->using(ServiceRequestTypeAuditor::class)
+        return $this->belongsToMany(
+            related: Team::class,
+            table: (new ServiceRequestTypeTeamManager())->getTable(),
+        )
+            ->using(ServiceRequestTypeTeamManager::class)
+            ->withPivot('id')
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<User, $this, covariant ServiceRequestTypeUserAuditor>
+     */
+    public function auditorUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            related: User::class,
+            table: 'service_request_type_auditor_users',
+        )
+            ->using(ServiceRequestTypeUserAuditor::class)
+            ->withPivot('id')
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<Team, $this, covariant ServiceRequestTypeTeamAuditor>
+     */
+    public function auditorTeams(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            related: Team::class,
+            table: (new ServiceRequestTypeTeamAuditor())->getTable(),
+        )
+            ->using(ServiceRequestTypeTeamAuditor::class)
+            ->withPivot('id')
             ->withTimestamps();
     }
 

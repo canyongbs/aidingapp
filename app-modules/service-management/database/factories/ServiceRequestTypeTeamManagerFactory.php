@@ -34,32 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Rules;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeDirectUserManagersFeature;
-use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeTeamManager;
+use AidingApp\Team\Models\Team;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ServiceRequestTypeAssignmentsIndividualUserMustBeAManager implements ValidationRule
+/**
+ * @extends Factory<ServiceRequestTypeTeamManager>
+ */
+class ServiceRequestTypeTeamManagerFactory extends Factory
 {
-    public function __construct(
-        protected ServiceRequestType $serviceRequestType
-    ) {}
-
     /**
-     * Run the validation rule.
+     * Define the model's default state.
      *
-     * @param Closure(string): PotentiallyTranslatedString $fail
+     * @return array<string, mixed>
      */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    public function definition(): array
     {
-        $isManager = (ServiceRequestTypeDirectUserManagersFeature::active() && $this->serviceRequestType->managerUsers()->where('users.id', $value)->exists()) ||
-            $this->serviceRequestType->managerTeams()->whereRelation('users', 'users.id', $value)->exists();
-
-        if (! $isManager) {
-            $fail('The selected user must be a manager user or belong to a team designated as managers of this Service Request Type.');
-        }
+        return [
+            'service_request_type_id' => ServiceRequestType::factory(),
+            'team_id' => Team::factory(),
+        ];
     }
 }

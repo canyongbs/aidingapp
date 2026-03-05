@@ -52,6 +52,8 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserAuditor;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserManager;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
@@ -367,6 +369,28 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return $this
             ->belongsToMany(Project::class, 'project_auditor_users', 'user_id', 'project_id')
             ->using(ProjectAuditorUser::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeUserManager>
+     */
+    public function manageableServiceRequestTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_manager_users')
+            ->using(ServiceRequestTypeUserManager::class)
+            ->withPivot('id')
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeUserAuditor>
+     */
+    public function auditableServiceRequestTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditor_users')
+            ->using(ServiceRequestTypeUserAuditor::class)
+            ->withPivot('id')
             ->withTimestamps();
     }
 

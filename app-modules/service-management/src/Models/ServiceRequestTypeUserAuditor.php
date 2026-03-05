@@ -34,32 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Rules;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeDirectUserManagersFeature;
-use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Translation\PotentiallyTranslatedString;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeUserAuditorFactory;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ServiceRequestTypeAssignmentsIndividualUserMustBeAManager implements ValidationRule
+/**
+ * @mixin IdeHelperServiceRequestTypeUserAuditor
+ */
+class ServiceRequestTypeUserAuditor extends Pivot
 {
-    public function __construct(
-        protected ServiceRequestType $serviceRequestType
-    ) {}
+    /** @use HasFactory<ServiceRequestTypeUserAuditorFactory> */
+    use HasFactory;
+
+    use HasUuids;
+
+    protected $table = 'service_request_type_auditor_users';
 
     /**
-     * Run the validation rule.
-     *
-     * @param Closure(string): PotentiallyTranslatedString $fail
+     * @return BelongsTo<ServiceRequestType, $this>
      */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    public function serviceRequestType(): BelongsTo
     {
-        $isManager = (ServiceRequestTypeDirectUserManagersFeature::active() && $this->serviceRequestType->managerUsers()->where('users.id', $value)->exists()) ||
-            $this->serviceRequestType->managerTeams()->whereRelation('users', 'users.id', $value)->exists();
+        return $this->belongsTo(ServiceRequestType::class)->withTrashed()->withArchived();
+    }
 
-        if (! $isManager) {
-            $fail('The selected user must be a manager user or belong to a team designated as managers of this Service Request Type.');
-        }
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 }
