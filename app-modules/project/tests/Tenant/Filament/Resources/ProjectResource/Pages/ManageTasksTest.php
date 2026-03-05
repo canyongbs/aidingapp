@@ -34,8 +34,10 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
 use AidingApp\Project\Models\Project;
+use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;
 use App\Models\User;
 
@@ -113,4 +115,40 @@ it('can list pending/in_progress tasks', function () {
         )
         ->assertCanNotSeeTableRecords($project->tasks
             ->whereIn('status', ['completed', 'canceled']));
+});
+
+it('can search tasks by related contact', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $matchingContact = Contact::factory()->create([
+        'first_name' => 'Zebediah',
+        'last_name' => 'Stone',
+        'full_name' => 'Zebediah Stone',
+    ]);
+    $otherContact = Contact::factory()->create([
+        'first_name' => 'Amelia',
+        'last_name' => 'Hart',
+        'full_name' => 'Amelia Hart',
+    ]);
+
+    $matchingTask = Task::factory()
+        ->for($project)
+        ->state(['status' => TaskStatus::Pending->value])
+        ->concerningContact($matchingContact)
+        ->create();
+
+    $otherTask = Task::factory()
+        ->for($project)
+        ->state(['status' => TaskStatus::InProgress->value])
+        ->concerningContact($otherContact)
+        ->create();
+
+    livewire(ManageTasks::class, [
+        'record' => $project->getRouteKey(),
+    ])
+        ->searchTable('zebediah')
+        ->assertCanSeeTableRecords([$matchingTask])
+        ->assertCanNotSeeTableRecords([$otherTask]);
 });

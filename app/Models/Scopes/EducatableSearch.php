@@ -54,18 +54,16 @@ class EducatableSearch
     {
         $search = strtolower($this->search);
 
-        $query->whereHasMorph(
-            $this->relationship,
-            [Contact::class],
-            function (Builder $query, string $type) use ($search) {
-                $column = app($type)::displayNameKey();
+        $relatedModel = $query->getModel()->{$this->relationship}()->getRelated();
+        $column = $relatedModel::displayNameKey();
 
-                $query->where(
-                    DB::raw("LOWER({$column})"),
-                    'like',
-                    "%{$search}%"
-                );
-            }
+        $query->whereHas(
+            $this->relationship,
+            fn (Builder $query) => $query->where(
+                DB::raw("LOWER({$column})"),
+                'like',
+                "%{$search}%"
+            )
         );
     }
 }
