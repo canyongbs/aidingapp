@@ -38,7 +38,6 @@ namespace App\Models\Scopes;
 
 use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\DB;
 
 class EducatableSearch
