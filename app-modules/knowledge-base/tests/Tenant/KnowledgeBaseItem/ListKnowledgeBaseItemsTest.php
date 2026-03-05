@@ -51,7 +51,7 @@ use function Tests\Helpers\testResourceRequiresPermissionForAccess;
 // TODO: Write ListKnowledgeBaseItems tests
 //test('The correct details are displayed on the ListKnowledgeBaseItems page', function () {});
 
-// TODO: Sorting and Searching tests
+// TODO: Sorting tests
 
 // Permission Tests
 
@@ -340,4 +340,84 @@ test('Filter ListKnowledgeBaseItems with `updated after` filter', function () {
             $knowledgeBaseItemsUpdatedAtAfter
         )
         ->assertCanNotSeeTableRecords($knowledgeBaseItemsUpdatedAtBefore);
+});
+
+test('SearchKnowledgeBaseItems by title', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->knowledgeManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('knowledge_base_item.view-any');
+
+    actingAs($user);
+
+    $matchingItem = KnowledgeBaseItem::factory()
+        ->state(['title' => 'How to reset your password'])
+        ->create();
+
+    $nonMatchingItem = KnowledgeBaseItem::factory()
+        ->state(['title' => 'Getting started with the app'])
+        ->create();
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->searchTable('reset your password')
+        ->assertCanSeeTableRecords(collect([$matchingItem]))
+        ->assertCanNotSeeTableRecords(collect([$nonMatchingItem]));
+});
+
+test('SearchKnowledgeBaseItems by article body text', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->knowledgeManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('knowledge_base_item.view-any');
+
+    actingAs($user);
+
+    $matchingItem = KnowledgeBaseItem::factory()
+        ->state([
+            'title' => 'General Article',
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    [
+                        'type' => 'paragraph',
+                        'content' => [
+                            ['type' => 'text', 'text' => 'This article contains unique search term xylophone instructions'],
+                        ],
+                    ],
+                ],
+            ],
+        ])
+        ->create();
+
+    $nonMatchingItem = KnowledgeBaseItem::factory()
+        ->state([
+            'title' => 'Another Article',
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    [
+                        'type' => 'paragraph',
+                        'content' => [
+                            ['type' => 'text', 'text' => 'This article is about something completely different'],
+                        ],
+                    ],
+                ],
+            ],
+        ])
+        ->create();
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->searchTable('xylophone')
+        ->assertCanSeeTableRecords(collect([$matchingItem]))
+        ->assertCanNotSeeTableRecords(collect([$nonMatchingItem]));
 });
