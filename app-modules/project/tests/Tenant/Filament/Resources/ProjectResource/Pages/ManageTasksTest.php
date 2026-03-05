@@ -151,4 +151,4 @@ it('can search tasks by related contact', function () {
         ->searchTable('zebediah')
         ->assertCanSeeTableRecords([$matchingTask])
         ->assertCanNotSeeTableRecords([$otherTask]);
-})->only()->repeat(100);
+});
