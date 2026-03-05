@@ -37,6 +37,7 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
 use AidingApp\Project\Models\Project;
+use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;
 use App\Models\User;
 
@@ -134,11 +135,13 @@ it('can search tasks by related contact', function () {
 
     $matchingTask = Task::factory()
         ->for($project)
+        ->state(['status' => TaskStatus::Pending->value])
         ->concerningContact($matchingContact)
         ->create();
 
     $otherTask = Task::factory()
         ->for($project)
+        ->state(['status' => TaskStatus::InProgress->value])
         ->concerningContact($otherContact)
         ->create();
 
@@ -148,4 +151,4 @@ it('can search tasks by related contact', function () {
         ->searchTable('zebediah')
         ->assertCanSeeTableRecords([$matchingTask])
         ->assertCanNotSeeTableRecords([$otherTask]);
-});
+})->only()->repeat(100);
