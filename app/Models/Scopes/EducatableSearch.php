@@ -38,6 +38,7 @@ namespace App\Models\Scopes;
 
 use AidingApp\Contact\Models\Contact;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\DB;
 
 class EducatableSearch
@@ -54,18 +55,36 @@ class EducatableSearch
     {
         $search = strtolower($this->search);
 
-        $query->whereHasMorph(
-            $this->relationship,
-            [Contact::class],
-            function (Builder $query, string $type) use ($search) {
-                $column = app($type)::displayNameKey();
+        $relation = $query->getModel()->{$this->relationship}();
 
-                $query->where(
-                    DB::raw("LOWER({$column})"),
-                    'like',
-                    "%{$search}%"
-                );
-            }
+        if ($relation instanceof MorphTo) {
+            $query->whereHasMorph(
+                $this->relationship,
+                [Contact::class],
+                function (Builder $query, string $type) use ($search) {
+                    $column = app($type)::displayNameKey();
+
+                    $query->where(
+                        DB::raw("LOWER({$column})"),
+                        'like',
+                        "%{$search}%"
+                    );
+                }
+            );
+
+            return;
+        }
+
+        $relatedModel = $relation->getRelated();
+        $column = $relatedModel::displayNameKey();
+
+        $query->whereHas(
+          $this->relationship,
+          fn (Builder $query) => $query->where(
+            DB::raw("LOWER({$column})"),
+            'like',
+            "%{$search}%"
+          )
         );
     }
 }
