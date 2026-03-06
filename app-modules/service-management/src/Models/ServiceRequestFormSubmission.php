@@ -122,6 +122,7 @@ class ServiceRequestFormSubmission extends Submission
 
     /**
      * @param Builder<ServiceRequestFormSubmission> $query
+     *
      * @return Builder<ServiceRequestFormSubmission>
      */
     public function scopeRequested(Builder $query): Builder
@@ -131,6 +132,7 @@ class ServiceRequestFormSubmission extends Submission
 
     /**
      * @param Builder<ServiceRequestFormSubmission> $query
+     *
      * @return Builder<ServiceRequestFormSubmission>
      */
     public function scopeSubmitted(Builder $query): Builder
@@ -140,6 +142,7 @@ class ServiceRequestFormSubmission extends Submission
 
     /**
      * @param Builder<ServiceRequestFormSubmission> $query
+     *
      * @return Builder<ServiceRequestFormSubmission>
      */
     public function scopeCanceled(Builder $query): Builder
@@ -149,6 +152,7 @@ class ServiceRequestFormSubmission extends Submission
 
     /**
      * @param Builder<ServiceRequestFormSubmission> $query
+     *
      * @return Builder<ServiceRequestFormSubmission>
      */
     public function scopeNotSubmitted(Builder $query): Builder
@@ -158,6 +162,7 @@ class ServiceRequestFormSubmission extends Submission
 
     /**
      * @param Builder<ServiceRequestFormSubmission> $query
+     *
      * @return Builder<ServiceRequestFormSubmission>
      */
     public function scopeNotCanceled(Builder $query): Builder

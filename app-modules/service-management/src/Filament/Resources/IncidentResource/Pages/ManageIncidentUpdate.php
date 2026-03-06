@@ -71,7 +71,7 @@ class ManageIncidentUpdate extends ManageRelatedRecords
     public function form(Schema $schema): Schema
     {
         assert($this->getOwnerRecord() instanceof Incident);
-        
+
         return $schema
             ->components([
                 Textarea::make('update')
