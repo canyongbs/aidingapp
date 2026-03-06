@@ -38,11 +38,14 @@ namespace AidingApp\Form\Filament\Blocks;
 
 use AidingApp\Form\Models\SubmissibleField;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 
 class RadioFormFieldBlock extends FormFieldBlock
 {
+    public string $width = '2xl';
+
     public string $preview = 'form::blocks.previews.radio';
 
     public string $rendered = 'form::blocks.submissions.radio';
@@ -61,6 +64,10 @@ class RadioFormFieldBlock extends FormFieldBlock
     {
         return [
             Repeater::make('options')
+                ->table([
+                    TableColumn::make('Value'),
+                    TableColumn::make('Label'),
+                ])
                 ->schema([
                     TextInput::make('value')->required(),
                     TextInput::make('label')->required(),

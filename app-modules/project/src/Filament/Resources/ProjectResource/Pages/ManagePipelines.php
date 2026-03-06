@@ -43,6 +43,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ManageRelatedRecords;
@@ -82,6 +83,9 @@ class ManagePipelines extends ManageRelatedRecords
                     ->maxLength(65535),
                 Repeater::make('stages')
                     ->relationship('stages')
+                    ->table([
+                        TableColumn::make('Stage Name'),
+                    ])
                     ->schema([
                         TextInput::make('name')
                             ->label('Stage')

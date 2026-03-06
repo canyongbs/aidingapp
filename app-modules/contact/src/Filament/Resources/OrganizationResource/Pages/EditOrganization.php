@@ -45,6 +45,7 @@ use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
@@ -95,6 +96,9 @@ class EditOrganization extends EditRecord
                         Toggle::make('is_contact_generation_enabled')
                             ->label('Automatically generate contact record on login.'),
                         Repeater::make('domains')
+                            ->table([
+                                TableColumn::make('Domain'),
+                            ])
                             ->schema([
                                 TextInput::make('domain')
                                     ->label('Domain')

@@ -44,6 +44,7 @@ use App\Concerns\EditPageRedirection;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -71,6 +72,9 @@ class EditPipeline extends EditRecord
                     ->maxLength(65535),
                 Repeater::make('stages')
                     ->relationship('stages')
+                    ->table([
+                        TableColumn::make('Stage Name'),
+                    ])
                     ->schema([
                         TextInput::make('name')
                             ->label('Stage')
