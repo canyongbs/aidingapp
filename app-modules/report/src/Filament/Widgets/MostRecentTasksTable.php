@@ -60,13 +60,13 @@ class MostRecentTasksTable extends BaseWidget
         'lg' => 4,
     ];
 
-    public function mount(string $cacheTag)
+    public function mount(string $cacheTag): void
     {
         $this->cacheTag = $cacheTag;
     }
 
     #[On('refresh-widgets')]
-    public function refreshWidget()
+    public function refreshWidget(): void
     {
         $this->dispatch('$refresh');
     }
@@ -85,12 +85,13 @@ class MostRecentTasksTable extends BaseWidget
                 TextColumn::make('status'),
                 TextColumn::make('association')
                     ->label('Association')
-                    ->getStateUsing(fn (Task $record): ?string => ! is_null($record->concern) ? match ($record->concern::class) {
+                    ->getStateUsing(fn (Task $record): string => ! is_null($record->concern) ? match ($record->concern::class) {
                         Contact::class => 'Contact',
+                        default => 'N/A',
                     } : 'Unrelated'),
                 TextColumn::make('concern.display_name')
                     ->label('Related To')
-                    ->getStateUsing(fn (Task $record): ?string => $record->concern?->{$record->concern::displayNameKey()} ?? 'N/A')
+                    ->getStateUsing(fn (Task $record): string => $record->concern->{$record->concern::displayNameKey()} ?? 'N/A')
                     ->url(fn (Task $record) => match ($record->concern ? $record->concern::class : null) {
                         Contact::class => ContactResource::getUrl('view', ['record' => $record->concern]),
                         default => null,

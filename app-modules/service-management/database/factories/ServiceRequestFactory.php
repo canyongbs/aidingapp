@@ -55,7 +55,7 @@ class ServiceRequestFactory extends Factory
             'respondent_id' => Contact::factory(),
             'title' => str($this->faker->words(asText: true))->headline()->toString(),
             'close_details' => $this->faker->sentence(),
-            'division_id' => Division::inRandomOrder()->first()?->id ?? Division::factory(),
+            'division_id' => Division::inRandomOrder()->first()->id ?? Division::factory(),
             'status_id' => ServiceRequestStatus::inRandomOrder()->first() ?? ServiceRequestStatus::factory(),
             'priority_id' => ServiceRequestPriority::inRandomOrder()->first() ?? ServiceRequestPriority::factory(),
             'created_by_id' => User::factory(),

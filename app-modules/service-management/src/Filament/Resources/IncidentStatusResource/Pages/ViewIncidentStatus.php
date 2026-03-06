@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource;
+use AidingApp\ServiceManagement\Models\IncidentStatus;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;

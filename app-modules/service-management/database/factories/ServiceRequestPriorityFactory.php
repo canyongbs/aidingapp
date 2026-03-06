@@ -54,6 +54,9 @@ class ServiceRequestPriorityFactory extends Factory
         ];
     }
 
+    /**
+     * @return Factory<ServiceRequestPriority>
+     */
     public function high(): Factory
     {
         return $this->state(function (array $attributes) {
@@ -64,6 +67,9 @@ class ServiceRequestPriorityFactory extends Factory
         });
     }
 
+    /**
+     * @return Factory<ServiceRequestPriority>
+     */
     public function medium(): Factory
     {
         return $this->state(function (array $attributes) {
@@ -74,6 +80,9 @@ class ServiceRequestPriorityFactory extends Factory
         });
     }
 
+    /**
+     * @return Factory<ServiceRequestPriority>
+     */
     public function low(): Factory
     {
         return $this->state(function (array $attributes) {

@@ -58,7 +58,7 @@ class TaskManagement extends EngagementReport
 
     protected static ?int $navigationSort = 100;
 
-    protected $cacheTag = 'report-tasks';
+    protected string $cacheTag = 'report-tasks';
 
     public function getWidgets(): array
     {

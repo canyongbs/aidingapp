@@ -52,13 +52,13 @@ abstract class StatsOverviewReportWidget extends StatsOverviewWidget
 
     protected static bool $isLazy = false;
 
-    public function mount(string $cacheTag)
+    public function mount(string $cacheTag): void
     {
         $this->cacheTag = $cacheTag;
     }
 
     #[On('refresh-widgets')]
-    public function refreshWidget()
+    public function refreshWidget(): void
     {
         $this->dispatch('$refresh');
     }

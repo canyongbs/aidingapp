@@ -69,7 +69,7 @@ class RefreshWidget extends StatsOverviewReportWidget
         return parent::render();
     }
 
-    public function removeWidgetCache($cacheTag)
+    public function removeWidgetCache(string $cacheTag): void
     {
         Cache::tags(["{{$cacheTag}}"])->flush();
 
