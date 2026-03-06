@@ -50,13 +50,7 @@
                     <p class="text-lg text-gray-600">
                         This feature is currently under development and will be available soon.
                     </p>
-                    <BaseButton
-                        variant="primary"
-                        size="md"
-                        :icon-left="HomeIcon"
-                        class="mt-4"
-                        @click="goHome"
-                    >
+                    <BaseButton variant="primary" size="md" :icon-left="HomeIcon" class="mt-4" @click="goHome">
                         Return to Home
                     </BaseButton>
                 </div>

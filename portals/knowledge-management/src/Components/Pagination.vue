@@ -71,12 +71,7 @@
 <template>
     <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
         <div class="flex flex-1 justify-between sm:hidden">
-            <BaseButton
-                variant="neutral"
-                size="md"
-                :disabled="currentPage === 1"
-                @click="$emit('fetchPreviousPage')"
-            >
+            <BaseButton variant="neutral" size="md" :disabled="currentPage === 1" @click="$emit('fetchPreviousPage')">
                 Previous
             </BaseButton>
             <BaseButton
@@ -141,10 +136,7 @@
                         {{ page }}
                     </BaseButton>
 
-                    <span
-                        v-if="currentPage < lastPage - 3"
-                        class="inline-flex items-center px-2 text-gray-500 text-sm"
-                    >
+                    <span v-if="currentPage < lastPage - 3" class="inline-flex items-center px-2 text-gray-500 text-sm">
                         &hellip;
                     </span>
                     <BaseButton

@@ -457,12 +457,7 @@
                         <p>Thank you. Your request has been submitted.</p>
                     </template>
 
-                    <BaseButton
-                        as="router-link"
-                        :to="{ name: 'create-service-request' }"
-                        variant="secondary"
-                        size="md"
-                    >
+                    <BaseButton as="router-link" :to="{ name: 'create-service-request' }" variant="secondary" size="md">
                         Submit Another Request
                     </BaseButton>
                 </main>
@@ -523,18 +518,10 @@
                         </p>
 
                         <div class="flex gap-3">
-                            <BaseButton
-                                variant="success"
-                                size="md"
-                                @click="handleAiResolutionAccepted"
-                            >
+                            <BaseButton variant="success" size="md" @click="handleAiResolutionAccepted">
                                 Yes (Resolved)
                             </BaseButton>
-                            <BaseButton
-                                variant="neutral"
-                                size="md"
-                                @click="handleAiResolutionDeclined"
-                            >
+                            <BaseButton variant="neutral" size="md" @click="handleAiResolutionDeclined">
                                 No
                             </BaseButton>
                         </div>
