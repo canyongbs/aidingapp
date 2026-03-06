@@ -77,7 +77,13 @@ class ListKnowledgeBaseItems extends ListRecords
                 IdColumn::make(),
                 TextColumn::make('title')
                     ->label('Title')
-                    ->searchable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        $search = strtolower($search);
+
+                        return $query
+                            ->whereRaw('lower(title) like ?', ["%{$search}%"])
+                            ->orWhereRaw('lower(article_details_fulltext) like ?', ["%{$search}%"]);
+                    })
                     ->sortable(),
                 TextColumn::make('category.name')
                     ->label('Category')
