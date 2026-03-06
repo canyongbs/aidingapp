@@ -146,7 +146,8 @@ class ManageLicenseSettings extends SettingsPage
                                 ->label('Incident Management'),
                         ]
                     ),
-            ]);
+            ])
+            ->disabled(! config('app.allow_license_settings_editing'));
     }
 
     protected function mutateFormDataBeforeSave(array $data): array

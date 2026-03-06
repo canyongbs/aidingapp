@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
@@ -82,6 +83,9 @@ class CreateOrganization extends CreateRecord
                         Toggle::make('is_contact_generation_enabled')
                             ->label('Automatically generate contact record on login.'),
                         Repeater::make('domains')
+                            ->table([
+                                TableColumn::make('Domain'),
+                            ])
                             ->schema([
                                 TextInput::make('domain')
                                     ->label('Domain')
