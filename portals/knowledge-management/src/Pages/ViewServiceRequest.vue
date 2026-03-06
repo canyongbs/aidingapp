@@ -39,6 +39,7 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';
     import Pagination from '../Components/Pagination.vue';
+    import BaseButton from '../Components/ui/BaseButton.vue';
     import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();
@@ -240,13 +241,9 @@
                             </p>
                         </div>
                     </div>
-                    <button
-                        type="submit"
-                        class="w-auto py-2 px-4 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-500 transition duration-200"
-                        :disabled="disableSubmitBtn"
-                    >
+                    <BaseButton type="submit" variant="primary" size="md" :loading="disableSubmitBtn">
                         Submit Update
-                    </button>
+                    </BaseButton>
                 </form>
             </div>
 

@@ -38,6 +38,7 @@
     import Page from '../Components/Page.vue';
     import Pagination from '../Components/Pagination.vue';
     import ServiceMonitorCard from '../Components/ServiceMonitorCard.vue';
+    import BaseButton from '../Components/ui/BaseButton.vue';
     import { consumer } from '../Services/Consumer.js';
 
     const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage', 'change-filter']);
@@ -156,12 +157,9 @@
             <EmptyState v-else>
                 <template #heading>There are no service monitors to display.</template>
                 <template #actions>
-                    <router-link
-                        :to="{ name: 'home' }"
-                        class="inline-block px-4 py-2 text-white bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] rounded"
-                    >
+                    <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
                         Return Home
-                    </router-link>
+                    </BaseButton>
                 </template>
             </EmptyState>
 

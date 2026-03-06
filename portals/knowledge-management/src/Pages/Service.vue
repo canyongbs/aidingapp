@@ -36,6 +36,7 @@
     import Breadcrumbs from './../Components/Breadcrumbs.vue';
     import EmptyState from './../Components/EmptyState.vue';
     import Page from './../Components/Page.vue';
+    import BaseButton from './../Components/ui/BaseButton.vue';
 
     defineProps({
         categories: {
@@ -120,12 +121,9 @@
         <EmptyState v-else>
             <template #heading>There are no service requests to display.</template>
             <template #actions>
-                <router-link
-                    :to="{ name: 'create-service-request' }"
-                    class="inline-block px-4 py-2 text-white bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] rounded"
-                >
+                <BaseButton as="router-link" :to="{ name: 'create-service-request' }" variant="primary" size="md">
                     New Request
-                </router-link>
+                </BaseButton>
             </template>
         </EmptyState>
     </Page>

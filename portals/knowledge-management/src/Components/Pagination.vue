@@ -35,6 +35,7 @@
 <script setup>
     import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/20/solid';
     import { computed, defineProps } from 'vue';
+    import BaseButton from './ui/BaseButton.vue';
 
     const props = defineProps({
         currentPage: {
@@ -70,22 +71,17 @@
 <template>
     <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
         <div class="flex flex-1 justify-between sm:hidden">
-            <button
-                type="button"
-                class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                :disabled="currentPage === 1"
-                @click="$emit('fetchPreviousPage')"
-            >
+            <BaseButton variant="neutral" size="md" :disabled="currentPage === 1" @click="$emit('fetchPreviousPage')">
                 Previous
-            </button>
-            <button
-                type="button"
-                class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+            </BaseButton>
+            <BaseButton
+                variant="neutral"
+                size="md"
                 :disabled="currentPage === lastPage"
                 @click="$emit('fetchNextPage')"
             >
                 Next
-            </button>
+            </BaseButton>
         </div>
         <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
             <div>
@@ -102,70 +98,66 @@
             <!-- Pagination buttons -->
             <div>
                 <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
-                    <button
-                        type="button"
-                        class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                    <BaseButton
+                        variant="ghost"
+                        size="md"
+                        icon-only
+                        :icon-left="ChevronLeftIcon"
                         :disabled="currentPage === 1"
+                        class="!rounded-r-none"
+                        aria-label="Previous page"
                         @click="$emit('fetchPreviousPage')"
-                    >
-                        <span class="sr-only">Previous</span>
-                        <ChevronLeftIcon class="h-5 w-5" aria-hidden="true" />
-                    </button>
+                    />
 
                     <!-- First Page Button -->
-                    <button
+                    <BaseButton
                         v-if="currentPage > 4"
-                        class="relative z-10 inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20"
-                        :class="
-                            currentPage === 1
-                                ? 'bg-indigo-600 text-white'
-                                : 'bg-white-500 text-black border border-gray-300'
-                        "
+                        variant="ghost"
+                        size="md"
+                        class="!rounded-none"
                         @click="$emit('fetchPage', 1)"
                     >
                         1
-                    </button>
-                    <span v-if="currentPage > 4">...</span>
+                    </BaseButton>
+                    <span v-if="currentPage > 4" class="inline-flex items-center px-2 text-gray-500 text-sm">
+                        &hellip;
+                    </span>
 
                     <!-- Page Numbers -->
-                    <button
+                    <BaseButton
                         v-for="page in visiblePages"
                         :key="page"
+                        :variant="page === currentPage ? 'primary' : 'ghost'"
+                        :selected="page === currentPage"
+                        size="md"
+                        class="!rounded-none"
                         @click="$emit('fetchPage', page)"
-                        class="relative z-10 inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20"
-                        :class="
-                            page === currentPage
-                                ? 'bg-brand-500 text-white'
-                                : 'bg-white-500 text-black border border-gray-300'
-                        "
-                        :disabled="page === currentPage"
                     >
                         {{ page }}
-                    </button>
+                    </BaseButton>
 
-                    <span v-if="currentPage < lastPage - 3">...</span>
-                    <button
+                    <span v-if="currentPage < lastPage - 3" class="inline-flex items-center px-2 text-gray-500 text-sm">
+                        &hellip;
+                    </span>
+                    <BaseButton
                         v-if="currentPage < lastPage - 3"
-                        class="relative z-10 inline-flex items-center px-4 py-2 text-sm font-semibold focus:z-20"
-                        :class="
-                            currentPage === lastPage
-                                ? 'bg-indigo-600 text-white'
-                                : 'bg-white-500 text-black border border-gray-300'
-                        "
+                        variant="ghost"
+                        size="md"
+                        class="!rounded-none"
                         @click="$emit('fetchPage', lastPage)"
                     >
                         {{ lastPage }}
-                    </button>
-
-                    <button
-                        type="button"
-                        class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0"
+                    </BaseButton>
+                    <BaseButton
+                        variant="ghost"
+                        size="md"
+                        icon-only
+                        :icon-left="ChevronRightIcon"
                         :disabled="currentPage === lastPage"
+                        class="!rounded-l-none"
+                        aria-label="Next page"
                         @click="$emit('fetchNextPage')"
-                    >
-                        <span class="sr-only">Next</span>
-                        <ChevronRightIcon class="h-5 w-5" aria-hidden="true" />
-                    </button>
+                    />
                 </nav>
             </div>
         </div>

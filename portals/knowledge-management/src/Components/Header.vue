@@ -42,6 +42,7 @@
     import { useTokenStore } from '../Stores/token.js';
     import GlobalSearchBar from './GlobalSearchBar.vue';
     import MobileMenu from './MobileMenu.vue';
+    import BaseButton from './ui/BaseButton.vue';
 
     const route = useRoute();
     const router = useRouter();
@@ -161,24 +162,24 @@
                         <GlobalSearchBar v-if="!['home', 'view-category'].includes(route.name)" />
 
                         <div v-if="requiresAuthentication || hasServiceManagement">
-                            <button
+                            <BaseButton
                                 v-if="user"
+                                variant="primary"
+                                size="md"
+                                :icon-left="ArrowRightStartOnRectangleIcon"
                                 @click="logout"
-                                type="button"
-                                class="flex items-center bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] text-white text-sm font-medium px-3 py-2 rounded"
                             >
-                                <ArrowRightStartOnRectangleIcon class="h-5 w-5 mr-1" />
-                                <span class="mr-2">Sign out</span>
-                            </button>
-                            <button
+                                Sign out
+                            </BaseButton>
+                            <BaseButton
                                 v-else
+                                variant="primary"
+                                size="md"
+                                :icon-left="ArrowRightEndOnRectangleIcon"
                                 @click="$emit('showLogin')"
-                                type="button"
-                                class="flex items-center bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] text-white text-sm font-medium px-3 py-2 rounded"
                             >
-                                <ArrowRightEndOnRectangleIcon class="h-5 w-5 mr-1" />
-                                <span>Sign in</span>
-                            </button>
+                                Sign in
+                            </BaseButton>
                         </div>
                         <MobileMenu class="relative lg:hidden" :visibleMenuItems="visibleMenuItems" />
                     </div>
