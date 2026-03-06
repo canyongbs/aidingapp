@@ -93,10 +93,10 @@ class MyServiceRequests extends BaseWidget
             ])
             ->recordActions([
                 ViewAction::make()
-                    ->url(fn (ServiceRequest $record): string => ServiceRequestResource::getUrl(name: 'view', parameters: ['record' => $record->service_request_id])),
+                    ->url(fn (ServiceRequest $record): string => ServiceRequestResource::getUrl(name: 'view', parameters: ['record' => $record->id])),
             ])
             ->recordUrl(
-                fn (ServiceRequest $record): string => ServiceRequestResource::getUrl(name: 'view', parameters: ['record' => $record->service_request_id]),
+                fn (ServiceRequest $record): string => ServiceRequestResource::getUrl(name: 'view', parameters: ['record' => $record->id]),
             )
             ->paginated([5]);
     }

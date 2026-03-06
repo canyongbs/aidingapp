@@ -68,7 +68,7 @@ class ServiceRequests extends Dashboard
 
     protected static ?int $navigationSort = 10;
 
-    protected $cacheTag = 'report-service-requests';
+    protected string $cacheTag = 'report-service-requests';
 
     protected string $view = 'report::filament.pages.report';
 

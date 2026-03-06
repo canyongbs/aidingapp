@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 class ResolveUploadsMediaCollectionForServiceRequest
 {
-    public function __invoke(): UploadsMediaCollection
+    public function __invoke(): ?UploadsMediaCollection
     {
         return app(ServiceRequest::class)->getMediaCollection('uploads');
     }

@@ -47,6 +47,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Collection;
 
 class ListIncidentStatuses extends ListRecords
 {
@@ -72,7 +73,7 @@ class ListIncidentStatuses extends ListRecords
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->action(function ($records) {
+                        ->action(function (Collection $records) {
                             $deletedIncidentStatusesCount = IncidentStatus::query()
                                 ->whereKey($records)
                                 ->whereDoesntHave('incidents')

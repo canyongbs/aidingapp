@@ -51,7 +51,7 @@ abstract class LineChartReportWidget extends ChartWidget
 
     protected static bool $isLazy = false;
 
-    public function mount($cacheTag = null): void
+    public function mount(?string $cacheTag = null): void
     {
         parent::mount();
 
@@ -59,7 +59,7 @@ abstract class LineChartReportWidget extends ChartWidget
     }
 
     #[On('refresh-widgets')]
-    public function refreshWidget()
+    public function refreshWidget(): void
     {
         $this->dispatch('$refresh');
     }
