@@ -41,6 +41,7 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
+    import BaseButton from '../Components/ui/BaseButton.vue';
     import Tags from '../Components/Tags.vue';
     import { consumer } from '../Services/Consumer.js';
 
@@ -212,30 +213,24 @@
         <div class="flex items-center mt-6 p-4 border rounded-lg bg-white">
             <p class="text-lg font-semibold mr-4">Was this content helpful?</p>
             <div class="flex space-x-2">
-                <button
+                <BaseButton
+                    :variant="feedback === true ? 'primary' : 'neutral'"
+                    :selected="feedback === true"
+                    size="md"
+                    :icon-left="HandThumbUpIcon"
                     @click="toggleFeedback(true)"
-                    :class="[
-                        'px-4 py-2 flex items-center justify-center space-x-1.5 rounded-lg border-2 transition duration-200 focus:outline-none',
-                        feedback === true
-                            ? 'bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] text-white border-brand-300'
-                            : 'bg-white text-gray-700 border-gray-300',
-                    ]"
                 >
-                    <HandThumbUpIcon class="w-5 h-5" :class="feedback === true ? 'text-white' : 'text-gray-600'" />
-                    <span class="text-sm">Yes</span>
-                </button>
-                <button
+                    Yes
+                </BaseButton>
+                <BaseButton
+                    :variant="feedback === false ? 'primary' : 'neutral'"
+                    :selected="feedback === false"
+                    size="md"
+                    :icon-left="HandThumbDownIcon"
                     @click="toggleFeedback(false)"
-                    :class="[
-                        'px-4 py-2 flex items-center justify-center space-x-1.5 rounded-lg border-2 transition duration-200 focus:outline-none',
-                        feedback === false
-                            ? 'bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] text-white border-brand-300'
-                            : 'bg-white text-gray-700 border-gray-300',
-                    ]"
                 >
-                    <HandThumbDownIcon class="w-5 h-5" :class="feedback === false ? 'text-white' : 'text-gray-600'" />
-                    <span class="text-sm">No</span>
-                </button>
+                    No
+                </BaseButton>
             </div>
             <p class="text-lg font-semibold ml-4" v-if="helpfulVotePercentage">
                 {{ helpfulVotePercentage }}% of visitors found this helpful.
@@ -250,12 +245,9 @@
             <template #heading>Article Not Found</template>
             <template #description>The article you are looking for does not exist or has been removed.</template>
             <template #actions>
-                <router-link
-                    :to="{ name: 'home' }"
-                    class="inline-block px-4 py-2 text-white bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] rounded"
-                >
+                <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
                     Return Home
-                </router-link>
+                </BaseButton>
             </template>
         </EmptyState>
     </Page>

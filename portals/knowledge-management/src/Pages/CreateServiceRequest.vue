@@ -40,6 +40,7 @@
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';
+    import BaseButton from '../Components/ui/BaseButton.vue';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
 
@@ -456,9 +457,14 @@
                         <p>Thank you. Your request has been submitted.</p>
                     </template>
 
-                    <button class="px-3 py-2 text-sm font-medium rounded bg-white text-brand-700">
-                        <router-link :to="{ name: 'create-service-request' }"> Submit Another Request </router-link>
-                    </button>
+                    <BaseButton
+                        as="router-link"
+                        :to="{ name: 'create-service-request' }"
+                        variant="secondary"
+                        size="md"
+                    >
+                        Submit Another Request
+                    </BaseButton>
                 </main>
 
                 <main class="grid gap-4" v-else>
@@ -517,18 +523,20 @@
                         </p>
 
                         <div class="flex gap-3">
-                            <button
+                            <BaseButton
+                                variant="success"
+                                size="md"
                                 @click="handleAiResolutionAccepted"
-                                class="px-3 py-2 text-sm font-medium rounded bg-green-600 text-white hover:bg-green-700 focus-visible:outline-2 focus-visible:outline-green-600 focus-visible:outline-offset-2"
                             >
                                 Yes (Resolved)
-                            </button>
-                            <button
+                            </BaseButton>
+                            <BaseButton
+                                variant="neutral"
+                                size="md"
                                 @click="handleAiResolutionDeclined"
-                                class="px-3 py-2 text-sm font-medium rounded bg-white text-gray-700 ring-1 ring-gray-300 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-gray-400 focus-visible:outline-offset-2"
                             >
                                 No
-                            </button>
+                            </BaseButton>
                         </div>
                     </div>
 

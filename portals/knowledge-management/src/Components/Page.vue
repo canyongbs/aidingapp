@@ -34,6 +34,7 @@
 <script setup>
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
+    import BaseButton from './ui/BaseButton.vue';
 
     const { user } = useAuthStore();
     const { hasServiceManagement } = useFeatureStore();
@@ -44,13 +45,14 @@
         <div class="bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] px-6">
             <div class="max-w-screen-xl flex flex-col gap-y-6 mx-auto py-8">
                 <div class="text-right" v-if="hasServiceManagement && user">
-                    <router-link :to="{ name: 'create-service-request' }">
-                        <button
-                            class="px-3 py-2 font-medium text-sm rounded bg-white text-brand-700 dark:text-brand-400"
-                        >
-                            New Request
-                        </button>
-                    </router-link>
+                    <BaseButton
+                        as="router-link"
+                        :to="{ name: 'create-service-request' }"
+                        variant="secondary"
+                        size="md"
+                    >
+                        New Request
+                    </BaseButton>
                 </div>
 
                 <div class="flex flex-col gap-y-1 text-left">
