@@ -39,6 +39,7 @@ namespace AidingApp\Authorization;
 use AidingApp\Authorization\Filament\Pages\Auth\SetPassword;
 use AidingApp\Authorization\Http\Middleware\RedirectIfPasswordNotSet;
 use Filament\Contracts\Plugin;
+use Filament\Facades\Filament;
 use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use Livewire\Livewire;
@@ -83,7 +84,8 @@ class AuthorizationPlugin implements Plugin
         $panel->userMenuItems(
             [
                 'logout' => MenuItem::make()
-                    ->label('Log out'),
+                    ->label('Log out')
+                    ->postAction(fn (): string => Filament::getLogoutUrl()),
             ]
         );
     }
