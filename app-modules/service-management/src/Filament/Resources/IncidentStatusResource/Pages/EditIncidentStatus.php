@@ -61,7 +61,7 @@ class EditIncidentStatus extends EditRecord
                 TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->maxLength('255')
+                    ->maxLength(255)
                     ->string(),
                 Select::make('classification')
                     ->label('Classification')

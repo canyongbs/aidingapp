@@ -53,7 +53,7 @@ class IncidentStatusFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word(10),
+            'name' => $this->faker->words(10, true),
             'classification' => $this->faker->randomElement(SystemIncidentStatusClassification::cases()),
         ];
     }

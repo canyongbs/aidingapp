@@ -44,11 +44,15 @@ use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Filament\Resources\UserResource;
 use App\Models\User;
 use Exception;
+use Filament\Infolists\Components\Entry;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 
 trait ServiceRequestUpdateInfolist
 {
+    /**
+     * @return array<Entry>
+     */
     public function serviceRequestUpdateInfolist(): array
     {
         return [

@@ -47,5 +47,5 @@ class ReportServiceProvider extends ServiceProvider
         Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ReportPlugin()));
     }
 
-    public function boot() {}
+    public function boot(): void {}
 }
