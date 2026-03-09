@@ -38,8 +38,8 @@ namespace AidingApp\Authorization;
 
 use AidingApp\Authorization\Filament\Pages\Auth\SetPassword;
 use AidingApp\Authorization\Http\Middleware\RedirectIfPasswordNotSet;
-use Filament\Contracts\Plugin;
 use Filament\Actions\Action;
+use Filament\Contracts\Plugin;
 use Filament\Panel;
 use Livewire\Livewire;
 use Livewire\Mechanisms\ComponentRegistry;
