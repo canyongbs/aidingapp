@@ -44,7 +44,6 @@ class EmailSettingsProperty extends SettingsPropertyWithMedia
     {
         $this->addMediaCollection('header_logo')
             ->singleFile()
-            ->useDisk('s3-public')
             ->acceptsMimeTypes([
                 'image/png',
                 'image/jpeg',

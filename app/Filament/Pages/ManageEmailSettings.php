@@ -51,7 +51,7 @@ use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 
 class ManageEmailSettings extends SettingsPage
 {
-    protected static ?string $navigationLabel = 'Emails';
+    protected static ?string $navigationLabel = 'Email';
 
     protected static ?int $navigationSort = 20;
 
@@ -73,7 +73,8 @@ class ManageEmailSettings extends SettingsPage
             ->components([
                 SpatieMediaLibraryFileUpload::make('header_logo')
                     ->collection('header_logo')
-                    ->visibility('public')
+                    ->visibility('private')
+                    ->disk('s3')
                     ->image()
                     ->maxSize(10240)
                     ->acceptedFileTypes([
@@ -84,7 +85,7 @@ class ManageEmailSettings extends SettingsPage
                         'image/svg+xml',
                     ])
                     ->model(
-                        EmailSettings::getSettingsPropertyModelClass('email.header_logo'),
+                        EmailSettings::getSettingsPropertyModel('email.header_logo'),
                     )
                     ->columnSpanFull(),
                 ColorPicker::make('background_color')
