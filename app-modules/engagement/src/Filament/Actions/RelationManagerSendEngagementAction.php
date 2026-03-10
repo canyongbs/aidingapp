@@ -114,6 +114,9 @@ class RelationManagerSendEngagementAction extends CreateAction
                                                 ->pluck('name', 'id')
                                                 ->toArray();
                                         })
+                                        ->getOptionLabelUsing(fn (string $value): ?string => EmailTemplate::query()
+                                            ->whereKey($value)
+                                            ->value('name'))
                                         ->getSearchResultsUsing(function (Get $get, string $search): array {
                                             return EmailTemplate::query()
                                                 ->when(
