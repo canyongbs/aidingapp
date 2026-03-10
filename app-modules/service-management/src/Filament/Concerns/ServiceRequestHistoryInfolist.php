@@ -43,6 +43,9 @@ use Filament\Infolists\Components\TextEntry;
 // TODO Re-use this trait across other places where infolist is rendered
 trait ServiceRequestHistoryInfolist
 {
+    /**
+     * @return array<TextEntry>
+     */
     public function serviceRequestHistoryInfolist(): array
     {
         return [

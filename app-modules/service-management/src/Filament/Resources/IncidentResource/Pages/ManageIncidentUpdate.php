@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages;
 use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
+use AidingApp\ServiceManagement\Models\Incident;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
 use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use App\Filament\Tables\Columns\IdColumn;
@@ -69,6 +70,8 @@ class ManageIncidentUpdate extends ManageRelatedRecords
 
     public function form(Schema $schema): Schema
     {
+        assert($this->getOwnerRecord() instanceof Incident);
+
         return $schema
             ->components([
                 Textarea::make('update')
@@ -97,6 +100,8 @@ class ManageIncidentUpdate extends ManageRelatedRecords
 
     public function table(Table $table): Table
     {
+        assert($this->getOwnerRecord() instanceof Incident);
+
         return $table
             ->columns([
                 IdColumn::make(),
@@ -113,8 +118,8 @@ class ManageIncidentUpdate extends ManageRelatedRecords
             ->defaultSort('created_at', 'desc')
             ->headerActions([
                 CreateAction::make()
-                    ->visible($this->getOwnerRecord()?->status?->classification === SystemIncidentStatusClassification::Resolved ? false : true)
-                    ->after(function ($data, IncidentUpdate $incidentUpdate) {
+                    ->visible($this->getOwnerRecord()->status->classification === SystemIncidentStatusClassification::Resolved ? false : true)
+                    ->after(function (array $data, IncidentUpdate $incidentUpdate) {
                         $incidentUpdate->incident->update(['status_id' => $data['status_id']]);
                     }),
             ])

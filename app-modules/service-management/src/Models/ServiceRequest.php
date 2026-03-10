@@ -286,6 +286,9 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         return $this->is_draft === true;
     }
 
+    /**
+     * @param Builder<ServiceRequest> $query
+     */
     public function scopeOpen(Builder $query): void
     {
         $query->whereIn(

@@ -41,6 +41,7 @@ use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Project;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
@@ -67,6 +68,9 @@ class CreatePipeline extends CreateRecord
                     ->required()
                     ->maxLength(65535),
                 Repeater::make('stages')
+                    ->table([
+                        TableColumn::make('Stage Name'),
+                    ])
                     ->relationship('stages')
                     ->schema([
                         TextInput::make('name')

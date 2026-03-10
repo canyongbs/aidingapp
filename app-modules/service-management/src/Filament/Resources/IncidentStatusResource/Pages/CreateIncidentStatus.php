@@ -53,7 +53,7 @@ class CreateIncidentStatus extends CreateRecord
             ->components([
                 TextInput::make('name')
                     ->label('Name')
-                    ->maxLength('255')
+                    ->maxLength(255)
                     ->required()
                     ->string(),
                 Select::make('classification')

@@ -635,6 +635,63 @@ it('can filter service requests by assigned to with unassigned option via direct
         ]);
 });
 
+it('can filter service requests by searched assigned user outside initial preload options', function () {
+    asSuperAdmin();
+
+    User::factory()->count(75)->create();
+
+    $searchedUser = User::factory()->create();
+    $otherUser = User::factory()->create();
+
+    $searchedUserTeam = Team::factory()->create();
+    $otherUserTeam = Team::factory()->create();
+
+    $searchedUser->team()->associate($searchedUserTeam)->save();
+    $otherUser->team()->associate($otherUserTeam)->save();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managerTeams()->attach([$searchedUserTeam->getKey(), $otherUserTeam->getKey()]);
+
+    $priority = ServiceRequestPriority::factory()->create([
+        'type_id' => $serviceRequestType->getKey(),
+    ]);
+
+    $matchingRequest = ServiceRequest::factory()
+        ->has(
+            factory: ServiceRequestAssignment::factory()
+                ->state([
+                    'user_id' => $searchedUser->getKey(),
+                ])
+                ->active(),
+            relationship: 'assignments'
+        )
+        ->state([
+            'priority_id' => $priority->getKey(),
+        ])
+        ->create();
+
+    $nonMatchingRequest = ServiceRequest::factory()
+        ->has(
+            factory: ServiceRequestAssignment::factory()
+                ->state([
+                    'user_id' => $otherUser->getKey(),
+                ])
+                ->active(),
+            relationship: 'assignments'
+        )
+        ->state([
+            'priority_id' => $priority->getKey(),
+        ])
+        ->create();
+
+    livewire(ListServiceRequests::class)
+        ->filterTable('assignedTo', $searchedUser->getKey())
+        ->assertHasNoErrors()
+        ->assertCanSeeTableRecords([$matchingRequest])
+        ->assertCanNotSeeTableRecords([$nonMatchingRequest]);
+});
+
 it('default non closed service request will not display', function () {
     $nonClosedServiceRequests = ServiceRequest::factory()
         ->for(
