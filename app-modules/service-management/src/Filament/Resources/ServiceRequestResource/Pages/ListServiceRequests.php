@@ -192,6 +192,9 @@ class ListServiceRequests extends ListRecords
                         '' => ['unassigned' => 'Unassigned'],
                         'Assigned to' => User::query()->limit(50)->pluck('name', 'id')->toArray(), // Initially load 50 users
                     ])
+                    ->getOptionLabelUsing(fn (string $value): ?string => $value === 'unassigned'
+                        ? 'Unassigned'
+                        : User::query()->whereKey($value)->value('name'))
                     ->getSearchResultsUsing(fn (string $search): array => ['Assigned To' => User::query()->where(new Expression('lower(name)'), 'like', '%' . strtolower($search) . '%')->take(50)->pluck('name', 'id')->toArray()])
                     ->query(
                         fn (Builder $query, array $data) => $query
