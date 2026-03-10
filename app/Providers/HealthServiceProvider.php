@@ -80,10 +80,10 @@ class HealthServiceProvider extends ServiceProvider
                 ->url($parsedUrl['host'])
                 ->timeout(2),
             QueueCheck::new()
-                ->failWhenHealthJobTakesLongerThanMinutes(3),
+                ->failAfterMinutes(3),
             RedisCheck::new(),
             // ScheduleCheck::new()
             //     ->heartbeatMaxAgeInMinutes(2),
         ]);
-    }
+    } 
 }
