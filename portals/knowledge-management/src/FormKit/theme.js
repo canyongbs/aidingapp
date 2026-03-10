@@ -65,7 +65,7 @@ export default {
         wrapper: 'flex items-center mb-1',
     },
     'family:button': {
-        input: '$reset inline-flex items-center justify-center gap-2 font-medium text-sm py-2 px-3 rounded select-none transition-all duration-200 focus-visible:outline-none formkit-loading:cursor-wait formkit-loading:before:w-4 formkit-loading:before:h-4 formkit-loading:before:mr-2 formkit-loading:before:border-2 formkit-loading:before:border-r-transparent formkit-loading:before:rounded-full formkit-loading:before:border-current formkit-loading:before:animate-spin formkit-disabled:opacity-60 formkit-disabled:cursor-not-allowed formkit-disabled:pointer-events-none formkit-disabled:bg-gray-100 formkit-disabled:text-gray-400 formkit-disabled:border formkit-disabled:border-gray-200',
+        input: '$reset inline-flex items-center justify-center gap-2 font-medium text-sm py-2 px-3 rounded select-none transition-all duration-200 focus-visible:outline-none formkit-loading:cursor-wait formkit-loading:before:w-4 formkit-loading:before:h-4 formkit-loading:before:mr-2 formkit-loading:before:border-2 formkit-loading:before:border-r-transparent formkit-loading:before:rounded-full formkit-loading:before:border-current formkit-loading:before:animate-spin disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none disabled:bg-gray-100 disabled:text-gray-400 disabled:border disabled:border-gray-200 disabled:shadow-none',
         wrapper: 'mb-1',
         prefixIcon: '$reset block w-4 -ml-1 mr-2 shrink-0',
         suffixIcon: '$reset block w-4 ml-2 shrink-0',
