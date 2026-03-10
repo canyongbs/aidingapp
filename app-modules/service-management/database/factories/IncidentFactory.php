@@ -55,7 +55,7 @@ class IncidentFactory extends Factory
     public function definition(): array
     {
         return [
-            'title' => $this->faker->word(20),
+            'title' => $this->faker->words(20, true),
             'description' => $this->faker->paragraph(),
             'severity_id' => IncidentSeverity::factory(),
             'status_id' => IncidentStatus::factory(),

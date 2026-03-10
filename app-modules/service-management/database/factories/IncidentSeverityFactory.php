@@ -53,7 +53,7 @@ class IncidentSeverityFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word(10),
+            'name' => $this->faker->words(10, true),
             'color' => $this->faker->randomElement(
                 collect(Color::cases())->values()
             ),

@@ -44,6 +44,7 @@ use Illuminate\Support\Str;
 use function Pest\Laravel\assertAuthenticatedAs;
 use function Pest\Laravel\assertGuest;
 use function Pest\Laravel\get;
+use function Pest\Laravel\head;
 
 it('requires a valid signed URL ', function () {
     $code = Str::random();
@@ -203,4 +204,35 @@ it('logs in the user and redirects to the admin panel home', function () {
     $magicLink->refresh();
 
     expect($magicLink->used_at)->not->toBeNull();
+});
+
+it('returns no content for HEAD requests to protect against link scanning bots', function () {
+    $code = Str::random();
+
+    $magicLink = LoginMagicLink::factory()->withCode($code)->create();
+
+    $url = URL::temporarySignedRoute(
+        name: 'magic-link.login',
+        expiration: now()->addMinutes(10)->toImmutable(),
+        parameters: [
+            'magicLink' => $magicLink->getKey(),
+            'payload' => urlencode(
+                Crypt::encrypt(
+                    [
+                        'code' => $code,
+                        'user_id' => $magicLink->user_id,
+                    ]
+                )
+            ),
+        ],
+    );
+
+    head($url)
+        ->assertNoContent();
+
+    $magicLink->refresh();
+
+    expect($magicLink->used_at)->toBeNull();
+
+    assertGuest(Filament::getPanel('admin')->getAuthGuard());
 });

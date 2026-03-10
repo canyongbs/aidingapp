@@ -36,6 +36,7 @@
 
 namespace AidingApp\Report\Abstract;
 
+use App\Models\User;
 use Filament\Pages\Dashboard;
 
 abstract class EngagementReport extends Dashboard
