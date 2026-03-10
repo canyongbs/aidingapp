@@ -85,5 +85,5 @@ class HealthServiceProvider extends ServiceProvider
             // ScheduleCheck::new()
             //     ->heartbeatMaxAgeInMinutes(2),
         ]);
-    } 
+    }
 }
