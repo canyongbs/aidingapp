@@ -79,7 +79,8 @@ class HealthServiceProvider extends ServiceProvider
             PingCheck::new()
                 ->url($parsedUrl['host'])
                 ->timeout(2),
-            QueueCheck::new(),
+            QueueCheck::new()
+                ->failAfterMinutes(3),
             RedisCheck::new(),
             // ScheduleCheck::new()
             //     ->heartbeatMaxAgeInMinutes(2),
