@@ -40,9 +40,9 @@
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
     import { useTokenStore } from '../Stores/token.js';
-    import BaseButton from './ui/BaseButton.vue';
     import GlobalSearchBar from './GlobalSearchBar.vue';
     import MobileMenu from './MobileMenu.vue';
+    import BaseButton from './ui/BaseButton.vue';
 
     const route = useRoute();
     const router = useRouter();

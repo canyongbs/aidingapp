@@ -34,6 +34,16 @@
 <script setup>
     import { FormKit } from '@formkit/vue';
     import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+    import { RouterView, useRoute, useRouter } from 'vue-router';
+    import AppLoading from './Components/AppLoading.vue';
+    import Footer from './Components/Footer.vue';
+    import Header from './Components/Header.vue';
+    import axios from './Globals/Axios.js';
+    import { consumer } from './Services/Consumer.js';
+    import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
+    import { useAuthStore } from './Stores/auth.js';
+    import { useFeatureStore } from './Stores/feature.js';
+    import { useTokenStore } from './Stores/token.js';
 
     /**
      * Computes a perceptually-correct contrast colour for text placed on top of
@@ -55,16 +65,6 @@
         const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
         return luminance > 0.35 ? '#111827' : 'white';
     }
-    import { RouterView, useRoute, useRouter } from 'vue-router';
-    import AppLoading from './Components/AppLoading.vue';
-    import Footer from './Components/Footer.vue';
-    import Header from './Components/Header.vue';
-    import axios from './Globals/Axios.js';
-    import { consumer } from './Services/Consumer.js';
-    import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
-    import { useAuthStore } from './Stores/auth.js';
-    import { useFeatureStore } from './Stores/feature.js';
-    import { useTokenStore } from './Stores/token.js';
 
     const props = defineProps({
         url: {

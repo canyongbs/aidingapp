@@ -169,9 +169,7 @@
         </div>
         <Loader :loading="loading" />
         <div class="flex justify-center mt-6" v-if="hasMore && !loading">
-            <BaseButton variant="primary" size="md" @click="loadMore">
-                Load More
-            </BaseButton>
+            <BaseButton variant="primary" size="md" @click="loadMore"> Load More </BaseButton>
         </div>
 
         <EmptyState v-if="!loading && incidents.length === 0">

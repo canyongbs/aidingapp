@@ -41,8 +41,8 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
-    import BaseButton from '../Components/ui/BaseButton.vue';
     import Tags from '../Components/Tags.vue';
+    import BaseButton from '../Components/ui/BaseButton.vue';
     import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();

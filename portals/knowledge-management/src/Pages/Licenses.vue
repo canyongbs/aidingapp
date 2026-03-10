@@ -159,7 +159,9 @@
                                     size="sm"
                                     icon-only
                                     :icon-left="showLicenseKeys[activeLicense.id] ? EyeIcon : EyeSlashIcon"
-                                    :aria-label="showLicenseKeys[activeLicense.id] ? 'Hide license key' : 'Show license key'"
+                                    :aria-label="
+                                        showLicenseKeys[activeLicense.id] ? 'Hide license key' : 'Show license key'
+                                    "
                                     @click="toggleLicenseKey(activeLicense.id)"
                                 />
                             </p>
@@ -204,7 +206,9 @@
                                     size="sm"
                                     icon-only
                                     :icon-left="showLicenseKeys[expiredLicense.id] ? EyeIcon : EyeSlashIcon"
-                                    :aria-label="showLicenseKeys[expiredLicense.id] ? 'Hide license key' : 'Show license key'"
+                                    :aria-label="
+                                        showLicenseKeys[expiredLicense.id] ? 'Hide license key' : 'Show license key'
+                                    "
                                     @click="toggleLicenseKey(expiredLicense.id)"
                                 />
                             </p>
