@@ -39,7 +39,7 @@ namespace App\Settings;
 use App\Settings\SettingsProperties\EmailSettingsProperty;
 use Spatie\LaravelSettings\Settings;
 
-class EmailSettings extends Settings
+class EmailSettings extends SettingsWithMedia
 {
     public ?string $header_logo = null;
 
