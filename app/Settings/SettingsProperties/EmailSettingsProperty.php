@@ -40,7 +40,7 @@ use App\Models\SettingsPropertyWithMedia;
 
 class EmailSettingsProperty extends SettingsPropertyWithMedia
 {
-     public function registerMediaCollections(): void
+    public function registerMediaCollections(): void
     {
         $this->addMediaCollection('header_logo')
             ->singleFile()
