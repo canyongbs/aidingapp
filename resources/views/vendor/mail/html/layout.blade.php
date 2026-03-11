@@ -35,9 +35,15 @@
 @php
     use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
     use Filament\Support\Colors\Color;
+    use App\Settings\EmailSettings;
 
-    $paragraphTextColor = app(SesSettings::class)->paragraph_text_color;
+    $emailSettings = app(EmailSettings::class);
+    $paragraphTextColor = $emailSettings->paragraph_text_color ?? app(SesSettings::class)->paragraph_text_color;
+    $h1TextColor = $emailSettings->h1_text_color ?? null;
+    $h2TextColor = $emailSettings->h2_text_color ?? null;
+    $backgroundColor = $emailSettings->background_color ?? null;
     $color = Color::all()[$settings?->primary_color ?? 'blue'];
+    
 @endphp
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -49,11 +55,24 @@
     <meta name="color-scheme" content="light">
     <meta name="supported-color-schemes" content="light">
     <style>
+        
         body,
         .panel-content,
         .panel-content p {
             color: {{ $paragraphTextColor }};
         }
+        @if($h1TextColor)
+        h1,
+        .panel-content h1 {
+            color: {{ $h1TextColor }};
+        }
+        @endif
+        @if($h2TextColor)
+        h2,
+        .panel-content h2 {
+            color: {{ $h2TextColor }};
+        }
+        @endif
 
         @media only screen and (max-width: 600px) {
             .inner-body {
@@ -80,21 +99,21 @@
         }
     </style>
 </head>
-<body>
+<body >
 
 <table class="wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
-        <td align="center">
+        <td align="center" >
             <table class="content" width="100%" cellpadding="0" cellspacing="0" role="presentation">
                 {{ $header ?? '' }}
 
                 <!-- Email Body -->
                 <tr>
-                    <td class="body" width="100%" cellpadding="0" cellspacing="0" style="border: hidden !important;">
+                    <td class="body" width="100%" cellpadding="0" cellspacing="0" style="border: hidden !important;" >
                         <table class="inner-body" align="center" width="570" cellpadding="0" cellspacing="0"
                                role="presentation">
                             <!-- Body content -->
-                            <tr>
+                            <tr @if($backgroundColor) style="background-color: {{ $backgroundColor }};" @endif>
                                 <td class="content-cell">
                                     {{ Illuminate\Mail\Markdown::parse($slot) }}
 
@@ -104,8 +123,6 @@
                         </table>
                     </td>
                 </tr>
-
-                {{ $footer ?? '' }}
             </table>
         </td>
     </tr>
