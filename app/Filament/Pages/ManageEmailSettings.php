@@ -38,7 +38,6 @@ namespace App\Filament\Pages;
 
 use App\Filament\Clusters\DisplaySettings as DisplaySettingsCluster;
 use App\Models\User;
-use App\Settings\DisplaySettings;
 use App\Settings\EmailSettings;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -47,7 +46,6 @@ use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Schema;
-use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 
 class ManageEmailSettings extends SettingsPage
 {
