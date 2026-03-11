@@ -37,16 +37,13 @@
     use App\Settings\EmailSettings;
 
     $emailSettings = app(EmailSettings::class);
-    $headerLogo = EmailSettings::getSettingsPropertyModel('email.header_logo')->getFirstMediaUrl('header_logo');
+    
     $footer = $emailSettings->footer ? RichContentRenderer::make($emailSettings->footer)->toHtml() : null;
 @endphp
 <x-mail::layout :settings="$settings">
     {{-- Header --}}
     <x-slot:header>
-        <x-mail::header :url="config('app.url')" :settings="$settings"></x-mail::header>
-        @if ($headerLogo ?? null)
-        <img src="{{ $headerLogo }}" class="logo" alt="Logo">
-        @endif
+        <x-mail::header :url="config('app.url')" :settings="$settings"></x-mail::header>        
     </x-slot:header>
 
     {{-- Body --}}
