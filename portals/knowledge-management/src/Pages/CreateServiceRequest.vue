@@ -36,7 +36,7 @@
     import { FormKitSchema } from '@formkit/vue';
     import { computed, defineProps, nextTick, onMounted, reactive, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
-    import wizard from '../../../../widgets/service-request-form/src/FormKit/wizard.js';
+    import wizard from '../FormKit/wizard.js';
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';

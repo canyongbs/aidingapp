@@ -37,7 +37,7 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\Organization;
+use AidingApp\Portal\Actions\FindOrganizationByEmailDomain;
 use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticationRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
@@ -52,28 +52,18 @@ use Illuminate\Validation\ValidationException;
 
 class KnowledgeManagementPortalRequestAuthenticationController extends Controller
 {
-    public function __invoke(KnowledgeManagementPortalAuthenticationRequest $request, ResolveEducatableFromEmail $resolveEducatableFromEmail): JsonResponse
+    public function __invoke(
+        KnowledgeManagementPortalAuthenticationRequest $request,
+        ResolveEducatableFromEmail $resolveEducatableFromEmail,
+        FindOrganizationByEmailDomain $findOrganizationByEmailDomain
+    ): JsonResponse
     {
         $email = $request->safe()->email;
 
         $educatable = $resolveEducatableFromEmail($email);
 
         if (! $educatable) {
-            preg_match('/@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/', $email, $matches);
-
-            $domain = $matches[1];
-
-            $organization = Organization::query()
-                ->whereRaw(
-                    "EXISTS (
-                        SELECT 1
-                        FROM jsonb_array_elements(domains) AS elem
-                        WHERE LOWER(elem->>'domain') = ?
-                    )",
-                    [strtolower($domain)]
-                )
-                ->where('is_contact_generation_enabled', true)
-                ->first();
+            $organization = $findOrganizationByEmailDomain($email);
 
             if ($organization) {
                 $authenticationUrl = $this->createPortalAuthentication($request);
