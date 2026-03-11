@@ -38,6 +38,7 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
+    import BaseButton from '../Components/ui/BaseButton.vue';
     import { consumer } from '../Services/Consumer';
 
     const productLicenses = ref({});
@@ -153,13 +154,16 @@
                                 >
                                     {{ activeLicense.license }}
                                 </span>
-                                <button
+                                <BaseButton
+                                    variant="ghost"
+                                    size="sm"
+                                    icon-only
+                                    :icon-left="showLicenseKeys[activeLicense.id] ? EyeIcon : EyeSlashIcon"
+                                    :aria-label="
+                                        showLicenseKeys[activeLicense.id] ? 'Hide license key' : 'Show license key'
+                                    "
                                     @click="toggleLicenseKey(activeLicense.id)"
-                                    class="text-gray-500 hover:text-gray-700"
-                                >
-                                    <EyeSlashIcon v-if="!showLicenseKeys[activeLicense.id]" class="h-5 w-5" />
-                                    <EyeIcon v-else class="h-5 w-5" />
-                                </button>
+                                />
                             </p>
                         </template>
                     </Card>
@@ -197,13 +201,16 @@
                                 >
                                     {{ expiredLicense.license }}
                                 </span>
-                                <button
+                                <BaseButton
+                                    variant="ghost"
+                                    size="sm"
+                                    icon-only
+                                    :icon-left="showLicenseKeys[expiredLicense.id] ? EyeIcon : EyeSlashIcon"
+                                    :aria-label="
+                                        showLicenseKeys[expiredLicense.id] ? 'Hide license key' : 'Show license key'
+                                    "
                                     @click="toggleLicenseKey(expiredLicense.id)"
-                                    class="text-gray-500 hover:text-gray-700"
-                                >
-                                    <EyeSlashIcon v-if="!showLicenseKeys[expiredLicense.id]" class="h-5 w-5" />
-                                    <EyeIcon v-else class="h-5 w-5" />
-                                </button>
+                                />
                             </p>
                         </template>
                     </Card>
@@ -214,12 +221,9 @@
         <EmptyState v-if="!loading && !productLicenses.activeLicense.length && !productLicenses.expiredLicense.length">
             <template #heading>There are no licenses to display.</template>
             <template #actions>
-                <router-link
-                    :to="{ name: 'home' }"
-                    class="inline-block px-4 py-2 text-white bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] rounded"
-                >
+                <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
                     Return Home
-                </router-link>
+                </BaseButton>
             </template>
         </EmptyState>
     </Page>
