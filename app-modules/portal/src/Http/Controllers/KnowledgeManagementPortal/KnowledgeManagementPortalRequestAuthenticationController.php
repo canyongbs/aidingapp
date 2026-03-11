@@ -56,8 +56,7 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
         KnowledgeManagementPortalAuthenticationRequest $request,
         ResolveEducatableFromEmail $resolveEducatableFromEmail,
         FindOrganizationByEmailDomain $findOrganizationByEmailDomain
-    ): JsonResponse
-    {
+    ): JsonResponse {
         $email = $request->safe()->email;
 
         $educatable = $resolveEducatableFromEmail($email);

@@ -36,10 +36,10 @@
     import { FormKitSchema } from '@formkit/vue';
     import { computed, defineProps, nextTick, onMounted, reactive, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
-    import wizard from '../FormKit/wizard.js';
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';
+    import wizard from '../FormKit/wizard.js';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
 
