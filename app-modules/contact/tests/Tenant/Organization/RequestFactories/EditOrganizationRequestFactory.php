@@ -47,7 +47,7 @@ class EditOrganizationRequestFactory extends RequestFactory
         return [
             'name' => fake()->company(),
             'email' => fake()->companyEmail(),
-            'domains' => array_map(fn () => ['domain' => fake()->domainName()], range(1, 3)),
+            'domains' => array_map(fn () => ['domain' => fake()->unique()->domainName()], range(1, 3)),
             'phone_number' => fake()->e164PhoneNumber(),
             'website' => fake()->url(),
             'industry_id' => OrganizationIndustry::factory()->create()->id,

@@ -75,6 +75,7 @@ test('Edit Organization is gated with proper access control', function () {
     ])
         ->assertSuccessful();
 });
+
 test('Edit Organization Record', function () {
     $user = User::factory()->create();
     $organization = Organization::factory()->create();
