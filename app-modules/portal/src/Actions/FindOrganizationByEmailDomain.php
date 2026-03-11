@@ -37,6 +37,7 @@
 namespace AidingApp\Portal\Actions;
 
 use AidingApp\Contact\Models\Organization;
+use Illuminate\Database\Eloquent\Builder;
 
 class FindOrganizationByEmailDomain
 {
@@ -62,7 +63,7 @@ class FindOrganizationByEmailDomain
         return $query->exists();
     }
 
-    protected function query(string $email)
+    protected function query(string $email): ?Builder
     {
         $emailDomain = $this->extractEmailDomain($email);
 
