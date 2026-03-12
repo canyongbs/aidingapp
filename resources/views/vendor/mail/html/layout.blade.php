@@ -113,6 +113,7 @@
     <tr>
         <td align="center" >                      
             <table class="content" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+                {{-- Header --}}
                 <tr>
                     <td class="header">
                         <a href="{{ $url ?? config('app.url') }}" style="display: inline-block;">
@@ -154,6 +155,7 @@
                     </td>
                 </tr>
             </table>
+            {{-- Footer --}}
             <tr>
                 <td>
                 <table class="footer" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation">
@@ -168,7 +170,7 @@
                 </tr>
                 </table>
                 </td>
-                </tr>
+            </tr>
                         
         </td>
     </tr>
