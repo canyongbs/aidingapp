@@ -33,9 +33,6 @@
 --}}
 @props(['settings' => null])
 <x-mail::layout :url="config('app.url')" :settings="$settings">
-    {{-- Header --}}
-    <x-slot:header>       
-    </x-slot:header>
 
     {{-- Body --}}
     {{ $slot }}
@@ -48,8 +45,4 @@
             </x-mail::subcopy>
         </x-slot:subcopy>
     @endisset
-
-    {{-- Footer --}}
-    <x-slot:footer>
-    </x-slot:footer>
 </x-mail::layout>
