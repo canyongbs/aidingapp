@@ -282,7 +282,7 @@ test('check if the provided domain is valid', function (string $domain) {
     $undoRepeaterFake();
 })
     ->with([
-       'www.example.com',
+        'www.example.com',
         'google.com',
         'example.co.uk',
         'test-domain-123.com',
