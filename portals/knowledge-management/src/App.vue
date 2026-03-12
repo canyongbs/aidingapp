@@ -45,6 +45,27 @@
     import { useFeatureStore } from './Stores/feature.js';
     import { useTokenStore } from './Stores/token.js';
 
+    /**
+     * Computes a perceptually-correct contrast colour for text placed on top of
+     * a given sRGB background expressed as "R G B" space-separated integers.
+     * Returns '#111827' (near-black) for light palettes (yellow, lime, amber, etc.)
+     * and 'white' for dark palettes, so primary-variant button text is always readable
+     * regardless of which static primary colour the admin has configured.
+     */
+    function contrastOnColor(rgbString) {
+        const parts = String(rgbString ?? '')
+            .trim()
+            .split(/\s+/)
+            .map(Number);
+        if (parts.length !== 3 || parts.some((n) => isNaN(n))) return 'white';
+        const [r, g, b] = parts.map((c) => {
+            const s = c / 255;
+            return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+        });
+        const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+        return luminance > 0.35 ? '#111827' : 'white';
+    }
+
     const props = defineProps({
         url: {
             type: String,
@@ -93,6 +114,9 @@
 
     const portalPrimaryColor = ref('');
     const portalRounding = ref('');
+
+    /** Contrast-safe text colour for primary-variant buttons (adapts to any static palette). */
+    const primaryOnColor = computed(() => contrastOnColor(portalPrimaryColor.value?.[500]));
     const categories = ref({});
     const serviceRequests = ref({});
     const headerLogo = ref('');
@@ -519,6 +543,7 @@
             '--primary-800': portalPrimaryColor[800],
             '--primary-900': portalPrimaryColor[900],
             '--primary-950': portalPrimaryColor[950],
+            '--primary-on-color': primaryOnColor.value,
             '--rounding-sm': portalRounding.sm,
             '--rounding': portalRounding.default,
             '--rounding-md': portalRounding.md,

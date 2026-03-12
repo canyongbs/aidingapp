@@ -37,6 +37,7 @@
     import EmptyState from '../Components/EmptyState.vue';
     import Loader from '../Components/Loader.vue';
     import Page from '../Components/Page.vue';
+    import BaseButton from '../Components/ui/BaseButton.vue';
     import { consumer } from '../Services/Consumer';
 
     const incidents = ref([]);
@@ -168,24 +169,15 @@
         </div>
         <Loader :loading="loading" />
         <div class="flex justify-center mt-6" v-if="hasMore && !loading">
-            <button
-                type="button"
-                @click="loadMore"
-                class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-            >
-                Load More
-            </button>
+            <BaseButton variant="primary" size="md" @click="loadMore"> Load More </BaseButton>
         </div>
 
         <EmptyState v-if="!loading && incidents.length === 0">
             <template #heading>There are no incidents to display.</template>
             <template #actions>
-                <router-link
-                    :to="{ name: 'home' }"
-                    class="inline-block px-4 py-2 text-white bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] rounded"
-                >
+                <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
                     Return Home
-                </router-link>
+                </BaseButton>
             </template>
         </EmptyState>
     </Page>

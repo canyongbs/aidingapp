@@ -65,10 +65,16 @@ export default {
         wrapper: 'flex items-center mb-1',
     },
     'family:button': {
-        input: '$reset inline-flex items-center bg-brand-500 text-white text-sm font-medium py-2 px-3 rounded focus-visible:outline-2 focus-visible:outline-brand-600 focus-visible:outline-offset-2 formkit-disabled:bg-gray-400 formkit-loading:before:w-4 formkit-loading:before:h-4 formkit-loading:before:mr-2 formkit-loading:before:border formkit-loading:before:border-2 formkit-loading:before:border-r-transparent formkit-loading:before:rounded-3xl formkit-loading:before:border-white formkit-loading:before:animate-spin hover:bg-brand-600',
+        input: '$reset inline-flex items-center justify-center gap-2 font-medium text-sm py-2 px-3 rounded select-none transition-all duration-200 focus-visible:outline-none formkit-loading:cursor-wait formkit-loading:before:w-4 formkit-loading:before:h-4 formkit-loading:before:mr-2 formkit-loading:before:border-2 formkit-loading:before:border-r-transparent formkit-loading:before:rounded-full formkit-loading:before:border-current formkit-loading:before:animate-spin disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none disabled:bg-gray-100 disabled:text-gray-400 disabled:border disabled:border-gray-200 disabled:shadow-none',
         wrapper: 'mb-1',
-        prefixIcon: '$reset block w-4 -ml-2 mr-2 stretch',
-        suffixIcon: '$reset block w-4 ml-2 stretch',
+        prefixIcon: '$reset block w-4 -ml-1 mr-2 shrink-0',
+        suffixIcon: '$reset block w-4 ml-2 shrink-0',
+    },
+    submit: {
+        input: 'bg-[linear-gradient(to_right_bottom,rgb(var(--primary-500)),rgb(var(--primary-800)))] [color:var(--primary-on-color,white)] border border-transparent shadow-sm hover:shadow-md hover:brightness-105 active:scale-[0.98] active:shadow-inner active:brightness-95 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[rgb(var(--primary-500))]',
+    },
+    button: {
+        input: 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 active:bg-gray-100 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400',
     },
     'family:dropdown': {
         dropdownWrapper: 'my-2 w-full shadow-lg rounded [&::-webkit-scrollbar]:hidden',

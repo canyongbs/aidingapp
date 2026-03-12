@@ -34,6 +34,7 @@
 <script setup>
     import { HomeIcon } from '@heroicons/vue/24/outline';
     import { useRouter } from 'vue-router';
+    import BaseButton from '../Components/ui/BaseButton.vue';
     const router = useRouter();
     const goHome = () => {
         router.push({ name: 'home' });
@@ -49,13 +50,9 @@
                     <p class="text-lg text-gray-600">
                         This feature is currently under development and will be available soon.
                     </p>
-                    <button
-                        @click="goHome"
-                        class="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium rounded shadow text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-500"
-                    >
-                        <HomeIcon class="h-5 w-5 mr-1" />
+                    <BaseButton variant="primary" size="md" :icon-left="HomeIcon" class="mt-4" @click="goHome">
                         Return to Home
-                    </button>
+                    </BaseButton>
                 </div>
             </div>
         </div>
