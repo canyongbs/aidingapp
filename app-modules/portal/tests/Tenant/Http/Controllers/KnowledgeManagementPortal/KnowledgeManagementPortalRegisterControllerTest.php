@@ -276,7 +276,7 @@ test('it returns validation error when code is invalid', function () {
 });
 
 test('it generates registration url for unknown contact when organization domain matches', function () {
-     Organization::factory()->create([
+    Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
             ['domain' => 'example.com'],
@@ -304,7 +304,7 @@ test('it generates registration url for unknown contact when organization domain
 });
 
 test('it generates spa registration url for unknown contact when organization domain matches', function () {
-     Organization::factory()->create([
+    Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
             ['domain' => 'example.com'],
@@ -330,4 +330,3 @@ test('it generates spa registration url for unknown contact when organization do
         ->and($authentication?->portal_type)->toBe(PortalType::KnowledgeManagement)
         ->and($authentication?->educatable_id)->toBeNull();
 });
-
