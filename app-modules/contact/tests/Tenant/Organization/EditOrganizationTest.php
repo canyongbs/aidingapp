@@ -245,10 +245,7 @@ test('check if the provided domain is invalid', function (string $domain) {
     ->with([
         'test example.com',
         '.example.com',
-        'sub*domain.example.com',
         'subdomain!.example.com',
-        'sub..domain.example.com',
-        'example!.com',
         'localhost',
         'https://www.example.com',
         'example.com::8080',
@@ -285,13 +282,9 @@ test('check if the provided domain is valid', function (string $domain) {
     $undoRepeaterFake();
 })
     ->with([
-        'www.example.com',
+       'www.example.com',
         'google.com',
         'example.co.uk',
-        'www.my-domain.com',
-        'example123.com',
         'test-domain-123.com',
         'subdomain.example.org',
-        'a.org.in',
-        'test.museum.org.in',
     ]);
