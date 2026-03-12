@@ -212,7 +212,7 @@ test('if the domain is already in use then not be used second time.', function (
     $undoRepeaterFake();
 });
 
-test('check if the provided domain is valid', function (string $domain) {
+test('check if the provided domain is invalid', function (string $domain) {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -250,4 +250,48 @@ test('check if the provided domain is valid', function (string $domain) {
         'sub..domain.example.com',
         'example!.com',
         'localhost',
+        'https://www.example.com',
+        'example.com::8080',
+        'mydomain.com/path',
+        '-mydomain.com',
+    ]);
+
+test('check if the provided domain is valid', function (string $domain) {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    $organization = Organization::factory()->create();
+
+    $request = collect(EditOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => $domain],
+            ],
+        ])->create());
+
+    actingAs($user);
+
+    livewire(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $undoRepeaterFake();
+})
+    ->with([
+        'www.example.com',
+        'google.com',
+        'example.co.uk',
+        'www.my-domain.com',
+        'example123.com',
+        'test-domain-123.com',
+        'subdomain.example.org',
+        'a.org.in',
+        'test.museum.org.in',
     ]);

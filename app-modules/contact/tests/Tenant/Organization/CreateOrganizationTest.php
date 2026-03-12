@@ -185,4 +185,44 @@ test('check if the provided domain is invalid', function (string $domain) {
         'sub..domain.example.com',
         'example!.com',
         'localhost',
+        'https://www.example.com',
+        'example.com::8080',
+        'mydomain.com/path',
+        '-mydomain.com',
+    ]);
+
+test('check if the provided domain is valid', function (string $domain) {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    $request = collect(CreateOrganizationRequestFactory::new()
+        ->state([
+            'domains' => [
+                ['domain' => $domain],
+            ]])
+        ->create());
+
+    actingAs($user);
+
+    livewire(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $undoRepeaterFake();
+})
+    ->with([
+        'www.example.com',
+        'google.com',
+        'example.co.uk',
+        'www.my-domain.com',
+        'example123.com',
+        'test-domain-123.com',
+        'subdomain.example.org',
+        'a.org.in',
+        'test.museum.org.in',
     ]);
