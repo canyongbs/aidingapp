@@ -52,7 +52,7 @@ class FindOrganizationByEmailDomain
         $organization = $query->first();
 
         if (! $organization instanceof Organization) {
-          return null;
+            return null;
         }
 
         return $organization;

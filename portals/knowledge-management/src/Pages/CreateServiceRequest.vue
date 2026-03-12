@@ -39,8 +39,8 @@
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';
-    import wizard from '../FormKit/wizard.js';
     import BaseButton from '../Components/ui/BaseButton.vue';
+    import wizard from '../FormKit/wizard.js';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
 
