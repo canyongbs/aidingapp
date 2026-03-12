@@ -49,7 +49,13 @@ class FindOrganizationByEmailDomain
             return null;
         }
 
-        return $query->first();
+        $organization = $query->first();
+
+        if (! $organization instanceof Organization) {
+          return null;
+        }
+
+        return $organization;
     }
 
     public function exists(string $email): bool
@@ -63,6 +69,9 @@ class FindOrganizationByEmailDomain
         return $query->exists();
     }
 
+    /**
+     * @return Builder<Organization>|null
+     */
     protected function query(string $email): ?Builder
     {
         $emailDomain = $this->extractEmailDomain($email);
@@ -77,35 +86,7 @@ class FindOrganizationByEmailDomain
                 "EXISTS (
                     SELECT 1
                     FROM jsonb_array_elements(domains) AS elem
-                    CROSS JOIN LATERAL (
-                        SELECT LOWER(
-                            regexp_replace(
-                                regexp_replace(
-                                    split_part(
-                                        split_part(
-                                            regexp_replace(trim(elem->>'domain'), '^https?://', '', 'i'),
-                                            '/',
-                                            1
-                                        ),
-                                        ':',
-                                        1
-                                    ),
-                                    '^www\\.',
-                                    '',
-                                    'i'
-                                ),
-                                '\\.$',
-                                ''
-                            )
-                        ) AS host
-                    ) AS normalized
-                    WHERE (
-                        CASE
-                            WHEN normalized.host ~ '^.*\\.(ac|co|com|edu|gov|id|me|mil|net|nom|or|org|sch)\\.[a-z]{2}$'
-                                THEN regexp_replace(normalized.host, '^.*\\.([^.]+\\.(ac|co|com|edu|gov|id|me|mil|net|nom|or|org|sch)\\.[a-z]{2})$', '\\1')
-                            ELSE regexp_replace(normalized.host, '^.*\\.([^.]+\\.[^.]+)$', '\\1')
-                        END
-                    ) = ?
+              WHERE LOWER(regexp_replace(trim(elem->>'domain'), '^www\\.', '', 'i')) = ?
                 )",
                 [$emailDomain]
             );
