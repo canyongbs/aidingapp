@@ -32,18 +32,9 @@
     </COPYRIGHT>
 --}}
 @props(['settings' => null])
-@php
-    use Filament\Forms\Components\RichEditor\RichContentRenderer;
-    use App\Settings\EmailSettings;
-
-    $emailSettings = app(EmailSettings::class);
-    
-    $footer = $emailSettings->footer ? RichContentRenderer::make($emailSettings->footer)->toHtml() : null;
-@endphp
-<x-mail::layout :settings="$settings">
+<x-mail::layout :url="config('app.url')" :settings="$settings">
     {{-- Header --}}
-    <x-slot:header>
-        <x-mail::header :url="config('app.url')" :settings="$settings"></x-mail::header>        
+    <x-slot:header>       
     </x-slot:header>
 
     {{-- Body --}}
@@ -60,12 +51,5 @@
 
     {{-- Footer --}}
     <x-slot:footer>
-        <x-mail::footer>
-            @if ($footer ?? null)
-                {!! $footer !!}
-            @else
-                This email was sent using Aiding App™. <br /> <br /> © 2016-{{ date('Y') }} Canyon GBS LLC. All Rights Reserved. Canyon GBS™ and Aiding App™ are trademarks of Canyon GBS LLC.
-            @endif            
-        </x-mail::footer>
     </x-slot:footer>
 </x-mail::layout>
