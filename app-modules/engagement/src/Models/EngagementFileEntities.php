@@ -36,6 +36,7 @@
 
 namespace AidingApp\Engagement\Models;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -47,6 +48,9 @@ class EngagementFileEntities extends MorphPivot
 {
     protected $table = 'engagement_file_entities';
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function entity(): MorphTo
     {
         return $this->morphTo();
