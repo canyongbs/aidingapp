@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
-use App\Features\ServiceRequestTypeAiFeatureTogglesFeature;
 use App\Filament\Actions\ArchiveAction;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Actions\Action;
@@ -120,8 +119,7 @@ class EditServiceRequestType extends EditRecord
                             ->label('AI Resolution')
                             ->visible(fn (): bool => app(AiResolutionSettings::class)->is_enabled),
                     ])
-                    ->visible(fn (): bool => ServiceRequestTypeAiFeatureTogglesFeature::active()
-                        && (app(AiClarificationSettings::class)->is_enabled || app(AiResolutionSettings::class)->is_enabled)),
+                    ->visible(fn (): bool => app(AiClarificationSettings::class)->is_enabled || app(AiResolutionSettings::class)->is_enabled),
             ])
             ->disabled(fn (ServiceRequestType $record) => $record->trashed());
     }
