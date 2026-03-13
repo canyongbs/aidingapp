@@ -77,7 +77,7 @@ class KnowledgeManagementPortalRegisterController extends Controller
         $organization = app(FindOrganizationByEmailDomain::class)->__invoke($data['email']);
 
         if ($organization) {
-          $contact->organization()->associate($organization);
+            $contact->organization()->associate($organization);
         }
 
         if ($type) {
