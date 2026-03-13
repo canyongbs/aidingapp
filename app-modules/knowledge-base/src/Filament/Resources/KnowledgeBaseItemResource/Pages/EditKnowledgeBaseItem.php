@@ -39,7 +39,6 @@ namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\P
 use AidingApp\KnowledgeBase\Filament\Resources\Actions\DraftKnowledgeBaseItemWithAiAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
 use App\Concerns\EditPageRedirection;
-use App\Features\KnowledgeBaseArticleTableOfContents;
 use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
 use Filament\Actions\Action as BaseAction;
 use Filament\Actions\EditAction;
@@ -96,8 +95,7 @@ class EditKnowledgeBaseItem extends EditRecord
                             ->label('Table of Contents')
                             ->default(false)
                             ->onColor('success')
-                            ->offColor('gray')
-                            ->visible(fn (): bool => KnowledgeBaseArticleTableOfContents::active()),
+                            ->offColor('gray'),
                     ]),
                 View::make('knowledge-base::filament.pages.badges'),
                 TiptapEditor::make('article_details')
