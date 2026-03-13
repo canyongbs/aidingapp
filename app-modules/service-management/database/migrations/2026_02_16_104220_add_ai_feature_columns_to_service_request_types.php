@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestTypeAiFeatureTogglesFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -43,27 +42,19 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_types', function (Blueprint $table) {
-                $table->boolean('is_ai_clarification_enabled')->default(false);
-                $table->boolean('is_ai_resolution_enabled')->default(false);
-            });
-
-            ServiceRequestTypeAiFeatureTogglesFeature::activate();
+        Schema::table('service_request_types', function (Blueprint $table) {
+            $table->boolean('is_ai_clarification_enabled')->default(false);
+            $table->boolean('is_ai_resolution_enabled')->default(false);
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            ServiceRequestTypeAiFeatureTogglesFeature::deactivate();
-
-            Schema::table('service_request_types', function (Blueprint $table) {
-                $table->dropColumn([
-                    'is_ai_clarification_enabled',
-                    'is_ai_resolution_enabled',
-                ]);
-            });
+        Schema::table('service_request_types', function (Blueprint $table) {
+            $table->dropColumn([
+                'is_ai_clarification_enabled',
+                'is_ai_resolution_enabled',
+            ]);
         });
     }
 };
