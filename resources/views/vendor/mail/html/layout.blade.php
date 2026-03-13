@@ -31,13 +31,27 @@
     
     </COPYRIGHT>
 --}}
-@props(['settings' => null])
+@props(['url' => null,'settings' => null])
 @php
     use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
     use Filament\Support\Colors\Color;
+    use App\Settings\EmailSettings;
+    use Filament\Forms\Components\RichEditor\RichContentRenderer;use App\Models\SettingsProperty;
+    use AidingApp\Theme\Settings\ThemeSettings;
 
-    $paragraphTextColor = app(SesSettings::class)->paragraph_text_color;
+    $themeSettings = app(ThemeSettings::class);
+    $settingsProperty = $themeSettings::getSettingsPropertyModel('theme.is_logo_active');
+    $logo = $settingsProperty->getFirstMedia('logo');
+
+    $emailSettings = app(EmailSettings::class);
+    $paragraphTextColor = $emailSettings->paragraph_text_color ?? app(SesSettings::class)->paragraph_text_color;
+    $h1TextColor = $emailSettings->h1_text_color ?? null;
+    $h2TextColor = $emailSettings->h2_text_color ?? null;
+    $backgroundColor = $emailSettings->background_color ?? null;
     $color = Color::all()[$settings?->primary_color ?? 'blue'];
+    $footer = $emailSettings->footer ? RichContentRenderer::make($emailSettings->footer)->toHtml() : null;
+    $headerLogo = $emailSettings->getSettingsPropertyModel('email.header_logo')->getFirstMediaUrl('header_logo');
+    $settingsLogoUrl = $settings?->getFirstMediaUrl('logo');
 @endphp
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -49,11 +63,24 @@
     <meta name="color-scheme" content="light">
     <meta name="supported-color-schemes" content="light">
     <style>
+        
         body,
         .panel-content,
         .panel-content p {
             color: {{ $paragraphTextColor }};
         }
+        @if($h1TextColor)
+        h1,
+        .panel-content h1 {
+            color: {{ $h1TextColor }};
+        }
+        @endif
+        @if($h2TextColor)
+        h2,
+        .panel-content h2 {
+            color: {{ $h2TextColor }};
+        }
+        @endif
 
         @media only screen and (max-width: 600px) {
             .inner-body {
@@ -80,21 +107,43 @@
         }
     </style>
 </head>
-<body>
+<body >
 
 <table class="wrapper" width="100%" cellpadding="0" cellspacing="0" role="presentation">
     <tr>
-        <td align="center">
+        <td align="center" >                      
             <table class="content" width="100%" cellpadding="0" cellspacing="0" role="presentation">
-                {{ $header ?? '' }}
-
+                {{-- Header --}}
+                <tr>
+                    <td class="header">
+                        <a href="{{ $url ?? config('app.url') }}" style="display: inline-block;">
+                            @if ($headerLogo ?? null)
+                                <img src="{{ $headerLogo }}" class="logo" alt="Logo">
+                            @elseif ($settings?->hasMedia('logo'))
+                                <img src="{{ $settingsLogoUrl }}"
+                                    style="height: 75px; max-height: 75px; max-width: 100vw;"
+                                    alt="Logo">
+                            @elseif ($themeSettings->is_logo_active && $logo)
+                                <img src="{{ $logo->getTemporaryUrl(now()->addDays(6)) }}"
+                                    style="height: 75px; max-height: 75px; max-width: 100vw;"
+                                    alt="Logo">
+                            @else
+                                <img src="{{ url(Vite::asset('resources/images/default-logo-light-1735308866.svg')) }}"
+                                    style="height: 75px; max-height: 75px; max-width: 100vw;"
+                                    alt="Logo">
+                            @endif
+                        </a>
+                    </td>
+                </tr>
                 <!-- Email Body -->
                 <tr>
-                    <td class="body" width="100%" cellpadding="0" cellspacing="0" style="border: hidden !important;">
+                    <td class="body" width="100%" cellpadding="0" cellspacing="0" style="border: hidden !important;" >
                         <table class="inner-body" align="center" width="570" cellpadding="0" cellspacing="0"
                                role="presentation">
                             <!-- Body content -->
-                            <tr>
+                            
+                            <tr @if($backgroundColor) style="background-color: {{ $backgroundColor }};" @endif>
+                                
                                 <td class="content-cell">
                                     {{ Illuminate\Mail\Markdown::parse($slot) }}
 
@@ -104,11 +153,27 @@
                         </table>
                     </td>
                 </tr>
-
-                {{ $footer ?? '' }}
             </table>
+            {{-- Footer --}}
+            <tr>
+                <td>
+                <table class="footer" align="center" width="570" cellpadding="0" cellspacing="0" role="presentation">
+                <tr>
+                <td class="content-cell" align="center">
+                @if ($footer ?? null)
+                {!! $footer !!}
+                @else
+                    This email was sent using Aiding App™. <br /> <br /> © 2016-{{ date('Y') }} Canyon GBS LLC. All Rights Reserved. Canyon GBS™ and Aiding App™ are trademarks of Canyon GBS LLC.
+                @endif    
+                </td>
+                </tr>
+                </table>
+                </td>
+            </tr>
+                        
         </td>
     </tr>
+    
 </table>
 </body>
 </html>
