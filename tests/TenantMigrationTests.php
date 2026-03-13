@@ -53,7 +53,6 @@
 //    });
 //});
 
-use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -61,7 +60,7 @@ use Illuminate\Support\Str;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 describe('2026_03_04_000000_add_service_request_type_direct_user_manager_auditor_tables', function () {
-    it('renames team tables, creates user tables, preserves data, and activates feature flag', function () {
+    it('renames team tables, creates user tables, and preserves data', function () {
         isolatedMigration(
             '2026_03_04_000000_add_service_request_type_direct_user_manager_auditor_tables',
             function () {
@@ -141,9 +140,6 @@ describe('2026_03_04_000000_add_service_request_type_direct_user_manager_auditor
                 // Verify user tables have correct columns
                 expect(Schema::hasColumns('service_request_type_manager_users', ['id', 'service_request_type_id', 'user_id', 'created_at', 'updated_at']))->toBeTrue();
                 expect(Schema::hasColumns('service_request_type_auditor_users', ['id', 'service_request_type_id', 'user_id', 'created_at', 'updated_at']))->toBeTrue();
-
-                // Verify the feature flag was activated
-                expect(ServiceRequestTypeDirectUserManagersFeature::active())->toBeTrue();
             }
         );
     });

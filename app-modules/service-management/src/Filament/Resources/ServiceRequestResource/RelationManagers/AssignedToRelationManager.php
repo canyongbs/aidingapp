@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use App\Filament\Resources\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
@@ -88,7 +87,7 @@ class AssignedToRelationManager extends RelationManager
                         return $user->can('update', $this->getOwnerRecord())
                             && is_null($this->getOwnerRecord()->assignedTo)
                             && (
-                                (ServiceRequestTypeDirectUserManagersFeature::active() && $type->managerUsers->contains('id', $user?->getKey())) ||
+                                $type->managerUsers->contains('id', $user?->getKey()) ||
                                 $type->managerTeams->contains('id', $user?->team?->getKey())
                             );
                     })
@@ -123,11 +122,9 @@ class AssignedToRelationManager extends RelationManager
                                         $query->where('service_request_type_id', $typeId);
                                     });
 
-                                    if (ServiceRequestTypeDirectUserManagersFeature::active()) {
-                                        $query->orWhereHas('manageableServiceRequestTypes', function (Builder $query) use ($typeId) {
-                                            $query->where('service_request_type_id', $typeId);
-                                        });
-                                    }
+                                    $query->orWhereHas('manageableServiceRequestTypes', function (Builder $query) use ($typeId) {
+                                        $query->where('service_request_type_id', $typeId);
+                                    });
                                 })
                                 ->where('id', '!=', $this->getOwnerRecord()->assignedTo?->user_id)
                                 ->pluck('name', 'id')
