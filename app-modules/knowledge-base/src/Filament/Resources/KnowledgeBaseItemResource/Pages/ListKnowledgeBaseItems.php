@@ -73,11 +73,17 @@ class ListKnowledgeBaseItems extends ListRecords
     public function table(Table $table): Table
     {
         return $table
+            ->splitSearchTerms(false)
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('title')
                     ->label('Title')
-                    ->searchable()
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereRaw(
+                            "search_vector @@ plainto_tsquery('english', ?)",
+                            [$search]
+                        );
+                    })
                     ->sortable(),
                 TextColumn::make('category.name')
                     ->label('Category')
