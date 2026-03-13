@@ -94,6 +94,9 @@ class AssetCheckIn extends BaseModel implements Auditable, ProvidesATimeline
         return $this->belongsTo(Asset::class, 'asset_id');
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function checkedInBy(): MorphTo
     {
         return $this->morphTo(

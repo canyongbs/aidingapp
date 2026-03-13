@@ -42,7 +42,7 @@ enum PortalType: string implements HasLabel
 {
     case KnowledgeManagement = 'knowledge_management';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return match ($this) {
             PortalType::KnowledgeManagement => 'Knowledge Management',

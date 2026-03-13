@@ -113,6 +113,9 @@ class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeli
         return $forModel->orderedEngagementResponses()->get();
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function sender(): MorphTo
     {
         return $this->morphTo(
