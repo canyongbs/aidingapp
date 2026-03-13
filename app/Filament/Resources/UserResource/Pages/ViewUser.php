@@ -37,7 +37,6 @@
 namespace App\Filament\Resources\UserResource\Pages;
 
 use App\Filament\Resources\UserResource;
-use App\Models\Authenticatable;
 use App\Models\User;
 use App\Rules\EmailNotInUseOrSoftDeleted;
 use Carbon\Carbon;
@@ -104,7 +103,7 @@ class ViewUser extends ViewRecord
                             ->relationship('team', 'name')
                             ->disabled(),
                     ])
-                    ->hidden(fn (?User $record) => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
+                    ->hidden(fn (?User $record) => $record?->isAdmin() ?? false),
             ]);
     }
 

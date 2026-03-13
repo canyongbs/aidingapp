@@ -67,7 +67,7 @@ class ManageAiIntegratedAssistantSettings extends SettingsPage
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->isSuperAdmin();
+        return $user->canAccessAiSettings();
     }
 
     public function form(Schema $schema): Schema
@@ -88,12 +88,12 @@ class ManageAiIntegratedAssistantSettings extends SettingsPage
                     ->helperText('Used for general purposes like generating content when an assistant is not being used.')
                     ->required(),
             ])
-            ->disabled(! auth()->user()->isSuperAdmin());
+            ->disabled(! auth()->user()->canAccessAiSettings());
     }
 
     public function save(): void
     {
-        if (! auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->canAccessAiSettings()) {
             return;
         }
 
@@ -105,7 +105,7 @@ class ManageAiIntegratedAssistantSettings extends SettingsPage
      */
     public function getFormActions(): array
     {
-        if (! auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->canAccessAiSettings()) {
             return [];
         }
 

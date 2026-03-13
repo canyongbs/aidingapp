@@ -64,7 +64,7 @@ class ManageAiIntegrationsSettings extends SettingsPage
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->isSuperAdmin();
+        return $user->canAccessAiSettings();
     }
 
     public function form(Schema $schema): Schema
