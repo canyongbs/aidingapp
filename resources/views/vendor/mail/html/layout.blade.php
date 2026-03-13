@@ -50,8 +50,7 @@
     $backgroundColor = $emailSettings->background_color ?? null;
     $color = Color::all()[$settings?->primary_color ?? 'blue'];
     $footer = $emailSettings->footer ? RichContentRenderer::make($emailSettings->footer)->toHtml() : null;
-    $headerLogo = $emailSettings->getSettingsPropertyModel('email.header_logo')->getFirstMediaUrl('header_logo')
-    
+    $headerLogo = $emailSettings->getSettingsPropertyModel('email.header_logo')->getFirstMediaUrl('header_logo');    
 @endphp
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
