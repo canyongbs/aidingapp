@@ -34,55 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace App\Models\Scopes;
 
-use AidingApp\Authorization\Models\Concerns\HasRolesWithPivot;
-use App\Models\Concerns\CanOrElse;
-use Illuminate\Foundation\Auth\User as BaseAuthenticatable;
-use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
-abstract class Authenticatable extends BaseAuthenticatable
+class ConditionalAdminScope
 {
-    use HasRolesWithPivot;
-    use CanOrElse;
-    use UsesTenantConnection;
-
-    public const SUPER_ADMIN_ROLE = 'SaaS Global Admin';
-
-    public const PARTNER_ADMIN_ROLE = 'Partner Admin';
-
-    public const AI_ADMIN_ROLE = 'AI Admin';
-
-    protected bool $isAdmin;
-
-    protected bool $isSuperAdmin;
-
-    protected bool $isPartnerAdmin;
-
-    protected bool $isAiAdmin;
-
-    public function isAdmin(): bool
+    /**
+     * @param Builder<User> $query
+     */
+    public function __invoke(Builder $query): void
     {
-        return $this->isAdmin ??= $this->hasAnyRole([static::SUPER_ADMIN_ROLE, static::PARTNER_ADMIN_ROLE, static::AI_ADMIN_ROLE]);
-    }
+        $user = Auth::user();
 
-    public function isSuperAdmin(): bool
-    {
-        return $this->isSuperAdmin ??= $this->hasRole(static::SUPER_ADMIN_ROLE);
-    }
+        if (! $user instanceof User) {
+            return;
+        }
 
-    public function isPartnerAdmin(): bool
-    {
-        return $this->isPartnerAdmin ??= $this->hasRole(static::PARTNER_ADMIN_ROLE);
-    }
+        $user->loadMissing('roles');
 
-    public function isAiAdmin(): bool
-    {
-        return $this->isAiAdmin ??= $this->hasRole(static::AI_ADMIN_ROLE);
-    }
-
-    public function canAccessAiSettings(): bool
-    {
-        return $this->isSuperAdmin() || $this->isAiAdmin();
+        $query
+            ->unless($user->isSuperAdmin(), fn (Builder $query) => $query->tap(new WithoutSuperAdmin()))
+            ->unless($user->isSuperAdmin() || $user->isPartnerAdmin(), fn (Builder $query) => $query->tap(new WithoutPartnerAdmin()))
+            ->unless($user->isSuperAdmin() || $user->isAiAdmin(), fn (Builder $query) => $query->tap(new WithoutAiAdmin()));
     }
 }

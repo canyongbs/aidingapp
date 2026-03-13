@@ -65,7 +65,7 @@ class ManageAiSupportAssistantSettings extends SettingsPage
         $user = auth()->user();
         assert($user instanceof User);
 
-        return $user->isSuperAdmin();
+        return $user->canAccessAiSettings();
     }
 
     public function form(Schema $schema): Schema
@@ -84,12 +84,12 @@ class ManageAiSupportAssistantSettings extends SettingsPage
                             ->visible(fn (Get $get) => app(AiSupportAssistantSettings::class)->is_enabled && ! $get('is_enabled')),
                     ]),
             ])
-            ->disabled(! auth()->user()->isSuperAdmin());
+            ->disabled(! auth()->user()->canAccessAiSettings());
     }
 
     public function save(): void
     {
-        if (! auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->canAccessAiSettings()) {
             return;
         }
 
@@ -120,7 +120,7 @@ class ManageAiSupportAssistantSettings extends SettingsPage
      */
     public function getFormActions(): array
     {
-        if (! auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->canAccessAiSettings()) {
             return [];
         }
 

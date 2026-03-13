@@ -62,7 +62,7 @@ class ManageAiResolutionSettings extends SettingsPage
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->isSuperAdmin();
+        return $user->canAccessAiSettings();
     }
 
     public function form(Schema $schema): Schema
@@ -84,12 +84,12 @@ class ManageAiResolutionSettings extends SettingsPage
                             ->helperText('Minimum confidence score (1-100) required to show AI resolution to users. The AI will only present a solution when its confidence meets or exceeds this threshold. Default is 70%.'),
                     ]),
             ])
-            ->disabled(! auth()->user()->isSuperAdmin());
+            ->disabled(! auth()->user()->canAccessAiSettings());
     }
 
     public function save(): void
     {
-        if (! auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->canAccessAiSettings()) {
             return;
         }
 
@@ -101,7 +101,7 @@ class ManageAiResolutionSettings extends SettingsPage
      */
     public function getFormActions(): array
     {
-        if (! auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->canAccessAiSettings()) {
             return [];
         }
 

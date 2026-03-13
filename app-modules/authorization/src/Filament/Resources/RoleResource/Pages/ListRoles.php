@@ -38,6 +38,7 @@ namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
 
 use AidingApp\Authorization\Filament\Resources\RoleResource;
 use App\Filament\Tables\Columns\IdColumn;
+use App\Models\Authenticatable;
 use Filament\Actions\CreateAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
@@ -63,6 +64,15 @@ class ListRoles extends ListRecords
     public function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                $user = auth()->user();
+
+                assert($user instanceof Authenticatable);
+
+                if (! $user->isSuperAdmin()) {
+                    $query->whereNotIn('name', [Authenticatable::SUPER_ADMIN_ROLE, Authenticatable::PARTNER_ADMIN_ROLE, Authenticatable::AI_ADMIN_ROLE]);
+                }
+            })
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('name')

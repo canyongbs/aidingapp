@@ -34,55 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+use AidingApp\Authorization\Models\Role;
+use App\Models\Authenticatable;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-use AidingApp\Authorization\Models\Concerns\HasRolesWithPivot;
-use App\Models\Concerns\CanOrElse;
-use Illuminate\Foundation\Auth\User as BaseAuthenticatable;
-use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
-
-abstract class Authenticatable extends BaseAuthenticatable
-{
-    use HasRolesWithPivot;
-    use CanOrElse;
-    use UsesTenantConnection;
-
-    public const SUPER_ADMIN_ROLE = 'SaaS Global Admin';
-
-    public const PARTNER_ADMIN_ROLE = 'Partner Admin';
-
-    public const AI_ADMIN_ROLE = 'AI Admin';
-
-    protected bool $isAdmin;
-
-    protected bool $isSuperAdmin;
-
-    protected bool $isPartnerAdmin;
-
-    protected bool $isAiAdmin;
-
-    public function isAdmin(): bool
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->isAdmin ??= $this->hasAnyRole([static::SUPER_ADMIN_ROLE, static::PARTNER_ADMIN_ROLE, static::AI_ADMIN_ROLE]);
+        DB::transaction(function () {
+            Role::create([
+                'name' => Authenticatable::PARTNER_ADMIN_ROLE,
+                'guard_name' => 'web',
+            ]);
+
+            Role::create([
+                'name' => Authenticatable::AI_ADMIN_ROLE,
+                'guard_name' => 'web',
+            ]);
+        });
     }
 
-    public function isSuperAdmin(): bool
+    public function down(): void
     {
-        return $this->isSuperAdmin ??= $this->hasRole(static::SUPER_ADMIN_ROLE);
+        Role::query()
+            ->whereIn('name', [Authenticatable::PARTNER_ADMIN_ROLE, Authenticatable::AI_ADMIN_ROLE])
+            ->where('guard_name', 'web')
+            ->delete();
     }
-
-    public function isPartnerAdmin(): bool
-    {
-        return $this->isPartnerAdmin ??= $this->hasRole(static::PARTNER_ADMIN_ROLE);
-    }
-
-    public function isAiAdmin(): bool
-    {
-        return $this->isAiAdmin ??= $this->hasRole(static::AI_ADMIN_ROLE);
-    }
-
-    public function canAccessAiSettings(): bool
-    {
-        return $this->isSuperAdmin() || $this->isAiAdmin();
-    }
-}
+};

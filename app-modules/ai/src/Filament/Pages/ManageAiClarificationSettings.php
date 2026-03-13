@@ -61,7 +61,7 @@ class ManageAiClarificationSettings extends SettingsPage
         $user = auth()->user();
         assert($user instanceof User);
 
-        return $user->isSuperAdmin();
+        return $user->canAccessAiSettings();
     }
 
     public function form(Schema $schema): Schema
@@ -76,12 +76,12 @@ class ManageAiClarificationSettings extends SettingsPage
                             ->helperText('When enabled, users submitting service requests through the portal will be presented with AI-generated clarifying questions to help provide more context for their request.'),
                     ]),
             ])
-            ->disabled(! auth()->user()->isSuperAdmin());
+            ->disabled(! auth()->user()->canAccessAiSettings());
     }
 
     public function save(): void
     {
-        if (! auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->canAccessAiSettings()) {
             return;
         }
 
@@ -93,7 +93,7 @@ class ManageAiClarificationSettings extends SettingsPage
      */
     public function getFormActions(): array
     {
-        if (! auth()->user()->isSuperAdmin()) {
+        if (! auth()->user()->canAccessAiSettings()) {
             return [];
         }
 

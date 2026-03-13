@@ -44,7 +44,7 @@ class ConfidentialTaskScope implements Scope
 {
     public function apply(Builder $builder, Model $model): void
     {
-        if (auth()->user()?->isSuperAdmin()) {
+        if (auth()->user()?->isAdmin()) {
             return;
         }
 
