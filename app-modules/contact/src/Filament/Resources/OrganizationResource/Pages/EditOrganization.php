@@ -94,7 +94,8 @@ class EditOrganization extends EditRecord
                             ->collection('organization_logo')
                             ->image(),
                         Toggle::make('is_contact_generation_enabled')
-                            ->label('Automatically generate contact record on login.'),
+                            ->label('Automatically generate contact record on login.')
+                            ->helperText('When enabled, a contact record is automatically created for users whose email domain matches one of the organization\'s domains. Domains entered with or without www. are treated as equivalent. Subdomains (e.g., @college.example.com) will not match example.com — add them as separate domain entries if needed.'),
                         Repeater::make('domains')
                             ->table([
                                 TableColumn::make('Domain'),

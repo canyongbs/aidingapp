@@ -57,7 +57,7 @@ test('it registers a new portal contact for matching organization domain', funct
         'classification' => SystemContactClassification::New,
     ]);
 
-    Organization::factory()->create([
+    $organization = Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
             ['domain' => 'example.com'],
@@ -98,7 +98,8 @@ test('it registers a new portal contact for matching organization domain', funct
 
     expect($contact)
         ->not->toBeNull()
-        ->and($contact?->full_name)->toBe('New Contact');
+        ->and($contact?->full_name)->toBe('New Contact')
+        ->and($contact?->organization_id)->toBe($organization->id);
 
     expect($response->json('token'))->not->toBeEmpty();
 });
