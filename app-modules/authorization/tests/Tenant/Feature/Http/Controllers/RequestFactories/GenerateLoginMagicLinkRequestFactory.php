@@ -48,6 +48,8 @@ class GenerateLoginMagicLinkRequestFactory extends RequestFactory
             'name' => $this->faker->name(),
             'type' => $this->faker->randomElement([
                 Authenticatable::SUPER_ADMIN_ROLE,
+                Authenticatable::PARTNER_ADMIN_ROLE,
+                Authenticatable::AI_ADMIN_ROLE,
             ]),
         ];
     }

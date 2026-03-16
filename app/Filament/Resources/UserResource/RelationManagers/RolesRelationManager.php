@@ -36,19 +36,23 @@
 
 namespace App\Filament\Resources\UserResource\RelationManagers;
 
+use AidingApp\Authorization\Models\Role;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Authenticatable;
 use App\Models\User;
+use App\Rules\OnlySuperAdminMayAssignAdminRoles;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Expression;
 
 class RolesRelationManager extends RelationManager
 {
@@ -79,16 +83,52 @@ class RolesRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->recordSelectOptionsQuery(function (Builder $query) {
-                        $query->where('guard_name', 'web');
+                    ->schema([
+                        Select::make('recordId')
+                            ->hiddenLabel()
+                            ->searchable()
+                            ->required()
+                            ->rule(new OnlySuperAdminMayAssignAdminRoles())
+                            ->preload()
+                            ->getSearchResultsUsing(
+                                fn (string $search): array => Role::query()
+                                    ->when(
+                                        ! auth()->user()->isSuperAdmin(),
+                                        fn (Builder $query) => $query->whereNotIn('name', [Authenticatable::SUPER_ADMIN_ROLE, Authenticatable::PARTNER_ADMIN_ROLE, Authenticatable::AI_ADMIN_ROLE])
+                                    )
+                                    ->where(new Expression('lower(name)'), 'like', '%' . strtolower($search) . '%')
+                                    ->limit(50)
+                                    ->pluck('name', 'id')
+                                    ->toArray()
+                            )
+                            ->options(function () {
+                                $user = $this->getOwnerRecord();
 
-                        /** @var User $user */
-                        $user = auth()->user();
+                                assert($user instanceof User);
 
-                        if (! $user->isSuperAdmin()) {
-                            $query->where('name', '!=', Authenticatable::SUPER_ADMIN_ROLE);
-                        }
-                    })
+                                return Role::query()
+                                    ->when(
+                                        ! auth()->user()->isSuperAdmin(),
+                                        fn (Builder $query) => $query->whereNotIn('name', [Authenticatable::SUPER_ADMIN_ROLE, Authenticatable::PARTNER_ADMIN_ROLE, Authenticatable::AI_ADMIN_ROLE])
+                                    )
+                                    ->when(
+                                        $user->has('roles'),
+                                        fn (Builder $query) => $query->whereNotIn('id', $user->roles()->pluck('id')->toArray())
+                                    )
+                                    ->limit(50)
+                                    ->pluck('name', 'id')
+                                    ->toArray();
+                            })
+                            ->getOptionLabelUsing(fn ($value): ?string => filled($value)
+                                ? Role::query()
+                                    ->when(
+                                        ! auth()->user()->isSuperAdmin(),
+                                        fn (Builder $query) => $query->whereNotIn('name', [Authenticatable::SUPER_ADMIN_ROLE, Authenticatable::PARTNER_ADMIN_ROLE, Authenticatable::AI_ADMIN_ROLE])
+                                    )
+                                    ->whereKey($value)
+                                    ->value('name')
+                                : null),
+                    ])
                     ->multiple()
                     ->preloadRecordSelect(),
             ])

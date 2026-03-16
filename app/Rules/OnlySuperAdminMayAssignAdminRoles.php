@@ -34,55 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace App\Rules;
 
-use AidingApp\Authorization\Models\Concerns\HasRolesWithPivot;
-use App\Models\Concerns\CanOrElse;
-use Illuminate\Foundation\Auth\User as BaseAuthenticatable;
-use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
+use AidingApp\Authorization\Models\Role;
+use App\Models\Authenticatable;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
 
-abstract class Authenticatable extends BaseAuthenticatable
+class OnlySuperAdminMayAssignAdminRoles implements ValidationRule
 {
-    use HasRolesWithPivot;
-    use CanOrElse;
-    use UsesTenantConnection;
-
-    public const SUPER_ADMIN_ROLE = 'SaaS Global Admin';
-
-    public const PARTNER_ADMIN_ROLE = 'Partner Admin';
-
-    public const AI_ADMIN_ROLE = 'AI Admin';
-
-    protected bool $isAdmin;
-
-    protected bool $isSuperAdmin;
-
-    protected bool $isPartnerAdmin;
-
-    protected bool $isAiAdmin;
-
-    public function isAdmin(): bool
+    /**
+     * Run the validation rule.
+     *
+     * @param  Closure(string): PotentiallyTranslatedString  $fail
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        return $this->isAdmin ??= $this->hasAnyRole([static::SUPER_ADMIN_ROLE, static::PARTNER_ADMIN_ROLE, static::AI_ADMIN_ROLE]);
-    }
+        $role = Role::find($value);
 
-    public function isSuperAdmin(): bool
-    {
-        return $this->isSuperAdmin ??= $this->hasRole(static::SUPER_ADMIN_ROLE);
-    }
+        if (! $role) {
+            $fail('The selected role does not exist.');
 
-    public function isPartnerAdmin(): bool
-    {
-        return $this->isPartnerAdmin ??= $this->hasRole(static::PARTNER_ADMIN_ROLE);
-    }
+            return;
+        }
 
-    public function isAiAdmin(): bool
-    {
-        return $this->isAiAdmin ??= $this->hasRole(static::AI_ADMIN_ROLE);
-    }
-
-    public function canAccessAiSettings(): bool
-    {
-        return $this->isSuperAdmin() || $this->isAiAdmin();
+        if (! auth()->user()->isSuperAdmin() && in_array($role->name, [Authenticatable::SUPER_ADMIN_ROLE, Authenticatable::PARTNER_ADMIN_ROLE, Authenticatable::AI_ADMIN_ROLE])) {
+            $fail('You are not allowed to assign admin roles.');
+        }
     }
 }

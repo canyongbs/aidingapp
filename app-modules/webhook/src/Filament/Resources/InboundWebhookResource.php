@@ -39,6 +39,7 @@ namespace AidingApp\Webhook\Filament\Resources;
 use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ListInboundWebhooks;
 use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ViewInboundWebhook;
 use AidingApp\Webhook\Models\InboundWebhook;
+use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Resource;
 use UnitEnum;
@@ -52,6 +53,14 @@ class InboundWebhookResource extends Resource
     protected static ?int $navigationSort = 40;
 
     protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
+
+    public static function canAccess(): bool
+    {
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user->isSuperAdmin() && parent::canAccess();
+    }
 
     public static function getPages(): array
     {

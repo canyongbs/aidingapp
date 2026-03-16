@@ -42,8 +42,10 @@ use App\Filament\Resources\UserResource\Pages\ListUsers;
 use App\Filament\Resources\UserResource\Pages\ViewUser;
 use App\Filament\Resources\UserResource\RelationManagers\PermissionsRelationManager;
 use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
+use App\Models\Scopes\ConditionalAdminScope;
 use App\Models\User;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
 
 class UserResource extends Resource
@@ -59,6 +61,15 @@ class UserResource extends Resource
     protected static ?string $breadcrumb = 'Users';
 
     protected static ?string $modelLabel = 'User';
+
+    /**
+     * @return Builder<User>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->tap(new ConditionalAdminScope());
+    }
 
     public static function getRelations(): array
     {
