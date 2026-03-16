@@ -74,7 +74,7 @@ class KnowledgeManagementPortalRegisterController extends Controller
             ->where('classification', SystemContactClassification::New)
             ->first();
 
-        $organization = app(FindOrganizationByEmailDomain::class)->__invoke($data['email']);
+        $organization = app(FindOrganizationByEmailDomain::class)($data['email']);
 
         if ($organization) {
             $contact->organization()->associate($organization);

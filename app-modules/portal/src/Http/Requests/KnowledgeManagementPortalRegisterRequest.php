@@ -46,7 +46,7 @@ class KnowledgeManagementPortalRegisterRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return app(FindOrganizationByEmailDomain::class)->exists((string) $this->input('email'));
+        return app(FindOrganizationByEmailDomain::class)((string) $this->input('email')) !== null;
     }
 
     public function rules(): array

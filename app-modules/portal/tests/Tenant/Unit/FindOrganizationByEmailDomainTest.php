@@ -89,8 +89,7 @@ test('it does not match when only email domain includes www', function () {
 
     $result = app(FindOrganizationByEmailDomain::class)('myemail@www.example.com');
 
-    expect($result)->toBeNull()
-        ->and(app(FindOrganizationByEmailDomain::class)->exists('myemail@www.example.com'))->toBeFalse();
+    expect($result)->toBeNull();
 });
 
 test('it ignores organizations where contact generation is disabled', function () {
@@ -106,11 +105,9 @@ test('it ignores organizations where contact generation is disabled', function (
     expect($result)->toBeNull();
 });
 
-test('it returns null and exists false for invalid email format', function () {
+test('it returns null for invalid email format', function () {
     $action = app(FindOrganizationByEmailDomain::class);
 
     expect($action('invalid-email'))->toBeNull()
-        ->and($action->exists('invalid-email'))->toBeFalse()
-        ->and($action('myemail@'))->toBeNull()
-        ->and($action->exists('myemail@'))->toBeFalse();
+        ->and($action('myemail@'))->toBeNull();
 });

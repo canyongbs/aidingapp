@@ -245,7 +245,10 @@ test('check if the provided domain is invalid', function (string $domain) {
     ->with([
         'test example.com',
         '.example.com',
+        'sub*domain.example.com',
         'subdomain!.example.com',
+        'sub..domain.example.com',
+        'example!.com',
         'localhost',
         'https://www.example.com',
         'example.com::8080',

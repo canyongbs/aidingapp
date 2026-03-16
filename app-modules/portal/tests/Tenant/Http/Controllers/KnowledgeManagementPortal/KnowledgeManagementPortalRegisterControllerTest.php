@@ -108,7 +108,7 @@ test('it returns expired flag when portal authentication is expired', function (
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
-            ['domain' => 'example.com'],
+            ['domain' => 'test.example.com'],
         ],
     ]);
 
@@ -127,7 +127,7 @@ test('it returns expired flag when portal authentication is expired', function (
     );
 
     $response = postJson($url, [
-        'email' => 'expired.user@example.com',
+        'email' => 'expired.user@test.example.com',
         'first_name' => 'Expired',
         'last_name' => 'User',
         'mobile' => '+15550003333',
@@ -139,7 +139,7 @@ test('it returns expired flag when portal authentication is expired', function (
         ->assertOk()
         ->assertJsonPath('is_expired', true);
 
-    expect(Contact::query()->where('email', 'expired.user@example.com')->exists())->toBeFalse();
+    expect(Contact::query()->where('email', 'expired.user@test.example.com')->exists())->toBeFalse();
 });
 
 test('it forbids registration when email domain does not match an enabled organization', function () {

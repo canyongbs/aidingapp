@@ -58,17 +58,6 @@ class FindOrganizationByEmailDomain
         return $organization;
     }
 
-    public function exists(string $email): bool
-    {
-        $query = $this->query($email);
-
-        if (is_null($query)) {
-            return false;
-        }
-
-        return $query->exists();
-    }
-
     /**
      * @return Builder<Organization>|null
      */
@@ -84,9 +73,29 @@ class FindOrganizationByEmailDomain
             ->where('is_contact_generation_enabled', true)
             ->whereRaw(
                 "EXISTS (
-                    SELECT 1
-                    FROM jsonb_array_elements(domains) AS elem
-              WHERE LOWER(regexp_replace(trim(elem->>'domain'), '^www\\.', '', 'i')) = ?
+                  SELECT 1
+                  FROM jsonb_array_elements(domains) AS elem
+                    WHERE LOWER(
+                      regexp_replace(
+                        regexp_replace(
+                          regexp_replace(
+                            regexp_replace(
+                              trim(elem->>'domain'),
+                              '^https?://',
+                              '',
+                              'i'
+                            ),
+                            '/.*$',
+                            ''
+                          ),
+                          ':[0-9]+$',
+                          ''
+                        ),
+                        '^www\\.',
+                        '',
+                        'i'
+                      )
+                    ) = ?
                 )",
                 [$emailDomain]
             );
