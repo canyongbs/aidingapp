@@ -49,7 +49,7 @@ class ServiceRequestTypeFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => str($this->faker->word())->ucfirst()->toString(),
+            'name' => str($this->faker->unique()->word())->ucfirst()->toString(),
             'description' => $this->faker->optional()->sentences(2, true),
             'icon' => $this->faker->optional()->randomElement($this->icons()),
         ];
