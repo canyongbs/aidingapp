@@ -43,12 +43,12 @@ return new class () extends Migration {
         try {
             DB::beginTransaction();
 
-            $oldGDPRBannerText = DB::table('settings')
+            $oldGdprBannerText = DB::table('settings')
                 ->where('group', 'portal')
                 ->where('name', 'gdpr_banner_text')
                 ->first();
 
-            if ($oldGDPRBannerText) {
+            if ($oldGdprBannerText) {
                 DB::table('settings')->where('group', 'portal')
                     ->where('name', 'gdpr_banner_text')
                     ->update([
@@ -63,7 +63,7 @@ return new class () extends Migration {
                                     'content' => [
                                         [
                                             'type' => 'text',
-                                            'text' => json_decode($oldGDPRBannerText->payload),
+                                            'text' => json_decode($oldGdprBannerText->payload),
                                         ],
                                     ],
                                 ],
