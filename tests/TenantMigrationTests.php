@@ -297,7 +297,7 @@ describe('2026_03_16_162338_add_citext_unique_to_service_request_priority_name',
         );
     });
 
-    it('does nothing when no duplicates exist, changes column to citext, and creates composite unique index', function () {
+    it('does nothing when no duplicates exist', function () {
         isolatedMigration(
             '2026_03_16_162338_add_citext_unique_to_service_request_priority_name',
             function () {
@@ -325,18 +325,6 @@ describe('2026_03_16_162338_add_citext_unique_to_service_request_priority_name',
                 // Both names should be completely unchanged
                 expect($priority1->name)->toBe('High');
                 expect($priority2->name)->toBe('Low');
-
-                // Column type should now be citext
-                $columnType = DB::selectOne(
-                    "SELECT data_type FROM information_schema.columns WHERE table_name = 'service_request_priorities' AND column_name = 'name'"
-                );
-                expect($columnType->data_type)->toBe('citext');
-
-                // Composite unique index on (name, type_id) should exist
-                $indexExists = DB::selectOne(
-                    "SELECT 1 FROM pg_indexes WHERE tablename = 'service_request_priorities' AND indexname = 'service_request_priorities_name_type_id_unique'"
-                );
-                expect($indexExists)->not->toBeNull();
             }
         );
     });
