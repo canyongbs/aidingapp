@@ -1,5 +1,5 @@
 ARG BASE_IMAGE="public.ecr.aws/lts/ubuntu:24.04"
-ARG IMAGEMAGICK_VERSION='7.1.2-16'
+ARG IMAGEMAGICK_VERSION='7.1.2-17'
 
 FROM ${BASE_IMAGE} AS setup
 
@@ -299,7 +299,7 @@ COPY --chmod=644 ./docker/cron.d/ /etc/cron.d/
 COPY --chmod=755 docker/web/etc/s6-overlay/ /etc/s6-overlay/
 COPY --chmod=755 docker/scheduler/etc/s6-overlay/ /etc/s6-overlay/
 
-COPY --from=ghcr.io/roadrunner-server/roadrunner:2025.1.8 --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
+COPY --from=ghcr.io/roadrunner-server/roadrunner:2025.1.9 --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
 
 EXPOSE 80 443
 
