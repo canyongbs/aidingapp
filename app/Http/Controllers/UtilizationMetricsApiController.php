@@ -61,7 +61,7 @@ class UtilizationMetricsApiController extends Controller
         $currentQuotaUsageOfEmail = EmailMessage::query()
             ->whereBetween('created_at', [$resetWindow['start'], $resetWindow['end']])
             ->sum('quota_usage');
-            
+
         try {
             return response()->json([
                 'data' => [
