@@ -50,6 +50,7 @@ use App\Rules\ValidUrl;
 use BackedEnum;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\Action;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TagsInput;
@@ -62,7 +63,6 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
-use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
@@ -223,10 +223,11 @@ class ManagePortalSettings extends SettingsPage
                     ])->columns(2),
                 Section::make('GDPR Banner Notice')
                     ->schema([
-                        TiptapEditor::make('gdpr_banner_text')
+                        RichEditor::make('gdpr_banner_text')
                             ->label('GDPR Banner Text')
                             ->required()
-                            ->tools(['link'])
+                            ->json()
+                            ->toolbarButtons(['link'])
                             ->columnSpanFull(),
                         Toggle::make('gdpr_privacy_policy')
                             ->label('Privacy Policy')
