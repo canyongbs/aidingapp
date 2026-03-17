@@ -126,7 +126,7 @@ class ListServiceRequestTypes extends ListRecords
             'treeData.uncategorized_types' => 'array',
             'treeData.new_categories' => 'array',
             'treeData.new_types' => 'array',
-            'treeData.new_types.*.name' => ['required', 'string', Rule::unique('service_request_types', 'name')],
+            'treeData.new_types.*.name' => ['required', 'string', Rule::unique('service_request_types', 'name')->withoutTrashed()],
             'treeData.updated_categories' => 'array',
             'treeData.updated_types' => 'array',
             'treeData.deleted_categories' => 'array',
@@ -195,7 +195,7 @@ class ListServiceRequestTypes extends ListRecords
                 foreach ($treeData['updated_types'] as $updatedType) {
                     Validator::validate(
                         ['name' => trim($updatedType['name'])],
-                        ['name' => ['required', 'string', Rule::unique('service_request_types', 'name')->ignore($updatedType['id'])]],
+                        ['name' => ['required', 'string', Rule::unique('service_request_types', 'name')->ignore($updatedType['id'])->withoutTrashed()]],
                     );
 
                     ServiceRequestType::where('id', $updatedType['id'])->update([

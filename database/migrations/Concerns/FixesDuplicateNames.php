@@ -45,33 +45,49 @@ trait FixesDuplicateNames
 {
     private function fixDuplicates(): void
     {
+        /** @var array<int, string> $groupByColumns */
+        $groupByColumns = $this->groupByColumns ?? []; // @phpstan-ignore property.notFound
+
         $query = DB::table($this->table)
-            ->select(DB::raw("LOWER({$this->column}) as lower_name"));
+            ->select([
+                ...$groupByColumns,
+                DB::raw("LOWER({$this->column}) as lower_name"),
+            ]);
 
         if ($this->usesSoftDeletes) {
             $query->whereNull('deleted_at');
         }
 
         $duplicates = $query
-            ->groupBy(DB::raw("LOWER({$this->column})"))
+            ->groupBy([
+                ...$groupByColumns,
+                DB::raw("LOWER({$this->column})"),
+            ])
             ->havingRaw('COUNT(*) > 1')
-            ->pluck('lower_name');
+            ->get();
 
         if ($duplicates->isEmpty()) {
             return;
         }
 
-        /** @var string $duplicateName */
-        foreach ($duplicates as $duplicateName) {
-            $this->processDuplicateGroup($duplicateName);
+        foreach ($duplicates as $duplicate) {
+            $this->processDuplicateGroup($duplicate->lower_name, (array) $duplicate, $groupByColumns);
         }
     }
 
-    private function processDuplicateGroup(string $duplicateName): void
+    /**
+     * @param  array<string, mixed>  $groupValues
+     * @param  array<int, string>  $groupByColumns
+     */
+    private function processDuplicateGroup(string $duplicateName, array $groupValues = [], array $groupByColumns = []): void
     {
         $recordsQuery = DB::table($this->table)
             ->select('id', $this->column, 'created_at')
             ->whereRaw("LOWER({$this->column}) = ?", [$duplicateName]);
+
+        foreach ($groupByColumns as $col) {
+            $recordsQuery->where($col, $groupValues[$col]);
+        }
 
         if ($this->usesSoftDeletes) {
             $recordsQuery->whereNull('deleted_at');
@@ -93,6 +109,10 @@ trait FixesDuplicateNames
 
         if ($this->usesSoftDeletes) {
             $existingNamesQuery->whereNull('deleted_at');
+        }
+
+        foreach ($groupByColumns as $col) {
+            $existingNamesQuery->where($col, $groupValues[$col]);
         }
 
         /** @var array<string, int> $existingNames */
@@ -165,11 +185,20 @@ trait FixesDuplicateNames
 
     private function revertDuplicates(): void
     {
-        DB::table($this->table)
-            ->select('id', $this->column)
-            ->whereRaw("{$this->column} ~ '-[0-9]+$'")
+        /** @var array<int, string> $groupByColumns */
+        $groupByColumns = $this->groupByColumns ?? []; // @phpstan-ignore property.notFound
+
+        $query = DB::table($this->table)
+            ->select(['id', $this->column, ...$groupByColumns])
+            ->whereRaw("{$this->column} ~ '-[0-9]+$'");
+
+        if ($this->usesSoftDeletes) {
+            $query->whereNull('deleted_at');
+        }
+
+        $query
             ->orderBy('id')
-            ->chunk($this->chunkSize, function (Collection $records): void {
+            ->chunk($this->chunkSize, function (Collection $records) use ($groupByColumns): void {
                 $updates = [];
 
                 foreach ($records as $record) {
@@ -177,7 +206,21 @@ trait FixesDuplicateNames
                     $currentName = $record->{$this->column};
                     /** @var string $originalName */
                     $originalName = preg_replace('/-\d+$/', '', $currentName);
-                    $updates[$record->id] = $originalName;
+
+                    $conflictQuery = DB::table($this->table)
+                        ->whereRaw("LOWER({$this->column}) = ?", [strtolower(strval($originalName))]);
+
+                    foreach ($groupByColumns as $col) {
+                        $conflictQuery->where($col, $record->{$col});
+                    }
+
+                    if ($this->usesSoftDeletes) {
+                        $conflictQuery->whereNull('deleted_at');
+                    }
+
+                    if (! $conflictQuery->where('id', '!=', $record->id)->exists()) {
+                        $updates[$record->id] = $originalName;
+                    }
                 }
 
                 if (! empty($updates)) {

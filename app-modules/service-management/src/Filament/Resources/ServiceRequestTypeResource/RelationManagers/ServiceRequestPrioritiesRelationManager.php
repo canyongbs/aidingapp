@@ -69,7 +69,7 @@ class ServiceRequestPrioritiesRelationManager extends RelationManager
                         table: 'service_request_priorities',
                         column: 'name',
                         ignorable: fn (?Model $record): ?Model => $record,
-                        modifyRuleUsing: fn (Unique $rule, RelationManager $livewire) => $rule->where('type_id', $livewire->getOwnerRecord()->getKey()),
+                        modifyRuleUsing: fn (Unique $rule, RelationManager $livewire) => $rule->where('type_id', $livewire->getOwnerRecord()->getKey())->withoutTrashed(),
                     ),
                 TextInput::make('order')
                     ->label('Priority Order')

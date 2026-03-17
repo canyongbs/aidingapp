@@ -36,6 +36,7 @@
 
 use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
@@ -49,7 +50,7 @@ return new class () extends Migration {
 
     private int $chunkSize = 500;
 
-    private bool $usesSoftDeletes = false;
+    private bool $usesSoftDeletes = true;
 
     public function up(): void
     {
@@ -65,16 +66,15 @@ return new class () extends Migration {
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
             Schema::table($this->table, function (Blueprint $table) {
-                $table->unique($this->column);
+                $table->uniqueIndex($this->column, 'service_request_types_name_unique')
+                    ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
         });
     }
 
     public function down(): void
     {
-        Schema::table($this->table, function (Blueprint $table) {
-            $table->dropUnique([$this->column]);
-        });
+        DB::statement('DROP INDEX IF EXISTS service_request_types_name_unique');
 
         DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
 

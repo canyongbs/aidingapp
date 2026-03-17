@@ -34,17 +34,26 @@
 </COPYRIGHT>
 */
 
+use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 
 return new class () extends Migration {
+    use FixesDuplicateNames;
+
     private string $table = 'service_request_priorities';
 
     private string $column = 'name';
 
+    /** @var array<int, string> */
+    private array $groupByColumns = ['type_id'];
+
     private int $chunkSize = 500;
+
+    private bool $usesSoftDeletes = true;
 
     public function up(): void
     {
@@ -59,100 +68,18 @@ return new class () extends Migration {
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
             Schema::table($this->table, function (Blueprint $table) {
-                $table->unique([$this->column, 'type_id']);
+                $table->uniqueIndex([$this->column, 'type_id'], 'service_request_priorities_name_type_id_unique')
+                    ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
         });
     }
 
     public function down(): void
     {
-        Schema::table($this->table, function (Blueprint $table) {
-            $table->dropUnique([$this->column, 'type_id']);
-        });
+        DB::statement('DROP INDEX IF EXISTS service_request_priorities_name_type_id_unique');
 
         DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-    }
 
-    private function fixDuplicates(): void
-    {
-        $duplicates = DB::table($this->table)
-            ->select('type_id', DB::raw("LOWER({$this->column}) as lower_name"))
-            ->whereNull('deleted_at')
-            ->groupBy('type_id', DB::raw("LOWER({$this->column})"))
-            ->havingRaw('COUNT(*) > 1')
-            ->get();
-
-        if ($duplicates->isEmpty()) {
-            return;
-        }
-
-        foreach ($duplicates as $duplicate) {
-            $records = DB::table($this->table)
-                ->select('id', $this->column, 'created_at')
-                ->whereNull('deleted_at')
-                ->where('type_id', $duplicate->type_id)
-                ->whereRaw("LOWER({$this->column}) = ?", [$duplicate->lower_name])
-                ->orderBy('created_at', 'asc')
-                ->orderBy('id', 'asc')
-                ->get();
-
-            if ($records->count() <= 1) {
-                continue;
-            }
-
-            $updates = [];
-            $counter = 2;
-
-            foreach ($records->skip(1) as $record) {
-                /** @var string $originalName */
-                $originalName = $record->{$this->column};
-                $newName = "{$originalName}-{$counter}";
-
-                while (DB::table($this->table)
-                    ->whereNull('deleted_at')
-                    ->where('type_id', $duplicate->type_id)
-                    ->whereRaw("LOWER({$this->column}) = ?", [strtolower($newName)])
-                    ->exists()) {
-                    $counter++;
-                    $newName = "{$originalName}-{$counter}";
-                }
-
-                $updates[$record->id] = $newName;
-                $counter++;
-
-                if (count($updates) >= $this->chunkSize) {
-                    $this->batchUpdate($updates);
-                    $updates = [];
-                }
-            }
-
-            if (! empty($updates)) {
-                $this->batchUpdate($updates);
-            }
-        }
-    }
-
-    /**
-     * @param array<string, string> $updates
-     */
-    private function batchUpdate(array $updates): void
-    {
-        $cases = [];
-        $ids = [];
-        $bindings = [];
-
-        foreach ($updates as $id => $newName) {
-            $cases[] = 'WHEN id = ? THEN ?';
-            $bindings[] = $id;
-            $bindings[] = $newName;
-            $ids[] = $id;
-        }
-
-        $idPlaceholders = implode(',', array_fill(0, count($ids), '?'));
-        $bindings = array_merge($bindings, $ids);
-
-        $sql = "UPDATE {$this->table} SET {$this->column} = CASE " . implode(' ', $cases) . " END WHERE id IN ({$idPlaceholders})";
-
-        DB::statement($sql, $bindings);
+        $this->revertDuplicates();
     }
 };
