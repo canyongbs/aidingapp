@@ -106,5 +106,6 @@ class ServiceManagementServiceProvider extends ServiceProvider
         ]);
 
         $this->loadRoutesFrom(__DIR__ . '/../../routes/widgets.php');
+        $this->loadTranslationsFrom(__DIR__ . '/../../lang', 'service-management');
     }
 }

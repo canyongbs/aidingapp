@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Settings\DisplaySettings;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
@@ -58,6 +59,9 @@ class Feedback extends ViewRecord
         $serviceRequest = $this->record;
         assert($serviceRequest instanceof ServiceRequest);
 
+        $hasFeedback = filled($serviceRequest->feedback?->nps_answer) || filled($serviceRequest->feedback?->csat_answer);
+        $isResolved = $serviceRequest->isResolved();
+
         return $schema
             ->schema([
                 Section::make()
@@ -69,17 +73,40 @@ class Feedback extends ViewRecord
                             ->label('Net Promoter Score (NPS)')
                             ->default('N/A'),
                     ])
-                    ->visible(fn () => (filled($serviceRequest->feedback?->nps_answer) || filled($serviceRequest->feedback?->csat_answer)))
+                    ->visible(fn () => $hasFeedback)
                     ->columns(),
                 Section::make()
                     ->schema([
                         TextEntry::make('feedback_notice')
                             ->color('primary')
                             ->hiddenLabel()
-                            ->default("Since this service request is still not closed, we haven't sent out customer surveys yet. As a result, we're currently unable to report on customer feedback for this service request."),
+                            ->state(fn () => $this->buildFeedbackNoticeMessage($serviceRequest, $isResolved))
+                            ->html(),
                     ])
-                    ->hidden(fn () => (filled($serviceRequest->feedback?->nps_answer) || filled($serviceRequest->feedback?->csat_answer)))
+                    ->visible(fn () => ! $hasFeedback)
                     ->columns(1),
             ]);
+    }
+
+    private function buildFeedbackNoticeMessage(ServiceRequest $serviceRequest, bool $isResolved): string
+    {
+        if (! $isResolved) {
+            return __('service-management::service_requests.feedback.not_closed');
+        }
+
+        if (blank($serviceRequest->survey_sent_at)) {
+            return __('service-management::service_requests.feedback.no_survey_sent');
+        }
+
+        $timezone = app(DisplaySettings::class)->getTimezone();
+        $sentAt = $serviceRequest->survey_sent_at->setTimezone($timezone)->format('M j, Y \a\t h:i A (T)');
+        $message = __('service-management::service_requests.feedback.survey_sent', ['sent_at' => $sentAt]);
+
+        if (filled($serviceRequest->reminder_sent_at)) {
+            $reminderAt = $serviceRequest->reminder_sent_at->setTimezone($timezone)->format('M j, Y \a\t h:i A (T)');
+            $message .= "\n" . __('service-management::service_requests.feedback.reminder_sent', ['reminder_at' => $reminderAt]);
+        }
+
+        return $message;
     }
 }
