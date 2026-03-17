@@ -39,6 +39,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
+use AidingApp\Portal\Actions\FindOrganizationByEmailDomain;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalRegisterRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
 use App\Http\Controllers\Controller;
@@ -72,6 +73,12 @@ class KnowledgeManagementPortalRegisterController extends Controller
         $type = ContactType::query()
             ->where('classification', SystemContactClassification::New)
             ->first();
+
+        $organization = app(FindOrganizationByEmailDomain::class)($data['email']);
+
+        if ($organization) {
+            $contact->organization()->associate($organization);
+        }
 
         if ($type) {
             $contact->type()->associate($type);

@@ -36,7 +36,7 @@
 
 namespace AidingApp\Portal\Http\Requests;
 
-use AidingApp\Contact\Models\Organization;
+use AidingApp\Portal\Actions\FindOrganizationByEmailDomain;
 use AidingApp\Portal\Rules\PortalAuthenticateCodeValidation;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
@@ -46,23 +46,7 @@ class KnowledgeManagementPortalRegisterRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        $email = $this->input('email');
-
-        preg_match('/@([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})$/', $email, $matches);
-
-        $domain = $matches[1];
-
-        return Organization::query()
-            ->whereRaw(
-                "EXISTS (
-                    SELECT 1
-                    FROM jsonb_array_elements(domains) AS elem
-                    WHERE LOWER(elem->>'domain') = ?
-                )",
-                [strtolower($domain)]
-            )
-            ->where('is_contact_generation_enabled', true)
-            ->exists();
+        return app(FindOrganizationByEmailDomain::class)((string) $this->input('email')) !== null;
     }
 
     public function rules(): array

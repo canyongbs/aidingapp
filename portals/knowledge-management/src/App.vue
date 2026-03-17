@@ -419,7 +419,7 @@
         const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
 
         if (authentication.value.isRequested) {
-            const data = {
+            let data = {
                 code: formData.code,
             };
 

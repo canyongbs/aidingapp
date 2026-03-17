@@ -78,7 +78,7 @@ class CreateTenantUser implements ShouldQueue, NotTenantAware
         $this->tenant->execute(function () {
             $user = User::create($this->data->toArray());
 
-            $user->roles()->sync(Role::where('name', Authenticatable::SUPER_ADMIN_ROLE)->firstOrFail());
+            $user->roles()->sync(Role::where('name', Authenticatable::PARTNER_ADMIN_ROLE)->firstOrFail());
         });
     }
 }

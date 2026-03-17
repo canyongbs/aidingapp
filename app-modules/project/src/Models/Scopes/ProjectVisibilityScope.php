@@ -54,7 +54,7 @@ class ProjectVisibilityScope implements Scope
             return;
         }
 
-        if ($user->isSuperAdmin()) {
+        if ($user->isAdmin()) {
             return;
         }
 

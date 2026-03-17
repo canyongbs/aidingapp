@@ -44,6 +44,7 @@ class KnowledgeManagementPortalAuthenticationRequest extends FormRequest
     {
         return [
             'email' => ['required', 'email'],
+            'isSpa' => ['sometimes', 'boolean'],
         ];
     }
 }
