@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Ai\Models\AiThread;
+use AidingApp\Ai\Models\Prompt;
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
@@ -146,4 +148,35 @@ it('checks the API returns tasks', function () {
     $response->assertStatus(200);
 
     expect($data['tasks'])->toBe($randomRecords);
+});
+
+it('checks the API returns Saved AI Chats', function () {
+    $randomRecords = random_int(1, 10);
+
+    AiThread::factory()->count($randomRecords)->saved()->create();
+
+    $softDeleteAiThread = AiThread::factory()->saved()->create();
+    $softDeleteAiThread->delete();
+
+    $response = get(route('utilization-metrics'));
+
+    $data = $response->json('data');
+
+    $response->assertStatus(200);
+
+    expect($data['saved_ai_chats'])->toBe($randomRecords);
+});
+
+it('checks the API returns Saved Prompts', function () {
+    $randomRecords = random_int(1, 10);
+
+    Prompt::factory()->count($randomRecords)->create();
+
+    $response = get(route('utilization-metrics'));
+
+    $data = $response->json('data');
+
+    $response->assertStatus(200);
+
+    expect($data['saved_prompts'])->toBe($randomRecords);
 });
