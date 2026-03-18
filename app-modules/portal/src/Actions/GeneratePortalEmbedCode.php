@@ -86,7 +86,6 @@ class GeneratePortalEmbedCode
                 <script src="{$loaderScriptUrl}"></script>
                 EOD;
             })(),
-            default => throw new Exception('Unsupported Portal.'),
         };
     }
 }

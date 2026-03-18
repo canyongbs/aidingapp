@@ -44,7 +44,10 @@ use Illuminate\Support\Carbon;
 
 class SyncTimelineData
 {
-    public function now(Model $recordModel, $modelsToTimeline): void
+    /**
+     * @param array<Model> $modelsToTimeline
+     */
+    public function now(Model $recordModel, array $modelsToTimeline): void
     {
         if (cache()->has("timeline.synced.{$recordModel->getMorphClass()}.{$recordModel->getKey()}")) {
             return;
@@ -60,11 +63,11 @@ class SyncTimelineData
             $aggregateRecords = $aggregateRecords->concat($model::getTimelineData($recordModel));
         }
 
-        $aggregateRecords = $aggregateRecords->sortByDesc(function ($record) {
+        $aggregateRecords = $aggregateRecords->sortByDesc(function (Model $record) {
             return Carbon::parse($record->timeline()->sortableBy())->timestamp;
         });
 
-        $aggregateRecords->each(function ($record) use ($recordModel) {
+        $aggregateRecords->each(function (Model $record) use ($recordModel) {
             $timelineRecord = Timeline::firstOrCreate([
                 'entity_type' => $recordModel->getMorphClass(),
                 'entity_id' => $recordModel->getKey(),

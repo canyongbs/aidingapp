@@ -195,6 +195,8 @@ class EditServiceRequest extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
+        assert($this->getRecord() instanceof ServiceRequest);
+        
         $data['type_id'] = $this->getRecord()->priority->type_id;
 
         return $data;

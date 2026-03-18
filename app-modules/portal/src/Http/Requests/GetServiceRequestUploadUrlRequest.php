@@ -42,7 +42,7 @@ use Illuminate\Foundation\Http\FormRequest;
 class GetServiceRequestUploadUrlRequest extends FormRequest
 {
     /**
-     * @return array<string, ValidationRule|array>
+     * @return array<string, ValidationRule|array<string>>
      */
     public function rules(): array
     {

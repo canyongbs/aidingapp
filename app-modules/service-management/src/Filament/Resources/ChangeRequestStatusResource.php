@@ -62,6 +62,9 @@ class ChangeRequestStatusResource extends Resource
 
     protected static ?string $cluster = ServiceManagementAdministration::class;
 
+    /**
+     * @return Builder<ChangeRequestStatus>
+     */
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()

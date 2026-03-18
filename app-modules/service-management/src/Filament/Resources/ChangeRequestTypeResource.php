@@ -62,6 +62,9 @@ class ChangeRequestTypeResource extends Resource
 
     protected static ?string $cluster = ServiceManagementAdministration::class;
 
+    /**
+     * @return Builder<ChangeRequestType>
+     */
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
