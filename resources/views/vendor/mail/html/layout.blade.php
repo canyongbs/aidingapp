@@ -50,8 +50,13 @@
     $backgroundColor = $emailSettings->background_color ?? null;
     $color = Color::all()[$settings?->primary_color ?? 'blue'];
     $footer = $emailSettings->footer ? RichContentRenderer::make($emailSettings->footer)->toHtml() : null;
-    $headerLogo = $emailSettings->getSettingsPropertyModel('email.header_logo')->getFirstMediaUrl('header_logo');
-    $settingsLogoUrl = $settings?->getFirstMediaUrl('logo');
+    $headerLogoModel = $emailSettings->getSettingsPropertyModel('email.header_logo');
+    $headerLogo = $headerLogoModel->getFirstMedia('header_logo')
+        ? $headerLogoModel->getFirstTemporaryUrl(now()->addDays(6), 'header_logo')
+        : null;
+    $settingsLogoUrl = $settings?->getFirstMedia('logo')
+        ? $settings->getFirstTemporaryUrl(now()->addDays(6), 'logo')
+        : null;
 @endphp
 
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -72,9 +77,10 @@
         @if($h1TextColor)
         h1,
         .panel-content h1 {
-            color: {{ $h1TextColor }};
+            color: {{ $h1TextColor ?? '#3d4852' }};
         }
         @endif
+
         @if($h2TextColor)
         h2,
         .panel-content h2 {
@@ -117,7 +123,7 @@
                 <tr>
                     <td class="header">
                         <a href="{{ $url ?? config('app.url') }}" style="display: inline-block;">
-                            @if ($headerLogo ?? null)
+                            @if ($headerLogo)
                                 <img src="{{ $headerLogo }}" class="logo" alt="Logo">
                             @elseif ($settings?->hasMedia('logo'))
                                 <img src="{{ $settingsLogoUrl }}"
