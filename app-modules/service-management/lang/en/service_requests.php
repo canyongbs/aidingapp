@@ -35,9 +35,7 @@
 */
 
 return [
-
     'feedback' => [
-
         // Shown when feedback management is enabled but feedback collection is disabled for the service request type.
         'type_feedback_disabled' => 'Feedback has not been enabled for this Service Request Type.',
 
@@ -54,7 +52,5 @@ return [
         // Appended on a new line to the survey_sent message when a reminder was also sent (reminder_sent_at is not null).
         // :reminder_at — formatted datetime of reminder_sent_at in the user's timezone.
         'reminder_sent' => 'Feedback survey reminder sent at :reminder_at.',
-
     ],
-
 ];

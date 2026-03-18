@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
+use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use AidingApp\ServiceManagement\Livewire\RenderServiceRequestFeedbackForm;
 use AidingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
-use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')

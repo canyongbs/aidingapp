@@ -99,7 +99,7 @@ class Feedback extends ViewRecord
 
     private function buildFeedbackNoticeMessage(ServiceRequest $serviceRequest, bool $isResolved): string
     {
-        if (! ($serviceRequest->priority?->type?->has_enabled_feedback_collection ?? false)) {
+        if (! ($serviceRequest->priority?->type->has_enabled_feedback_collection ?? false)) {
             return __('service-management::service_requests.feedback.type_feedback_disabled');
         }
 
