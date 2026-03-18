@@ -46,12 +46,14 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ServiceRequestTimeline;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Enums\Feature;
 use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 class ServiceRequestResource extends Resource
@@ -131,6 +133,21 @@ class ServiceRequestResource extends Resource
         return false;
     }
 
+    public static function shouldShowFeedback(Page $page): bool
+    {
+        $record = $page->record;
+
+        if (! $record instanceof ServiceRequest) {
+            return false;
+        }
+
+        if ($record->feedback()->exists()) {
+            return true;
+        }
+
+        return Gate::check(Feature::FeedbackManagement->getGateName());
+    }
+
     public static function getRecordSubNavigation(Page $page): array
     {
         $navigationItems = [
@@ -138,12 +155,15 @@ class ServiceRequestResource extends Resource
             EditServiceRequest::class,
             ManageAssignments::class,
             ManageServiceRequestUpdate::class,
-            Feedback::class,
             ServiceRequestTimeline::class,
         ];
 
         if (static::shouldShowFormSubmission($page)) {
             array_splice($navigationItems, 1, 0, ManageServiceRequestFormSubmission::class);
+        }
+
+        if (static::shouldShowFeedback($page)) {
+            array_splice($navigationItems, array_search(ServiceRequestTimeline::class, $navigationItems), 0, Feedback::class);
         }
 
         return $page->generateNavigationItems($navigationItems);
