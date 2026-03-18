@@ -135,7 +135,7 @@ class ServiceRequestResource extends Resource
 
     public static function shouldShowFeedback(Page $page): bool
     {
-        $record = $page->record;
+        $record = $page->getRecord();
 
         if (! $record instanceof ServiceRequest) {
             return false;
