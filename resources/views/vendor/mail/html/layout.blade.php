@@ -128,7 +128,7 @@
                                     style="height: 75px; max-height: 75px; max-width: 100vw;"
                                     alt="Logo">
                             @elseif ($themeSettings->is_logo_active && $logo)
-                                <img src="{{ $logo->getTemporaryUrl(now()->addDays(6)) }}"
+                                <img src="{{ $settingsProperty->getFirstMediaUrl('logo') }}"
                                     style="height: 75px; max-height: 75px; max-width: 100vw;"
                                     alt="Logo">
                             @elseif ($headerLogo)

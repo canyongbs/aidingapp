@@ -78,9 +78,9 @@ class ManageBrandConfigurationSettings extends SettingsPage
                     ->aside()
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('favicon')
-                            ->disk('s3')
+                            ->disk('s3-public')
                             ->collection('favicon')
-                            ->visibility('private')
+                            ->visibility('public')
                             ->image()
                             ->model(
                                 ThemeSettings::getSettingsPropertyModel('theme.is_favicon_active'),
@@ -96,9 +96,9 @@ class ManageBrandConfigurationSettings extends SettingsPage
                     ->aside()
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('logo')
-                            ->disk('s3')
+                            ->disk('s3-public')
                             ->collection('logo')
-                            ->visibility('private')
+                            ->visibility('public')
                             ->image()
                             ->model(
                                 ThemeSettings::getSettingsPropertyModel('theme.is_logo_active'),
@@ -107,9 +107,9 @@ class ManageBrandConfigurationSettings extends SettingsPage
                             ->deleteUploadedFileUsing(fn (Set $set) => $set('is_logo_active', false))
                             ->hiddenLabel(),
                         SpatieMediaLibraryFileUpload::make('dark_logo')
-                            ->disk('s3')
+                            ->disk('s3-public')
                             ->collection('dark_logo')
-                            ->visibility('private')
+                            ->visibility('public')
                             ->image()
                             ->model(
                                 ThemeSettings::getSettingsPropertyModel('theme.is_logo_active'),
