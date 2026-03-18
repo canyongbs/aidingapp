@@ -43,6 +43,7 @@ use App\Models\Tenant;
 use App\Overrides\Filament\Actions\Imports\Jobs\ImportCsvOverride;
 use App\Overrides\Filament\Actions\Imports\Jobs\PrepareCsvExportOverride;
 use App\Overrides\Laravel\PermissionMigrationCreator;
+use App\Settings\SettingsProperties\EmailSettingsProperty;
 use Exception;
 use Filament\Actions\Exports\Jobs\PrepareCsvExport;
 use Filament\Actions\Imports\Jobs\ImportCsv;
@@ -82,6 +83,7 @@ class AppServiceProvider extends ServiceProvider
         Relation::morphMap([
             'system_user' => SystemUser::class,
             'tenant' => Tenant::class,
+            'email_settings_property' => EmailSettingsProperty::class,
         ]);
 
         Feature::resolveScopeUsing(fn ($driver) => null);
