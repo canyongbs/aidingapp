@@ -55,7 +55,7 @@
         ? $headerLogoModel->getFirstMediaUrl('header_logo')
         : null;
     $settingsLogoUrl = $settings?->getFirstMedia('logo')
-        ? $settings->getFirstTemporaryUrl(now()->addDays(6), 'logo')
+        ? $settings->getFirstMediaUrl('logo')
         : null;
 @endphp
 
@@ -122,10 +122,8 @@
                 {{-- Header --}}
                 <tr>
                     <td class="header">
-                        <a href="{{ $url ?? config('app.url') }}" style="display: inline-block;">
-                            @if ($headerLogo)
-                                <img src="{{ $headerLogo }}" class="logo" alt="Logo">
-                            @elseif ($settings?->hasMedia('logo'))
+                        <a href="{{ $url ?? config('app.url') }}" style="display: inline-block;">                            
+                            @if ($settingsLogoUrl)
                                 <img src="{{ $settingsLogoUrl }}"
                                     style="height: 75px; max-height: 75px; max-width: 100vw;"
                                     alt="Logo">
@@ -133,6 +131,8 @@
                                 <img src="{{ $logo->getTemporaryUrl(now()->addDays(6)) }}"
                                     style="height: 75px; max-height: 75px; max-width: 100vw;"
                                     alt="Logo">
+                            @elseif ($headerLogo)
+                                <img src="{{ $headerLogo }}" class="logo" alt="Logo">
                             @else
                                 <img src="{{ url(Vite::asset('resources/images/default-logo-light-1735308866.svg')) }}"
                                     style="height: 75px; max-height: 75px; max-width: 100vw;"
