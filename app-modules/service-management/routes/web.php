@@ -36,6 +36,7 @@
 
 use AidingApp\ServiceManagement\Livewire\RenderServiceRequestFeedbackForm;
 use AidingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
+use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')
@@ -47,5 +48,5 @@ Route::middleware('web')
     });
 
 Route::get('/service-requests/{serviceRequest}/feedback/', RenderServiceRequestFeedbackForm::class)
-    ->middleware('web')
+    ->middleware(['web', FeedbackManagementIsOn::class])
     ->name('feedback.service.request');

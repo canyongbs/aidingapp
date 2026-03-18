@@ -38,6 +38,9 @@ return [
 
     'feedback' => [
 
+        // Shown when feedback management is enabled but feedback collection is disabled for the service request type.
+        'type_feedback_disabled' => 'Feedback has not been enabled for this Service Request Type.',
+
         // Shown when the service request has not yet reached a closed classification status.
         'not_closed' => "Since this service request is still not closed, we haven't sent out customer surveys yet. As a result, we're currently unable to report on customer feedback for this service request.",
 

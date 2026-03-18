@@ -141,10 +141,6 @@ class ServiceRequestResource extends Resource
             return false;
         }
 
-        if ($record->feedback()->exists()) {
-            return true;
-        }
-
         return Gate::check(Feature::FeedbackManagement->getGateName());
     }
 

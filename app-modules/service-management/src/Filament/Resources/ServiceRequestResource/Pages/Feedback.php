@@ -38,11 +38,13 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Enums\Feature;
 use App\Settings\DisplaySettings;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Gate;
 
 class Feedback extends ViewRecord
 {
@@ -54,12 +56,19 @@ class Feedback extends ViewRecord
 
     protected static ?string $breadcrumb = 'Feedback';
 
+    public function mount(int | string $record): void
+    {
+        parent::mount($record);
+
+        abort_unless(Gate::check(Feature::FeedbackManagement->getGateName()), 403);
+    }
+
     public function infolist(Schema $schema): Schema
     {
         $serviceRequest = $this->record;
         assert($serviceRequest instanceof ServiceRequest);
 
-        $hasFeedback = filled($serviceRequest->feedback?->nps_answer) || filled($serviceRequest->feedback?->csat_answer);
+        $hasFeedbackSubmission = $serviceRequest->feedback()->exists();
         $isResolved = $serviceRequest->isResolved();
 
         return $schema
@@ -73,7 +82,7 @@ class Feedback extends ViewRecord
                             ->label('Net Promoter Score (NPS)')
                             ->default('N/A'),
                     ])
-                    ->visible(fn () => $hasFeedback)
+                    ->visible(fn () => $hasFeedbackSubmission)
                     ->columns(),
                 Section::make()
                     ->schema([
@@ -83,13 +92,17 @@ class Feedback extends ViewRecord
                             ->state(fn () => $this->buildFeedbackNoticeMessage($serviceRequest, $isResolved))
                             ->html(),
                     ])
-                    ->visible(fn () => ! $hasFeedback)
+                    ->visible(fn () => ! $hasFeedbackSubmission)
                     ->columns(1),
             ]);
     }
 
     private function buildFeedbackNoticeMessage(ServiceRequest $serviceRequest, bool $isResolved): string
     {
+        if (! ($serviceRequest->priority?->type?->has_enabled_feedback_collection ?? false)) {
+            return __('service-management::service_requests.feedback.type_feedback_disabled');
+        }
+
         if (! $isResolved) {
             return __('service-management::service_requests.feedback.not_closed');
         }
@@ -104,7 +117,7 @@ class Feedback extends ViewRecord
 
         if (filled($serviceRequest->reminder_sent_at)) {
             $reminderAt = $serviceRequest->reminder_sent_at->setTimezone($timezone)->format('M j, Y \a\t h:i A (T)');
-            $message .= "\n" . __('service-management::service_requests.feedback.reminder_sent', ['reminder_at' => $reminderAt]);
+            $message .= '<br>' . __('service-management::service_requests.feedback.reminder_sent', ['reminder_at' => $reminderAt]);
         }
 
         return $message;
