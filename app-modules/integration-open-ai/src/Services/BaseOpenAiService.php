@@ -613,6 +613,10 @@ abstract class BaseOpenAiService implements AiService
             if (! $vectorStore->ready_until?->isFuture()) {
                 $vectorStoreState = $this->getVectorStoreState($vectorStore);
 
+                if (blank($vectorStoreState)) {
+                    return false;
+                }
+
                 return $this->evaluateVectorStoreState($vectorStore, $vectorStoreState);
             }
         }
