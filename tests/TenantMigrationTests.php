@@ -57,7 +57,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\DB;
 
 describe('2026_03_16_134851_add_citext_unique_to_service_request_type_name', function () {
     it('renames duplicate service request type names with suffix', function () {
