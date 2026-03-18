@@ -61,7 +61,11 @@ return new class () extends Migration {
             /*
              * TODO: After feature is stable:
              * - Remove the $this->fixDuplicates() call below
+             * - Remove the revertDuplicates() call in down()
              * - Remove the $chunkSize property
+             * - Remove the $usesSoftDeletes property
+             * - Remove the $groupByColumns property
+             * - Remove the FixesDuplicateNames trait
              */
             $this->fixDuplicates();
 
