@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeTeamAuditorFactory;
 use AidingApp\Team\Models\Team;
-use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,9 +55,7 @@ class ServiceRequestTypeTeamAuditor extends Pivot
 
     public function getTable(): string
     {
-        return ServiceRequestTypeDirectUserManagersFeature::active()
-            ? 'service_request_type_auditor_teams'
-            : 'service_request_type_auditors';
+        return 'service_request_type_auditor_teams';
     }
 
     /**

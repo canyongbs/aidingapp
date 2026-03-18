@@ -46,7 +46,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Concerns\EditPageRedirection;
-use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use App\Filament\Support\HideDeletedExceptSelectedFromSelectOptions;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
@@ -119,11 +118,8 @@ class EditServiceRequest extends EditRecord
                                                     ->withoutArchived()
                                                     ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                                         $query->where(function (Builder $query) {
-                                                            if (ServiceRequestTypeDirectUserManagersFeature::active()) {
-                                                                $query->whereHas('managerUsers', fn (Builder $query) => $query->where('users.id', auth()->user()->getKey()));
-                                                            }
-
-                                                            $query->{ServiceRequestTypeDirectUserManagersFeature::active() ? 'orWhereHas' : 'whereHas'}('managerTeams', fn (Builder $query) => $query->where('teams.id', auth()->user()->team?->getKey()));
+                                                            $query->whereHas('managerUsers', fn (Builder $query) => $query->where('users.id', auth()->user()->getKey()));
+                                                            $query->orWhereHas('managerTeams', fn (Builder $query) => $query->where('teams.id', auth()->user()->team?->getKey()));
                                                         });
                                                     }),
                                             )

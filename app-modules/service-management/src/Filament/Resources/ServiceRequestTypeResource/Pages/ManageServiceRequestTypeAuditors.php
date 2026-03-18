@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResou
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use App\Concerns\EditPageRedirection;
-use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
@@ -70,20 +69,18 @@ class ManageServiceRequestTypeAuditors extends EditRecord
         return $schema
             ->components([
                 Section::make()
-                    ->schema(array_filter([
-                        ServiceRequestTypeDirectUserManagersFeature::active()
-                            ? Select::make('auditorUsers')
-                                ->label('Users')
-                                ->multiple()
-                                ->relationship('auditorUsers', 'name')
-                                ->preload()
-                            : null,
+                    ->schema([
+                        Select::make('auditorUsers')
+                            ->label('Users')
+                            ->multiple()
+                            ->relationship('auditorUsers', 'name')
+                            ->preload(),
                         Select::make('auditorTeams')
                             ->label('Teams')
                             ->multiple()
                             ->relationship('auditorTeams', 'name')
                             ->preload(),
-                    ]))
+                    ])
                     ->columns(2),
             ]);
     }

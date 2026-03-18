@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use App\Support\BulkProcessingMachine;
 use Closure;
 use Filament\Actions\BulkAction;
@@ -65,12 +64,12 @@ class ChangeServiceRequestStatusBulkAction
                     ->required(),
             ])
             ->action(function (array $data, Collection $records) {
-                $records->loadMissing(array_filter([
-                    ServiceRequestTypeDirectUserManagersFeature::active() ? 'priority.type.managerUsers' : null,
+                $records->loadMissing([
+                    'priority.type.managerUsers',
                     'priority.type.managerTeams',
                     'respondent',
                     'status',
-                ]));
+                ]);
 
                 $user = auth()->user();
                 $isUserSuperAdmin = $user->isSuperAdmin();
@@ -110,7 +109,7 @@ class ChangeServiceRequestStatusBulkAction
 
                         $team = $user->team;
 
-                        if ((ServiceRequestTypeDirectUserManagersFeature::active() && $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey())) ||
+                        if (($serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey())) ||
                             $serviceRequest->priority?->type?->managerTeams?->contains('id', $team?->getKey())) {
                             return null;
                         }

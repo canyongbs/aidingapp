@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
 use App\Concerns\EditPageRedirection;
-use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
 use Filament\Forms\Components\Radio;
@@ -111,13 +110,11 @@ class EditServiceRequestTypeAssignments extends EditRecord
                                         $this->record->getKey(),
                                     );
 
-                                    if (ServiceRequestTypeDirectUserManagersFeature::active()) {
-                                        $query->orWhereRelation(
-                                            'manageableServiceRequestTypes',
-                                            'service_request_types.id',
-                                            $this->record->getKey(),
-                                        );
-                                    }
+                                    $query->orWhereRelation(
+                                        'manageableServiceRequestTypes',
+                                        'service_request_types.id',
+                                        $this->record->getKey(),
+                                    );
                                 }
                             )
                             ->searchable(['name', 'email'])

@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeTeamManagerFactory;
 use AidingApp\Team\Models\Team;
-use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,9 +55,7 @@ class ServiceRequestTypeTeamManager extends Pivot
 
     public function getTable(): string
     {
-        return ServiceRequestTypeDirectUserManagersFeature::active()
-            ? 'service_request_type_manager_teams'
-            : 'service_request_type_managers';
+        return 'service_request_type_manager_teams';
     }
 
     /**

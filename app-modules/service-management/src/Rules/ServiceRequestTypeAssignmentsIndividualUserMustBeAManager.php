@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Rules;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeDirectUserManagersFeature;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
@@ -55,7 +54,7 @@ class ServiceRequestTypeAssignmentsIndividualUserMustBeAManager implements Valid
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $isManager = (ServiceRequestTypeDirectUserManagersFeature::active() && $this->serviceRequestType->managerUsers()->where('users.id', $value)->exists()) ||
+        $isManager = $this->serviceRequestType->managerUsers()->where('users.id', $value)->exists() ||
             $this->serviceRequestType->managerTeams()->whereRelation('users', 'users.id', $value)->exists();
 
         if (! $isManager) {
