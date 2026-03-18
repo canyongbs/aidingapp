@@ -52,7 +52,7 @@
     $footer = $emailSettings->footer ? RichContentRenderer::make($emailSettings->footer)->toHtml() : null;
     $headerLogoModel = $emailSettings->getSettingsPropertyModel('email.header_logo');
     $headerLogo = $headerLogoModel->getFirstMedia('header_logo')
-        ? $headerLogoModel->getFirstTemporaryUrl(now()->addDays(6), 'header_logo')
+        ? $headerLogoModel->getFirstMediaUrl('header_logo')
         : null;
     $settingsLogoUrl = $settings?->getFirstMedia('logo')
         ? $settings->getFirstTemporaryUrl(now()->addDays(6), 'logo')

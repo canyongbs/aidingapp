@@ -71,8 +71,8 @@ class ManageEmailSettings extends SettingsPage
             ->components([
                 SpatieMediaLibraryFileUpload::make('header_logo')
                     ->collection('header_logo')
-                    ->visibility('private')
-                    ->disk('s3')
+                    ->disk('s3-public')
+                    ->visibility('public')
                     ->image()
                     ->maxSize(10240)
                     ->acceptedFileTypes([
