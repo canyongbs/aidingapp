@@ -48,6 +48,8 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rules\Unique;
 
 class ServiceRequestPrioritiesRelationManager extends RelationManager
 {
@@ -62,7 +64,13 @@ class ServiceRequestPrioritiesRelationManager extends RelationManager
                 TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->string(),
+                    ->string()
+                    ->unique(
+                        table: 'service_request_priorities',
+                        column: 'name',
+                        ignorable: fn (?Model $record): ?Model => $record,
+                        modifyRuleUsing: fn (Unique $rule, RelationManager $livewire) => $rule->where('type_id', $livewire->getOwnerRecord()->getKey())->withoutTrashed(),
+                    ),
                 TextInput::make('order')
                     ->label('Priority Order')
                     ->required()

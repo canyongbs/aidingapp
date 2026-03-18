@@ -57,6 +57,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rules\Unique;
 
 class EditServiceRequestType extends EditRecord
 {
@@ -76,7 +77,11 @@ class EditServiceRequestType extends EditRecord
                         TextInput::make('name')
                             ->label('Name')
                             ->required()
-                            ->string(),
+                            ->string()
+                            ->unique(
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed(),
+                            ),
                         IconSelect::make('icon'),
                         Group::make()
                             ->schema([

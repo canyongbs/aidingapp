@@ -34,47 +34,52 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+use Database\Migrations\Concerns\FixesDuplicateNames;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use BladeUI\Icons\Factory as BladeUIIconsFactory;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\File;
+return new class () extends Migration {
+    use FixesDuplicateNames;
 
-/**
- * @extends Factory<ServiceRequestType>
- */
-class ServiceRequestTypeFactory extends Factory
-{
-    public function definition(): array
+    private string $table = 'service_request_types';
+
+    private string $column = 'name';
+
+    private int $chunkSize = 500;
+
+    private bool $usesSoftDeletes = true;
+
+    public function up(): void
     {
-        return [
-            'name' => str($this->faker->unique()->word())->ucfirst()->toString(),
-            'description' => $this->faker->optional()->sentences(2, true),
-            'icon' => $this->faker->optional()->randomElement($this->icons()),
-        ];
-    }
+        DB::transaction(function () {
+            /*
+             * TODO: After feature is stable:
+             * - Remove the $this->fixDuplicates() call below
+             * - Remove the revertDuplicates() call in down()
+             * - Remove the $chunkSize property
+             * - Remove the $usesSoftDeletes property
+             * - Remove the FixesDuplicateNames trait
+             */
+            $this->fixDuplicates();
 
-    private function icons(): array
-    {
-        return cache()->remember('heroicon-factory-options', now()->addMinutes(5), function (): array {
-            $paths = app(BladeUIIconsFactory::class)->all()['heroicons']['paths'];
+            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
-            $options = [];
-
-            foreach ($paths as $path) {
-                foreach (File::files($path) as $file) {
-                    $id = $file->getFilenameWithoutExtension();
-
-                    if (! str($id)->startsWith('o-')) {
-                        continue;
-                    }
-
-                    $options[] = "heroicon-{$id}";
-                }
-            }
-
-            return $options;
+            Schema::table($this->table, function (Blueprint $table) {
+                $table->uniqueIndex($this->column, 'service_request_types_name_unique')
+                    ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
+            });
         });
     }
-}
+
+    public function down(): void
+    {
+        DB::statement('DROP INDEX IF EXISTS service_request_types_name_unique');
+
+        DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
+
+        $this->revertDuplicates();
+    }
+};

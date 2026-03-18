@@ -34,47 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use BladeUI\Icons\Factory as BladeUIIconsFactory;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\File;
-
-/**
- * @extends Factory<ServiceRequestType>
- */
-class ServiceRequestTypeFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => str($this->faker->unique()->word())->ucfirst()->toString(),
-            'description' => $this->faker->optional()->sentences(2, true),
-            'icon' => $this->faker->optional()->randomElement($this->icons()),
-        ];
+        DB::statement('CREATE EXTENSION IF NOT EXISTS citext');
     }
 
-    private function icons(): array
+    public function down(): void
     {
-        return cache()->remember('heroicon-factory-options', now()->addMinutes(5), function (): array {
-            $paths = app(BladeUIIconsFactory::class)->all()['heroicons']['paths'];
-
-            $options = [];
-
-            foreach ($paths as $path) {
-                foreach (File::files($path) as $file) {
-                    $id = $file->getFilenameWithoutExtension();
-
-                    if (! str($id)->startsWith('o-')) {
-                        continue;
-                    }
-
-                    $options[] = "heroicon-{$id}";
-                }
-            }
-
-            return $options;
-        });
+        DB::statement('DROP EXTENSION IF EXISTS citext');
     }
-}
+};

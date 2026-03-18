@@ -52,3 +52,279 @@
 //        );
 //    });
 //});
+
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
+
+describe('2026_03_16_134851_add_citext_unique_to_service_request_type_name', function () {
+    it('renames duplicate service request type names with suffix', function () {
+        isolatedMigration(
+            '2026_03_16_134851_add_citext_unique_to_service_request_type_name',
+            function () {
+                $type1 = ServiceRequestType::factory()
+                    ->state(['name' => 'IT Support'])
+                    ->create();
+
+                $type2 = ServiceRequestType::factory()
+                    ->state(['name' => 'it support'])
+                    ->create();
+
+                $type3 = ServiceRequestType::factory()
+                    ->state(['name' => 'IT SUPPORT'])
+                    ->create();
+
+                $uniqueType = ServiceRequestType::factory()
+                    ->state(['name' => 'HR Support'])
+                    ->create();
+
+                $migrate = Artisan::call('migrate', [
+                    '--path' => 'app-modules/service-management/database/migrations/2026_03_16_134851_add_citext_unique_to_service_request_type_name.php',
+                ]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                $type1->refresh();
+                $type2->refresh();
+                $type3->refresh();
+                $uniqueType->refresh();
+
+                // Oldest record keeps its original name
+                expect($type1->name)->toBe('IT Support');
+
+                // Subsequent case-insensitive duplicates get a numeric suffix
+                expect($type2->name)->toBe('it support-2');
+                expect($type3->name)->toBe('IT SUPPORT-3');
+
+                // Non-duplicate is untouched
+                expect($uniqueType->name)->toBe('HR Support');
+            }
+        );
+    });
+
+    it('handles existing suffixed names correctly', function () {
+        isolatedMigration(
+            '2026_03_16_134851_add_citext_unique_to_service_request_type_name',
+            function () {
+                $type1 = ServiceRequestType::factory()
+                    ->state(['name' => 'IT Support'])
+                    ->create();
+
+                $type2 = ServiceRequestType::factory()
+                    ->state(['name' => 'IT Support-2'])
+                    ->create();
+
+                $type3 = ServiceRequestType::factory()
+                    ->state(['name' => 'it support'])
+                    ->create();
+
+                $migrate = Artisan::call('migrate', [
+                    '--path' => 'app-modules/service-management/database/migrations/2026_03_16_134851_add_citext_unique_to_service_request_type_name.php',
+                ]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                $type1->refresh();
+                $type2->refresh();
+                $type3->refresh();
+
+                expect($type1->name)->toBe('IT Support');
+
+                // Pre-existing suffixed name is untouched
+                expect($type2->name)->toBe('IT Support-2');
+
+                // -2 is already taken so the duplicate skips to -3
+                expect($type3->name)->toBe('it support-3');
+            }
+        );
+    });
+
+    it('does nothing when no duplicates exist', function () {
+        isolatedMigration(
+            '2026_03_16_134851_add_citext_unique_to_service_request_type_name',
+            function () {
+                $type1 = ServiceRequestType::factory()
+                    ->state(['name' => 'IT Support'])
+                    ->create();
+
+                $type2 = ServiceRequestType::factory()
+                    ->state(['name' => 'HR Support'])
+                    ->create();
+
+                $migrate = Artisan::call('migrate', [
+                    '--path' => 'app-modules/service-management/database/migrations/2026_03_16_134851_add_citext_unique_to_service_request_type_name.php',
+                ]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                $type1->refresh();
+                $type2->refresh();
+
+                // Both names should be completely unchanged
+                expect($type1->name)->toBe('IT Support');
+                expect($type2->name)->toBe('HR Support');
+            }
+        );
+    });
+});
+
+describe('2026_03_16_162338_add_citext_unique_to_service_request_priority_name', function () {
+    it('renames duplicate priority names within the same type with suffix', function () {
+        isolatedMigration(
+            '2026_03_16_162338_add_citext_unique_to_service_request_priority_name',
+            function () {
+                $type = ServiceRequestType::factory()->create();
+
+                $priority1 = ServiceRequestPriority::factory()
+                    ->for($type, 'type')
+                    ->state(['name' => 'High'])
+                    ->create();
+
+                $priority2 = ServiceRequestPriority::factory()
+                    ->for($type, 'type')
+                    ->state(['name' => 'high'])
+                    ->create();
+
+                $priority3 = ServiceRequestPriority::factory()
+                    ->for($type, 'type')
+                    ->state(['name' => 'HIGH'])
+                    ->create();
+
+                $uniquePriority = ServiceRequestPriority::factory()
+                    ->for($type, 'type')
+                    ->state(['name' => 'Low'])
+                    ->create();
+
+                $migrate = Artisan::call('migrate', [
+                    '--path' => 'app-modules/service-management/database/migrations/2026_03_16_162338_add_citext_unique_to_service_request_priority_name.php',
+                ]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                $priority1->refresh();
+                $priority2->refresh();
+                $priority3->refresh();
+                $uniquePriority->refresh();
+
+                // Oldest record keeps its original name
+                expect($priority1->name)->toBe('High');
+
+                // Subsequent case-insensitive duplicates within the same type get a numeric suffix
+                expect($priority2->name)->toBe('high-2');
+                expect($priority3->name)->toBe('HIGH-3');
+
+                // Non-duplicate is untouched
+                expect($uniquePriority->name)->toBe('Low');
+            }
+        );
+    });
+
+    it('does not rename same-named priorities belonging to different types', function () {
+        isolatedMigration(
+            '2026_03_16_162338_add_citext_unique_to_service_request_priority_name',
+            function () {
+                $typeA = ServiceRequestType::factory()->create();
+                $typeB = ServiceRequestType::factory()->create();
+
+                // Same name but different types — should both survive unchanged
+                $priorityA = ServiceRequestPriority::factory()
+                    ->for($typeA, 'type')
+                    ->state(['name' => 'High'])
+                    ->create();
+
+                $priorityB = ServiceRequestPriority::factory()
+                    ->for($typeB, 'type')
+                    ->state(['name' => 'high'])
+                    ->create();
+
+                $migrate = Artisan::call('migrate', [
+                    '--path' => 'app-modules/service-management/database/migrations/2026_03_16_162338_add_citext_unique_to_service_request_priority_name.php',
+                ]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                $priorityA->refresh();
+                $priorityB->refresh();
+
+                // Uniqueness is scoped per type_id
+                expect($priorityA->name)->toBe('High');
+                expect($priorityB->name)->toBe('high');
+            }
+        );
+    });
+
+    it('handles existing suffixed names correctly within the same type', function () {
+        isolatedMigration(
+            '2026_03_16_162338_add_citext_unique_to_service_request_priority_name',
+            function () {
+                $type = ServiceRequestType::factory()->create();
+
+                $priority1 = ServiceRequestPriority::factory()
+                    ->for($type, 'type')
+                    ->state(['name' => 'Medium'])
+                    ->create();
+
+                $priority2 = ServiceRequestPriority::factory()
+                    ->for($type, 'type')
+                    ->state(['name' => 'Medium-2'])
+                    ->create();
+
+                $priority3 = ServiceRequestPriority::factory()
+                    ->for($type, 'type')
+                    ->state(['name' => 'medium'])
+                    ->create();
+
+                $migrate = Artisan::call('migrate', [
+                    '--path' => 'app-modules/service-management/database/migrations/2026_03_16_162338_add_citext_unique_to_service_request_priority_name.php',
+                ]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                $priority1->refresh();
+                $priority2->refresh();
+                $priority3->refresh();
+
+                expect($priority1->name)->toBe('Medium');
+
+                // Pre-existing suffixed name is untouched
+                expect($priority2->name)->toBe('Medium-2');
+
+                // -2 is already taken so the duplicate skips to -3
+                expect($priority3->name)->toBe('medium-3');
+            }
+        );
+    });
+
+    it('does nothing when no duplicates exist', function () {
+        isolatedMigration(
+            '2026_03_16_162338_add_citext_unique_to_service_request_priority_name',
+            function () {
+                $type = ServiceRequestType::factory()->create();
+
+                $priority1 = ServiceRequestPriority::factory()
+                    ->for($type, 'type')
+                    ->state(['name' => 'High'])
+                    ->create();
+
+                $priority2 = ServiceRequestPriority::factory()
+                    ->for($type, 'type')
+                    ->state(['name' => 'Low'])
+                    ->create();
+
+                $migrate = Artisan::call('migrate', [
+                    '--path' => 'app-modules/service-management/database/migrations/2026_03_16_162338_add_citext_unique_to_service_request_priority_name.php',
+                ]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                $priority1->refresh();
+                $priority2->refresh();
+
+                // Both names should be completely unchanged
+                expect($priority1->name)->toBe('High');
+                expect($priority2->name)->toBe('Low');
+            }
+        );
+    });
+});

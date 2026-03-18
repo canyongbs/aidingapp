@@ -51,6 +51,7 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateServiceRequestType extends CreateRecord
 {
@@ -66,6 +67,7 @@ class CreateServiceRequestType extends CreateRecord
                         TextInput::make('name')
                             ->label('Name')
                             ->required()
+                            ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())
                             ->string(),
                         IconSelect::make('icon'),
                         Group::make()

@@ -45,6 +45,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
@@ -125,6 +126,7 @@ class ListServiceRequestTypes extends ListRecords
             'treeData.uncategorized_types' => 'array',
             'treeData.new_categories' => 'array',
             'treeData.new_types' => 'array',
+            'treeData.new_types.*.name' => ['required', 'string', Rule::unique('service_request_types', 'name')->withoutTrashed()],
             'treeData.updated_categories' => 'array',
             'treeData.updated_types' => 'array',
             'treeData.deleted_categories' => 'array',
@@ -191,6 +193,11 @@ class ListServiceRequestTypes extends ListRecords
             // Update renamed types
             if (! empty($treeData['updated_types'])) {
                 foreach ($treeData['updated_types'] as $updatedType) {
+                    Validator::validate(
+                        ['name' => trim($updatedType['name'])],
+                        ['name' => ['required', 'string', Rule::unique('service_request_types', 'name')->ignore($updatedType['id'])->withoutTrashed()]],
+                    );
+
                     ServiceRequestType::where('id', $updatedType['id'])->update([
                         'name' => trim($updatedType['name']),
                     ]);
