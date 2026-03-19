@@ -64,12 +64,16 @@ class UserResource extends Resource
     protected static ?string $modelLabel = 'User';
 
     /**
-     * @return Builder<Model>
+     * @return Builder<User>
      */
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
-            ->tap(fn () => new ConditionalAdminScope());
+        /** @var Builder<User> $query */
+        $query = parent::getEloquentQuery();
+
+        (new ConditionalAdminScope())($query);
+
+        return $query;
     }
 
     public static function getRelations(): array
