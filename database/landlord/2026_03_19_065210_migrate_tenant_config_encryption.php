@@ -1,0 +1,113 @@
+<?php
+
+/*
+<COPYRIGHT>
+
+    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+
+    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+
+    Notice:
+
+    - You may not provide the software to third parties as a hosted or managed
+      service, where the service provides users with access to any substantial set of
+      the features or functionality of the software.
+    - You may not move, change, disable, or circumvent the license key functionality
+      in the software, and you may not remove or obscure any functionality in the
+      software that is protected by the license key.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+      of the licensor in the software. Any use of the licensor's trademarks is subject
+      to applicable law.
+    - Canyon GBS LLC respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
+      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+      vigorously.
+    - The software solution, including services, infrastructure, and code, is offered as a
+      Software as a Service (SaaS) by Canyon GBS LLC.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
+
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+
+</COPYRIGHT>
+*/
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Encryption\Encrypter;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
+return new class() extends Migration {
+    public function up(): void
+    {
+        $tenants = DB::connection('landlord')
+            ->table('tenants')
+            ->whereNotNull('config')
+            ->whereNotNull('key')
+            ->get();
+
+        foreach ($tenants as $tenant) {
+            $tenantKey = Crypt::decrypt($tenant->key);
+
+            $parsedKey = $this->parseKey($tenantKey);
+
+            $tenantEncrypter = new Encrypter($parsedKey, config('app.cipher'));
+            $decryptedConfig = $tenantEncrypter->decrypt($tenant->config);
+
+            if (is_string($decryptedConfig)) {
+                $json = $decryptedConfig;
+                json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+            } else {
+                $json = json_encode($decryptedConfig, JSON_THROW_ON_ERROR);
+            }
+
+            $newEncrypted = Crypt::encryptString($json);
+
+            DB::connection('landlord')
+                ->table('tenants')
+                ->where('id', $tenant->id)
+                ->update(['config' => $newEncrypted]);
+        }
+    }
+
+    public function down(): void
+    {
+        $tenants = DB::connection('landlord')
+            ->table('tenants')
+            ->whereNotNull('config')
+            ->whereNotNull('key')
+            ->get();
+
+        foreach ($tenants as $tenant) {
+            // Decrypt the config using the standard app key
+            $json = Crypt::decryptString($tenant->config);
+
+            // Decrypt the tenant's per-tenant key using the app key
+            $tenantKey = Crypt::decrypt($tenant->key);
+
+            // Parse the raw key (handle base64: prefix)
+            $parsedKey = $this->parseKey($tenantKey);
+
+            // Re-encrypt with the tenant's per-tenant key (serialize mode)
+            $tenantEncrypter = new Encrypter($parsedKey, config('app.cipher'));
+            $oldEncrypted = $tenantEncrypter->encrypt($json);
+
+            DB::connection('landlord')
+                ->table('tenants')
+                ->where('id', $tenant->id)
+                ->update(['config' => $oldEncrypted]);
+        }
+    }
+
+    private function parseKey(string $key): string
+    {
+        if (Str::startsWith($key, 'base64:')) {
+            return base64_decode(Str::after($key, 'base64:'));
+        }
+
+        return $key;
+    }
+};

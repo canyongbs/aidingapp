@@ -36,7 +36,7 @@
 
 namespace App\Models;
 
-use App\Casts\LandlordEncrypted;
+use App\Multitenancy\DataTransferObjects\TenantConfig;
 use App\Settings\DisplaySettings;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -55,14 +55,12 @@ class Tenant extends SpatieTenant
     protected $fillable = [
         'name',
         'domain',
-        'key',
         'config',
         'setup_complete',
     ];
 
     protected $casts = [
-        'key' => LandlordEncrypted::class,
-        'config' => LandlordEncrypted::class,
+        'config' => TenantConfig::class . ':encrypted',
         'setup_complete' => 'boolean',
     ];
 
