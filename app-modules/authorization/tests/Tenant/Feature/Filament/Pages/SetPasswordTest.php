@@ -36,12 +36,10 @@
 
 use AidingApp\Authorization\Filament\Pages\Auth\SetPassword;
 use App\Models\User;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertGuest;
-use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 it('sets the user\'s password', function () {

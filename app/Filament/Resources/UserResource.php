@@ -69,7 +69,7 @@ class UserResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->tap(fn() => new ConditionalAdminScope());
+            ->tap(fn () => new ConditionalAdminScope());
     }
 
     public static function getRelations(): array
