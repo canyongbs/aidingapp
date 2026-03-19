@@ -68,6 +68,8 @@ class ContactResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'full_name';
 
+    protected static bool $isGloballySearchable = true;
+
     public static function getRecordSubNavigation(Page $page): array
     {
         return $page->generateNavigationItems([

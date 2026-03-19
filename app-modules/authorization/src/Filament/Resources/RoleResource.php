@@ -43,6 +43,7 @@ use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\ViewRole;
 use AidingApp\Authorization\Models\Role;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class RoleResource extends Resource
@@ -64,7 +65,7 @@ class RoleResource extends Resource
     }
 
     /**
-     * @return Builder<Role>
+     * @return Builder<Model>
      */
     public static function getEloquentQuery(): Builder
     {

@@ -46,6 +46,7 @@ use App\Models\Scopes\ConditionalAdminScope;
 use App\Models\User;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class UserResource extends Resource
@@ -63,12 +64,12 @@ class UserResource extends Resource
     protected static ?string $modelLabel = 'User';
 
     /**
-     * @return Builder<User>
+     * @return Builder<Model>
      */
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->tap(new ConditionalAdminScope());
+            ->tap(fn() => new ConditionalAdminScope());
     }
 
     public static function getRelations(): array

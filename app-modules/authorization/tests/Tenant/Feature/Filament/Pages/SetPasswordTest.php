@@ -36,6 +36,7 @@
 
 use AidingApp\Authorization\Filament\Pages\Auth\SetPassword;
 use App\Models\User;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
@@ -145,6 +146,7 @@ it('does not redirect if the password is not set', function () {
 
     actingAs($user);
 
-    get(route('filament.admin.auth.set-password'))
-        ->assertOk();
+    livewire(SetPassword::class)
+        ->assertOk()
+        ->assertNoRedirect();
 });

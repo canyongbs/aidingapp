@@ -68,13 +68,15 @@ class ServiceRequestResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'service_request_number';
 
+    protected static bool $isGloballySearchable = true;
+
     public static function getGloballySearchableAttributes(): array
     {
         return ['service_request_number', 'title'];
     }
 
     /**
-     * @return Builder<ServiceRequest>
+     * @return Builder<Model>
      */
     public static function getGlobalSearchEloquentQuery(): Builder
     {
