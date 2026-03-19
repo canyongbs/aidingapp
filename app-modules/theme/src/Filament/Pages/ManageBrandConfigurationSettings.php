@@ -78,9 +78,9 @@ class ManageBrandConfigurationSettings extends SettingsPage
                     ->aside()
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('favicon')
-                            ->disk('s3-public')
+                            ->disk('s3')
                             ->collection('favicon')
-                            ->visibility('public')
+                            ->visibility('private')
                             ->image()
                             ->model(
                                 ThemeSettings::getSettingsPropertyModel('theme.is_favicon_active'),
