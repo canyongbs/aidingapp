@@ -46,7 +46,6 @@ use App\Models\Scopes\ConditionalAdminScope;
 use App\Models\User;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class UserResource extends Resource
