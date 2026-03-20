@@ -54,6 +54,7 @@ use Filament\Navigation\NavigationItem;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Arr;
 use UnitEnum;
@@ -71,7 +72,7 @@ class ServiceRequestTypeResource extends Resource
     protected static ?string $cluster = ServiceManagementAdministration::class;
 
     /**
-     * @return Builder<ServiceRequestType>
+     * @return Builder<Model>
      */
     public static function getEloquentQuery(): Builder
     {

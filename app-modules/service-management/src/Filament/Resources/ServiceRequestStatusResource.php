@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use UnitEnum;
 
@@ -60,7 +61,7 @@ class ServiceRequestStatusResource extends Resource
     protected static ?string $cluster = ServiceManagementAdministration::class;
 
     /**
-     * @return Builder<ServiceRequestStatus>
+     * @return Builder<Model>
      */
     public static function getEloquentQuery(): Builder
     {
