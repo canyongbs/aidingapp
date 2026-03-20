@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -49,7 +48,6 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
-
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
             Schema::table($this->table, function (Blueprint $table) {

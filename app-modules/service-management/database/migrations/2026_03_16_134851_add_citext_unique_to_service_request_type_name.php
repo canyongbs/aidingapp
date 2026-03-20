@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -42,7 +41,6 @@ use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-
     private string $table = 'service_request_types';
 
     private string $column = 'name';
@@ -50,7 +48,6 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
-
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
             Schema::table($this->table, function (Blueprint $table) {
