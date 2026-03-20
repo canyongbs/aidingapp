@@ -186,7 +186,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
                 'profile' => fn (Action $action) => $action->url(fn () => EditProfile::getUrl()),
-            ]);
+            ])
+            ->globalSearchResourceOptIn();
     }
 
     public function boot(): void {}

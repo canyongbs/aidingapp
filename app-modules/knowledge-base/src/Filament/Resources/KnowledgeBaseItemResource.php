@@ -65,6 +65,8 @@ class KnowledgeBaseItemResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'title';
 
+    protected static bool $isGloballySearchable = true;
+
     protected static ?int $globalSearchSort = 2;
 
     public static function getGloballySearchableAttributes(): array
