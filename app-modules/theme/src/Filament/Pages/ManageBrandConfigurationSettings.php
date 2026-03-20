@@ -37,6 +37,7 @@
 namespace AidingApp\Theme\Filament\Pages;
 
 use AidingApp\Theme\Settings\ThemeSettings;
+use App\Features\MediaToPublicDiskFeature;
 use App\Models\User;
 use BackedEnum;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -96,6 +97,18 @@ class ManageBrandConfigurationSettings extends SettingsPage
                     ->aside()
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('logo')
+                            ->disk('s3')
+                            ->collection('logo')
+                            ->visibility('private')
+                            ->image()
+                            ->model(
+                                ThemeSettings::getSettingsPropertyModel('theme.is_logo_active'),
+                            )
+                            ->afterStateUpdated(fn (Set $set) => $set('is_logo_active', true))
+                            ->deleteUploadedFileUsing(fn (Set $set) => $set('is_logo_active', false))
+                            ->hiddenLabel()
+                            ->hidden(MediaToPublicDiskFeature::active()),
+                        SpatieMediaLibraryFileUpload::make('logo')
                             ->disk('s3-public')
                             ->collection('logo')
                             ->visibility('public')
@@ -105,7 +118,18 @@ class ManageBrandConfigurationSettings extends SettingsPage
                             )
                             ->afterStateUpdated(fn (Set $set) => $set('is_logo_active', true))
                             ->deleteUploadedFileUsing(fn (Set $set) => $set('is_logo_active', false))
-                            ->hiddenLabel(),
+                            ->hiddenLabel()
+                            ->visible(MediaToPublicDiskFeature::active()),
+                        SpatieMediaLibraryFileUpload::make('dark_logo')
+                            ->disk('s3')
+                            ->collection('dark_logo')
+                            ->visibility('private')
+                            ->image()
+                            ->model(
+                                ThemeSettings::getSettingsPropertyModel('theme.is_logo_active'),
+                            )
+                            ->hidden(fn (Get $get): bool => blank($get('logo')))
+                            ->visible(!MediaToPublicDiskFeature::active()),
                         SpatieMediaLibraryFileUpload::make('dark_logo')
                             ->disk('s3-public')
                             ->collection('dark_logo')
@@ -114,7 +138,8 @@ class ManageBrandConfigurationSettings extends SettingsPage
                             ->model(
                                 ThemeSettings::getSettingsPropertyModel('theme.is_logo_active'),
                             )
-                            ->hidden(fn (Get $get): bool => blank($get('logo'))),
+                            ->hidden(fn (Get $get): bool => blank($get('logo')))
+                            ->visible(MediaToPublicDiskFeature::active()),
                         Toggle::make('is_logo_active')
                             ->label('Active')
                             ->hidden(fn (Get $get): bool => blank($get('logo'))),
