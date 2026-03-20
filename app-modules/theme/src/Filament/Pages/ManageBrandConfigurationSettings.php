@@ -129,7 +129,7 @@ class ManageBrandConfigurationSettings extends SettingsPage
                                 ThemeSettings::getSettingsPropertyModel('theme.is_logo_active'),
                             )
                             ->hidden(fn (Get $get): bool => blank($get('logo')))
-                            ->visible(!MediaToPublicDiskFeature::active()),
+                            ->visible(! MediaToPublicDiskFeature::active()),
                         SpatieMediaLibraryFileUpload::make('dark_logo')
                             ->disk('s3-public')
                             ->collection('dark_logo')
