@@ -36,8 +36,6 @@
 
 namespace App\Http\Controllers;
 
-use AidingApp\Ai\Models\AiThread;
-use AidingApp\Ai\Models\Prompt;
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Notification\Models\EmailMessage;
