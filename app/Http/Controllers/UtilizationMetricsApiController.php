@@ -71,8 +71,6 @@ class UtilizationMetricsApiController extends Controller
                     'changes' => ChangeRequest::count(),
                     'knowledge_base_articles' => KnowledgeBaseItem::count(),
                     'tasks' => Task::count(),
-                    'saved_ai_chats' => AiThread::whereNotNull('name')->whereNotNUll('saved_at')->count(),
-                    'saved_prompts' => Prompt::count(),
                     'emails' => $currentQuotaUsageOfEmail . '/' . $licenseSettings->data->limits->emails,
                     'messages_reset' => $licenseSettings->data->limits->resetDate,
                 ],
