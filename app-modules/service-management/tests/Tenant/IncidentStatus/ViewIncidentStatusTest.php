@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\IncidentStatusResource;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
 use App\Models\User;
 

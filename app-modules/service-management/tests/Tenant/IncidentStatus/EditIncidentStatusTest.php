@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages\EditIncidentStatus;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\IncidentStatusResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages\EditIncidentStatus;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\IncidentStatusRequestFactory;
 use App\Models\User;

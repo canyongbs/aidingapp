@@ -34,33 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource;
+use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\IncidentStatusResource;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
-class ViewIncidentStatus extends ViewRecord
+class EditIncidentStatus extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = IncidentStatusResource::class;
 
-    public function infolist(Schema $schema): Schema
+    public function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name'),
-                        TextEntry::make('classification')
-                            ->label('Classification'),
-                    ])
-                    ->columns(),
+            ->components([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->required()
+                    ->maxLength(255)
+                    ->string(),
+                Select::make('classification')
+                    ->label('Classification')
+                    ->required()
+                    ->searchable()
+                    ->preload()
+                    ->options(SystemIncidentStatusClassification::class)
+                    ->enum(SystemIncidentStatusClassification::class),
             ]);
     }
 
@@ -90,7 +99,8 @@ class ViewIncidentStatus extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

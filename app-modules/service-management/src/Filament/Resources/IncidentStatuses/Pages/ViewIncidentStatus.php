@@ -34,35 +34,63 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages;
 
-use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\IncidentStatusResource;
+use AidingApp\ServiceManagement\Models\IncidentStatus;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 
-class CreateIncidentStatus extends CreateRecord
+class ViewIncidentStatus extends ViewRecord
 {
     protected static string $resource = IncidentStatusResource::class;
 
-    public function form(Schema $schema): Schema
+    public function infolist(Schema $schema): Schema
     {
         return $schema
-            ->components([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->maxLength(255)
-                    ->required()
-                    ->string(),
-                Select::make('classification')
-                    ->label('Classification')
-                    ->required()
-                    ->preload()
-                    ->searchable()
-                    ->options(SystemIncidentStatusClassification::class)
-                    ->enum(SystemIncidentStatusClassification::class),
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Name'),
+                        TextEntry::make('classification')
+                            ->label('Classification'),
+                    ])
+                    ->columns(),
             ]);
+    }
+
+    /**
+     * @return array<int|string, string|null>
+     */
+    public function getBreadcrumbs(): array
+    {
+        $resource = static::getResource();
+        /** @var IncidentStatus $record */
+        $record = $this->getRecord();
+
+        /** @var array<string, string> $breadcrumbs */
+        $breadcrumbs = [
+            $resource::getUrl() => $resource::getBreadcrumb(),
+            $resource::getUrl('edit', ['record' => $record]) => Str::limit($record->name, 16),
+            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
+        ];
+
+        if (filled($cluster = static::getCluster())) {
+            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
+        }
+
+        return $breadcrumbs;
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            EditAction::make(),
+        ];
     }
 }

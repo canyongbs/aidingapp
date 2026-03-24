@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages\CreateIncidentStatus;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages\EditIncidentStatus;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages\ListIncidentStatuses;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages\ViewIncidentStatus;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages\CreateIncidentStatus;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages\EditIncidentStatus;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages\ListIncidentStatuses;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages\ViewIncidentStatus;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
 use App\Filament\Clusters\IncidentManagement;
 use Filament\Resources\Resource;

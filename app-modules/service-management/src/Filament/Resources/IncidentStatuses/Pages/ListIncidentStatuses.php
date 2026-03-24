@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentStatusResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\IncidentStatusResource;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
