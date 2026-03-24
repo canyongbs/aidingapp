@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities\IncidentSeverityResource;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
 use App\Models\User;
 

@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities\IncidentSeverityResource;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;

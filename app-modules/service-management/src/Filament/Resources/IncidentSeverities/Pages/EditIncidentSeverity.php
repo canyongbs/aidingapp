@@ -34,16 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities\IncidentSeverityResource;
+use AidingApp\ServiceManagement\Models\IncidentSeverity;
+use App\Concerns\EditPageRedirection;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 
-class CreateIncidentSeverity extends CreateRecord
+class EditIncidentSeverity extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = IncidentSeverityResource::class;
 
     public function form(Schema $schema): Schema
@@ -59,5 +66,36 @@ class CreateIncidentSeverity extends CreateRecord
                     ->label('Color')
                     ->required(),
             ]);
+    }
+
+    /**
+     * @return array<int|string, string|null>
+     */
+    public function getBreadcrumbs(): array
+    {
+        $resource = static::getResource();
+        /** @var IncidentSeverity $record */
+        $record = $this->getRecord();
+
+        /** @var array<string, string> $breadcrumbs */
+        $breadcrumbs = [
+            $resource::getUrl() => $resource::getBreadcrumb(),
+            $resource::getUrl('edit', ['record' => $record]) => Str::limit($record->name, 16),
+            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
+        ];
+
+        if (filled($cluster = static::getCluster())) {
+            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
+        }
+
+        return $breadcrumbs;
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            ViewAction::make(),
+            DeleteAction::make(),
+        ];
     }
 }

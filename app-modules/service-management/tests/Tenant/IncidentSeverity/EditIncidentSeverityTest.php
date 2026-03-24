@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages\EditIncidentSeverity;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities\IncidentSeverityResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities\Pages\EditIncidentSeverity;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\IncidentSeverityRequestFactory;
 use App\Models\User;

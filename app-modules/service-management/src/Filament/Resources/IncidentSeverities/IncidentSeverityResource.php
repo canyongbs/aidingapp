@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages\CreateIncidentSeverity;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages\EditIncidentSeverity;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages\ListIncidentSeverities;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverityResource\Pages\ViewIncidentSeverity;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities\Pages\CreateIncidentSeverity;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities\Pages\EditIncidentSeverity;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities\Pages\ListIncidentSeverities;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities\Pages\ViewIncidentSeverity;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
 use App\Filament\Clusters\IncidentManagement;
 use Filament\Resources\Resource;
