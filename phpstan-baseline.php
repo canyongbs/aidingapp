@@ -1320,19 +1320,19 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetCheckOuts/Pages/ListAssetCheckOuts.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^PHPDoc type array\\<class\\-string\\> of property AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\AssetResource\\\\Pages\\\\AssetTimeline\\:\\:\\$modelsToTimeline is not covariant with PHPDoc type array\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\> of overridden property AidingApp\\\\Timeline\\\\Filament\\\\Pages\\\\TimelinePage\\:\\:\\$modelsToTimeline\\.$#',
+    'message' => '#^PHPDoc type array\\<class\\-string\\> of property AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\Assets\\\\Pages\\\\AssetTimeline\\:\\:\\$modelsToTimeline is not covariant with PHPDoc type array\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\> of overridden property AidingApp\\\\Timeline\\\\Filament\\\\Pages\\\\TimelinePage\\:\\:\\$modelsToTimeline\\.$#',
     'identifier' => 'property.phpDocType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/Assets/Pages/AssetTimeline.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\AssetResource\\\\Pages\\\\ManageAssetMaintenanceActivity\\:\\:managers\\(\\) return type has no value type specified in iterable type array\\.$#',
+    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\Assets\\\\Pages\\\\ManageAssetMaintenanceActivity\\:\\:managers\\(\\) return type has no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/Assets/Pages/ManageAssetMaintenanceActivity.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Unsafe call to private method AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\AssetResource\\\\Pages\\\\ManageAssetMaintenanceActivity\\:\\:managers\\(\\) through static\\:\\:\\.$#',
+    'message' => '#^Unsafe call to private method AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\Assets\\\\Pages\\\\ManageAssetMaintenanceActivity\\:\\:managers\\(\\) through static\\:\\:\\.$#',
     'identifier' => 'staticClassAccess.privateMethod',
     'count' => 2,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/Assets/Pages/ManageAssetMaintenanceActivity.php',
