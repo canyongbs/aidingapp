@@ -37,8 +37,8 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -186,10 +186,14 @@ test('EditServiceRequest requires valid data', function ($data, $errors, $setup 
     [
         'division_id missing' => [
             EditServiceRequestRequestFactory::new()->state(['division_id' => null]),
-            ['division_id' => 'required'], fn () => Division::factory()->count(2)->create()],
+            ['division_id' => 'required'],
+            fn () => Division::factory()->count(2)->create(),
+        ],
         'division_id does not exist' => [
             EditServiceRequestRequestFactory::new()->state(['division_id' => fake()->uuid()]),
-            ['division_id' => 'in'], fn () => Division::factory()->count(2)->create()],
+            ['division_id' => 'in'],
+            fn () => Division::factory()->count(2)->create(),
+        ],
         'status_id missing' => [EditServiceRequestRequestFactory::new()->state(['status_id' => null]), ['status_id' => 'required']],
         'status_id does not exist' => [
             EditServiceRequestRequestFactory::new()->state(['status_id' => fake()->uuid()]),

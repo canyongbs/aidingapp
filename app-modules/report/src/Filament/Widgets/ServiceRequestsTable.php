@@ -40,7 +40,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Report\Filament\Exports\ServiceRequestsExporter;
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Filament\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;

@@ -34,43 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
 
-use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestLocked;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers\ServiceRequestUpdatesRelationManager;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use Illuminate\Database\Eloquent\Model;
+use App\Filament\Resources\UserResource;
+use App\Filament\Tables\Columns\IdColumn;
+use App\Models\User;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Schema;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class ManageServiceRequestUpdate extends ManageRelatedRecords
+class CreatedByRelationManager extends RelationManager
 {
-    use ServiceRequestLocked;
+    protected static string $relationship = 'createdBy';
 
-    protected static string $resource = ServiceRequestResource::class;
+    protected static ?string $recordTitleAttribute = 'name';
 
-    // TODO: Obsolete when there is no table, remove from Filament
-    protected static string $relationship = 'serviceRequestUpdates';
-
-    protected static ?string $navigationLabel = 'Updates';
-
-    protected static ?string $breadcrumb = 'Updates';
-
-    public static function canAccess(array $arguments = []): bool
+    public function form(Schema $schema): Schema
     {
-        return (bool) count(static::managers($arguments['record'] ?? null));
+        return $schema
+            ->components([
+                TextInput::make('full')
+                    ->required()
+                    ->maxLength(255),
+            ]);
     }
 
-    public function getRelationManagers(): array
+    public function table(Table $table): Table
     {
-        return static::managers($this->getRecord());
-    }
-
-    private static function managers(?Model $record = null): array
-    {
-        return collect([
-            ServiceRequestUpdatesRelationManager::class,
-        ])
-            ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
-            ->toArray();
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name')
+                    ->label('Name'),
+            ])
+            ->paginated(false)
+            ->recordActions([
+                ViewAction::make()
+                    ->url(fn (User $user) => UserResource::getUrl('view', ['record' => $user])),
+            ]);
     }
 }

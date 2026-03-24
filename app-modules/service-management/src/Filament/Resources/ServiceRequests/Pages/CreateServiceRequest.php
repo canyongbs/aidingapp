@@ -34,14 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
@@ -86,7 +86,7 @@ class CreateServiceRequest extends CreateRecord
                             ->saveRelationshipsWhenHidden()
                             ->default(
                                 fn () => Division::count() === 1 ? (auth()->user()->team?->division?->getKey()
-                                            ?? Division::query()->first()?->getKey()) : null
+                                    ?? Division::query()->first()?->getKey()) : null
                             ),
                         Grid::make(6)
                             ->schema([

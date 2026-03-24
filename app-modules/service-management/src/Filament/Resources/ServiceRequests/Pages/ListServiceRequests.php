@@ -34,16 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Actions\AddServiceRequestUpdateBulkAction;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Actions\ChangeServiceRequestStatusBulkAction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\AddServiceRequestUpdateBulkAction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\ChangeServiceRequestStatusBulkAction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;

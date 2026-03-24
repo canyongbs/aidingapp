@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
@@ -134,8 +134,7 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                     ->sortable(),
             ])
             ->defaultSort(fn (Builder $query) => $query->orderBy('created_at', 'desc')->orderBy('id', 'desc'))
-            ->filters([
-            ])
+            ->filters([])
             ->headerActions([
                 CreateAction::make()
                     ->visible(function () {

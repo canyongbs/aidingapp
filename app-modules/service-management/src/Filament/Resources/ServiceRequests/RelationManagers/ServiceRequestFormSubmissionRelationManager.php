@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
@@ -61,8 +61,8 @@ class ServiceRequestFormSubmissionRelationManager extends RelationManager
                     ->label('Submitted By')
                     ->url(
                         fn (ServiceRequestFormSubmission $record) => $record->author
-                        ? resolve($record->author::filamentResource())->getUrl('view', ['record' => $record->author])
-                        : null
+                            ? resolve($record->author::filamentResource())->getUrl('view', ['record' => $record->author])
+                            : null
                     )
                     ->color('primary'),
                 TextColumn::make('author_type')

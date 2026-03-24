@@ -34,43 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers\ServiceRequestFormSubmissionRelationManager;
-use BackedEnum;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use Illuminate\Database\Eloquent\Model;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\Timeline\Filament\Pages\TimelinePage;
 
-class ManageServiceRequestFormSubmission extends ManageRelatedRecords
+class ServiceRequestTimeline extends TimelinePage
 {
     protected static string $resource = ServiceRequestResource::class;
 
-    // TODO: Obsolete when there is no table, remove from Filament
-    protected static string $relationship = 'serviceRequestFormSubmission';
+    protected static ?string $navigationLabel = 'Timeline';
 
-    protected static ?string $navigationLabel = 'Service Request Form Submission';
+    public string $emptyStateMessage = 'There are is no timeline available for this Service Request.';
 
-    protected static ?string $breadcrumb = 'Form Submission';
+    public string $noMoreRecordsMessage = "You have reached the end of this service request's timeline.";
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-check';
-
-    public static function canAccess(array $arguments = []): bool
-    {
-        return (bool) count(static::managers($arguments['record'] ?? null));
-    }
-
-    public function getRelationManagers(): array
-    {
-        return static::managers($this->getRecord());
-    }
-
-    private static function managers(?Model $record = null): array
-    {
-        return collect([
-            ServiceRequestFormSubmissionRelationManager::class,
-        ])
-            ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
-            ->toArray();
-    }
+    /** @var array<class-string> */
+    public array $modelsToTimeline = [
+        ServiceRequestUpdate::class,
+        ServiceRequestAssignment::class,
+        ServiceRequestHistory::class,
+    ];
 }

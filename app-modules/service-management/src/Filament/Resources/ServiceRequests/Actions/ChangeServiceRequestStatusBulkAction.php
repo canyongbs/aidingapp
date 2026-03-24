@@ -34,74 +34,82 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Actions;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions;
 
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Support\BulkProcessingMachine;
 use Closure;
 use Filament\Actions\BulkAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Collection;
 
-class AddServiceRequestUpdateBulkAction
+class ChangeServiceRequestStatusBulkAction
 {
     public static function make(): BulkAction
     {
-        return BulkAction::make('addServiceRequestUpdate')
-            ->label('Add Request Update')
+        return BulkAction::make('changeServiceRequestStatus')
+            ->label('Change status')
             ->icon('heroicon-m-pencil-square')
-            ->modalHeading('Bulk add service request update')
+            ->modalHeading('Bulk change service request statuses')
             ->modalWidth('md')
-            ->modalSubmitActionLabel('Add Update')
             ->form([
-                Textarea::make('update')
-                    ->label('Update')
-                    ->rows(3)
-                    ->columnSpan('full')
-                    ->required()
-                    ->string(),
-                Toggle::make('internal')
-                    ->label('Internal')
-                    ->rule(['boolean']),
+                Select::make('statusId')
+                    ->label('New status')
+                    ->options(
+                        ServiceRequestStatus::query()->orderBy('sort')->pluck('name', 'id')
+                    )
+                    ->exists(ServiceRequestStatus::class, 'id')
+                    ->required(),
             ])
             ->action(function (array $data, Collection $records) {
                 $records->loadMissing([
                     'priority.type.managerUsers',
                     'priority.type.managerTeams',
-                    'serviceRequestUpdates',
+                    'respondent',
+                    'status',
                 ]);
 
                 $user = auth()->user();
+                $isUserSuperAdmin = $user->isSuperAdmin();
+                $canUserUpdateServiceRequest = $user->can('service_request.*.update');
 
                 BulkProcessingMachine::make($records->all())
-                    ->check(function (ServiceRequest $serviceRequest) use ($user): ?Closure {
-                        $user = auth()->user();
-
-                        if (
-                            $user->can('service_request.*.update') && $user->can('service_request_update.create')
-                        ) {
+                    ->check(function (ServiceRequest $serviceRequest) use ($canUserUpdateServiceRequest): ?Closure {
+                        if ($canUserUpdateServiceRequest) {
                             return null;
                         }
 
                         return function (int $count): string {
                             if ($count === 1) {
-                                return 'Service request update cannot be created for 1 service request because you do not have permission.';
+                                return '1 service request cannot be updated because you do not have permission.';
                             }
 
-                            return "Service request update cannot be created for {$count} service requests because you do not have permission.";
+                            return "{$count} service requests cannot be updated because you do not have permission.";
                         };
                     })
-                    ->check(function (ServiceRequest $serviceRequest) use ($user): ?Closure {
-                        if ($user->isSuperAdmin()) {
+                    ->check(function (ServiceRequest $serviceRequest): ?Closure {
+                        if ($serviceRequest->status?->classification !== SystemServiceRequestClassification::Closed) {
+                            return null;
+                        }
+
+                        return function (int $count): string {
+                            if ($count === 1) {
+                                return '1 service request is closed and cannot be edited.';
+                            }
+
+                            return "{$count} service requests are closed and cannot be edited.";
+                        };
+                    })
+                    ->check(function (ServiceRequest $serviceRequest) use ($user, $isUserSuperAdmin): ?Closure {
+                        if ($isUserSuperAdmin) {
                             return null;
                         }
 
                         $team = $user->team;
 
-                        if (
-                            ($serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey())) ||
+                        if (($serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey())) ||
                             $serviceRequest->priority?->type?->managerTeams?->contains('id', $team?->getKey())
                         ) {
                             return null;
@@ -109,33 +117,26 @@ class AddServiceRequestUpdateBulkAction
 
                         return function (int $count): string {
                             if ($count === 1) {
-                                return "You don't have permission to add service request update to 1 service request because you're not a manager of its type.";
+                                return "You don't have permission to update 1 service request because you're not a manager of its type.";
                             }
 
-                            return "You don't have permission to add service request update to {$count} service requests because you're not a manager of their types.";
+                            return "You don't have permission to update {$count} service requests because you're not a manager of their types.";
                         };
                     })
                     ->process(function (ServiceRequest $serviceRequest) use ($data) {
-                        $update = new ServiceRequestUpdate([
-                            'service_request_id' => $serviceRequest->getKey(),
-                            'update' => $data['update'],
-                            'internal' => $data['internal'],
-                        ]);
-
-                        $update->createdBy()->associate(auth()->user());
-
-                        $update->saveOrFail();
+                        $serviceRequest->status()->associate($data['statusId']);
+                        $serviceRequest->save();
                     })
                     ->sendNotification(function (int $successCount): string {
                         if (! $successCount) {
-                            return 'No service request update have been created for any service requests.';
+                            return 'No service request statuses have been updated.';
                         }
 
                         if ($successCount === 1) {
-                            return 'Service request update has been created for 1 service request.';
+                            return '1 service request status has been updated.';
                         }
 
-                        return "Service request update has been created for {$successCount} service requests.";
+                        return "{$successCount} service request statuses have been updated.";
                     });
             });
     }

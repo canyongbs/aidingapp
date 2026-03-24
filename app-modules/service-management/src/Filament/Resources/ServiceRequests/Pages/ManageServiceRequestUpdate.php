@@ -34,27 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 
 use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestLocked;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers\AssignedToRelationManager;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\RelationManagers\CreatedByRelationManager;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\ServiceRequestUpdatesRelationManager;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Illuminate\Database\Eloquent\Model;
 
-class ManageAssignments extends ManageRelatedRecords
+class ManageServiceRequestUpdate extends ManageRelatedRecords
 {
     use ServiceRequestLocked;
 
     protected static string $resource = ServiceRequestResource::class;
 
     // TODO: Obsolete when there is no table, remove from Filament
-    protected static string $relationship = 'assignedTo';
+    protected static string $relationship = 'serviceRequestUpdates';
 
-    protected static ?string $navigationLabel = 'Assignments';
+    protected static ?string $navigationLabel = 'Updates';
 
-    protected static ?string $breadcrumb = 'Assignments';
+    protected static ?string $breadcrumb = 'Updates';
 
     public static function canAccess(array $arguments = []): bool
     {
@@ -69,8 +68,7 @@ class ManageAssignments extends ManageRelatedRecords
     private static function managers(?Model $record = null): array
     {
         return collect([
-            AssignedToRelationManager::class,
-            CreatedByRelationManager::class,
+            ServiceRequestUpdatesRelationManager::class,
         ])
             ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
             ->toArray();

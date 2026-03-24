@@ -34,17 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\CreateServiceRequest;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\EditServiceRequest;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\Feedback;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ListServiceRequests;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageAssignments;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestFormSubmission;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ManageServiceRequestUpdate;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ServiceRequestTimeline;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ViewServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\CreateServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\Feedback;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageAssignments;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ServiceRequestTimeline;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
 use App\Models\User;
