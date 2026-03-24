@@ -34,42 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Timeline\Timelines;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Pages;
 
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Components\AssetCheckOutViewAction;
-use AidingApp\InventoryManagement\Models\AssetCheckOut;
-use AidingApp\Timeline\Models\CustomTimeline;
-use Filament\Actions\ViewAction;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckIns\AssetCheckInResource;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckIns\Concerns\HasAssetCheckInInfolist;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Schema;
 
-// TODO Decide where these belong - might want to keep these in the context of the original module
-class AssetCheckOutTimeline extends CustomTimeline
+class ViewAssetCheckOut extends ViewRecord
 {
-    public function __construct(
-        public AssetCheckOut $assetCheckOut
-    ) {}
+    use HasAssetCheckInInfolist;
 
-    public function icon(): string
-    {
-        return 'heroicon-o-arrow-small-right';
-    }
+    protected static string $resource = AssetCheckInResource::class;
 
-    public function sortableBy(): string
+    public function infolist(Schema $schema): Schema
     {
-        return $this->assetCheckOut->checked_out_at;
-    }
-
-    public function providesCustomView(): bool
-    {
-        return true;
-    }
-
-    public function renderCustomView(): string
-    {
-        return 'inventory-management::asset-check-out-timeline-item';
-    }
-
-    public function modalViewAction(): ViewAction
-    {
-        return AssetCheckOutViewAction::make()->record($this->assetCheckOut);
+        return $schema($this->renderInfolist());
     }
 }

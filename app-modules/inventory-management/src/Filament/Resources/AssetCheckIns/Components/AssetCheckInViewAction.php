@@ -34,42 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Timeline\Timelines;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckIns\Components;
 
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Components\AssetCheckOutViewAction;
-use AidingApp\InventoryManagement\Models\AssetCheckOut;
-use AidingApp\Timeline\Models\CustomTimeline;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckIns\Concerns\HasAssetCheckInInfolist;
 use Filament\Actions\ViewAction;
 
-// TODO Decide where these belong - might want to keep these in the context of the original module
-class AssetCheckOutTimeline extends CustomTimeline
+class AssetCheckInViewAction extends ViewAction
 {
-    public function __construct(
-        public AssetCheckOut $assetCheckOut
-    ) {}
+    use HasAssetCheckInInfolist;
 
-    public function icon(): string
+    protected function setUp(): void
     {
-        return 'heroicon-o-arrow-small-right';
-    }
+        parent::setUp();
 
-    public function sortableBy(): string
-    {
-        return $this->assetCheckOut->checked_out_at;
-    }
+        $this->modalHeading('View Asset Check In');
 
-    public function providesCustomView(): bool
-    {
-        return true;
-    }
-
-    public function renderCustomView(): string
-    {
-        return 'inventory-management::asset-check-out-timeline-item';
-    }
-
-    public function modalViewAction(): ViewAction
-    {
-        return AssetCheckOutViewAction::make()->record($this->assetCheckOut);
+        $this->schema($this->renderInfolist());
     }
 }

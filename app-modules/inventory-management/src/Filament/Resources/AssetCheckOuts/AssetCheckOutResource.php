@@ -34,42 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Timeline\Timelines;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts;
 
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Components\AssetCheckOutViewAction;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Pages\ListAssetCheckOuts;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
-use AidingApp\Timeline\Models\CustomTimeline;
-use Filament\Actions\ViewAction;
+use BackedEnum;
+use Filament\Resources\Resource;
 
-// TODO Decide where these belong - might want to keep these in the context of the original module
-class AssetCheckOutTimeline extends CustomTimeline
+class AssetCheckOutResource extends Resource
 {
-    public function __construct(
-        public AssetCheckOut $assetCheckOut
-    ) {}
+    protected static ?string $model = AssetCheckOut::class;
 
-    public function icon(): string
-    {
-        return 'heroicon-o-arrow-small-right';
-    }
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public function sortableBy(): string
-    {
-        return $this->assetCheckOut->checked_out_at;
-    }
+    protected static bool $shouldRegisterNavigation = false;
 
-    public function providesCustomView(): bool
+    public static function getPages(): array
     {
-        return true;
-    }
-
-    public function renderCustomView(): string
-    {
-        return 'inventory-management::asset-check-out-timeline-item';
-    }
-
-    public function modalViewAction(): ViewAction
-    {
-        return AssetCheckOutViewAction::make()->record($this->assetCheckOut);
+        return [
+            'index' => ListAssetCheckOuts::route('/'),
+        ];
     }
 }

@@ -34,42 +34,49 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Timeline\Timelines;
+namespace AidingApp\InventoryManagement\Filament\Resources\Assets\Pages;
 
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Components\AssetCheckOutViewAction;
-use AidingApp\InventoryManagement\Models\AssetCheckOut;
-use AidingApp\Timeline\Models\CustomTimeline;
-use Filament\Actions\ViewAction;
+use AidingApp\InventoryManagement\Filament\Resources\Assets\AssetResource;
+use AidingApp\InventoryManagement\Filament\Resources\Assets\RelationManagers\MaintenanceActivitiesRelationManager;
+use BackedEnum;
+use Filament\Resources\Pages\ManageRelatedRecords;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
 
-// TODO Decide where these belong - might want to keep these in the context of the original module
-class AssetCheckOutTimeline extends CustomTimeline
+class ManageAssetMaintenanceActivity extends ManageRelatedRecords
 {
-    public function __construct(
-        public AssetCheckOut $assetCheckOut
-    ) {}
+    protected static string $resource = AssetResource::class;
 
-    public function icon(): string
+    // TODO: Obsolete when there is no table, remove from Filament
+    protected static string $relationship = 'maintenanceActivities';
+
+    protected static ?string $navigationLabel = 'Maintenance';
+
+    protected static ?string $breadcrumb = 'Maintenance';
+
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-wrench-screwdriver';
+
+    public function getTitle(): string | Htmlable
     {
-        return 'heroicon-o-arrow-small-right';
+        return 'Manage Asset Maintenance Activity';
     }
 
-    public function sortableBy(): string
+    public static function canAccess(array $arguments = []): bool
     {
-        return $this->assetCheckOut->checked_out_at;
+        return (bool) count(static::managers($arguments['record'] ?? null));
     }
 
-    public function providesCustomView(): bool
+    public function getRelationManagers(): array
     {
-        return true;
+        return static::managers($this->getRecord());
     }
 
-    public function renderCustomView(): string
+    private static function managers(?Model $record = null): array
     {
-        return 'inventory-management::asset-check-out-timeline-item';
-    }
-
-    public function modalViewAction(): ViewAction
-    {
-        return AssetCheckOutViewAction::make()->record($this->assetCheckOut);
+        return collect([
+            MaintenanceActivitiesRelationManager::class,
+        ])
+            ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
+            ->toArray();
     }
 }

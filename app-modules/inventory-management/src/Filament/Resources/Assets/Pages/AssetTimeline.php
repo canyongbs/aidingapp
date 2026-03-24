@@ -34,42 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Timeline\Timelines;
+namespace AidingApp\InventoryManagement\Filament\Resources\Assets\Pages;
 
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Components\AssetCheckOutViewAction;
+use AidingApp\InventoryManagement\Filament\Resources\Assets\AssetResource;
+use AidingApp\InventoryManagement\Models\AssetCheckIn;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
-use AidingApp\Timeline\Models\CustomTimeline;
-use Filament\Actions\ViewAction;
+use AidingApp\InventoryManagement\Models\MaintenanceActivity;
+use AidingApp\Timeline\Filament\Pages\TimelinePage;
 
-// TODO Decide where these belong - might want to keep these in the context of the original module
-class AssetCheckOutTimeline extends CustomTimeline
+class AssetTimeline extends TimelinePage
 {
-    public function __construct(
-        public AssetCheckOut $assetCheckOut
-    ) {}
+    protected static string $resource = AssetResource::class;
 
-    public function icon(): string
-    {
-        return 'heroicon-o-arrow-small-right';
-    }
+    protected static ?string $navigationLabel = 'Timeline';
 
-    public function sortableBy(): string
-    {
-        return $this->assetCheckOut->checked_out_at;
-    }
+    public string $emptyStateMessage = 'There are no maintenance or activity records to show for this asset.';
 
-    public function providesCustomView(): bool
-    {
-        return true;
-    }
+    public string $noMoreRecordsMessage = "You have reached the end of this asset's maintenance and activity timeline.";
 
-    public function renderCustomView(): string
-    {
-        return 'inventory-management::asset-check-out-timeline-item';
-    }
-
-    public function modalViewAction(): ViewAction
-    {
-        return AssetCheckOutViewAction::make()->record($this->assetCheckOut);
-    }
+    /**
+     * @var array<class-string>
+     */
+    public array $modelsToTimeline = [
+        MaintenanceActivity::class,
+        AssetCheckOut::class,
+        AssetCheckIn::class,
+    ];
 }

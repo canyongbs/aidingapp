@@ -34,42 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Timeline\Timelines;
+namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\Pages;
 
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Components\AssetCheckOutViewAction;
-use AidingApp\InventoryManagement\Models\AssetCheckOut;
-use AidingApp\Timeline\Models\CustomTimeline;
+use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\MaintenanceProviderResource;
+use App\Concerns\EditPageRedirection;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Schema;
 
-// TODO Decide where these belong - might want to keep these in the context of the original module
-class AssetCheckOutTimeline extends CustomTimeline
+class EditMaintenanceProvider extends EditRecord
 {
-    public function __construct(
-        public AssetCheckOut $assetCheckOut
-    ) {}
+    use EditPageRedirection;
 
-    public function icon(): string
+    protected static string $resource = MaintenanceProviderResource::class;
+
+    public function form(Schema $schema): Schema
     {
-        return 'heroicon-o-arrow-small-right';
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->autoFocus()
+                    ->string()
+                    ->maxLength(255)
+                    ->required(),
+            ]);
     }
 
-    public function sortableBy(): string
+    protected function getHeaderActions(): array
     {
-        return $this->assetCheckOut->checked_out_at;
-    }
-
-    public function providesCustomView(): bool
-    {
-        return true;
-    }
-
-    public function renderCustomView(): string
-    {
-        return 'inventory-management::asset-check-out-timeline-item';
-    }
-
-    public function modalViewAction(): ViewAction
-    {
-        return AssetCheckOutViewAction::make()->record($this->assetCheckOut);
+        return [
+            ViewAction::make(),
+        ];
     }
 }
