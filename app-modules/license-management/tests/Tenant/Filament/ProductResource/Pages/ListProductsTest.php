@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ListProducts;
+use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ListProducts;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 

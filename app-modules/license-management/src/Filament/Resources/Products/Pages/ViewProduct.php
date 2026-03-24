@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages;
+namespace AidingApp\LicenseManagement\Filament\Resources\Products\Pages;
 
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
+use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;

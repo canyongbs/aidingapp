@@ -1593,13 +1593,13 @@ $ignoreErrors[] = [
     'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
     'identifier' => 'MeliorStan.closureParameterMissingTypehint',
     'count' => 1,
-    'path' => __DIR__ . '/app-modules/license-management/src/Filament/Resources/ProductResource/Pages/ManageProductLicenses.php',
+    'path' => __DIR__ . '/app-modules/license-management/src/Filament/Resources/Products/Pages/ManageProductLicenses.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#3 \\$record of anonymous function has no typehint\\.$#',
     'identifier' => 'MeliorStan.closureParameterMissingTypehint',
     'count' => 1,
-    'path' => __DIR__ . '/app-modules/license-management/src/Filament/Resources/ProductResource/Pages/ManageProductLicenses.php',
+    'path' => __DIR__ . '/app-modules/license-management/src/Filament/Resources/Products/Pages/ManageProductLicenses.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\LicenseManagement\\\\Models\\\\ProductLicense\\:\\:contact\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',

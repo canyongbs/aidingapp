@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages;
+namespace AidingApp\LicenseManagement\Filament\Resources\Products\Pages;
 
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
+use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
