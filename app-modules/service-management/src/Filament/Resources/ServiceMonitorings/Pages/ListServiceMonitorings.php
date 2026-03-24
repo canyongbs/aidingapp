@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;

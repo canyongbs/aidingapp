@@ -34,29 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Widgets;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings;
 
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\CreateServiceMonitoring;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\EditServiceMonitoring;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\ListServiceMonitorings;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\ViewServiceMonitoring;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Filament\Widgets\StatsOverviewWidget as BaseWidget;
-use Filament\Widgets\StatsOverviewWidget\Stat;
+use Filament\Resources\Resource;
+use UnitEnum;
 
-class ServiceUptimeWidget extends BaseWidget
+class ServiceMonitoringResource extends Resource
 {
-    protected int | string | array $columnSpan = 4;
+    protected static ?string $model = ServiceMonitoringTarget::class;
 
-    public ?ServiceMonitoringTarget $record = null;
+    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
 
-    protected function getStats(): array
+    protected static ?string $pluralModelLabel = 'service monitoring';
+
+    protected static ?string $modelLabel = 'service monitoring';
+
+    protected static ?string $slug = 'service-monitoring';
+
+    protected static ?int $navigationSort = 80;
+
+    public static function getPages(): array
     {
         return [
-            Stat::make('Last 1 Day', $this->record->getUptimePercentage(1))
-                ->description('Uptime Percentage'),
-            Stat::make('Last 7 Days', $this->record->getUptimePercentage(7))
-                ->description('Uptime Percentage'),
-            Stat::make('Last 30 Days', $this->record->getUptimePercentage(30))
-                ->description('Uptime Percentage'),
-            Stat::make('Last 1 Year', $this->record->getUptimePercentage(365))
-                ->description('Uptime Percentage'),
+            'index' => ListServiceMonitorings::route('/'),
+            'create' => CreateServiceMonitoring::route('/create'),
+            'view' => ViewServiceMonitoring::route('/{record}'),
+            'edit' => EditServiceMonitoring::route('/{record}/edit'),
+        ];
+    }
+
+    public static function getWidgets(): array
+    {
+        return [
+            ServiceUptimeWidget::class,
         ];
     }
 }

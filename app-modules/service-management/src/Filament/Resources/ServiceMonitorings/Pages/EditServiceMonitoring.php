@@ -34,21 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
+use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Concerns\EditPageRedirection;
 use App\Rules\ValidUrl;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 
-class CreateServiceMonitoring extends CreateRecord
+class EditServiceMonitoring extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ServiceMonitoringResource::class;
 
     public function form(Schema $schema): Schema
@@ -57,8 +65,8 @@ class CreateServiceMonitoring extends CreateRecord
             ->components([
                 TextInput::make('name')
                     ->label('Name')
-                    ->string()
                     ->required()
+                    ->string()
                     ->maxLength(255),
                 Textarea::make('description')
                     ->label('Description')
@@ -98,5 +106,37 @@ class CreateServiceMonitoring extends CreateRecord
                     ])
                     ->columns(2),
             ]);
+    }
+
+    /**
+     * @return array<int|string, string|null>
+     */
+    public function getBreadcrumbs(): array
+    {
+        $resource = static::getResource();
+        /** @var ServiceMonitoringTarget $record */
+        $record = $this->getRecord();
+
+        /** @var array<string, string> $breadcrumbs */
+        $breadcrumbs = [
+            $resource::getUrl() => $resource::getBreadcrumb(),
+            $resource::getUrl('edit', ['record' => $record]) => Str::limit($record->name, 16),
+            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
+        ];
+
+        if (filled($cluster = static::getCluster())) {
+            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
+        }
+
+        return $breadcrumbs;
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            ViewAction::make(),
+            ResetAction::make(),
+            DeleteAction::make(),
+        ];
     }
 }

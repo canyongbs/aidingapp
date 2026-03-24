@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages;
 
 use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitoringResource\Widgets\ServiceUptimeWidget;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
