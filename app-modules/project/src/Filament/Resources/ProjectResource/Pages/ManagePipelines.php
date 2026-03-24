@@ -36,7 +36,7 @@
 
 namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
 
-use AidingApp\Project\Filament\Resources\PipelineResource;
+use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use Filament\Actions\CreateAction;
