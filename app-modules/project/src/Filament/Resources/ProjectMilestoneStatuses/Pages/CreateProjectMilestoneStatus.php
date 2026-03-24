@@ -34,35 +34,33 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
-use AidingApp\Audit\Models\Audit;
-use App\Models\User;
+namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages;
 
-use function Pest\Laravel\actingAs;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\ProjectMilestoneStatusResource;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
-test('The correct details are displayed on the ViewAudit page')->todo();
+class CreateProjectMilestoneStatus extends CreateRecord
+{
+    protected static string $resource = ProjectMilestoneStatusResource::class;
 
-// Permission Tests
-
-test('ViewAudit is gated with proper access control', function () {
-    $user = User::factory()->create();
-
-    $audit = Audit::factory()->create();
-
-    actingAs($user)
-        ->get(
-            AuditResource::getUrl('view', [
-                'record' => $audit,
-            ])
-        )->assertForbidden();
-
-    $user->givePermissionTo('audit.view-any');
-    $user->givePermissionTo('audit.*.view');
-
-    actingAs($user)
-        ->get(
-            AuditResource::getUrl('view', [
-                'record' => $audit,
-            ])
-        )->assertSuccessful();
-});
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->maxLength(255)
+                    ->autofocus()
+                    ->required()
+                    ->string()
+                    ->unique(),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->maxLength(65535)
+                    ->required(),
+            ]);
+    }
+}

@@ -34,35 +34,29 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
+namespace AidingApp\Audit\Filament\Resources\Audits;
+
+use AidingApp\Audit\Filament\Resources\Audits\Pages\ListAudits;
+use AidingApp\Audit\Filament\Resources\Audits\Pages\ViewAudit;
 use AidingApp\Audit\Models\Audit;
-use App\Models\User;
+use App\Filament\Clusters\UsageAuditing;
+use Filament\Resources\Resource;
 
-use function Pest\Laravel\actingAs;
+class AuditResource extends Resource
+{
+    protected static ?string $model = Audit::class;
 
-test('The correct details are displayed on the ViewAudit page')->todo();
+    protected static ?string $navigationLabel = 'Other Records';
 
-// Permission Tests
+    protected static ?int $navigationSort = 40;
 
-test('ViewAudit is gated with proper access control', function () {
-    $user = User::factory()->create();
+    protected static ?string $cluster = UsageAuditing::class;
 
-    $audit = Audit::factory()->create();
-
-    actingAs($user)
-        ->get(
-            AuditResource::getUrl('view', [
-                'record' => $audit,
-            ])
-        )->assertForbidden();
-
-    $user->givePermissionTo('audit.view-any');
-    $user->givePermissionTo('audit.*.view');
-
-    actingAs($user)
-        ->get(
-            AuditResource::getUrl('view', [
-                'record' => $audit,
-            ])
-        )->assertSuccessful();
-});
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListAudits::route('/'),
+            'view' => ViewAudit::route('/{record}'),
+        ];
+    }
+}

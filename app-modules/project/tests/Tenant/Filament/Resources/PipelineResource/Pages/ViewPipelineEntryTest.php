@@ -35,8 +35,8 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Project\Filament\Resources\PipelineResource;
-use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ViewPipelineEntry;
+use AidingApp\Project\Filament\Resources\Pipelines\Pages\ViewPipelineEntry;
+use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;

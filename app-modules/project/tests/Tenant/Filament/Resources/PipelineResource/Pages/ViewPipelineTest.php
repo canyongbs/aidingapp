@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Project\Filament\Resources\PipelineResource;
-use AidingApp\Project\Filament\Resources\PipelineResource\Pages\ViewPipeline;
+use AidingApp\Project\Filament\Resources\Pipelines\Pages\ViewPipeline;
+use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
