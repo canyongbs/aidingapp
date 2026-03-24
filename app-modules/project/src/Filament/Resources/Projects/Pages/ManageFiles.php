@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use AidingApp\Project\Filament\Resources\ProjectResource;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\ProjectFile;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\Action;

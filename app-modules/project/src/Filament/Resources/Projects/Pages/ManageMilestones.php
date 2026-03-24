@@ -34,96 +34,86 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
-use AidingApp\Project\Filament\Resources\ProjectResource;
-use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Models\ProjectMilestone;
+use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Repeater\TableColumn;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
-class ManagePipelines extends ManageRelatedRecords
+class ManageMilestones extends ManageRelatedRecords
 {
     protected static string $resource = ProjectResource::class;
 
-    protected static string $relationship = 'pipelines';
+    protected static string $relationship = 'milestones';
 
     public static function getNavigationLabel(): string
     {
-        return 'Pipelines';
+        return 'Milestones';
     }
 
     public static function canAccess(array $arguments = []): bool
     {
         $user = auth()->user();
 
-        return $user->can('viewAny', [Pipeline::class, $arguments['record']]);
+        return $user->can('viewAny', [ProjectMilestone::class, $arguments['record']]);
     }
 
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextInput::make('name')
+                TextInput::make('title')
                     ->required()
                     ->maxLength(255),
                 Textarea::make('description')
                     ->required()
                     ->maxLength(65535),
-                Repeater::make('stages')
-                    ->relationship('stages')
-                    ->table([
-                        TableColumn::make('Stage Name'),
-                    ])
-                    ->schema([
-                        TextInput::make('name')
-                            ->label('Stage')
-                            ->distinct()
-                            ->required(),
-                    ])
-                    ->orderColumn('order')
-                    ->reorderable()
-                    ->columnSpanFull()
-                    ->label('Pipeline Stages')
-                    ->minItems(1)
-                    ->maxItems(5),
+                Select::make('status_id')
+                    ->searchable()
+                    ->preload()
+                    ->required()
+                    ->relationship('status', 'name'),
+                DatePicker::make('target_date'),
             ]);
     }
 
     public function table(Table $table): Table
     {
         return $table
+            ->recordTitleAttribute('title')
             ->columns([
-                TextColumn::make('name'),
-                TextColumn::make('createdBy.name')->label('Created By'),
+                IdColumn::make(),
+                TextColumn::make('title'),
+                TextColumn::make('description'),
+                TextColumn::make('status.name')
+                    ->label('Status'),
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime(),
+                TextColumn::make('createdBy.name')
+                    ->default('N/A')
+                    ->label('Created By'),
             ])
             ->headerActions([
                 CreateAction::make()
-                    ->url(PipelineResource::getUrl('create', ['project' => $this->getRecord()->getKey()]))
-                    ->authorize(fn (): bool => auth()->user()->can('create', Pipeline::class) && auth()->user()->can('update', $this->getRecord())),
-            ])
-            ->filters([
-                Filter::make('createdBy')
-                    ->label('My Pipelines')
-                    ->default()
-                    ->query(fn (Builder $query) => $query->where('created_by_id', auth()->id())),
+                    ->authorize('create', $this->getOwnerRecord()),
             ])
             ->recordActions([
-                ViewAction::make()
-                    ->url(fn (Pipeline $record): string => PipelineResource::getUrl('view', ['record' => $record])),
                 EditAction::make()
-                    ->url(fn (Pipeline $record): string => PipelineResource::getUrl('edit', ['record' => $record])),
+                    ->authorize('update', $this->getOwnerRecord()),
+                DeleteAction::make()
+                    ->authorize('update', $this->getOwnerRecord()),
             ]);
     }
 }

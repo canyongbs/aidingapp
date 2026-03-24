@@ -34,46 +34,61 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use AidingApp\Project\Filament\Resources\ProjectResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions\DeleteAction;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Models\Project;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class EditProject extends EditRecord
+class ListProjects extends ListRecords
 {
-    use EditPageRedirection;
-
     protected static string $resource = ProjectResource::class;
 
-    protected static ?string $navigationLabel = 'Edit';
-
-    public function form(Schema $schema): Schema
+    public function table(Table $table): Table
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->string()
-                    ->unique(ignoreRecord: true)
-                    ->maxLength(255),
-                Textarea::make('description')
-                    ->string()
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name')
+                    ->description(fn (Project $record): ?string => $record->description)
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('active_tasks_count')
+                    ->counts('activeTasks')
+                    ->label('Active Tasks'),
+                TextColumn::make('files_count')
+                    ->counts('files')
+                    ->label('Files'),
+                TextColumn::make('pipelines_count')
+                    ->counts('pipelines')
+                    ->label('Pipelines'),
+                TextColumn::make('milestones_count')
+                    ->counts('milestones')
+                    ->label('Milestones'),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make(),
-            DeleteAction::make(),
+            CreateAction::make(),
         ];
     }
 }

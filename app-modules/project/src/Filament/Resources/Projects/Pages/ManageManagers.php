@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use AidingApp\Project\Filament\Resources\ProjectResource;
-use AidingApp\Project\Filament\Resources\ProjectResource\RelationManagers\ManagerTeamsRelationManager;
-use AidingApp\Project\Filament\Resources\ProjectResource\RelationManagers\ManagerUsersRelationManager;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\ManagerTeamsRelationManager;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\ManagerUsersRelationManager;
 use Filament\Resources\Pages\ManageRelatedRecords;
 
 class ManageManagers extends ManageRelatedRecords

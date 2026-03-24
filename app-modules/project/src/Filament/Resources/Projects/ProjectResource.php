@@ -34,18 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources;
+namespace AidingApp\Project\Filament\Resources\Projects;
 
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\CreateProject;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\EditProject;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ListProjects;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageAuditors;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageFiles;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageManagers;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageMilestones;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManagePipelines;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ViewProject;
+use AidingApp\Project\Filament\Resources\Projects\Pages\CreateProject;
+use AidingApp\Project\Filament\Resources\Projects\Pages\EditProject;
+use AidingApp\Project\Filament\Resources\Projects\Pages\ListProjects;
+use AidingApp\Project\Filament\Resources\Projects\Pages\ManageAuditors;
+use AidingApp\Project\Filament\Resources\Projects\Pages\ManageFiles;
+use AidingApp\Project\Filament\Resources\Projects\Pages\ManageManagers;
+use AidingApp\Project\Filament\Resources\Projects\Pages\ManageMilestones;
+use AidingApp\Project\Filament\Resources\Projects\Pages\ManagePipelines;
+use AidingApp\Project\Filament\Resources\Projects\Pages\ManageTasks;
+use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Models\Project;
 use BackedEnum;
 use Filament\Resources\Pages\Page;

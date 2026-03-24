@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use AidingApp\Project\Filament\Resources\ProjectResource;
-use AidingApp\Project\Filament\Resources\ProjectResource\RelationManagers\AuditorTeamsRelationManager;
-use AidingApp\Project\Filament\Resources\ProjectResource\RelationManagers\AuditorUsersRelationManager;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\AuditorTeamsRelationManager;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\AuditorUsersRelationManager;
 use Filament\Resources\Pages\ManageRelatedRecords;
 
 class ManageAuditors extends ManageRelatedRecords

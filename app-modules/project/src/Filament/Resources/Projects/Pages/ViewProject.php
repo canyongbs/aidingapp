@@ -34,41 +34,39 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectResource\RelationManagers;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use AidingApp\Project\Models\Project;
-use Filament\Actions\AttachAction;
-use Filament\Actions\DetachAction;
-use Filament\Actions\DetachBulkAction;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
-class ManagerTeamsRelationManager extends RelationManager
+class ViewProject extends ViewRecord
 {
-    protected static string $relationship = 'managerTeams';
+    protected static string $resource = ProjectResource::class;
 
-    protected static ?string $title = 'Teams';
+    protected static ?string $navigationLabel = 'View';
 
-    public function table(Table $table): Table
+    public function infolist(Schema $schema): Schema
     {
-        return $table
-            ->recordTitleAttribute('name')
-            ->columns([
-                TextColumn::make('name'),
-            ])
-            ->headerActions([
-                AttachAction::make()
-                    ->authorize('update', Project::class),
-            ])
-            ->recordActions([
-                DetachAction::make()
-                    ->authorize('update', Project::class),
-            ])
-            ->toolbarActions([
-                DetachBulkAction::make()
-                    ->authorize('update', Project::class),
-            ])
-            ->inverseRelationship('managedProjects');
+        return $schema
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name'),
+                        TextEntry::make('description')
+                            ->label('Description')
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            EditAction::make(),
+        ];
     }
 }

@@ -34,31 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
+namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
 
-use AidingApp\Project\Filament\Resources\ProjectResource;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Schema;
+use AidingApp\Project\Models\Project;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class CreateProject extends CreateRecord
+class ManagerTeamsRelationManager extends RelationManager
 {
-    protected static string $resource = ProjectResource::class;
+    protected static string $relationship = 'managerTeams';
 
-    public function form(Schema $schema): Schema
+    protected static ?string $title = 'Teams';
+
+    public function table(Table $table): Table
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->unique()
-                    ->string()
-                    ->maxLength(255),
-                Textarea::make('description')
-                    ->string()
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-            ]);
+        return $table
+            ->recordTitleAttribute('name')
+            ->columns([
+                TextColumn::make('name'),
+            ])
+            ->headerActions([
+                AttachAction::make()
+                    ->authorize('update', Project::class),
+            ])
+            ->recordActions([
+                DetachAction::make()
+                    ->authorize('update', Project::class),
+            ])
+            ->toolbarActions([
+                DetachBulkAction::make()
+                    ->authorize('update', Project::class),
+            ])
+            ->inverseRelationship('managedProjects');
     }
 }

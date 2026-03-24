@@ -34,61 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectResource\Pages;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use AidingApp\Project\Filament\Resources\ProjectResource;
-use AidingApp\Project\Models\Project;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Schema;
 
-class ListProjects extends ListRecords
+class EditProject extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ProjectResource::class;
 
-    public function table(Table $table): Table
+    protected static ?string $navigationLabel = 'Edit';
+
+    public function form(Schema $schema): Schema
     {
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name')
-                    ->description(fn (Project $record): ?string => $record->description)
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('active_tasks_count')
-                    ->counts('activeTasks')
-                    ->label('Active Tasks'),
-                TextColumn::make('files_count')
-                    ->counts('files')
-                    ->label('Files'),
-                TextColumn::make('pipelines_count')
-                    ->counts('pipelines')
-                    ->label('Pipelines'),
-                TextColumn::make('milestones_count')
-                    ->counts('milestones')
-                    ->label('Milestones'),
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->required()
+                    ->string()
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255),
+                Textarea::make('description')
+                    ->string()
+                    ->maxLength(65535)
+                    ->columnSpanFull(),
             ]);
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

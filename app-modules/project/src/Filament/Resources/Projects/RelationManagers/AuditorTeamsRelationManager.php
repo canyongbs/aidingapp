@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectResource\RelationManagers;
+namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
 
 use AidingApp\Project\Models\Project;
 use Filament\Actions\AttachAction;
@@ -44,11 +44,11 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class ManagerUsersRelationManager extends RelationManager
+class AuditorTeamsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'managerUsers';
+    protected static string $relationship = 'auditorTeams';
 
-    protected static ?string $title = 'Users';
+    protected static ?string $title = 'Teams';
 
     public function table(Table $table): Table
     {
@@ -69,6 +69,6 @@ class ManagerUsersRelationManager extends RelationManager
                 DetachBulkAction::make()
                     ->authorize('update', Project::class),
             ])
-            ->inverseRelationship('managedProjects');
+            ->inverseRelationship('auditedProjects');
     }
 }

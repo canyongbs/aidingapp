@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectResource\RelationManagers;
+namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
 
 use AidingApp\Project\Models\Project;
 use Filament\Actions\AttachAction;
@@ -44,11 +44,11 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class AuditorTeamsRelationManager extends RelationManager
+class AuditorUsersRelationManager extends RelationManager
 {
-    protected static string $relationship = 'auditorTeams';
+    protected static string $relationship = 'auditorUsers';
 
-    protected static ?string $title = 'Teams';
+    protected static ?string $title = 'Users';
 
     public function table(Table $table): Table
     {
