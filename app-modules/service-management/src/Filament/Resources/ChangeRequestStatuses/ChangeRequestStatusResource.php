@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses;
 
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource\Pages\CreateChangeRequestStatus;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource\Pages\EditChangeRequestStatus;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource\Pages\ListChangeRequestStatuses;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource\Pages\ViewChangeRequestStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages\CreateChangeRequestStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages\EditChangeRequestStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages\ListChangeRequestStatuses;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages\ViewChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use BackedEnum;

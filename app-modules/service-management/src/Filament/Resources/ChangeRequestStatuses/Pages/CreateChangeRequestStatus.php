@@ -34,26 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages;
 
 use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource;
-use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions\Action;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\RestoreAction;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\ChangeRequestStatusResource;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-class EditChangeRequestStatus extends EditRecord
+class CreateChangeRequestStatus extends CreateRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ChangeRequestStatusResource::class;
 
     public function form(Schema $schema): Schema
@@ -72,21 +64,6 @@ class EditChangeRequestStatus extends EditRecord
                             ->required()
                             ->enum(SystemChangeRequestClassification::class),
                     ]),
-            ])->disabled(fn (ChangeRequestStatus $record) => $record->trashed());
-    }
-
-    protected function getSaveFormAction(): Action
-    {
-        return parent::getSaveFormAction()
-            ->hidden(fn (ChangeRequestStatus $record) => $record->trashed());
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            DeleteAction::make(),
-            RestoreAction::make(),
-            ForceDeleteAction::make(),
-        ];
+            ]);
     }
 }

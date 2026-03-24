@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\ChangeRequestStatusResource;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;

@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatusResource;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\ChangeRequestStatusResource;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
