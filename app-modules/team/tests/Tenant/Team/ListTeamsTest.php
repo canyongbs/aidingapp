@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Team\Filament\Resources\TeamResource;
+use AidingApp\Team\Filament\Resources\Teams\TeamResource;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
