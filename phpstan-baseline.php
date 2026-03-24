@@ -2214,22 +2214,40 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestStatuses/Pages/ListServiceRequestStatuses.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Filament\\\\Resources\\\\Pages\\\\Page\\:\\:\\$record\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypeResource.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
     'identifier' => 'argument.templateType',
     'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypeResource/Pages/EditServiceRequestTypeNotifications.php',
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/Pages/EditServiceRequestTypeNotifications.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Unable to resolve the template type TValue in call to function collect$#',
     'identifier' => 'argument.templateType',
     'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypeResource/Pages/EditServiceRequestTypeNotifications.php',
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/Pages/EditServiceRequestTypeNotifications.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$relations of method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestTypeCategory\\>\\:\\:with\\(\\) expects array\\<array\\|\\(Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\Relation\\<\\*, \\*, \\*\\>\\)\\: mixed\\)\\|string\\>\\|string, array\\{children\\: Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\)\\: void, types\\: Closure\\(mixed\\)\\: mixed\\} given\\.$#',
+    'identifier' => 'argument.type',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/Pages/ListServiceRequestTypes.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$relations of method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:with\\(\\) expects array\\<array\\|\\(Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\Relation\\<\\*, \\*, \\*\\>\\)\\: mixed\\)\\|string\\>\\|string, array\\{types\\: Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\)\\: Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany, children\\: Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\)\\: void\\} given\\.$#',
+    'identifier' => 'argument.type',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/Pages/ListServiceRequestTypes.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$relations of method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:with\\(\\) expects array\\<array\\|\\(Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\Relation\\<\\*, \\*, \\*\\>\\)\\: mixed\\)\\|string\\>\\|string, array\\{types\\: Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\)\\: Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\} given\\.$#',
+    'identifier' => 'argument.type',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/Pages/ListServiceRequestTypes.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Access to an undefined property Filament\\\\Resources\\\\Pages\\\\Page\\:\\:\\$record\\.$#',
+    'identifier' => 'property.notFound',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/ServiceRequestTypeResource.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$join of anonymous function has no typehint\\.$#',

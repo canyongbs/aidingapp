@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ListServiceRequestTypes;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ListServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 

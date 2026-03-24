@@ -36,7 +36,7 @@
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ServiceRequestTypeEmailTemplatePage;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ServiceRequestTypeEmailTemplatePage;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Tests\Tenant\ServiceRequestType\RequestFactories\ServiceRequestTypeEmailTemplateRequestFactory;
@@ -58,8 +58,8 @@ test('it creates a ServiceRequestTypeEmailTemplate if it did not already exist',
     $type = collect(ServiceRequestEmailTemplateType::cases())->random();
 
     $role = $type === ServiceRequestEmailTemplateType::SurveyResponse
-              ? ServiceRequestTypeEmailTemplateRole::Customer
-              : collect(ServiceRequestTypeEmailTemplateRole::cases())->random();
+        ? ServiceRequestTypeEmailTemplateRole::Customer
+        : collect(ServiceRequestTypeEmailTemplateRole::cases())->random();
 
     livewire(ServiceRequestTypeEmailTemplatePage::class, [
         'record' => $serviceRequestType->getKey(),

@@ -33,8 +33,9 @@
 
 </COPYRIGHT>
 */
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ManageServiceRequestTypeAuditors;
+
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypeAuditors;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Team\Models\Team;
 use App\Models\User;

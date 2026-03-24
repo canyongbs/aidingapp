@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\RelationManagers;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\RelationManagers;
 
 use AidingApp\ServiceManagement\Filament\Resources\SlaResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;

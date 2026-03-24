@@ -35,8 +35,8 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\CreateServiceRequestType;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\CreateServiceRequestType;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestTypeRequestFactory;
 use App\Models\User;

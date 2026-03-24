@@ -35,7 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;

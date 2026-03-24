@@ -35,8 +35,8 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\ListServiceRequestTypes;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ListServiceRequestTypes;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;

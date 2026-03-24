@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use App\Concerns\EditPageRedirection;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\EditRecord;

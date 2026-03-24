@@ -36,7 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages\EditServiceRequestTypeAssignments;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\EditServiceRequestTypeAssignments;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestTypeAssignmentsRequestFactory;

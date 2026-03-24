@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
 use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Concerns\EditPageRedirection;
