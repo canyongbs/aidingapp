@@ -55,9 +55,9 @@ class ListRoles extends ListRecords
     {
         return [
             'web' => Tab::make('Web')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('guard_name', 'web')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->web()),
             'api' => Tab::make('Api')
-                ->modifyQueryUsing(fn (Builder $query) => $query->where('guard_name', 'api')),
+                ->modifyQueryUsing(fn (Builder $query) => $query->api()),
         ];
     }
 
