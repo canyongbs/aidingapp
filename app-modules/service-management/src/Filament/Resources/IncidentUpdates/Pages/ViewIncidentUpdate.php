@@ -34,25 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\IncidentResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\IncidentUpdateResource;
+use AidingApp\ServiceManagement\Models\IncidentUpdate;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
-class EditIncidentUpdate extends EditRecord
+class ViewIncidentUpdate extends ViewRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = IncidentUpdateResource::class;
+
+    public function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('incident.title')
+                            ->label('Incident')
+                            ->url(fn (IncidentUpdate $incidentUpdate): string => IncidentResource::getUrl('view', ['record' => $incidentUpdate->incident]))
+                            ->color('primary'),
+                        IconEntry::make('internal')
+                            ->boolean(),
+                        TextEntry::make('update')
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(),
+            ]);
+    }
 
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make(),
-            DeleteAction::make(),
+            EditAction::make(),
         ];
     }
 }

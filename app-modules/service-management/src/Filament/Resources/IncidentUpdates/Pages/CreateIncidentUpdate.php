@@ -34,45 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\Incidents\IncidentResource;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
-use AidingApp\ServiceManagement\Models\IncidentUpdate;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\IncidentUpdateResource;
+use Filament\Resources\Pages\CreateRecord;
 
-class ViewIncidentUpdate extends ViewRecord
+class CreateIncidentUpdate extends CreateRecord
 {
     protected static string $resource = IncidentUpdateResource::class;
-
-    public function infolist(Schema $schema): Schema
-    {
-        return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('incident.title')
-                            ->label('Incident')
-                            ->url(fn (IncidentUpdate $incidentUpdate): string => IncidentResource::getUrl('view', ['record' => $incidentUpdate->incident]))
-                            ->color('primary'),
-                        IconEntry::make('internal')
-                            ->boolean(),
-                        TextEntry::make('update')
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            EditAction::make(),
-        ];
-    }
 }

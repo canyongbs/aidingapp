@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\IncidentUpdateResource;
 use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use App\Models\User;
 use App\Settings\LicenseSettings;

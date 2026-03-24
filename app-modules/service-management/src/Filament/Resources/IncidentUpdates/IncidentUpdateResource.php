@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages\CreateIncidentUpdate;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages\EditIncidentUpdate;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages\ListIncidentUpdates;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages\ViewIncidentUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\Pages\CreateIncidentUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\Pages\EditIncidentUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\Pages\ListIncidentUpdates;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\Pages\ViewIncidentUpdate;
 use AidingApp\ServiceManagement\Models\Incident;
 use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use App\Filament\Tables\Columns\IdColumn;

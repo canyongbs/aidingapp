@@ -34,20 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
-use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\IncidentUpdateResource;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\EditRecord;
 
-class ListIncidentUpdates extends ListRecords
+class EditIncidentUpdate extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = IncidentUpdateResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

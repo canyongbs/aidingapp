@@ -35,8 +35,8 @@
 */
 
 use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages\EditIncidentUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\IncidentUpdateResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\Pages\EditIncidentUpdate;
 use AidingApp\ServiceManagement\Models\Incident;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
 use AidingApp\ServiceManagement\Models\IncidentUpdate;

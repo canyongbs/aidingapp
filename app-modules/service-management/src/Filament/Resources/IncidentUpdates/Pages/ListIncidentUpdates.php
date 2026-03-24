@@ -34,12 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
-use Filament\Resources\Pages\CreateRecord;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\IncidentUpdateResource;
+use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
 
-class CreateIncidentUpdate extends CreateRecord
+class ListIncidentUpdates extends ListRecords
 {
     protected static string $resource = IncidentUpdateResource::class;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
+    }
 }

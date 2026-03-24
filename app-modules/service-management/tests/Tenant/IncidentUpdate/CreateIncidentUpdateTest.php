@@ -35,8 +35,8 @@
 */
 
 use AidingApp\ServiceManagement\Filament\Resources\Incidents\IncidentResource;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages\CreateIncidentUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\IncidentUpdateResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\Pages\CreateIncidentUpdate;
 use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateIncidentUpdateRequestFactory;
 use App\Models\User;

@@ -35,8 +35,8 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages\ListIncidentUpdates;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\IncidentUpdateResource;
+use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdates\Pages\ListIncidentUpdates;
 use AidingApp\ServiceManagement\Models\Incident;
 use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use App\Models\User;
