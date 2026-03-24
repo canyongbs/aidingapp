@@ -36,13 +36,12 @@
 
 namespace AidingApp\Portal\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class GetServiceRequestUploadUrlRequest extends FormRequest
 {
     /**
-     * @return array<string, ValidationRule|array<string>>
+     * @return ValidationRules
      */
     public function rules(): array
     {

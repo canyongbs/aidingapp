@@ -50,16 +50,7 @@ class KnowledgeManagementPortalRegisterRequest extends FormRequest
     }
 
     /**
-     * @return array{
-     *     email: array<string|Rule>,
-     *     first_name: array<string>,
-     *     last_name: array<string>,
-     *     preferred: array<string>,
-     *     mobile: array<string>,
-     *     phone: array<string>,
-     *     sms_opt_out: array<string>,
-     *     code: array<string|PortalAuthenticateCodeValidation>,
-     * }
+     * @return ValidationRules
      */
     public function rules(): array
     {

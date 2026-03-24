@@ -41,10 +41,7 @@ use Illuminate\Foundation\Http\FormRequest;
 class KnowledgeManagementPortalAuthenticationRequest extends FormRequest
 {
     /**
-     * @return array{
-     *     email: array<string>,
-     *     isSpa: array<string>,
-     * }
+     * @return ValidationRules
      */
     public function rules(): array
     {
