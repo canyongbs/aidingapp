@@ -34,46 +34,65 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
+namespace App\Filament\Resources\SystemUsers\Pages;
 
-use App\Filament\Resources\Users\UserResource;
-use App\Filament\Tables\Columns\IdColumn;
-use App\Models\User;
-use Filament\Actions\ViewAction;
+use App\Concerns\EditPageRedirection;
+use App\Filament\Resources\SystemUsers\SystemUserResource;
+use App\Models\SystemUser;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\TextInput;
-use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 
-class CreatedByRelationManager extends RelationManager
+class EditSystemUser extends EditRecord
 {
-    protected static string $relationship = 'createdBy';
+    use EditPageRedirection;
 
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static string $resource = SystemUserResource::class;
+
+    protected ?string $heading = 'Edit Programmatic (API) User';
 
     public function form(Schema $schema): Schema
     {
-        return $schema
-            ->components([
-                TextInput::make('full')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+        return $schema->components([
+            TextInput::make('name')
+                ->required()
+                ->string(),
+            TextInput::make('token')
+                ->hint('Please copy the token, it will only be shown once.')
+                ->disabled()
+                ->dehydrated(false)
+                ->visible(fn (?string $state) => filled($state)),
+        ]);
     }
 
-    public function table(Table $table): Table
+    protected function mutateFormDataBeforeFill(array $data): array
     {
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name')
-                    ->label('Name'),
-            ])
-            ->paginated(false)
-            ->recordActions([
-                ViewAction::make()
-                    ->url(fn (User $user) => UserResource::getUrl('view', ['record' => $user])),
-            ]);
+        /** @var SystemUser $systemUser */
+        $systemUser = $this->getRecord();
+
+        if (! $systemUser->tokens()->where('name', 'api')->first()) {
+            $token = str($systemUser->createToken('api')->plainTextToken)->after('|')->toString();
+
+            $data['token'] = $token;
+        }
+
+        return $data;
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Action::make('Reset Token')
+                ->action(function (SystemUser $record) {
+                    $record->tokens()->where('name', 'api')->delete();
+
+                    $token = str($record->createToken('api')->plainTextToken)->after('|')->toString();
+
+                    $this->data['token'] = $token;
+                }),
+            DeleteAction::make(),
+        ];
     }
 }

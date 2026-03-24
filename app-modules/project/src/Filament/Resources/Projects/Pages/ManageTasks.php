@@ -44,7 +44,7 @@ use AidingApp\Task\Filament\Concerns\TaskEditForm;
 use AidingApp\Task\Filament\Concerns\TaskViewActionInfoList;
 use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 use AidingApp\Task\Models\Task;
-use App\Filament\Resources\UserResource;
+use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSearch;
 use App\Models\User;

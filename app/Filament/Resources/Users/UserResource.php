@@ -34,30 +34,60 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Concerns;
+namespace App\Filament\Resources\Users;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Filament\Resources\Users\UserResource;
-use Filament\Infolists\Components\TextEntry;
+use App\Filament\Resources\Users\Pages\CreateUser;
+use App\Filament\Resources\Users\Pages\EditUser;
+use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\Pages\ViewUser;
+use App\Filament\Resources\Users\RelationManagers\PermissionsRelationManager;
+use App\Filament\Resources\Users\RelationManagers\RolesRelationManager;
+use App\Models\Scopes\ConditionalAdminScope;
+use App\Models\User;
+use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
+use UnitEnum;
 
-// TODO Re-use this trait across other places where infolist is rendered
-trait ServiceRequestAssignmentInfolist
+class UserResource extends Resource
 {
+    protected static ?string $model = User::class;
+
+    protected static string | UnitEnum | null $navigationGroup = 'User Management';
+
+    protected static ?int $navigationSort = 10;
+
+    protected static ?string $navigationLabel = 'Users';
+
+    protected static ?string $breadcrumb = 'Users';
+
+    protected static ?string $modelLabel = 'User';
+
     /**
-     * @return array<TextEntry>
+     * @return Builder<User>
      */
-    public function serviceRequestAssignmentInfolist(): array
+    public static function getEloquentQuery(): Builder
+    {
+        /** @var Builder<User> $query */
+        $query = parent::getEloquentQuery();
+
+        return $query->tap(new ConditionalAdminScope());
+    }
+
+    public static function getRelations(): array
     {
         return [
-            TextEntry::make('serviceRequest.service_request_number')
-                ->label('Service Request')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => ServiceRequestResource::getUrl('view', ['record' => $serviceRequestAssignment->serviceRequest]))
-                ->color('primary'),
-            TextEntry::make('user.name')
-                ->label('Assigned To')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => UserResource::getUrl('view', ['record' => $serviceRequestAssignment->user]))
-                ->color('primary'),
+            RolesRelationManager::class,
+            PermissionsRelationManager::class,
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListUsers::route('/'),
+            'create' => CreateUser::route('/create'),
+            'view' => ViewUser::route('/{record}'),
+            'edit' => EditUser::route('/{record}/edit'),
         ];
     }
 }

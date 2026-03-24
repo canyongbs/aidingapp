@@ -34,30 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Concerns;
+namespace App\Filament\Resources\Tags\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Filament\Resources\Users\UserResource;
-use Filament\Infolists\Components\TextEntry;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use App\Filament\Resources\Tags\TagResource;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
-// TODO Re-use this trait across other places where infolist is rendered
-trait ServiceRequestAssignmentInfolist
+class CreateTag extends CreateRecord
 {
-    /**
-     * @return array<TextEntry>
-     */
-    public function serviceRequestAssignmentInfolist(): array
+    protected static string $resource = TagResource::class;
+
+    public function form(Schema $schema): Schema
     {
-        return [
-            TextEntry::make('serviceRequest.service_request_number')
-                ->label('Service Request')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => ServiceRequestResource::getUrl('view', ['record' => $serviceRequestAssignment->serviceRequest]))
-                ->color('primary'),
-            TextEntry::make('user.name')
-                ->label('Assigned To')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => UserResource::getUrl('view', ['record' => $serviceRequestAssignment->user]))
-                ->color('primary'),
-        ];
+        return $schema
+            ->components([
+                Section::make()
+                    ->schema([
+                        //change this if we want non-class types
+                        Select::make('type')
+                            ->options([
+                                KnowledgeBaseItem::getTagType() => KnowledgeBaseItem::getTagLabel(),
+                            ])
+                            ->required()
+                            ->string()
+                            ->columnSpanFull()
+                            ->live(),
+                        TextInput::make('name')
+                            ->autocomplete(false)
+                            ->required()
+                            ->string()
+                            ->unique(modifyRuleUsing: function (Unique $rule, Get $get) {
+                                return $rule->where('type', $get('type'));
+                            })
+                            ->columnSpanFull(),
+                    ]),
+            ]);
     }
 }

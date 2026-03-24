@@ -34,46 +34,55 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
+namespace App\Filament\Resources\Users\Actions;
 
-use App\Filament\Resources\Users\UserResource;
-use App\Filament\Tables\Columns\IdColumn;
+use AidingApp\Authorization\Models\Role;
 use App\Models\User;
-use Filament\Actions\ViewAction;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Actions\BulkAction;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
+use Filament\Support\Enums\Width;
+use Illuminate\Database\Eloquent\Collection;
 
-class CreatedByRelationManager extends RelationManager
+class AssignRolesBulkAction extends BulkAction
 {
-    protected static string $relationship = 'createdBy';
-
-    protected static ?string $recordTitleAttribute = 'name';
-
-    public function form(Schema $schema): Schema
+    protected function setUp(): void
     {
-        return $schema
-            ->components([
-                TextInput::make('full')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+        parent::setUp();
+
+        $this->icon('heroicon-s-wrench-screwdriver')
+            ->modalWidth(Width::Small)
+            ->fillForm(fn (Collection $records): array => [
+                'records' => $records,
+            ])
+            ->form([
+                Checkbox::make('replace')
+                    ->label('Replace existing roles?'),
+                Select::make('roles')
+                    ->label('Roles')
+                    ->options(Role::where('guard_name', 'web')->pluck('name', 'name'))
+                    ->multiple(),
+            ])
+            ->action(function (array $data, Collection $records) {
+                /** @var Collection<int, User> $records */
+                $records->each(function (User $record) use ($data) {
+                    if ($data['replace']) {
+                        $record->syncRoles($data['roles']);
+                    } else {
+                        $record->assignRole($data['roles']);
+                    }
+                });
+
+                Notification::make()
+                    ->title('Assigned Roles')
+                    ->success()
+                    ->send();
+            });
     }
 
-    public function table(Table $table): Table
+    public static function getDefaultName(): ?string
     {
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name')
-                    ->label('Name'),
-            ])
-            ->paginated(false)
-            ->recordActions([
-                ViewAction::make()
-                    ->url(fn (User $user) => UserResource::getUrl('view', ['record' => $user])),
-            ]);
+        return 'assign_roles';
     }
 }

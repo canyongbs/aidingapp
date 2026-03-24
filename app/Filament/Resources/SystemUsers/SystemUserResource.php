@@ -34,30 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Concerns;
+namespace App\Filament\Resources\SystemUsers;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Filament\Resources\Users\UserResource;
-use Filament\Infolists\Components\TextEntry;
+use App\Filament\Resources\SystemUsers\Pages\CreateSystemUser;
+use App\Filament\Resources\SystemUsers\Pages\EditSystemUser;
+use App\Filament\Resources\SystemUsers\Pages\ListSystemUsers;
+use App\Filament\Resources\SystemUsers\RelationManagers\PermissionsRelationManager;
+use App\Models\SystemUser;
+use Filament\Resources\Resource;
+use UnitEnum;
 
-// TODO Re-use this trait across other places where infolist is rendered
-trait ServiceRequestAssignmentInfolist
+class SystemUserResource extends Resource
 {
-    /**
-     * @return array<TextEntry>
-     */
-    public function serviceRequestAssignmentInfolist(): array
+    protected static ?string $model = SystemUser::class;
+
+    protected static string | UnitEnum | null $navigationGroup = 'User Management';
+
+    protected static ?string $navigationLabel = 'Programmatic Users';
+
+    protected static ?string $modelLabel = 'Programmatic User';
+
+    protected static ?string $breadcrumb = 'Programmatic Users';
+
+    protected static ?int $navigationSort = 40;
+
+    public static function getRelations(): array
     {
         return [
-            TextEntry::make('serviceRequest.service_request_number')
-                ->label('Service Request')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => ServiceRequestResource::getUrl('view', ['record' => $serviceRequestAssignment->serviceRequest]))
-                ->color('primary'),
-            TextEntry::make('user.name')
-                ->label('Assigned To')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => UserResource::getUrl('view', ['record' => $serviceRequestAssignment->user]))
-                ->color('primary'),
+            PermissionsRelationManager::class,
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListSystemUsers::route('/'),
+            'create' => CreateSystemUser::route('/create'),
+            'edit' => EditSystemUser::route('/{record}/edit'),
         ];
     }
 }
