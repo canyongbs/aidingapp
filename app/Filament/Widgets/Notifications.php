@@ -41,6 +41,7 @@ use Filament\Notifications\Notification;
 use Filament\Widgets\Widget;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Notifications\DatabaseNotification;
 use Livewire\Attributes\On;
@@ -72,6 +73,9 @@ class Notifications extends Widget
         $this->getUnreadNotificationsQuery()->update(['read_at' => now()]);
     }
 
+    /**
+     * @return Paginator<int, Model>
+     */
     public function getNotifications(): Paginator
     {
         return $this->getNotificationsQuery()->simplePaginate(10);

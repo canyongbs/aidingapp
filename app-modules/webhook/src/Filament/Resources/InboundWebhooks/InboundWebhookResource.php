@@ -34,44 +34,39 @@
 </COPYRIGHT>
 */
 
-use Database\Migrations\Concerns\CanModifyPermissions;
-use Illuminate\Database\Migrations\Migration;
+namespace AidingApp\Webhook\Filament\Resources\InboundWebhooks;
 
-return new class () extends Migration {
-    use CanModifyPermissions;
+use AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages\ListInboundWebhooks;
+use AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages\ViewInboundWebhook;
+use AidingApp\Webhook\Models\InboundWebhook;
+use App\Models\User;
+use BackedEnum;
+use Filament\Resources\Resource;
+use UnitEnum;
 
-    /**
-     * @var array<string, string>
-     */
-    private array $permissions = [
-        'incident_update.view-any' => 'Incident Update',
-        'incident_update.create' => 'Incident Update',
-        'incident_update.*.view' => 'Incident Update',
-        'incident_update.*.update' => 'Incident Update',
-        'incident_update.*.delete' => 'Incident Update',
-        'incident_update.*.restore' => 'Incident Update',
-        'incident_update.*.force-delete' => 'Incident Update',
-    ];
+class InboundWebhookResource extends Resource
+{
+    protected static ?string $model = InboundWebhook::class;
 
-    /**
-     * @var array<string>
-     */
-    private array $guards = [
-        'web',
-        'api',
-    ];
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-signal';
 
-    public function up(): void
+    protected static ?int $navigationSort = 40;
+
+    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
+
+    public static function canAccess(): bool
     {
-        foreach ($this->guards as $guard) {
-            $this->createPermissions($this->permissions, $guard);
-        }
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user->isSuperAdmin() && parent::canAccess();
     }
 
-    public function down(): void
+    public static function getPages(): array
     {
-        foreach ($this->guards as $guard) {
-            $this->deletePermissions(array_keys($this->permissions), $guard);
-        }
+        return [
+            'index' => ListInboundWebhooks::route('/'),
+            'view' => ViewInboundWebhook::route('/{record}'),
+        ];
     }
-};
+}

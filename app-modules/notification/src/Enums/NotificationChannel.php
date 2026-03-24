@@ -49,7 +49,7 @@ enum NotificationChannel: string implements HasLabel, HasIcon
         return $this->name;
     }
 
-    public function getIcon(): ?string
+    public function getIcon(): string
     {
         return match ($this) {
             self::Email => 'heroicon-o-envelope',
@@ -62,6 +62,9 @@ enum NotificationChannel: string implements HasLabel, HasIcon
         return NotificationChannel::Email;
     }
 
+    /**
+     * @return array<string, string>
+     */
     public static function getEngagementOptions(): array
     {
         return [
