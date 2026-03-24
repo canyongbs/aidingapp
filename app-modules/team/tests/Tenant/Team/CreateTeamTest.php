@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Team\Filament\Resources\TeamResource;
-use AidingApp\Team\Filament\Resources\TeamResource\Pages\CreateTeam;
+use AidingApp\Team\Filament\Resources\Teams\Pages\CreateTeam;
+use AidingApp\Team\Filament\Resources\Teams\TeamResource;
 use AidingApp\Team\Models\Team;
 use App\Models\User;
 

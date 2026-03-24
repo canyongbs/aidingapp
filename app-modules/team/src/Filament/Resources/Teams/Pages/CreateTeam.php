@@ -34,38 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Filament\Resources\TeamResource\Pages;
+namespace AidingApp\Team\Filament\Resources\Teams\Pages;
 
-use AidingApp\Team\Filament\Resources\TeamResource;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
+use AidingApp\Division\Models\Division;
+use AidingApp\Team\Filament\Resources\Teams\TeamResource;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
-class ViewTeam extends ViewRecord
+class CreateTeam extends CreateRecord
 {
     protected static string $resource = TeamResource::class;
 
-    public function infolist(Schema $schema): Schema
+    public function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name'),
-                        TextEntry::make('division.name')->default('N/A'),
-                        TextEntry::make('description')
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(),
+            ->components([
+                TextInput::make('name')
+                    ->required()
+                    ->unique()
+                    ->string()
+                    ->maxLength(255),
+                Textarea::make('description')
+                    ->required()
+                    ->string(),
+                Select::make('division_id')
+                    ->relationship('division', 'name', modifyQueryUsing: fn (Builder $query) => $query->orderBy('is_default', 'DESC'))
+                    ->searchable()
+                    ->preload()
+                    ->default(fn () => Division::query()->where('is_default', true)->first()?->getKey()),
             ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            EditAction::make(),
-        ];
     }
 }
