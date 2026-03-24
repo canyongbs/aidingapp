@@ -34,35 +34,39 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
-use AidingApp\Audit\Models\Audit;
-use App\Models\User;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use function Pest\Laravel\actingAs;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
-test('The correct details are displayed on the ViewAudit page')->todo();
+class ViewProject extends ViewRecord
+{
+    protected static string $resource = ProjectResource::class;
 
-// Permission Tests
+    protected static ?string $navigationLabel = 'View';
 
-test('ViewAudit is gated with proper access control', function () {
-    $user = User::factory()->create();
+    public function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name'),
+                        TextEntry::make('description')
+                            ->label('Description')
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
 
-    $audit = Audit::factory()->create();
-
-    actingAs($user)
-        ->get(
-            AuditResource::getUrl('view', [
-                'record' => $audit,
-            ])
-        )->assertForbidden();
-
-    $user->givePermissionTo('audit.view-any');
-    $user->givePermissionTo('audit.*.view');
-
-    actingAs($user)
-        ->get(
-            AuditResource::getUrl('view', [
-                'record' => $audit,
-            ])
-        )->assertSuccessful();
-});
+    protected function getHeaderActions(): array
+    {
+        return [
+            EditAction::make(),
+        ];
+    }
+}

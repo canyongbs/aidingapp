@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages\ListProjectMilestoneStatuses;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ListProjectMilestoneStatuses;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 

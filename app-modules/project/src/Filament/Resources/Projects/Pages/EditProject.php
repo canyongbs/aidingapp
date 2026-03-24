@@ -34,35 +34,46 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
-use AidingApp\Audit\Models\Audit;
-use App\Models\User;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use function Pest\Laravel\actingAs;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Schema;
 
-test('The correct details are displayed on the ViewAudit page')->todo();
+class EditProject extends EditRecord
+{
+    use EditPageRedirection;
 
-// Permission Tests
+    protected static string $resource = ProjectResource::class;
 
-test('ViewAudit is gated with proper access control', function () {
-    $user = User::factory()->create();
+    protected static ?string $navigationLabel = 'Edit';
 
-    $audit = Audit::factory()->create();
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->required()
+                    ->string()
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255),
+                Textarea::make('description')
+                    ->string()
+                    ->maxLength(65535)
+                    ->columnSpanFull(),
+            ]);
+    }
 
-    actingAs($user)
-        ->get(
-            AuditResource::getUrl('view', [
-                'record' => $audit,
-            ])
-        )->assertForbidden();
-
-    $user->givePermissionTo('audit.view-any');
-    $user->givePermissionTo('audit.*.view');
-
-    actingAs($user)
-        ->get(
-            AuditResource::getUrl('view', [
-                'record' => $audit,
-            ])
-        )->assertSuccessful();
-});
+    protected function getHeaderActions(): array
+    {
+        return [
+            ViewAction::make(),
+            DeleteAction::make(),
+        ];
+    }
+}

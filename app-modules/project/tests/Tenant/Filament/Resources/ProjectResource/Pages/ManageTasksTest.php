@@ -35,7 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageTasks;
+use AidingApp\Project\Filament\Resources\Projects\Pages\ManageTasks;
 use AidingApp\Project\Models\Project;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\CreateProject;
+use AidingApp\Project\Filament\Resources\Projects\Pages\CreateProject;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\ProjectResource\RequestFactory\CreateProjectRequestFactory;
 use App\Models\User;

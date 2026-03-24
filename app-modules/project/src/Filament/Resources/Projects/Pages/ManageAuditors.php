@@ -34,35 +34,36 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
-use AidingApp\Audit\Models\Audit;
-use App\Models\User;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use function Pest\Laravel\actingAs;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\AuditorTeamsRelationManager;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\AuditorUsersRelationManager;
+use Filament\Resources\Pages\ManageRelatedRecords;
 
-test('The correct details are displayed on the ViewAudit page')->todo();
+class ManageAuditors extends ManageRelatedRecords
+{
+    protected static string $resource = ProjectResource::class;
 
-// Permission Tests
+    protected static string $relationship = 'auditorUsers';
 
-test('ViewAudit is gated with proper access control', function () {
-    $user = User::factory()->create();
+    public static function getNavigationLabel(): string
+    {
+        return 'Auditors';
+    }
 
-    $audit = Audit::factory()->create();
+    public function getRelationManagers(): array
+    {
+        return [
+            AuditorUsersRelationManager::class,
+            AuditorTeamsRelationManager::class,
+        ];
+    }
 
-    actingAs($user)
-        ->get(
-            AuditResource::getUrl('view', [
-                'record' => $audit,
-            ])
-        )->assertForbidden();
+    public static function canAccess(array $arguments = []): bool
+    {
+        $user = auth()->user();
 
-    $user->givePermissionTo('audit.view-any');
-    $user->givePermissionTo('audit.*.view');
-
-    actingAs($user)
-        ->get(
-            AuditResource::getUrl('view', [
-                'record' => $audit,
-            ])
-        )->assertSuccessful();
-});
+        return $user->can(['project.view-any', 'project.*.view']) && parent::canAccess($arguments);
+    }
+}

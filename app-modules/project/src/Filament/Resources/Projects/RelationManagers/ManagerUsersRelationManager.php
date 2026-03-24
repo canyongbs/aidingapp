@@ -34,35 +34,41 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
-use AidingApp\Audit\Models\Audit;
-use App\Models\User;
+namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
 
-use function Pest\Laravel\actingAs;
+use AidingApp\Project\Models\Project;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-test('The correct details are displayed on the ViewAudit page')->todo();
+class ManagerUsersRelationManager extends RelationManager
+{
+    protected static string $relationship = 'managerUsers';
 
-// Permission Tests
+    protected static ?string $title = 'Users';
 
-test('ViewAudit is gated with proper access control', function () {
-    $user = User::factory()->create();
-
-    $audit = Audit::factory()->create();
-
-    actingAs($user)
-        ->get(
-            AuditResource::getUrl('view', [
-                'record' => $audit,
+    public function table(Table $table): Table
+    {
+        return $table
+            ->recordTitleAttribute('name')
+            ->columns([
+                TextColumn::make('name'),
             ])
-        )->assertForbidden();
-
-    $user->givePermissionTo('audit.view-any');
-    $user->givePermissionTo('audit.*.view');
-
-    actingAs($user)
-        ->get(
-            AuditResource::getUrl('view', [
-                'record' => $audit,
+            ->headerActions([
+                AttachAction::make()
+                    ->authorize('update', Project::class),
             ])
-        )->assertSuccessful();
-});
+            ->recordActions([
+                DetachAction::make()
+                    ->authorize('update', Project::class),
+            ])
+            ->toolbarActions([
+                DetachBulkAction::make()
+                    ->authorize('update', Project::class),
+            ])
+            ->inverseRelationship('managedProjects');
+    }
+}
