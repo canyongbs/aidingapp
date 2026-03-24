@@ -34,52 +34,39 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Filament\Resources\TeamResource\Pages;
+namespace AidingApp\Team\Filament\Resources\Teams;
 
-use AidingApp\Team\Filament\Resources\TeamResource;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use AidingApp\Team\Filament\Resources\Teams\Pages\CreateTeam;
+use AidingApp\Team\Filament\Resources\Teams\Pages\EditTeam;
+use AidingApp\Team\Filament\Resources\Teams\Pages\ListTeams;
+use AidingApp\Team\Filament\Resources\Teams\Pages\ViewTeam;
+use AidingApp\Team\Filament\Resources\Teams\RelationManagers\UsersRelationManager;
+use AidingApp\Team\Models\Team;
+use Filament\Resources\Resource;
+use UnitEnum;
 
-class ListTeams extends ListRecords
+class TeamResource extends Resource
 {
-    protected static string $resource = TeamResource::class;
+    protected static ?string $model = Team::class;
 
-    public function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name')
-                    ->sortable(),
-                TextColumn::make('division.name')
-                    ->sortable(),
-                TextColumn::make('description')
-                    ->limit(50),
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
+    protected static string | UnitEnum | null $navigationGroup = 'User Management';
 
-    protected function getHeaderActions(): array
+    protected static ?int $navigationSort = 20;
+
+    public static function getRelations(): array
     {
         return [
-            CreateAction::make(),
+            UsersRelationManager::make(),
+        ];
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListTeams::route('/'),
+            'create' => CreateTeam::route('/create'),
+            'view' => ViewTeam::route('/{record}'),
+            'edit' => EditTeam::route('/{record}/edit'),
         ];
     }
 }
