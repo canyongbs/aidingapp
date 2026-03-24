@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Components;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Components;
 
 use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestAssignmentInfolist;
 use Filament\Actions\ViewAction;

@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\CreateServiceRequestUpdate;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\EditServiceRequestUpdate;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\ListServiceRequestUpdates;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\ViewServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\CreateServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\EditServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\ListServiceRequestUpdates;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\ViewServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Filament\Tables\Columns\IdColumn;

@@ -34,12 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Components;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
-use Filament\Resources\Pages\CreateRecord;
+use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestUpdateInfolist;
+use Filament\Actions\ViewAction;
 
-class CreateServiceRequestUpdate extends CreateRecord
+class ServiceRequestUpdateViewAction extends ViewAction
 {
-    protected static string $resource = ServiceRequestUpdateResource::class;
+    use ServiceRequestUpdateInfolist;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->schema($this->serviceRequestUpdateInfolist());
+    }
 }

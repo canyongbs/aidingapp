@@ -33,9 +33,10 @@
 
 </COPYRIGHT>
 */
+
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages\ListServiceRequestUpdates;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\ListServiceRequestUpdates;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\User;

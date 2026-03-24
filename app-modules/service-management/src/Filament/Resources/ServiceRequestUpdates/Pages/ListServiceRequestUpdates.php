@@ -34,25 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
+use Filament\Actions\CreateAction;
+use Filament\Resources\Pages\ListRecords;
 
-class EditServiceRequestUpdate extends EditRecord
+class ListServiceRequestUpdates extends ListRecords
 {
-    use EditPageRedirection;
-
     protected static string $resource = ServiceRequestUpdateResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make(),
-            DeleteAction::make(),
+            CreateAction::make(),
         ];
     }
 }

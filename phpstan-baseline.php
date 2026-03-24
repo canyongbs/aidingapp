@@ -2253,7 +2253,7 @@ $ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$join of anonymous function has no typehint\\.$#',
     'identifier' => 'MeliorStan.closureParameterMissingTypehint',
     'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestUpdateResource.php',
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestUpdates/ServiceRequestUpdateResource.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$priority\\.$#',

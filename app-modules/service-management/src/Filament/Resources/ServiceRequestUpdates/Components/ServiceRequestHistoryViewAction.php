@@ -34,19 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Components;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Components;
 
-use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestUpdateInfolist;
+use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestHistoryInfolist;
 use Filament\Actions\ViewAction;
 
-class ServiceRequestUpdateViewAction extends ViewAction
+class ServiceRequestHistoryViewAction extends ViewAction
 {
-    use ServiceRequestUpdateInfolist;
+    use ServiceRequestHistoryInfolist;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->schema($this->serviceRequestUpdateInfolist());
+        $this->schema($this->serviceRequestHistoryInfolist());
     }
 }

@@ -34,20 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
-use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
+use Filament\Resources\Pages\CreateRecord;
 
-class ListServiceRequestUpdates extends ListRecords
+class CreateServiceRequestUpdate extends CreateRecord
 {
     protected static string $resource = ServiceRequestUpdateResource::class;
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make(),
-        ];
-    }
 }

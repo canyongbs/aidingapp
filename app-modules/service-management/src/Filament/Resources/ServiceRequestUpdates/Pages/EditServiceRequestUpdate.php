@@ -34,19 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Components;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages;
 
-use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestHistoryInfolist;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\EditRecord;
 
-class ServiceRequestHistoryViewAction extends ViewAction
+class EditServiceRequestUpdate extends EditRecord
 {
-    use ServiceRequestHistoryInfolist;
+    use EditPageRedirection;
 
-    protected function setUp(): void
+    protected static string $resource = ServiceRequestUpdateResource::class;
+
+    protected function getHeaderActions(): array
     {
-        parent::setUp();
-
-        $this->schema($this->serviceRequestHistoryInfolist());
+        return [
+            ViewAction::make(),
+            DeleteAction::make(),
+        ];
     }
 }
