@@ -36,11 +36,13 @@
 
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Task\Models\Task;
 use App\Models\User;
 use App\Multitenancy\Http\Middleware\CheckOlympusKey;
+use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\get;
 use function Pest\Laravel\withoutMiddleware;
@@ -146,4 +148,39 @@ it('checks the API returns tasks', function () {
     $response->assertStatus(200);
 
     expect($data['tasks'])->toBe($randomRecords);
+});
+
+it('checks the API returns emails sent', function () {
+    $randomRecords = random_int(1, 10);
+
+    EmailMessage::factory(['quota_usage' => 1])->count($randomRecords)->create();
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->limits->emails = 100;
+    $settings->data->limits->resetDate = now()->addMonth()->format('m-d');
+    $settings->save();
+
+    $response = get(route('utilization-metrics'));
+
+    $data = $response->json('data');
+
+    $response->assertStatus(200);
+
+    expect($data['emails'])->toBe($randomRecords . '/100');
+});
+
+it('checks the API returns the reset date', function () {
+    $resetDate = now()->addMonth()->format('m-d');
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->limits->resetDate = $resetDate;
+    $settings->save();
+
+    $response = get(route('utilization-metrics'));
+
+    $data = $response->json('data');
+
+    $response->assertStatus(200);
+
+    expect($data['messages_reset'])->toBe($resetDate);
 });
