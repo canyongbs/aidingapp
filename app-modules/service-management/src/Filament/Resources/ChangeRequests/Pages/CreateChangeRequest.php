@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\ChangeRequestResource;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;

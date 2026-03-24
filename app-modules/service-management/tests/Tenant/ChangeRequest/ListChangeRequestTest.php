@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\ChangeRequestResource;
 
 use function Tests\Helpers\testResourceRequiresPermissionForAccess;
 

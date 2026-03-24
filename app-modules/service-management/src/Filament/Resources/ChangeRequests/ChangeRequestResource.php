@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequests;
 
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\CreateChangeRequest;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\EditChangeRequest;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\ListChangeRequests;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource\Pages\ViewChangeRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\Pages\CreateChangeRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\Pages\EditChangeRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\Pages\ListChangeRequests;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\Pages\ViewChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use BackedEnum;
 use Filament\Resources\Resource;
