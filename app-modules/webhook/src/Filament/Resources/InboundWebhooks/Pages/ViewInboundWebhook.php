@@ -34,39 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Webhook\Filament\Resources;
+namespace AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages;
 
-use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ListInboundWebhooks;
-use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ViewInboundWebhook;
-use AidingApp\Webhook\Models\InboundWebhook;
-use App\Models\User;
-use BackedEnum;
-use Filament\Resources\Resource;
-use UnitEnum;
+use AidingApp\Webhook\Filament\Resources\InboundWebhooks\InboundWebhookResource;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
-class InboundWebhookResource extends Resource
+class ViewInboundWebhook extends ViewRecord
 {
-    protected static ?string $model = InboundWebhook::class;
+    protected static string $resource = InboundWebhookResource::class;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-signal';
-
-    protected static ?int $navigationSort = 40;
-
-    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
-
-    public static function canAccess(): bool
+    public function infolist(Schema $schema): Schema
     {
-        /** @var User $user */
-        $user = auth()->user();
-
-        return $user->isSuperAdmin() && parent::canAccess();
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListInboundWebhooks::route('/'),
-            'view' => ViewInboundWebhook::route('/{record}'),
-        ];
+        return $schema
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('source'),
+                        TextEntry::make('event'),
+                        TextEntry::make('url'),
+                        TextEntry::make('payload')
+                            ->limit(100),
+                    ])
+                    ->columns(),
+            ]);
     }
 }
