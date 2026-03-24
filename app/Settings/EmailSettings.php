@@ -34,56 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Notifications\Messages;
+namespace App\Settings;
 
-use App\Models\NotificationSetting;
-use Illuminate\Notifications\Messages\MailMessage as BaseMailMessage;
+use App\Settings\SettingsProperties\EmailSettingsProperty;
 
-class MailMessage extends BaseMailMessage
+class EmailSettings extends SettingsWithMedia
 {
-    public static function make(): static
+    public ?string $header_logo = null;
+
+    public ?string $background_color = null;
+
+    public ?string $h1_text_color = null;
+
+    public ?string $h2_text_color = null;
+
+    public ?string $paragraph_text_color = null;
+
+    /** @phpstan-ignore-next-line missingType.iterableValue */
+    public ?array $footer = null;
+
+    public static function group(): string
     {
-        return app(static::class);
+        return 'email';
     }
 
-    public function content(string $content): static
+    public static function getSettingsPropertyModelClass(): string
     {
-        $this->viewData = array_merge($this->viewData, [
-            'content' => $content,
-        ]);
-
-        return $this;
-    }
-
-    public function settings(?NotificationSetting $setting): static
-    {
-        if (! empty($setting->from_name)) {
-            $this->from(
-                address: config('mail.from.address'),
-                name: $setting->from_name,
-            );
-        }
-
-        $this->viewData = array_merge($this->viewData, [
-            'settings' => $setting,
-        ]);
-
-        return $this;
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'level' => $this->level,
-            'subject' => $this->subject,
-            'greeting' => $this->greeting,
-            'salutation' => $this->salutation,
-            'introLines' => $this->introLines,
-            'outroLines' => $this->outroLines,
-            'actionText' => $this->actionText,
-            'actionUrl' => $this->actionUrl,
-            'displayableActionUrl' => str_replace(['mailto:', 'tel:'], '', $this->actionUrl ?? ''),
-            'viewData' => $this->viewData,
-        ];
+        return EmailSettingsProperty::class;
     }
 }

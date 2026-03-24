@@ -34,56 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Notifications\Messages;
+namespace App\Settings\SettingsProperties;
 
-use App\Models\NotificationSetting;
-use Illuminate\Notifications\Messages\MailMessage as BaseMailMessage;
+use App\Models\SettingsPropertyWithMedia;
 
-class MailMessage extends BaseMailMessage
+class EmailSettingsProperty extends SettingsPropertyWithMedia
 {
-    public static function make(): static
+    public function registerMediaCollections(): void
     {
-        return app(static::class);
-    }
-
-    public function content(string $content): static
-    {
-        $this->viewData = array_merge($this->viewData, [
-            'content' => $content,
-        ]);
-
-        return $this;
-    }
-
-    public function settings(?NotificationSetting $setting): static
-    {
-        if (! empty($setting->from_name)) {
-            $this->from(
-                address: config('mail.from.address'),
-                name: $setting->from_name,
-            );
-        }
-
-        $this->viewData = array_merge($this->viewData, [
-            'settings' => $setting,
-        ]);
-
-        return $this;
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'level' => $this->level,
-            'subject' => $this->subject,
-            'greeting' => $this->greeting,
-            'salutation' => $this->salutation,
-            'introLines' => $this->introLines,
-            'outroLines' => $this->outroLines,
-            'actionText' => $this->actionText,
-            'actionUrl' => $this->actionUrl,
-            'displayableActionUrl' => str_replace(['mailto:', 'tel:'], '', $this->actionUrl ?? ''),
-            'viewData' => $this->viewData,
-        ];
+        $this->addMediaCollection('header_logo')
+            ->singleFile()
+            ->acceptsMimeTypes([
+                'image/png',
+                'image/jpeg',
+                'image/jpg',
+                'image/webp',
+                'image/svg+xml',
+            ]);
     }
 }

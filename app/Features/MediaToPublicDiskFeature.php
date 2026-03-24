@@ -34,56 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Notifications\Messages;
+namespace App\Features;
 
-use App\Models\NotificationSetting;
-use Illuminate\Notifications\Messages\MailMessage as BaseMailMessage;
+use App\Support\AbstractFeatureFlag;
 
-class MailMessage extends BaseMailMessage
+class MediaToPublicDiskFeature extends AbstractFeatureFlag
 {
-    public static function make(): static
+    public function resolve(mixed $scope): mixed
     {
-        return app(static::class);
-    }
-
-    public function content(string $content): static
-    {
-        $this->viewData = array_merge($this->viewData, [
-            'content' => $content,
-        ]);
-
-        return $this;
-    }
-
-    public function settings(?NotificationSetting $setting): static
-    {
-        if (! empty($setting->from_name)) {
-            $this->from(
-                address: config('mail.from.address'),
-                name: $setting->from_name,
-            );
-        }
-
-        $this->viewData = array_merge($this->viewData, [
-            'settings' => $setting,
-        ]);
-
-        return $this;
-    }
-
-    public function toArray(): array
-    {
-        return [
-            'level' => $this->level,
-            'subject' => $this->subject,
-            'greeting' => $this->greeting,
-            'salutation' => $this->salutation,
-            'introLines' => $this->introLines,
-            'outroLines' => $this->outroLines,
-            'actionText' => $this->actionText,
-            'actionUrl' => $this->actionUrl,
-            'displayableActionUrl' => str_replace(['mailto:', 'tel:'], '', $this->actionUrl ?? ''),
-            'viewData' => $this->viewData,
-        ];
+        return false;
     }
 }

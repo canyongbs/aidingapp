@@ -36,6 +36,7 @@
 
 namespace App\Filament\Resources\NotificationSettingResource\Forms;
 
+use App\Features\MediaToPublicDiskFeature;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
@@ -64,7 +65,14 @@ class NotificationSettingForm
                     ->disk('s3')
                     ->collection('logo')
                     ->visibility('private')
-                    ->image(),
+                    ->image()
+                    ->hidden(MediaToPublicDiskFeature::active()),
+                SpatieMediaLibraryFileUpload::make('logo')
+                    ->disk('s3-public')
+                    ->collection('logo')
+                    ->visibility('public')
+                    ->image()
+                    ->visible(MediaToPublicDiskFeature::active()),
             ]);
     }
 }
