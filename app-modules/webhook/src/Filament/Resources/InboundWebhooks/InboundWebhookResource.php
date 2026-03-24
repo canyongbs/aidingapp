@@ -34,52 +34,39 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Filament\Resources\TeamResource\Pages;
+namespace AidingApp\Webhook\Filament\Resources\InboundWebhooks;
 
-use AidingApp\Team\Filament\Resources\TeamResource;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages\ListInboundWebhooks;
+use AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages\ViewInboundWebhook;
+use AidingApp\Webhook\Models\InboundWebhook;
+use App\Models\User;
+use BackedEnum;
+use Filament\Resources\Resource;
+use UnitEnum;
 
-class ListTeams extends ListRecords
+class InboundWebhookResource extends Resource
 {
-    protected static string $resource = TeamResource::class;
+    protected static ?string $model = InboundWebhook::class;
 
-    public function table(Table $table): Table
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-signal';
+
+    protected static ?int $navigationSort = 40;
+
+    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
+
+    public static function canAccess(): bool
     {
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name')
-                    ->sortable(),
-                TextColumn::make('division.name')
-                    ->sortable(),
-                TextColumn::make('description')
-                    ->limit(50),
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user->isSuperAdmin() && parent::canAccess();
     }
 
-    protected function getHeaderActions(): array
+    public static function getPages(): array
     {
         return [
-            CreateAction::make(),
+            'index' => ListInboundWebhooks::route('/'),
+            'view' => ViewInboundWebhook::route('/{record}'),
         ];
     }
 }

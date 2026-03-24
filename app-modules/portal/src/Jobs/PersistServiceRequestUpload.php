@@ -55,7 +55,7 @@ class PersistServiceRequestUpload implements ShouldQueue
     use SerializesModels;
     use Batchable;
 
-    public $deleteWhenMissingModels = true;
+    public bool $deleteWhenMissingModels = true;
 
     public function __construct(
         protected ServiceRequest $serviceRequest,
@@ -64,6 +64,9 @@ class PersistServiceRequestUpload implements ShouldQueue
         protected string $collection,
     ) {}
 
+    /**
+     * @return array<SkipIfBatchCancelled>
+     */
     public function middleware(): array
     {
         return [

@@ -40,6 +40,9 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class KnowledgeManagementPortalAuthenticationRequest extends FormRequest
 {
+    /**
+     * @return ValidationRules
+     */
     public function rules(): array
     {
         return [

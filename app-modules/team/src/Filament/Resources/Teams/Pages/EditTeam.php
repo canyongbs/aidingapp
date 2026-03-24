@@ -34,31 +34,49 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages;
+namespace AidingApp\Team\Filament\Resources\Teams\Pages;
 
-use AidingApp\Webhook\Filament\Resources\InboundWebhookResource;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
+use AidingApp\Division\Models\Division;
+use AidingApp\Team\Filament\Resources\Teams\TeamResource;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
-class ViewInboundWebhook extends ViewRecord
+class EditTeam extends EditRecord
 {
-    protected static string $resource = InboundWebhookResource::class;
+    use EditPageRedirection;
 
-    public function infolist(Schema $schema): Schema
+    protected static string $resource = TeamResource::class;
+
+    public function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('source'),
-                        TextEntry::make('event'),
-                        TextEntry::make('url'),
-                        TextEntry::make('payload')
-                            ->limit(100),
-                    ])
-                    ->columns(),
+            ->components([
+                TextInput::make('name')
+                    ->required()
+                    ->string()
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255),
+                Textarea::make('description')
+                    ->required()
+                    ->string(),
+                Select::make('division_id')
+                    ->relationship('division', 'name', modifyQueryUsing: fn (Builder $query) => $query->orderBy('is_default', 'DESC'))
+                    ->searchable()
+                    ->preload()
+                    ->default(fn () => Division::query()->where('is_default', true)->first()?->getKey()),
             ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+        ];
     }
 }

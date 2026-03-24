@@ -34,38 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Filament\Resources\TeamResource\Pages;
+return [
+    'feedback' => [
+        // Shown when feedback management is enabled but feedback collection is disabled for the service request type.
+        'type_feedback_disabled' => 'Feedback has not been enabled for this Service Request Type.',
 
-use AidingApp\Division\Models\Division;
-use AidingApp\Team\Filament\Resources\TeamResource;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Builder;
+        // Shown when the service request has not yet reached a closed classification status.
+        'not_closed' => "Since this service request is still not closed, we haven't sent out customer surveys yet. As a result, we're currently unable to report on customer feedback for this service request.",
 
-class CreateTeam extends CreateRecord
-{
-    protected static string $resource = TeamResource::class;
+        // Shown when the service request is closed but no feedback survey has been sent (survey_sent_at is null).
+        'no_survey_sent' => 'No feedback survey was sent for this closed request.',
 
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->unique()
-                    ->string()
-                    ->maxLength(255),
-                Textarea::make('description')
-                    ->required()
-                    ->string(),
-                Select::make('division_id')
-                    ->relationship('division', 'name', modifyQueryUsing: fn (Builder $query) => $query->orderBy('is_default', 'DESC'))
-                    ->searchable()
-                    ->preload()
-                    ->default(fn () => Division::query()->where('is_default', true)->first()?->getKey()),
-            ]);
-    }
-}
+        // Shown when the service request is closed, a survey was sent, but no feedback record exists yet.
+        // :sent_at — formatted datetime of survey_sent_at in the user's timezone.
+        'survey_sent' => 'Feedback survey was sent at :sent_at. Waiting on reply...',
+
+        // Appended on a new line to the survey_sent message when a reminder was also sent (reminder_sent_at is not null).
+        // :reminder_at — formatted datetime of reminder_sent_at in the user's timezone.
+        'reminder_sent' => 'Feedback survey reminder sent at :reminder_at.',
+    ],
+];

@@ -34,39 +34,52 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Webhook\Filament\Resources;
+namespace AidingApp\Team\Filament\Resources\Teams\Pages;
 
-use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ListInboundWebhooks;
-use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ViewInboundWebhook;
-use AidingApp\Webhook\Models\InboundWebhook;
-use App\Models\User;
-use BackedEnum;
-use Filament\Resources\Resource;
-use UnitEnum;
+use AidingApp\Team\Filament\Resources\Teams\TeamResource;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class InboundWebhookResource extends Resource
+class ListTeams extends ListRecords
 {
-    protected static ?string $model = InboundWebhook::class;
+    protected static string $resource = TeamResource::class;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-signal';
-
-    protected static ?int $navigationSort = 40;
-
-    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
-
-    public static function canAccess(): bool
+    public function table(Table $table): Table
     {
-        /** @var User $user */
-        $user = auth()->user();
-
-        return $user->isSuperAdmin() && parent::canAccess();
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name')
+                    ->sortable(),
+                TextColumn::make('division.name')
+                    ->sortable(),
+                TextColumn::make('description')
+                    ->limit(50),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
     }
 
-    public static function getPages(): array
+    protected function getHeaderActions(): array
     {
         return [
-            'index' => ListInboundWebhooks::route('/'),
-            'view' => ViewInboundWebhook::route('/{record}'),
+            CreateAction::make(),
         ];
     }
 }

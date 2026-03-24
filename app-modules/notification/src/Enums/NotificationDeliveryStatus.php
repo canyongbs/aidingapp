@@ -51,7 +51,7 @@ enum NotificationDeliveryStatus: string implements HasLabel
     case Failed = 'failed';
     case Successful = 'successful';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return $this->name;
     }

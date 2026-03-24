@@ -34,39 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Filament\Resources;
+namespace AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages;
 
-use AidingApp\Team\Filament\Resources\TeamResource\Pages\CreateTeam;
-use AidingApp\Team\Filament\Resources\TeamResource\Pages\EditTeam;
-use AidingApp\Team\Filament\Resources\TeamResource\Pages\ListTeams;
-use AidingApp\Team\Filament\Resources\TeamResource\Pages\ViewTeam;
-use AidingApp\Team\Filament\Resources\TeamResource\RelationManagers\UsersRelationManager;
-use AidingApp\Team\Models\Team;
-use Filament\Resources\Resource;
-use UnitEnum;
+use AidingApp\Webhook\Filament\Resources\InboundWebhooks\InboundWebhookResource;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class TeamResource extends Resource
+class ListInboundWebhooks extends ListRecords
 {
-    protected static ?string $model = Team::class;
+    protected static string $resource = InboundWebhookResource::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'User Management';
-
-    protected static ?int $navigationSort = 20;
-
-    public static function getRelations(): array
+    public function table(Table $table): Table
     {
-        return [
-            UsersRelationManager::make(),
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListTeams::route('/'),
-            'create' => CreateTeam::route('/create'),
-            'view' => ViewTeam::route('/{record}'),
-            'edit' => EditTeam::route('/{record}/edit'),
-        ];
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('source')
+                    ->label('Source'),
+                TextColumn::make('event'),
+                TextColumn::make('url'),
+                TextColumn::make('payload'),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+            ])
+            ->toolbarActions([
+            ]);
     }
 }

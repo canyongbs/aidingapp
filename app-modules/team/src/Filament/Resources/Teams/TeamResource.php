@@ -34,44 +34,39 @@
 </COPYRIGHT>
 */
 
-use Database\Migrations\Concerns\CanModifyPermissions;
-use Illuminate\Database\Migrations\Migration;
+namespace AidingApp\Team\Filament\Resources\Teams;
 
-return new class () extends Migration {
-    use CanModifyPermissions;
+use AidingApp\Team\Filament\Resources\Teams\Pages\CreateTeam;
+use AidingApp\Team\Filament\Resources\Teams\Pages\EditTeam;
+use AidingApp\Team\Filament\Resources\Teams\Pages\ListTeams;
+use AidingApp\Team\Filament\Resources\Teams\Pages\ViewTeam;
+use AidingApp\Team\Filament\Resources\Teams\RelationManagers\UsersRelationManager;
+use AidingApp\Team\Models\Team;
+use Filament\Resources\Resource;
+use UnitEnum;
 
-    /**
-     * @var array<string, string>
-     */
-    private array $permissions = [
-        'incident_update.view-any' => 'Incident Update',
-        'incident_update.create' => 'Incident Update',
-        'incident_update.*.view' => 'Incident Update',
-        'incident_update.*.update' => 'Incident Update',
-        'incident_update.*.delete' => 'Incident Update',
-        'incident_update.*.restore' => 'Incident Update',
-        'incident_update.*.force-delete' => 'Incident Update',
-    ];
+class TeamResource extends Resource
+{
+    protected static ?string $model = Team::class;
 
-    /**
-     * @var array<string>
-     */
-    private array $guards = [
-        'web',
-        'api',
-    ];
+    protected static string | UnitEnum | null $navigationGroup = 'User Management';
 
-    public function up(): void
+    protected static ?int $navigationSort = 20;
+
+    public static function getRelations(): array
     {
-        foreach ($this->guards as $guard) {
-            $this->createPermissions($this->permissions, $guard);
-        }
+        return [
+            UsersRelationManager::make(),
+        ];
     }
 
-    public function down(): void
+    public static function getPages(): array
     {
-        foreach ($this->guards as $guard) {
-            $this->deletePermissions(array_keys($this->permissions), $guard);
-        }
+        return [
+            'index' => ListTeams::route('/'),
+            'create' => CreateTeam::route('/create'),
+            'view' => ViewTeam::route('/{record}'),
+            'edit' => EditTeam::route('/{record}/edit'),
+        ];
     }
-};
+}
