@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;

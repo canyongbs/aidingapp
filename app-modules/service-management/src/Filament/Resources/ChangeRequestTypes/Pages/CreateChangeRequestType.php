@@ -34,26 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource;
-use AidingApp\ServiceManagement\Models\ChangeRequestType;
-use App\Concerns\EditPageRedirection;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
 use App\Models\User;
-use Filament\Actions\Action;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-class EditChangeRequestType extends EditRecord
+class CreateChangeRequestType extends CreateRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ChangeRequestTypeResource::class;
 
     public function form(Schema $schema): Schema
@@ -80,21 +72,6 @@ class EditChangeRequestType extends EditRecord
                             ->multiple()
                             ->exists((new User())->getTable(), 'id'),
                     ]),
-            ])->disabled(fn (ChangeRequestType $record) => $record->trashed());
-    }
-
-    protected function getSaveFormAction(): Action
-    {
-        return parent::getSaveFormAction()
-            ->hidden(fn (ChangeRequestType $record) => $record->trashed());
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            DeleteAction::make(),
-            RestoreAction::make(),
-            ForceDeleteAction::make(),
-        ];
+            ]);
     }
 }

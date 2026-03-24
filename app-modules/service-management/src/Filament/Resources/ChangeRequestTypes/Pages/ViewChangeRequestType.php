@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
 use App\Filament\Resources\UserResource;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\RepeatableEntry;

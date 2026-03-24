@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes;
 
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages\CreateChangeRequestType;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages\EditChangeRequestType;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages\ListChangeRequestTypes;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypeResource\Pages\ViewChangeRequestType;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\CreateChangeRequestType;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\EditChangeRequestType;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\ListChangeRequestTypes;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\ViewChangeRequestType;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use BackedEnum;
