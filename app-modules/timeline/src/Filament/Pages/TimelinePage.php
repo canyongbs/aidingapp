@@ -58,6 +58,9 @@ abstract class TimelinePage extends Page
 
     public string $noMoreRecordsMessage = 'You have reached the end of this timeline.';
 
+    /**
+     * @var array<Model>
+     */
     public array $modelsToTimeline = [];
 
     public Model $currentRecordToView;

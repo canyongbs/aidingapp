@@ -34,31 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages;
+return [
+    'feedback' => [
+        // Shown when feedback management is enabled but feedback collection is disabled for the service request type.
+        'type_feedback_disabled' => 'Feedback has not been enabled for this Service Request Type.',
 
-use AidingApp\Webhook\Filament\Resources\InboundWebhookResource;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
+        // Shown when the service request has not yet reached a closed classification status.
+        'not_closed' => "Since this service request is still not closed, we haven't sent out customer surveys yet. As a result, we're currently unable to report on customer feedback for this service request.",
 
-class ViewInboundWebhook extends ViewRecord
-{
-    protected static string $resource = InboundWebhookResource::class;
+        // Shown when the service request is closed but no feedback survey has been sent (survey_sent_at is null).
+        'no_survey_sent' => 'No feedback survey was sent for this closed request.',
 
-    public function infolist(Schema $schema): Schema
-    {
-        return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('source'),
-                        TextEntry::make('event'),
-                        TextEntry::make('url'),
-                        TextEntry::make('payload')
-                            ->limit(100),
-                    ])
-                    ->columns(),
-            ]);
-    }
-}
+        // Shown when the service request is closed, a survey was sent, but no feedback record exists yet.
+        // :sent_at — formatted datetime of survey_sent_at in the user's timezone.
+        'survey_sent' => 'Feedback survey was sent at :sent_at. Waiting on reply...',
+
+        // Appended on a new line to the survey_sent message when a reminder was also sent (reminder_sent_at is not null).
+        // :reminder_at — formatted datetime of reminder_sent_at in the user's timezone.
+        'reminder_sent' => 'Feedback survey reminder sent at :reminder_at.',
+    ],
+];

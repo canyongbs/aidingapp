@@ -34,39 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Webhook\Filament\Resources;
+namespace AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages;
 
-use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ListInboundWebhooks;
-use AidingApp\Webhook\Filament\Resources\InboundWebhookResource\Pages\ViewInboundWebhook;
-use AidingApp\Webhook\Models\InboundWebhook;
-use App\Models\User;
-use BackedEnum;
-use Filament\Resources\Resource;
-use UnitEnum;
+use AidingApp\Webhook\Filament\Resources\InboundWebhooks\InboundWebhookResource;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class InboundWebhookResource extends Resource
+class ListInboundWebhooks extends ListRecords
 {
-    protected static ?string $model = InboundWebhook::class;
+    protected static string $resource = InboundWebhookResource::class;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-signal';
-
-    protected static ?int $navigationSort = 40;
-
-    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
-
-    public static function canAccess(): bool
+    public function table(Table $table): Table
     {
-        /** @var User $user */
-        $user = auth()->user();
-
-        return $user->isSuperAdmin() && parent::canAccess();
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListInboundWebhooks::route('/'),
-            'view' => ViewInboundWebhook::route('/{record}'),
-        ];
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('source')
+                    ->label('Source'),
+                TextColumn::make('event'),
+                TextColumn::make('url'),
+                TextColumn::make('payload'),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+            ])
+            ->toolbarActions([
+            ]);
     }
 }
