@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
+namespace AidingApp\Authorization\Filament\Resources\Roles\Pages;
 
-use AidingApp\Authorization\Filament\Resources\RoleResource;
+use AidingApp\Authorization\Filament\Resources\Roles\RoleResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Authenticatable;
 use Filament\Actions\CreateAction;

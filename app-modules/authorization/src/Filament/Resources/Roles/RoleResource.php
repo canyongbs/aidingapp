@@ -34,23 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Filament\Resources;
+namespace AidingApp\Authorization\Filament\Resources\Roles;
 
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\CreateRole;
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\EditRole;
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\ListRoles;
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\ViewRole;
+use AidingApp\Authorization\Filament\Resources\Roles\Pages\CreateRole;
+use AidingApp\Authorization\Filament\Resources\Roles\Pages\EditRole;
+use AidingApp\Authorization\Filament\Resources\Roles\Pages\ListRoles;
+use AidingApp\Authorization\Filament\Resources\Roles\Pages\ViewRole;
 use AidingApp\Authorization\Models\Role;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use UnitEnum;
 
 class RoleResource extends Resource
 {
     protected static ?string $model = Role::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'User Management';
+    protected static string | \UnitEnum | null $navigationGroup = 'User Management';
 
     protected static ?int $navigationSort = 30;
 

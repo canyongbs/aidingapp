@@ -34,22 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
+namespace AidingApp\Authorization\Filament\Resources\Roles\Pages;
 
 use AidingApp\Authorization\Enums\PermissionDescription;
-use AidingApp\Authorization\Filament\Resources\RoleResource;
+use AidingApp\Authorization\Filament\Resources\Roles\RoleResource;
 use AidingApp\Authorization\Models\PermissionGroup;
 use CanyonGBS\Common\Filament\Forms\Components\PermissionsMatrix;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Illuminate\Validation\Rules\Unique;
 
-class CreateRole extends CreateRecord
+class ViewRole extends ViewRecord
 {
     protected static string $resource = RoleResource::class;
 
@@ -60,22 +59,13 @@ class CreateRole extends CreateRecord
                 TextInput::make('name')
                     ->required()
                     ->maxLength(125)
-                    ->unique(
-                        table: 'roles',
-                        column: 'name',
-                        modifyRuleUsing: function (Unique $rule, Get $get) {
-                            $rule->where('guard_name', $get('guard_name'));
-                        }
-                    ),
+                    ->unique('roles', 'name'),
                 Select::make('guard_name')
                     ->required()
                     ->options([
                         'web' => 'Web',
                         'api' => 'API',
-                    ])
-                    ->default('web')
-                    ->live()
-                    ->afterStateUpdated(fn (Set $set) => $set('permissions', [])),
+                    ]),
                 Textarea::make('description')
                     ->nullable()
                     ->maxLength(65535)
@@ -83,9 +73,15 @@ class CreateRole extends CreateRecord
                 PermissionsMatrix::make('permissions')
                     ->columnSpanFull()
                     ->guard(fn (Get $get): string => $get('guard_name'))
-                    ->visible(fn (Get $get): bool => filled($get('guard_name')))
                     ->permissionGroupModel(PermissionGroup::class)
                     ->descriptions(PermissionDescription::cases()),
             ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            EditAction::make(),
+        ];
     }
 }
