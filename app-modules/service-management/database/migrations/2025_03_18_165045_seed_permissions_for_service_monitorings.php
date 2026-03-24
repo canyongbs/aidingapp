@@ -40,6 +40,9 @@ use Illuminate\Database\Migrations\Migration;
 return new class () extends Migration {
     use CanModifyPermissions;
 
+    /**
+     * @var array<string, string>
+     */
     private array $permissions = [
         'service_monitoring.view-any' => 'Service Monitoring',
         'service_monitoring.create' => 'Service Monitoring',
@@ -50,6 +53,9 @@ return new class () extends Migration {
         'service_monitoring.*.force-delete' => 'Service Monitoring',
     ];
 
+    /**
+     * @var array<string>
+     */
     private array $guards = [
         'web',
         'api',

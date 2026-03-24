@@ -77,7 +77,7 @@ class GetServiceRequestsController extends Controller
                         return ServiceRequestData::from([
                             'id' => $serviceRequest->getKey(),
                             'number' => $serviceRequest->service_request_number,
-                            'title' => $serviceRequest->serviceRequestFormSubmission?->description ?? $serviceRequest->title,
+                            'title' => $serviceRequest->serviceRequestFormSubmission->description ?? $serviceRequest->title,
                             'statusName' => $serviceRequest->status?->name,
                             'statusColor' => $serviceRequest->status ? $colors[$serviceRequest->status->color->value][600] : null,
                             'icon' => $serviceRequest->priority->type->icon ? svg($serviceRequest->priority->type->icon, 'h-6 w-6')->toHtml() : null,

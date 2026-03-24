@@ -69,6 +69,9 @@ class PortalAuthentication extends BaseModel
         return $this->created_at->addDay()->isPast();
     }
 
+    /**
+     * @return Builder<static>
+     */
     public function prunable(): Builder
     {
         return static::query()

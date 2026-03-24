@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
 class ServiceRequestsStats extends StatsOverviewReportWidget
@@ -102,6 +103,9 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
         ];
     }
 
+    /**
+     * @return array{int, string, ?string, ?string}
+     */
     private function calculateOpenServiceRequestStats(Carbon $intervalStart, ?callable $applyFilters = null): array
     {
         $openStatusIds = ServiceRequestStatus::tap(new ClassifiedIn(SystemServiceRequestClassification::getUnclosedClassifications()))->pluck('id');
@@ -143,7 +147,10 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
         ];
     }
 
-    private function wasOpenAtIntervalStart(ServiceRequest $serviceRequest, $openStatusIds): bool
+    /**
+     * @param Collection<int, string> $openStatusIds
+     */
+    private function wasOpenAtIntervalStart(ServiceRequest $serviceRequest, Collection $openStatusIds): bool
     {
         // If the service request has no history and it is open, it was open at interval date
         if ($serviceRequest->histories->isEmpty()) {
@@ -160,6 +167,9 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
         return false;
     }
 
+    /**
+     * @return array{int, string, ?string, ?string}
+     */
     private function calculateAllServiceRequestStats(Carbon $intervalStart, ?callable $applyFilters = null): array
     {
         $currentAllServiceRequestsQuery = ServiceRequest::query();
@@ -189,6 +199,9 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
         ];
     }
 
+    /**
+     * @return array{non-falsy-string, string, ?string, ?string}
+     */
     private function calculateAverageServiceResolutionTime(Carbon $intervalStart, ?callable $applyFilters = null): array
     {
         $averageServiceResolutionTimeQuery = ServiceRequest::query();
@@ -232,6 +245,9 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
             : ($newValue > 0 ? 100 : 0);
     }
 
+    /**
+     * @return array{string, ?string, ?string}
+     */
     private function getFormattedPercentageChangeDetails(int $percentageChange): array
     {
         if ($percentageChange > 0) {
