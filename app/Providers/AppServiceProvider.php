@@ -68,8 +68,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->singleton('originalAppKey', fn () => config('app.key'));
-
         $this->app->bind(ImportCsv::class, ImportCsvOverride::class);
         $this->app->bind(PrepareCsvExport::class, PrepareCsvExportOverride::class);
     }
