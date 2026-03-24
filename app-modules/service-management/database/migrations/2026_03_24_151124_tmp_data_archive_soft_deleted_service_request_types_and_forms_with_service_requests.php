@@ -34,38 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Support;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-use Filament\Forms\Components\Select;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-
-/**
- * This is used in the `modifyQueryUsing` argument of a `Select` `relationship()` method,
- * usually for a `BelongsTo` relationship, to hide soft-deleted and archived records
- * from the select options, while also ensuring that if the currently-selected
- * record is soft-deleted or archived, it is still loaded and shown as an option.
- */
-class HideDeletedAndArchivedExceptSelectedFromSelectOptions
-{
-    /**
-     * @param Builder<Model> $query
-     *
-     * @return Builder<Model>
-     */
-    public function __invoke(Builder $query, ?Model $record, Select $component): Builder
+return new class () extends Migration {
+    public function up(): void
     {
-        return $query->where(
-            fn (Builder $query) => $query
-                ->where(
-                    fn (Builder $query) => $query /** @phpstan-ignore method.notFound */
-                        ->withoutTrashed()
-                        ->withoutArchived(),
-                )
-                ->orWhere(
-                    $component->getRelationship()->getQualifiedOwnerKeyName(),
-                    $record?->getAttributeValue($component->getRelationship()->getForeignKeyName()),
-                ),
-        );
+        ServiceRequestType::query()
+            ->onlyTrashed()
+            ->whereHas('serviceRequests')
+            ->update([
+                'archived_at' => DB::raw('service_request_types.deleted_at'),
+                'deleted_at' => null,
+            ]);
+
+        ServiceRequestForm::query()
+            ->onlyTrashed()
+            ->whereHas('submissions')
+            ->update([
+                'archived_at' => DB::raw('service_request_forms.deleted_at'),
+                'deleted_at' => null,
+            ]);
     }
-}
+
+    public function down(): void
+    {
+        // This migration is irreversible because we cannot determine which records were originally soft-deleted vs. archived.
+    }
+};

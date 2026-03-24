@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages\Con
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\ServiceRequestFormResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Concerns\EditPageRedirection;
-use App\Filament\Actions\ArchiveAction;
+use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Infolists\Components\TextEntry;

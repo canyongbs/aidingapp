@@ -111,11 +111,8 @@ class ServiceRequestsRelationManager extends RelationManager
                         Select::make('type_id')
                             ->options(
                                 fn (?ServiceRequest $record) => ServiceRequestType::query() // @phpstan-ignore method.notFound
-                                    ->withTrashed()
-                                    ->withArchived()
                                     ->where(
                                         fn (Builder $query) => $query // @phpstan-ignore method.notFound
-                                            ->withoutTrashed()
                                             ->withoutArchived()
                                             ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                                 $query->where(function (Builder $query) {
