@@ -34,45 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages\CreateServiceRequestForm;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages\EditServiceRequestForm;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages\ListServiceRequestForms;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use App\Filament\Clusters\ServiceManagementAdministration;
+use Filament\Resources\Resource;
+use UnitEnum;
 
-class ListServiceRequestForms extends ListRecords
+class ServiceRequestFormResource extends Resource
 {
-    protected static string $resource = ServiceRequestFormResource::class;
+    protected static ?string $model = ServiceRequestForm::class;
 
-    public function table(Table $table): Table
-    {
-        return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->whereHas('type', fn (Builder $query) => $query->withoutTrashed()->withoutArchived())) /** @phpstan-ignore method.notFound */
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name'),
-            ])
-            ->recordActions([
-                Action::make('Respond')
-                    ->url(fn (ServiceRequestForm $form) => route('service-request-forms.show', ['serviceRequestForm' => $form]))
-                    ->icon('heroicon-m-arrow-top-right-on-square')
-                    ->openUrlInNewTab()
-                    ->color('gray'),
-                EditAction::make(),
-            ]);
-    }
+    protected static ?int $navigationSort = 30;
 
-    protected function getHeaderActions(): array
+    protected static string | UnitEnum | null $navigationGroup = 'Service Requests';
+
+    protected static ?string $navigationLabel = 'Forms';
+
+    protected static ?string $cluster = ServiceManagementAdministration::class;
+
+    public static function getPages(): array
     {
         return [
-            CreateAction::make(),
+            'index' => ListServiceRequestForms::route('/'),
+            'create' => CreateServiceRequestForm::route('/create'),
+            'edit' => EditServiceRequestForm::route('/{record}/edit'),
         ];
     }
 }

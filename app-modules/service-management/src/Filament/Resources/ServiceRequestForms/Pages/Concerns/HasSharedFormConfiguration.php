@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\Concerns;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages\Concerns;
 
 use AidingApp\Form\Enums\Rounding;
 use AidingApp\Form\Filament\Blocks\FormFieldBlockRegistry;

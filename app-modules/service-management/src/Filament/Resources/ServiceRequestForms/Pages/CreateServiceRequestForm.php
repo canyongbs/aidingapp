@@ -34,34 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\CreateServiceRequestForm;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\EditServiceRequestForm;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\ListServiceRequestForms;
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use App\Filament\Clusters\ServiceManagementAdministration;
-use Filament\Resources\Resource;
-use UnitEnum;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages\Concerns\HasSharedFormConfiguration;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\ServiceRequestFormResource;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
-class ServiceRequestFormResource extends Resource
+class CreateServiceRequestForm extends CreateRecord
 {
-    protected static ?string $model = ServiceRequestForm::class;
+    use HasSharedFormConfiguration;
 
-    protected static ?int $navigationSort = 30;
+    protected static string $resource = ServiceRequestFormResource::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Requests';
-
-    protected static ?string $navigationLabel = 'Forms';
-
-    protected static ?string $cluster = ServiceManagementAdministration::class;
-
-    public static function getPages(): array
+    public function form(Schema $schema): Schema
     {
-        return [
-            'index' => ListServiceRequestForms::route('/'),
-            'create' => CreateServiceRequestForm::route('/create'),
-            'edit' => EditServiceRequestForm::route('/{record}/edit'),
-        ];
+        return $schema
+            ->components($this->fields());
     }
 }

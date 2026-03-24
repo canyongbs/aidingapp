@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages;
 
 use AidingApp\Form\Actions\GenerateSubmissibleEmbedCode;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestFormResource\Pages\Concerns\HasSharedFormConfiguration;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages\Concerns\HasSharedFormConfiguration;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\ServiceRequestFormResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Concerns\EditPageRedirection;
 use App\Filament\Actions\ArchiveAction;
