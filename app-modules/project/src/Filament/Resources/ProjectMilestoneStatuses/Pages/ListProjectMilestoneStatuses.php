@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
+namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages;
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\ProjectMilestoneStatusResource;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -87,8 +87,8 @@ class ListProjectMilestoneStatuses extends ListRecords
                                 ->title('Deleted ' . $deletedCount . ' statuses')
                                 ->body(
                                     $deletedCount < $records->count()
-                                            ? ($records->count() - $deletedCount) . ' statuses were not deleted because they have associated project milestones.'
-                                            : null
+                                        ? ($records->count() - $deletedCount) . ' statuses were not deleted because they have associated project milestones.'
+                                        : null
                                 )
                                 ->success()
                                 ->send();

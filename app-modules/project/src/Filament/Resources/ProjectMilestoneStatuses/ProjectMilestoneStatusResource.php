@@ -34,37 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource\Pages;
+namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses;
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatusResource;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\CreateProjectMilestoneStatus;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\EditProjectMilestoneStatus;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ListProjectMilestoneStatuses;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ViewProjectMilestoneStatus;
+use AidingApp\Project\Models\ProjectMilestoneStatus;
+use App\Filament\Clusters\ProjectManagement;
+use BackedEnum;
+use Filament\Resources\Resource;
 
-class ViewProjectMilestoneStatus extends ViewRecord
+class ProjectMilestoneStatusResource extends Resource
 {
-    protected static string $resource = ProjectMilestoneStatusResource::class;
+    protected static ?string $model = ProjectMilestoneStatus::class;
 
-    public function infolist(Schema $schema): Schema
-    {
-        return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name'),
-                        TextEntry::make('description')
-                            ->label('Description'),
-                    ]),
-            ]);
-    }
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected function getHeaderActions(): array
+    protected static ?string $navigationLabel = 'Statuses';
+
+    protected static ?string $cluster = ProjectManagement::class;
+
+    protected static ?int $navigationSort = 20;
+
+    public static function getPages(): array
     {
         return [
-            EditAction::make(),
+            'index' => ListProjectMilestoneStatuses::route('/'),
+            'create' => CreateProjectMilestoneStatus::route('/create'),
+            'edit' => EditProjectMilestoneStatus::route('/{record}/edit'),
+            'view' => ViewProjectMilestoneStatus::route('/{record}'),
         ];
     }
 }
