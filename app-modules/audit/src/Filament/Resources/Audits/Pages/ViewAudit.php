@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Audit\Filament\Resources\AuditResource\Pages;
+namespace AidingApp\Audit\Filament\Resources\Audits\Pages;
 
-use AidingApp\Audit\Filament\Resources\AuditResource;
+use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
 use AidingApp\Audit\Models\Audit;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
