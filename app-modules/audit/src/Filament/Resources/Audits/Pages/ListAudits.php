@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Audit\Filament\Resources\AuditResource\Pages;
+namespace AidingApp\Audit\Filament\Resources\Audits\Pages;
 
 use AidingApp\Audit\Actions\Finders\AuditableModels;
-use AidingApp\Audit\Filament\Resources\AuditResource;
+use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
 use Filament\Actions\ViewAction;
