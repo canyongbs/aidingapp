@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Team\Filament\Resources\TeamResource\RelationManagers;
+namespace AidingApp\Team\Filament\Resources\Teams\RelationManagers;
 
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\WithoutAnyAdmin;
@@ -98,7 +98,6 @@ class UsersRelationManager extends RelationManager
                 DissociateAction::make()
                     ->label('Remove from this team'),
             ])
-            ->toolbarActions([
-            ]);
+            ->toolbarActions([]);
     }
 }
