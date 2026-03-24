@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Filament\Resources;
+namespace AidingApp\Authorization\Filament\Resources\Roles;
 
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\CreateRole;
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\EditRole;
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\ListRoles;
-use AidingApp\Authorization\Filament\Resources\RoleResource\Pages\ViewRole;
+use AidingApp\Authorization\Filament\Resources\Roles\Pages\CreateRole;
+use AidingApp\Authorization\Filament\Resources\Roles\Pages\EditRole;
+use AidingApp\Authorization\Filament\Resources\Roles\Pages\ListRoles;
+use AidingApp\Authorization\Filament\Resources\Roles\Pages\ViewRole;
 use AidingApp\Authorization\Models\Role;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;

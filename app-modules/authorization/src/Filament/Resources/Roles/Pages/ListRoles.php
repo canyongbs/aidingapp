@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
+namespace AidingApp\Authorization\Filament\Resources\Roles\Pages;
 
-use AidingApp\Authorization\Filament\Resources\RoleResource;
+use AidingApp\Authorization\Filament\Resources\Roles\RoleResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Authenticatable;
 use Filament\Actions\CreateAction;
@@ -45,7 +45,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListRoles extends ListRecords
 {

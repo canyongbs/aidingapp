@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Filament\Resources\RoleResource\Pages;
+namespace AidingApp\Authorization\Filament\Resources\Roles\Pages;
 
 use AidingApp\Authorization\Enums\PermissionDescription;
-use AidingApp\Authorization\Filament\Resources\RoleResource;
+use AidingApp\Authorization\Filament\Resources\Roles\RoleResource;
 use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Authorization\Models\Role;
 use App\Concerns\EditPageRedirection;
