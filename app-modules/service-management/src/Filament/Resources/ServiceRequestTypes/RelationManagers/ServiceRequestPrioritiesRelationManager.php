@@ -36,7 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\RelationManagers;
 
-use AidingApp\ServiceManagement\Filament\Resources\SlaResource;
+use AidingApp\ServiceManagement\Filament\Resources\SLAs\SlaResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;

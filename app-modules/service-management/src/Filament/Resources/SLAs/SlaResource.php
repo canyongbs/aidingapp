@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\SLAs;
 
-use AidingApp\ServiceManagement\Filament\Resources\SlaResource\Pages\CreateSla;
-use AidingApp\ServiceManagement\Filament\Resources\SlaResource\Pages\EditSla;
-use AidingApp\ServiceManagement\Filament\Resources\SlaResource\Pages\ListSlas;
-use AidingApp\ServiceManagement\Filament\Resources\SlaResource\RelationManagers\ServiceRequestPrioritiesRelationManager;
+use AidingApp\ServiceManagement\Filament\Resources\SLAs\Pages\CreateSla;
+use AidingApp\ServiceManagement\Filament\Resources\SLAs\Pages\EditSla;
+use AidingApp\ServiceManagement\Filament\Resources\SLAs\Pages\ListSlas;
+use AidingApp\ServiceManagement\Filament\Resources\SLAs\RelationManagers\ServiceRequestPrioritiesRelationManager;
 use AidingApp\ServiceManagement\Models\Sla;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use App\Filament\Forms\Components\SecondsDurationInput;
