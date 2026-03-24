@@ -36,8 +36,8 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages\EditServiceRequestStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\EditServiceRequestStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestStatusRequestFactory;
 use App\Models\User;

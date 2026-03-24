@@ -2211,7 +2211,7 @@ $ignoreErrors[] = [
     'message' => '#^Dead catch \\- Illuminate\\\\Database\\\\QueryException is never thrown in the try block\\.$#',
     'identifier' => 'catch.neverThrown',
     'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestStatusResource/Pages/ListServiceRequestStatuses.php',
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestStatuses/Pages/ListServiceRequestStatuses.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property Filament\\\\Resources\\\\Pages\\\\Page\\:\\:\\$record\\.$#',

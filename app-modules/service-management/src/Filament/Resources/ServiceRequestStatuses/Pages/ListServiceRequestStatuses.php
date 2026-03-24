@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;

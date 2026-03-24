@@ -34,19 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages;
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Concerns\EditPageRedirection;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
-class CreateServiceRequestStatus extends CreateRecord
+class EditServiceRequestStatus extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ServiceRequestStatusResource::class;
 
     public function form(Schema $schema): Schema
@@ -68,6 +76,21 @@ class CreateServiceRequestStatus extends CreateRecord
                         ColorSelect::make()
                             ->required(),
                     ]),
-            ]);
+            ])->disabled(fn (ServiceRequestStatus $record) => $record->trashed());
+    }
+
+    protected function getSaveFormAction(): Action
+    {
+        return parent::getSaveFormAction()
+            ->hidden(fn (ServiceRequestStatus $record) => $record->trashed());
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            DeleteAction::make(),
+            RestoreAction::make(),
+            ForceDeleteAction::make(),
+        ];
     }
 }

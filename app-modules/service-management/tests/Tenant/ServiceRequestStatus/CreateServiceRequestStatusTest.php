@@ -35,8 +35,8 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages\CreateServiceRequestStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\CreateServiceRequestStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestStatusRequestFactory;
 use App\Models\User;

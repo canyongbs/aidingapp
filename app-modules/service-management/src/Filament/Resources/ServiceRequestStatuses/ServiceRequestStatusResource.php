@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages\CreateServiceRequestStatus;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages\EditServiceRequestStatus;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages\ListServiceRequestStatuses;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages\ViewServiceRequestStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\CreateServiceRequestStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\EditServiceRequestStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\ListServiceRequestStatuses;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\ViewServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use Filament\Resources\Resource;

@@ -35,8 +35,8 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages\ViewServiceRequestStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\ViewServiceRequestStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Models\User;
 use App\Settings\LicenseSettings;

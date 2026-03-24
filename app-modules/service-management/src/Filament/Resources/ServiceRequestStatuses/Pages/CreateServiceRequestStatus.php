@@ -34,58 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
+use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Support\Facades\FilamentView;
-use Filament\View\PanelsRenderHook;
-use Illuminate\Contracts\View\View;
 
-class ViewServiceRequestStatus extends ViewRecord
+class CreateServiceRequestStatus extends CreateRecord
 {
     protected static string $resource = ServiceRequestStatusResource::class;
 
-    public function boot(): void
-    {
-        FilamentView::registerRenderHook(
-            PanelsRenderHook::PAGE_HEADER_ACTIONS_AFTER,
-            fn (): View => view('service-management::filament.pages.service-request-type-lock-icon'),
-            scopes: static::class,
-        );
-    }
-
-    public function infolist(Schema $schema): Schema
+    public function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 Section::make()
+                    ->columns()
                     ->schema([
-                        TextEntry::make('name')
-                            ->label('Name'),
-                        TextEntry::make('classification')
-                            ->label('Classification'),
-                        TextEntry::make('color')
-                            ->label('Color')
-                            ->badge()
-                            ->color(fn (ServiceRequestStatus $serviceRequestStatus) => $serviceRequestStatus->color->value),
-                        TextEntry::make('sort')
-                            ->label('Sort Order')
-                            ->numeric(),
-                    ])
-                    ->columns(),
+                        TextInput::make('name')
+                            ->label('Name')
+                            ->required()
+                            ->string(),
+                        Select::make('classification')
+                            ->searchable()
+                            ->options(SystemServiceRequestClassification::class)
+                            ->required()
+                            ->enum(SystemServiceRequestClassification::class),
+                        ColorSelect::make()
+                            ->required(),
+                    ]),
             ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            EditAction::make(),
-        ];
     }
 }

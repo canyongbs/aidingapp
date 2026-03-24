@@ -34,63 +34,58 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages;
 
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatusResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Concerns\EditPageRedirection;
-use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
-use Filament\Actions\Action;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\RestoreAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Facades\FilamentView;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Contracts\View\View;
 
-class EditServiceRequestStatus extends EditRecord
+class ViewServiceRequestStatus extends ViewRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ServiceRequestStatusResource::class;
 
-    public function form(Schema $schema): Schema
+    public function boot(): void
     {
-        return $schema
-            ->components([
-                Section::make()
-                    ->columns()
-                    ->schema([
-                        TextInput::make('name')
-                            ->label('Name')
-                            ->required()
-                            ->string(),
-                        Select::make('classification')
-                            ->searchable()
-                            ->options(SystemServiceRequestClassification::class)
-                            ->required()
-                            ->enum(SystemServiceRequestClassification::class),
-                        ColorSelect::make()
-                            ->required(),
-                    ]),
-            ])->disabled(fn (ServiceRequestStatus $record) => $record->trashed());
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::PAGE_HEADER_ACTIONS_AFTER,
+            fn (): View => view('service-management::filament.pages.service-request-type-lock-icon'),
+            scopes: static::class,
+        );
     }
 
-    protected function getSaveFormAction(): Action
+    public function infolist(Schema $schema): Schema
     {
-        return parent::getSaveFormAction()
-            ->hidden(fn (ServiceRequestStatus $record) => $record->trashed());
+        return $schema
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Name'),
+                        TextEntry::make('classification')
+                            ->label('Classification'),
+                        TextEntry::make('color')
+                            ->label('Color')
+                            ->badge()
+                            ->color(fn (ServiceRequestStatus $serviceRequestStatus) => $serviceRequestStatus->color->value),
+                        TextEntry::make('sort')
+                            ->label('Sort Order')
+                            ->numeric(),
+                    ])
+                    ->columns(),
+            ]);
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
-            RestoreAction::make(),
-            ForceDeleteAction::make(),
+            EditAction::make(),
         ];
     }
 }
