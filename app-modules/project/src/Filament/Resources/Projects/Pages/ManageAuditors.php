@@ -34,35 +34,36 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ListProjectMilestoneStatuses;
-use App\Models\User;
-use App\Settings\LicenseSettings;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\AuditorTeamsRelationManager;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\AuditorUsersRelationManager;
+use Filament\Resources\Pages\ManageRelatedRecords;
 
-it('is gated with proper access control', function () {
-    $settings = app(LicenseSettings::class);
+class ManageAuditors extends ManageRelatedRecords
+{
+    protected static string $resource = ProjectResource::class;
 
-    $settings->data->addons->projectManagement = false;
-    $settings->save();
+    protected static string $relationship = 'auditorUsers';
 
-    $user = User::factory()->create();
+    public static function getNavigationLabel(): string
+    {
+        return 'Auditors';
+    }
 
-    $user->givePermissionTo('settings.view-any');
+    public function getRelationManagers(): array
+    {
+        return [
+            AuditorUsersRelationManager::class,
+            AuditorTeamsRelationManager::class,
+        ];
+    }
 
-    actingAs($user);
+    public static function canAccess(array $arguments = []): bool
+    {
+        $user = auth()->user();
 
-    get(ListProjectMilestoneStatuses::getUrl())->assertForbidden();
-
-    $settings->data->addons->projectManagement = true;
-    $settings->save();
-
-    $user->revokePermissionTo('settings.view-any');
-
-    get(ListProjectMilestoneStatuses::getUrl())->assertForbidden();
-
-    $user->givePermissionTo('settings.view-any');
-
-    get(ListProjectMilestoneStatuses::getUrl())->assertSuccessful();
-});
+        return $user->can(['project.view-any', 'project.*.view']) && parent::canAccess($arguments);
+    }
+}

@@ -34,35 +34,39 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ListProjectMilestoneStatuses;
-use App\Models\User;
-use App\Settings\LicenseSettings;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
-it('is gated with proper access control', function () {
-    $settings = app(LicenseSettings::class);
+class ViewProject extends ViewRecord
+{
+    protected static string $resource = ProjectResource::class;
 
-    $settings->data->addons->projectManagement = false;
-    $settings->save();
+    protected static ?string $navigationLabel = 'View';
 
-    $user = User::factory()->create();
+    public function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name'),
+                        TextEntry::make('description')
+                            ->label('Description')
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
 
-    $user->givePermissionTo('settings.view-any');
-
-    actingAs($user);
-
-    get(ListProjectMilestoneStatuses::getUrl())->assertForbidden();
-
-    $settings->data->addons->projectManagement = true;
-    $settings->save();
-
-    $user->revokePermissionTo('settings.view-any');
-
-    get(ListProjectMilestoneStatuses::getUrl())->assertForbidden();
-
-    $user->givePermissionTo('settings.view-any');
-
-    get(ListProjectMilestoneStatuses::getUrl())->assertSuccessful();
-});
+    protected function getHeaderActions(): array
+    {
+        return [
+            EditAction::make(),
+        ];
+    }
+}

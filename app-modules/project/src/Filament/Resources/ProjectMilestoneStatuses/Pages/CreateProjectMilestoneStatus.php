@@ -34,35 +34,33 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ListProjectMilestoneStatuses;
-use App\Models\User;
-use App\Settings\LicenseSettings;
+namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\ProjectMilestoneStatusResource;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
-it('is gated with proper access control', function () {
-    $settings = app(LicenseSettings::class);
+class CreateProjectMilestoneStatus extends CreateRecord
+{
+    protected static string $resource = ProjectMilestoneStatusResource::class;
 
-    $settings->data->addons->projectManagement = false;
-    $settings->save();
-
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('settings.view-any');
-
-    actingAs($user);
-
-    get(ListProjectMilestoneStatuses::getUrl())->assertForbidden();
-
-    $settings->data->addons->projectManagement = true;
-    $settings->save();
-
-    $user->revokePermissionTo('settings.view-any');
-
-    get(ListProjectMilestoneStatuses::getUrl())->assertForbidden();
-
-    $user->givePermissionTo('settings.view-any');
-
-    get(ListProjectMilestoneStatuses::getUrl())->assertSuccessful();
-});
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->maxLength(255)
+                    ->autofocus()
+                    ->required()
+                    ->string()
+                    ->unique(),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->maxLength(65535)
+                    ->required(),
+            ]);
+    }
+}

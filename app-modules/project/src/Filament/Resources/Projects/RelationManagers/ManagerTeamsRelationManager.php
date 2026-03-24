@@ -34,35 +34,41 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ListProjectMilestoneStatuses;
-use App\Models\User;
-use App\Settings\LicenseSettings;
+namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
+use AidingApp\Project\Models\Project;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-it('is gated with proper access control', function () {
-    $settings = app(LicenseSettings::class);
+class ManagerTeamsRelationManager extends RelationManager
+{
+    protected static string $relationship = 'managerTeams';
 
-    $settings->data->addons->projectManagement = false;
-    $settings->save();
+    protected static ?string $title = 'Teams';
 
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('settings.view-any');
-
-    actingAs($user);
-
-    get(ListProjectMilestoneStatuses::getUrl())->assertForbidden();
-
-    $settings->data->addons->projectManagement = true;
-    $settings->save();
-
-    $user->revokePermissionTo('settings.view-any');
-
-    get(ListProjectMilestoneStatuses::getUrl())->assertForbidden();
-
-    $user->givePermissionTo('settings.view-any');
-
-    get(ListProjectMilestoneStatuses::getUrl())->assertSuccessful();
-});
+    public function table(Table $table): Table
+    {
+        return $table
+            ->recordTitleAttribute('name')
+            ->columns([
+                TextColumn::make('name'),
+            ])
+            ->headerActions([
+                AttachAction::make()
+                    ->authorize('update', Project::class),
+            ])
+            ->recordActions([
+                DetachAction::make()
+                    ->authorize('update', Project::class),
+            ])
+            ->toolbarActions([
+                DetachBulkAction::make()
+                    ->authorize('update', Project::class),
+            ])
+            ->inverseRelationship('managedProjects');
+    }
+}

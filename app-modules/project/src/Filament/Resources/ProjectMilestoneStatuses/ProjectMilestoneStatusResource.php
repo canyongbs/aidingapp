@@ -34,35 +34,36 @@
 </COPYRIGHT>
 */
 
+namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses;
+
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\CreateProjectMilestoneStatus;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\EditProjectMilestoneStatus;
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ListProjectMilestoneStatuses;
-use App\Models\User;
-use App\Settings\LicenseSettings;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ViewProjectMilestoneStatus;
+use AidingApp\Project\Models\ProjectMilestoneStatus;
+use App\Filament\Clusters\ProjectManagement;
+use BackedEnum;
+use Filament\Resources\Resource;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
+class ProjectMilestoneStatusResource extends Resource
+{
+    protected static ?string $model = ProjectMilestoneStatus::class;
 
-it('is gated with proper access control', function () {
-    $settings = app(LicenseSettings::class);
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    $settings->data->addons->projectManagement = false;
-    $settings->save();
+    protected static ?string $navigationLabel = 'Statuses';
 
-    $user = User::factory()->create();
+    protected static ?string $cluster = ProjectManagement::class;
 
-    $user->givePermissionTo('settings.view-any');
+    protected static ?int $navigationSort = 20;
 
-    actingAs($user);
-
-    get(ListProjectMilestoneStatuses::getUrl())->assertForbidden();
-
-    $settings->data->addons->projectManagement = true;
-    $settings->save();
-
-    $user->revokePermissionTo('settings.view-any');
-
-    get(ListProjectMilestoneStatuses::getUrl())->assertForbidden();
-
-    $user->givePermissionTo('settings.view-any');
-
-    get(ListProjectMilestoneStatuses::getUrl())->assertSuccessful();
-});
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListProjectMilestoneStatuses::route('/'),
+            'create' => CreateProjectMilestoneStatus::route('/create'),
+            'edit' => EditProjectMilestoneStatus::route('/{record}/edit'),
+            'view' => ViewProjectMilestoneStatus::route('/{record}'),
+        ];
+    }
+}

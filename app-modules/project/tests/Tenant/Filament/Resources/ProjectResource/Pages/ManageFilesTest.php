@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Project\Filament\Resources\ProjectResource\Pages\ManageFiles;
+use AidingApp\Project\Filament\Resources\Projects\Pages\ManageFiles;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectFile;
 use App\Models\User;

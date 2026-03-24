@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Project\Filament\Resources\PipelineResource\Pages\CreatePipeline;
+use AidingApp\Project\Filament\Resources\Pipelines\Pages\CreatePipeline;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory\CreatePipelineRequestFactory;
 use App\Models\User;
