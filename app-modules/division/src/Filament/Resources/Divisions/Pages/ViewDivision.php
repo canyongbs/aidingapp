@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
+namespace AidingApp\Division\Filament\Resources\Divisions\Pages;
 
-use AidingApp\Division\Filament\Resources\DivisionResource;
+use AidingApp\Division\Filament\Resources\Divisions\DivisionResource;
 use AidingApp\Division\Models\Division;
 use App\Filament\Resources\NotificationSettingResource;
 use App\Filament\Resources\UserResource;

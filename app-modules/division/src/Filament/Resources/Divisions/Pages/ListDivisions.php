@@ -34,42 +34,64 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources\DivisionResource\RelationManagers;
+namespace AidingApp\Division\Filament\Resources\Divisions\Pages;
 
+use AidingApp\Division\Filament\Resources\Divisions\DivisionResource;
 use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\AssociateAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DissociateAction;
-use Filament\Actions\DissociateBulkAction;
-use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class TeamsRelationManager extends RelationManager
+class ListDivisions extends ListRecords
 {
-    protected static string $relationship = 'teams';
+    protected static string $resource = DivisionResource::class;
 
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('name')
-            ->inverseRelationship('division')
             ->columns([
                 IdColumn::make(),
-                TextColumn::make('name'),
-            ])
-            ->headerActions([
-                AssociateAction::make(),
+                TextColumn::make('name')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('code')
+                    ->sortable()
+                    ->searchable(),
+                IconColumn::make('is_default')
+                    ->label('Default')
+                    ->boolean(),
+                TextColumn::make('createdBy.name')
+                    ->default('N/A')
+                    ->label('Created By')
+                    ->sortable(),
+                TextColumn::make('updated_at')
+                    ->label('Updated At')
+                    ->dateTime(config('project.datetime_format') ?? 'Y-m-d H:i:s')
+                    ->sortable(),
+                TextColumn::make('notificationSetting.setting.name')
+                    ->label('Notification Setting'),
             ])
             ->recordActions([
-                DissociateAction::make(),
+                ViewAction::make(),
+                EditAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DissociateBulkAction::make(),
+                    DeleteBulkAction::make(),
                 ]),
-            ])
-            ->emptyStateActions([
             ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
     }
 }
