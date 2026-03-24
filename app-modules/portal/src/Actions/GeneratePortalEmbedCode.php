@@ -38,7 +38,6 @@ namespace AidingApp\Portal\Actions;
 
 use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Settings\PortalSettings;
-use Exception;
 use Illuminate\Support\Facades\File;
 
 class GeneratePortalEmbedCode
@@ -86,7 +85,6 @@ class GeneratePortalEmbedCode
                 <script src="{$loaderScriptUrl}"></script>
                 EOD;
             })(),
-            default => throw new Exception('Unsupported Portal.'),
         };
     }
 }

@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Notifications;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\StoredAnonymousNotifiable;
 use AidingApp\Notification\Notifications\Attributes\SystemNotification;
@@ -73,6 +74,9 @@ class AuthenticatePortalNotification extends Notification implements ShouldQueue
             ->line('For security reasons, the code will expire in 24 hours, but you can always request another.');
     }
 
+    /**
+     * @return array<string>
+     */
     public function identifyRecipient(?object $notifiable = null): array
     {
         /** @var ?Contact $contact */

@@ -73,6 +73,9 @@ class KnowledgeBaseArticleVote extends Pivot
         return $this->morphTo();
     }
 
+    /**
+     * @return BelongsTo<KnowledgeBaseItem, $this>
+     */
     public function knowledgeBaseArticle(): BelongsTo
     {
         return $this->belongsTo(KnowledgeBaseItem::class, 'article_id');
