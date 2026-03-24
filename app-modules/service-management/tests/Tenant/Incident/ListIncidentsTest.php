@@ -33,8 +33,9 @@
 
 </COPYRIGHT>
 */
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ListIncidents;
+
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\IncidentResource;
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\Pages\ListIncidents;
 use AidingApp\ServiceManagement\Models\Incident;
 use App\Models\User;
 use App\Settings\LicenseSettings;

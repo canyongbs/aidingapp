@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\CreateIncident;
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\IncidentResource;
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\Pages\CreateIncident;
 use AidingApp\ServiceManagement\Models\Incident;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\IncidentRequestFactory;
 use App\Models\User;

@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\Incidents\Pages;
 
 use AidingApp\ServiceManagement\Enums\SystemIncidentStatusClassification;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\IncidentResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
 use AidingApp\ServiceManagement\Models\Incident;
 use AidingApp\ServiceManagement\Models\IncidentStatus;

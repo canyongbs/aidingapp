@@ -36,7 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\IncidentResource;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentUpdateResource;
 use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use Filament\Actions\EditAction;

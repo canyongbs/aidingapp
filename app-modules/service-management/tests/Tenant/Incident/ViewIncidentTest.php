@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\IncidentResource;
 use AidingApp\ServiceManagement\Models\Incident;
 use App\Models\User;
 

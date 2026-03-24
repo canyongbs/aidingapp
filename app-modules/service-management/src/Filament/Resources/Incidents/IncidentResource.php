@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources;
+namespace AidingApp\ServiceManagement\Filament\Resources\Incidents;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\CreateIncident;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\EditIncident;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ListIncidents;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ManageIncidentUpdate;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages\ViewIncident;
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\Pages\CreateIncident;
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\Pages\EditIncident;
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\Pages\ListIncidents;
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\Pages\ManageIncidentUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\Pages\ViewIncident;
 use AidingApp\ServiceManagement\Models\Incident;
 use BackedEnum;
 use Filament\Resources\Pages\Page;

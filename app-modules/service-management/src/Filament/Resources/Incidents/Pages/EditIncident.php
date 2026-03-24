@@ -34,49 +34,59 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\Incidents\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\IncidentResource;
 use AidingApp\ServiceManagement\Models\Incident;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\ColorEntry;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
-class ViewIncident extends ViewRecord
+class EditIncident extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = IncidentResource::class;
 
-    protected static ?string $navigationLabel = 'View';
+    protected static ?string $navigationLabel = 'Edit';
 
-    public function infolist(Schema $schema): Schema
+    public function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('title')
-                            ->label('Title'),
-                        TextEntry::make('description')
-                            ->label('Description'),
-                        ColorEntry::make('severity.rgb_color')
-                            ->label('Severity')
-                            ->tooltip(fn (Incident $record) => $record->severity->name),
-                        TextEntry::make('status.name')
-                            ->label('Status'),
-                        TextEntry::make('assignedTeam.name')
-                            ->label('Assigned Team'),
-                        TextEntry::make('created_at')
-                            ->datetime('Y-m-d H:i:s')
-                            ->label('Created'),
-                        TextEntry::make('updated_at')
-                            ->datetime('Y-m-d H:i:s')
-                            ->label('Last Updated'),
-                    ])
-                    ->columns(),
+            ->components([
+                TextInput::make('title')
+                    ->label('Title')
+                    ->required()
+                    ->maxLength(255)
+                    ->string(),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->required()
+                    ->maxLength(65535)
+                    ->string(),
+                Select::make('severity_id')
+                    ->label('Severity')
+                    ->preload()
+                    ->required()
+                    ->searchable()
+                    ->relationship('severity', 'name'),
+                Select::make('status_id')
+                    ->label('Status')
+                    ->required()
+                    ->preload()
+                    ->searchable()
+                    ->relationship('status', 'name'),
+                Select::make('assigned_team_id')
+                    ->label('Assigned Team')
+                    ->preload()
+                    ->searchable()
+                    ->relationship('assignedTeam', 'name'),
             ]);
     }
 
@@ -106,7 +116,8 @@ class ViewIncident extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

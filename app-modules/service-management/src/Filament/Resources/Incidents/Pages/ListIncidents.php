@@ -34,51 +34,59 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\IncidentResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\Incidents\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentResource;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Schema;
+use AidingApp\ServiceManagement\Filament\Resources\Incidents\IncidentResource;
+use AidingApp\ServiceManagement\Models\Incident;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\ColorColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class CreateIncident extends CreateRecord
+class ListIncidents extends ListRecords
 {
     protected static string $resource = IncidentResource::class;
 
-    public function form(Schema $schema): Schema
+    public function table(Table $table): Table
     {
-        return $schema
-            ->components([
-                TextInput::make('title')
+        return $table
+            ->columns([
+                TextColumn::make('title')
                     ->label('Title')
-                    ->required()
-                    ->maxLength(255)
-                    ->string(),
-                Textarea::make('description')
-                    ->label('Description')
-                    ->required()
-                    ->maxLength(65535)
-                    ->string(),
-                Select::make('severity_id')
+                    ->searchable()
+                    ->sortable(),
+                ColorColumn::make('severity.rgb_color')
                     ->label('Severity')
-                    ->preload()
-                    ->required()
-                    ->searchable()
-                    ->relationship('severity', 'name'),
-                Select::make('status_id')
+                    ->tooltip(fn (Incident $record) => $record->severity->name),
+                TextColumn::make('status.name')
                     ->label('Status')
-                    ->required()
-                    ->preload()
                     ->searchable()
-                    ->relationship('status', 'name'),
-                Select::make('assigned_team_id')
+                    ->sortable(),
+                TextColumn::make('assignedTeam.name')
                     ->label('Assigned Team')
-                    ->preload()
                     ->searchable()
-                    ->relationship('assignedTeam', 'name')
-                    ->default(auth()->user()?->team?->getKey()),
+                    ->sortable(),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
     }
 }
