@@ -34,38 +34,52 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions\DeleteAction;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBaseStatusResource;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class EditKnowledgeBaseStatus extends EditRecord
+class ListKnowledgeBaseStatuses extends ListRecords
 {
-    use EditPageRedirection;
-
     protected static string $resource = KnowledgeBaseStatusResource::class;
 
-    public function form(Schema $schema): Schema
+    public function table(Table $table): Table
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name')
                     ->label('Name')
-                    ->required()
-                    ->string(),
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('knowledge_base_items_count')
+                    ->label('# of Knowledge Base Items')
+                    ->counts('knowledgeBaseItems')
+                    ->sortable(),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make(),
-            DeleteAction::make(),
+            CreateAction::make(),
         ];
     }
 }

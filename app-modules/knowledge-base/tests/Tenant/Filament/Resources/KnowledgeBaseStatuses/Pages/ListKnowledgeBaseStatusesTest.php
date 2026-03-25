@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBaseStatusResource;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 

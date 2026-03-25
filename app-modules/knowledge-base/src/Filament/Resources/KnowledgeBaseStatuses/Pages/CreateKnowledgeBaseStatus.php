@@ -34,36 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBaseStatusResource;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
 
-class ViewKnowledgeBaseStatus extends ViewRecord
+class CreateKnowledgeBaseStatus extends CreateRecord
 {
     protected static string $resource = KnowledgeBaseStatusResource::class;
 
-    public function infolist(Schema $schema): Schema
+    public function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name'),
-                    ])
-                    ->columns(),
+            ->components([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->required()
+                    ->string(),
             ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            EditAction::make(),
-        ];
     }
 }

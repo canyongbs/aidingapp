@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseStatus\RequestFactories;
+namespace AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseStatuses\RequestFactories;
 
 use Worksome\RequestFactories\RequestFactory;
 
-class EditKnowledgeBaseStatusRequestFactory extends RequestFactory
+class CreateKnowledgeBaseStatusRequestFactory extends RequestFactory
 {
     public function definition(): array
     {

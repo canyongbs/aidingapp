@@ -33,57 +33,43 @@
 
 </COPYRIGHT>
 */
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus;
+
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBaseStatusResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseStatus\RequestFactories\CreateKnowledgeBaseStatusRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
-use function PHPUnit\Framework\assertCount;
 
-// TODO: Write CreateKnowledgeBaseStatus tests
-//test('A successful action on the CreateKnowledgeBaseStatus page', function () {});
-//
-//test('CreateKnowledgeBaseStatus requires valid data', function ($data, $errors) {})->with([]);
+// TODO: Write ViewKnowledgeBaseStatus tests
+//test('The correct details are displayed on the ViewKnowledgeBaseStatus page', function () {});
 
 // Permission Tests
 
-test('CreateKnowledgeBaseStatus is gated with proper access control', function () {
+test('ViewKnowledgeBaseStatus is gated with proper access control', function () {
     $user = User::factory()->create();
 
+    $knowledgeBaseStatus = KnowledgeBaseStatus::factory()->create();
+
     actingAs($user)
         ->get(
-            KnowledgeBaseStatusResource::getUrl('create')
+            KnowledgeBaseStatusResource::getUrl('view', [
+                'record' => $knowledgeBaseStatus,
+            ])
         )->assertForbidden();
 
-    livewire(CreateKnowledgeBaseStatus::class)
-        ->assertForbidden();
-
     $user->givePermissionTo('settings.view-any');
-    $user->givePermissionTo('settings.create');
+    $user->givePermissionTo('settings.*.view');
 
     actingAs($user)
         ->get(
-            KnowledgeBaseStatusResource::getUrl('create')
+            KnowledgeBaseStatusResource::getUrl('view', [
+                'record' => $knowledgeBaseStatus,
+            ])
         )->assertSuccessful();
-
-    $request = collect(CreateKnowledgeBaseStatusRequestFactory::new()->create());
-
-    livewire(CreateKnowledgeBaseStatus::class)
-        ->fillForm($request->toArray())
-        ->call('create')
-        ->assertHasNoFormErrors();
-
-    assertCount(1, KnowledgeBaseStatus::all());
-
-    assertDatabaseHas(KnowledgeBaseStatus::class, $request->toArray());
 });
 
-test('CreateKnowledgeBaseStatus is gated with proper feature access control', function () {
+test('ViewKnowledgeBaseStatus is gated with proper feature access control', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -93,15 +79,16 @@ test('CreateKnowledgeBaseStatus is gated with proper feature access control', fu
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
-    $user->givePermissionTo('settings.create');
+    $user->givePermissionTo('settings.*.view');
+
+    $knowledgeBaseStatus = KnowledgeBaseStatus::factory()->create();
 
     actingAs($user)
         ->get(
-            KnowledgeBaseStatusResource::getUrl('create')
+            KnowledgeBaseStatusResource::getUrl('view', [
+                'record' => $knowledgeBaseStatus,
+            ])
         )->assertForbidden();
-
-    livewire(CreateKnowledgeBaseStatus::class)
-        ->assertForbidden();
 
     $settings->data->addons->knowledgeManagement = true;
 
@@ -109,17 +96,8 @@ test('CreateKnowledgeBaseStatus is gated with proper feature access control', fu
 
     actingAs($user)
         ->get(
-            KnowledgeBaseStatusResource::getUrl('create')
+            KnowledgeBaseStatusResource::getUrl('view', [
+                'record' => $knowledgeBaseStatus,
+            ])
         )->assertSuccessful();
-
-    $request = collect(CreateKnowledgeBaseStatusRequestFactory::new()->create());
-
-    livewire(CreateKnowledgeBaseStatus::class)
-        ->fillForm($request->toArray())
-        ->call('create')
-        ->assertHasNoFormErrors();
-
-    assertCount(1, KnowledgeBaseStatus::all());
-
-    assertDatabaseHas(KnowledgeBaseStatus::class, $request->toArray());
 });

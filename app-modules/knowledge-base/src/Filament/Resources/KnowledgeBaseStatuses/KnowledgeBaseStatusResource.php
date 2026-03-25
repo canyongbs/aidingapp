@@ -34,16 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseStatus\RequestFactories;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses;
 
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages\CreateKnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages\EditKnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages\ListKnowledgeBaseStatuses;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages\ViewKnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use App\Filament\Clusters\KnowledgeManagement;
+use Filament\Resources\Resource;
 
-class CreateKnowledgeBaseStatusRequestFactory extends RequestFactory
+class KnowledgeBaseStatusResource extends Resource
 {
-    public function definition(): array
+    protected static ?string $model = KnowledgeBaseStatus::class;
+
+    protected static ?string $navigationLabel = 'Statuses';
+
+    protected static ?int $navigationSort = 3;
+
+    protected static ?string $cluster = KnowledgeManagement::class;
+
+    public static function getPages(): array
     {
         return [
-            'name' => $this->faker->word(),
+            'index' => ListKnowledgeBaseStatuses::route('/'),
+            'create' => CreateKnowledgeBaseStatus::route('/create'),
+            'view' => ViewKnowledgeBaseStatus::route('/{record}'),
+            'edit' => EditKnowledgeBaseStatus::route('/{record}/edit'),
         ];
     }
 }

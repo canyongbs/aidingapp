@@ -34,33 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\CreateKnowledgeBaseStatus;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\EditKnowledgeBaseStatus;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\ListKnowledgeBaseStatuses;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages\ViewKnowledgeBaseStatus;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use App\Filament\Clusters\KnowledgeManagement;
-use Filament\Resources\Resource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBaseStatusResource;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Schema;
 
-class KnowledgeBaseStatusResource extends Resource
+class EditKnowledgeBaseStatus extends EditRecord
 {
-    protected static ?string $model = KnowledgeBaseStatus::class;
+    use EditPageRedirection;
 
-    protected static ?string $navigationLabel = 'Statuses';
+    protected static string $resource = KnowledgeBaseStatusResource::class;
 
-    protected static ?int $navigationSort = 3;
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->required()
+                    ->string(),
+            ]);
+    }
 
-    protected static ?string $cluster = KnowledgeManagement::class;
-
-    public static function getPages(): array
+    protected function getHeaderActions(): array
     {
         return [
-            'index' => ListKnowledgeBaseStatuses::route('/'),
-            'create' => CreateKnowledgeBaseStatus::route('/create'),
-            'view' => ViewKnowledgeBaseStatus::route('/{record}'),
-            'edit' => EditKnowledgeBaseStatus::route('/{record}/edit'),
+            ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

@@ -34,52 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource\Pages;
+namespace AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseStatuses\RequestFactories;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatusResource;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Worksome\RequestFactories\RequestFactory;
 
-class ListKnowledgeBaseStatuses extends ListRecords
+class EditKnowledgeBaseStatusRequestFactory extends RequestFactory
 {
-    protected static string $resource = KnowledgeBaseStatusResource::class;
-
-    public function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name')
-                    ->label('Name')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('knowledge_base_items_count')
-                    ->label('# of Knowledge Base Items')
-                    ->counts('knowledgeBaseItems')
-                    ->sortable(),
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
+    public function definition(): array
     {
         return [
-            CreateAction::make(),
+            'name' => $this->faker->word(),
         ];
     }
 }
