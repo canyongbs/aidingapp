@@ -43,7 +43,6 @@ use App\Jobs\UpdateTenantLicenseData;
 use App\Models\Tenant;
 use App\Multitenancy\DataTransferObjects\TenantConfig;
 use App\Multitenancy\Events\NewTenantSetupComplete;
-use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Event;
 
@@ -61,7 +60,6 @@ class CreateTenant
                 [
                     'name' => $name,
                     'domain' => $domain,
-                    'key' => $this->generateTenantKey(),
                     'config' => $config,
                 ]
             );
@@ -82,12 +80,5 @@ class CreateTenant
             ->dispatch();
 
         return $tenant;
-    }
-
-    protected function generateTenantKey(): string
-    {
-        return 'base64:' . base64_encode(
-            Encrypter::generateKey(config('app.cipher'))
-        );
     }
 }

@@ -34,12 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace App\Multitenancy\Exceptions;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use Exception;
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::table('tenants', function (Blueprint $table) {
+            $table->dropColumn('key');
+        });
+    }
 
-class TenantAppKeyIsNull extends Exception
-{
-    /** @var string */
-    protected $message = 'Tenant app key is null';
-}
+    public function down(): void
+    {
+        Schema::table('tenants', function (Blueprint $table) {
+            $table->string('key')->nullable();
+        });
+    }
+};

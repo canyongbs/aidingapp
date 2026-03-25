@@ -34,19 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace App\Multitenancy\DataTransferObjects;
+namespace App\Features;
 
-use Spatie\LaravelData\Data;
+use App\Support\LandlordAbstractFeatureFlag;
 
-class TenantSmtpMailerConfig extends Data
+class TenantConfigEncryptionFeature extends LandlordAbstractFeatureFlag
 {
-    public function __construct(
-        public ?string $host = null,
-        public int $port = 587,
-        public ?string $encryption = null,
-        public ?string $username = null,
-        public ?string $password = null,
-        public ?int $timeout = null,
-        public ?string $localDomain = null,
-    ) {}
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
 }

@@ -34,38 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace App\Actions;
+namespace App\Support;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Encryption\Encrypter;
-use Illuminate\Support\Str;
-use Laravel\SerializableClosure\SerializableClosure;
+use Laravel\Pennant\Feature;
 
-class ChangeAppKey
+abstract class LandlordAbstractFeatureFlag
 {
-    public function __invoke(string $appKey): void
+    public static function active(): bool
     {
-        config()->set('app.key', $appKey);
-
-        app()->extend('encrypter', function ($service, $app) use ($appKey) {
-            $config = $app->make('config')->get('app');
-
-            return new Encrypter($this->parseKey($appKey), $config['cipher']);
-        });
-
-        Model::$encrypter = app('encrypter');
-
-        if (class_exists(SerializableClosure::class)) {
-            SerializableClosure::setSecretKey($this->parseKey($appKey));
-        }
+        return Feature::store('landlord')->active(static::class);
     }
 
-    protected function parseKey(string $key): false|string
+    public static function activate(): void
     {
-        if (Str::startsWith($key, $prefix = 'base64:')) {
-            $key = base64_decode(Str::after($key, $prefix));
-        }
+        Feature::store('landlord')->activate(static::class);
+    }
 
-        return $key;
+    public static function deactivate(): void
+    {
+        Feature::store('landlord')->deactivate(static::class);
+    }
+
+    public static function purge(): void
+    {
+        Feature::store('landlord')->purge(static::class);
     }
 }

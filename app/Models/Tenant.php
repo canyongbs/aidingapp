@@ -37,13 +37,19 @@
 namespace App\Models;
 
 use App\Casts\LandlordEncrypted;
+use App\Features\TenantConfigEncryptionFeature;
+use App\Multitenancy\DataTransferObjects\TenantConfig;
 use App\Settings\DisplaySettings;
+use Database\Factories\TenantFactory;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
 use Spatie\Multitenancy\Models\Tenant as SpatieTenant;
 
 /**
+ * @property TenantConfig $config
+ *
  * @mixin IdeHelperTenant
  */
 class Tenant extends SpatieTenant
@@ -52,17 +58,17 @@ class Tenant extends SpatieTenant
     use HasUuids;
     use SoftDeletes;
 
+    /** @use HasFactory<TenantFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'domain',
-        'key',
         'config',
         'setup_complete',
     ];
 
     protected $casts = [
-        'key' => LandlordEncrypted::class,
-        'config' => LandlordEncrypted::class,
         'setup_complete' => 'boolean',
     ];
 
@@ -73,5 +79,12 @@ class Tenant extends SpatieTenant
         }
 
         return config('app.timezone');
+    }
+
+    protected function casts(): array
+    {
+        return [
+            'config' => TenantConfigEncryptionFeature::active() ? TenantConfig::class . ':encrypted' : LandlordEncrypted::class,
+        ];
     }
 }
