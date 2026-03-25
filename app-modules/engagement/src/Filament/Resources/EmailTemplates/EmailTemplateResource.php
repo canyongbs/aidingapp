@@ -34,12 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EmailTemplates;
 
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
-use Filament\Resources\Pages\CreateRecord;
+use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\CreateEmailTemplate;
+use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\EditEmailTemplate;
+use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\ListEmailTemplates;
+use AidingApp\Engagement\Models\EmailTemplate;
+use App\Filament\Clusters\Communication;
+use Filament\Resources\Resource;
+use UnitEnum;
 
-class CreateEngagementFile extends CreateRecord
+class EmailTemplateResource extends Resource
 {
-    protected static string $resource = EngagementFileResource::class;
+    protected static ?string $model = EmailTemplate::class;
+
+    protected static string | UnitEnum | null $navigationGroup = 'Communication';
+
+    protected static ?int $navigationSort = 120;
+
+    protected static ?string $cluster = Communication::class;
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListEmailTemplates::route('/'),
+            'create' => CreateEmailTemplate::route('/create'),
+            'edit' => EditEmailTemplate::route('/{record}/edit'),
+        ];
+    }
 }

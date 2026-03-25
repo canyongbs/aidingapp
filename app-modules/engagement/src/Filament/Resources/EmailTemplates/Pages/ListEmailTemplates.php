@@ -34,58 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EngagementFileResource\RelationManagers;
+namespace AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages;
 
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
-use App\Filament\Tables\Columns\IdColumn;
+use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
+use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class EngagementFilesRelationManager extends RelationManager
+class ListEmailTemplates extends ListRecords
 {
-    protected static string $relationship = 'engagementFiles';
-
-    protected static ?string $label = 'Files and Documents';
-
-    protected static ?string $title = 'Files and Documents';
-
-    protected static ?string $modelLabel = 'File';
-
-    public function form(Schema $schema): Schema
-    {
-        return EngagementFileResource::form($schema);
-    }
+    protected static string $resource = EmailTemplateResource::class;
 
     public function table(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('description')
             ->columns([
-                IdColumn::make(),
+                TextColumn::make('name'),
                 TextColumn::make('description'),
-                SpatieMediaLibraryImageColumn::make('file')
-                    ->collection('file')
-                    ->visibility('private'),
-            ])
-            ->headerActions([
-                CreateAction::make(),
             ])
             ->recordActions([
                 EditAction::make(),
-                DeleteAction::make(),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
             ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
     }
 }

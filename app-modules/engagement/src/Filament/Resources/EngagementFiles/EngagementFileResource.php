@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources;
+namespace AidingApp\Engagement\Filament\Resources\EngagementFiles;
 
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages\CreateEngagementFile;
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages\EditEngagementFile;
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages\ListEngagementFiles;
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages\ViewEngagementFile;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages\CreateEngagementFile;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages\EditEngagementFile;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages\ListEngagementFiles;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages\ViewEngagementFile;
 use AidingApp\Engagement\Models\EngagementFile;
 use BackedEnum;
 use Filament\Forms\Components\DatePicker;

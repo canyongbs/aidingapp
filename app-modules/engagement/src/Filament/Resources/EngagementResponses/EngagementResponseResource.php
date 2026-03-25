@@ -34,42 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EngagementResponses;
 
-use AidingApp\Engagement\Filament\Resources\EmailTemplateResource;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use AidingApp\Engagement\Filament\Resources\EngagementResponses\Pages\ListEngagementResponses;
+use AidingApp\Engagement\Filament\Resources\EngagementResponses\Pages\ViewEngagementResponse;
+use AidingApp\Engagement\Models\EngagementResponse;
+use BackedEnum;
+use Filament\Resources\Resource;
 
-class ListEmailTemplates extends ListRecords
+class EngagementResponseResource extends Resource
 {
-    protected static string $resource = EmailTemplateResource::class;
+    protected static ?string $model = EngagementResponse::class;
 
-    public function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make('name'),
-                TextColumn::make('description'),
-            ])
-            ->recordActions([
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-arrow-path-rounded-square';
 
-    protected function getHeaderActions(): array
+    protected static bool $shouldRegisterNavigation = false;
+
+    public static function getPages(): array
     {
         return [
-            CreateAction::make(),
+            'index' => ListEngagementResponses::route('/'),
+            'view' => ViewEngagementResponse::route('/{record}'),
         ];
     }
 }

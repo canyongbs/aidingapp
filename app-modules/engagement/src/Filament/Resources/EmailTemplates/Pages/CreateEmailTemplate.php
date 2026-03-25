@@ -34,32 +34,49 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources;
+namespace AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages;
 
-use AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages\CreateEmailTemplate;
-use AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages\EditEmailTemplate;
-use AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages\ListEmailTemplates;
-use AidingApp\Engagement\Models\EmailTemplate;
-use App\Filament\Clusters\Communication;
+use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Resource;
-use UnitEnum;
+use Filament\Schemas\Schema;
+use FilamentTiptapEditor\TiptapEditor;
 
-class EmailTemplateResource extends Resource
+class CreateEmailTemplate extends CreateRecord
 {
-    protected static ?string $model = EmailTemplate::class;
+    protected static string $resource = EmailTemplateResource::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Communication';
-
-    protected static ?int $navigationSort = 120;
-
-    protected static ?string $cluster = Communication::class;
-
-    public static function getPages(): array
+    public function form(Schema $schema): Schema
     {
-        return [
-            'index' => ListEmailTemplates::route('/'),
-            'create' => CreateEmailTemplate::route('/create'),
-            'edit' => EditEmailTemplate::route('/{record}/edit'),
-        ];
+        return $schema
+            ->columns(1)
+            ->components([
+                TextInput::make('name')
+                    ->string()
+                    ->required()
+                    ->autocomplete(false),
+                Textarea::make('description')
+                    ->string(),
+                TiptapEditor::make('content')
+                    ->disk('s3-public')
+                    ->mergeTags([
+                        'contact full name',
+                        'contact email',
+                    ])
+                    ->profile('email')
+                    ->columnSpanFull()
+                    ->extraInputAttributes(['style' => 'min-height: 12rem;'])
+                    ->required(),
+            ]);
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        /** @var class-string<Resource> $resource */
+        $resource = $this->getResource();
+
+        return $resource::getUrl();
     }
 }

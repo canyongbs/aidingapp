@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages;
 
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
 use AidingApp\Engagement\Models\EngagementFile;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;

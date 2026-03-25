@@ -34,34 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EngagementResponseResource\Actions;
+namespace AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages;
 
-use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Flex;
-use Filament\Schemas\Components\Section;
-use Illuminate\Support\HtmlString;
+use Filament\Resources\Pages\EditRecord;
 
-class EngagementResponseViewAction
+class EditEngagementFile extends EditRecord
 {
-    public static function make(): ViewAction
+    use EditPageRedirection;
+
+    protected static string $resource = EngagementFileResource::class;
+
+    protected function getHeaderActions(): array
     {
-        return ViewAction::make()
-            ->schema([
-                Flex::make([
-                    Section::make([
-                        TextEntry::make('subject')
-                            ->getStateUsing(fn (EngagementResponse $record): ?string => $record->subject)
-                            ->hidden(fn ($state): bool => blank($state)),
-                        TextEntry::make('content')
-                            ->getStateUsing(fn (EngagementResponse $record): HtmlString => $record->getBody()),
-                    ]),
-                    Section::make([
-                        TextEntry::make('sent_at')
-                            ->dateTime('Y-m-d H:i:s'),
-                    ])->grow(false),
-                ]),
-            ]);
+        return [
+            ViewAction::make(),
+            DeleteAction::make(),
+        ];
     }
 }

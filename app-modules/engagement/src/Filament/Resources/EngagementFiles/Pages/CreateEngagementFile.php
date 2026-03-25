@@ -34,51 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages;
 
-use AidingApp\Engagement\Filament\Resources\EmailTemplateResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
-use FilamentTiptapEditor\TiptapEditor;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
+use Filament\Resources\Pages\CreateRecord;
 
-class EditEmailTemplate extends EditRecord
+class CreateEngagementFile extends CreateRecord
 {
-    use EditPageRedirection;
-
-    protected static string $resource = EmailTemplateResource::class;
-
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->columns(1)
-            ->components([
-                TextInput::make('name')
-                    ->string()
-                    ->required()
-                    ->autocomplete(false),
-                Textarea::make('description')
-                    ->string(),
-                TiptapEditor::make('content')
-                    ->disk('s3-public')
-                    ->mergeTags([
-                        'contact full name',
-                        'contact email',
-                    ])
-                    ->profile('email')
-                    ->columnSpanFull()
-                    ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-                    ->required(),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            DeleteAction::make(),
-        ];
-    }
+    protected static string $resource = EngagementFileResource::class;
 }

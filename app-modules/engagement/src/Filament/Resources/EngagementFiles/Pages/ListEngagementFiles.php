@@ -34,25 +34,48 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages;
 
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions\DeleteAction;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class EditEngagementFile extends EditRecord
+class ListEngagementFiles extends ListRecords
 {
-    use EditPageRedirection;
-
     protected static string $resource = EngagementFileResource::class;
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('description')
+                    ->label('Description')
+                    ->searchable()
+                    ->sortable(),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
 
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make(),
-            DeleteAction::make(),
+            CreateAction::make(),
         ];
     }
 }

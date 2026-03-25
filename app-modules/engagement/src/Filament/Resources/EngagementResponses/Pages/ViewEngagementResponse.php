@@ -34,49 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EngagementResponses\Pages;
 
-use AidingApp\Engagement\Filament\Resources\EmailTemplateResource;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Resources\Resource;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Filament\Resources\EngagementResponses\EngagementResponseResource;
+use AidingApp\Engagement\Models\EngagementResponse;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use FilamentTiptapEditor\TiptapEditor;
 
-class CreateEmailTemplate extends CreateRecord
+class ViewEngagementResponse extends ViewRecord
 {
-    protected static string $resource = EmailTemplateResource::class;
+    protected static string $resource = EngagementResponseResource::class;
 
-    public function form(Schema $schema): Schema
+    public function infolist(Schema $schema): Schema
     {
         return $schema
-            ->columns(1)
-            ->components([
-                TextInput::make('name')
-                    ->string()
-                    ->required()
-                    ->autocomplete(false),
-                Textarea::make('description')
-                    ->string(),
-                TiptapEditor::make('content')
-                    ->disk('s3-public')
-                    ->mergeTags([
-                        'contact full name',
-                        'contact email',
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('sender')
+                            ->label('Sent By')
+                            ->color('primary')
+                            ->state(function (EngagementResponse $record): string {
+                                /** @var Contact $sender */
+                                $sender = $record->sender;
+
+                                return "{$sender->full_name} (Contact)";
+                            })
+                            ->url(function (EngagementResponse $record) {
+                                /** @var Contact $sender */
+                                $sender = $record->sender;
+
+                                return ContactResource::getUrl('view', ['record' => $sender->id]);
+                            }),
+                        TextEntry::make('content'),
                     ])
-                    ->profile('email')
-                    ->columnSpanFull()
-                    ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-                    ->required(),
+                    ->columns(),
             ]);
-    }
-
-    protected function getRedirectUrl(): string
-    {
-        /** @var class-string<Resource> $resource */
-        $resource = $this->getResource();
-
-        return $resource::getUrl();
     }
 }
