@@ -57,16 +57,12 @@ class CreateEngagement
         }
 
         DB::transaction(function () use ($data, $engagement) {
+            $engagement->body = $data->body;
             $engagement->save();
 
-            [$engagement->body] = tiptap_converter()->saveImages(
-                $data->body,
-                disk: 's3-public',
-                record: $engagement,
-                recordAttribute: 'body',
-                newImages: $data->temporaryBodyImages,
-            );
-            $engagement->save();
+            if ($data->schema) {
+                $data->schema->model($engagement)->saveRelationships();
+            }
 
             if (! $engagement->scheduled_at) {
                 $engagement->recipient->notify(new EngagementNotification($engagement)->afterCommit());

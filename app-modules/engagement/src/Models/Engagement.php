@@ -50,6 +50,9 @@ use AidingApp\Timeline\Timelines\EngagementTimeline;
 use App\Models\BaseModel;
 use App\Models\Contracts\Educatable;
 use App\Models\User;
+use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
+use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
+use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -71,10 +74,11 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @mixin IdeHelperEngagement
  */
 #[ObservedBy([EngagementObserver::class])]
-class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasDeliveryMethod, HasMedia
+class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasDeliveryMethod, HasMedia, HasRichContent
 {
     use AuditableTrait;
     use InteractsWithMedia;
+    use InteractsWithRichContent;
     use SoftDeletes;
 
     /** @use HasFactory<EngagementFactory> */
@@ -251,5 +255,16 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
     public function getDeliveryMethod(): NotificationChannel
     {
         return $this->channel;
+    }
+
+    public function setUpRichContent(): void
+    {
+        $this->registerRichContent('body')
+            ->fileAttachmentsDisk('s3-public')
+            ->fileAttachmentProvider(SpatieMediaLibraryFileAttachmentProvider::make())
+            ->mergeTags([
+                'contact full name' => 'contact full name',
+                'contact email' => 'contact email',
+            ]);
     }
 }

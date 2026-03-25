@@ -39,25 +39,27 @@ namespace AidingApp\Engagement\Filament\Actions;
 use AidingApp\Engagement\Actions\CreateEngagementBatch;
 use AidingApp\Engagement\DataTransferObjects\EngagementCreationData;
 use AidingApp\Engagement\Models\EmailTemplate;
+use AidingApp\Engagement\Models\EngagementBatch;
 use AidingApp\Notification\Enums\NotificationChannel;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
-use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Illuminate\Support\Str;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class BulkEngagementAction
 {
@@ -81,22 +83,22 @@ class BulkEngagementAction
                 Step::make('Engagement Details')
                     ->description("Add the details that will be sent to the selected {$context}")
                     ->schema([
-                        TextInput::make('subject')
-                            ->autofocus()
+                        RichEditor::make('subject')
+                            ->label('Subject')
+                            ->toolbarButtons([])
+                            ->helperText('You may use "merge tags" to substitute information about a recipient into your subject line. Insert a "{{" in the subject line field to see a list of available merge tags')
                             ->required()
-                            ->placeholder(__('Subject'))
-                            ->columnSpanFull(),
-                        TiptapEditor::make('body')
-                            ->disk('s3-public')
+                            ->live()
+                            ->placeholder('Enter the email subject here...')
+                            ->columnSpanFull()
+                            ->json(),
+                        RichEditor::make('body')
                             ->label('Body')
-                            ->mergeTags($mergeTags = [
-                                'contact full name',
-                                'contact email',
-                            ])
-                            ->showMergeTagsInBlocksPanel(false)
-                            ->profile('email')
+                            ->toolbarButtons([['bold', 'italic', 'small', 'link'], ['h1', 'h2', 'h3', 'bulletList', 'orderedList', 'horizontalRule', 'attachFiles'], ['mergeTags']])
+                            ->activePanel('mergeTags')
+                            ->resizableImages()
                             ->required()
-                            ->hintAction(fn (TiptapEditor $component) => Action::make('loadEmailTemplate')
+                            ->hintAction(fn (RichEditor $component) => Action::make('loadEmailTemplate')
                                 ->schema([
                                     Select::make('emailTemplate')
                                         ->searchable()
@@ -111,50 +113,59 @@ class BulkEngagementAction
                                                 ->pluck('name', 'id')
                                                 ->toArray();
                                         })
-                                        ->getOptionLabelUsing(fn (string $value): ?string => EmailTemplate::query()
-                                            ->whereKey($value)
-                                            ->value('name'))
                                         ->getSearchResultsUsing(function (Get $get, string $search): array {
+                                            $search = Str::lower($search);
+
                                             return EmailTemplate::query()
                                                 ->when(
                                                     $get('onlyMyTemplates'),
                                                     fn (Builder $query) => $query->whereBelongsTo(auth()->user())
-                                                )
-                                                ->when(
-                                                    $get('onlyMyTeamTemplates'),
-                                                    fn (Builder $query) => $query->whereIn('user_id', auth()->user()->team->users->pluck('id'))
                                                 )
                                                 ->where(new Expression('lower(name)'), 'like', "%{$search}%")
                                                 ->orderBy('name')
                                                 ->limit(50)
                                                 ->pluck('name', 'id')
                                                 ->toArray();
-                                        }),
+                                        })
+                                        ->getOptionLabelUsing(fn (string $value): ?string => EmailTemplate::find($value)?->name),
                                     Checkbox::make('onlyMyTemplates')
                                         ->label('Only show my templates')
-                                        ->live()
-                                        ->afterStateUpdated(fn (Set $set) => $set('emailTemplate', null)),
-                                    Checkbox::make('onlyMyTeamTemplates')
-                                        ->label("Only show my team's templates")
                                         ->live()
                                         ->afterStateUpdated(fn (Set $set) => $set('emailTemplate', null)),
                                 ])
                                 ->action(function (array $data) use ($component) {
                                     $template = EmailTemplate::find($data['emailTemplate']);
 
-                                    if (! $template) {
-                                        return;
+                                    if (! $template instanceof EmailTemplate) {
+                                        throw new Exception('template is not instance of EmailTemplate');
                                     }
 
-                                    $component->state(
-                                        $component->generateImageUrls($template->content),
-                                    );
+                                    $component->state($template->content);
                                 }))
-                            ->helperText('You can insert student information by typing {{ and choosing a merge value to insert.')
-                            ->columnSpanFull(),
+                            ->getFileAttachmentUrlFromAnotherRecordUsing(function (mixed $file): ?string {
+                                return Media::query()
+                                    ->where('uuid', $file)
+                                    ->where('model_type', (new EmailTemplate())->getMorphClass())
+                                    ->first()
+                                    ?->getUrl();
+                            })
+                            ->saveFileAttachmentFromAnotherRecordUsing(function (mixed $file, EngagementBatch $record): ?string {
+                                return Media::query()
+                                    ->where('uuid', $file)
+                                    ->where('model_type', (new EmailTemplate())->getMorphClass())
+                                    ->first()
+                                    ?->copy($record, 'body', 's3-public')
+                                    ->uuid;
+                            })
+                            ->helperText('You can insert recipient or your information by typing {{ and choosing a merge value to insert.')
+                            ->columnSpanFull()
+                            ->json(),
                         Actions::make([
                             BulkDraftWithAiAction::make()
-                                ->mergeTags($mergeTags),
+                                ->mergeTags([
+                                    'contact full name',
+                                    'contact email',
+                                ]),
                         ]),
                     ]),
                 Step::make('Schedule')
@@ -171,20 +182,17 @@ class BulkEngagementAction
             ->action(function (Collection $records, array $data, Schema $schema) {
                 $channel = NotificationChannel::parse($data['channel']);
 
+                $data['subject'] ??= ['type' => 'doc', 'content' => []];
+                $data['body'] ??= ['type' => 'doc', 'content' => []];
+
                 app(CreateEngagementBatch::class)->execute(new EngagementCreationData(
                     user: auth()->user(),
                     recipient: $records,
                     channel: $channel,
-                    subject: $data['subject'] ?? null,
-                    body: $data['body'] ?? null,
-                    temporaryBodyImages: array_map(
-                        fn (TemporaryUploadedFile $file): array => [
-                            'extension' => $file->getClientOriginalExtension(),
-                            'path' => (fn () => $this->path)->call($file),
-                        ],
-                        $schema->getFlatFields()['body']->getTemporaryImages(),
-                    ),
+                    subject: $data['subject'],
+                    body: $data['body'],
                     scheduledAt: ($data['send_later'] ?? false) ? Carbon::parse($data['scheduled_at'] ?? null) : null,
+                    schema: $schema,
                 ));
             })
             ->modalSubmitActionLabel('Send')

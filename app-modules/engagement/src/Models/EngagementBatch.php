@@ -42,6 +42,9 @@ use AidingApp\Engagement\Observers\EngagementBatchObserver;
 use AidingApp\Notification\Enums\NotificationChannel;
 use App\Models\BaseModel;
 use App\Models\User;
+use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
+use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
+use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -52,10 +55,11 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @mixin IdeHelperEngagementBatch
  */
 #[ObservedBy([EngagementBatchObserver::class])]
-class EngagementBatch extends BaseModel implements HasMedia
+class EngagementBatch extends BaseModel implements HasMedia, HasRichContent
 {
     use HasManyEngagements;
     use InteractsWithMedia;
+    use InteractsWithRichContent;
 
     /** @use HasFactory<EngagementBatchFactory> */
     use HasFactory;
@@ -86,5 +90,22 @@ class EngagementBatch extends BaseModel implements HasMedia
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function setUpRichContent(): void
+    {
+        $this->registerRichContent('subject')
+            ->mergeTags([
+                'contact full name' => 'contact full name',
+                'contact email' => 'contact email',
+            ]);
+
+        $this->registerRichContent('body')
+            ->fileAttachmentsDisk('s3-public')
+            ->fileAttachmentProvider(SpatieMediaLibraryFileAttachmentProvider::make())
+            ->mergeTags([
+                'contact full name' => 'contact full name',
+                'contact email' => 'contact email',
+            ]);
     }
 }

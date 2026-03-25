@@ -40,6 +40,9 @@ use AidingApp\Engagement\Database\Factories\EmailTemplateFactory;
 use AidingApp\Engagement\Observers\EmailTemplateObserver;
 use App\Models\BaseModel;
 use App\Models\User;
+use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
+use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
+use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -51,9 +54,10 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @mixin IdeHelperEmailTemplate
  */
 #[ObservedBy([EmailTemplateObserver::class])]
-class EmailTemplate extends BaseModel implements HasMedia
+class EmailTemplate extends BaseModel implements HasMedia, HasRichContent
 {
     use InteractsWithMedia;
+    use InteractsWithRichContent;
     use SoftDeletes;
 
     /** @use HasFactory<EmailTemplateFactory> */
@@ -75,5 +79,16 @@ class EmailTemplate extends BaseModel implements HasMedia
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function setUpRichContent(): void
+    {
+        $this->registerRichContent('content')
+            ->fileAttachmentsDisk('s3-public')
+            ->fileAttachmentProvider(SpatieMediaLibraryFileAttachmentProvider::make())
+            ->mergeTags([
+                'contact full name' => 'contact full name',
+                'contact email' => 'contact email',
+            ]);
     }
 }
