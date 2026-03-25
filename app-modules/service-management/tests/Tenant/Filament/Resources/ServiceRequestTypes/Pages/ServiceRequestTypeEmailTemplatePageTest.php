@@ -39,7 +39,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ServiceRequestTypeEmailTemplatePage;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use AidingApp\ServiceManagement\Tests\Tenant\ServiceRequestType\RequestFactories\ServiceRequestTypeEmailTemplateRequestFactory;
+use AidingApp\ServiceManagement\Tests\Tenant\Filament\Resources\ServiceRequestTypes\RequestFactories\ServiceRequestTypeEmailTemplateRequestFactory;
 
 use function Pest\Laravel\assertDatabaseEmpty;
 use function Pest\Laravel\assertDatabaseHas;
