@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages;
+namespace AidingApp\ContractManagement\Filament\Resources\Contracts\Pages;
 
-use AidingApp\ContractManagement\Filament\Resources\ContractResource;
+use AidingApp\ContractManagement\Filament\Resources\Contracts\ContractResource;
 use AidingApp\ContractManagement\Models\Contract;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;

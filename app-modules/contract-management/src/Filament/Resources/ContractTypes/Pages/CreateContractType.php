@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages;
+namespace AidingApp\ContractManagement\Filament\Resources\ContractTypes\Pages;
 
-use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource;
+use AidingApp\ContractManagement\Filament\Resources\ContractTypes\ContractTypeResource;
 use AidingApp\ContractManagement\Models\ContractType;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -60,7 +60,7 @@ class CreateContractType extends CreateRecord
                 Toggle::make('is_default')
                     ->label('Default')
                     ->live()
-                    ->hint(function (?ContractType $record, $state): ?string {
+                    ->hint(function (?ContractType $record, ?bool $state): ?string {
                         if ($record?->is_default) {
                             return null;
                         }

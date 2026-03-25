@@ -34,27 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ContractManagement\Filament\Resources;
+namespace AidingApp\ContractManagement\Filament\Resources\Contracts;
 
-use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\CreateContractType;
-use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\EditContractType;
-use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\ListContractTypes;
-use AidingApp\ContractManagement\Models\ContractType;
-use App\Filament\Clusters\ContractManagement;
+use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\CreateContract;
+use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\EditContract;
+use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ListContracts;
+use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ViewContract;
+use AidingApp\ContractManagement\Models\Contract;
+use BackedEnum;
 use Filament\Resources\Resource;
+use UnitEnum;
 
-class ContractTypeResource extends Resource
+class ContractResource extends Resource
 {
-    protected static ?string $model = ContractType::class;
+    protected static ?string $model = Contract::class;
 
-    protected static ?string $cluster = ContractManagement::class;
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-check';
+
+    protected static string | UnitEnum | null $navigationGroup = 'Purchasing';
+
+    protected static ?string $navigationLabel = 'Contract Management';
+
+    protected static ?int $navigationSort = 10;
 
     public static function getPages(): array
     {
         return [
-            'index' => ListContractTypes::route('/'),
-            'create' => CreateContractType::route('/create'),
-            'edit' => EditContractType::route('/{record}/edit'),
+            'index' => ListContracts::route('/'),
+            'create' => CreateContract::route('/create'),
+            'view' => ViewContract::route('/{record}'),
+            'edit' => EditContract::route('/{record}/edit'),
         ];
     }
 }
