@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\ListContractTypes;
+use AidingApp\ContractManagement\Filament\Resources\ContractTypes\Pages\ListContractTypes;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
