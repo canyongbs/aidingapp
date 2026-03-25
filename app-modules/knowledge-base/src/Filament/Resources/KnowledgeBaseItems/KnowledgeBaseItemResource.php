@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\CreateKnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\EditKnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\ListKnowledgeBaseItems;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\CreateKnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\EditKnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ListKnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -80,6 +80,9 @@ class KnowledgeBaseItemResource extends Resource
             ->with(['quality', 'status', 'category', 'division']);
     }
 
+    /**
+     * @param KnowledgeBaseItem $record
+     */
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return array_filter([
@@ -90,6 +93,9 @@ class KnowledgeBaseItemResource extends Resource
         ], fn (mixed $value): bool => filled($value));
     }
 
+    /**
+     * @param KnowledgeBaseItem $record
+     */
     public static function getGlobalSearchResultUrl(Model $record): ?string
     {
         return static::getUrl('edit', ['record' => $record]);

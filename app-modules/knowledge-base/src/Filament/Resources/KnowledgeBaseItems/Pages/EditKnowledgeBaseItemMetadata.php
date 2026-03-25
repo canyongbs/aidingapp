@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
 use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
@@ -47,12 +47,16 @@ use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Illuminate\Database\Eloquent\Builder;
 
 class EditKnowledgeBaseItemMetadata
 {
+    /**
+     * @return array<Component>
+     */
     public function form(): array
     {
         return [

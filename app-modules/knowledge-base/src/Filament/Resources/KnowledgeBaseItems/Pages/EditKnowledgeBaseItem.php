@@ -34,10 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
 use AidingApp\KnowledgeBase\Filament\Resources\Actions\DraftKnowledgeBaseItemWithAiAction;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use App\Concerns\EditPageRedirection;
 use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
 use Filament\Actions\Action as BaseAction;
@@ -51,7 +52,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use FilamentTiptapEditor\TiptapEditor;
-use Illuminate\Database\Eloquent\Model;
 
 class EditKnowledgeBaseItem extends EditRecord
 {
@@ -73,7 +73,7 @@ class EditKnowledgeBaseItem extends EditRecord
                             ->suffixAction(
                                 BaseAction::make('saveArticleTitle')
                                     ->icon('heroicon-o-check')
-                                    ->action(function (Model $record, $state) {
+                                    ->action(function (KnowledgeBaseItem $record, string $state) {
                                         if ($record->title === $state) {
                                             return;
                                         }

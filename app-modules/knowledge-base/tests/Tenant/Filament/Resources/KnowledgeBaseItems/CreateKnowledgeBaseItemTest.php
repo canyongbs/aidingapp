@@ -35,9 +35,9 @@
 */
 
 use AidingApp\Division\Models\Division;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\ListKnowledgeBaseItems;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ListKnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseItem\RequestFactories\CreateKnowledgeBaseItemRequestFactory;
+use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseItems\RequestFactories\CreateKnowledgeBaseItemRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 

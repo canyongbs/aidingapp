@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseItem\RequestFactories;
+namespace AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseItems\RequestFactories;
 
 use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;

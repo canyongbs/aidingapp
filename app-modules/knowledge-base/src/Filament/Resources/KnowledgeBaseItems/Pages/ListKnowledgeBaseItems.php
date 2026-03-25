@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
 use AidingApp\Division\Models\Division;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
@@ -217,7 +217,7 @@ class ListKnowledgeBaseItems extends ListRecords
                                     ->exists((new Division())->getTable(), (new Division())->getKeyName()),
                             ]),
                     ])
-                    ->before(function (array $data, Model $record) {
+                    ->before(function (array $data, KnowledgeBaseItem $record) {
                         $record->title = $data['title'];
                         $record->public = $data['public'];
                         $record->notes = $data['notes'];
@@ -230,10 +230,7 @@ class ListKnowledgeBaseItems extends ListRecords
                         }
 
                         foreach ($record->tags as $tag) {
-                            $replica->tags()->attach($tag->id, [
-                                // Include any pivot data if necessary
-                                'taggable_type' => $tag->pivot->taggable_type,
-                            ]);
+                            $replica->tags()->attach($tag->id);
                         }
 
                         $replica->article_details = tiptap_converter()

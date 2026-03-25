@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource\Pages\EditKnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\EditKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use App\Models\User;
 use App\Settings\LicenseSettings;
