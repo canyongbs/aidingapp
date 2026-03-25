@@ -34,43 +34,47 @@
 </COPYRIGHT>
 */
 
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ManageProductLicenses;
-use AidingApp\LicenseManagement\Models\Product;
-use App\Models\User;
-use App\Settings\LicenseSettings;
+namespace AidingApp\LicenseManagement\Filament\Resources\Products\Pages;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
+use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
-it('is gated with proper access control', function () {
-    $settings = app(LicenseSettings::class);
+class CreateProduct extends CreateRecord
+{
+    protected static string $resource = ProductResource::class;
 
-    $settings->data->addons->licenseManagement = false;
-    $settings->save();
-
-    $user = User::factory()->create();
-    $product = Product::factory()->create();
-
-    $user->givePermissionTo('product.view-any');
-    $user->givePermissionTo('product.*.view');
-    $user->givePermissionTo('product_license.view-any');
-
-    actingAs($user);
-
-    get(ManageProductLicenses::getUrl(['record' => $product]))->assertForbidden();
-
-    $settings->data->addons->licenseManagement = true;
-    $settings->save();
-
-    $user->revokePermissionTo('product.view-any');
-    $user->revokePermissionTo('product.*.view');
-    $user->revokePermissionTo('product_license.view-any');
-
-    get(ManageProductLicenses::getUrl(['record' => $product]))->assertForbidden();
-
-    $user->givePermissionTo('product.view-any');
-    $user->givePermissionTo('product.*.view');
-    $user->givePermissionTo('product_license.view-any');
-
-    get(ManageProductLicenses::getUrl(['record' => $product]))->assertSuccessful();
-});
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->label('Product Name')
+                    ->required()
+                    ->string()
+                    ->maxLength(255),
+                TextInput::make('url')
+                    ->label('Product Link')
+                    ->maxLength(255)
+                    ->url()
+                    ->nullable(),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->string()
+                    ->nullable()
+                    ->maxLength(65535),
+                TextInput::make('version')
+                    ->label('Version')
+                    ->string()
+                    ->nullable()
+                    ->maxLength(255),
+                Textarea::make('additional_notes')
+                    ->label('Additional Notes')
+                    ->nullable()
+                    ->maxLength(65535)
+                    ->string(),
+            ]);
+    }
+}

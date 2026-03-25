@@ -34,48 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\LicenseManagement\Filament\Resources;
-
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\CreateProduct;
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\EditProduct;
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ListProducts;
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ManageProductLicenses;
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages\ViewProduct;
+use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ManageProductLicenses;
 use AidingApp\LicenseManagement\Models\Product;
-use BackedEnum;
-use Filament\Resources\Pages\Page;
-use Filament\Resources\Resource;
-use UnitEnum;
+use App\Models\User;
+use App\Settings\LicenseSettings;
 
-class ProductResource extends Resource
-{
-    protected static ?string $model = Product::class;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+it('is gated with proper access control', function () {
+    $settings = app(LicenseSettings::class);
 
-    protected static string | UnitEnum | null $navigationGroup = 'Purchasing';
+    $settings->data->addons->licenseManagement = false;
+    $settings->save();
 
-    protected static ?string $navigationLabel = 'License Management';
+    $user = User::factory()->create();
+    $product = Product::factory()->create();
 
-    protected static ?int $navigationSort = 20;
+    $user->givePermissionTo('product.view-any');
+    $user->givePermissionTo('product.*.view');
+    $user->givePermissionTo('product_license.view-any');
 
-    public static function getRecordSubNavigation(Page $page): array
-    {
-        return $page->generateNavigationItems([
-            ViewProduct::class,
-            EditProduct::class,
-            ManageProductLicenses::class,
-        ]);
-    }
+    actingAs($user);
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListProducts::route('/'),
-            'create' => CreateProduct::route('/create'),
-            'view' => ViewProduct::route('/{record}'),
-            'edit' => EditProduct::route('/{record}/edit'),
-            'product-licences' => ManageProductLicenses::route('/{record}/product-licences'),
-        ];
-    }
-}
+    get(ManageProductLicenses::getUrl(['record' => $product]))->assertForbidden();
+
+    $settings->data->addons->licenseManagement = true;
+    $settings->save();
+
+    $user->revokePermissionTo('product.view-any');
+    $user->revokePermissionTo('product.*.view');
+    $user->revokePermissionTo('product_license.view-any');
+
+    get(ManageProductLicenses::getUrl(['record' => $product]))->assertForbidden();
+
+    $user->givePermissionTo('product.view-any');
+    $user->givePermissionTo('product.*.view');
+    $user->givePermissionTo('product_license.view-any');
+
+    get(ManageProductLicenses::getUrl(['record' => $product]))->assertSuccessful();
+});

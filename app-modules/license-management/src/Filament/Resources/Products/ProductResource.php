@@ -34,58 +34,48 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages;
+namespace AidingApp\LicenseManagement\Filament\Resources\Products;
 
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\CreateProduct;
+use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\EditProduct;
+use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ListProducts;
+use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ManageProductLicenses;
+use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ViewProduct;
+use AidingApp\LicenseManagement\Models\Product;
+use BackedEnum;
+use Filament\Resources\Pages\Page;
+use Filament\Resources\Resource;
+use UnitEnum;
 
-class ListProducts extends ListRecords
+class ProductResource extends Resource
 {
-    protected static string $resource = ProductResource::class;
+    protected static ?string $model = Product::class;
 
-    public function table(Table $table): Table
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    protected static string | UnitEnum | null $navigationGroup = 'Purchasing';
+
+    protected static ?string $navigationLabel = 'License Management';
+
+    protected static ?int $navigationSort = 20;
+
+    public static function getRecordSubNavigation(Page $page): array
     {
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name')
-                    ->label('Product Name')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('version')
-                    ->label('Version')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('url')
-                    ->label('Product Link')
-                    ->url(fn ($record) => $record->url, true)
-                    ->openUrlInNewTab(),
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+        return $page->generateNavigationItems([
+            ViewProduct::class,
+            EditProduct::class,
+            ManageProductLicenses::class,
+        ]);
     }
 
-    protected function getHeaderActions(): array
+    public static function getPages(): array
     {
         return [
-            CreateAction::make(),
+            'index' => ListProducts::route('/'),
+            'create' => CreateProduct::route('/create'),
+            'view' => ViewProduct::route('/{record}'),
+            'edit' => EditProduct::route('/{record}/edit'),
+            'product-licences' => ManageProductLicenses::route('/{record}/product-licences'),
         ];
     }
 }

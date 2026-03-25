@@ -34,47 +34,58 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\LicenseManagement\Filament\Resources\ProductResource\Pages;
+namespace AidingApp\LicenseManagement\Filament\Resources\Products\Pages;
 
-use AidingApp\LicenseManagement\Filament\Resources\ProductResource;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Schema;
+use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class CreateProduct extends CreateRecord
+class ListProducts extends ListRecords
 {
     protected static string $resource = ProductResource::class;
 
-    public function form(Schema $schema): Schema
+    public function table(Table $table): Table
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name')
                     ->label('Product Name')
-                    ->required()
-                    ->string()
-                    ->maxLength(255),
-                TextInput::make('url')
-                    ->label('Product Link')
-                    ->maxLength(255)
-                    ->url()
-                    ->nullable(),
-                Textarea::make('description')
-                    ->label('Description')
-                    ->string()
-                    ->nullable()
-                    ->maxLength(65535),
-                TextInput::make('version')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('version')
                     ->label('Version')
-                    ->string()
-                    ->nullable()
-                    ->maxLength(255),
-                Textarea::make('additional_notes')
-                    ->label('Additional Notes')
-                    ->nullable()
-                    ->maxLength(65535)
-                    ->string(),
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('url')
+                    ->label('Product Link')
+                    ->url(fn ($record) => $record->url, true)
+                    ->openUrlInNewTab(),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
     }
 }
