@@ -36,7 +36,7 @@
 
 namespace AidingApp\Timeline\Timelines;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource\Components\ServiceRequestHistoryViewAction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Components\ServiceRequestHistoryViewAction;
 use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\Timeline\Models\CustomTimeline;
 use Filament\Actions\ViewAction;

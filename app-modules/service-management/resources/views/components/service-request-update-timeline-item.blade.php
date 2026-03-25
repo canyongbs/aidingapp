@@ -32,7 +32,7 @@
     </COPYRIGHT>
 --}}
 @php
-    use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdateResource;
+    use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
     use App\Models\User;
 @endphp
 
