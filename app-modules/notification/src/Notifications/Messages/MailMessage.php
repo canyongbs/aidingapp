@@ -48,10 +48,9 @@ class MailMessage extends BaseMailMessage
 
     public function content(string $content): static
     {
-        $this->viewData = [
-            $this->viewData,
+        $this->viewData = array_merge($this->viewData, [
             'content' => $content,
-        ];
+        ]);
 
         return $this;
     }
@@ -65,10 +64,9 @@ class MailMessage extends BaseMailMessage
             );
         }
 
-        $this->viewData = [
-            $this->viewData,
+        $this->viewData = array_merge($this->viewData, [
             'settings' => $setting,
-        ];
+        ]);
 
         return $this;
     }

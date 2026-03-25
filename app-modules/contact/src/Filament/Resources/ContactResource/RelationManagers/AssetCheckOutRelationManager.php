@@ -36,8 +36,8 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Concerns\HasAssetCheckOutInfolist;
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Pages\ListAssetCheckOuts;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Concerns\HasAssetCheckOutInfolist;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Pages\ListAssetCheckOuts;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Table;

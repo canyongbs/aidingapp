@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Audit\Filament\Resources\AuditResource;
+use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
 use AidingApp\Audit\Models\Audit;
 use App\Models\User;
 
