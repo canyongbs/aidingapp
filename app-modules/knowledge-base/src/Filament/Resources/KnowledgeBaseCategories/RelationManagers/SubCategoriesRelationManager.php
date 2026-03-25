@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\RelationManagers;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\RelationManagers;
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use App\Filament\Forms\Components\IconSelect;

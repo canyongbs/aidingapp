@@ -34,42 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
+namespace AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseCategories\RequestFactories;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
-use App\Filament\Forms\Components\IconSelect;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Schema;
-use Illuminate\Validation\Rules\Unique;
+use Worksome\RequestFactories\RequestFactory;
 
-class CreateKnowledgeBaseCategory extends CreateRecord
+class CreateKnowledgeBaseCategoryRequestFactory extends RequestFactory
 {
-    protected static string $resource = KnowledgeBaseCategoryResource::class;
-
-    public function form(Schema $schema): Schema
+    public function definition(): array
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->string(),
-                IconSelect::make('icon'),
-                TextInput::make('slug')
-                    ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
-                    ->unique(modifyRuleUsing: function (Unique $rule) {
-                        $rule->withoutTrashed();
-                    })
-                    ->maxLength(255)
-                    ->required()
-                    ->dehydrateStateUsing(fn (string $state): string => strtolower($state)),
-                Textarea::make('description')
-                    ->label('Description')
-                    ->nullable()
-                    ->string()
-                    ->columnSpanFull(),
-            ]);
+        return [
+            'name' => fake()->word(),
+            'slug' => fake()->slug(),
+        ];
     }
 }

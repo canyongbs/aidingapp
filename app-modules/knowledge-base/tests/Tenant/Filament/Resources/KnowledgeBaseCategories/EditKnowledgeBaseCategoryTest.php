@@ -33,11 +33,12 @@
 
 </COPYRIGHT>
 */
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\RelationManagers\SubCategoriesRelationManager;
+
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\KnowledgeBaseCategoryResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\Pages\EditKnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\RelationManagers\SubCategoriesRelationManager;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseCategory\RequestFactories\EditKnowledgeBaseCategoryRequestFactory;
+use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseCategories\RequestFactories\EditKnowledgeBaseCategoryRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\AssociateAction;

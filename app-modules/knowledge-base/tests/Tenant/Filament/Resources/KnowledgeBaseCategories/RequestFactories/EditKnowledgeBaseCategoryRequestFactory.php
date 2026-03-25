@@ -34,41 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources;
+namespace AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseCategories\RequestFactories;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\CreateKnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\EditKnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\ListKnowledgeBaseCategories;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages\ViewKnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\RelationManagers\SubCategoriesRelationManager;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use App\Filament\Clusters\KnowledgeManagement;
-use Filament\Resources\Resource;
+use Worksome\RequestFactories\RequestFactory;
 
-class KnowledgeBaseCategoryResource extends Resource
+class EditKnowledgeBaseCategoryRequestFactory extends RequestFactory
 {
-    protected static ?string $model = KnowledgeBaseCategory::class;
-
-    protected static ?string $navigationLabel = 'Categories';
-
-    protected static ?int $navigationSort = 1;
-
-    protected static ?string $cluster = KnowledgeManagement::class;
-
-    public static function getPages(): array
+    public function definition(): array
     {
         return [
-            'index' => ListKnowledgeBaseCategories::route('/'),
-            'create' => CreateKnowledgeBaseCategory::route('/create'),
-            'view' => ViewKnowledgeBaseCategory::route('/{record}'),
-            'edit' => EditKnowledgeBaseCategory::route('/{record}/edit'),
-        ];
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            SubCategoriesRelationManager::class,
+            'name' => $this->faker->word(),
         ];
     }
 }

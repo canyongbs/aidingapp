@@ -34,36 +34,42 @@
 </COPYRIGHT>
 */
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\KnowledgeBaseCategoryResource;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 
-// TODO: Write ListKnowledgeBaseCategory tests
-//test('The correct details are displayed on the ListKnowledgeBaseCategory page', function () {});
-
-// TODO: Sorting and Searching tests
+// TODO: Write ViewKnowledgeBaseCategory tests
+//test('The correct details are displayed on the ViewKnowledgeBaseCategory page', function () {});
 
 // Permission Tests
 
-test('ListKnowledgeBaseCategory is gated with proper access control', function () {
+test('ViewKnowledgeBaseCategory is gated with proper access control', function () {
     $user = User::factory()->create();
+
+    $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
 
     actingAs($user)
         ->get(
-            KnowledgeBaseCategoryResource::getUrl('index')
+            KnowledgeBaseCategoryResource::getUrl('view', [
+                'record' => $knowledgeBaseCategory,
+            ])
         )->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.view');
 
     actingAs($user)
         ->get(
-            KnowledgeBaseCategoryResource::getUrl('index')
+            KnowledgeBaseCategoryResource::getUrl('view', [
+                'record' => $knowledgeBaseCategory,
+            ])
         )->assertSuccessful();
 });
 
-test('ListKnowledgeBaseCategory is gated with proper feature access control', function () {
+test('ViewKnowledgeBaseCategory is gated with proper feature access control', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -73,10 +79,15 @@ test('ListKnowledgeBaseCategory is gated with proper feature access control', fu
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.view');
+
+    $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
 
     actingAs($user)
         ->get(
-            KnowledgeBaseCategoryResource::getUrl('index')
+            KnowledgeBaseCategoryResource::getUrl('view', [
+                'record' => $knowledgeBaseCategory,
+            ])
         )->assertForbidden();
 
     $settings->data->addons->knowledgeManagement = true;
@@ -85,6 +96,8 @@ test('ListKnowledgeBaseCategory is gated with proper feature access control', fu
 
     actingAs($user)
         ->get(
-            KnowledgeBaseCategoryResource::getUrl('index')
+            KnowledgeBaseCategoryResource::getUrl('view', [
+                'record' => $knowledgeBaseCategory,
+            ])
         )->assertSuccessful();
 });

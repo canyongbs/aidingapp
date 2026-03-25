@@ -34,51 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\Pages;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\KnowledgeBaseCategoryResource;
+use App\Filament\Forms\Components\IconSelect;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
-class ViewKnowledgeBaseCategory extends ViewRecord
+class CreateKnowledgeBaseCategory extends CreateRecord
 {
     protected static string $resource = KnowledgeBaseCategoryResource::class;
 
-    public function infolist(Schema $schema): Schema
+    public function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name'),
-                        TextEntry::make('icon')
-                            ->state(fn (KnowledgeBaseCategory $record): string => (string) str($record->icon)->after('heroicon-o-')->headline())
-                            ->icon(fn (KnowledgeBaseCategory $record): string => $record->icon)
-                            ->hidden(fn (KnowledgeBaseCategory $record): bool => blank($record->icon)),
-                        TextEntry::make('description')
-                            ->label('Description')
-                            ->columnSpanFull(),
-                        TextEntry::make('slug')
-                            ->hidden(fn (KnowledgeBaseCategory $record): bool => blank($record->slug)),
-                    ])
-                    ->columns(),
+            ->components([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->required()
+                    ->string(),
+                IconSelect::make('icon'),
+                TextInput::make('slug')
+                    ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
+                    ->unique(modifyRuleUsing: function (Unique $rule) {
+                        $rule->withoutTrashed();
+                    })
+                    ->maxLength(255)
+                    ->required()
+                    ->dehydrateStateUsing(fn (string $state): string => strtolower($state)),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->nullable()
+                    ->string()
+                    ->columnSpanFull(),
             ]);
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return 'View';
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            EditAction::make(),
-        ];
     }
 }

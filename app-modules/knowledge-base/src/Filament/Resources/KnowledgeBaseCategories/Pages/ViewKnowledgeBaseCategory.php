@@ -34,60 +34,51 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\Pages;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\KnowledgeBaseCategoryResource;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
-class ListKnowledgeBaseCategories extends ListRecords
+class ViewKnowledgeBaseCategory extends ViewRecord
 {
     protected static string $resource = KnowledgeBaseCategoryResource::class;
 
-    public function table(Table $table): Table
+    public function infolist(Schema $schema): Schema
     {
-        return $table
-            ->modifyQueryUsing(
-                fn (Builder $query) => $query->doesntHave('parentCategory')
-            )
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name')
-                    ->label('Name')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('knowledge_base_items_count')
-                    ->label('# of Knowledge Base Items')
-                    ->counts('knowledgeBaseItems')
-                    ->sortable(),
-                IconColumn::make('icon')
-                    ->icon(fn (string $state): string => $state)
-                    ->tooltip(fn (?string $state): ?string => filled($state) ? (string) str($state)->after('heroicon-o-')->headline() : null),
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+        return $schema
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Name'),
+                        TextEntry::make('icon')
+                            ->state(fn (KnowledgeBaseCategory $record): string => (string) str($record->icon)->after('heroicon-o-')->headline())
+                            ->icon(fn (KnowledgeBaseCategory $record): string => $record->icon)
+                            ->hidden(fn (KnowledgeBaseCategory $record): bool => blank($record->icon)),
+                        TextEntry::make('description')
+                            ->label('Description')
+                            ->columnSpanFull(),
+                        TextEntry::make('slug')
+                            ->hidden(fn (KnowledgeBaseCategory $record): bool => blank($record->slug)),
+                    ])
+                    ->columns(),
             ]);
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return 'View';
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            EditAction::make(),
         ];
     }
 }

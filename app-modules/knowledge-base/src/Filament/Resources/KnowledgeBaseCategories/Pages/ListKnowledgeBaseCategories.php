@@ -34,60 +34,60 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\Pages;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategoryResource;
-use App\Concerns\EditPageRedirection;
-use App\Filament\Forms\Components\IconSelect;
-use Filament\Actions\DeleteAction;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\KnowledgeBaseCategoryResource;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
-use Illuminate\Validation\Rules\Unique;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
-class EditKnowledgeBaseCategory extends EditRecord
+class ListKnowledgeBaseCategories extends ListRecords
 {
-    use EditPageRedirection;
-
     protected static string $resource = KnowledgeBaseCategoryResource::class;
 
-    public function form(Schema $schema): Schema
+    public function table(Table $table): Table
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
+        return $table
+            ->modifyQueryUsing(
+                fn (Builder $query) => $query->doesntHave('parentCategory')
+            )
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name')
                     ->label('Name')
-                    ->required()
-                    ->string(),
-                IconSelect::make('icon'),
-                TextInput::make('slug')
-                    ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
-                    ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule) {
-                        $rule->withoutTrashed();
-                    })
-                    ->maxLength(255)
-                    ->required()
-                    ->dehydrateStateUsing(fn (string $state): string => strtolower($state)),
-                Textarea::make('description')
-                    ->label('Description')
-                    ->nullable()
-                    ->string()
-                    ->columnSpanFull(),
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('knowledge_base_items_count')
+                    ->label('# of Knowledge Base Items')
+                    ->counts('knowledgeBaseItems')
+                    ->sortable(),
+                IconColumn::make('icon')
+                    ->icon(fn (string $state): string => $state)
+                    ->tooltip(fn (?string $state): ?string => filled($state) ? (string) str($state)->after('heroicon-o-')->headline() : null),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
             ]);
-    }
-
-    public static function getNavigationLabel(): string
-    {
-        return 'Edit';
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            ViewAction::make(),
-            DeleteAction::make(),
+            CreateAction::make(),
         ];
     }
 }
