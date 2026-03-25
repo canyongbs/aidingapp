@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\ServiceRequestType\RequestFactories;
+namespace AidingApp\ServiceManagement\Tests\Tenant\Filament\Resources\ServiceRequestTypes\RequestFactories;
 
 use Worksome\RequestFactories\RequestFactory;
 
