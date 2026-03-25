@@ -95,7 +95,7 @@ class ViewServiceRequest extends ViewRecord
                                     ->color(fn (ServiceRequest $record): string => $record->status->color->value),
                                 TextEntry::make('priority.type.name')
                                     ->state(
-                                        fn (ServiceRequest $record) => $record->priority->type()->withTrashed()->first()?->name
+                                        fn (ServiceRequest $record) => $record->priority->type()->first()?->name
                                     )
                                     ->label('Type'),
                                 TextEntry::make('priority.name')

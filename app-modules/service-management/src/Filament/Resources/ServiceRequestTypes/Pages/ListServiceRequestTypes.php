@@ -84,28 +84,27 @@ class ListServiceRequestTypes extends ListRecords
                 /** @phpstan-ignore argument.type */
                 'children' => function (HasMany $query) {
                     $query->orderBy('sort')
-                        ->with([
-                            /** @phpstan-ignore argument.type */
-                            'types' => fn (HasMany $typeQuery) => $typeQuery->orderBy('sort')->withCount('serviceRequests'),
+                        ->with([/** @phpstan-ignore argument.type */
+                            'types' => fn (HasMany $typeQuery) => $typeQuery->withoutArchived()->orderBy('sort')->withCount('serviceRequests'), /** @phpstan-ignore method.notFound */
                             'children' => function (HasMany $childQuery) {
                                 $childQuery->orderBy('sort')
-                                    ->with([
-                                        /** @phpstan-ignore argument.type */
-                                        'types' => fn (HasMany $typeQuery) => $typeQuery->orderBy('sort')->withCount('serviceRequests'),
+                                    ->with([/** @phpstan-ignore argument.type */
+                                        'types' => fn (HasMany $typeQuery) => $typeQuery->withoutArchived()->orderBy('sort')->withCount('serviceRequests'), /** @phpstan-ignore method.notFound */
                                     ])
                                     ->withCount('descendantServiceRequests');
                             },
                         ])
                         ->withCount('descendantServiceRequests');
                 },
-                'types' => fn ($query) => $query->orderBy('sort')->withCount('serviceRequests'),
+                'types' => fn ($query) => $query->withoutArchived()->orderBy('sort')->withCount('serviceRequests'),
             ])
             ->withCount('descendantServiceRequests')
             ->whereNull('parent_id')
             ->orderBy('sort')
             ->get();
 
-        $uncategorizedTypes = ServiceRequestType::query()
+        $uncategorizedTypes = ServiceRequestType::query() /** @phpstan-ignore method.notFound */
+            ->withoutArchived()
             ->whereNull('category_id')
             ->orderBy('sort')
             ->withCount('serviceRequests')

@@ -46,7 +46,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Concerns\EditPageRedirection;
-use App\Filament\Support\HideDeletedExceptSelectedFromSelectOptions;
+use CanyonGBS\Common\Filament\Support\HideDeletedExceptSelectedFromSelectOptions;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -95,7 +95,7 @@ class EditServiceRequest extends EditRecord
                                     ->relationship('status', 'name')
                                     ->label('Status')
                                     ->allowHtml()
-                                    ->options(fn (ServiceRequest $record) => ServiceRequestStatus::withTrashed()
+                                    ->options(fn (ServiceRequest $record) => ServiceRequestStatus::query()
                                         ->whereKey($record->status_id)
                                         ->orWhereNull('deleted_at')
                                         ->orderBy('sort')
@@ -110,11 +110,8 @@ class EditServiceRequest extends EditRecord
                                 Select::make('type_id')
                                     ->options(
                                         fn (ServiceRequest $record) => ServiceRequestType::query() // @phpstan-ignore method.notFound
-                                            ->withTrashed()
-                                            ->withArchived()
                                             ->where(
                                                 fn (Builder $query) => $query // @phpstan-ignore method.notFound
-                                                    ->withoutTrashed()
                                                     ->withoutArchived()
                                                     ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                                         $query->where(function (Builder $query) {

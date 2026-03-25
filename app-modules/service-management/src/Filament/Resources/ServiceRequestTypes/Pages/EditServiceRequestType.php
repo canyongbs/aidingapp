@@ -42,8 +42,8 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRe
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
-use App\Filament\Actions\ArchiveAction;
 use App\Filament\Forms\Components\IconSelect;
+use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
