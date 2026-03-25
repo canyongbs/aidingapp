@@ -34,42 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Timeline\Timelines;
+namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders;
 
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Components\AssetCheckOutViewAction;
-use AidingApp\InventoryManagement\Models\AssetCheckOut;
-use AidingApp\Timeline\Models\CustomTimeline;
-use Filament\Actions\ViewAction;
+use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\Pages\CreateMaintenanceProvider;
+use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\Pages\EditMaintenanceProvider;
+use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\Pages\ListMaintenanceProviders;
+use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\Pages\ViewMaintenanceProvider;
+use AidingApp\InventoryManagement\Models\MaintenanceProvider;
+use App\Filament\Clusters\AssetManagement;
+use BackedEnum;
+use Filament\Resources\Resource;
 
-// TODO Decide where these belong - might want to keep these in the context of the original module
-class AssetCheckOutTimeline extends CustomTimeline
+class MaintenanceProviderResource extends Resource
 {
-    public function __construct(
-        public AssetCheckOut $assetCheckOut
-    ) {}
+    protected static ?string $model = MaintenanceProvider::class;
 
-    public function icon(): string
-    {
-        return 'heroicon-o-arrow-small-right';
-    }
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public function sortableBy(): string
-    {
-        return $this->assetCheckOut->checked_out_at;
-    }
+    protected static ?string $navigationLabel = 'Maintenance Providers';
 
-    public function providesCustomView(): bool
-    {
-        return true;
-    }
+    protected static ?int $navigationSort = 40;
 
-    public function renderCustomView(): string
-    {
-        return 'inventory-management::asset-check-out-timeline-item';
-    }
+    protected static ?string $cluster = AssetManagement::class;
 
-    public function modalViewAction(): ViewAction
+    public static function getPages(): array
     {
-        return AssetCheckOutViewAction::make()->record($this->assetCheckOut);
+        return [
+            'index' => ListMaintenanceProviders::route('/'),
+            'create' => CreateMaintenanceProvider::route('/create'),
+            'view' => ViewMaintenanceProvider::route('/{record}/view'),
+            'edit' => EditMaintenanceProvider::route('/{record}/edit'),
+        ];
     }
 }

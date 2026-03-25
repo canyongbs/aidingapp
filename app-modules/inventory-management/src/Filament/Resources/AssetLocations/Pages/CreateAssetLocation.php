@@ -34,42 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Timeline\Timelines;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetLocations\Pages;
 
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Components\AssetCheckOutViewAction;
-use AidingApp\InventoryManagement\Models\AssetCheckOut;
-use AidingApp\Timeline\Models\CustomTimeline;
-use Filament\Actions\ViewAction;
+use AidingApp\InventoryManagement\Filament\Resources\AssetLocations\AssetLocationResource;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
-// TODO Decide where these belong - might want to keep these in the context of the original module
-class AssetCheckOutTimeline extends CustomTimeline
+class CreateAssetLocation extends CreateRecord
 {
-    public function __construct(
-        public AssetCheckOut $assetCheckOut
-    ) {}
+    protected static string $resource = AssetLocationResource::class;
 
-    public function icon(): string
+    public function form(Schema $schema): Schema
     {
-        return 'heroicon-o-arrow-small-right';
-    }
-
-    public function sortableBy(): string
-    {
-        return $this->assetCheckOut->checked_out_at;
-    }
-
-    public function providesCustomView(): bool
-    {
-        return true;
-    }
-
-    public function renderCustomView(): string
-    {
-        return 'inventory-management::asset-check-out-timeline-item';
-    }
-
-    public function modalViewAction(): ViewAction
-    {
-        return AssetCheckOutViewAction::make()->record($this->assetCheckOut);
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->required(),
+            ]);
     }
 }

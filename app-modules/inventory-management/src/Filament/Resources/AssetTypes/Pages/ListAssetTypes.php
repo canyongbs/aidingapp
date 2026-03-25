@@ -34,42 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Timeline\Timelines;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetTypes\Pages;
 
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Components\AssetCheckOutViewAction;
-use AidingApp\InventoryManagement\Models\AssetCheckOut;
-use AidingApp\Timeline\Models\CustomTimeline;
-use Filament\Actions\ViewAction;
+use AidingApp\InventoryManagement\Filament\Resources\AssetTypes\AssetTypeResource;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-// TODO Decide where these belong - might want to keep these in the context of the original module
-class AssetCheckOutTimeline extends CustomTimeline
+class ListAssetTypes extends ListRecords
 {
-    public function __construct(
-        public AssetCheckOut $assetCheckOut
-    ) {}
+    protected static string $resource = AssetTypeResource::class;
 
-    public function icon(): string
+    public function table(Table $table): Table
     {
-        return 'heroicon-o-arrow-small-right';
+        return $table
+            ->columns([
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable(),
+            ])
+            ->recordActions([
+                EditAction::make(),
+                DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
     }
 
-    public function sortableBy(): string
+    protected function getHeaderActions(): array
     {
-        return $this->assetCheckOut->checked_out_at;
-    }
-
-    public function providesCustomView(): bool
-    {
-        return true;
-    }
-
-    public function renderCustomView(): string
-    {
-        return 'inventory-management::asset-check-out-timeline-item';
-    }
-
-    public function modalViewAction(): ViewAction
-    {
-        return AssetCheckOutViewAction::make()->record($this->assetCheckOut);
+        return [
+            CreateAction::make(),
+        ];
     }
 }

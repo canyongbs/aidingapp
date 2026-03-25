@@ -34,42 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Timeline\Timelines;
+namespace AidingApp\InventoryManagement\Filament\Resources\AssetStatuses;
 
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Components\AssetCheckOutViewAction;
-use AidingApp\InventoryManagement\Models\AssetCheckOut;
-use AidingApp\Timeline\Models\CustomTimeline;
-use Filament\Actions\ViewAction;
+use AidingApp\InventoryManagement\Filament\Resources\AssetStatuses\Pages\CreateAssetStatus;
+use AidingApp\InventoryManagement\Filament\Resources\AssetStatuses\Pages\ListAssetStatuses;
+use AidingApp\InventoryManagement\Filament\Resources\AssetStatuses\Pages\ViewAssetStatus;
+use AidingApp\InventoryManagement\Models\AssetStatus;
+use App\Filament\Clusters\AssetManagement;
+use BackedEnum;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 
-// TODO Decide where these belong - might want to keep these in the context of the original module
-class AssetCheckOutTimeline extends CustomTimeline
+class AssetStatusResource extends Resource
 {
-    public function __construct(
-        public AssetCheckOut $assetCheckOut
-    ) {}
+    protected static ?string $model = AssetStatus::class;
 
-    public function icon(): string
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-tag';
+
+    protected static ?string $navigationLabel = 'Statuses';
+
+    protected static ?int $navigationSort = 20;
+
+    protected static ?string $cluster = AssetManagement::class;
+
+    public static function form(Schema $schema): Schema
     {
-        return 'heroicon-o-arrow-small-right';
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->autofocus()
+                    ->required(),
+            ]);
     }
 
-    public function sortableBy(): string
+    public static function getPages(): array
     {
-        return $this->assetCheckOut->checked_out_at;
-    }
-
-    public function providesCustomView(): bool
-    {
-        return true;
-    }
-
-    public function renderCustomView(): string
-    {
-        return 'inventory-management::asset-check-out-timeline-item';
-    }
-
-    public function modalViewAction(): ViewAction
-    {
-        return AssetCheckOutViewAction::make()->record($this->assetCheckOut);
+        return [
+            'index' => ListAssetStatuses::route('/'),
+            'create' => CreateAssetStatus::route('/create'),
+            'view' => ViewAssetStatus::route('/{record}'),
+        ];
     }
 }
