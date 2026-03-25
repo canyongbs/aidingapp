@@ -39,7 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Relatio
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Filament\Resources\UserResource;
+use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
 use Filament\Actions\Action;

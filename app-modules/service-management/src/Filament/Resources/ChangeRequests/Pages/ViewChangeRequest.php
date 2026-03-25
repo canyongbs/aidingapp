@@ -42,7 +42,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\ChangeRequestR
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\Scopes\ClassifiedAs;
-use App\Filament\Resources\UserResource;
+use App\Filament\Resources\Users\UserResource;
 use Carbon\CarbonInterface;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;

@@ -57,7 +57,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserManager;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
-use App\Filament\Resources\UserResource;
+use App\Filament\Resources\Users\UserResource;
 use App\Settings\DisplaySettings;
 use App\Support\HasAdvancedFilter;
 use Database\Factories\UserFactory;

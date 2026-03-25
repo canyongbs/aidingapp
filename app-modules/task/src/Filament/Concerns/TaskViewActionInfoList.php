@@ -40,7 +40,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;
-use App\Filament\Resources\UserResource;
+use App\Filament\Resources\Users\UserResource;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Fieldset;

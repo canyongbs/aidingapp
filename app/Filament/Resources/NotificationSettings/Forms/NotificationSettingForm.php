@@ -34,30 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Concerns;
+namespace App\Filament\Resources\NotificationSettings\Forms;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Filament\Resources\Users\UserResource;
-use Filament\Infolists\Components\TextEntry;
+use App\Features\MediaToPublicDiskFeature;
+use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Schema;
 
-// TODO Re-use this trait across other places where infolist is rendered
-trait ServiceRequestAssignmentInfolist
+class NotificationSettingForm
 {
-    /**
-     * @return array<TextEntry>
-     */
-    public function serviceRequestAssignmentInfolist(): array
+    public function form(Schema $schema): Schema
     {
-        return [
-            TextEntry::make('serviceRequest.service_request_number')
-                ->label('Service Request')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => ServiceRequestResource::getUrl('view', ['record' => $serviceRequestAssignment->serviceRequest]))
-                ->color('primary'),
-            TextEntry::make('user.name')
-                ->label('Assigned To')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => UserResource::getUrl('view', ['record' => $serviceRequestAssignment->user]))
-                ->color('primary'),
-        ];
+        return $schema
+            ->columns(1)
+            ->components([
+                TextInput::make('name')
+                    ->string()
+                    ->required()
+                    ->autocomplete(false),
+                TextInput::make('from_name')
+                    ->string()
+                    ->maxLength(150)
+                    ->autocomplete(false),
+                Textarea::make('description')
+                    ->string(),
+                ColorSelect::make('primary_color'),
+                SpatieMediaLibraryFileUpload::make('logo')
+                    ->disk('s3')
+                    ->collection('logo')
+                    ->visibility('private')
+                    ->image()
+                    ->hidden(MediaToPublicDiskFeature::active()),
+                SpatieMediaLibraryFileUpload::make('logo')
+                    ->disk('s3-public')
+                    ->collection('logo')
+                    ->visibility('public')
+                    ->image()
+                    ->visible(MediaToPublicDiskFeature::active()),
+            ]);
     }
 }

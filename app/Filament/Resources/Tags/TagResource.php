@@ -34,30 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Concerns;
+namespace App\Filament\Resources\Tags;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Filament\Resources\Users\UserResource;
-use Filament\Infolists\Components\TextEntry;
+use App\Filament\Clusters\KnowledgeManagement;
+use App\Filament\Resources\Tags\Pages\CreateTag;
+use App\Filament\Resources\Tags\Pages\EditTag;
+use App\Filament\Resources\Tags\Pages\ListTags;
+use App\Models\Tag;
+use Filament\Resources\Resource;
 
-// TODO Re-use this trait across other places where infolist is rendered
-trait ServiceRequestAssignmentInfolist
+class TagResource extends Resource
 {
-    /**
-     * @return array<TextEntry>
-     */
-    public function serviceRequestAssignmentInfolist(): array
+    protected static ?string $model = Tag::class;
+
+    protected static ?string $cluster = KnowledgeManagement::class;
+
+    protected static ?int $navigationSort = 40;
+
+    public static function getPages(): array
     {
         return [
-            TextEntry::make('serviceRequest.service_request_number')
-                ->label('Service Request')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => ServiceRequestResource::getUrl('view', ['record' => $serviceRequestAssignment->serviceRequest]))
-                ->color('primary'),
-            TextEntry::make('user.name')
-                ->label('Assigned To')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => UserResource::getUrl('view', ['record' => $serviceRequestAssignment->user]))
-                ->color('primary'),
+            'index' => ListTags::route('/'),
+            'create' => CreateTag::route('/create'),
+            'edit' => EditTag::route('/{record}/edit'),
         ];
     }
 }

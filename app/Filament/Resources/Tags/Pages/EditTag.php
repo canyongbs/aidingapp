@@ -34,46 +34,57 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages;
+namespace App\Filament\Resources\Tags\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
-use App\Filament\Resources\Users\UserResource;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use App\Concerns\EditPageRedirection;
+use App\Filament\Resources\Tags\TagResource;
+use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
-class ViewChangeRequestType extends ViewRecord
+class EditTag extends EditRecord
 {
-    protected static string $resource = ChangeRequestTypeResource::class;
+    use EditPageRedirection;
 
-    public function infolist(Schema $schema): Schema
+    protected static string $resource = TagResource::class;
+
+    public function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([
                 Section::make()
                     ->schema([
-                        TextEntry::make('name'),
-                        TextEntry::make('number_of_required_approvals')
-                            ->label('Number of required approvers.'),
-                        RepeatableEntry::make('userApprovers')
-                            ->schema([
-                                TextEntry::make('name')
-                                    ->hiddenLabel()
-                                    ->url(fn ($record) => UserResource::getUrl('view', ['record' => $record]))
-                                    ->color('primary'),
-                            ]),
-                    ])
-                    ->columns(),
+                        //change this if we want non-class types
+                        Select::make('type')
+                            ->options([
+                                KnowledgeBaseItem::getTagType() => KnowledgeBaseItem::getTagLabel(),
+                            ])
+                            ->required()
+                            ->string()
+                            ->columnSpanFull()
+                            ->live(),
+                        TextInput::make('name')
+                            ->autocomplete(false)
+                            ->required()
+                            ->string()
+                            ->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule, Get $get) {
+                                return $rule->where('type', $get('type'));
+                            })
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

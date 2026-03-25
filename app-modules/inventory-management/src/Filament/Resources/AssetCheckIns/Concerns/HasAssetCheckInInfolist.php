@@ -38,7 +38,7 @@ namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckIns\Concern
 
 use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
-use App\Filament\Resources\UserResource;
+use App\Filament\Resources\Users\UserResource;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Fieldset;

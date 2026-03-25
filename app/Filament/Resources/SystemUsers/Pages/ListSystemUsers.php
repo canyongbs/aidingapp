@@ -34,30 +34,47 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Concerns;
+namespace App\Filament\Resources\SystemUsers\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Filament\Resources\Users\UserResource;
-use Filament\Infolists\Components\TextEntry;
+use App\Filament\Resources\SystemUsers\SystemUserResource;
+use App\Models\SystemUser;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-// TODO Re-use this trait across other places where infolist is rendered
-trait ServiceRequestAssignmentInfolist
+class ListSystemUsers extends ListRecords
 {
-    /**
-     * @return array<TextEntry>
-     */
-    public function serviceRequestAssignmentInfolist(): array
+    protected static string $resource = SystemUserResource::class;
+
+    protected ?string $heading = 'Programmatic Users';
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('name'),
+                TextColumn::make('last_used_at')
+                    ->state(fn (?SystemUser $record) => $record?->tokens()->where('name', 'api')->first()?->last_used_at)
+                    ->dateTime(),
+            ])
+            ->recordActions([
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
     {
         return [
-            TextEntry::make('serviceRequest.service_request_number')
-                ->label('Service Request')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => ServiceRequestResource::getUrl('view', ['record' => $serviceRequestAssignment->serviceRequest]))
-                ->color('primary'),
-            TextEntry::make('user.name')
-                ->label('Assigned To')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => UserResource::getUrl('view', ['record' => $serviceRequestAssignment->user]))
-                ->color('primary'),
+            CreateAction::make(),
         ];
     }
 }

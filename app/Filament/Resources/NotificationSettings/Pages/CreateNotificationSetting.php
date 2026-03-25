@@ -34,30 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Concerns;
+namespace App\Filament\Resources\NotificationSettings\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Filament\Resources\Users\UserResource;
-use Filament\Infolists\Components\TextEntry;
+use App\Filament\Resources\NotificationSettings\Forms\NotificationSettingForm;
+use App\Filament\Resources\NotificationSettings\NotificationSettingResource;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
-// TODO Re-use this trait across other places where infolist is rendered
-trait ServiceRequestAssignmentInfolist
+class CreateNotificationSetting extends CreateRecord
 {
-    /**
-     * @return array<TextEntry>
-     */
-    public function serviceRequestAssignmentInfolist(): array
+    protected static string $resource = NotificationSettingResource::class;
+
+    public function form(Schema $schema): Schema
     {
-        return [
-            TextEntry::make('serviceRequest.service_request_number')
-                ->label('Service Request')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => ServiceRequestResource::getUrl('view', ['record' => $serviceRequestAssignment->serviceRequest]))
-                ->color('primary'),
-            TextEntry::make('user.name')
-                ->label('Assigned To')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => UserResource::getUrl('view', ['record' => $serviceRequestAssignment->user]))
-                ->color('primary'),
-        ];
+        return resolve(NotificationSettingForm::class)->form($schema);
     }
 }
