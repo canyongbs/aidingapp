@@ -33,8 +33,8 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages\EditEngagementFile;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages\EditEngagementFile;
 use AidingApp\Engagement\Models\EngagementFile;
 use App\Models\User;
 

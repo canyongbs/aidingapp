@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
 use AidingApp\Engagement\Models\EngagementFile;
 use App\Models\User;
 

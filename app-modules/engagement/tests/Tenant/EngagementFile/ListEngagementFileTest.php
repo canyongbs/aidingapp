@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
