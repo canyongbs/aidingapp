@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages;
+namespace AidingApp\ContractManagement\Filament\Resources\Contracts\Pages;
 
 use AidingApp\ContractManagement\Enums\ContractStatus;
-use AidingApp\ContractManagement\Filament\Resources\ContractResource;
+use AidingApp\ContractManagement\Filament\Resources\Contracts\ContractResource;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -77,7 +77,7 @@ class ListContracts extends ListRecords
                     ->options(collect(ContractStatus::cases())->mapWithKeys(fn (ContractStatus $contractStatus) => [
                         $contractStatus->value => $contractStatus->getLabel(),
                     ]))
-                    ->query(function (Builder $query, $state) {
+                    ->query(function (Builder $query, array $state) {
                         $today = now();
 
                         return match ($state['value']) {

@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages;
+namespace AidingApp\ContractManagement\Filament\Resources\ContractTypes\Pages;
 
-use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource;
+use AidingApp\ContractManagement\Filament\Resources\ContractTypes\ContractTypeResource;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;

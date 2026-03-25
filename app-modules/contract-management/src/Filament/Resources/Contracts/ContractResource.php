@@ -34,35 +34,36 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages\ListContracts;
-use App\Models\User;
-use App\Settings\LicenseSettings;
+namespace AidingApp\ContractManagement\Filament\Resources\Contracts;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
+use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\CreateContract;
+use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\EditContract;
+use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ListContracts;
+use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ViewContract;
+use AidingApp\ContractManagement\Models\Contract;
+use BackedEnum;
+use Filament\Resources\Resource;
+use UnitEnum;
 
-it('is gated with proper access control', function () {
-    $settings = app(LicenseSettings::class);
+class ContractResource extends Resource
+{
+    protected static ?string $model = Contract::class;
 
-    $settings->data->addons->contractManagement = false;
-    $settings->save();
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-check';
 
-    $user = User::factory()->create();
+    protected static string | UnitEnum | null $navigationGroup = 'Purchasing';
 
-    $user->givePermissionTo('contract.view-any');
+    protected static ?string $navigationLabel = 'Contract Management';
 
-    actingAs($user);
+    protected static ?int $navigationSort = 10;
 
-    get(ListContracts::getUrl())->assertForbidden();
-
-    $settings->data->addons->contractManagement = true;
-    $settings->save();
-
-    $user->revokePermissionTo('contract.view-any');
-
-    get(ListContracts::getUrl())->assertForbidden();
-
-    $user->givePermissionTo('contract.view-any');
-
-    get(ListContracts::getUrl())->assertSuccessful();
-});
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListContracts::route('/'),
+            'create' => CreateContract::route('/create'),
+            'view' => ViewContract::route('/{record}'),
+            'edit' => EditContract::route('/{record}/edit'),
+        ];
+    }
+}

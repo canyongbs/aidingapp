@@ -34,27 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ContractManagement\Filament\Resources;
+use AidingApp\ContractManagement\Filament\Resources\ContractTypes\Pages\ListContractTypes;
+use App\Models\User;
+use App\Settings\LicenseSettings;
 
-use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\CreateContractType;
-use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\EditContractType;
-use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\ListContractTypes;
-use AidingApp\ContractManagement\Models\ContractType;
-use App\Filament\Clusters\ContractManagement;
-use Filament\Resources\Resource;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
-class ContractTypeResource extends Resource
-{
-    protected static ?string $model = ContractType::class;
+it('is gated with proper access control', function () {
+    $settings = app(LicenseSettings::class);
 
-    protected static ?string $cluster = ContractManagement::class;
+    $settings->data->addons->contractManagement = false;
+    $settings->save();
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListContractTypes::route('/'),
-            'create' => CreateContractType::route('/create'),
-            'edit' => EditContractType::route('/{record}/edit'),
-        ];
-    }
-}
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('settings.view-any');
+
+    actingAs($user);
+
+    get(ListContractTypes::getUrl())->assertForbidden();
+
+    $settings->data->addons->contractManagement = true;
+    $settings->save();
+
+    $user->revokePermissionTo('settings.view-any');
+
+    get(ListContractTypes::getUrl())->assertForbidden();
+
+    $user->givePermissionTo('settings.view-any');
+
+    get(ListContractTypes::getUrl())->assertSuccessful();
+});

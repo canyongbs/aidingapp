@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ContractManagement\Filament\Resources\ContractResource\Pages;
+namespace AidingApp\ContractManagement\Filament\Resources\Contracts\Pages;
 
-use AidingApp\ContractManagement\Filament\Resources\ContractResource;
+use AidingApp\ContractManagement\Filament\Resources\Contracts\ContractResource;
 use AidingApp\ContractManagement\Models\Contract;
 use AidingApp\ContractManagement\Models\ContractType;
 use App\Concerns\EditPageRedirection;
@@ -172,6 +172,8 @@ class EditContract extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
+        assert($this->getRecord() instanceof Contract);
+
         $data['contract_value'] = $this->getRecord()->contract_value?->formatByDecimal();
 
         return $data;

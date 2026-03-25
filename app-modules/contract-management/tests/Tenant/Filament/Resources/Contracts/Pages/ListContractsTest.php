@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ContractManagement\Filament\Resources\ContractTypeResource\Pages\ListContractTypes;
+use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ListContracts;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -49,20 +49,20 @@ it('is gated with proper access control', function () {
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('contract.view-any');
 
     actingAs($user);
 
-    get(ListContractTypes::getUrl())->assertForbidden();
+    get(ListContracts::getUrl())->assertForbidden();
 
     $settings->data->addons->contractManagement = true;
     $settings->save();
 
-    $user->revokePermissionTo('settings.view-any');
+    $user->revokePermissionTo('contract.view-any');
 
-    get(ListContractTypes::getUrl())->assertForbidden();
+    get(ListContracts::getUrl())->assertForbidden();
 
-    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('contract.view-any');
 
-    get(ListContractTypes::getUrl())->assertSuccessful();
+    get(ListContracts::getUrl())->assertSuccessful();
 });
