@@ -34,49 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EngagementResponseResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EngagementResponses\Actions;
 
-use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Engagement\Filament\Resources\EngagementResponseResource;
 use AidingApp\Engagement\Models\EngagementResponse;
+use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Flex;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
+use Illuminate\Support\HtmlString;
 
-class ViewEngagementResponse extends ViewRecord
+class EngagementResponseViewAction
 {
-    protected static string $resource = EngagementResponseResource::class;
-
-    public function infolist(Schema $schema): Schema
+    public static function make(): ViewAction
     {
-        return $schema
+        return ViewAction::make()
             ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('sender')
-                            ->label('Sent By')
-                            ->color('primary')
-                            ->state(function (EngagementResponse $record): string {
-                                /** @var Contact $sender */
-                                $sender = $record->sender;
-
-                                return match ($sender::class) {
-                                    Contact::class => "{$sender->full} (Contact)",
-                                };
-                            })
-                            ->url(function (EngagementResponse $record) {
-                                /** @var Contact $sender */
-                                $sender = $record->sender;
-
-                                return match ($sender::class) {
-                                    Contact::class => ContactResource::getUrl('view', ['record' => $sender->id]),
-                                };
-                            }),
-                        TextEntry::make('content'),
-                    ])
-                    ->columns(),
+                Flex::make([
+                    Section::make([
+                        TextEntry::make('subject')
+                            ->getStateUsing(fn (EngagementResponse $record): ?string => $record->subject)
+                            ->hidden(fn ($state): bool => blank($state)),
+                        TextEntry::make('content')
+                            ->getStateUsing(fn (EngagementResponse $record): HtmlString => $record->getBody()),
+                    ]),
+                    Section::make([
+                        TextEntry::make('sent_at')
+                            ->dateTime('Y-m-d H:i:s'),
+                    ])->grow(false),
+                ]),
             ]);
     }
 }

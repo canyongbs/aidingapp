@@ -34,36 +34,32 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
-use AidingApp\Engagement\Models\EngagementFile;
-use App\Models\User;
+namespace AidingApp\Engagement\Filament\Resources\EmailTemplates;
 
-use function Pest\Laravel\actingAs;
+use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\CreateEmailTemplate;
+use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\EditEmailTemplate;
+use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\ListEmailTemplates;
+use AidingApp\Engagement\Models\EmailTemplate;
+use App\Filament\Clusters\Communication;
+use Filament\Resources\Resource;
+use UnitEnum;
 
-// TODO: Add tests for the ViewEngagementFile
-//test('The correct details are displayed on the ViewEngagementFile page', function () {});
+class EmailTemplateResource extends Resource
+{
+    protected static ?string $model = EmailTemplate::class;
 
-// Permission Tests
+    protected static string | UnitEnum | null $navigationGroup = 'Communication';
 
-test('ViewEngagementFile is gated with proper access control', function () {
-    $user = User::factory()->create();
+    protected static ?int $navigationSort = 120;
 
-    $engagementFile = EngagementFile::factory()->create();
+    protected static ?string $cluster = Communication::class;
 
-    actingAs($user)
-        ->get(
-            EngagementFileResource::getUrl('view', [
-                'record' => $engagementFile,
-            ])
-        )->assertForbidden();
-
-    $user->givePermissionTo('engagement_file.view-any');
-    $user->givePermissionTo('engagement_file.*.view');
-
-    actingAs($user)
-        ->get(
-            EngagementFileResource::getUrl('view', [
-                'record' => $engagementFile,
-            ])
-        )->assertSuccessful();
-});
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListEmailTemplates::route('/'),
+            'create' => CreateEmailTemplate::route('/create'),
+            'edit' => EditEmailTemplate::route('/{record}/edit'),
+        ];
+    }
+}

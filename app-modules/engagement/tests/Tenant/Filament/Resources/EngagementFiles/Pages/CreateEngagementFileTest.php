@@ -33,35 +33,49 @@
 
 </COPYRIGHT>
 */
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages\CreateEngagementFile;
+use App\Models\User;
 
-namespace AidingApp\Engagement\Filament\Resources\EngagementResponseResource\Actions;
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
-use AidingApp\Engagement\Models\EngagementResponse;
-use Filament\Actions\ViewAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Flex;
-use Filament\Schemas\Components\Section;
-use Illuminate\Support\HtmlString;
+// TODO: Add tests for the CreateEngagementFile
+//test('A successful action on the CreateEngagementFile page', function () {});
+//
+//test('CreateEngagementFile requires valid data', function ($data, $errors) {})->with([]);
 
-class EngagementResponseViewAction
-{
-    public static function make(): ViewAction
-    {
-        return ViewAction::make()
-            ->schema([
-                Flex::make([
-                    Section::make([
-                        TextEntry::make('subject')
-                            ->getStateUsing(fn (EngagementResponse $record): ?string => $record->subject)
-                            ->hidden(fn ($state): bool => blank($state)),
-                        TextEntry::make('content')
-                            ->getStateUsing(fn (EngagementResponse $record): HtmlString => $record->getBody()),
-                    ]),
-                    Section::make([
-                        TextEntry::make('sent_at')
-                            ->dateTime('Y-m-d H:i:s'),
-                    ])->grow(false),
-                ]),
-            ]);
-    }
-}
+// Permission Tests
+
+test('CreateEngagementFile is gated with proper access control', function () {
+    $user = User::factory()->create();
+
+    actingAs($user)
+        ->get(
+            EngagementFileResource::getUrl('create')
+        )->assertForbidden();
+
+    livewire(CreateEngagementFile::class)
+        ->assertForbidden();
+
+    $user->givePermissionTo('engagement_file.view-any');
+    $user->givePermissionTo('engagement_file.create');
+
+    actingAs($user)
+        ->get(
+            EngagementFileResource::getUrl('create')
+        )->assertSuccessful();
+
+    // TODO: Test for file upload
+
+    //$request = collect(CreateEngagementFileRequestFactory::new()->create());
+    //
+    //livewire(EngagementFileResource\Pages\CreateEngagementFile::class)
+    //    ->fillForm($request->toArray())
+    //    ->call('create')
+    //    ->assertHasNoFormErrors();
+    //
+    //assertCount(1, EngagementFile::all());
+    //
+    //assertDatabaseHas(EngagementFile::class, $request->toArray());
+});

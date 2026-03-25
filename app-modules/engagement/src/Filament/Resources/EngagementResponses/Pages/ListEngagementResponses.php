@@ -34,51 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EmailTemplateResource\Pages;
+namespace AidingApp\Engagement\Filament\Resources\EngagementResponses\Pages;
 
-use AidingApp\Engagement\Filament\Resources\EmailTemplateResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
-use FilamentTiptapEditor\TiptapEditor;
+use AidingApp\Engagement\Filament\Resources\EngagementResponses\EngagementResponseResource;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class EditEmailTemplate extends EditRecord
+class ListEngagementResponses extends ListRecords
 {
-    use EditPageRedirection;
+    protected static string $resource = EngagementResponseResource::class;
 
-    protected static string $resource = EmailTemplateResource::class;
-
-    public function form(Schema $schema): Schema
+    public function table(Table $table): Table
     {
-        return $schema
-            ->columns(1)
-            ->components([
-                TextInput::make('name')
-                    ->string()
-                    ->required()
-                    ->autocomplete(false),
-                Textarea::make('description')
-                    ->string(),
-                TiptapEditor::make('content')
-                    ->disk('s3-public')
-                    ->mergeTags([
-                        'contact full name',
-                        'contact email',
-                    ])
-                    ->profile('email')
-                    ->columnSpanFull()
-                    ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-                    ->required(),
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('content'),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+            ])
+            ->toolbarActions([
             ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            DeleteAction::make(),
-        ];
     }
 }

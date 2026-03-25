@@ -34,27 +34,49 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources;
+namespace AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages;
 
-use AidingApp\Engagement\Filament\Resources\EngagementResponseResource\Pages\ListEngagementResponses;
-use AidingApp\Engagement\Filament\Resources\EngagementResponseResource\Pages\ViewEngagementResponse;
-use AidingApp\Engagement\Models\EngagementResponse;
-use BackedEnum;
+use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use FilamentTiptapEditor\TiptapEditor;
 
-class EngagementResponseResource extends Resource
+class CreateEmailTemplate extends CreateRecord
 {
-    protected static ?string $model = EngagementResponse::class;
+    protected static string $resource = EmailTemplateResource::class;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-arrow-path-rounded-square';
-
-    protected static bool $shouldRegisterNavigation = false;
-
-    public static function getPages(): array
+    public function form(Schema $schema): Schema
     {
-        return [
-            'index' => ListEngagementResponses::route('/'),
-            'view' => ViewEngagementResponse::route('/{record}'),
-        ];
+        return $schema
+            ->columns(1)
+            ->components([
+                TextInput::make('name')
+                    ->string()
+                    ->required()
+                    ->autocomplete(false),
+                Textarea::make('description')
+                    ->string(),
+                TiptapEditor::make('content')
+                    ->disk('s3-public')
+                    ->mergeTags([
+                        'contact full name',
+                        'contact email',
+                    ])
+                    ->profile('email')
+                    ->columnSpanFull()
+                    ->extraInputAttributes(['style' => 'min-height: 12rem;'])
+                    ->required(),
+            ]);
+    }
+
+    protected function getRedirectUrl(): string
+    {
+        /** @var class-string<Resource> $resource */
+        $resource = $this->getResource();
+
+        return $resource::getUrl();
     }
 }

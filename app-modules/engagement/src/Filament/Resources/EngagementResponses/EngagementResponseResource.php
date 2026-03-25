@@ -33,49 +33,28 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages\CreateEngagementFile;
-use App\Models\User;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
+namespace AidingApp\Engagement\Filament\Resources\EngagementResponses;
 
-// TODO: Add tests for the CreateEngagementFile
-//test('A successful action on the CreateEngagementFile page', function () {});
-//
-//test('CreateEngagementFile requires valid data', function ($data, $errors) {})->with([]);
+use AidingApp\Engagement\Filament\Resources\EngagementResponses\Pages\ListEngagementResponses;
+use AidingApp\Engagement\Filament\Resources\EngagementResponses\Pages\ViewEngagementResponse;
+use AidingApp\Engagement\Models\EngagementResponse;
+use BackedEnum;
+use Filament\Resources\Resource;
 
-// Permission Tests
+class EngagementResponseResource extends Resource
+{
+    protected static ?string $model = EngagementResponse::class;
 
-test('CreateEngagementFile is gated with proper access control', function () {
-    $user = User::factory()->create();
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-arrow-path-rounded-square';
 
-    actingAs($user)
-        ->get(
-            EngagementFileResource::getUrl('create')
-        )->assertForbidden();
+    protected static bool $shouldRegisterNavigation = false;
 
-    livewire(CreateEngagementFile::class)
-        ->assertForbidden();
-
-    $user->givePermissionTo('engagement_file.view-any');
-    $user->givePermissionTo('engagement_file.create');
-
-    actingAs($user)
-        ->get(
-            EngagementFileResource::getUrl('create')
-        )->assertSuccessful();
-
-    // TODO: Test for file upload
-
-    //$request = collect(CreateEngagementFileRequestFactory::new()->create());
-    //
-    //livewire(EngagementFileResource\Pages\CreateEngagementFile::class)
-    //    ->fillForm($request->toArray())
-    //    ->call('create')
-    //    ->assertHasNoFormErrors();
-    //
-    //assertCount(1, EngagementFile::all());
-    //
-    //assertDatabaseHas(EngagementFile::class, $request->toArray());
-});
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListEngagementResponses::route('/'),
+            'view' => ViewEngagementResponse::route('/{record}'),
+        ];
+    }
+}

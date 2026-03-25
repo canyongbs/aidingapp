@@ -34,25 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
+use App\Models\User;
 
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
+use function Pest\Laravel\actingAs;
 
-class EditEngagementFile extends EditRecord
-{
-    use EditPageRedirection;
+// TODO: Add tests for the ListEngagementFiles
+//test('The correct details are displayed on the ListEngagementFiles page', function () {});
 
-    protected static string $resource = EngagementFileResource::class;
+// TODO: Sorting and Searching tests
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-            DeleteAction::make(),
-        ];
-    }
-}
+// Permission Tests
+
+test('ListEngagementFiles is gated with proper access control', function () {
+    $user = User::factory()->create();
+
+    actingAs($user)
+        ->get(
+            EngagementFileResource::getUrl('index')
+        )->assertForbidden();
+
+    $user->givePermissionTo('engagement_file.view-any');
+
+    actingAs($user)
+        ->get(
+            EngagementFileResource::getUrl('index')
+        )->assertSuccessful();
+});

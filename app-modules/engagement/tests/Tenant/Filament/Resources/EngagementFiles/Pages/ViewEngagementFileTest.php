@@ -34,48 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EngagementFileResource\Pages;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
+use AidingApp\Engagement\Models\EngagementFile;
+use App\Models\User;
 
-use AidingApp\Engagement\Filament\Resources\EngagementFileResource;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use function Pest\Laravel\actingAs;
 
-class ListEngagementFiles extends ListRecords
-{
-    protected static string $resource = EngagementFileResource::class;
+// TODO: Add tests for the ViewEngagementFile
+//test('The correct details are displayed on the ViewEngagementFile page', function () {});
 
-    public function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('description')
-                    ->label('Description')
-                    ->searchable()
-                    ->sortable(),
+// Permission Tests
+
+test('ViewEngagementFile is gated with proper access control', function () {
+    $user = User::factory()->create();
+
+    $engagementFile = EngagementFile::factory()->create();
+
+    actingAs($user)
+        ->get(
+            EngagementFileResource::getUrl('view', [
+                'record' => $engagementFile,
             ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
-    }
+        )->assertForbidden();
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make(),
-        ];
-    }
-}
+    $user->givePermissionTo('engagement_file.view-any');
+    $user->givePermissionTo('engagement_file.*.view');
+
+    actingAs($user)
+        ->get(
+            EngagementFileResource::getUrl('view', [
+                'record' => $engagementFile,
+            ])
+        )->assertSuccessful();
+});
