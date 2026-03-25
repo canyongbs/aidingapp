@@ -230,7 +230,10 @@ class ListKnowledgeBaseItems extends ListRecords
                         }
 
                         foreach ($record->tags as $tag) {
-                            $replica->tags()->attach($tag->id);
+                            $replica->tags()->attach($tag->id, [
+                                // Include any pivot data if necessary
+                                'taggable_type' => $tag->pivot->taggable_type,
+                            ]);
                         }
 
                         $replica->article_details = tiptap_converter()
