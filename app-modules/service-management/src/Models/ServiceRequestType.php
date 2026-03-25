@@ -184,7 +184,8 @@ class ServiceRequestType extends BaseModel implements Auditable
      */
     public function form(): HasOne
     {
-        return $this->hasOne(ServiceRequestForm::class, 'service_request_type_id');
+        return $this->hasOne(ServiceRequestForm::class, 'service_request_type_id')
+            ->withoutArchived(); /** @phpstan-ignore method.notFound */
     }
 
     /**
