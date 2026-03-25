@@ -34,20 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\KnowledgeBaseQualityResource;
 use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
 
-class EditKnowledgeBaseQuality extends EditRecord
+class CreateKnowledgeBaseQuality extends CreateRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = KnowledgeBaseQualityResource::class;
 
     public function form(Schema $schema): Schema
@@ -59,13 +54,5 @@ class EditKnowledgeBaseQuality extends EditRecord
                     ->required()
                     ->string(),
             ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-            DeleteAction::make(),
-        ];
     }
 }

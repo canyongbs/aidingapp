@@ -33,57 +33,37 @@
 
 </COPYRIGHT>
 */
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseQuality\RequestFactories\CreateKnowledgeBaseQualityRequestFactory;
+
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\KnowledgeBaseQualityResource;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
-use function PHPUnit\Framework\assertCount;
 
-// TODO: Write CreateKnowledgeBaseQuality tests
-//test('A successful action on the CreateKnowledgeBaseQuality page', function () {});
-//
-//test('CreateKnowledgeBaseQuality requires valid data', function ($data, $errors) {})->with([]);
+// TODO: Write ListKnowledgeBaseQuality tests
+//test('The correct details are displayed on the ListKnowledgeBaseQuality page', function () {});
+
+// TODO: Sorting and Searching tests
 
 // Permission Tests
 
-test('CreateKnowledgeBaseQuality is gated with proper access control', function () {
+test('ListKnowledgeBaseQuality is gated with proper access control', function () {
     $user = User::factory()->create();
 
     actingAs($user)
         ->get(
-            KnowledgeBaseQualityResource::getUrl('create')
+            KnowledgeBaseQualityResource::getUrl('index')
         )->assertForbidden();
 
-    livewire(CreateKnowledgeBaseQuality::class)
-        ->assertForbidden();
-
     $user->givePermissionTo('settings.view-any');
-    $user->givePermissionTo('settings.create');
 
     actingAs($user)
         ->get(
-            KnowledgeBaseQualityResource::getUrl('create')
+            KnowledgeBaseQualityResource::getUrl('index')
         )->assertSuccessful();
-
-    $request = collect(CreateKnowledgeBaseQualityRequestFactory::new()->create());
-
-    livewire(CreateKnowledgeBaseQuality::class)
-        ->fillForm($request->toArray())
-        ->call('create')
-        ->assertHasNoFormErrors();
-
-    assertCount(1, KnowledgeBaseQuality::all());
-
-    assertDatabaseHas(KnowledgeBaseQuality::class, $request->toArray());
 });
 
-test('CreateKnowledgeBaseQuality is gated with proper feature ccess control', function () {
+test('ListKnowledgeBaseQuality is gated with proper feature access control', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -93,15 +73,11 @@ test('CreateKnowledgeBaseQuality is gated with proper feature ccess control', fu
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
-    $user->givePermissionTo('settings.create');
 
     actingAs($user)
         ->get(
-            KnowledgeBaseQualityResource::getUrl('create')
+            KnowledgeBaseQualityResource::getUrl('index')
         )->assertForbidden();
-
-    livewire(CreateKnowledgeBaseQuality::class)
-        ->assertForbidden();
 
     $settings->data->addons->knowledgeManagement = true;
 
@@ -109,17 +85,6 @@ test('CreateKnowledgeBaseQuality is gated with proper feature ccess control', fu
 
     actingAs($user)
         ->get(
-            KnowledgeBaseQualityResource::getUrl('create')
+            KnowledgeBaseQualityResource::getUrl('index')
         )->assertSuccessful();
-
-    $request = collect(CreateKnowledgeBaseQualityRequestFactory::new()->create());
-
-    livewire(CreateKnowledgeBaseQuality::class)
-        ->fillForm($request->toArray())
-        ->call('create')
-        ->assertHasNoFormErrors();
-
-    assertCount(1, KnowledgeBaseQuality::all());
-
-    assertDatabaseHas(KnowledgeBaseQuality::class, $request->toArray());
 });

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\KnowledgeBaseQualityResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use App\Models\User;
 use App\Settings\LicenseSettings;

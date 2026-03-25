@@ -34,16 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Tests\Tenant\KnowledgeBaseQuality\RequestFactories;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages;
 
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\KnowledgeBaseQualityResource;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
-class EditKnowledgeBaseQualityRequestFactory extends RequestFactory
+class ViewKnowledgeBaseQuality extends ViewRecord
 {
-    public function definition(): array
+    protected static string $resource = KnowledgeBaseQualityResource::class;
+
+    public function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Name'),
+                    ])
+                    ->columns(),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
     {
         return [
-            'name' => $this->faker->word(),
+            EditAction::make(),
         ];
     }
 }

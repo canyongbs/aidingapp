@@ -34,36 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages\CreateKnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages\EditKnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages\ListKnowledgeBaseQualities;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages\ViewKnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
+use App\Filament\Clusters\KnowledgeManagement;
+use Filament\Resources\Resource;
 
-class ViewKnowledgeBaseQuality extends ViewRecord
+class KnowledgeBaseQualityResource extends Resource
 {
-    protected static string $resource = KnowledgeBaseQualityResource::class;
+    protected static ?string $model = KnowledgeBaseQuality::class;
 
-    public function infolist(Schema $schema): Schema
-    {
-        return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name'),
-                    ])
-                    ->columns(),
-            ]);
-    }
+    protected static ?string $navigationLabel = 'Qualities';
 
-    protected function getHeaderActions(): array
+    protected static ?int $navigationSort = 2;
+
+    protected static ?string $cluster = KnowledgeManagement::class;
+
+    public static function getPages(): array
     {
         return [
-            EditAction::make(),
+            'index' => ListKnowledgeBaseQualities::route('/'),
+            'create' => CreateKnowledgeBaseQuality::route('/create'),
+            'view' => ViewKnowledgeBaseQuality::route('/{record}'),
+            'edit' => EditKnowledgeBaseQuality::route('/{record}/edit'),
         ];
     }
 }

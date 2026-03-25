@@ -34,57 +34,16 @@
 </COPYRIGHT>
 */
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource;
-use App\Models\User;
-use App\Settings\LicenseSettings;
+namespace AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseQualities\RequestFactories;
 
-use function Pest\Laravel\actingAs;
+use Worksome\RequestFactories\RequestFactory;
 
-// TODO: Write ListKnowledgeBaseQuality tests
-//test('The correct details are displayed on the ListKnowledgeBaseQuality page', function () {});
-
-// TODO: Sorting and Searching tests
-
-// Permission Tests
-
-test('ListKnowledgeBaseQuality is gated with proper access control', function () {
-    $user = User::factory()->create();
-
-    actingAs($user)
-        ->get(
-            KnowledgeBaseQualityResource::getUrl('index')
-        )->assertForbidden();
-
-    $user->givePermissionTo('settings.view-any');
-
-    actingAs($user)
-        ->get(
-            KnowledgeBaseQualityResource::getUrl('index')
-        )->assertSuccessful();
-});
-
-test('ListKnowledgeBaseQuality is gated with proper feature access control', function () {
-    $settings = app(LicenseSettings::class);
-
-    $settings->data->addons->knowledgeManagement = false;
-
-    $settings->save();
-
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('settings.view-any');
-
-    actingAs($user)
-        ->get(
-            KnowledgeBaseQualityResource::getUrl('index')
-        )->assertForbidden();
-
-    $settings->data->addons->knowledgeManagement = true;
-
-    $settings->save();
-
-    actingAs($user)
-        ->get(
-            KnowledgeBaseQualityResource::getUrl('index')
-        )->assertSuccessful();
-});
+class EditKnowledgeBaseQualityRequestFactory extends RequestFactory
+{
+    public function definition(): array
+    {
+        return [
+            'name' => $this->faker->word(),
+        ];
+    }
+}

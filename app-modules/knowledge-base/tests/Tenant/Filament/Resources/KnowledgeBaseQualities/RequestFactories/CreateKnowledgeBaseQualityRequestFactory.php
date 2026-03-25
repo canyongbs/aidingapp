@@ -34,33 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources;
+namespace AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseQualities\RequestFactories;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\CreateKnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\EditKnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\ListKnowledgeBaseQualities;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualityResource\Pages\ViewKnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use App\Filament\Clusters\KnowledgeManagement;
-use Filament\Resources\Resource;
+use Worksome\RequestFactories\RequestFactory;
 
-class KnowledgeBaseQualityResource extends Resource
+class CreateKnowledgeBaseQualityRequestFactory extends RequestFactory
 {
-    protected static ?string $model = KnowledgeBaseQuality::class;
-
-    protected static ?string $navigationLabel = 'Qualities';
-
-    protected static ?int $navigationSort = 2;
-
-    protected static ?string $cluster = KnowledgeManagement::class;
-
-    public static function getPages(): array
+    public function definition(): array
     {
         return [
-            'index' => ListKnowledgeBaseQualities::route('/'),
-            'create' => CreateKnowledgeBaseQuality::route('/create'),
-            'view' => ViewKnowledgeBaseQuality::route('/{record}'),
-            'edit' => EditKnowledgeBaseQuality::route('/{record}/edit'),
+            'name' => $this->faker->word(),
         ];
     }
 }
