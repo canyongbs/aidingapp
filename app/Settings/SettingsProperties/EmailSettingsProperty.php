@@ -38,6 +38,9 @@ namespace App\Settings\SettingsProperties;
 
 use App\Models\SettingsPropertyWithMedia;
 
+/**
+ * @mixin IdeHelperEmailSettingsProperty
+ */
 class EmailSettingsProperty extends SettingsPropertyWithMedia
 {
     public function registerMediaCollections(): void

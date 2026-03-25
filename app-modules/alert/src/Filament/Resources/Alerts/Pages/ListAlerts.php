@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Alert\Filament\Resources\AlertResource\Pages;
+namespace AidingApp\Alert\Filament\Resources\Alerts\Pages;
 
 use AidingApp\Alert\Enums\AlertSeverity;
 use AidingApp\Alert\Enums\AlertStatus;
-use AidingApp\Alert\Filament\Resources\AlertResource;
+use AidingApp\Alert\Filament\Resources\Alerts\AlertResource;
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
 use App\Filament\Tables\Columns\IdColumn;
