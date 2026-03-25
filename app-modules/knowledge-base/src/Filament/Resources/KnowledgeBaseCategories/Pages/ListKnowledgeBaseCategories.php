@@ -34,63 +34,60 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Widgets;
+namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\Pages;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\KnowledgeBaseCategoryResource;
 use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\ListRecords;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Database\Eloquent\Builder;
 
-class RecentKnowledgeBaseArticlesList extends BaseWidget
+class ListKnowledgeBaseCategories extends ListRecords
 {
-    protected int | string | array $columnSpan = [
-        'sm' => 1,
-        'md' => 1,
-        'lg' => 2,
-    ];
+    protected static string $resource = KnowledgeBaseCategoryResource::class;
 
     public function table(Table $table): Table
     {
         return $table
-            ->heading('Latest KB Articles (5)')
-            ->query(
-                KnowledgeBaseItem::latest()->limit(5)
+            ->modifyQueryUsing(
+                fn (Builder $query) => $query->doesntHave('parentCategory')
             )
             ->columns([
                 IdColumn::make(),
-                TextColumn::make('title')
-                    ->label('Title')
+                TextColumn::make('name')
+                    ->label('Name')
                     ->searchable()
-                    ->sortable()
-                    ->limit(),
-                TextColumn::make('quality.name')
-                    ->label('Quality')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('status.name')
-                    ->label('Status')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('public')
-                    ->label('Public')
-                    ->sortable()
-                    ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No')
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('category.name')
-                    ->label('Category')
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->sortable(),
+                TextColumn::make('knowledge_base_items_count')
+                    ->label('# of Knowledge Base Items')
+                    ->counts('knowledgeBaseItems')
+                    ->sortable(),
+                IconColumn::make('icon')
+                    ->icon(fn (string $state): string => $state)
+                    ->tooltip(fn (?string $state): ?string => filled($state) ? (string) str($state)->after('heroicon-o-')->headline() : null),
             ])
             ->recordActions([
-                ViewAction::make()
-                    ->url(fn (KnowledgeBaseItem $record): string => KnowledgeBaseItemResource::getUrl(name: 'view', parameters: ['record' => $record])),
+                ViewAction::make(),
+                EditAction::make(),
             ])
-            ->recordUrl(
-                fn (KnowledgeBaseItem $record): string => KnowledgeBaseItemResource::getUrl(name: 'view', parameters: ['record' => $record]),
-            )
-            ->paginated(false);
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
     }
 }
