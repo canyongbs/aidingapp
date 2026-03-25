@@ -78,7 +78,7 @@ class EditDivision extends EditRecord
                 Toggle::make('is_default')
                     ->label('Default')
                     ->live()
-                    ->hint(function (?Division $record, $state): ?string {
+                    ->hint(function (?Division $record, bool $state): ?string {
                         if ($record?->is_default) {
                             return null;
                         }
