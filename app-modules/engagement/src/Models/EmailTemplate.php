@@ -87,8 +87,8 @@ class EmailTemplate extends BaseModel implements HasMedia, HasRichContent
             ->fileAttachmentsDisk('s3-public')
             ->fileAttachmentProvider(SpatieMediaLibraryFileAttachmentProvider::make())
             ->mergeTags([
-                'contact full name' => 'contact full name',
-                'contact email' => 'contact email',
+                'contact full name' => '{{ contact full name }}',
+                'contact email' => '{{ contact email }}',
             ]);
     }
 }
