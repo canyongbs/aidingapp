@@ -34,39 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources;
+namespace AidingApp\Division\Filament\Resources\Divisions\RelationManagers;
 
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\DivisionResource\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\DivisionResource\RelationManagers\TeamsRelationManager;
-use AidingApp\Division\Models\Division;
-use Filament\Resources\Resource;
-use UnitEnum;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\AssociateAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DissociateAction;
+use Filament\Actions\DissociateBulkAction;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class DivisionResource extends Resource
+class TeamsRelationManager extends RelationManager
 {
-    protected static ?string $model = Division::class;
+    protected static string $relationship = 'teams';
 
-    protected static string | UnitEnum | null $navigationGroup = 'User Management';
-
-    protected static ?int $navigationSort = 50;
-
-    public static function getRelations(): array
+    public function table(Table $table): Table
     {
-        return [
-            TeamsRelationManager::make(),
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
+        return $table
+            ->recordTitleAttribute('name')
+            ->inverseRelationship('division')
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name'),
+            ])
+            ->headerActions([
+                AssociateAction::make(),
+            ])
+            ->recordActions([
+                DissociateAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DissociateBulkAction::make(),
+                ]),
+            ])
+            ->emptyStateActions([
+            ]);
     }
 }

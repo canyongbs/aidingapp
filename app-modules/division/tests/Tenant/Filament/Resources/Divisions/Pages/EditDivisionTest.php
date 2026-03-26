@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Division\Filament\Resources\DivisionResource;
+use AidingApp\Division\Filament\Resources\Divisions\DivisionResource;
 use AidingApp\Division\Models\Division;
 use App\Models\User;
 

@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources\DivisionResource\Pages;
+namespace AidingApp\Division\Filament\Resources\Divisions\Pages;
 
-use AidingApp\Division\Filament\Resources\DivisionResource;
+use AidingApp\Division\Filament\Resources\Divisions\DivisionResource;
 use AidingApp\Division\Models\Division;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -67,7 +67,7 @@ class CreateDivision extends CreateRecord
                 Toggle::make('is_default')
                     ->label('Default')
                     ->live()
-                    ->hint(function (?Division $record, $state): ?string {
+                    ->hint(function (?Division $record, bool $state): ?string {
                         if ($record?->is_default) {
                             return null;
                         }
