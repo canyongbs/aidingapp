@@ -60,9 +60,9 @@ use Illuminate\Support\Facades\DB;
 //    });
 //});
 
-test('2026_03_26_125010_reset_oversized_image_dimensions_in_engagement_tables email_templates', function () {
+test('2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables email_templates', function () {
     isolatedMigration(
-        '2026_03_26_125010_reset_oversized_image_dimensions_in_engagement_tables',
+        '2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables',
         function () {
             $emailTemplate = EmailTemplate::factory()->createQuietly([
                 'content' => [
@@ -106,7 +106,7 @@ test('2026_03_26_125010_reset_oversized_image_dimensions_in_engagement_tables em
                 ],
             ]);
 
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_03_26_125010_reset_oversized_image_dimensions_in_engagement_tables.php']);
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables.php']);
 
             expect($migrate)->toBe(Command::SUCCESS);
 
@@ -125,9 +125,9 @@ test('2026_03_26_125010_reset_oversized_image_dimensions_in_engagement_tables em
     );
 });
 
-test('2026_03_26_125010_reset_oversized_image_dimensions_in_engagement_tables engagements', function () {
+test('2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables engagements', function () {
     isolatedMigration(
-        '2026_03_26_125010_reset_oversized_image_dimensions_in_engagement_tables',
+        '2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables',
         function () {
             $engagement = Engagement::factory()->createQuietly([
                 'body' => [
@@ -171,7 +171,7 @@ test('2026_03_26_125010_reset_oversized_image_dimensions_in_engagement_tables en
                 ],
             ]);
 
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_03_26_125010_reset_oversized_image_dimensions_in_engagement_tables.php']);
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables.php']);
 
             expect($migrate)->toBe(Command::SUCCESS);
 
@@ -190,9 +190,9 @@ test('2026_03_26_125010_reset_oversized_image_dimensions_in_engagement_tables en
     );
 });
 
-test('2026_03_26_125010_reset_oversized_image_dimensions_in_engagement_tables engagement_batches', function () {
+test('2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables engagement_batches', function () {
     isolatedMigration(
-        '2026_03_26_125010_reset_oversized_image_dimensions_in_engagement_tables',
+        '2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables',
         function () {
             $engagementBatch = EngagementBatch::factory()->createQuietly([
                 'body' => [
@@ -236,7 +236,7 @@ test('2026_03_26_125010_reset_oversized_image_dimensions_in_engagement_tables en
                 ],
             ]);
 
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_03_26_125010_reset_oversized_image_dimensions_in_engagement_tables.php']);
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables.php']);
 
             expect($migrate)->toBe(Command::SUCCESS);
 
