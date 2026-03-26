@@ -94,12 +94,6 @@ class EngagementBatch extends BaseModel implements HasMedia, HasRichContent
 
     public function setUpRichContent(): void
     {
-        $this->registerRichContent('subject')
-            ->mergeTags([
-                'contact full name' => 'contact full name',
-                'contact email' => 'contact email',
-            ]);
-
         $this->registerRichContent('body')
             ->fileAttachmentsDisk('s3-public')
             ->fileAttachmentProvider(SpatieMediaLibraryFileAttachmentProvider::make())

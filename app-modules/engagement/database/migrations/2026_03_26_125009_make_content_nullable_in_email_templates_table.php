@@ -34,25 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\DataTransferObjects;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\Notification\Enums\NotificationChannel;
-use AidingApp\Notification\Models\Contracts\CanBeNotified;
-use App\Models\User;
-use Carbon\CarbonInterface;
-use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Collection;
-use Spatie\LaravelData\Data;
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::table('email_templates', function (Blueprint $table) {
+            $table->json('content')->nullable()->change();
+        });
+    }
 
-class EngagementCreationData extends Data
-{
-    public function __construct(
-        public User $user,
-        public CanBeNotified | Collection $recipient,
-        public NotificationChannel $channel,
-        public ?string $subject = null,
-        public ?array $body = null,
-        public ?CarbonInterface $scheduledAt = null,
-        public ?Schema $schema = null,
-    ) {}
-}
+    public function down(): void
+    {
+        Schema::table('email_templates', function (Blueprint $table) {
+            $table->json('content')->nullable(false)->change();
+        });
+    }
+};

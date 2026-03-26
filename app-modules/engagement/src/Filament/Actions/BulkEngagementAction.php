@@ -48,6 +48,7 @@ use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Utilities\Get;
@@ -83,15 +84,11 @@ class BulkEngagementAction
                 Step::make('Engagement Details')
                     ->description("Add the details that will be sent to the selected {$context}")
                     ->schema([
-                        RichEditor::make('subject')
-                            ->label('Subject')
-                            ->toolbarButtons([])
-                            ->helperText('You may use "merge tags" to substitute information about a recipient into your subject line. Insert a "{{" in the subject line field to see a list of available merge tags')
+                        TextInput::make('subject')
+                            ->autofocus()
                             ->required()
-                            ->live()
-                            ->placeholder('Enter the email subject here...')
-                            ->columnSpanFull()
-                            ->json(),
+                            ->placeholder(__('Subject'))
+                            ->columnSpanFull(),
                         RichEditor::make('body')
                             ->label('Body')
                             ->toolbarButtons([['bold', 'italic', 'small', 'link'], ['h1', 'h2', 'h3', 'bulletList', 'orderedList', 'horizontalRule', 'attachFiles'], ['mergeTags']])
@@ -182,14 +179,13 @@ class BulkEngagementAction
             ->action(function (Collection $records, array $data, Schema $schema) {
                 $channel = NotificationChannel::parse($data['channel']);
 
-                $data['subject'] ??= ['type' => 'doc', 'content' => []];
                 $data['body'] ??= ['type' => 'doc', 'content' => []];
 
                 app(CreateEngagementBatch::class)->execute(new EngagementCreationData(
                     user: auth()->user(),
                     recipient: $records,
                     channel: $channel,
-                    subject: $data['subject'],
+                    subject: $data['subject'] ?? null,
                     body: $data['body'],
                     scheduledAt: ($data['send_later'] ?? false) ? Carbon::parse($data['scheduled_at'] ?? null) : null,
                     schema: $schema,

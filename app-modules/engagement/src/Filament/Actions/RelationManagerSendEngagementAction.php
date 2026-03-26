@@ -48,6 +48,7 @@ use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Actions;
@@ -80,15 +81,11 @@ class RelationManagerSendEngagementAction extends CreateAction
             ->form(fn (Schema $schema) => $schema->components([
                 Fieldset::make('Content')
                     ->schema([
-                        RichEditor::make('subject')
-                            ->label('Subject')
+                        TextInput::make('subject')
                             ->autofocus()
-                            ->toolbarButtons([])
-                            ->helperText('You may use "merge tags" to substitute information about a recipient into your subject line. Insert a "{{" in the subject line field to see a list of available merge tags')
                             ->required()
-                            ->placeholder('Enter the email subject here...')
-                            ->columnSpanFull()
-                            ->json(),
+                            ->placeholder(__('Subject'))
+                            ->columnSpanFull(),
                         RichEditor::make('body')
                             ->label('Body')
                             ->toolbarButtons([['bold', 'italic', 'small', 'link'], ['h1', 'h2', 'h3', 'bulletList', 'orderedList', 'horizontalRule', 'attachFiles'], ['mergeTags']])
@@ -176,14 +173,13 @@ class RelationManagerSendEngagementAction extends CreateAction
                     ]),
             ]))
             ->action(function (array $data, Schema $schema, RelationManager $livewire) {
-                $data['subject'] ??= ['type' => 'doc', 'content' => []];
                 $data['body'] ??= ['type' => 'doc', 'content' => []];
 
                 app(CreateEngagement::class)->execute(new EngagementCreationData(
                     user: auth()->user(),
                     recipient: Collection::make([$livewire->getOwnerRecord()]),
                     channel: NotificationChannel::Email,
-                    subject: $data['subject'],
+                    subject: $data['subject'] ?? null,
                     body: $data['body'],
                     scheduledAt: ($data['send_later'] ?? false) ? Carbon::parse($data['scheduled_at'] ?? null) : null,
                     schema: $schema,

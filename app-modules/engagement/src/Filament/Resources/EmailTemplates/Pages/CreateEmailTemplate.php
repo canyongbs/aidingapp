@@ -37,6 +37,7 @@
 namespace AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages;
 
 use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
