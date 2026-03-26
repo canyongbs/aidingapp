@@ -33,7 +33,6 @@
 */
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
-import primeUI from 'tailwindcss-primeui';
 
 export default {
     theme: {
@@ -65,5 +64,5 @@ export default {
             },
         },
     },
-    plugins: [forms, typography, primeUI],
+    plugins: [forms, typography],
 };

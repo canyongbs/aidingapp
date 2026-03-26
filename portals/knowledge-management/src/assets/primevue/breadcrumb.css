@@ -54,7 +54,7 @@
 .p-breadcrumb-item-link {
     @apply no-underline flex items-center gap-2 transition-colors duration-200 rounded-md
         text-surface-500 dark:text-surface-400
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
+        focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
 }
 
 .p-breadcrumb-item-link:hover .p-breadcrumb-item-label {

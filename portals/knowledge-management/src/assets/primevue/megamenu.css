@@ -44,7 +44,7 @@
 }
 
 .p-megamenu-root-list {
-    @apply m-0 p-0 list-none outline-none flex items-center flex-wrap gap-2;
+    @apply m-0 p-0 list-none outline-hidden flex items-center flex-wrap gap-2;
 }
 
 .p-megamenu-root-list > .p-megamenu-item > .p-menumegamenubar-item-content {
@@ -61,7 +61,7 @@
 
 .p-megamenu-item-link {
     @apply cursor-pointer flex items-center no-underline overflow-hidden relative text-inherit
-        px-3 py-2 gap-2 select-none outline-none;
+        px-3 py-2 gap-2 select-none outline-hidden;
 }
 
 .p-megamenu-item-icon {
@@ -69,7 +69,7 @@
 }
 
 .p-megamenu-submenu-icon {
-    @apply text-surface-400 dark:text-surface-500 ms-auto text-sm w-[0.875rem] h-[0.875rem];
+    @apply text-surface-400 dark:text-surface-500 ms-auto text-sm w-3.5 h-3.5;
 }
 
 .p-megamenu-item.p-focus > .p-megamenu-item-content {
@@ -109,7 +109,7 @@
 }
 
 .p-megamenu-overlay {
-    @apply hidden absolute w-auto z-10 start-0 min-w-full rounded-md
+    @apply hidden absolute w-auto z-10 inset-s-0 min-w-full rounded-md
         bg-surface-0 dark:bg-surface-900
         border border-surface-200 dark:border-surface-700
         text-surface-700 dark:text-surface-0
@@ -169,7 +169,7 @@
 .p-megamenu-col-4,
 .p-megamenu-col-6,
 .p-megamenu-col-12 {
-    @apply flex-grow-0 flex-shrink-0 basis-auto p-2;
+    @apply grow-0 shrink-0 basis-auto p-2;
 }
 
 .p-megamenu-col-2 {
@@ -196,7 +196,7 @@
     @apply hidden justify-center items-center cursor-pointer w-7 h-7 relative border-none rounded-full
         text-surface-500 dark:text-surface-400 hover:text-surface-600 dark:hover:text-surface-300
         bg-transparent hover:bg-surface-100 dark:hover:bg-surface-800
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary
+        focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary
         transition-colors duration-200;
 }
 
@@ -209,7 +209,7 @@
 }
 
 .p-megamenu-mobile .p-megamenu-root-list {
-    @apply absolute hidden flex-col top-full start-0 z-10 w-full p-1 gap-[2px]
+    @apply absolute hidden flex-col top-full inset-s-0 z-10 w-full p-1 gap-[2px]
         bg-surface-0 dark:bg-surface-900
         border border-surface-200 dark:border-surface-700
         shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)];
@@ -232,7 +232,7 @@
 }
 
 .p-megamenu-mobile .p-megamenu-root-list > .p-megamenu-item > .p-megamenu-item-content .p-megamenu-submenu-icon {
-    @apply ms-auto transition-transform duration-[200ms];
+    @apply ms-auto transition-transform duration-200;
 }
 
 .p-megamenu-mobile .p-megamenu-root-list > .p-megamenu-item-active > .p-megamenu-item-content .p-megamenu-submenu-icon {

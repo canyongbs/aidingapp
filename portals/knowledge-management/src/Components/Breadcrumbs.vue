@@ -55,14 +55,14 @@
             <li>
                 <div>
                     <router-link :to="{ name: 'home' }" class="text-gray-400 hover:text-gray-500">
-                        <HomeIcon class="h-5 w-5 flex-shrink-0" aria-hidden="true" />
+                        <HomeIcon class="h-5 w-5 shrink-0" aria-hidden="true" />
                         <span class="sr-only">Home</span>
                     </router-link>
                 </div>
             </li>
             <li v-for="(crumb, index) in breadcrumbs" :key="(crumb.id || crumb.name) + index">
                 <div class="flex items-center">
-                    <ChevronRightIcon class="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
+                    <ChevronRightIcon class="h-5 w-5 shrink-0 text-gray-400" aria-hidden="true" />
 
                     <!-- If crumb.route is provided, use router-link. Otherwise render a button that emits an event so pages like SelectServiceRequestType can handle category navigation -->
                     <div class="ml-4 text-sm font-medium">
@@ -84,7 +84,7 @@
             </li>
             <li>
                 <div class="flex items-center">
-                    <ChevronRightIcon class="h-5 w-5 flex-shrink-0 text-gray-400" aria-hidden="true" />
+                    <ChevronRightIcon class="h-5 w-5 shrink-0 text-gray-400" aria-hidden="true" />
 
                     <div class="ml-4 text-sm font-medium text-brand-600">
                         {{ currentCrumb }}

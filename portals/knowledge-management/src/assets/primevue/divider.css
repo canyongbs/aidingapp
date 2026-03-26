@@ -33,7 +33,7 @@
 */
 .p-divider-horizontal {
     @apply flex w-full relative items-center my-4 mx-0 py-0 px-4
-        before:absolute before:block before:top-1/2 before:start-0 before:w-full
+        before:absolute before:block before:top-1/2 before:inset-s-0 before:w-full
         before:border-t before:border-surface-200 dark:before:border-surface-700;
 }
 
@@ -43,8 +43,8 @@
 
 .p-divider-vertical {
     @apply min-h-full flex relative justify-center my-0 mx-4 py-2 px-0
-        before:absolute before:block before:top-0 before:start-1/2 before:h-full
-        before:border-s before:border-surface-200 before:dark:border-surface-700;
+        before:absolute before:block before:top-0 before:inset-s-1/2 before:h-full
+        before:border-s before:border-surface-200 dark:before:border-surface-700;
 }
 
 .p-divider.p-divider-vertical .p-divider-content {

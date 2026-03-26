@@ -498,7 +498,7 @@
                         </div>
                     </div>
 
-                    <div v-if="showAiResolutionStep" class="bg-white rounded-lg p-6 shadow-sm">
+                    <div v-if="showAiResolutionStep" class="bg-white rounded-lg p-6 shadow-xs">
                         <h3 class="text-lg font-semibold text-gray-900 mb-4">AI Resolution Available</h3>
 
                         <p class="text-gray-600 mb-4">

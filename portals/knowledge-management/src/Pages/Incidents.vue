@@ -140,7 +140,7 @@
             <Breadcrumbs :currentCrumb="'Incidents'" />
         </template>
 
-        <div class="mb-6 bg-white shadow rounded-lg p-4" v-for="(incident, index) in incidents" :key="index">
+        <div class="mb-6 bg-white shadow-sm rounded-lg p-4" v-for="(incident, index) in incidents" :key="index">
             <time class="mb-1 text-lg font-semibold leading-none text-black">{{
                 formatDate(incident.created_at)
             }}</time>
@@ -158,7 +158,7 @@
             <hr class="my-4" v-if="incident.incident_updates?.length" />
             <ol class="relative border-s border-gray-200" v-if="incident.incident_updates?.length">
                 <li class="mb-8 ms-4" v-for="updateData in incident.incident_updates" :key="updateData.id">
-                    <div class="absolute w-3 h-3 bg-gray-200 rounded-lg mt-1.5 -start-1.5 border border-white"></div>
+                    <div class="absolute w-3 h-3 bg-gray-200 rounded-lg mt-1.5 -inset-s-1.5 border border-white"></div>
 
                     <time class="mb-1 text-sm font-normal leading-none text-gray-400">{{
                         formatDate(updateData.created_at)

@@ -31,12 +31,24 @@
 
 </COPYRIGHT>
 */
-@import '../src/FormKit/index.css';
+@import '../src/FormKit/index.css' layer(base);
 
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import '../src/assets/primevue/tailwind.css';
-@import 'tailwindcss/utilities';
+@import 'tailwindcss';
+@import './preflight-v3-compat.css' layer(base);
+@import 'tailwindcss-primeui';
+@import '../src/assets/primevue/tailwind.css' layer(components);
+
+@config '../tailwind.config.js';
+
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
 
 .formkit-inner {
     @apply max-w-full;

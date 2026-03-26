@@ -31,7 +31,7 @@
 
 </COPYRIGHT>
 */
-@import './button';
+@import './button.css';
 
 .p-speeddial {
     @apply static flex gap-2;
@@ -46,7 +46,7 @@
 }
 
 .p-speeddial-list {
-    @apply m-0 p-0 list-none flex items-center justify-center pointer-events-none outline-none z-20 gap-2
+    @apply m-0 p-0 list-none flex items-center justify-center pointer-events-none outline-hidden z-20 gap-2
         transition-[top] ease-linear duration-200;
 }
 
@@ -61,7 +61,7 @@
 }
 
 .p-speeddial-mask {
-    @apply absolute start-0 top-0 w-full h-full opacity-0 bg-white/40 dark:bg-white/60 rounded-md transition-opacity duration-150;
+    @apply absolute inset-s-0 top-0 w-full h-full opacity-0 bg-white/40 dark:bg-white/60 rounded-md transition-opacity duration-150;
 }
 
 .p-speeddial-mask-visible {

@@ -36,7 +36,7 @@
 }
 
 .p-radiobutton-input {
-    @apply cursor-pointer disabled:cursor-default appearance-none absolute start-0 top-0 w-full h-full m-0 p-0 opacity-0 z-10
+    @apply cursor-pointer disabled:cursor-default appearance-none absolute inset-s-0 top-0 w-full h-full m-0 p-0 opacity-0 z-10
         border border-transparent rounded-full;
 }
 
@@ -85,7 +85,7 @@
 }
 
 .p-radiobutton:not(.p-disabled):has(.p-radiobutton-input:focus-visible) .p-radiobutton-box {
-    @apply outline outline-1 outline-offset-2 outline-primary;
+    @apply outline-solid outline-1 outline-offset-2 outline-primary;
 }
 
 .p-radiobutton.p-invalid > .p-radiobutton-box {

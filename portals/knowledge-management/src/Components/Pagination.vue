@@ -97,7 +97,7 @@
             </div>
             <!-- Pagination buttons -->
             <div>
-                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                <nav class="isolate inline-flex -space-x-px rounded-md shadow-xs" aria-label="Pagination">
                     <BaseButton
                         variant="ghost"
                         size="md"
@@ -108,7 +108,7 @@
                         aria-label="Previous page"
                         @click="$emit('fetchPreviousPage')"
                     />
-
+                    
                     <!-- First Page Button -->
                     <BaseButton
                         v-if="currentPage > 4"

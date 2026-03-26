@@ -40,7 +40,7 @@
 }
 
 .p-connected-overlay-enter-active {
-    @apply transition-[opacity,transform] duration-150 ease-[cubic-bezier(0,0,0.2,1)];
+    @apply transition-[opacity,scale] duration-150 ease-[cubic-bezier(0,0,0.2,1)];
 }
 
 .p-connected-overlay-leave-active {
@@ -58,7 +58,7 @@
 }
 
 .p-toggleable-content-leave-active {
-    @apply overflow-hidden transition-[max-height] animate-duration-[450ms] ease-[cubic-bezier(0,1,0,1)];
+    @apply overflow-hidden transition-[max-height] animate-duration-450 ease-[cubic-bezier(0,1,0,1)];
 }
 
 .p-toggleable-content-enter-active {
@@ -84,7 +84,7 @@
 }
 
 .p-overlay-mask {
-    @apply bg-black/50 text-surface-200 transition-colors duration-150 fixed top-0 start-0 w-full h-full;
+    @apply bg-black/50 text-surface-200 transition-colors duration-150 fixed top-0 inset-s-0 w-full h-full;
 }
 
 .p-overlay-mask-enter {

@@ -31,7 +31,7 @@
 
 </COPYRIGHT>
 */
-@import './paginator';
+@import './paginator.css';
 
 .p-datatable {
     @apply relative;
@@ -109,7 +109,7 @@
 }
 
 .p-datatable-column-resizer {
-    @apply block absolute top-0 end-0 m-0 w-2 h-full p-0 cursor-col-resize border border-transparent;
+    @apply block absolute top-0 inset-e-0 m-0 w-2 h-full p-0 cursor-col-resize border border-transparent;
 }
 
 .p-datatable-column-header-content {
@@ -166,7 +166,7 @@
 }
 
 .p-datatable-filter-constraint:focus-visible {
-    @apply outline-none bg-surface-100 dark:bg-surface-800 text-surface-800 dark:text-surface-0;
+    @apply outline-hidden bg-surface-100 dark:bg-surface-800 text-surface-800 dark:text-surface-0;
 }
 
 .p-datatable-filter-constraint-selected:focus-visible {
@@ -218,7 +218,7 @@
 }
 
 .p-datatable .p-virtualscroller .p-virtualscroller-loading {
-    @apply !transform-none min-h-0 sticky top-0 start-0;
+    @apply transform-none! min-h-0 sticky top-0 inset-s-0;
 }
 
 .p-datatable-paginator-top {
@@ -278,7 +278,7 @@
 
 .p-datatable-tbody > tr:focus-visible,
 .p-datatable-tbody > tr.p-datatable-contextmenu-row-selected {
-    @apply outline outline-1 -outline-offset-1 outline-primary;
+    @apply outline-solid outline-1 -outline-offset-1 outline-primary;
 }
 
 .p-datatable-tfoot > tr > td {
@@ -292,7 +292,7 @@
 }
 
 .p-datatable-sortable-column {
-    @apply cursor-pointer select-none focus-visible:outline focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-primary;
+    @apply cursor-pointer select-none focus-visible:outline-solid focus-visible:outline-1 focus-visible:-outline-offset-1 focus-visible:outline-primary;
 }
 
 .p-datatable-column-title,
@@ -326,11 +326,11 @@
 }
 
 .p-datatable-tbody > tr.p-datatable-dragpoint-top > td {
-    @apply shadow-[inset_0_2px_0_0_theme(colors.primary)];
+    @apply shadow-[inset_0_2px_0_0_var(--color-primary)];
 }
 
 .p-datatable-tbody > tr.p-datatable-dragpoint-bottom > td {
-    @apply shadow-[inset_0_-2px_0_0_theme(colors.primary)];
+    @apply shadow-[inset_0_-2px_0_0_var(--color-primary)];
 }
 
 .p-datatable-loading-icon {
@@ -437,7 +437,7 @@
         transition-colors duration-200 rounded-full border-none bg-transparent
         text-surface-500 enabled:hover:bg-surface-100 enabled:hover:text-surface-700
         dark:text-surface-400 dark:enabled:hover:bg-surface-800 dark:enabled:hover:text-surface-0
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
+        focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
 }
 
 .p-datatable-tbody > tr.p-datatable-row-selected .p-datatable-row-toggle-button:hover {

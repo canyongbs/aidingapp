@@ -31,13 +31,18 @@
 
 </COPYRIGHT>
 */
-export default {
-    plugins: {
-        'postcss-import': {},
-        'tailwindcss/nesting': {},
-        tailwindcss: {
-            config: './tailwind.config.js',
-        },
-        autoprefixer: {},
-    },
-};
+/*
+  Optional v3-like Preflight behavior for Tailwind v4.
+  https://tailwindcss.com/docs/upgrade-guide#preflight-changes
+*/
+@layer base {
+    input::placeholder,
+    textarea::placeholder {
+        color: var(--color-gray-400, #9ca3af);
+    }
+
+    button:not(:disabled),
+    [role=button]:not(:disabled) {
+        cursor: pointer;
+    }
+}

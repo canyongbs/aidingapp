@@ -94,7 +94,7 @@
             <div v-if="checkedOutAssets?.length > 0">
                 <h3 class="text-xl">Assets</h3>
                 <div
-                    class="mt-4 overflow-hidden rounded bg-gray-200 shadow-sm ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
+                    class="mt-4 overflow-hidden rounded bg-gray-200 shadow-xs ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
                 >
                     <div
                         v-for="checkedOutAsset in checkedOutAssets"
@@ -127,7 +127,7 @@
             <div v-if="checkedInAssets?.length > 0">
                 <h3 class="text-xl">Returned Assets</h3>
                 <div
-                    class="mt-4 overflow-hidden rounded bg-gray-200 shadow-sm ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
+                    class="mt-4 overflow-hidden rounded bg-gray-200 shadow-xs ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
                 >
                     <div
                         v-for="checkedInAsset in checkedInAssets"

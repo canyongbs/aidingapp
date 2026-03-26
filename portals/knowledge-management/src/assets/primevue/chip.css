@@ -56,5 +56,5 @@
 .p-chip-remove-icon {
     @apply cursor-pointer text-base w-4 h-4 rounded-full
         text-surface-800 dark:text-surface-0
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
+        focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
 }

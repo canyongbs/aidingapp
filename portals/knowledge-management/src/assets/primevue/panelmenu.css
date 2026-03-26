@@ -42,7 +42,7 @@
 }
 
 .p-panelmenu-header {
-    @apply outline-none;
+    @apply outline-hidden;
 }
 
 .p-panelmenu-header-content {
@@ -91,7 +91,7 @@
 }
 
 .p-panelmenu-submenu {
-    @apply m-0 py-0 ps-4 outline-none list-none;
+    @apply m-0 py-0 ps-4 outline-hidden list-none;
 }
 
 .p-panelmenu-item-link {

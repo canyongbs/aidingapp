@@ -32,7 +32,7 @@
 </COPYRIGHT>
 */
 .p-message {
-    @apply rounded-md outline outline-1;
+    @apply rounded-md outline-solid outline-1;
 }
 
 .p-message-content {
@@ -40,19 +40,19 @@
 }
 
 .p-message-icon {
-    @apply flex-shrink-0;
+    @apply shrink-0;
 }
 
 .p-message-close-button {
-    @apply flex items-center justify-center flex-shrink-0 ms-auto overflow-hidden relative cursor-pointer select-none
+    @apply flex items-center justify-center shrink-0 ms-auto overflow-hidden relative cursor-pointer select-none
         w-7 h-7 rounded-full bg-transparent transition-colors duration-200 text-inherit p-0 border-none
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2;
+        focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-2;
 }
 
 .p-message-info {
     @apply bg-blue-50/95 outline-blue-200 text-blue-600
         dark:bg-blue-500/15 dark:outline-blue-700/35 dark:text-blue-500
-        shadow-[0px_4px_8px_0px_theme(colors.blue.500/0.04)];
+        shadow-[0px_4px_8px_0px_--theme(--color-blue-500/0.04)];
 }
 
 .p-message-info .p-message-close-button {
@@ -71,7 +71,7 @@
 .p-message-success {
     @apply bg-green-50/95 outline-green-200 text-green-600
         dark:bg-green-500/15 dark:outline-green-700/35 dark:text-green-500
-        shadow-[0px_4px_8px_0px_theme(colors.green.500/0.04)];
+        shadow-[0px_4px_8px_0px_--theme(--color-green-500/0.04)];
 }
 
 .p-message-success .p-message-close-button {
@@ -90,7 +90,7 @@
 .p-message-warn {
     @apply bg-yellow-50/95 outline-yellow-200 text-yellow-600
         dark:bg-yellow-500/15 dark:outline-yellow-700/35 dark:text-yellow-500
-        shadow-[0px_4px_8px_0px_theme(colors.yellow.500/0.04)];
+        shadow-[0px_4px_8px_0px_--theme(--color-yellow-500/0.04)];
 }
 
 .p-message-warn .p-message-close-button {
@@ -109,7 +109,7 @@
 .p-message-error {
     @apply bg-red-50/95 outline-red-200 text-red-600
         dark:bg-red-500/15 dark:outline-red-700/35 dark:text-red-500
-        shadow-[0px_4px_8px_0px_theme(colors.red.500/0.04)];
+        shadow-[0px_4px_8px_0px_--theme(--color-red-500/0.04)];
 }
 
 .p-message-error .p-message-close-button {
@@ -168,7 +168,7 @@
 }
 
 .p-message-icon {
-    @apply text-lg w-[1.125rem] h-[1.125rem];
+    @apply text-lg w-4.5 h-4.5;
 }
 
 .p-message-enter-from {
@@ -196,7 +196,7 @@
 }
 
 .p-message-sm .p-message-content {
-    @apply px-2.5 py-[0.375rem];
+    @apply px-2.5 py-1.5;
 }
 
 .p-message-sm .p-message-text {
@@ -224,15 +224,15 @@
 }
 
 .p-message-lg .p-message-close-icon {
-    @apply w-[1.125rem] h-[1.125rem] text-xl;
+    @apply w-4.5 h-4.5 text-xl;
 }
 
 .p-message-outlined {
-    @apply bg-transparent outline outline-1;
+    @apply bg-transparent outline-solid outline-1;
 }
 
 .p-message-simple {
-    @apply bg-transparent outline-none shadow-none;
+    @apply bg-transparent outline-hidden shadow-none;
 }
 
 .p-message-simple .p-message-content {

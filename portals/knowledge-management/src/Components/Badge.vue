@@ -51,7 +51,7 @@
 <template>
     <span
         :class="[
-            'flex items-center justify-center gap-x-1 rounded ring-1 ring-inset px-2 min-w-[theme(spacing.6)] text-xs font-medium py-0.5',
+            'flex items-center justify-center gap-x-1 rounded ring-1 ring-inset px-2 min-w-6 text-xs font-medium py-0.5',
             bgColor, // dynamically applied background color
             ringColor, // dynamically applied ring color
         ]"

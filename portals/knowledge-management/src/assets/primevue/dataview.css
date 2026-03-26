@@ -31,7 +31,7 @@
 
 </COPYRIGHT>
 */
-@import './paginator';
+@import './paginator.css';
 
 .p-dataview {
     @apply border-none;

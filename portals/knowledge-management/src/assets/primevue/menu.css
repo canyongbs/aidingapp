@@ -39,7 +39,7 @@
 }
 
 .p-menu-list {
-    @apply m-0 p-1 list-none outline-none flex flex-col gap-[2px];
+    @apply m-0 p-1 list-none outline-hidden flex flex-col gap-[2px];
 }
 
 .p-menu-item-content {
@@ -48,7 +48,7 @@
 
 .p-menu-item-link {
     @apply cursor-pointer flex items-center no-underline overflow-hidden relative text-inherit
-        px-3 py-2 gap-2 select-none outline-none;
+        px-3 py-2 gap-2 select-none outline-hidden;
 }
 
 .p-menu-item-icon {

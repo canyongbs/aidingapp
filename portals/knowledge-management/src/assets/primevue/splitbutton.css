@@ -31,8 +31,8 @@
 
 </COPYRIGHT>
 */
-@import './button';
-@import './tieredmenu';
+@import './button.css';
+@import './tieredmenu.css';
 
 .p-splitbutton {
     @apply inline-flex relative rounded-md;
@@ -55,11 +55,11 @@
 }
 
 .p-splitbutton-rounded .p-splitbutton-dropdown {
-    @apply rounded-e-[2rem];
+    @apply rounded-e-4xl;
 }
 
 .p-splitbutton-rounded .p-splitbutton-button {
-    @apply rounded-s-[2rem];
+    @apply rounded-s-4xl;
 }
 
 .p-splitbutton-raised {

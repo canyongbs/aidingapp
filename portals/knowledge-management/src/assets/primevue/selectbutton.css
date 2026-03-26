@@ -31,7 +31,7 @@
 
 </COPYRIGHT>
 */
-@import './togglebutton';
+@import './togglebutton.css';
 
 .p-selectbutton {
     @apply inline-flex select-none rounded-md;
@@ -54,5 +54,5 @@
 }
 
 .p-selectbutton.p-invalid {
-    @apply outline outline-offset-0 outline-red-400 dark:outline-red-300;
+    @apply outline-solid outline-offset-0 outline-red-400 dark:outline-red-300;
 }

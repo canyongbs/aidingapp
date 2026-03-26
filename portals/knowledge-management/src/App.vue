@@ -564,7 +564,7 @@
                 class="bg-gradient flex flex-col items-center justify-start min-h-screen"
             >
                 <div
-                    class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
+                    class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-xs px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
                 >
                     <h1 class="text-brand-950 text-center text-2xl font-semibold">Login to Help Center</h1>
 
@@ -698,6 +698,6 @@
 <style scoped>
     .bg-gradient {
         @apply relative bg-no-repeat;
-        background-image: radial-gradient(circle at top, theme('colors.brand.200'), theme('colors.white') 50%);
+        background-image: radial-gradient(circle at top, rgba(var(--primary-200), 1), white 50%);
     }
 </style>

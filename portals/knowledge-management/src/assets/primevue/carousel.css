@@ -31,7 +31,7 @@
 
 </COPYRIGHT>
 */
-@import './button';
+@import './button.css';
 
 .p-carousel {
     @apply flex flex-col;
@@ -59,7 +59,7 @@
 
 .p-carousel-prev-button,
 .p-carousel-next-button {
-    @apply self-center flex-shrink-0;
+    @apply self-center shrink-0;
 }
 
 .p-carousel-indicator-list {
@@ -73,7 +73,7 @@
 .p-carousel-indicator-button {
     @apply flex items-center justify-center w-8 h-2 border-none rounded-md p-0 m-0 select-none cursor-pointer transition-colors duration-200
         bg-surface-200 hover:bg-surface-300 dark:bg-surface-700 dark:hover:bg-surface-600
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
+        focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
 }
 
 .p-carousel-indicator-active .p-carousel-indicator-button {

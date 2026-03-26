@@ -31,7 +31,7 @@
 
 </COPYRIGHT>
 */
-@import './button';
+@import './button.css';
 
 .p-drawer {
     @apply flex flex-col pointer-events-auto relative transition-transform duration-300
@@ -42,15 +42,15 @@
 }
 
 .p-drawer {
-    @apply [transform:translate3d(0,0,0)];
+    @apply transform-[translate3d(0,0,0)];
 }
 
 .p-drawer-content {
-    @apply overflow-y-auto flex-grow pt-0 pb-5 px-5;
+    @apply overflow-y-auto grow pt-0 pb-5 px-5;
 }
 
 .p-drawer-header {
-    @apply flex items-center justify-between flex-shrink-0 p-5;
+    @apply flex items-center justify-between shrink-0 p-5;
 }
 
 .p-drawer-footer {

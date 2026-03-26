@@ -31,11 +31,11 @@
 
 </COPYRIGHT>
 */
-@import './button';
-@import './listbox';
+@import './button.css';
+@import './listbox.css';
 
 .p-picklist {
-    @apply flex gap-[1.125rem];
+    @apply flex gap-4.5;
 }
 
 .p-picklist-controls {
@@ -43,7 +43,7 @@
 }
 
 .p-picklist-list-container {
-    @apply flex-grow flex-shrink basis-1/2;
+    @apply grow shrink basis-1/2;
 }
 
 .p-picklist .p-listbox {

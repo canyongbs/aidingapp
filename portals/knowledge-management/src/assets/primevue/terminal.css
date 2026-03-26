@@ -43,7 +43,7 @@
 }
 
 .p-terminal-prompt-value {
-    @apply flex-auto border-none bg-transparent text-inherit p-0 outline-none text-base;
+    @apply flex-auto border-none bg-transparent text-inherit p-0 outline-hidden text-base;
 }
 
 .p-terminal-prompt-label {

@@ -81,7 +81,7 @@
 
         // --primary-on-color is computed in App.vue from palette luminance (ensures contrast on light palettes).
         const primaryGradient =
-            'bg-[linear-gradient(to_right_bottom,rgb(var(--primary-500)),rgb(var(--primary-800)))] [color:var(--primary-on-color,white)] border border-transparent shadow-sm';
+            'bg-[linear-gradient(to_right_bottom,rgb(var(--primary-500)),rgb(var(--primary-800)))] text-(--primary-on-color,white) border border-transparent shadow-xs';
 
         if (props.selected) {
             return `${primaryGradient} cursor-default pointer-events-none`;
@@ -90,7 +90,7 @@
         const variants = {
             primary: `${primaryGradient} hover:shadow-md hover:brightness-105 active:scale-[0.98] active:shadow-inner active:brightness-95 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[rgb(var(--primary-500))]`,
             secondary:
-                'bg-white text-brand-700 border border-transparent shadow-sm hover:bg-brand-50 active:bg-brand-100 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-500',
+                'bg-white text-brand-700 border border-transparent shadow-xs hover:bg-brand-50 active:bg-brand-100 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-brand-500',
             ghost: 'bg-transparent text-gray-600 border border-gray-300 hover:bg-gray-50 hover:text-gray-800 active:bg-gray-100 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400',
             success:
                 'bg-green-600 text-white border border-transparent hover:bg-green-700 active:bg-green-800 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-500',
@@ -113,7 +113,7 @@
     <component
         :is="tag"
         v-bind="elementAttrs"
-        class="inline-flex items-center justify-center font-medium rounded transition-all duration-200 focus-visible:outline-none select-none"
+        class="inline-flex items-center justify-center font-medium rounded transition-all duration-200 focus-visible:outline-hidden select-none"
         :class="[sizeClasses, variantClasses]"
         :aria-disabled="isInert || selected ? true : undefined"
         :aria-busy="loading || undefined"
