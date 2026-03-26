@@ -140,7 +140,7 @@
             <Breadcrumbs :currentCrumb="'Incidents'" />
         </template>
 
-        <div class="mb-6 bg-white shadow-sm rounded-lg p-4" v-for="(incident, index) in incidents" :key="index">
+        <div class="mb-6 bg-white shadow-xs rounded-lg p-4" v-for="(incident, index) in incidents" :key="index">
             <time class="mb-1 text-lg font-semibold leading-none text-black">{{
                 formatDate(incident.created_at)
             }}</time>

@@ -231,7 +231,7 @@
                         <div
                             v-for="category in displayedCategories"
                             :key="category.id"
-                            class="group relative bg-brand-700 text-white p-6 rounded shadow-sm cursor-pointer hover:shadow-md"
+                            class="group relative bg-brand-700 text-white p-6 rounded shadow-xs cursor-pointer hover:shadow-md"
                             @click="openCategory(category)"
                         >
                             <div class="flex items-center gap-x-3">
@@ -287,7 +287,7 @@
                         <div
                             v-for="type in displayedTypes"
                             :key="type.id"
-                            class="group relative bg-white p-6 rounded shadow-sm border-l-4 border-transparent hover:border-brand-500"
+                            class="group relative bg-white p-6 rounded shadow-xs border-l-4 border-transparent hover:border-brand-500"
                         >
                             <div class="flex items-center gap-x-3">
                                 <div class="shrink-0">
@@ -351,7 +351,7 @@
 
                         <div
                             v-if="displayedCategories.length === 0 && displayedTypes.length === 0"
-                            class="text-gray-500 p-6 bg-white rounded shadow-sm"
+                            class="text-gray-500 p-6 bg-white rounded shadow-xs"
                         >
                             No categories or types found.
                         </div>
