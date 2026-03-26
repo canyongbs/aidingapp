@@ -35,7 +35,7 @@
 */
 
 use AidingApp\Team\Models\Team;
-use App\Filament\Resources\UserResource\Pages\ListUsers;
+use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Lab404\Impersonate\Services\ImpersonateManager;

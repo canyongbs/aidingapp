@@ -36,7 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Concerns;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use Filament\Infolists\Components\TextEntry;
 

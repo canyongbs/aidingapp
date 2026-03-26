@@ -32,11 +32,7 @@
     </COPYRIGHT>
 --}}
 @props(['settings' => null])
-<x-mail::layout :settings="$settings">
-    {{-- Header --}}
-    <x-slot:header>
-        <x-mail::header :url="config('app.url')" :settings="$settings"></x-mail::header>
-    </x-slot:header>
+<x-mail::layout :url="config('app.url')" :settings="$settings">
 
     {{-- Body --}}
     {{ $slot }}
@@ -49,11 +45,4 @@
             </x-mail::subcopy>
         </x-slot:subcopy>
     @endisset
-
-    {{-- Footer --}}
-    <x-slot:footer>
-        <x-mail::footer>
-            This email was sent using Aiding App™. <br /> <br /> © 2016-{{ date('Y') }} Canyon GBS LLC. All Rights Reserved. Canyon GBS™ and Aiding App™ are trademarks of Canyon GBS LLC.
-        </x-mail::footer>
-    </x-slot:footer>
 </x-mail::layout>

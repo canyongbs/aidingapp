@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use App\Filament\Resources\UserResource\Pages\ViewUser;
+use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Models\User;
 
 use function Pest\Livewire\livewire;

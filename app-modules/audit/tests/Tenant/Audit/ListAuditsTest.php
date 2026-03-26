@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Audit\Filament\Resources\AuditResource;
+use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;

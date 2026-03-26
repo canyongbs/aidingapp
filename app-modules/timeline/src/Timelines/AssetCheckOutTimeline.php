@@ -36,7 +36,7 @@
 
 namespace AidingApp\Timeline\Timelines;
 
-use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOutResource\Components\AssetCheckOutViewAction;
+use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Components\AssetCheckOutViewAction;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use AidingApp\Timeline\Models\CustomTimeline;
 use Filament\Actions\ViewAction;

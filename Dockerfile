@@ -1,5 +1,5 @@
 ARG BASE_IMAGE="public.ecr.aws/lts/ubuntu:24.04"
-ARG IMAGEMAGICK_VERSION='7.1.2-17'
+ARG IMAGEMAGICK_VERSION='7.1.2-18'
 
 FROM ${BASE_IMAGE} AS setup
 
@@ -266,7 +266,7 @@ WORKDIR /var/www/html
 # Install JS package management
 ENV NVM_VERSION=v0.40.4
 # If we change this version, remember to also update the .nvmrc file
-ENV NODE_VERSION=24.14.0
+ENV NODE_VERSION=24.14.1
 ENV NPM_VERSION=^11.12.0
 ENV NVM_DIR=/usr/local/nvm
 RUN mkdir "$NVM_DIR"

@@ -35,9 +35,9 @@
 */
 
 use AidingApp\Authorization\Models\Role;
-use App\Filament\Resources\UserResource;
-use App\Filament\Resources\UserResource\Pages\EditUser;
-use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
+use App\Filament\Resources\Users\Pages\EditUser;
+use App\Filament\Resources\Users\RelationManagers\RolesRelationManager;
+use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\AttachAction;

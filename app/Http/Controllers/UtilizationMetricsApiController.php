@@ -38,10 +38,12 @@ namespace App\Http\Controllers;
 
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Task\Models\Task;
 use App\Models\User;
+use App\Settings\LicenseSettings;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -50,6 +52,14 @@ class UtilizationMetricsApiController extends Controller
 {
     public function __invoke(Request $request): JsonResponse
     {
+        $licenseSettings = app(LicenseSettings::class);
+
+        $resetWindow = $licenseSettings->data->limits->getResetWindow();
+
+        $currentQuotaUsageOfEmail = EmailMessage::query()
+            ->whereBetween('created_at', [$resetWindow['start'], $resetWindow['end']])
+            ->sum('quota_usage');
+
         try {
             return response()->json([
                 'data' => [
@@ -59,6 +69,8 @@ class UtilizationMetricsApiController extends Controller
                     'changes' => ChangeRequest::count(),
                     'knowledge_base_articles' => KnowledgeBaseItem::count(),
                     'tasks' => Task::count(),
+                    'emails' => $currentQuotaUsageOfEmail . '/' . $licenseSettings->data->limits->emails,
+                    'messages_reset' => $licenseSettings->data->limits->resetDate,
                 ],
             ], 200);
         } catch (Exception $exception) {

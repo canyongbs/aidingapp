@@ -78,7 +78,7 @@ class ServiceRequestPriority extends BaseModel implements Auditable
      */
     public function type(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestType::class, 'type_id')->withTrashed()->withArchived();
+        return $this->belongsTo(ServiceRequestType::class, 'type_id');
     }
 
     /**

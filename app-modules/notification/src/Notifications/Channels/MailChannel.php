@@ -100,8 +100,8 @@ class MailChannel extends BaseMailChannel
 
         try {
             if (
-                (! ($tenantMailConfig?->isDemoModeEnabled ?? false))
-                || ($isSystemNotification && $tenantMailConfig?->isExcludingSystemNotificationsFromDemoMode)
+                (! ($tenantMailConfig->isDemoModeEnabled ?? false))
+                || ($isSystemNotification && $tenantMailConfig->isExcludingSystemNotificationsFromDemoMode)
             ) {
                 $message = $notification->toMail($notifiable)
                     ->withSymfonyMessage(function (Email $message) use ($tenant, $emailMessage) {
@@ -160,7 +160,7 @@ class MailChannel extends BaseMailChannel
                     $emailMessage->events()->create([
                         'type' => (
                             (! $tenantMailConfig?->isDemoModeEnabled ?? false)
-                            || ($isSystemNotification && $tenantMailConfig?->isExcludingSystemNotificationsFromDemoMode)
+                            || ($isSystemNotification && $tenantMailConfig->isExcludingSystemNotificationsFromDemoMode)
                         )
                             ? EmailMessageEventType::Dispatched
                             : EmailMessageEventType::BlockedByDemoMode,

@@ -36,7 +36,7 @@
 
 namespace AidingApp\Timeline\Timelines;
 
-use AidingApp\InventoryManagement\Filament\Resources\MaintenanceActivityResource\MaintenanceActivityViewAction;
+use AidingApp\InventoryManagement\Filament\Resources\MaintenanceActivities\MaintenanceActivityViewAction;
 use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 use AidingApp\Timeline\Models\CustomTimeline;
 use Filament\Actions\ViewAction;

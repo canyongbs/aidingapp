@@ -81,7 +81,7 @@ class ServiceRequestFormSubmission extends Submission
      */
     public function submissible(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestForm::class, 'service_request_form_id')->withTrashed()->withArchived();
+        return $this->belongsTo(ServiceRequestForm::class, 'service_request_form_id');
     }
 
     /**
@@ -97,7 +97,7 @@ class ServiceRequestFormSubmission extends Submission
      */
     public function priority(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestPriority::class, 'service_request_priority_id')->withTrashed();
+        return $this->belongsTo(ServiceRequestPriority::class, 'service_request_priority_id');
     }
 
     /**
@@ -111,8 +111,7 @@ class ServiceRequestFormSubmission extends Submission
             'service_request_form_submission_id',
             'service_request_form_field_id',
         )
-            ->withPivot(['id', 'response'])
-            ->withTrashed();
+            ->withPivot(['id', 'response']);
     }
 
     public function deliverRequest(): void

@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -42,33 +41,13 @@ use Illuminate\Support\Facades\Schema;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 
 return new class () extends Migration {
-    use FixesDuplicateNames;
-
     private string $table = 'service_request_priorities';
 
     private string $column = 'name';
 
-    /** @var array<int, string> */
-    private array $groupByColumns = ['type_id'];
-
-    private int $chunkSize = 500;
-
-    private bool $usesSoftDeletes = true;
-
     public function up(): void
     {
         DB::transaction(function () {
-            /*
-             * TODO: After feature is stable:
-             * - Remove the $this->fixDuplicates() call below
-             * - Remove the revertDuplicates() call in down()
-             * - Remove the $chunkSize property
-             * - Remove the $usesSoftDeletes property
-             * - Remove the $groupByColumns property
-             * - Remove the FixesDuplicateNames trait
-             */
-            $this->fixDuplicates();
-
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
             Schema::table($this->table, function (Blueprint $table) {
@@ -83,7 +62,5 @@ return new class () extends Migration {
         DB::statement('DROP INDEX IF EXISTS service_request_priorities_name_type_id_unique');
 
         DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
-        $this->revertDuplicates();
     }
 };

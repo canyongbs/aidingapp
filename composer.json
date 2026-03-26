@@ -46,7 +46,7 @@
         "canyon-gbs/project": "*",
         "canyon-gbs/purchasing": "*",
         "canyon-gbs/report": "*",
-        "canyongbs/common": "^2.8.1",
+        "canyongbs/common": "^2.9.1",
         "canyongbs/filament-tiptap-editor": "^2.3.4",
         "canyongbs/model-state-machine": "^2.0.5",
         "cknow/laravel-money": "^8.1",
@@ -54,9 +54,9 @@
         "composer/composer": "^2.7",
         "defectivecode/laravel-sqs-extended": "^1.1.0",
         "fakerphp/faker": "^1.23",
-        "filament/filament": "^4.0",
-        "filament/spatie-laravel-media-library-plugin": "^4.0",
-        "filament/spatie-laravel-settings-plugin": "^4.0",
+        "filament/filament": "^4.9.1",
+        "filament/spatie-laravel-media-library-plugin": "^4.9.1",
+        "filament/spatie-laravel-settings-plugin": "^4.9.1",
         "google/apiclient": "^2.17",
         "guzzlehttp/guzzle": "^7.2",
         "internachi/modular": "^2.2",
@@ -223,7 +223,8 @@
         },
         "audit": {
             "abandoned": "report"
-        }
+        },
+        "source-fallback": false
     },
     "prefer-stable": true,
     "minimum-stability": "stable",

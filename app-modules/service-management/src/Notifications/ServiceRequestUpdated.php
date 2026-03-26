@@ -43,7 +43,7 @@ use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;

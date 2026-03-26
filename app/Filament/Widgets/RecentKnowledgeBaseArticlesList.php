@@ -36,7 +36,7 @@
 
 namespace App\Filament\Widgets;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItemResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\ViewAction;

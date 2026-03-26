@@ -49,6 +49,9 @@ class KnowledgeManagementPortalRegisterRequest extends FormRequest
         return app(FindOrganizationByEmailDomain::class)((string) $this->input('email')) !== null;
     }
 
+    /**
+     * @return ValidationRules
+     */
     public function rules(): array
     {
         return [
