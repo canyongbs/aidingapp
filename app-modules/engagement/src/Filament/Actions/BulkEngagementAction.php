@@ -70,6 +70,7 @@ class BulkEngagementAction
             ->icon('heroicon-o-chat-bubble-bottom-center-text')
             ->modalHeading('Send Bulk Engagement')
             ->modalDescription(fn (Collection $records) => "You have selected {$records->count()} {$context} to engage.")
+            ->model(EngagementBatch::class)
             ->steps([
                 Step::make('Choose your delivery method')
                     ->schema([

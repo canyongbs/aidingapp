@@ -263,8 +263,8 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
             ->fileAttachmentsDisk('s3-public')
             ->fileAttachmentProvider(SpatieMediaLibraryFileAttachmentProvider::make())
             ->mergeTags([
-                'contact full name' => 'contact full name',
-                'contact email' => 'contact email',
+                'contact full name' => '{{ contact full name }}',
+                'contact email' => '{{ contact email }}',
             ]);
     }
 }

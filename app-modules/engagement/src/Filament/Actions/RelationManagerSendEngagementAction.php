@@ -57,7 +57,6 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -185,7 +184,7 @@ class RelationManagerSendEngagementAction extends CreateAction
 
                 app(CreateEngagement::class)->execute(new EngagementCreationData(
                     user: auth()->user(),
-                    recipient: Collection::make([$livewire->getOwnerRecord()]),
+                    recipient: $livewire->getOwnerRecord(),
                     channel: NotificationChannel::Email,
                     subject: $data['subject'] ?? null,
                     body: $data['body'],
