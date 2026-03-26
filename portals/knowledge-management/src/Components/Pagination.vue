@@ -108,7 +108,7 @@
                         aria-label="Previous page"
                         @click="$emit('fetchPreviousPage')"
                     />
-                    
+
                     <!-- First Page Button -->
                     <BaseButton
                         v-if="currentPage > 4"
