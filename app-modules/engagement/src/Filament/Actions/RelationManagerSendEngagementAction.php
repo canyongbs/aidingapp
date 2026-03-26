@@ -115,6 +115,10 @@ class RelationManagerSendEngagementAction extends CreateAction
                                                     $get('onlyMyTemplates'),
                                                     fn (Builder $query) => $query->whereBelongsTo(auth()->user())
                                                 )
+                                                ->when(
+                                                    $get('onlyMyTeamTemplates'),
+                                                    fn (Builder $query) => $query->whereIn('user_id', auth()->user()->team->users->pluck('id'))
+                                                )
                                                 ->where(new Expression('lower(name)'), 'like', "%{$search}%")
                                                 ->orderBy('name')
                                                 ->limit(50)
@@ -124,6 +128,10 @@ class RelationManagerSendEngagementAction extends CreateAction
                                         ->getOptionLabelUsing(fn (string $value): ?string => EmailTemplate::find($value)?->name),
                                     Checkbox::make('onlyMyTemplates')
                                         ->label('Only show my templates')
+                                        ->live()
+                                        ->afterStateUpdated(fn (Set $set) => $set('emailTemplate', null)),
+                                    Checkbox::make('onlyMyTeamTemplates')
+                                        ->label("Only show my team's templates")
                                         ->live()
                                         ->afterStateUpdated(fn (Set $set) => $set('emailTemplate', null)),
                                 ])

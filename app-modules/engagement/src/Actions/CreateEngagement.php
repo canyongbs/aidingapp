@@ -50,6 +50,7 @@ class CreateEngagement
         $engagement->recipient()->associate($data->recipient);
         $engagement->channel = $data->channel;
         $engagement->subject = $data->subject;
+        $engagement->body = $data->body;
         $engagement->scheduled_at = $data->scheduledAt;
 
         if (! $engagement->scheduled_at) {
@@ -57,7 +58,6 @@ class CreateEngagement
         }
 
         DB::transaction(function () use ($data, $engagement) {
-            $engagement->body = $data->body;
             $engagement->save();
 
             if ($data->schema) {
