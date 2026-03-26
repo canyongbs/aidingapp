@@ -31,10 +31,10 @@
 
 </COPYRIGHT>
 */
-@import './button';
+@import './button.css';
 
 .p-scrolltop.p-button {
-    @apply fixed bottom-5 end-5;
+    @apply fixed bottom-5 inset-e-5;
 }
 
 .p-scrolltop-sticky.p-button {

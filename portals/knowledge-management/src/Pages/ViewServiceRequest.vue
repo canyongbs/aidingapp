@@ -182,7 +182,7 @@
         </div>
 
         <div>
-            <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white mb-4">
+            <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-xs px-3 pt-3 pb-1 rounded bg-white mb-4">
                 <div class="mb-4">
                     <h4 class="text-base font-semibold">Title:</h4>
                     <p class="text-gray-700">
@@ -224,14 +224,14 @@
                 </div>
             </div>
 
-            <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white mb-4">
+            <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-xs px-3 pt-3 pb-1 rounded bg-white mb-4">
                 <h2 class="text-xl font-bold mb-4">New Service Request Update</h2>
 
                 <form @submit.prevent="submitUpdate">
                     <div class="mb-4">
                         <textarea
                             v-model="updateMessage"
-                            class="w-full h-32 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-500"
+                            class="w-full h-32 p-2 border border-gray-300 rounded-md focus:outline-hidden focus:ring-3 focus:ring-blue-500"
                             placeholder="Enter your update here..."
                             required
                         ></textarea>
@@ -247,7 +247,7 @@
                 </form>
             </div>
 
-            <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white mb-4">
+            <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-xs px-3 pt-3 pb-1 rounded bg-white mb-4">
                 <h2 class="text-xl font-bold mb-4">Service Request Updates</h2>
 
                 <div id="updates-list">

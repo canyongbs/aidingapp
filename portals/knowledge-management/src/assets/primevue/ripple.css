@@ -36,5 +36,5 @@
 }
 
 .p-ink-active {
-    @apply transition-[opacity,transform] duration-500 scale-[2.5] opacity-0 ease-linear;
+    @apply transition-[opacity,scale] duration-500 scale-[2.5] opacity-0 ease-linear;
 }

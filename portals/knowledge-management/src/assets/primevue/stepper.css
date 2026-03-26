@@ -42,7 +42,7 @@
 .p-step-header {
     @apply border-none inline-flex items-center no-underline cursor-pointer
         transition-colors duration-200 rounded-md bg-transparent p-0 gap-2
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
+        focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
 }
 
 .p-step.p-disabled .p-step-header {
@@ -78,7 +78,7 @@
 }
 
 .p-step:not(.p-disabled):focus-visible {
-    @apply outline outline-1 outline-offset-2 outline-primary;
+    @apply outline-solid outline-1 outline-offset-2 outline-primary;
 }
 
 .p-step:has(~ .p-step-active) .p-stepper-separator {
@@ -90,7 +90,7 @@
 }
 
 .p-steppanels {
-    @apply pt-[0.875rem] pb-[1.125rem] px-2;
+    @apply pt-3.5 pb-4.5 px-2;
 }
 
 .p-steppanel {
@@ -122,7 +122,7 @@
 }
 
 .p-stepitem .p-stepper-separator {
-    @apply flex-grow-0 flex-shrink-0 basis-auto w-[2px] h-auto ms-[1.625rem] relative start-[-2.5px];
+    @apply grow-0 shrink-0 basis-auto w-[2px] h-auto ms-6.5 relative inset-s-[-2.5px];
 }
 
 .p-stepitem:has(~ .p-stepitem-active) .p-stepper-separator {

@@ -231,11 +231,11 @@
                         <div
                             v-for="category in displayedCategories"
                             :key="category.id"
-                            class="group relative bg-brand-700 text-white p-6 rounded shadow cursor-pointer hover:shadow-md"
+                            class="group relative bg-brand-700 text-white p-6 rounded shadow-xs cursor-pointer hover:shadow-md"
                             @click="openCategory(category)"
                         >
                             <div class="flex items-center gap-x-3">
-                                <div class="flex-shrink-0">
+                                <div class="shrink-0">
                                     <!-- Folder icon for categories (neutral color) -->
                                     <div
                                         class="w-10 h-10 flex items-center justify-center rounded bg-white/10 text-white/70"
@@ -287,10 +287,10 @@
                         <div
                             v-for="type in displayedTypes"
                             :key="type.id"
-                            class="group relative bg-white p-6 rounded shadow border-l-4 border-transparent hover:border-brand-500"
+                            class="group relative bg-white p-6 rounded shadow-xs border-l-4 border-transparent hover:border-brand-500"
                         >
                             <div class="flex items-center gap-x-3">
-                                <div class="flex-shrink-0">
+                                <div class="shrink-0">
                                     <!-- Type icon container; fall back to a document icon when no custom icon is provided -->
                                     <div
                                         class="w-10 h-10 flex items-center justify-center rounded bg-gray-100 text-brand-600"
@@ -351,7 +351,7 @@
 
                         <div
                             v-if="displayedCategories.length === 0 && displayedTypes.length === 0"
-                            class="text-gray-500 p-6 bg-white rounded shadow"
+                            class="text-gray-500 p-6 bg-white rounded shadow-xs"
                         >
                             No categories or types found.
                         </div>

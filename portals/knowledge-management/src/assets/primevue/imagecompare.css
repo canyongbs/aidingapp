@@ -48,18 +48,18 @@
 }
 
 .p-imagecompare-slider {
-    @apply relative appearance-none w-[calc(100%+1rem)] h-full -ms-2 bg-transparent outline-none transition-all duration-200
+    @apply relative appearance-none w-[calc(100%+1rem)] h-full -ms-2 bg-transparent outline-hidden transition-all duration-200
         hover:w-[calc(100%+2rem)] hover:-ms-4;
 }
 
 .p-imagecompare-slider::-webkit-slider-thumb {
     @apply appearance-none h-4 w-4 bg-white/30 rounded-full bg-contain cursor-ew-resize transition-all duration-200
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
+        focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
 }
 
 .p-imagecompare-slider::-moz-range-thumb {
     @apply appearance-none h-4 w-4 bg-white/30 rounded-full bg-contain cursor-ew-resize transition-all duration-200
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
+        focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
 }
 
 .p-imagecompare-slider:hover::-webkit-slider-thumb {

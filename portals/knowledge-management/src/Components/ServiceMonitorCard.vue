@@ -48,7 +48,7 @@
     });
 </script>
 <template>
-    <div class="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-lg shadow">
+    <div class="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-lg shadow-sm">
         <div class="flex items-center">
             <svg
                 v-if="status === true"

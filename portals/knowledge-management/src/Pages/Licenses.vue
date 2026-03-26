@@ -150,7 +150,7 @@
                                 License Key:
                                 <span
                                     class="font-normal text-gray-700 bg-gray-100 px-2 py-1 rounded"
-                                    :class="{ 'blur-sm': !showLicenseKeys[activeLicense.id] }"
+                                    :class="{ 'blur-xs': !showLicenseKeys[activeLicense.id] }"
                                 >
                                     {{ activeLicense.license }}
                                 </span>
@@ -197,7 +197,7 @@
                                 License Key:
                                 <span
                                     class="font-normal text-gray-700 bg-gray-100 px-2 py-1 rounded"
-                                    :class="{ 'blur-sm': !showLicenseKeys[expiredLicense.id] }"
+                                    :class="{ 'blur-xs': !showLicenseKeys[expiredLicense.id] }"
                                 >
                                     {{ expiredLicense.license }}
                                 </span>

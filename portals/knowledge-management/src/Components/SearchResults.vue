@@ -106,7 +106,7 @@
         </h3>
 
         <filter-component @change-filter="updateFilter" :selected-filter="selectedFilter"></filter-component>
-        <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white">
+        <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-xs px-3 pt-3 pb-1 rounded bg-white">
             <h4 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">Articles ({{ totalArticles }})</h4>
 
             <div v-if="searchResults.data.articles.data.length > 0">
@@ -133,7 +133,7 @@
             </div>
         </div>
 
-        <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-sm px-3 pt-3 pb-1 rounded bg-white">
+        <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-xs px-3 pt-3 pb-1 rounded bg-white">
             <h4 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">Categories</h4>
 
             <div v-if="searchResults.data.categories.length > 0">

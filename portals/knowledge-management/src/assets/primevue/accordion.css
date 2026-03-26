@@ -36,7 +36,7 @@
 }
 
 .p-accordionheader {
-    @apply cursor-pointer disabled:cursor-auto flex items-center justify-between p-[1.125rem] font-semibold
+    @apply cursor-pointer disabled:cursor-auto flex items-center justify-between p-4.5 font-semibold
         bg-surface-0 dark:bg-surface-900
         text-surface-500 dark:text-surface-400
         transition-colors duration-200;
@@ -59,7 +59,7 @@
 }
 
 .p-accordionpanel:not(.p-disabled) .p-accordionheader:focus-visible {
-    @apply outline outline-1 outline-offset-[-1px] outline-primary;
+    @apply outline-solid outline-1 -outline-offset-1 outline-primary;
 }
 
 .p-accordionpanel:not(.p-accordionpanel-active):not(.p-disabled) > .p-accordionheader:hover {
@@ -89,5 +89,5 @@
 }
 
 .p-accordioncontent-content {
-    @apply bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 pt-0 px-[1.125rem] pb-[1.125rem];
+    @apply bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0 pt-0 px-4.5 pb-4.5;
 }

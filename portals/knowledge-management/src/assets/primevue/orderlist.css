@@ -31,11 +31,11 @@
 
 </COPYRIGHT>
 */
-@import './button';
-@import './listbox';
+@import './button.css';
+@import './listbox.css';
 
 .p-orderlist {
-    @apply flex gap-[1.125rem];
+    @apply flex gap-4.5;
 }
 
 .p-orderlist-controls {

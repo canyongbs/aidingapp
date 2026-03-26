@@ -31,8 +31,8 @@
 
 </COPYRIGHT>
 */
-@import './inputtext';
-@import './chip';
+@import './inputtext.css';
+@import './chip.css';
 
 .p-autocomplete {
     @apply inline-flex;
@@ -43,11 +43,11 @@
 }
 
 .p-autocomplete-loader {
-    @apply absolute top-1/2 -mt-2 end-3;
+    @apply absolute top-1/2 -mt-2 inset-e-3;
 }
 
 .p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-loader {
-    @apply end-[3.25rem];
+    @apply inset-e-13;
 }
 
 .p-autocomplete:has(.p-autocomplete-dropdown) .p-autocomplete-input {
@@ -65,7 +65,7 @@
         text-surface-600 enabled:hover:text-surface-700 enabled:hover:active:text-surface-800
         dark:bg-surface-800 dark:enabled:hover:bg-surface-700 dark:enabled:active:bg-surface-600
         dark:text-surface-300 dark:enabled:hover:text-surface-200 dark:enabled:active:text-surface-100
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary
+        focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary
         transition-colors duration-200;
 }
 
@@ -116,7 +116,7 @@
         px-3 py-1 gap-1 text-surface-700 dark:text-surface-0 bg-surface-0 dark:bg-surface-950
         border border-surface-300 dark:border-surface-700 rounded-md w-full
         shadow-[0_1px_2px_0_rgba(18,18,23,0.05)]
-        transition-colors duration-200 outline-none;
+        transition-colors duration-200 outline-hidden;
 }
 
 .p-autocomplete:not(.p-disabled):hover .p-autocomplete-input-multiple {
@@ -156,7 +156,7 @@
 }
 
 .p-autocomplete-input-chip input {
-    @apply border-none outline-none bg-transparent m-0 p-0 shadow-none rounded-none w-full text-inherit;
+    @apply border-none outline-hidden bg-transparent m-0 p-0 shadow-none rounded-none w-full text-inherit;
 }
 
 .p-autocomplete-input-chip input::placeholder {

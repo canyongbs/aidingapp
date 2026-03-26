@@ -58,7 +58,7 @@
         <Bars3Icon @click="openDrawer" class="h-6 w-6 text-gray-700" aria-hidden="true" />
 
         <Transition name="backdrop">
-            <div v-if="visible" class="fixed inset-0 z-40 bg-black bg-opacity-50" @click="closeDrawer"></div>
+            <div v-if="visible" class="fixed inset-0 z-40 bg-black/50" @click="closeDrawer"></div>
         </Transition>
 
         <Transition name="drawer">

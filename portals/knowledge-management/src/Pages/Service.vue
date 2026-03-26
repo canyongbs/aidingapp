@@ -60,7 +60,7 @@
 
         <div
             v-if="serviceRequests?.length > 0"
-            class="overflow-hidden rounded bg-gray-200 shadow-sm ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
+            class="overflow-hidden rounded bg-gray-200 shadow-xs ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
         >
             <div
                 v-for="serviceRequest in serviceRequests"

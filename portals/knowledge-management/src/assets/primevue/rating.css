@@ -40,7 +40,7 @@
 }
 
 .p-rating-option.p-focus-visible {
-    @apply outline outline-1 outline-offset-2 outline-primary;
+    @apply outline-solid outline-1 outline-offset-2 outline-primary;
 }
 
 .p-rating-icon {

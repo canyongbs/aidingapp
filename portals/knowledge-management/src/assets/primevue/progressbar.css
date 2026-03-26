@@ -52,7 +52,7 @@
 }
 
 .p-progressbar-indeterminate .p-progressbar-value::before {
-    @apply content-[''] absolute bg-inherit top-0 start-0 bottom-0 will-change-[inset-inline-start,inset-inline-end];
+    @apply content-[''] absolute bg-inherit top-0 inset-s-0 bottom-0 will-change-[inset-inline-start,inset-inline-end];
 }
 
 .p-progressbar-indeterminate .p-progressbar-value::before {
@@ -60,7 +60,7 @@
 }
 
 .p-progressbar-indeterminate .p-progressbar-value::after {
-    @apply content-[''] absolute bg-inherit top-0 start-0 bottom-0 will-change-[inset-inline-start,inset-inline-end];
+    @apply content-[''] absolute bg-inherit top-0 inset-s-0 bottom-0 will-change-[inset-inline-start,inset-inline-end];
 }
 
 .p-progressbar-indeterminate .p-progressbar-value::after {

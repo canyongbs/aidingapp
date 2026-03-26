@@ -43,12 +43,12 @@
 }
 
 .p-splitter-gutter {
-    @apply flex-grow-0 flex-shrink-0 flex items-center justify-center z-10 bg-surface-200 dark:bg-surface-700;
+    @apply grow-0 shrink-0 flex items-center justify-center z-10 bg-surface-200 dark:bg-surface-700;
 }
 
 .p-splitter-gutter-handle {
     @apply rounded-md bg-transparent 
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary
+        focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary
         transition-colors duration-200;
 }
 
@@ -77,7 +77,7 @@
 }
 
 .p-splitterpanel {
-    @apply flex-grow overflow-hidden;
+    @apply grow overflow-hidden;
 }
 
 .p-splitterpanel-nested {
@@ -85,5 +85,5 @@
 }
 
 .p-splitterpanel .p-splitter {
-    @apply flex-grow border-none;
+    @apply grow border-none;
 }

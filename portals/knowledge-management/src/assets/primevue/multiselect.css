@@ -31,10 +31,10 @@
 
 </COPYRIGHT>
 */
-@import './checkbox';
-@import './chip';
-@import './inputtext';
-@import './iconfield';
+@import './checkbox.css';
+@import './chip.css';
+@import './inputtext.css';
+@import './iconfield.css';
 
 .p-multiselect {
     @apply inline-flex cursor-pointer relative select-none rounded-md
@@ -70,7 +70,7 @@
 }
 
 .p-multiselect-clear-icon {
-    @apply absolute top-1/2 -mt-2 text-surface-500 dark:text-surface-400 end-10;
+    @apply absolute top-1/2 -mt-2 text-surface-500 dark:text-surface-400 inset-e-10;
 }
 
 .p-multiselect-label-container {
@@ -152,7 +152,7 @@
 }
 
 .p-multiselect-label:has(.p-chip) {
-    @apply py-1 px-[0.375rem];
+    @apply py-1 px-1.5;
 }
 
 .p-multiselect-fluid {
@@ -160,17 +160,17 @@
 }
 
 .p-multiselect-sm .p-multiselect-label {
-    @apply text-sm px-[0.625rem] py-[0.375rem];
+    @apply text-sm px-2.5 py-1.5;
 }
 
 .p-multiselect-sm .p-multiselect-dropdown .p-icon {
-    @apply text-sm w-[0.875rem] h-[0.875rem];
+    @apply text-sm w-3.5 h-3.5;
 }
 
 .p-multiselect-lg .p-multiselect-label {
-    @apply text-lg px-[0.875rem] py-[0.625rem];
+    @apply text-lg px-3.5 py-2.5;
 }
 
 .p-multiselect-lg .p-multiselect-dropdown .p-icon {
-    @apply text-lg w-[1.125rem] h-[1.125rem];
+    @apply text-lg w-4.5 h-4.5;
 }

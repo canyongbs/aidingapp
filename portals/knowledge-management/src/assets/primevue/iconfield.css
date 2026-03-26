@@ -40,11 +40,11 @@
 }
 
 .p-iconfield .p-inputicon:first-child {
-    @apply start-3;
+    @apply inset-s-3;
 }
 
 .p-iconfield .p-inputicon:last-child {
-    @apply end-3;
+    @apply inset-e-3;
 }
 
 .p-iconfield .p-inputtext:not(:first-child) {

@@ -60,12 +60,12 @@
 }
 
 .p-organizationchart-node-toggle-button {
-    @apply absolute -bottom-3 -ms-3 z-20 start-1/2 select-none cursor-pointer w-6 h-6 no-underline rounded-full
+    @apply absolute -bottom-3 -ms-3 z-20 inset-s-1/2 select-none cursor-pointer w-6 h-6 no-underline rounded-full
         inline-flex items-center justify-center transition-colors duration-200
         border border-surface-200 dark:border-surface-700
         bg-surface-0 text-surface-500 hover:bg-surface-100 hover:text-surface-700
         dark:bg-surface-900 dark:text-surface-400 dark:hover:bg-surface-800 dark:hover:text-surface-0
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
+        focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
 }
 .p-organizationchart-node-toggle-button-icon {
     @apply relative top-px;

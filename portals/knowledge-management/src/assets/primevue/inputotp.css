@@ -31,7 +31,7 @@
 
 </COPYRIGHT>
 */
-@import './inputtext';
+@import './inputtext.css';
 
 .p-inputotp {
     @apply flex items-center gap-2;

@@ -182,7 +182,7 @@
                 <div
                     v-for="n in 15"
                     :key="`service-monitor-skeleton-${n}`"
-                    class="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-lg shadow animate-pulse"
+                    class="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-lg shadow-xs animate-pulse"
                 >
                     <div class="flex items-center">
                         <div class="h-7 w-7 bg-gray-300 rounded-full"></div>

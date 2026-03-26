@@ -40,12 +40,12 @@
 }
 
 .p-dock-list {
-    @apply m-0 p-0 list-none flex items-center justify-center outline-none;
+    @apply m-0 p-0 list-none flex items-center justify-center outline-hidden;
 }
 
 .p-dock-item {
     @apply transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)] will-change-transform p-2 rounded-md
-        focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
+        focus-visible:outline-solid focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-primary;
 }
 
 .p-dock-item-link {
@@ -53,7 +53,7 @@
 }
 
 .p-dock-top {
-    @apply start-0 top-0 w-full;
+    @apply inset-s-0 top-0 w-full;
 }
 
 .p-dock-top .p-dock-item {
@@ -61,7 +61,7 @@
 }
 
 .p-dock-bottom {
-    @apply start-0 bottom-0 w-full;
+    @apply inset-s-0 bottom-0 w-full;
 }
 
 .p-dock-bottom .p-dock-item {
@@ -69,7 +69,7 @@
 }
 
 .p-dock-right {
-    @apply end-0 top-0 h-full;
+    @apply inset-e-0 top-0 h-full;
 }
 
 .p-dock-right .p-dock-item {
@@ -81,7 +81,7 @@
 }
 
 .p-dock-left {
-    @apply start-0 top-0 h-full;
+    @apply inset-s-0 top-0 h-full;
 }
 
 .p-dock-left .p-dock-item {

@@ -99,7 +99,7 @@
                             checked
                                 ? 'bg-brand-600 text-white hover:bg-brand-500'
                                 : 'ring-1 ring-inset ring-gray-300 bg-white text-gray-900 hover:bg-gray-50',
-                            'flex items-center justify-center rounded py-1 px-2 text-sm font-medium cursor-pointer focus:outline-none',
+                            'flex items-center justify-center rounded py-1 px-2 text-sm font-medium cursor-pointer focus:outline-hidden',
                         ]"
                     >
                         <RadioGroupLabel as="span">Draw it</RadioGroupLabel>
@@ -113,7 +113,7 @@
                             checked
                                 ? 'bg-brand-600 text-white hover:bg-brand-500'
                                 : 'ring-1 ring-inset ring-gray-300 bg-white text-gray-900 hover:bg-gray-50',
-                            'flex items-center justify-center rounded py-1 px-2 text-sm font-medium cursor-pointer focus:outline-none',
+                            'flex items-center justify-center rounded py-1 px-2 text-sm font-medium cursor-pointer focus:outline-hidden',
                         ]"
                     >
                         <RadioGroupLabel as="span">Type it</RadioGroupLabel>

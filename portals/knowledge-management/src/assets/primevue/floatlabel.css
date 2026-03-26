@@ -37,7 +37,7 @@
 
 .p-floatlabel label {
     @apply absolute pointer-events-none top-1/2 -translate-y-1/2 transition-all duration-200 ease-out leading-none font-medium
-        start-3 text-surface-500 dark:text-surface-400;
+        inset-s-3 text-surface-500 dark:text-surface-400;
 }
 
 .p-floatlabel:has(.p-textarea) label {
@@ -45,7 +45,7 @@
 }
 
 .p-floatlabel:has(.p-inputicon:first-child) label {
-    @apply start-10;
+    @apply inset-s-10;
 }
 
 .p-floatlabel:has(.p-invalid) label {
@@ -102,5 +102,5 @@
 .p-floatlabel-on:has(textarea.p-filled) label,
 .p-floatlabel-on:has(.p-inputwrapper-focus) label,
 .p-floatlabel-on:has(.p-inputwrapper-filled) label {
-    @apply top-0 -translate-y-1/2 rounded-sm bg-surface-0 dark:bg-surface-950 py-0 px-[0.125rem];
+    @apply top-0 -translate-y-1/2 rounded-sm bg-surface-0 dark:bg-surface-950 py-0 px-0.5;
 }

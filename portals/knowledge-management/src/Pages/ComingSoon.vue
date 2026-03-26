@@ -43,8 +43,8 @@
 
 <template>
     <div class="bg-gray-50 flex flex-col overflow-hidden" style="height: calc(100vh - 160px)">
-        <div class="flex-grow flex items-center justify-center overflow-hidden">
-            <div class="w-full max-w-screen-xl mx-auto px-4">
+        <div class="grow flex items-center justify-center overflow-hidden">
+            <div class="w-full max-w-(--breakpoint-xl) mx-auto px-4">
                 <div class="p-4 text-center">
                     <h1 class="text-3xl font-bold text-gray-900 sm:text-4xl">Coming Soon!</h1>
                     <p class="text-lg text-gray-600">
