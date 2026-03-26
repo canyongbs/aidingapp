@@ -40,7 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateContent;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateSubject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use App\Models\User;
 use Illuminate\Support\HtmlString;
 

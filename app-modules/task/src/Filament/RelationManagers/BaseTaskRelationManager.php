@@ -41,7 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 use AidingApp\Task\Models\Task;
-use App\Filament\Resources\UserResource;
+use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;

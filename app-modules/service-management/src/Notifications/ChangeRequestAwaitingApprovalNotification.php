@@ -37,7 +37,7 @@
 namespace AidingApp\ServiceManagement\Notifications;
 
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestResource;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\ChangeRequestResource;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use App\Models\NotificationSetting;
 use App\Models\User;

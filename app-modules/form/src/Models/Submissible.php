@@ -36,7 +36,7 @@
 
 namespace AidingApp\Form\Models;
 
-use App\Models\Concerns\CanBeArchived;
+use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;

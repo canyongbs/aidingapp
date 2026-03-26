@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Filament\Concerns;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Filament\Resources\UserResource;
+use App\Filament\Resources\Users\UserResource;
 use Filament\Infolists\Components\TextEntry;
 
 // TODO Re-use this trait across other places where infolist is rendered

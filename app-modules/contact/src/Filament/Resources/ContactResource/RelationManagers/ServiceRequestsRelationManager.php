@@ -40,7 +40,7 @@ use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestResource\Pages\ViewServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
@@ -88,9 +88,9 @@ class ServiceRequestsRelationManager extends RelationManager
                     ->saveRelationshipsWhenHidden()
                     ->default(
                         fn () => Division::count() === 1 ? (auth()->user()->team?->division?->getKey()
-                                    ?? Division::query()
-                                        ->first()
-                                        ?->getKey()) : null
+                            ?? Division::query()
+                                ->first()
+                                ?->getKey()) : null
                     ),
                 Select::make('status_id')
                     ->relationship('status', 'name')
@@ -111,11 +111,8 @@ class ServiceRequestsRelationManager extends RelationManager
                         Select::make('type_id')
                             ->options(
                                 fn (?ServiceRequest $record) => ServiceRequestType::query() // @phpstan-ignore method.notFound
-                                    ->withTrashed()
-                                    ->withArchived()
                                     ->where(
                                         fn (Builder $query) => $query // @phpstan-ignore method.notFound
-                                            ->withoutTrashed()
                                             ->withoutArchived()
                                             ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                                 $query->where(function (Builder $query) {

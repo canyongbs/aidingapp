@@ -66,7 +66,7 @@ class ServiceRequestFormStep extends SubmissibleStep
      */
     public function submissible(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestForm::class, 'service_request_form_id')->withTrashed()->withArchived();
+        return $this->belongsTo(ServiceRequestForm::class, 'service_request_form_id');
     }
 
     /**
