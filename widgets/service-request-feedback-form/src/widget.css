@@ -31,11 +31,31 @@
 
 </COPYRIGHT>
 */
-@import './FormKit/index.css';
+@import './FormKit/index.css' layer(base);
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+@config '../tailwind.config.js';
+
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-gray-200, currentColor);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+        color: var(--color-gray-400, #9ca3af);
+    }
+
+    button:not(:disabled),
+    [role=button]:not(:disabled) {
+        cursor: pointer;
+    }
+}
 
 .formkit-inner {
     @apply max-w-full;
@@ -47,5 +67,5 @@ li[data-message-type='success'] {
 
 .bg-gradient {
     @apply relative bg-no-repeat;
-    background-image: radial-gradient(circle at top, theme('colors.primary.200'), theme('colors.white') 50%);
+    background-image: radial-gradient(circle at top, rgba(var(--primary-200), 1), white 50%);
 }
