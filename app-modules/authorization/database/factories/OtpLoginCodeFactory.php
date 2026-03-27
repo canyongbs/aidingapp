@@ -36,7 +36,7 @@
 
 namespace AidingApp\Authorization\Database\Factories;
 
-use AidingApp\Authorization\Models\LoginMagicLink;
+use AidingApp\Authorization\Models\OtpLoginCode;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -44,9 +44,9 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
- * @extends Factory<LoginMagicLink>
+ * @extends Factory<OtpLoginCode>
  */
-class LoginMagicLinkFactory extends Factory
+class OtpLoginCodeFactory extends Factory
 {
     /**
      * @return array<string, mixed>
@@ -54,13 +54,13 @@ class LoginMagicLinkFactory extends Factory
     public function definition(): array
     {
         return [
-            'code' => Hash::make(Str::random()),
+            'code' => Hash::make((string) random_int(100000, 999999)),
             'user_id' => User::factory(),
         ];
     }
 
     /**
-     * @return Factory<LoginMagicLink>
+     * @return Factory<OtpLoginCode>
      */
     public function withCode(string $code): Factory
     {
@@ -72,7 +72,7 @@ class LoginMagicLinkFactory extends Factory
     }
 
     /**
-     * @return Factory<LoginMagicLink>
+     * @return Factory<OtpLoginCode>
      */
     public function used(?Carbon $when = null): Factory
     {

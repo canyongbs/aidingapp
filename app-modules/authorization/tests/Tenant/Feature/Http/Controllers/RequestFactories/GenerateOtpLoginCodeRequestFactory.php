@@ -34,34 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Models;
+namespace AidingApp\Authorization\Tests\Tenant\Feature\Http\Controllers\RequestFactories;
 
-use AidingApp\Authorization\Database\Factories\LoginMagicLinkFactory;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
+use App\Models\Authenticatable;
+use Worksome\RequestFactories\RequestFactory;
 
-/**
- * @mixin IdeHelperLoginMagicLink
- */
-class LoginMagicLink extends Model
+class GenerateOtpLoginCodeRequestFactory extends RequestFactory
 {
-    /** @use HasFactory<LoginMagicLinkFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use UsesTenantConnection;
-
-    protected $fillable = [];
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(User::class);
+        return [
+            'email' => $this->faker->safeEmail(),
+            'name' => $this->faker->name(),
+            'type' => $this->faker->randomElement([
+                Authenticatable::SUPER_ADMIN_ROLE,
+                Authenticatable::PARTNER_ADMIN_ROLE,
+                Authenticatable::AI_ADMIN_ROLE,
+            ]),
+        ];
     }
 }

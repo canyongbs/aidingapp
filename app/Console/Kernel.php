@@ -38,6 +38,7 @@ namespace App\Console;
 
 use AidingApp\Ai\Jobs\PrepareKnowledgeBaseVectorStore;
 use AidingApp\Audit\Models\Audit;
+use AidingApp\Authorization\Models\OtpLoginCode;
 use AidingApp\Engagement\Jobs\DeliverEngagements;
 use AidingApp\Engagement\Jobs\GatherAndDispatchSesS3InboundEmails;
 use AidingApp\Engagement\Jobs\UnmatchedInboundCommunicationsJob;
@@ -173,6 +174,7 @@ class Kernel extends ConsoleKernel
                         FailedImportRow::class,
                         HealthCheckResultHistoryItem::class,
                         ProjectFile::class,
+                        OtpLoginCode::class,
                     ])
                         ->each(
                             fn ($model) => $schedule->command("tenants:artisan \"model:prune --model={$model}\" --tenant={$tenant->id}")

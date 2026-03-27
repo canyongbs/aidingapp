@@ -34,26 +34,47 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Http\Requests;
+namespace AidingApp\Authorization\Models;
 
-use App\Models\Authenticatable;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use AidingApp\Authorization\Database\Factories\LoginMagicLinkFactory;
+use AidingApp\Authorization\Database\Factories\OtpLoginCodeFactory;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\MassPrunable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
-class GenerateLoginMagicLinkRequest extends FormRequest
+/**
+ * @mixin IdeHelperLoginMagicLink
+ */
+class OtpLoginCode extends Model
 {
+    /** @use HasFactory<OtpLoginCodeFactory> */
+    use HasFactory;
+
+    use HasUuids;
+    use UsesTenantConnection;
+    use MassPrunable;
+
+    protected $fillable = [];
+
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return BelongsTo<User, $this>
      */
-    public function rules(): array
+    public function user(): BelongsTo
     {
-        return [
-            'email' => ['required', 'email'],
-            'name' => ['required', 'string', 'max:255'],
-            'type' => ['required', 'string', Rule::in([Authenticatable::SUPER_ADMIN_ROLE, Authenticatable::PARTNER_ADMIN_ROLE, Authenticatable::AI_ADMIN_ROLE])],
-        ];
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return Builder<OtpLoginCode>
+     */
+    public function prunable(): Builder
+    {
+        return static::where('created_at', '<=', now()->subMinutes(20))
+            ->orWhereNotNull('used_at');
     }
 }
