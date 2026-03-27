@@ -57,7 +57,7 @@ it('is gated with proper access control', function () {
 
     livewire(IncidentManagement::class)->assertForbidden();
 
-    $settings->data->addons->serviceManagement = true;
+    $settings->data->addons->incidentManagement = true;
     $settings->save();
 
     livewire(IncidentManagement::class)->assertOk();
