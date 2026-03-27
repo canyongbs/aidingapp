@@ -606,6 +606,60 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/engagement/src/Actions/CreateEngagementBatch.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Method AidingApp\\\\Engagement\\\\Actions\\\\GenerateEngagementBodyContent\\:\\:__invoke\\(\\) has parameter \\$content with no value type specified in iterable type array\\.$#',
+    'identifier' => 'missingType.iterableValue',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Actions/GenerateEngagementBodyContent.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Method AidingApp\\\\Engagement\\\\Actions\\\\GenerateEngagementBodyContent\\:\\:__invoke\\(\\) has parameter \\$mergeData with no value type specified in iterable type array\\.$#',
+    'identifier' => 'missingType.iterableValue',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Actions/GenerateEngagementBodyContent.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Method AidingApp\\\\Engagement\\\\Actions\\\\GenerateTipTapBodyJson\\:\\:__invoke\\(\\) has parameter \\$mergeTags with no value type specified in iterable type array\\.$#',
+    'identifier' => 'missingType.iterableValue',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Actions/GenerateTipTapBodyJson.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Method AidingApp\\\\Engagement\\\\Actions\\\\GenerateTipTapBodyJson\\:\\:__invoke\\(\\) return type has no value type specified in iterable type array\\.$#',
+    'identifier' => 'missingType.iterableValue',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Actions/GenerateTipTapBodyJson.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Method AidingApp\\\\Engagement\\\\Actions\\\\GenerateTipTapBodyJson\\:\\:mergeTag\\(\\) return type has no value type specified in iterable type array\\.$#',
+    'identifier' => 'missingType.iterableValue',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Actions/GenerateTipTapBodyJson.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Method AidingApp\\\\Engagement\\\\Actions\\\\GenerateTipTapBodyJson\\:\\:text\\(\\) return type has no value type specified in iterable type array\\.$#',
+    'identifier' => 'missingType.iterableValue',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Actions/GenerateTipTapBodyJson.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Parameter \\#1 \\$node of anonymous function has no typehint\\.$#',
+    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Actions/GenerateTipTapBodyJson.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
+    'identifier' => 'argument.templateType',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Actions/GenerateTipTapBodyJson.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Unable to resolve the template type TValue in call to function collect$#',
+    'identifier' => 'argument.templateType',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Actions/GenerateTipTapBodyJson.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Engagement\\\\DataTransferObjects\\\\EngagementCreationData\\:\\:__construct\\(\\) has parameter \\$body with no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
