@@ -61,7 +61,7 @@ class KnowledgeBase extends Dashboard
 
     public static function canAccess(): bool
     {
-        if (! Gate::check([Feature::ServiceManagement->getGateName(), Feature::KnowledgeManagement->getGateName()])) {
+        if (! Gate::check(Feature::KnowledgeManagement->getGateName())) {
             return false;
         }
 

@@ -43,7 +43,6 @@ use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
     $settings = app(LicenseSettings::class);
-    $settings->data->addons->serviceManagement = false;
     $settings->data->addons->changeManagement = false;
     $settings->save();
 
@@ -55,11 +54,6 @@ it('is gated with proper access control', function () {
 
     $user->givePermissionTo('report-library.view-any');
     $user->refresh();
-
-    livewire(ChangeManagement::class)->assertForbidden();
-
-    $settings->data->addons->serviceManagement = true;
-    $settings->save();
 
     livewire(ChangeManagement::class)->assertForbidden();
 

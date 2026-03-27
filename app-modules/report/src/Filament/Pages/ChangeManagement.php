@@ -61,7 +61,7 @@ class ChangeManagement extends Dashboard
 
     public static function canAccess(): bool
     {
-        if (! Gate::check([Feature::ServiceManagement->getGateName(), Feature::ChangeManagement->getGateName()])) {
+        if (! Gate::check(Feature::ChangeManagement->getGateName())) {
             return false;
         }
 
