@@ -35,7 +35,12 @@
 */
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\ListChangeRequestTypes;
+use App\Models\User;
+use App\Settings\LicenseSettings;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 use function Tests\Helpers\testResourceRequiresPermissionForAccess;
 
 testResourceRequiresPermissionForAccess(
@@ -44,3 +49,25 @@ testResourceRequiresPermissionForAccess(
     method: 'index',
     feature: 'changeManagement'
 );
+
+it('is gated with proper access control', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->changeManagement = false;
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    livewire(ListChangeRequestTypes::class)->assertForbidden();
+
+    $user->givePermissionTo('change_request_type.view-any');
+    $user->refresh();
+
+    livewire(ListChangeRequestTypes::class)->assertForbidden();
+
+    $settings->data->addons->changeManagement = true;
+    $settings->save();
+
+    livewire(ListChangeRequestTypes::class)->assertOk();
+});

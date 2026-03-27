@@ -35,7 +35,12 @@
 */
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\ChangeRequestStatusResource;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages\ListChangeRequestStatuses;
+use App\Models\User;
+use App\Settings\LicenseSettings;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 use function Tests\Helpers\testResourceRequiresPermissionForAccess;
 
 testResourceRequiresPermissionForAccess(
@@ -44,3 +49,25 @@ testResourceRequiresPermissionForAccess(
     method: 'index',
     feature: 'changeManagement'
 );
+
+it('is gated with proper access control', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->changeManagement = false;
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    livewire(ListChangeRequestStatuses::class)->assertForbidden();
+
+    $user->givePermissionTo('change_request_status.view-any');
+    $user->refresh();
+
+    livewire(ListChangeRequestStatuses::class)->assertForbidden();
+
+    $settings->data->addons->changeManagement = true;
+    $settings->save();
+
+    livewire(ListChangeRequestStatuses::class)->assertOk();
+});

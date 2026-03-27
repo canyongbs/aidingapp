@@ -36,9 +36,11 @@
 
 namespace App\Filament\Clusters\ServiceManagementAdministration\Pages;
 
+use App\Enums\Feature;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use BackedEnum;
 use Filament\Pages\Page;
+use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 class Sequence extends Page
@@ -55,6 +57,10 @@ class Sequence extends Page
 
     public static function canAccess(): bool
     {
+        if (! Gate::check(Feature::ServiceManagement->getGateName())) {
+            return false;
+        }
+
         return auth()->user()?->can('settings.view-any');
     }
 }

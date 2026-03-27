@@ -39,9 +39,11 @@ namespace AidingApp\Report\Filament\Pages;
 use AidingApp\Report\Filament\Widgets\AssetsTable;
 use AidingApp\Report\Filament\Widgets\AssetStats;
 use AidingApp\Report\Filament\Widgets\RefreshWidget;
+use App\Enums\Feature;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Pages\Dashboard;
+use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 class AssetManagement extends Dashboard
@@ -62,6 +64,10 @@ class AssetManagement extends Dashboard
 
     public static function canAccess(): bool
     {
+        if (! Gate::check([Feature::ServiceManagement->getGateName(), Feature::AssetManagement->getGateName()])) {
+            return false;
+        }
+
         /** @var User $user */
         $user = auth()->user();
 

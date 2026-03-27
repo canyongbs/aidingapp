@@ -37,11 +37,24 @@
 namespace AidingApp\InventoryManagement\Policies;
 
 use AidingApp\InventoryManagement\Models\MaintenanceProvider;
+use App\Concerns\PerformsFeatureChecks;
+use App\Enums\Feature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
 class MaintenanceProviderPolicy
 {
+    use PerformsFeatureChecks;
+
+    public function before(Authenticatable $authenticatable): ?Response
+    {
+        if (! is_null($response = $this->hasFeatures())) {
+            return $response;
+        }
+
+        return null;
+    }
+
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -96,5 +109,10 @@ class MaintenanceProviderPolicy
             abilities: ['maintenance_provider.*.force-delete', "maintenance_provider.{$maintenanceProvider->id}.force-delete"],
             denyResponse: 'You do not have permission to permanently delete this maintenance provider.'
         );
+    }
+
+    protected function requiredFeatures(): array
+    {
+        return [Feature::AssetManagement];
     }
 }

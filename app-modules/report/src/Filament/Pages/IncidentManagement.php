@@ -36,9 +36,11 @@
 
 namespace AidingApp\Report\Filament\Pages;
 
+use App\Enums\Feature;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Pages\Dashboard;
+use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 class IncidentManagement extends Dashboard
@@ -59,6 +61,10 @@ class IncidentManagement extends Dashboard
 
     public static function canAccess(): bool
     {
+        if (! Gate::check([Feature::ServiceManagement->getGateName(), Feature::IncidentManagement->getGateName()])) {
+            return false;
+        }
+
         /** @var User $user */
         $user = auth()->user();
 
