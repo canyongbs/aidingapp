@@ -36,19 +36,14 @@
 
 namespace AidingApp\Authorization\Http\Controllers;
 
-use AidingApp\Authorization\Http\Requests\GenerateLoginMagicLinkRequest;
 use AidingApp\Authorization\Http\Requests\GenerateLoginOtpCodeRequest;
-use AidingApp\Authorization\Models\LoginMagicLink;
 use AidingApp\Authorization\Models\OtpLoginCode;
 use App\Features\OtpCodeLoginFeature;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Str;
-use RuntimeException;
 use Throwable;
 
 class GenerateOtpLoginCodeController
@@ -61,11 +56,11 @@ class GenerateOtpLoginCodeController
         try {
             DB::beginTransaction();
 
-            if(!OtpCodeLoginFeature::active()){
+            if (! OtpCodeLoginFeature::active()) {
                 return response()->json([
                     'link' => null,
                 ]);
-            }            
+            }
 
             $data = $request->validated();
 

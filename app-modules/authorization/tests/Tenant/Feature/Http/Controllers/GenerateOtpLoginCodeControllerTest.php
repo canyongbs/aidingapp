@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -36,7 +36,6 @@
 
 use AidingApp\Authorization\Models\OtpLoginCode;
 use AidingApp\Authorization\Tests\Tenant\Feature\Http\Controllers\RequestFactories\GenerateOtpLoginCodeRequestFactory;
-use App\Features\OtpCodeLoginFeature;
 use App\Models\Authenticatable;
 use App\Models\User;
 use App\Multitenancy\Http\Middleware\CheckOlympusKey;
@@ -45,7 +44,7 @@ use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\post;
 use function Pest\Laravel\withoutMiddleware;
 
-it('requires Olympus Key authentication', function () {    
+it('requires Olympus Key authentication', function () {
     post(
         route('otp-code.generate'),
         [
@@ -87,7 +86,7 @@ it('can generate an OTP login code for a non-existing user', function () {
     expect($otpCode->user_id)->toEqual($user->id);
 });
 
-it('can generate an OTP login code for an existing user', function () {    
+it('can generate an OTP login code for an existing user', function () {
     $user = User::factory()->create();
 
     $email = $user->email;
@@ -121,7 +120,7 @@ it('can generate an OTP login code for an existing user', function () {
     expect($otpCode->user_id)->toEqual($user->id);
 });
 
-it('can generate an OTP login code for an existing user that is deleted', function () {    
+it('can generate an OTP login code for an existing user that is deleted', function () {
     $user = User::factory()->create();
 
     $email = $user->email;
@@ -160,7 +159,7 @@ it('can generate an OTP login code for an existing user that is deleted', functi
     expect($otpCode->user_id)->toEqual($user->id);
 });
 
-it('updates details of an existing user', function () {    
+it('updates details of an existing user', function () {
     $user = User::factory()->create(
         [
             'is_external' => false,
@@ -202,7 +201,7 @@ it('updates details of an existing user', function () {
     expect($otpCode->user_id)->toEqual($user->id);
 });
 
-it('deletes existing OTP codes for a user', function () {    
+it('deletes existing OTP codes for a user', function () {
     $user = User::factory()->create();
 
     $email = $user->email;
@@ -240,7 +239,7 @@ it('deletes existing OTP codes for a user', function () {
     expect($otpCode->user_id)->toEqual($user->id);
 });
 
-it('returns a valid 6-digit OTP code', function () {    
+it('returns a valid 6-digit OTP code', function () {
     $response = withoutMiddleware(CheckOlympusKey::class)
         ->post(
             route('otp-code.generate'),
@@ -260,7 +259,7 @@ it('returns a valid 6-digit OTP code', function () {
         ->and($otp)->toBeLessThanOrEqual(999999);
 });
 
-it('requires valid data', function (GenerateOtpLoginCodeRequestFactory $data, array $errors) {    
+it('requires valid data', function (GenerateOtpLoginCodeRequestFactory $data, array $errors) {
     withoutMiddleware(CheckOlympusKey::class)
         ->post(
             route('otp-code.generate'),

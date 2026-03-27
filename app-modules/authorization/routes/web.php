@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Authorization\Http\Controllers\Auth\OneTimeLoginController;
-use AidingApp\Authorization\Http\Controllers\MagicLinkLoginController;
 use AidingApp\Authorization\Http\Controllers\OtpLoginCodeController;
 use AidingApp\Authorization\Http\Controllers\SocialiteController;
 use AidingApp\Authorization\Http\Controllers\VerifyOtpLoginCodeController;

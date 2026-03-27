@@ -36,7 +36,6 @@
 
 namespace AidingApp\Authorization\Models;
 
-use AidingApp\Authorization\Database\Factories\LoginMagicLinkFactory;
 use AidingApp\Authorization\Database\Factories\OtpLoginCodeFactory;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
