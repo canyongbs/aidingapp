@@ -34,40 +34,21 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\ListChangeRequestTypes;
+use App\Filament\Resources\Pronouns\PronounsResource;
 use App\Models\User;
-use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
-use function Tests\Helpers\testResourceRequiresPermissionForAccess;
-
-testResourceRequiresPermissionForAccess(
-    resource: ChangeRequestTypeResource::class,
-    permissions: 'change_request_type.view-any',
-    method: 'index',
-    feature: 'changeManagement'
-);
+use function Pest\Laravel\get;
 
 it('is gated with proper access control', function () {
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->changeManagement = false;
-    $settings->save();
-
     $user = User::factory()->create();
 
     actingAs($user);
 
-    livewire(ListChangeRequestTypes::class)->assertForbidden();
+    get(PronounsResource::getUrl('index'))->assertForbidden();
 
-    $user->givePermissionTo('change_request_type.view-any');
+    $user->givePermissionTo('settings.view-any');
     $user->refresh();
 
-    livewire(ListChangeRequestTypes::class)->assertForbidden();
-
-    $settings->data->addons->changeManagement = true;
-    $settings->save();
-
-    livewire(ListChangeRequestTypes::class)->assertOk();
+    get(PronounsResource::getUrl('index'))->assertOk();
 });

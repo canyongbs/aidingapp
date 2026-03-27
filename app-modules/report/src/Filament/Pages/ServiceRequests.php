@@ -42,6 +42,7 @@ use AidingApp\Report\Filament\Widgets\ServiceRequestsStats;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsTable;
 use AidingApp\Report\Filament\Widgets\ServiceRequestStatusDistributionDonutChart;
 use AidingApp\Report\Filament\Widgets\ServiceRequestTypesTable;
+use App\Enums\Feature;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
@@ -50,6 +51,7 @@ use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 class ServiceRequests extends Dashboard
@@ -74,6 +76,10 @@ class ServiceRequests extends Dashboard
 
     public static function canAccess(): bool
     {
+        if (! Gate::check(Feature::ServiceManagement->getGateName())) {
+            return false;
+        }
+
         /** @var User $user */
         $user = auth()->user();
 

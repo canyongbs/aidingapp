@@ -41,7 +41,9 @@ use AidingApp\Report\Filament\Widgets\MostRecentTasksTable;
 use AidingApp\Report\Filament\Widgets\RefreshWidget;
 use AidingApp\Report\Filament\Widgets\TaskCumulativeCountLineChart;
 use AidingApp\Report\Filament\Widgets\TaskStats;
+use App\Enums\Feature;
 use App\Filament\Clusters\ReportLibrary;
+use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 class TaskManagement extends EngagementReport
@@ -59,6 +61,15 @@ class TaskManagement extends EngagementReport
     protected static ?int $navigationSort = 100;
 
     protected string $cacheTag = 'report-tasks';
+
+    public static function canAccess(): bool
+    {
+        if (! Gate::check(Feature::ProjectManagement->getGateName())) {
+            return false;
+        }
+
+        return parent::canAccess();
+    }
 
     public function getWidgets(): array
     {

@@ -83,6 +83,10 @@ class ManagePortalSettings extends SettingsPage
 
     public static function canAccess(): bool
     {
+        if (! Gate::check(Feature::KnowledgeManagement->getGateName())) {
+            return false;
+        }
+
         /** @var User $user */
         $user = auth()->user();
 
