@@ -38,7 +38,6 @@ namespace AidingApp\Engagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Engagement\Actions\GenerateEngagementBodyContent;
 use AidingApp\Engagement\Database\Factories\EngagementFactory;
 use AidingApp\Engagement\Models\Contracts\HasDeliveryMethod;
 use AidingApp\Engagement\Observers\EngagementObserver;
@@ -50,6 +49,7 @@ use AidingApp\Timeline\Timelines\EngagementTimeline;
 use App\Models\BaseModel;
 use App\Models\Contracts\Educatable;
 use App\Models\User;
+use Closure;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
@@ -214,25 +214,23 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
 
     public function getBody(): HtmlString
     {
-        return app(GenerateEngagementBodyContent::class)(
-            $this->body,
-            $this->getMergeData(),
-            $this->batch ?? $this,
-            'body',
-        );
+        if ($this->batch) {
+            return new HtmlString($this->batch->getRichContentAttribute('body')
+                ?->mergeTags($this->getMergeData())
+                ->toHtml() ?? '');
+        }
+
+        return new HtmlString($this->getRichContentAttribute('body')?->toHtml() ?? '');
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, Closure>
      */
     public function getMergeData(): array
     {
-        /** @var Contact $contact */
-        $contact = $this->recipient;
-
         return [
-            'contact full name' => $contact->getAttribute($contact->displayNameKey()),
-            'contact email' => $contact->getAttribute($contact->displayEmailKey()),
+            'contact full name' => fn () => $this->recipient->{$this->recipient::displayNameKey()},
+            'contact email' => fn () => $this->recipient->{$this->recipient::displayEmailKey()},
         ];
     }
 
@@ -262,9 +260,6 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
         $this->registerRichContent('body')
             ->fileAttachmentsDisk('s3-public')
             ->fileAttachmentProvider(SpatieMediaLibraryFileAttachmentProvider::make())
-            ->mergeTags([
-                'contact full name' => '{{ contact full name }}',
-                'contact email' => '{{ contact email }}',
-            ]);
+            ->mergeTags($this->getMergeData());
     }
 }
