@@ -37,9 +37,11 @@
 namespace AidingApp\Report\Filament\Pages;
 
 use AidingApp\Report\Filament\Widgets\ServiceMonitorTable;
+use App\Enums\Feature;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Pages\Dashboard;
+use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 class ServiceMonitoring extends Dashboard
@@ -58,6 +60,10 @@ class ServiceMonitoring extends Dashboard
 
     public static function canAccess(): bool
     {
+        if (! Gate::check(Feature::ServiceManagement->getGateName())) {
+            return false;
+        }
+
         /** @var User $user */
         $user = auth()->user();
 
