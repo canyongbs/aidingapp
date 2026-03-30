@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Models\Scopes;
 
 use AidingApp\ServiceManagement\Models\Contracts\ClassificationInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class ClassifiedIn
 {
@@ -48,6 +49,9 @@ class ClassifiedIn
         protected array $classifications,
     ) {}
 
+    /**
+     * @param Builder<covariant Model> $query
+     */
     public function __invoke(Builder $query): void
     {
         $query->whereIn('classification', $this->classifications);

@@ -46,7 +46,7 @@ enum ProductLicenseStatus: string implements HasLabel
 
     case Expired = 'expired';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return $this->name;
     }

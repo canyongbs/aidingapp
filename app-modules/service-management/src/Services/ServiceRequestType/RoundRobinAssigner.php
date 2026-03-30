@@ -45,7 +45,7 @@ class RoundRobinAssigner implements ServiceRequestTypeAssigner
 {
     public function execute(ServiceRequest $serviceRequest): void
     {
-        $serviceRequestType = $serviceRequest->priority->type;
+        $serviceRequestType = $serviceRequest->priority?->type;
 
         if (! is_null($serviceRequestType)) {
             $lastAssignee = $serviceRequestType->lastAssignedUser;

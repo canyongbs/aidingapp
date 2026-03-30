@@ -51,7 +51,7 @@ return new class () extends Migration {
     {
         Schema::table('service_request_types', function (Blueprint $table) {
             $table->dropColumn('assignment_type');
-            $table->dropConstrainedForeignId(['assignment_type_individual_id']);
+            $table->dropConstrainedForeignId('assignment_type_individual_id');
         });
     }
 };

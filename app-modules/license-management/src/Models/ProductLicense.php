@@ -88,16 +88,25 @@ class ProductLicense extends BaseModel implements Auditable
      */
     protected $appends = ['status'];
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class, 'product_id', 'id');
     }
 
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class, 'assigned_to', 'id');
     }
 
+    /**
+     * @return Attribute<ProductLicenseStatus, null>
+     */
     protected function status(): Attribute
     {
         return new Attribute(

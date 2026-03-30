@@ -47,6 +47,7 @@ use App\Models\Concerns\InteractsWithTags;
 use App\Models\Contracts\HasTags;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -130,7 +131,11 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
         $this->addMediaCollection('article_details');
     }
 
-    public function scopePublic($query)
+    /**
+     * @param Builder<KnowledgeBaseItem> $query
+     * @return Builder<KnowledgeBaseItem>
+     */
+    public function scopePublic(Builder $query): Builder
     {
         return $query->where('public', true);
     }

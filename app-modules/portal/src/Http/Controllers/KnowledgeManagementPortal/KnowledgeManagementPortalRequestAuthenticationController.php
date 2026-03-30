@@ -93,7 +93,7 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
 
         $authentication = new PortalAuthentication();
         $authentication->portal_type = PortalType::KnowledgeManagement;
-        $authentication->code = Hash::make($code);
+        $authentication->code = Hash::make((string) $code);
 
         if ($contact) {
             $authentication->educatable()->associate($contact);

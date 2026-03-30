@@ -39,7 +39,7 @@ namespace App\Models\Contracts;
 use App\Models\Tag;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use Illuminate\Database\Eloquent\Relations\MorphPivot;
 
 interface HasTags
 {
@@ -48,7 +48,7 @@ interface HasTags
     public static function getTagLabel(): string;
 
     /**
-     * @return MorphToMany<Tag, Model, Pivot, string>
+     * @return MorphToMany<Tag, covariant Model, MorphPivot, 'pivot'>
      */
     public function tags(): MorphToMany;
 }

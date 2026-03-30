@@ -37,6 +37,8 @@
 namespace App\Models\Concerns;
 
 use App\Models\Tag;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphPivot;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 trait InteractsWithTags
@@ -52,7 +54,7 @@ trait InteractsWithTags
     }
 
     /**
-     * @return MorphToMany<Tag, $this>
+     * @return MorphToMany<Tag, covariant Model, MorphPivot, 'pivot'>
      */
     public function tags(): MorphToMany
     {

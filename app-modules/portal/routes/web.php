@@ -42,7 +42,7 @@ use AidingApp\Portal\Livewire\RenderKnowledgeManagementPortal;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
-Route::get('/portals/knowledge-management/{any?}', function ($any = null) {
+Route::get('/portals/knowledge-management/{any?}', function (?string $any = null) {
     $url = $any ? '/portal/' . $any : '/portal';
 
     return redirect($url, 301);

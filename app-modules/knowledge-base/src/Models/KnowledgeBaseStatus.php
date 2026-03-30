@@ -62,6 +62,9 @@ class KnowledgeBaseStatus extends BaseModel implements Auditable
         'name',
     ];
 
+    /**
+     * @return HasMany<KnowledgeBaseItem, $this>
+     */
     public function knowledgeBaseItems(): HasMany
     {
         return $this->hasMany(KnowledgeBaseItem::class, 'status_id');
