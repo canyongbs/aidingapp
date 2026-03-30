@@ -22,6 +22,12 @@ jobs:
                   ref: ${{ github.head_ref }}
                   token: ${{ secrets.PAT }}
 
+            - name: Login to Docker Hub
+              uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 #4.0.0
+              with:
+                  username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
             - name: Configure AWS credentials
               uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 #6.0.0
               with:
@@ -31,7 +37,7 @@ jobs:
 
             - name: Login to Amazon ECR
               id: login-ecr
-              uses: aws-actions/amazon-ecr-login@261fc3d4806db1fa66a15cc11113c456db8870a7 #2.1.0
+              uses: aws-actions/amazon-ecr-login@183a1442edf41672e66566b7fc560e297a290896 #2.1.1
 
             - name: Build, tag, and push image to Amazon ECR
               id: build-image
@@ -55,7 +61,7 @@ jobs:
                   image: ${{ steps.build-image.outputs.image }}
 
             - name: Deploy Amazon ECS task definition
-              uses: aws-actions/amazon-ecs-deploy-task-definition@cbf54ec46642b86ff78c2f5793da6746954cf8ff #2.6.0
+              uses: aws-actions/amazon-ecs-deploy-task-definition@fc8fc60f3a60ffd500fcb13b209c59d221ac8c8c #2.6.1
               with:
                   task-definition: ${{ steps.task-def.outputs.task-definition }}
                   service: 'aidingapp-prod-service'

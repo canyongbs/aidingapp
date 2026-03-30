@@ -36,9 +36,11 @@
 
 namespace AidingApp\Report\Filament\Pages;
 
+use App\Enums\Feature;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Pages\Dashboard;
+use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 class LicenseManagement extends Dashboard
@@ -59,6 +61,10 @@ class LicenseManagement extends Dashboard
 
     public static function canAccess(): bool
     {
+        if (! Gate::check(Feature::LicenseManagement->getGateName())) {
+            return false;
+        }
+
         /** @var User $user */
         $user = auth()->user();
 

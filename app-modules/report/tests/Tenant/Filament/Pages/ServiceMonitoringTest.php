@@ -34,40 +34,31 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\ListChangeRequestTypes;
+use AidingApp\Report\Filament\Pages\ServiceMonitoring;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-use function Tests\Helpers\testResourceRequiresPermissionForAccess;
-
-testResourceRequiresPermissionForAccess(
-    resource: ChangeRequestTypeResource::class,
-    permissions: 'change_request_type.view-any',
-    method: 'index',
-    feature: 'changeManagement'
-);
 
 it('is gated with proper access control', function () {
     $settings = app(LicenseSettings::class);
-    $settings->data->addons->changeManagement = false;
+    $settings->data->addons->serviceManagement = false;
     $settings->save();
 
     $user = User::factory()->create();
 
     actingAs($user);
 
-    livewire(ListChangeRequestTypes::class)->assertForbidden();
+    livewire(ServiceMonitoring::class)->assertForbidden();
 
-    $user->givePermissionTo('change_request_type.view-any');
+    $user->givePermissionTo('report-library.view-any');
     $user->refresh();
 
-    livewire(ListChangeRequestTypes::class)->assertForbidden();
+    livewire(ServiceMonitoring::class)->assertForbidden();
 
-    $settings->data->addons->changeManagement = true;
+    $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    livewire(ListChangeRequestTypes::class)->assertOk();
+    livewire(ServiceMonitoring::class)->assertOk();
 });

@@ -40,6 +40,7 @@ use AidingApp\Report\Filament\Widgets\RefreshWidget;
 use AidingApp\Report\Filament\Widgets\ServiceRequestFeedbackStats;
 use AidingApp\Report\Filament\Widgets\ServiceRequestFeedbackTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Enums\Feature;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Forms\Components\DatePicker;
@@ -49,6 +50,7 @@ use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 class ServiceRequestFeedback extends Dashboard
@@ -73,6 +75,10 @@ class ServiceRequestFeedback extends Dashboard
 
     public static function canAccess(): bool
     {
+        if (! Gate::check([Feature::ServiceManagement->getGateName(), Feature::FeedbackManagement->getGateName()])) {
+            return false;
+        }
+
         /** @var User $user */
         $user = auth()->user();
 
