@@ -534,30 +534,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/contract-management/src/Enums/ContractStatus.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$contract_value\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contract-management/src/Filament/Resources/ContractResource/Pages/EditContract.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contract-management/src/Filament/Resources/ContractResource/Pages/ListContracts.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contract-management/src/Filament/Resources/ContractTypeResource/Pages/CreateContractType.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contract-management/src/Filament/Resources/ContractTypeResource/Pages/EditContractType.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Division\\\\Database\\\\Factories\\\\DivisionFactory\\:\\:default\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory does not specify its types\\: TModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -700,18 +676,6 @@ $ignoreErrors[] = [
     'identifier' => 'argument.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/engagement/src/Filament/Actions/RelationManagerSendEngagementAction.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\Contact\\\\Models\\\\Contact\\:\\:\\$full\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/src/Filament/Resources/EngagementResponseResource/Pages/ViewEngagementResponse.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Match expression does not handle remaining value\\: class\\-string\\<AidingApp\\\\Contact\\\\Models\\\\Contact\\>&literal\\-string$#',
-    'identifier' => 'match.unhandled',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/engagement/src/Filament/Resources/EngagementResponseResource/Pages/ViewEngagementResponse.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method App\\\\Models\\\\Contracts\\\\Educatable\\:\\:notifyNow\\(\\)\\.$#',
@@ -2040,12 +2004,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/EditServiceRequestForm.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:withoutTrashed\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/ListServiceRequestForms.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Dead catch \\- Illuminate\\\\Database\\\\QueryException is never thrown in the try block\\.$#',
     'identifier' => 'catch.neverThrown',
     'count' => 1,
@@ -2065,18 +2023,6 @@ $ignoreErrors[] = [
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$relations of method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestTypeCategory\\>\\:\\:with\\(\\) expects array\\<array\\|\\(Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\Relation\\<\\*, \\*, \\*\\>\\)\\: mixed\\)\\|string\\>\\|string, array\\{children\\: Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\)\\: void, types\\: Closure\\(mixed\\)\\: mixed\\} given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/Pages/ListServiceRequestTypes.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$relations of method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:with\\(\\) expects array\\<array\\|\\(Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\Relation\\<\\*, \\*, \\*\\>\\)\\: mixed\\)\\|string\\>\\|string, array\\{types\\: Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\)\\: Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany, children\\: Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\)\\: void\\} given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/Pages/ListServiceRequestTypes.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$relations of method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:with\\(\\) expects array\\<array\\|\\(Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\Relation\\<\\*, \\*, \\*\\>\\)\\: mixed\\)\\|string\\>\\|string, array\\{types\\: Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\)\\: Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\} given\\.$#',
     'identifier' => 'argument.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/Pages/ListServiceRequestTypes.php',
@@ -2388,12 +2334,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Casts/CurrencyCast.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Class App\\\\Casts\\\\LandlordEncrypted implements generic interface Illuminate\\\\Contracts\\\\Database\\\\Eloquent\\\\CastsAttributes but does not specify its types\\: TGet, TSet$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Casts/LandlordEncrypted.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method App\\\\DataTransferObjects\\\\Casts\\\\DataCast\\:\\:get\\(\\) has parameter \\$payload with no type specified\\.$#',
     'identifier' => 'missingType.parameter',
     'count' => 1,
@@ -2488,6 +2428,12 @@ $ignoreErrors[] = [
     'identifier' => 'argument.templateType',
     'count' => 1,
     'path' => __DIR__ . '/app/Models/Authenticatable.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^PHPDoc tag @mixin contains unknown class App\\\\Settings\\\\SettingsProperties\\\\IdeHelperEmailSettingsProperty\\.$#',
+    'identifier' => 'class.notFound',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Settings/SettingsProperties/EmailSettingsProperty.php',
 ];
 
 return ['parameters' => ['ignoreErrors' => $ignoreErrors]];
