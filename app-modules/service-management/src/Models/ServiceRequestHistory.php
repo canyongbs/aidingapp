@@ -90,7 +90,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
     public static function getTimelineData(Model $forModel): Collection
     {
         assert($forModel instanceof ServiceRequest);
-        
+
         return $forModel->histories()->get();
     }
 

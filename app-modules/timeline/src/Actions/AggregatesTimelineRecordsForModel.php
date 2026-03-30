@@ -63,8 +63,8 @@ class AggregatesTimelineRecordsForModel
         }
 
         return $aggregateRecords->sortByDesc(function (Model $record) {
-          assert($record instanceof ProvidesATimeline);
-          
+            assert($record instanceof ProvidesATimeline);
+
             return Carbon::parse($record->timeline()->sortableBy())->timestamp;
         });
     }

@@ -133,6 +133,7 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
 
     /**
      * @param Builder<KnowledgeBaseItem> $query
+     *
      * @return Builder<KnowledgeBaseItem>
      */
     public function scopePublic(Builder $query): Builder

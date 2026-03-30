@@ -69,7 +69,7 @@ class SyncTimelineData
 
         $aggregateRecords->each(function (Model $record) use ($recordModel) {
             assert($record instanceof ProvidesATimeline);
-            
+
             $timelineRecord = Timeline::firstOrCreate([
                 'entity_type' => $recordModel->getMorphClass(),
                 'entity_id' => $recordModel->getKey(),

@@ -67,6 +67,7 @@ class Timeline extends BaseModel
 
     /**
      * @param Builder<covariant Model> $query
+     *
      * @return Builder<covariant Model>
      */
     public function scopeForEntity(Builder $query, Model $entity): Builder

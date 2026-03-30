@@ -98,7 +98,7 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
     public static function getTimelineData(Model $forModel): Collection
     {
         assert($forModel instanceof ServiceRequest);
-        
+
         return $forModel->serviceRequestUpdates()->get();
     }
 

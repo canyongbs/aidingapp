@@ -38,8 +38,8 @@ namespace App\Models\Contracts;
 
 use App\Models\Tag;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\Relations\MorphPivot;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 
 interface HasTags
 {
