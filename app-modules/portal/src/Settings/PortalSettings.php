@@ -73,25 +73,6 @@ class PortalSettings extends SettingsWithMedia
 
     public ?Rounding $knowledge_management_portal_rounding = null;
 
-    /**
-     * @var array{
-     *  type: string,
-     *  content: array{
-     *      array{
-     *          type: string,
-     *          attrs: array{
-     *              textAlign: string,
-     *          },
-     *          content: array{
-     *              array{
-     *                  type: string,
-     *                  text: string,
-     *              },
-     *          },
-     *      },
-     *  },
-     * }
-     */
     public array $gdpr_banner_text = [
         'type' => 'doc',
         'content' => [
