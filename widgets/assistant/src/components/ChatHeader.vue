@@ -56,7 +56,7 @@
                 <div v-if="portalServiceManagement" class="mt-1">
                     <button
                         @click="openServiceRequest"
-                        class="flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm transition-all shadow-sm"
+                        class="flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm transition-all shadow-xs"
                     >
                         <PlusIcon class="w-3.5 h-3.5" />
                         Open Service Request

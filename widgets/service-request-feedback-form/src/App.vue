@@ -285,7 +285,7 @@
                 <div v-if="!submittedSuccess">
                     <div
                         v-if="requiresAuthentication && !userIsAuthenticated"
-                        class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
+                        class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-xs px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
                     >
                         <h1 class="text-primary-950 text-center text-2xl font-semibold">Login to submit feedback</h1>
 
@@ -364,7 +364,7 @@
         <div v-else>
             <div class="bg-gradient flex flex-col items-center justify-start min-h-screen">
                 <div
-                    class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-sm px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
+                    class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-xs px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
                 >
                     <h1 class="text-primary-950 text-center text-2xl font-semibold">
                         Feedback is already submitted for this service request.
