@@ -220,7 +220,9 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
                 ->toHtml() ?? '');
         }
 
-        return new HtmlString($this->getRichContentAttribute('body')?->toHtml() ?? '');
+        return new HtmlString($this->getRichContentAttribute('body')
+            ?->mergeTags($this->getMergeData())
+            ->toHtml() ?? '');
     }
 
     /**

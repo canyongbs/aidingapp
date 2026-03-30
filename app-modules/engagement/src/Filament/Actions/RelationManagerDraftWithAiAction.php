@@ -44,11 +44,11 @@ use App\Models\Contracts\Educatable;
 use App\Settings\LicenseSettings;
 use Closure;
 use Filament\Actions\Action;
+use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Width;
 use Illuminate\Support\Facades\Vite;
@@ -87,7 +87,7 @@ class RelationManagerDraftWithAiAction extends Action
                     ->placeholder('What do you want to write about?')
                     ->required(),
             ])
-            ->action(function (array $data, Get $get, Set $set, ManageRelatedRecords | RelationManager $livewire) {
+            ->action(function (array $data, Set $set, ManageRelatedRecords | RelationManager $livewire) {
                 $model = app(AiIntegratedAssistantSettings::class)->getDefaultModel();
 
                 $userName = auth()->user()->name;
@@ -145,7 +145,7 @@ class RelationManagerDraftWithAiAction extends Action
                     ->before("\n")
                     ->trim());
 
-                $set('body', (string) str($content)->after("\n")->markdown());
+                $set('body', RichContentRenderer::make((string) str($content)->after("\n")->markdown())->toArray());
             });
     }
 
