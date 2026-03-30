@@ -36,8 +36,6 @@
 
 namespace App\Models;
 
-use App\Casts\LandlordEncrypted;
-use App\Features\TenantConfigEncryptionFeature;
 use App\Multitenancy\DataTransferObjects\TenantConfig;
 use App\Settings\DisplaySettings;
 use Database\Factories\TenantFactory;
@@ -70,6 +68,7 @@ class Tenant extends SpatieTenant
 
     protected $casts = [
         'setup_complete' => 'boolean',
+        'config' => TenantConfig::class . ':encrypted',
     ];
 
     public function getTimezone(): string
@@ -79,12 +78,5 @@ class Tenant extends SpatieTenant
         }
 
         return config('app.timezone');
-    }
-
-    protected function casts(): array
-    {
-        return [
-            'config' => TenantConfigEncryptionFeature::active() ? TenantConfig::class . ':encrypted' : LandlordEncrypted::class,
-        ];
     }
 }
