@@ -119,7 +119,9 @@
 </script>
 
 <template>
-    <div class="fixed bottom-4 inset-e-4 z-50 flex flex-col items-end max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)]">
+    <div
+        class="fixed bottom-4 inset-e-4 z-50 flex flex-col items-end max-h-[calc(100vh-2rem)] max-w-[calc(100vw-2rem)]"
+    >
         <ChatPanel
             :is-open="isOpen"
             :send-message-url="sendMessageUrl"
