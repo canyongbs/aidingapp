@@ -87,7 +87,6 @@
         "spatie/laravel-medialibrary": "^11.3",
         "spatie/laravel-multitenancy": "^4.0",
         "spatie/laravel-settings": "^3.3",
-        "spiral/roadrunner": "^2025.1.12",
         "spiral/roadrunner-cli": "^2.6",
         "spiral/roadrunner-http": "^3.5",
         "sqids/sqids": "^0.5.0",
