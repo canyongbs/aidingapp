@@ -37,12 +37,12 @@
 namespace AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages;
 
 use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use FilamentTiptapEditor\TiptapEditor;
 
 class CreateEmailTemplate extends CreateRecord
 {
@@ -59,16 +59,14 @@ class CreateEmailTemplate extends CreateRecord
                     ->autocomplete(false),
                 Textarea::make('description')
                     ->string(),
-                TiptapEditor::make('content')
-                    ->disk('s3-public')
-                    ->mergeTags([
-                        'contact full name',
-                        'contact email',
-                    ])
-                    ->profile('email')
+                RichEditor::make('content')
+                    ->toolbarButtons([['bold', 'italic', 'small', 'link'], ['h1', 'h2', 'h3', 'bulletList', 'orderedList', 'horizontalRule', 'attachFiles'], ['mergeTags']])
+                    ->activePanel('mergeTags')
+                    ->resizableImages()
                     ->columnSpanFull()
                     ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-                    ->required(),
+                    ->required()
+                    ->json(),
             ]);
     }
 

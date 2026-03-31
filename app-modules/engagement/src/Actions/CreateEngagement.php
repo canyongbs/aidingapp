@@ -50,6 +50,7 @@ class CreateEngagement
         $engagement->recipient()->associate($data->recipient);
         $engagement->channel = $data->channel;
         $engagement->subject = $data->subject;
+        $engagement->body = $data->body;
         $engagement->scheduled_at = $data->scheduledAt;
 
         if (! $engagement->scheduled_at) {
@@ -59,14 +60,9 @@ class CreateEngagement
         DB::transaction(function () use ($data, $engagement) {
             $engagement->save();
 
-            [$engagement->body] = tiptap_converter()->saveImages(
-                $data->body,
-                disk: 's3-public',
-                record: $engagement,
-                recordAttribute: 'body',
-                newImages: $data->temporaryBodyImages,
-            );
-            $engagement->save();
+            if ($data->schema) {
+                $data->schema->model($engagement)->saveRelationships();
+            }
 
             if (! $engagement->scheduled_at) {
                 $engagement->recipient->notify(new EngagementNotification($engagement)->afterCommit());

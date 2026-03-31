@@ -43,10 +43,10 @@ use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use App\Settings\LicenseSettings;
 use Closure;
 use Filament\Actions\Action;
+use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Width;
 use Illuminate\Support\Facades\Vite;
@@ -80,7 +80,7 @@ class BulkDraftWithAiAction extends Action
                     ->placeholder('What do you want to write about?')
                     ->required(),
             ])
-            ->action(function (array $data, Get $get, Set $set, Page $livewire) {
+            ->action(function (array $data, Set $set, Page $livewire) {
                 $model = app(AiIntegratedAssistantSettings::class)->getDefaultModel();
 
                 $userName = auth()->user()->name;
@@ -136,7 +136,7 @@ class BulkDraftWithAiAction extends Action
                     ->before("\n")
                     ->trim());
 
-                $set('body', (string) str($content)->after("\n")->markdown());
+                $set('body', RichContentRenderer::make((string) str($content)->after("\n")->markdown())->toArray());
             });
     }
 

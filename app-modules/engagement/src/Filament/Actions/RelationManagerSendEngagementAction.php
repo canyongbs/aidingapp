@@ -41,10 +41,12 @@ use AidingApp\Engagement\DataTransferObjects\EngagementCreationData;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Notification\Enums\NotificationChannel;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -54,11 +56,11 @@ use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Carbon;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
+use Illuminate\Support\Str;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class RelationManagerSendEngagementAction extends CreateAction
 {
@@ -76,13 +78,6 @@ class RelationManagerSendEngagementAction extends CreateAction
                 return auth()->user()->can('create', [Engagement::class, null]);
             })
             ->form(fn (Schema $schema) => $schema->components([
-                Select::make('channel')
-                    ->label('What would you like to send?')
-                    ->options(NotificationChannel::getEngagementOptions())
-                    ->default(NotificationChannel::Email->value)
-                    // ->disableOptionWhen(fn (RelationManager $livewire, string $value): bool => (($value == (NotificationChannel::Sms->value) && ! $livewire->getOwnerRecord()->canRecieveSms())) || NotificationChannel::tryFrom($value)?->getCaseDisabled())
-                    ->selectablePlaceholder(false)
-                    ->live(),
                 Fieldset::make('Content')
                     ->schema([
                         TextInput::make('subject')
@@ -90,16 +85,13 @@ class RelationManagerSendEngagementAction extends CreateAction
                             ->required()
                             ->placeholder(__('Subject'))
                             ->columnSpanFull(),
-                        TiptapEditor::make('body')
-                            ->disk('s3-public')
+                        RichEditor::make('body')
                             ->label('Body')
-                            ->mergeTags($mergeTags = [
-                                'contact full name',
-                                'contact email',
-                            ])
-                            ->profile('email')
+                            ->toolbarButtons([['bold', 'italic', 'small', 'link'], ['h1', 'h2', 'h3', 'bulletList', 'orderedList', 'horizontalRule', 'attachFiles'], ['mergeTags']])
+                            ->activePanel('mergeTags')
+                            ->resizableImages()
                             ->required()
-                            ->hintAction(fn (TiptapEditor $component) => Action::make('loadEmailTemplate')
+                            ->hintAction(fn (RichEditor $component) => Action::make('loadEmailTemplate')
                                 ->schema([
                                     Select::make('emailTemplate')
                                         ->searchable()
@@ -114,10 +106,9 @@ class RelationManagerSendEngagementAction extends CreateAction
                                                 ->pluck('name', 'id')
                                                 ->toArray();
                                         })
-                                        ->getOptionLabelUsing(fn (string $value): ?string => EmailTemplate::query()
-                                            ->whereKey($value)
-                                            ->value('name'))
                                         ->getSearchResultsUsing(function (Get $get, string $search): array {
+                                            $search = Str::lower($search);
+
                                             return EmailTemplate::query()
                                                 ->when(
                                                     $get('onlyMyTemplates'),
@@ -132,7 +123,8 @@ class RelationManagerSendEngagementAction extends CreateAction
                                                 ->limit(50)
                                                 ->pluck('name', 'id')
                                                 ->toArray();
-                                        }),
+                                        })
+                                        ->getOptionLabelUsing(fn (string $value): ?string => EmailTemplate::find($value)?->name),
                                     Checkbox::make('onlyMyTemplates')
                                         ->label('Only show my templates')
                                         ->live()
@@ -145,19 +137,36 @@ class RelationManagerSendEngagementAction extends CreateAction
                                 ->action(function (array $data) use ($component) {
                                     $template = EmailTemplate::find($data['emailTemplate']);
 
-                                    if (! $template) {
-                                        return;
+                                    if (! $template instanceof EmailTemplate) {
+                                        throw new Exception('template is not instance of EmailTemplate');
                                     }
 
-                                    $component->state(
-                                        $component->generateImageUrls($template->content),
-                                    );
+                                    $component->state($template->content);
                                 }))
-                            ->helperText('You can insert student information by typing {{ and choosing a merge value to insert.')
-                            ->columnSpanFull(),
+                            ->getFileAttachmentUrlFromAnotherRecordUsing(function (mixed $file): ?string {
+                                return Media::query()
+                                    ->where('uuid', $file)
+                                    ->where('model_type', (new EmailTemplate())->getMorphClass())
+                                    ->first()
+                                    ?->getUrl();
+                            })
+                            ->saveFileAttachmentFromAnotherRecordUsing(function (mixed $file, Engagement $record): ?string {
+                                return Media::query()
+                                    ->where('uuid', $file)
+                                    ->where('model_type', (new EmailTemplate())->getMorphClass())
+                                    ->first()
+                                    ?->copy($record, 'body', 's3-public')
+                                    ->uuid;
+                            })
+                            ->helperText('You can insert recipient or your information by typing {{ and choosing a merge value to insert.')
+                            ->columnSpanFull()
+                            ->json(),
                         Actions::make([
                             RelationManagerDraftWithAiAction::make()
-                                ->mergeTags($mergeTags),
+                                ->mergeTags([
+                                    'contact full name',
+                                    'contact email',
+                                ]),
                         ]),
                     ]),
                 Fieldset::make('Send your email')
@@ -171,23 +180,17 @@ class RelationManagerSendEngagementAction extends CreateAction
                     ]),
             ]))
             ->action(function (array $data, Schema $schema, RelationManager $livewire) {
-                $engagement = app(CreateEngagement::class)->execute(new EngagementCreationData(
+                $data['body'] ??= ['type' => 'doc', 'content' => []];
+
+                app(CreateEngagement::class)->execute(new EngagementCreationData(
                     user: auth()->user(),
                     recipient: $livewire->getOwnerRecord(),
-                    channel: NotificationChannel::parse($data['channel']),
+                    channel: NotificationChannel::Email,
                     subject: $data['subject'] ?? null,
-                    body: $data['body'] ?? null,
-                    temporaryBodyImages: array_map(
-                        fn (TemporaryUploadedFile $file): array => [
-                            'extension' => $file->getClientOriginalExtension(),
-                            'path' => (fn () => $this->path)->call($file),
-                        ],
-                        $schema->getFlatFields()['body']->getTemporaryImages(),
-                    ),
+                    body: $data['body'],
                     scheduledAt: ($data['send_later'] ?? false) ? Carbon::parse($data['scheduled_at'] ?? null) : null,
+                    schema: $schema,
                 ));
-
-                $schema->model($engagement)->saveRelationships();
             })
             ->modalSubmitActionLabel('Send')
             ->modalCloseButton(false)

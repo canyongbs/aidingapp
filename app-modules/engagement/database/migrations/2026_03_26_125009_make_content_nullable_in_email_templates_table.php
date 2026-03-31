@@ -34,20 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Actions;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\HtmlString;
-
-class GenerateEngagementBodyContent
-{
-    public function __invoke(string|array $content, array $mergeData, Model $record, string $recordAttribute): HtmlString
+return new class () extends Migration {
+    public function up(): void
     {
-        $content = tiptap_converter()
-            ->mergeTagsMap($mergeData)
-            ->record($record, $recordAttribute)
-            ->asHTML($content);
-
-        return str($content)->sanitizeHtml()->toHtmlString();
+        Schema::table('email_templates', function (Blueprint $table) {
+            $table->json('content')->nullable()->change();
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('email_templates', function (Blueprint $table) {
+            $table->json('content')->nullable(false)->change();
+        });
+    }
+};

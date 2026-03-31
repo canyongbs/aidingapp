@@ -34,6 +34,13 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Engagement\Models\EmailTemplate;
+use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Models\EngagementBatch;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+
 // Example migration test, leave commented out for future use as a template/example
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
 //    it('properly changed the data', function () {
@@ -52,3 +59,198 @@
 //        );
 //    });
 //});
+
+test('2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables email_templates', function () {
+    isolatedMigration(
+        '2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables',
+        function () {
+            $emailTemplate = EmailTemplate::factory()->createQuietly([
+                'content' => [
+                    'type' => 'doc',
+                    'content' => [
+                        [
+                            'type' => 'paragraph',
+                            'attrs' => ['textAlign' => 'start'],
+                            'content' => [
+                                [
+                                    'type' => 'image',
+                                    'attrs' => [
+                                        'id' => 'oversized-uuid',
+                                        'alt' => null,
+                                        'src' => null,
+                                        'title' => null,
+                                        'width' => 800,
+                                        'height' => 600,
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'type' => 'paragraph',
+                            'attrs' => ['textAlign' => 'start'],
+                            'content' => [
+                                [
+                                    'type' => 'image',
+                                    'attrs' => [
+                                        'id' => 'small-uuid',
+                                        'alt' => null,
+                                        'src' => null,
+                                        'title' => null,
+                                        'width' => 300,
+                                        'height' => 200,
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables.php']);
+
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $content = json_decode((string) DB::table('email_templates')->where('id', $emailTemplate->id)->value('content'), associative: true); /** @phpstan-ignore-line */
+
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['content'][0]['attrs']['width'])->toBeNull();
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['content'][0]['attrs']['height'])->toBeNull();
+
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][1]['content'][0]['attrs']['width'])->toBe(300);
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][1]['content'][0]['attrs']['height'])->toBe(200);
+        }
+    );
+});
+
+test('2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables engagements', function () {
+    isolatedMigration(
+        '2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables',
+        function () {
+            $engagement = Engagement::factory()->createQuietly([
+                'body' => [
+                    'type' => 'doc',
+                    'content' => [
+                        [
+                            'type' => 'paragraph',
+                            'attrs' => ['textAlign' => 'start'],
+                            'content' => [
+                                [
+                                    'type' => 'image',
+                                    'attrs' => [
+                                        'id' => 'oversized-uuid',
+                                        'alt' => null,
+                                        'src' => null,
+                                        'title' => null,
+                                        'width' => 800,
+                                        'height' => 600,
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'type' => 'paragraph',
+                            'attrs' => ['textAlign' => 'start'],
+                            'content' => [
+                                [
+                                    'type' => 'image',
+                                    'attrs' => [
+                                        'id' => 'small-uuid',
+                                        'alt' => null,
+                                        'src' => null,
+                                        'title' => null,
+                                        'width' => 300,
+                                        'height' => 200,
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables.php']);
+
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $body = json_decode((string) DB::table('engagements')->where('id', $engagement->id)->value('body'), associative: true); /** @phpstan-ignore-line */
+
+            /** @phpstan-ignore-next-line */
+            expect($body['content'][0]['content'][0]['attrs']['width'])->toBeNull();
+            /** @phpstan-ignore-next-line */
+            expect($body['content'][0]['content'][0]['attrs']['height'])->toBeNull();
+
+            /** @phpstan-ignore-next-line */
+            expect($body['content'][1]['content'][0]['attrs']['width'])->toBe(300);
+            /** @phpstan-ignore-next-line */
+            expect($body['content'][1]['content'][0]['attrs']['height'])->toBe(200);
+        }
+    );
+});
+
+test('2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables engagement_batches', function () {
+    isolatedMigration(
+        '2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables',
+        function () {
+            $engagementBatch = EngagementBatch::factory()->createQuietly([
+                'body' => [
+                    'type' => 'doc',
+                    'content' => [
+                        [
+                            'type' => 'paragraph',
+                            'attrs' => ['textAlign' => 'start'],
+                            'content' => [
+                                [
+                                    'type' => 'image',
+                                    'attrs' => [
+                                        'id' => 'oversized-uuid',
+                                        'alt' => null,
+                                        'src' => null,
+                                        'title' => null,
+                                        'width' => 800,
+                                        'height' => 600,
+                                    ],
+                                ],
+                            ],
+                        ],
+                        [
+                            'type' => 'paragraph',
+                            'attrs' => ['textAlign' => 'start'],
+                            'content' => [
+                                [
+                                    'type' => 'image',
+                                    'attrs' => [
+                                        'id' => 'small-uuid',
+                                        'alt' => null,
+                                        'src' => null,
+                                        'title' => null,
+                                        'width' => 300,
+                                        'height' => 200,
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_03_26_125010_tmp_reset_oversized_image_dimensions_in_engagement_tables.php']);
+
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $body = json_decode((string) DB::table('engagement_batches')->where('id', $engagementBatch->id)->value('body'), associative: true); /** @phpstan-ignore-line */
+
+            /** @phpstan-ignore-next-line */
+            expect($body['content'][0]['content'][0]['attrs']['width'])->toBeNull();
+            /** @phpstan-ignore-next-line */
+            expect($body['content'][0]['content'][0]['attrs']['height'])->toBeNull();
+
+            /** @phpstan-ignore-next-line */
+            expect($body['content'][1]['content'][0]['attrs']['width'])->toBe(300);
+            /** @phpstan-ignore-next-line */
+            expect($body['content'][1]['content'][0]['attrs']['height'])->toBe(200);
+        }
+    );
+});
