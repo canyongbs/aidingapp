@@ -37,12 +37,15 @@
 namespace AidingApp\Timeline\Listeners;
 
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
+use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
 
 class AddRecordToTimeline
 {
     public function handle(TimelineableRecordCreated $event): void
     {
+        assert($event->timelineableModel instanceof ProvidesATimeline);
+
         $entity = $event->entity;
 
         cache()->forget("timeline.synced.{$entity->getMorphClass()}.{$entity->getKey()}");

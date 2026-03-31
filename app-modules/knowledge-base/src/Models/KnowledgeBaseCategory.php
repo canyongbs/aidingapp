@@ -74,11 +74,17 @@ class KnowledgeBaseCategory extends BaseModel implements Auditable
         return $this->hasMany(KnowledgeBaseItem::class, 'category_id');
     }
 
+    /**
+     * @return BelongsTo<self, $this>
+     */
     public function parentCategory(): BelongsTo
     {
         return $this->belongsTo(self::class, 'parent_id', 'id');
     }
 
+    /**
+     * @return HasMany<self, $this>
+     */
     public function subCategories(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id');

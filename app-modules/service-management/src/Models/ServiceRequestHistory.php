@@ -89,11 +89,13 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
 
     public static function getTimelineData(Model $forModel): Collection
     {
+        assert($forModel instanceof ServiceRequest);
+
         return $forModel->histories()->get();
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<array<string, mixed>>
      */
     public function getUpdates(): array
     {
@@ -110,6 +112,9 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
         return $updates;
     }
 
+    /**
+     * @return Attribute<mixed, mixed>
+     */
     protected function newValuesFormatted(): Attribute
     {
         return Attribute::make(
@@ -117,6 +122,9 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
         );
     }
 
+    /**
+     * @return Attribute<mixed, mixed>
+     */
     protected function originalValuesFormatted(): Attribute
     {
         return Attribute::make(
@@ -125,7 +133,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
     }
 
     /**
-     * @param array $value
+     * @param array<string, mixed> $value
      *
      * @return array<string, mixed>
      */

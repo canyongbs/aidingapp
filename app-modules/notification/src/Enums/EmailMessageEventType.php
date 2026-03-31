@@ -58,7 +58,7 @@ enum EmailMessageEventType: string implements HasLabel
     case Subscription = 'subscription';
     case DeliveryDelay = 'delivery_delay';
 
-    public function getLabel(): ?string
+    public function getLabel(): string
     {
         return str($this->name)->headline();
     }

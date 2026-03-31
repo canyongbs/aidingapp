@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Models\Scopes;
 use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 class ClassifiedAs
 {
@@ -46,6 +47,9 @@ class ClassifiedAs
         protected SystemChangeRequestClassification|SystemServiceRequestClassification $classification,
     ) {}
 
+    /**
+     * @param Builder<covariant Model> $query
+     */
     public function __invoke(Builder $query): void
     {
         $query->where('classification', $this->classification);

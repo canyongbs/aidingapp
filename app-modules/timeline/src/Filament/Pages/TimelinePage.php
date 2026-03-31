@@ -38,6 +38,7 @@ namespace AidingApp\Timeline\Filament\Pages;
 
 use AidingApp\Timeline\Actions\SyncTimelineData;
 use AidingApp\Timeline\Filament\Pages\Concerns\LoadsTimelineRecords;
+use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use App\Actions\GetRecordFromMorphAndKey;
 use BackedEnum;
 use Filament\Actions\ViewAction;
@@ -59,7 +60,7 @@ abstract class TimelinePage extends Page
     public string $noMoreRecordsMessage = 'You have reached the end of this timeline.';
 
     /**
-     * @var array<Model>
+     * @var array<Model|string>
      */
     public array $modelsToTimeline = [];
 
@@ -67,7 +68,7 @@ abstract class TimelinePage extends Page
 
     public Model $recordModel;
 
-    public function mount(Model $record): void
+    public function mount(int|string $record): void
     {
         $this->recordModel = $this->record = $this->resolveRecord($record);
 
@@ -87,9 +88,11 @@ abstract class TimelinePage extends Page
 
     public function viewAction(): ViewAction
     {
+        assert($this->currentRecordToView instanceof ProvidesATimeline);
+
         return $this->currentRecordToView
             ->timeline()
-            ->modalViewAction($this->currentRecordToView);
+            ->modalViewAction();
     }
 
     public static function canAccess(array $parameters = []): bool

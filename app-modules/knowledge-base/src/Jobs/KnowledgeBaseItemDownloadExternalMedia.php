@@ -125,8 +125,8 @@ class KnowledgeBaseItemDownloadExternalMedia implements ShouldQueue
                         ->toMediaCollection('article_details');
 
                     return "{{media|id:{$media->getKey()};}}";
-                } catch (Exception $e) {
-                    report($e);
+                } catch (Exception $exception) {
+                    report($exception);
                 }
             }
         }

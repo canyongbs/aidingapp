@@ -57,14 +57,14 @@ class AggregatesTimelineRecordsForModel
         $aggregateRecords = collect();
 
         foreach ($modelsToTimeline as $model) {
-            if (! in_array(ProvidesATimeline::class, class_implements($model))) {
-                throw new ModelMustHaveATimeline("Model {$model} must have a timeline available");
-            }
+            throw_unless(is_a($model, ProvidesATimeline::class, true), new ModelMustHaveATimeline("Model {$model} must have a timeline available"));
 
             $aggregateRecords = $aggregateRecords->concat($model::getTimelineData($record));
         }
 
         return $aggregateRecords->sortByDesc(function (Model $record) {
+            assert($record instanceof ProvidesATimeline);
+
             return Carbon::parse($record->timeline()->sortableBy())->timestamp;
         });
     }

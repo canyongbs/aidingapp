@@ -42,6 +42,9 @@ use Illuminate\Support\Facades\DB;
 return new class () extends Migration {
     use CanModifyPermissions;
 
+    /**
+     * @var array<string, string>
+     */
     private array $permissions = [
         'product.view-any' => 'Product',
         'product.create' => 'Product',
@@ -59,6 +62,9 @@ return new class () extends Migration {
         'product_license.*.force-delete' => 'Product License',
     ];
 
+    /**
+     * @var array<string>
+     */
     private array $guards = [
         'web',
         'api',

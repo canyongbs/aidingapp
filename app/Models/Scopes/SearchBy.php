@@ -48,7 +48,7 @@ class SearchBy
     ) {}
 
     /**
-     * @param Builder<Model> $query
+     * @param Builder<covariant Model> $query
      */
     public function __invoke(Builder $query): void
     {

@@ -51,7 +51,7 @@ class ChangeRequestObserver
             $changeRequest->created_by = auth()->user()->id;
         }
 
-        if (is_null($changeRequest->change_request_status_id)) {
+        if (is_null($changeRequest->change_request_status_id ?? null)) {
             $changeRequest->change_request_status_id = ChangeRequestStatus::tap(new ClassifiedAs(SystemChangeRequestClassification::New))->first()->id;
         }
     }

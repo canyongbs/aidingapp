@@ -60,11 +60,17 @@ class ManageServiceRequestUpdate extends ManageRelatedRecords
         return (bool) count(static::managers($arguments['record'] ?? null));
     }
 
+    /**
+     * @return array<string>
+     */
     public function getRelationManagers(): array
     {
         return static::managers($this->getRecord());
     }
 
+    /**
+     * @return array<string>
+     */
     private static function managers(?Model $record = null): array
     {
         return collect([

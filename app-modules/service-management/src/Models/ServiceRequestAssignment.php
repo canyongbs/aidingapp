@@ -107,6 +107,8 @@ class ServiceRequestAssignment extends BaseModel implements Auditable, ProvidesA
 
     public static function getTimelineData(Model $forModel): Collection
     {
+        assert($forModel instanceof ServiceRequest);
+
         return $forModel->assignments()->get();
     }
 }

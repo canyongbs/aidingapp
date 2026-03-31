@@ -50,7 +50,7 @@ class LicenseManagementServiceProvider extends ServiceProvider
         Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new LicenseManagementPlugin()));
     }
 
-    public function boot()
+    public function boot(): void
     {
         Relation::morphMap([
             'product' => Product::class,

@@ -36,11 +36,18 @@
 
 namespace AidingApp\Notification\Models\Contracts;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 interface Message
 {
+    /**
+     * @return MorphTo<Model, covariant Model>
+     */
     public function related(): MorphTo;
 
+    /**
+     * @return MorphTo<Model, covariant Model>
+     */
     public function recipient(): MorphTo;
 }
