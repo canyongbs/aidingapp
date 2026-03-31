@@ -115,7 +115,7 @@
                 </div>
             </div>
             <div class="flex-1">
-                <div class="bg-white rounded-lg rounded-tl-sm px-4 py-3 shadow-sm border border-gray-200">
+                <div class="bg-white rounded-lg rounded-tl-sm px-4 py-3 shadow-xs border border-gray-200">
                     <p class="text-sm text-gray-800 leading-relaxed">{{ props.welcomeMessage }}</p>
                 </div>
             </div>

@@ -40,7 +40,7 @@ export default {
         fieldset: 'max-w-md border border-gray-400 rounded px-2 pb-1',
         help: 'text-xs text-gray-500',
         inner: 'formkit-disabled:bg-gray-200 formkit-disabled:cursor-not-allowed formkit-disabled:pointer-events-none',
-        input: 'appearance-none bg-transparent focus:outline-none focus:ring-0 focus:shadow-none font-sans',
+        input: 'appearance-none bg-transparent focus:outline-hidden focus:ring-0 focus:shadow-none font-sans',
         label: 'block mb-1 font-bold text-sm font-sans',
         legend: 'font-bold text-sm',
         loaderIcon: 'inline-flex items-center w-4 text-gray-600 animate-spin',
@@ -48,7 +48,7 @@ export default {
         messages: 'list-none p-0 mt-1 mb-0',
         outer: 'not-prose mb-4 formkit-disabled:opacity-50 font-sans',
         prefixIcon:
-            'w-10 flex self-stretch grow-0 shrink-0 rounded-tl rounded-bl border-r border-gray-400 bg-white bg-gradient-to-b from-transparent to-gray-200 [&>svg]:w-full [&>svg]:max-w-[1em] [&>svg]:max-h-[1em] [&>svg]:m-auto',
+            'w-10 flex self-stretch grow-0 shrink-0 rounded-tl rounded-bl border-r border-gray-400 bg-white bg-linear-to-b from-transparent to-gray-200 [&>svg]:w-full [&>svg]:max-w-[1em] [&>svg]:max-h-[1em] [&>svg]:m-auto',
         suffixIcon:
             'w-7 pr-3 p-3 flex self-stretch grow-0 shrink-0 [&>svg]:w-full [&>svg]:max-w-[1em] [&>svg]:max-h-[1em] [&>svg]:m-auto',
     },
@@ -56,7 +56,7 @@ export default {
     // Family styles apply to all inputs that share a common family
     'family:box': {
         decorator:
-            'block relative h-5 w-5 mr-2 rounded bg-white bg-gradient-to-b from-transparent to-gray-200 ring-1 ring-gray-400 peer-checked:ring-primary-500 text-transparent peer-checked:text-primary-500',
+            'block relative h-5 w-5 mr-2 rounded bg-white bg-linear-to-b from-transparent to-gray-200 ring-1 ring-gray-400 peer-checked:ring-primary-500 text-transparent peer-checked:text-primary-500',
         decoratorIcon: 'flex p-[3px] w-full h-full absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2',
         help: 'mb-2 mt-1.5',
         input: 'absolute w-0 h-0 overflow-hidden opacity-0 pointer-events-none peer',
@@ -65,7 +65,7 @@ export default {
         wrapper: 'flex items-center mb-1',
     },
     'family:button': {
-        input: '$reset inline-flex items-center enabled:bg-gradient-to-br enabled:from-primary-500 enabled:to-primary-700 text-white text-sm font-medium py-2 px-3 rounded focus-visible:outline-2 focus-visible:outline-primary-600 focus-visible:outline-offset-2 bg-gray-400 formkit-loading:before:w-4 formkit-loading:before:h-4 formkit-loading:before:mr-2 formkit-loading:before:border formkit-loading:before:border-2 formkit-loading:before:border-r-transparent formkit-loading:before:rounded-3xl formkit-loading:before:border-white formkit-loading:before:animate-spin enabled:hover:from-primary-600 enabled:hover:to-primary-600 disabled:cursor-not-allowed',
+        input: '$reset inline-flex items-center enabled:bg-linear-to-br enabled:from-primary-500 enabled:to-primary-700 text-white text-sm font-medium py-2 px-3 rounded focus-visible:outline-2 focus-visible:outline-primary-600 focus-visible:outline-offset-2 bg-gray-400 formkit-loading:before:w-4 formkit-loading:before:h-4 formkit-loading:before:mr-2 formkit-loading:before:border formkit-loading:before:border-2 formkit-loading:before:border-r-transparent formkit-loading:before:rounded-3xl formkit-loading:before:border-white formkit-loading:before:animate-spin enabled:hover:from-primary-600 enabled:hover:to-primary-600 disabled:cursor-not-allowed',
         wrapper: 'mb-1',
         prefixIcon: '$reset block w-4 -ml-2 mr-2 stretch',
         suffixIcon: '$reset block w-4 ml-2 stretch',
@@ -112,10 +112,10 @@ export default {
         fileList: 'shrink grow peer px-3 py-2 formkit-multiple:data-[has-multiple="true"]:mb-6',
         fileName: 'break-all grow text-ellipsis',
         fileRemove:
-            'relative z-[2] ml-auto text-[0px] hover:text-red-500 pl-2 peer-data-[has-multiple=true]:text-sm peer-data-[has-multiple=true]:text-primary-500 peer-data-[has-multiple=true]:ml-3 peer-data-[has-multiple=true]:mb-2 formkit-multiple:bottom-[0.15em] formkit-multiple:pl-0 formkit-multiple:ml-0 formkit-multiple:left-[1em] formkit-multiple:formkit-prefix-icon:left-[3.75em]',
-        fileRemoveIcon: 'block text-base w-3 relative z-[2]',
+            'relative z-2 ml-auto text-[0px] hover:text-red-500 pl-2 peer-data-[has-multiple=true]:text-sm peer-data-[has-multiple=true]:text-primary-500 peer-data-[has-multiple=true]:ml-3 peer-data-[has-multiple=true]:mb-2 formkit-multiple:bottom-[0.15em] formkit-multiple:pl-0 formkit-multiple:ml-0 formkit-multiple:left-[1em] formkit-multiple:formkit-prefix-icon:left-[3.75em]',
+        fileRemoveIcon: 'block text-base w-3 relative z-2',
         inner: 'grid relative max-w-md cursor-pointer formkit-multiple:[&>button]:absolute',
-        input: 'cursor-pointer text-transparent absolute top-0 right-0 left-0 bottom-0 opacity-0 z-[2]',
+        input: 'cursor-pointer text-transparent absolute top-0 right-0 left-0 bottom-0 opacity-0 z-2',
         noFiles: 'flex w-full items-center px-3 py-2 text-gray-400',
         noFilesIcon: 'w-4 mr-2',
     },
@@ -165,8 +165,8 @@ export default {
       relative
       inline-flex
       group-[[data-inline]]:shadow-none
-      group-[[data-inline]]:!ring-1
-      group-[[data-inline]]:!ring-gray-400
+      group-[[data-inline]]:ring-1!
+      group-[[data-inline]]:ring-gray-400!
     `,
         swatchPreview: `
       w-full
@@ -177,7 +177,7 @@ export default {
       rounded-md
       text-sm
       cursor-pointer
-      outline-none
+      outline-hidden
     `,
         canvasSwatchPreviewWrapper: `
       relative
@@ -189,7 +189,7 @@ export default {
       before:h-full
       before:rounded-sm
       before:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.2)]
-      before:z-[2]
+      before:z-2
     `,
         canvasSwatchPreview: `
       rounded
@@ -220,7 +220,7 @@ export default {
       group-[[data-inline]]:w-auto
       group-[[data-inline]]:shadow-none
       group-[[data-inline]]:z-auto
-      [@media(max-width:431px)_and_(hover:none)]:group-[&:not([data-inline])]:!fixed
+      [@media(max-width:431px)_and_(hover:none)]:group-[&:not([data-inline])]:fixed!
       [@media(max-width:431px)_and_(hover:none)]:group-[&:not([data-inline])]:top-auto
       [@media(max-width:431px)_and_(hover:none)]:group-[&:not([data-inline])]:max-w-none
       [@media(max-width:431px)_and_(hover:none)]:group-[&:not([data-inline])]:bottom-0
@@ -331,7 +331,7 @@ export default {
       -translate-y-1/2
       pointer-events-none
       data-[prevent-focus-style]:shadow-[0_0_0_2px_rgba(255,255,255,1),0_0_0_3px_rgba(0,0,0,0.2)]
-      focus-visible:outline-none
+      focus-visible:outline-hidden
       focus-visible:shadow-[0_0_0_2px_rgba(255,255,255,1),0_0_0_3px_rgba(0,0,0,0.2),0_0_0_4px_rgba(59,130,246,1),0_0_0_5px_rgba(0,0,0,1)]
     `,
         controlLS: `
@@ -383,7 +383,7 @@ export default {
       [&>input::-webkit-outer-spin-button]:appearance-none
       [&>input::-webkit-inner-spin-button]:appearance-none
       [&>input::-webkit-inner-spin-button]:m-0
-      [&>input:focus]:outline-none
+      [&>input:focus]:outline-hidden
       [&>input:focus]:ring
       [&>input:focus]:ring-primary-500
       max-[431px]:[&>input]:text-base
@@ -452,7 +452,7 @@ export default {
       before:rounded-sm
       before:shadow-[inset_0_0_0_1px_rgba(0,0,0,0.2)]
       before:pointer-events-none
-      before:z-[2]
+      before:z-2
       data-[active='true']:after:content-['']
       data-[active='true']:after:block
       data-[active='true']:after:absolute
@@ -465,14 +465,14 @@ export default {
       data-[active='true']:after:-translate-x-1/2
       data-[active='true']:after:-translate-y-1/2
       data-[active='true']:after:bg-white
-      data-[active='true']:after:z-[2]
+      data-[active='true']:after:z-2
       data-[active='true']:after:ring-1
       data-[active='true']:after:ring-[rgba(0,0,0,0.33)]
       [&>canvas]:block
       [&>canvas]:w-full
       [&>canvas]:aspect-square
       [&>canvas]:rounded-sm
-      [&>canvas:focus-visible]:outline-none
+      [&>canvas:focus-visible]:outline-hidden
       [&>canvas:focus-visible]:shadow-[0_0_0_2px_rgba(255,255,255,1),0_0_0_4px_rgba(59,130,246,1)]
     `,
     },
@@ -531,7 +531,7 @@ export default {
         nextIcon: 'flex w-3 select-none [&>svg]:w-full',
         openButton: `
       appearance-none border-0 bg-transparent flex p-0 self-stretch cursor-pointer
-      focus-visible:outline-none focus-visible:text-white focus-visible:bg-primary-500
+      focus-visible:outline-hidden focus-visible:text-white focus-visible:bg-primary-500
     `,
         calendarIcon:
             'flex w-8 grow-0 shrink-0 self-stretch select-none [&>svg]:w-full [&>svg]:m-auto [&>svg]:max-h-[1em] [&>svg]:max-w-[1em]',
@@ -574,7 +574,7 @@ export default {
         help: 'mt-0 mb-1',
         sliderInner:
             'flex items-center py-1 [&>.formkit-max-value]:mb-0 [&>.formkit-max-value]:ml-8 [&>.formkit-max-value]:shrink [&>.formkit-max-value]:grow-0 [&>.formkit-icon]:bg-none [&>.formkit-icon]:border-none [&>.formkit-icon]:p-0 [&>.formkit-icon]:w-4 [&>.formkit-prefix-icon]:mr-2 [&>.formkit-suffix-icon]:ml-2 [&[data-has-mark-labels="true"]_.formkit-track]:mb-4',
-        track: 'grow relative z-[3] py-1 user-select-none',
+        track: 'grow relative z-3 py-1 user-select-none',
         trackWrapper: 'px-[2px] rounded-full bg-gray-200',
         trackInner: 'h-[6px] mx-[2px] relative',
         fill: 'h-full rounded-full absolute top-0 mx-[-4px] bg-primary-500',
@@ -582,14 +582,14 @@ export default {
         mark: 'absolute top-1/2 w-[3px] h-[3px] rounded-full -translate-x-1/2 -translate-y-1/2 bg-gray-400 data-[active="true"]:bg-white',
         markLabel: 'absolute top-[calc(100%+0.5em)] left-1/2 text-gray-400 text-[0.66em] -translate-x-1/2',
         handles: 'm-0 p-0 list-none',
-        handle: 'group w-4 h-4 rounded-full bg-white absolute top-1/2 left-0 z-[2] -translate-x-1/2 -translate-y-1/2 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1),0_1px_2px_0_rgba(0,0,0,0.8)] focus-visible:outline-0 focus-visible:ring-2 ring-primary-500 data-[is-target="true"]:z-[3]',
+        handle: 'group w-4 h-4 rounded-full bg-white absolute top-1/2 left-0 z-2 -translate-x-1/2 -translate-y-1/2 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.1),0_1px_2px_0_rgba(0,0,0,0.8)] focus-visible:outline-0 focus-visible:ring-2 ring-primary-500 data-[is-target="true"]:z-3',
         tooltip:
             'absolute bottom-full left-1/2 -translate-x-1/2 -translate-y-[4px] bg-primary-500 text-white py-1 px-2 text-xs leading-none whitespace-nowrap rounded-sm opacity-0 pointer-events-none transition-opacity after:content-[""] after:absolute after:top-full after:left-1/2 after:-translate-x-1/2 after:-translate-y-[1px] after:border-4 after:border-transparent after:border-t-primary-500 group-hover:opacity-100 group-focus-visible:opacity-100 group-data-[show-tooltip="true"]:opacity-100',
         linkedValues: 'flex items-start justify-between',
         minValue:
             'grow max-w-[45%] mb-0 relative [&_.formkit-inner::after]:content-[""] [&_.formkit-inner::after]:absolute [&_.formkit-inner::after]:left-[105%] [&_.formkit-inner::after]:-translate-y-1/2 [&_.formkit-inner::after]:w-[10%] [&_.formkit-inner::after]:h-[1px] [&_.formkit-inner::after]:bg-gray-500',
         maxValue: 'grow max-w-[45%] mb-0 relative',
-        chart: 'relative z-[2] mb-2 flex justify-between items-center w-full aspect-[3/1]',
+        chart: 'relative z-2 mb-2 flex justify-between items-center w-full aspect-[3/1]',
         chartBar: 'absolute bottom-0 h-full bg-gray-400 opacity-[.66] data-[active="false"]:opacity-[.25]',
     },
     taglist: {
@@ -597,7 +597,7 @@ export default {
         removeSelection: 'w-2.5 mx-1 self-center text-black leading-none',
         tag: 'flex items-center my-1 p-1 bg-gray-200 text-xs rounded-full',
         tagWrapper:
-            'mr-1 focus:outline-none focus:text-white [&>div]:focus:bg-primary-500 [&>div>button]:focus:text-white',
+            'mr-1 focus:outline-hidden focus:text-white [&>div]:focus:bg-primary-500 [&>div>button]:focus:text-white',
         tagLabel: 'pl-2 pr-1',
         tags: 'flex items-center flex-wrap w-full py-1.5 px-2',
     },
@@ -641,7 +641,7 @@ export default {
         emptyMessageInner: 'flex items-center justify-center p-2 text-sm',
         transferlistControls: 'bg-white px-3 py-2 border-b',
         transferlistSearch: 'flex border rounded items-center',
-        transferlistSearchInput: 'border-none p-1 w-full bg-transparent outline-none text-sm',
+        transferlistSearchInput: 'border-none p-1 w-full bg-transparent outline-hidden text-sm',
         controlLabel: 'hidden',
         selectedIcon: 'w-3 absolute left-3 select-none',
         fastForwardIcon:

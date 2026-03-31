@@ -31,7 +31,6 @@
 
 </COPYRIGHT>
 */
-import FormKitVariants from '@formkit/themes/tailwindcss';
 import forms from '@tailwindcss/forms';
 import typography from '@tailwindcss/typography';
 
@@ -65,5 +64,5 @@ export default {
             },
         },
     },
-    plugins: [forms, typography, FormKitVariants],
+    plugins: [forms, typography],
 };

@@ -113,13 +113,13 @@
                 @input="handleInput"
                 placeholder="Type your message..."
                 rows="1"
-                class="flex-1 resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm leading-5 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent placeholder:text-gray-400 overflow-y-auto"
+                class="flex-1 resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm leading-5 focus:outline-hidden focus:ring-2 focus:ring-brand-500 focus:border-transparent placeholder:text-gray-400 overflow-y-auto"
                 style="height: 44px"
                 @keydown.enter.exact.prevent="send"
             ></textarea>
 
             <button
-                class="bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white rounded-lg p-3 font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                class="bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white rounded-lg p-3 font-medium transition-all duration-150 focus:outline-hidden focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 shadow-xs hover:shadow disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
                 aria-label="Send message"
                 @click="send"
                 :disabled="props.disabled || !localMessage.trim()"

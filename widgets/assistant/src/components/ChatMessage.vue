@@ -57,7 +57,7 @@
                         ? 'bg-white rounded-lg rounded-tl-sm'
                         : 'bg-brand-50 rounded-lg rounded-tr-sm'
                 "
-                class="px-4 py-3 shadow-sm border border-gray-200"
+                class="px-4 py-3 shadow-xs border border-gray-200"
             >
                 <div
                     v-if="props.message.author === 'assistant'"
