@@ -57,15 +57,17 @@ class CheckOutAssetHeaderAction extends Action
         $this->label(__('Check Out'));
 
         $this->modalHeading(function () {
-          assert($this->getRecord() instanceof Asset);
-          return __("Check out {$this->getRecord()->name}");
+            assert($this->getRecord() instanceof Asset);
+
+            return __("Check out {$this->getRecord()->name}");
         });
 
         $this->modalSubmitActionLabel(__('Done'));
 
         $this->successNotificationTitle(function () {
-          assert($this->getRecord() instanceof Asset);
-          return __("Successfully checked out {$this->getRecord()->name}");
+            assert($this->getRecord() instanceof Asset);
+
+            return __("Successfully checked out {$this->getRecord()->name}");
         });
 
         $this->schema([
