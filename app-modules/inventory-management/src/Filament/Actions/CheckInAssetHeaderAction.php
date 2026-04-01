@@ -55,11 +55,17 @@ class CheckInAssetHeaderAction extends Action
 
         $this->label(__('Check In'));
 
-        $this->modalHeading(fn () => __("Check in {$this->getRecord()?->name}"));
+        $this->modalHeading(function () {
+            assert($this->getRecord() instanceof Asset);
+            return __("Check in {$this->getRecord()->name}");
+        });
 
         $this->modalSubmitActionLabel(__('Done'));
 
-        $this->successNotificationTitle(fn () => __("Successfully checked in {$this->getRecord()?->name}"));
+        $this->successNotificationTitle(function () {
+            assert($this->getRecord() instanceof Asset);
+            return __("Successfully checked in {$this->getRecord()->name}");
+        });
 
         $this->schema([
             Textarea::make('notes')
