@@ -47,7 +47,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
- * @mixin IdeHelperLoginMagicLink
+ * @mixin IdeHelperOtpLoginCode
  */
 class OtpLoginCode extends Model
 {

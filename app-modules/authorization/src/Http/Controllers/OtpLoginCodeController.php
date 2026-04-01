@@ -38,6 +38,7 @@ namespace AidingApp\Authorization\Http\Controllers;
 
 use AidingApp\Authorization\Models\OtpLoginCode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Illuminate\View\View;
 
 class OtpLoginCodeController
@@ -51,9 +52,13 @@ class OtpLoginCodeController
             message: 'This OTP link has expired or has already been used. Please request a new one.'
         );
 
-        $verifyUrl = route('otp-code.verify', [
-            'otpCode' => $otpCode->getKey(),
-        ]);
+        $verifyUrl = URL::temporarySignedRoute(
+            name: 'otp-code.verify',
+            expiration: $otpCode->created_at->addMinutes(20)->toImmutable(),
+            parameters: [
+                'otpCode' => $otpCode->getKey(),
+            ],
+        );
 
         return view('authorization::otp-entry', [
             'verifyUrl' => $verifyUrl,

@@ -38,6 +38,7 @@ namespace AidingApp\Authorization\Http\Controllers;
 
 use AidingApp\Authorization\Http\Requests\GenerateLoginOtpCodeRequest;
 use AidingApp\Authorization\Models\OtpLoginCode;
+use AidingApp\Authorization\Notifications\OtpCodeNotification;
 use App\Features\OtpCodeLoginFeature;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -107,6 +108,8 @@ class GenerateOtpLoginCodeController
 
             DB::commit();
 
+            $user->notify(new OtpCodeNotification($code));
+
             return response()->json([
                 'link' => URL::temporarySignedRoute(
                     name: 'otp-code.login',
@@ -115,7 +118,6 @@ class GenerateOtpLoginCodeController
                         'otpCode' => $otpCode->getKey(),
                     ]
                 ),
-                'otp' => $code,
             ]);
         } catch (Throwable $exception) {
             DB::rollBack();

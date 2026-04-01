@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,56 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Database\Factories;
+namespace AidingApp\Authorization\Notifications;
 
-use AidingApp\Authorization\Models\OtpLoginCode;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
 use App\Models\User;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\Hash;
-use InvalidArgumentException;
+use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
 
-/**
- * @extends Factory<OtpLoginCode>
- */
-class OtpLoginCodeFactory extends Factory
+class OtpCodeNotification extends Notification
 {
+    use Queueable;
+
+    public function __construct(
+        protected int $code,
+    ) {}
+
     /**
-     * @return array<string, mixed>
+     * @return array<int, string>
      */
-    public function definition(): array
+    public function via(User $notifiable): array
     {
-        return [
-            'code' => Hash::make((string) random_int(100000, 999999)),
-            'user_id' => User::factory(),
-        ];
+        return ['mail'];
     }
 
-    /**
-     * @return Factory<OtpLoginCode>
-     */
-    public function withCode(int $code): Factory
+    public function toMail(User $notifiable): MailMessage
     {
-        if ($code < 100000 || $code > 999999) {
-            throw new InvalidArgumentException('OTP code must be a 6-digit integer between 100000 and 999999.');
-        }
-
-        return $this->state(function (array $attributes) use ($code) {
-            return [
-                'code' => Hash::make((string) $code),
-            ];
-        });
-    }
-
-    /**
-     * @return Factory<OtpLoginCode>
-     */
-    public function used(?Carbon $when = null): Factory
-    {
-        return $this->state(function (array $attributes) use ($when) {
-            return [
-                'used_at' => $when ?? now(),
-            ];
-        });
+        return MailMessage::make()
+            ->subject('Your Login Verification Code')
+            ->greeting('Hello ' . $notifiable->name . ',')
+            ->line('Your one-time login verification code is:')
+            ->line("**{$this->code}**")
+            ->line('This code will expire in 20 minutes.')
+            ->line('If you did not request this code, please ignore this email.');
     }
 }

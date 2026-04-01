@@ -36,13 +36,25 @@
 
 use AidingApp\Authorization\Models\OtpLoginCode;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\assertAuthenticatedAs;
 use function Pest\Laravel\assertGuest;
 use function Pest\Laravel\post;
 
-it('rejects an OTP code that is older than 20 minutes', function () {
-    $code = '123456';
+it('requires a valid signed URL', function () {
+    $code = 123456;
+
+    $otpCode = OtpLoginCode::factory()->withCode($code)->create();
+
+    post(route('otp-code.verify', ['otpCode' => $otpCode->getKey()]), [
+        'code' => (string) $code,
+    ])
+        ->assertForbidden();
+});
+
+it('rejects an expired signed URL', function () {
+    $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->create([
         'created_at' => now()->subMinutes(21),
@@ -50,8 +62,14 @@ it('rejects an OTP code that is older than 20 minutes', function () {
 
     $panel = Filament::getPanel('admin');
 
-    post(route('otp-code.verify', ['otpCode' => $otpCode->getKey()]), [
-        'code' => $code,
+    post(URL::temporarySignedRoute(
+        name: 'otp-code.verify',
+        expiration: $otpCode->created_at->addMinutes(20)->toImmutable(),
+        parameters: [
+            'otpCode' => $otpCode->getKey(),
+        ],
+    ), [
+        'code' => (string) $code,
     ])
         ->assertForbidden();
 
@@ -59,14 +77,20 @@ it('rejects an OTP code that is older than 20 minutes', function () {
 });
 
 it('rejects an OTP code that has already been used', function () {
-    $code = '123456';
+    $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->used()->create();
 
     $panel = Filament::getPanel('admin');
 
-    post(route('otp-code.verify', ['otpCode' => $otpCode->getKey()]), [
-        'code' => $code,
+    post(URL::temporarySignedRoute(
+        name: 'otp-code.verify',
+        expiration: now()->addMinutes(20)->toImmutable(),
+        parameters: [
+            'otpCode' => $otpCode->getKey(),
+        ],
+    ), [
+        'code' => (string) $code,
     ])
         ->assertForbidden();
 
@@ -76,19 +100,29 @@ it('rejects an OTP code that has already been used', function () {
 it('requires the code field', function () {
     $otpCode = OtpLoginCode::factory()->create();
 
-    post(route('otp-code.verify', ['otpCode' => $otpCode->getKey()]), [
-        'code' => null,
-    ])
+    post(URL::temporarySignedRoute(
+        name: 'otp-code.verify',
+        expiration: now()->addMinutes(20)->toImmutable(),
+        parameters: [
+            'otpCode' => $otpCode->getKey(),
+        ],
+    ), [])
         ->assertInvalid(['code' => 'required']);
 });
 
-it('requires the code to be exactly 6 digits', function (string $code, string $error) {
+it('requires the code to be exactly 6 digits', function (string $invalidCode, string $rule) {
     $otpCode = OtpLoginCode::factory()->create();
 
-    post(route('otp-code.verify', ['otpCode' => $otpCode->getKey()]), [
-        'code' => $code,
+    post(URL::temporarySignedRoute(
+        name: 'otp-code.verify',
+        expiration: now()->addMinutes(20)->toImmutable(),
+        parameters: [
+            'otpCode' => $otpCode->getKey(),
+        ],
+    ), [
+        'code' => $invalidCode,
     ])
-        ->assertInvalid(['code' => $error]);
+        ->assertInvalid(['code' => $rule]);
 })
     ->with([
         'too short' => ['12345', 'digits'],
@@ -97,17 +131,23 @@ it('requires the code to be exactly 6 digits', function (string $code, string $e
     ]);
 
 it('returns an error when the OTP code is incorrect', function () {
-    $code = '123456';
+    $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->create();
 
     $panel = Filament::getPanel('admin');
 
-    post(route('otp-code.verify', ['otpCode' => $otpCode->getKey()]), [
+    post(URL::temporarySignedRoute(
+        name: 'otp-code.verify',
+        expiration: now()->addMinutes(20)->toImmutable(),
+        parameters: [
+            'otpCode' => $otpCode->getKey(),
+        ],
+    ), [
         'code' => '654321',
     ])
         ->assertRedirect()
-        ->assertSessionHasErrors(['code' => 'The OTP code you entered is incorrect. Please try again.']);
+        ->assertSessionHasErrors(['code']);
 
     assertGuest($panel->getAuthGuard());
 
@@ -117,33 +157,41 @@ it('returns an error when the OTP code is incorrect', function () {
 });
 
 it('logs in the user and redirects to the admin panel home with a valid code', function () {
-    $code = '123456';
+    $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->create();
 
     $panel = Filament::getPanel('admin');
 
-    post(route('otp-code.verify', ['otpCode' => $otpCode->getKey()]), [
-        'code' => $code,
+    post(URL::temporarySignedRoute(
+        name: 'otp-code.verify',
+        expiration: now()->addMinutes(20)->toImmutable(),
+        parameters: [
+            'otpCode' => $otpCode->getKey(),
+        ],
+    ), [
+        'code' => (string) $code,
     ])
         ->assertRedirect($panel->getHomeUrl());
 
     assertAuthenticatedAs($otpCode->user, $panel->getAuthGuard());
-
-    $otpCode->refresh();
-
-    expect($otpCode->used_at)->not->toBeNull();
 });
 
 it('marks the OTP code as used after successful verification', function () {
-    $code = '999999';
+    $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->create();
 
     expect($otpCode->used_at)->toBeNull();
 
-    post(route('otp-code.verify', ['otpCode' => $otpCode->getKey()]), [
-        'code' => $code,
+    post(URL::temporarySignedRoute(
+        name: 'otp-code.verify',
+        expiration: now()->addMinutes(20)->toImmutable(),
+        parameters: [
+            'otpCode' => $otpCode->getKey(),
+        ],
+    ), [
+        'code' => (string) $code,
     ])
         ->assertRedirect();
 
@@ -152,16 +200,44 @@ it('marks the OTP code as used after successful verification', function () {
     expect($otpCode->used_at)->not->toBeNull();
 });
 
+it('does not mark the OTP code as used when the wrong code is entered', function () {
+    $code = 123456;
+
+    $otpCode = OtpLoginCode::factory()->withCode($code)->create();
+
+    post(URL::temporarySignedRoute(
+        name: 'otp-code.verify',
+        expiration: now()->addMinutes(20)->toImmutable(),
+        parameters: [
+            'otpCode' => $otpCode->getKey(),
+        ],
+    ), [
+        'code' => '654321',
+    ]);
+
+    $otpCode->refresh();
+
+    expect($otpCode->used_at)->toBeNull();
+});
+
 it('prevents reuse of an OTP code after successful verification', function () {
-    $code = '123456';
+    $code = 123456;
 
     $otpCode = OtpLoginCode::factory()->withCode($code)->create();
 
     $panel = Filament::getPanel('admin');
 
+    $signedUrl = URL::temporarySignedRoute(
+        name: 'otp-code.verify',
+        expiration: now()->addMinutes(20)->toImmutable(),
+        parameters: [
+            'otpCode' => $otpCode->getKey(),
+        ],
+    );
+
     // First verification should succeed
-    post(route('otp-code.verify', ['otpCode' => $otpCode->getKey()]), [
-        'code' => $code,
+    post($signedUrl, [
+        'code' => (string) $code,
     ])
         ->assertRedirect($panel->getHomeUrl());
 
@@ -170,9 +246,9 @@ it('prevents reuse of an OTP code after successful verification', function () {
     // Log out to test reuse
     auth()->guard($panel->getAuthGuard())->logout();
 
-    // Second verification should be rejected
-    post(route('otp-code.verify', ['otpCode' => $otpCode->getKey()]), [
-        'code' => $code,
+    // Second verification should be rejected because used_at is now set
+    post($signedUrl, [
+        'code' => (string) $code,
     ])
         ->assertForbidden();
 
