@@ -78,10 +78,19 @@ class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
 
                                 assert(! is_null($currentTenantDomain));
 
-                                return explode('.', $currentTenantDomain)[0] . '-';
+                                return Tenant::current()->getSubdomain() . '-sr-';
                             })
                             ->suffix(fn () => '@' . Config::string('mail.from.root_domain'))
                             ->required()
+                            ->maxLength(function () {
+                                $subdomain = Tenant::current()->getSubdomain();
+
+                                // SES local part limit is 64 chars: {subdomain}-sr-{typedomain}
+                                return 64 - mb_strlen($subdomain) - mb_strlen('-sr-');
+                            })
+                            ->validationMessages([
+                                'max' => 'The domain must not exceed :max characters to stay within the email local part limit.',
+                            ])
                             ->visible(fn (Get $get): bool => $get('is_email_automatic_creation_enabled'))
                             ->columnSpan(1),
                         Select::make('email_automatic_creation_priority_id')

@@ -42,6 +42,7 @@ use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 /**
@@ -59,6 +60,7 @@ class EmailMessage extends BaseModel implements Message
         'quota_usage',
         'recipient_id',
         'recipient_type',
+        'outbound_message_id',
     ];
 
     protected $casts = [
@@ -95,5 +97,13 @@ class EmailMessage extends BaseModel implements Message
     public function events(): HasMany
     {
         return $this->hasMany(EmailMessageEvent::class);
+    }
+
+    /**
+     * @return HasOne<OutboundEmailMessageId, $this>
+     */
+    public function outboundEmailMessageId(): HasOne
+    {
+        return $this->hasOne(OutboundEmailMessageId::class, 'message_id', 'outbound_message_id');
     }
 }

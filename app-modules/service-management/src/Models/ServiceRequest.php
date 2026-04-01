@@ -40,6 +40,7 @@ use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
+use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
@@ -58,6 +59,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
@@ -196,6 +198,14 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     public function serviceRequestUpdates(): HasMany
     {
         return $this->hasMany(ServiceRequestUpdate::class, 'service_request_id');
+    }
+
+    /**
+     * @return MorphMany<OutboundEmailMessageId, $this>
+     */
+    public function outboundEmailMessageIds(): MorphMany
+    {
+        return $this->morphMany(OutboundEmailMessageId::class, 'trackable');
     }
 
     /**

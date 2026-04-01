@@ -47,6 +47,7 @@ use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use App\Models\NotificationSetting;
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -89,9 +90,14 @@ class EngagementNotification extends Notification implements ShouldQueue, HasBef
             ->greeting("Hello {$this->engagement->recipient->display_name}!")
             ->content($this->engagement->getBody());
 
-        if (app(SesSettings::class)->dynamic_engagements === true) {
-            $mail->from(config('mail.from.address'), $this->engagement->user->name);
-        }
+        $tenant = Tenant::current();
+
+        $mail->from(
+            $tenant->getSubdomain() . '-msg@' . config('mail.from.root_domain'),
+            app(SesSettings::class)->dynamic_engagements === true
+                ? $this->engagement->user->name
+                : config('mail.from.name'),
+        );
 
         return $mail;
     }

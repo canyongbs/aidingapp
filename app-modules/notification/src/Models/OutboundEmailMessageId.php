@@ -34,56 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace AidingApp\Notification\Models;
 
-use App\Multitenancy\DataTransferObjects\TenantConfig;
-use App\Settings\DisplaySettings;
-use Database\Factories\TenantFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
-use Spatie\Multitenancy\Models\Tenant as SpatieTenant;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
-/**
- * @property TenantConfig $config
- *
- * @mixin IdeHelperTenant
- */
-class Tenant extends SpatieTenant
+class OutboundEmailMessageId extends Model
 {
-    use UsesLandlordConnection;
     use HasUuids;
-    use SoftDeletes;
-
-    /** @use HasFactory<TenantFactory> */
-    use HasFactory;
+    use UsesTenantConnection;
 
     protected $fillable = [
-        'name',
-        'domain',
-        'config',
-        'setup_complete',
+        'message_id',
     ];
 
-    protected $casts = [
-        'setup_complete' => 'boolean',
-        'config' => TenantConfig::class . ':encrypted',
-    ];
-
-    public function getTimezone(): string
+    /**
+     * @return BelongsTo<EmailMessage, $this>
+     */
+    public function emailMessage(): BelongsTo
     {
-        if (filled($settingsTimezone = app(DisplaySettings::class)->timezone)) {
-            return $settingsTimezone;
-        }
-
-        return config('app.timezone');
+        return $this->belongsTo(EmailMessage::class, 'message_id', 'outbound_message_id');
     }
 
-    public function getSubdomain(): string
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function trackable(): MorphTo
     {
-        preg_match('/^(.+)\.[^.]+\.[^.]+$/', $this->domain, $matches);
-
-        return $matches[1];
+        return $this->morphTo();
     }
 }

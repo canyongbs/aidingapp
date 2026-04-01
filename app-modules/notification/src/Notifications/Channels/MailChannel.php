@@ -46,6 +46,7 @@ use AidingApp\Notification\Models\StoredAnonymousNotifiable;
 use AidingApp\Notification\Notifications\Attributes\SystemNotification;
 use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
+use AidingApp\Notification\Notifications\Contracts\HasOutboundMailCustomization;
 use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
 use App\Models\Tenant;
 use App\Models\User;
@@ -122,6 +123,10 @@ class MailChannel extends BaseMailChannel
                             ]),
                         );
                     });
+
+                if ($notification instanceof HasOutboundMailCustomization) {
+                    $notification->customizeOutboundMail($message, $emailMessage, $notifiable);
+                }
 
                 $quotaUsage = $isSystemNotification ? 0 : $this->determineQuotaUsage($message, $emailMessage);
 

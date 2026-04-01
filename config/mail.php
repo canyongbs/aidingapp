@@ -101,7 +101,7 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'no-reply@aiding.app'),
+        'address' => env('MAIL_FROM_ADDRESS', 'noreply@mail.aiding.app'),
         'name' => env('MAIL_FROM_NAME', 'Aiding App™'),
         'root_domain' => env('MAIL_ROOT_DOMAIN', 'mail.aiding.app'),
     ],

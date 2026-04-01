@@ -43,10 +43,12 @@ use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\Contracts\Message;
 use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
+use AidingApp\Notification\Notifications\Contracts\HasOutboundMailCustomization;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
+use AidingApp\ServiceManagement\Notifications\Concerns\SetsServiceRequestEmailHeaders;
 use App\Models\NotificationSetting;
 use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
@@ -54,10 +56,11 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification;
 
-class SendClosedServiceFeedbackNotification extends Notification implements ShouldQueue, HasBeforeSendHook, HasAfterSendHook
+class SendClosedServiceFeedbackNotification extends Notification implements ShouldQueue, HasBeforeSendHook, HasAfterSendHook, HasOutboundMailCustomization
 {
     use Queueable;
     use HandlesServiceRequestTemplateContent;
+    use SetsServiceRequestEmailHeaders;
 
     protected bool $isReminder = false;
 
@@ -127,11 +130,18 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
                 'survey_sent_at' => now(),
             ]);
         }
+
+        $this->afterSendServiceRequestEmailThreading($notifiable, $message, $result);
     }
 
     public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
     {
         $message->related()->associate($this->serviceRequest);
+    }
+
+    protected function getServiceRequest(): ServiceRequest
+    {
+        return $this->serviceRequest;
     }
 
     private function resolveNotificationSetting(object $notifiable): ?NotificationSetting

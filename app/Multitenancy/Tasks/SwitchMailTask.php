@@ -52,10 +52,8 @@ use Spatie\Multitenancy\Tasks\SwitchTenantTask;
 class SwitchMailTask implements SwitchTenantTask
 {
     public function __construct(
-        protected ?string $originalFromAddress = null,
         protected ?string $originalFromName = null,
     ) {
-        $this->originalFromAddress ??= config('mail.from.address');
         $this->originalFromName ??= config('mail.from.name');
     }
 
@@ -68,12 +66,7 @@ class SwitchMailTask implements SwitchTenantTask
 
         $config = $tenant->config->mail;
 
-        preg_match('/^(.+)\.[^.]+\.[^.]+$/', $tenant->domain, $matches);
-
-        $subDomainBasedEmail = $matches[1] . '@' . config('mail.from.root_domain');
-
         $this->setMailConfig(
-            fromAddress: $subDomainBasedEmail,
             fromName: $config->fromName,
         );
     }
@@ -81,20 +74,16 @@ class SwitchMailTask implements SwitchTenantTask
     public function forgetCurrent(): void
     {
         $this->setMailConfig(
-            fromAddress: $this->originalFromAddress,
             fromName: $this->originalFromName,
         );
     }
 
     protected function setMailConfig(
-        ?string $fromAddress = null,
         ?string $fromName = null,
     ): void {
         config(
             [
-                'mail.from.address' => $fromAddress,
                 'mail.from.name' => $fromName,
-                'health.notifications.mail.from.address' => $fromAddress,
                 'health.notifications.mail.from.name' => $fromName,
             ]
         );
