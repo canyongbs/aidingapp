@@ -34,33 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+use App\Models\Tenant;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
+it('extracts subdomain from a standard three-part domain', function () {
+    $tenant = Tenant::query()->firstOrFail();
 
-/**
- * @extends Factory<ServiceRequest>
- */
-class ServiceRequestFactory extends Factory
-{
-    public function definition(): array
-    {
-        return [
-            'respondent_id' => Contact::factory(),
-            'service_request_number' => app(ServiceRequestNumberGenerator::class)->generate(),
-            'title' => str($this->faker->words(asText: true))->headline()->toString(),
-            'close_details' => $this->faker->sentence(),
-            'division_id' => Division::inRandomOrder()->first()->id ?? Division::factory(),
-            'status_id' => ServiceRequestStatus::inRandomOrder()->first() ?? ServiceRequestStatus::factory(),
-            'priority_id' => ServiceRequestPriority::inRandomOrder()->first() ?? ServiceRequestPriority::factory(),
-            'created_by_id' => User::factory(),
-        ];
-    }
-}
+    // Test tenant has domain 'test.aidingapp.local'
+    expect($tenant->getSubdomain())->toBe('test');
+});
+
+it('extracts subdomain from a two-level TLD domain', function () {
+    $tenant = Tenant::factory()->make([
+        'domain' => 'mycampus.example.com',
+    ]);
+
+    expect($tenant->getSubdomain())->toBe('mycampus');
+});
+
+it('extracts multi-level subdomain correctly', function () {
+    $tenant = Tenant::factory()->make([
+        'domain' => 'a.b.example.com',
+    ]);
+
+    expect($tenant->getSubdomain())->toBe('a.b');
+});
