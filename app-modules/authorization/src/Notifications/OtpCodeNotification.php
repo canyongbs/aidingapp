@@ -36,11 +36,13 @@
 
 namespace AidingApp\Authorization\Notifications;
 
+use AidingApp\Notification\Notifications\Attributes\SystemNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
 
+#[SystemNotification]
 class OtpCodeNotification extends Notification
 {
     use Queueable;

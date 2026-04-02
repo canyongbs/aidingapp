@@ -42,6 +42,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\Response;
 use Throwable;
 
 class VerifyOtpLoginCodeController
@@ -49,12 +50,18 @@ class VerifyOtpLoginCodeController
     /**
      * @throws Throwable
      */
-    public function __invoke(Request $request, OtpLoginCode $otpCode): RedirectResponse
+    public function __invoke(Request $request, OtpLoginCode $otpCode): RedirectResponse|Response
     {
+      if ($request->getMethod() === 'HEAD') {
+            // Protection against link scanning bots, like Microsoft Outlook.
+            return response()->noContent();
+        }
+
         abort_if(
-            boolean: $otpCode->used_at !== null,
+            boolean: now()->greaterThanOrEqualTo($otpCode->created_at->addMinutes(20))
+                || $otpCode->used_at !== null,
             code: 403,
-            message: 'This OTP code has already been used. Please request a new one.'
+            message: 'This OTP code has already been used or has expired. Please request a new one.'
         );
 
         $request->validate([

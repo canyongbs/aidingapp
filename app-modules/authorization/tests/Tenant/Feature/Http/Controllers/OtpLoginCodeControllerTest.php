@@ -37,6 +37,7 @@
 use AidingApp\Authorization\Models\OtpLoginCode;
 use Illuminate\Support\Facades\URL;
 
+use function Pest\Laravel\freezeTime;
 use function Pest\Laravel\get;
 
 it('requires a valid signed URL', function () {
@@ -91,35 +92,39 @@ it('renders the OTP entry view for a valid OTP code', function () {
         ->assertViewHas('verifyUrl');
 });
 
-it('allows an OTP code that is exactly at the 20 minute boundary', function () {
-    $otpCode = OtpLoginCode::factory()->create([
-        'created_at' => now()->subMinutes(20),
-    ]);
+it('rejects an OTP code that is exactly at the 20 minute boundary', function () {
+    freezeTime(function () {
+        $otpCode = OtpLoginCode::factory()->create([
+            'created_at' => now()->subMinutes(20),
+        ]);
 
-    get(URL::temporarySignedRoute(
-        name: 'otp-code.login',
-        expiration: now()->addMinutes(20)->toImmutable(),
-        parameters: [
-            'otpCode' => $otpCode->getKey(),
-        ],
-    ))
-        ->assertForbidden();
+        get(URL::temporarySignedRoute(
+            name: 'otp-code.login',
+            expiration: now()->addMinutes(20)->toImmutable(),
+            parameters: [
+                'otpCode' => $otpCode->getKey(),
+            ],
+        ))
+            ->assertForbidden();
+    });
 });
 
 it('allows an OTP code that is just under 20 minutes old', function () {
-    $otpCode = OtpLoginCode::factory()->create([
-        'created_at' => now()->subMinutes(19)->subSeconds(59),
-    ]);
+    freezeTime(function () {
+        $otpCode = OtpLoginCode::factory()->create([
+            'created_at' => now()->subMinutes(19)->subSeconds(59),
+        ]);
 
-    get(URL::temporarySignedRoute(
-        name: 'otp-code.login',
-        expiration: now()->addMinutes(20)->toImmutable(),
-        parameters: [
-            'otpCode' => $otpCode->getKey(),
-        ],
-    ))
-        ->assertOk()
-        ->assertViewIs('authorization::otp-entry');
+        get(URL::temporarySignedRoute(
+            name: 'otp-code.login',
+            expiration: now()->addMinutes(20)->toImmutable(),
+            parameters: [
+                'otpCode' => $otpCode->getKey(),
+            ],
+        ))
+            ->assertOk()
+            ->assertViewIs('authorization::otp-entry');
+    });
 });
 
 it('does not mark the OTP code as used when viewing the entry page', function () {
