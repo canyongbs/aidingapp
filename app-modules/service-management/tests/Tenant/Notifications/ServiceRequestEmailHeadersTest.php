@@ -213,11 +213,11 @@ describe('Full notification send flow', function () {
 
         $tenant = Tenant::current();
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::withoutEvents(fn () => ServiceRequest::factory()->create());
 
         $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
 
-        $serviceRequest->respondent->notify($notification);
+        $serviceRequest->respondent->notifyNow($notification);
 
         $expectedAddress = $tenant->getServiceRequestFromAddress();
 
@@ -234,11 +234,11 @@ describe('Full notification send flow', function () {
 
         $tenant = Tenant::current();
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::withoutEvents(fn () => ServiceRequest::factory()->create());
 
         $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
 
-        $serviceRequest->respondent->notify($notification);
+        $serviceRequest->respondent->notifyNow($notification);
 
         $expectedAddress = $tenant->getServiceRequestFromAddress();
 
@@ -253,11 +253,11 @@ describe('Full notification send flow', function () {
     it('sets a custom Message-ID containing the service request number on the actual outgoing email', function () {
         Event::fake([MessageSending::class]);
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::withoutEvents(fn () => ServiceRequest::factory()->create());
 
         $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
 
-        $serviceRequest->respondent->notify($notification);
+        $serviceRequest->respondent->notifyNow($notification);
 
         $rootDomain = config('mail.from.root_domain');
 
@@ -278,7 +278,7 @@ describe('Full notification send flow', function () {
     it('includes a References header with prior message IDs on the actual outgoing email', function () {
         Event::fake([MessageSending::class]);
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::withoutEvents(fn () => ServiceRequest::factory()->create());
 
         $serviceRequest->outboundEmailMessageIds()->create([
             'message_id' => 'SR-FIRST.1.1000@mail.aiding.app',
@@ -290,7 +290,7 @@ describe('Full notification send flow', function () {
 
         $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
 
-        $serviceRequest->respondent->notify($notification);
+        $serviceRequest->respondent->notifyNow($notification);
 
         Event::assertDispatched(MessageSending::class, function (MessageSending $event) {
             $referencesHeader = $event->message->getHeaders()->get('References');
@@ -307,11 +307,11 @@ describe('Full notification send flow', function () {
     });
 
     it('creates an OutboundEmailMessageId record after a successful send', function () {
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::withoutEvents(fn () => ServiceRequest::factory()->create());
 
         $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
 
-        $serviceRequest->respondent->notify($notification);
+        $serviceRequest->respondent->notifyNow($notification);
 
         expect(OutboundEmailMessageId::count())->toBe(1);
 
@@ -328,7 +328,7 @@ describe('Full notification send flow', function () {
 
         ServiceRequestEmailThreading::deactivate();
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::withoutEvents(fn () => ServiceRequest::factory()->create());
 
         $serviceRequest->outboundEmailMessageIds()->create([
             'message_id' => 'SR-FIRST.1.1000@mail.aiding.app',
@@ -336,7 +336,7 @@ describe('Full notification send flow', function () {
 
         $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
 
-        $serviceRequest->respondent->notify($notification);
+        $serviceRequest->respondent->notifyNow($notification);
 
         $tenant = Tenant::current();
         $expectedAddress = $tenant->getServiceRequestFromAddress();
