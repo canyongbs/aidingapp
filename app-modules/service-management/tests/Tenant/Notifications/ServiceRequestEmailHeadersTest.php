@@ -45,6 +45,10 @@ use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Facades\Event;
 
 describe('Unit-level customizeOutboundMail', function () {
+    beforeEach(function () {
+        ServiceRequestEmailThreading::activate();
+    });
+
     it('sets the from address to the tenant SR address', function () {
         $tenant = Tenant::current();
 
@@ -200,6 +204,10 @@ describe('Unit-level customizeOutboundMail', function () {
 });
 
 describe('Full notification send flow', function () {
+    beforeEach(function () {
+        ServiceRequestEmailThreading::activate();
+    });
+
     it('sets the from address on the actual outgoing email', function () {
         Event::fake([MessageSending::class]);
 
