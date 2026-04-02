@@ -110,7 +110,8 @@ class BulkDraftWithAiAction extends Action
                             The subject line can not use Markdown formatting, it is plain text.
                             Do not ever mention in your response that the answer is being formatted/rendered in Markdown.
 
-                            You should never include a signature in your response, the user will add that themselves.
+                            You should never include an email signature in your response, a users will add their own signature
+                            when they send the email.
 
                             You may use merge tags to insert dynamic data about the contact in the body of the email, but these do not work in the subject line:
                             {$mergeTagsList}
