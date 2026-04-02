@@ -54,7 +54,7 @@ it('sets the from address to the tenant engagement address', function () {
 
     $mailMessage = $notification->toMail($engagement->recipient);
 
-    $expectedAddress = $tenant->getSubdomain() . '-msg@' . config('mail.from.root_domain');
+    $expectedAddress = $tenant->getEngagementFromAddress();
 
     expect($mailMessage->from[0])->toBe($expectedAddress);
 });

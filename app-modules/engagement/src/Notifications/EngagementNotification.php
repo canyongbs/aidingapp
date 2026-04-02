@@ -93,7 +93,7 @@ class EngagementNotification extends Notification implements ShouldQueue, HasBef
         $tenant = Tenant::current();
 
         $mail->from(
-            $tenant->getSubdomain() . '-msg@' . config('mail.from.root_domain'),
+            $tenant->getEngagementFromAddress(),
             app(SesSettings::class)->dynamic_engagements === true
                 ? $this->engagement->user->name
                 : config('mail.from.name'),

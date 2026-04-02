@@ -86,4 +86,14 @@ class Tenant extends SpatieTenant
 
         return $matches[1];
     }
+
+    public function getEngagementFromAddress(): string
+    {
+        return $this->getSubdomain() . '-msg@' . config('mail.from.root_domain');
+    }
+
+    public function getServiceRequestFromAddress(): string
+    {
+        return $this->getSubdomain() . '-sr@' . config('mail.from.root_domain');
+    }
 }

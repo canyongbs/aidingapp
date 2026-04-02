@@ -55,7 +55,7 @@ it('sets the from address to the tenant SR address', function () {
 
     $notification->customizeOutboundMail($mailMessage, $emailMessage, $serviceRequest->respondent);
 
-    $expectedAddress = $tenant->getSubdomain() . '-sr@' . config('mail.from.root_domain');
+    $expectedAddress = $tenant->getServiceRequestFromAddress();
 
     expect($mailMessage->from[0])->toBe($expectedAddress)
         ->and($mailMessage->from[1])->toBe(config('mail.from.name'));
@@ -74,7 +74,7 @@ it('sets the reply-to address to the tenant SR address', function () {
 
     $notification->customizeOutboundMail($mailMessage, $emailMessage, $serviceRequest->respondent);
 
-    $expectedAddress = $tenant->getSubdomain() . '-sr@' . config('mail.from.root_domain');
+    $expectedAddress = $tenant->getServiceRequestFromAddress();
 
     expect($mailMessage->replyTo)->toHaveCount(1)
         ->and($mailMessage->replyTo[0][0])->toBe($expectedAddress);
@@ -182,7 +182,7 @@ it('does not set custom Message-ID or References when feature flag is disabled',
 
     // From and reply-to should still be set
     $tenant = Tenant::current();
-    $expectedAddress = $tenant->getSubdomain() . '-sr@' . config('mail.from.root_domain');
+    $expectedAddress = $tenant->getServiceRequestFromAddress();
 
     expect($mailMessage->from[0])->toBe($expectedAddress)
         ->and($emailMessage->outbound_message_id)->toBeNull();

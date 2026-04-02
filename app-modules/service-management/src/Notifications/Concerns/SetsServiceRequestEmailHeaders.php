@@ -56,7 +56,7 @@ trait SetsServiceRequestEmailHeaders
         object $notifiable
     ): void {
         $tenant = Tenant::current();
-        $srFromAddress = $tenant->getSubdomain() . '-sr@' . config('mail.from.root_domain');
+        $srFromAddress = $tenant->getServiceRequestFromAddress();
 
         $mailMessage->from($srFromAddress, config('mail.from.name'));
         $mailMessage->replyTo($srFromAddress);
