@@ -38,30 +38,15 @@ namespace AidingApp\Engagement\Filament\Actions;
 
 use AidingApp\Engagement\Actions\CreateEngagement;
 use AidingApp\Engagement\DataTransferObjects\EngagementCreationData;
-use AidingApp\Engagement\Models\EmailTemplate;
+use AidingApp\Engagement\Filament\Schemas\EngagementFields;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Notification\Enums\NotificationChannel;
-use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
-use Filament\Forms\Components\Checkbox;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Fieldset;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Str;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class RelationManagerSendEngagementAction extends CreateAction
 {
@@ -79,115 +64,21 @@ class RelationManagerSendEngagementAction extends CreateAction
 
                 return auth()->user()->can('create', [Engagement::class, null]);
             })
-            ->form(fn (Schema $schema) => $schema->components([
+            ->schema(fn (Schema $schema) => $schema->components([
                 Fieldset::make('Content')
-                    ->schema([
-                        TextInput::make('subject')
-                            ->autofocus()
-                            ->required()
-                            ->placeholder(__('Subject'))
-                            ->columnSpanFull(),
-                        RichEditor::make('body')
-                            ->label('Body')
-                            ->fileAttachmentsDisk('s3-public')
-                            ->toolbarButtons([
-                                ['bold', 'italic', 'link'],
-                                [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])->textualButtons(), 'bulletList', 'orderedList', 'horizontalRule'],
-                                ['textColor', 'small'],
-                                ['attachFiles', 'mergeTags'],
-                                ['clearFormatting'],
-                                ['undo', 'redo'],
-                            ])
-                            ->activePanel('mergeTags')
-                            ->resizableImages()
-                            ->required()
-                            ->hintAction(fn (RichEditor $component) => Action::make('loadEmailTemplate')
-                                ->schema([
-                                    Select::make('emailTemplate')
-                                        ->searchable()
-                                        ->options(function (Get $get): array {
-                                            return EmailTemplate::query()
-                                                ->when(
-                                                    $get('onlyMyTemplates'),
-                                                    fn (Builder $query) => $query->whereBelongsTo(auth()->user())
-                                                )
-                                                ->orderBy('name')
-                                                ->limit(50)
-                                                ->pluck('name', 'id')
-                                                ->toArray();
-                                        })
-                                        ->getSearchResultsUsing(function (Get $get, string $search): array {
-                                            $search = Str::lower($search);
-
-                                            return EmailTemplate::query()
-                                                ->when(
-                                                    $get('onlyMyTemplates'),
-                                                    fn (Builder $query) => $query->whereBelongsTo(auth()->user())
-                                                )
-                                                ->when(
-                                                    $get('onlyMyTeamTemplates'),
-                                                    fn (Builder $query) => $query->whereIn('user_id', auth()->user()->team->users->pluck('id'))
-                                                )
-                                                ->where(new Expression('lower(name)'), 'like', "%{$search}%")
-                                                ->orderBy('name')
-                                                ->limit(50)
-                                                ->pluck('name', 'id')
-                                                ->toArray();
-                                        })
-                                        ->getOptionLabelUsing(fn (string $value): ?string => EmailTemplate::find($value)?->name),
-                                    Checkbox::make('onlyMyTemplates')
-                                        ->label('Only show my templates')
-                                        ->live()
-                                        ->afterStateUpdated(fn (Set $set) => $set('emailTemplate', null)),
-                                    Checkbox::make('onlyMyTeamTemplates')
-                                        ->label("Only show my team's templates")
-                                        ->live()
-                                        ->afterStateUpdated(fn (Set $set) => $set('emailTemplate', null)),
-                                ])
-                                ->action(function (array $data) use ($component) {
-                                    $template = EmailTemplate::find($data['emailTemplate']);
-
-                                    if (! $template instanceof EmailTemplate) {
-                                        throw new Exception('template is not instance of EmailTemplate');
-                                    }
-
-                                    $component->state($template->content);
-                                }))
-                            ->getFileAttachmentUrlFromAnotherRecordUsing(function (mixed $file): ?string {
-                                return Media::query()
-                                    ->where('uuid', $file)
-                                    ->where('model_type', (new EmailTemplate())->getMorphClass())
-                                    ->first()
-                                    ?->getUrl();
-                            })
-                            ->saveFileAttachmentFromAnotherRecordUsing(function (mixed $file, Engagement $record): ?string {
-                                return Media::query()
-                                    ->where('uuid', $file)
-                                    ->where('model_type', (new EmailTemplate())->getMorphClass())
-                                    ->first()
-                                    ?->copy($record, 'body', 's3-public')
-                                    ->uuid;
-                            })
-                            ->helperText('You can insert recipient or your information by typing {{ and choosing a merge value to insert.')
-                            ->columnSpanFull()
-                            ->json(),
-                        Actions::make([
+                    ->schema(
+                        EngagementFields::getContentSchema(
                             RelationManagerDraftWithAiAction::make()
                                 ->mergeTags([
                                     'contact full name',
                                     'contact email',
-                                ]),
-                        ]),
-                    ]),
+                                ])
+                        )
+                    ),
                 Fieldset::make('Send your email')
-                    ->schema([
-                        Toggle::make('send_later')
-                            ->reactive()
-                            ->helperText('By default, this email will send as soon as it is created unless you schedule it to send later.'),
-                        DateTimePicker::make('scheduled_at')
-                            ->required()
-                            ->visible(fn (Get $get) => $get('send_later')),
-                    ]),
+                    ->schema(
+                        EngagementFields::getScheduleSchema('By default, this email will send as soon as it is created unless you schedule it to send later.')
+                    ),
             ]))
             ->action(function (array $data, Schema $schema, RelationManager $livewire) {
                 $data['body'] ??= ['type' => 'doc', 'content' => []];
