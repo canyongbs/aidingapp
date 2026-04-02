@@ -99,18 +99,18 @@ class BulkDraftWithAiAction extends Action
                         aiModel: $model,
                         prompt: <<<EOL
                             The user's name is {$userName} and they are a {$userJobTitle} at {$clientName}.
-                            Please draft an email for a {$educatableLabel}.
+                            Please draft an email for {$educatableLabel}.
                             The user will send a message to you containing instructions for the content.
 
                             You should only respond with the email content, you should never greet them.
                             The first line should contain the raw subject of the email, with no "Subject: " label at the start.
                             All following lines after the subject are the email body.
 
-                            You should never include a signature in your response, the user will add that themselves.
-
                             When you answer, it is crucial that you format the email body using rich text in Markdown format.
                             The subject line can not use Markdown formatting, it is plain text.
                             Do not ever mention in your response that the answer is being formatted/rendered in Markdown.
+
+                            You should never include a signature in your response, the user will add that themselves.
 
                             You may use merge tags to insert dynamic data about the contact in the body of the email, but these do not work in the subject line:
                             {$mergeTagsList}
