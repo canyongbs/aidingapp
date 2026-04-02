@@ -31,6 +31,11 @@ use AidingApp\Engagement\Models\EngagementFile;
 use AidingApp\Engagement\Models\EngagementFileEntities;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
+use AidingApp\Form\Models\Submissible;
+use AidingApp\Form\Models\SubmissibleAuthentication;
+use AidingApp\Form\Models\SubmissibleField;
+use AidingApp\Form\Models\SubmissibleStep;
+use AidingApp\Form\Models\Submission;
 use AidingApp\IntegrationOpenAi\Models\OpenAiVectorStore;
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
@@ -105,6 +110,7 @@ use AidingApp\Team\Models\Team;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Webhook\Models\InboundWebhook;
 use AidingApp\Webhook\Models\LandlordInboundWebhook;
+use App\Models\BaseModel;
 use App\Models\Export;
 use App\Models\FailedImportRow;
 use App\Models\HealthCheckResultHistoryItem;
@@ -278,4 +284,10 @@ return [
     Tag::class,
     Tenant::class,
     User::class,
+    BaseModel::class,
+    Submissible::class,
+    SubmissibleField::class,
+    Submission::class,
+    SubmissibleAuthentication::class,
+    SubmissibleStep::class,
 ];
