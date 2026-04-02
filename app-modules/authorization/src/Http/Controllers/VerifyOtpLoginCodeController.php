@@ -40,9 +40,9 @@ use AidingApp\Authorization\Models\OtpLoginCode;
 use Filament\Facades\Filament;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Http\Response;
 use Throwable;
 
 class VerifyOtpLoginCodeController
@@ -52,7 +52,7 @@ class VerifyOtpLoginCodeController
      */
     public function __invoke(Request $request, OtpLoginCode $otpCode): RedirectResponse|Response
     {
-      if ($request->getMethod() === 'HEAD') {
+        if ($request->getMethod() === 'HEAD') {
             // Protection against link scanning bots, like Microsoft Outlook.
             return response()->noContent();
         }
