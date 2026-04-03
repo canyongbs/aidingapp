@@ -57,6 +57,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
@@ -158,7 +159,7 @@ class ListKnowledgeBaseItems extends ListRecords
                                 fn (Builder $query, $date): Builder => $query->whereDate('updated_at', '>=', $date),
                             );
                     }),
-            ])
+            ], layout: FiltersLayout::BeforeContent)
             ->recordActions([
                 EditAction::make(),
                 ReplicateAction::make()
