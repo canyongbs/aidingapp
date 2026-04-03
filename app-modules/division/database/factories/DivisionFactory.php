@@ -57,6 +57,9 @@ class DivisionFactory extends Factory
         ];
     }
 
+    /**
+     * @return Factory<Division>
+     */
     public function default(): Factory
     {
         return $this->state(function (array $attributes) {

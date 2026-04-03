@@ -137,6 +137,8 @@ class AssetCheckIn extends BaseModel implements Auditable, ProvidesATimeline
 
     public static function getTimelineData(Model $forModel): Collection
     {
+        assert($forModel instanceof Asset);
+
         return $forModel->checkIns()->get();
     }
 

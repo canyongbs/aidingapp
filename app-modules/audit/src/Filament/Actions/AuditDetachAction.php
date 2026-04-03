@@ -53,7 +53,7 @@ class AuditDetachAction extends DetachAction
             /** @var BelongsToMany<Model, Audit> $relationship */
             $relationship = $table->getRelationship();
 
-            /** @var Auditable $parent */
+            /** @var Auditable&\OwenIt\Auditing\Auditable $parent */
             $parent = $relationship->getParent();
 
             $parent->auditDetach($relationship->getRelationName(), $record);

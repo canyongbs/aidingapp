@@ -98,6 +98,9 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
         return $this->belongsTo(Asset::class, 'asset_id');
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function checkedOutBy(): MorphTo
     {
         return $this->morphTo(
@@ -138,14 +141,23 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
 
     public static function getTimelineData(Model $forModel): Collection
     {
+        assert($forModel instanceof Asset);
+
         return $forModel->checkOuts()->get();
     }
 
+    /**
+     * @param Builder<AssetCheckOut> $query
+     * @return Builder<AssetCheckOut>
+     */
     public function scopeWithoutReturned(Builder $query): Builder
     {
         return $query->whereNull('asset_check_in_id');
     }
 
+    /**
+     * @return Attribute<AssetCheckOutStatus, never>
+     */
     protected function status(): Attribute
     {
         return Attribute::get(function () {

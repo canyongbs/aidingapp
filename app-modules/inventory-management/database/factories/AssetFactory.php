@@ -51,7 +51,7 @@ class AssetFactory extends Factory
     {
         return [
             'serial_number' => $this->faker->isbn13(),
-            'name' => $this->faker->catchPhrase(),
+            'name' => $this->faker->sentence(),  
             'description' => $this->faker->paragraph(),
             'type_id' => AssetType::inRandomOrder()->first() ?? AssetType::factory()->create(),
             'status_id' => AssetStatus::inRandomOrder()->first() ?? AssetStatus::factory()->create(),

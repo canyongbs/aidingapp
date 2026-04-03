@@ -46,6 +46,9 @@ class ClassifiedAs
         protected SystemAssetStatusClassification $classification,
     ) {}
 
+    /**
+     * @param Builder<\Illuminate\Database\Eloquent\Model> $query
+     */
     public function __invoke(Builder $query): void
     {
         $query->where('classification', $this->classification);

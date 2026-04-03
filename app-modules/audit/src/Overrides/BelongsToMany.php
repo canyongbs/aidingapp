@@ -39,6 +39,13 @@ namespace AidingApp\Audit\Overrides;
 use AidingApp\Audit\Overrides\Concerns\AttachOverrides;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany as IlluminateBelongsToMany;
 
+/**
+ * @template TRelatedModel of \Illuminate\Database\Eloquent\Model
+ * @template TDeclaringModel of \Illuminate\Database\Eloquent\Model
+ * @template TPivotModel of \Illuminate\Database\Eloquent\Relations\Pivot
+ * @template TAccessor of \Illuminate\Database\Eloquent\Model = TRelatedModel
+ * @extends IlluminateBelongsToMany<TRelatedModel, TDeclaringModel, TPivotModel, TAccessor>
+ */
 class BelongsToMany extends IlluminateBelongsToMany
 {
     use AttachOverrides;

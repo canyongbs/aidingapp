@@ -112,6 +112,8 @@ class MaintenanceActivity extends BaseModel implements Auditable, ProvidesATimel
 
     public static function getTimelineData(Model $forModel): Collection
     {
+        assert($forModel instanceof Asset);
+
         return $forModel->maintenanceActivities()->get();
     }
 

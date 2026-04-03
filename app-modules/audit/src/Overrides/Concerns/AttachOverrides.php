@@ -50,7 +50,7 @@ trait AttachOverrides
      */
     public function attach($id, array $attributes = [], $touch = true)
     {
-        /** @var Auditable $parentModel */
+        /** @var Auditable&\OwenIt\Auditing\Auditable $parentModel */
         $parentModel = $this->getParent();
 
         if (! $this->isAuditable($parentModel::class)) {
@@ -78,7 +78,7 @@ trait AttachOverrides
 
     public function detach($ids = null, $touch = true)
     {
-        /** @var Auditable $parentModel */
+        /** @var Auditable&\OwenIt\Auditing\Auditable $parentModel */
         $parentModel = $this->getParent();
 
         if (! $this->isAuditable($parentModel::class)) {
@@ -112,7 +112,7 @@ trait AttachOverrides
      */
     public function sync($ids, $detaching = true): array
     {
-        /** @var Auditable $parentModel */
+        /** @var Auditable&\OwenIt\Auditing\Auditable $parentModel */
         $parentModel = $this->getParent();
 
         if (! $this->isAuditable($parentModel::class)) {

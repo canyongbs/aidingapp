@@ -71,7 +71,10 @@ class ManageAssetMaintenanceActivity extends ManageRelatedRecords
         return static::managers($this->getRecord());
     }
 
-    private static function managers(?Model $record = null): array
+    /**
+     * @return array<class-string>
+     */
+    protected static function managers(?Model $record = null): array
     {
         return collect([
             MaintenanceActivitiesRelationManager::class,

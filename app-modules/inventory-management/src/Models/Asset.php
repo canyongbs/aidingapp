@@ -125,12 +125,18 @@ class Asset extends BaseModel implements Auditable
         return $this->hasMany(AssetCheckIn::class, 'asset_id');
     }
 
+    /**
+     * @return HasOne<AssetCheckOut, $this>
+     */
     public function latestCheckOut(): HasOne
     {
         return $this->hasOne(AssetCheckOut::class, 'asset_id')
             ->latest('checked_out_at');
     }
 
+    /**
+     * @return HasOne<AssetCheckIn, $this>
+     */
     public function latestCheckIn(): HasOne
     {
         return $this->hasOne(AssetCheckIn::class, 'asset_id')
@@ -140,7 +146,7 @@ class Asset extends BaseModel implements Auditable
     public function isAvailable(): bool
     {
         return $this->status->classification === SystemAssetStatusClassification::Available
-            && (is_null($this->latestCheckOut) || ! is_null($this->latestCheckOut?->asset_check_in_id));
+            && (is_null($this->latestCheckOut) || ! is_null($this->latestCheckOut->asset_check_in_id));
     }
 
     public function isNotAvailable(): bool
@@ -168,6 +174,9 @@ class Asset extends BaseModel implements Auditable
             ->save();
     }
 
+    /**
+     * @return Attribute<string, never>
+     */
     protected function purchaseAge(): Attribute
     {
         return Attribute::get(function () {

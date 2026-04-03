@@ -81,6 +81,9 @@ class ListAssetCheckOuts extends ListRecords
                 ViewAction::make()
                     ->modalHeading('View Checked Out Asset'),
             ])
-            ->modifyQueryUsing(fn (Builder $query) => $query->withoutReturned());
+            ->modifyQueryUsing(function (Builder $query): Builder {
+                /** @var \Illuminate\Database\Eloquent\Builder<AssetCheckOut> $query */
+                return $query->withoutReturned();
+            });
     }
 }
