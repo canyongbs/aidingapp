@@ -38,6 +38,7 @@ namespace AidingApp\InventoryManagement\Models\Scopes;
 
 use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 // TODO Make this somewhat re-usable across any system classifications
 class ClassifiedAs
@@ -47,7 +48,7 @@ class ClassifiedAs
     ) {}
 
     /**
-     * @param Builder<\Illuminate\Database\Eloquent\Model> $query
+     * @param Builder<Model> $query
      */
     public function __invoke(Builder $query): void
     {

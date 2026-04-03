@@ -148,6 +148,7 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
 
     /**
      * @param Builder<AssetCheckOut> $query
+     *
      * @return Builder<AssetCheckOut>
      */
     public function scopeWithoutReturned(Builder $query): Builder

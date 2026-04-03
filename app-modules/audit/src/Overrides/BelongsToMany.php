@@ -44,6 +44,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany as IlluminateBelongsToM
  * @template TDeclaringModel of \Illuminate\Database\Eloquent\Model
  * @template TPivotModel of \Illuminate\Database\Eloquent\Relations\Pivot
  * @template TAccessor of \Illuminate\Database\Eloquent\Model = TRelatedModel
+ *
  * @extends IlluminateBelongsToMany<TRelatedModel, TDeclaringModel, TPivotModel, TAccessor>
  */
 class BelongsToMany extends IlluminateBelongsToMany

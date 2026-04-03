@@ -82,7 +82,7 @@ class ListAssetCheckOuts extends ListRecords
                     ->modalHeading('View Checked Out Asset'),
             ])
             ->modifyQueryUsing(function (Builder $query): Builder {
-                /** @var \Illuminate\Database\Eloquent\Builder<AssetCheckOut> $query */
+                /** @var Builder<AssetCheckOut> $query */
                 return $query->withoutReturned();
             });
     }

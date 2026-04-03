@@ -44,6 +44,7 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany as IlluminateMorphToMany;
  * @template TDeclaringModel of \Illuminate\Database\Eloquent\Model
  * @template TPivotModel of \Illuminate\Database\Eloquent\Relations\Pivot
  * @template TAccessor of \Illuminate\Database\Eloquent\Model = TRelatedModel
+ *
  * @extends IlluminateMorphToMany<TRelatedModel, TDeclaringModel, TPivotModel, TAccessor>
  */
 class MorphToMany extends IlluminateMorphToMany
