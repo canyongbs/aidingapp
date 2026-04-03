@@ -36,15 +36,19 @@
 
 namespace AidingApp\ServiceManagement\Notifications;
 
+use AidingApp\Notification\DataTransferObjects\NotificationResultData;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\Contracts\Message;
+use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
+use AidingApp\Notification\Notifications\Contracts\HasOutboundMailCustomization;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
+use AidingApp\ServiceManagement\Notifications\Concerns\SetsServiceRequestEmailHeaders;
 use App\Models\NotificationSetting;
 use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
@@ -53,10 +57,11 @@ use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Str;
 
-class SendEducatableServiceRequestClosedNotification extends Notification implements ShouldQueue, HasBeforeSendHook
+class SendEducatableServiceRequestClosedNotification extends Notification implements ShouldQueue, HasBeforeSendHook, HasAfterSendHook, HasOutboundMailCustomization
 {
     use Queueable;
     use HandlesServiceRequestTemplateContent;
+    use SetsServiceRequestEmailHeaders;
 
     public function __construct(
         protected ServiceRequest $serviceRequest,
@@ -105,6 +110,16 @@ class SendEducatableServiceRequestClosedNotification extends Notification implem
     public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
     {
         $message->related()->associate($this->serviceRequest);
+    }
+
+    public function afterSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationResultData $result): void
+    {
+        $this->afterSendServiceRequestEmailThreading($notifiable, $message, $result);
+    }
+
+    protected function getServiceRequest(): ServiceRequest
+    {
+        return $this->serviceRequest;
     }
 
     private function resolveNotificationSetting(object $notifiable): ?NotificationSetting

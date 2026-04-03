@@ -34,66 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace AidingApp\Notification\Notifications\Contracts;
 
-use App\Multitenancy\DataTransferObjects\TenantConfig;
-use App\Settings\DisplaySettings;
-use Database\Factories\TenantFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
-use Spatie\Multitenancy\Models\Tenant as SpatieTenant;
+use AidingApp\Notification\Models\EmailMessage;
+use Illuminate\Notifications\Messages\MailMessage;
 
-/**
- * @property TenantConfig $config
- *
- * @mixin IdeHelperTenant
- */
-class Tenant extends SpatieTenant
+interface HasOutboundMailCustomization
 {
-    use UsesLandlordConnection;
-    use HasUuids;
-    use SoftDeletes;
-
-    /** @use HasFactory<TenantFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-        'domain',
-        'config',
-        'setup_complete',
-    ];
-
-    protected $casts = [
-        'setup_complete' => 'boolean',
-        'config' => TenantConfig::class . ':encrypted',
-    ];
-
-    public function getTimezone(): string
-    {
-        if (filled($settingsTimezone = app(DisplaySettings::class)->timezone)) {
-            return $settingsTimezone;
-        }
-
-        return config('app.timezone');
-    }
-
-    public function getSubdomain(): string
-    {
-        preg_match('/^(.+)\.[^.]+\.[^.]+$/', $this->domain, $matches);
-
-        return $matches[1];
-    }
-
-    public function getEngagementFromAddress(): string
-    {
-        return $this->getSubdomain() . '-msg@' . config('mail.from.root_domain');
-    }
-
-    public function getServiceRequestFromAddress(): string
-    {
-        return $this->getSubdomain() . '-sr@' . config('mail.from.root_domain');
-    }
+    public function customizeOutboundMail(
+        MailMessage $mailMessage,
+        EmailMessage $emailMessage,
+        object $notifiable
+    ): void;
 }

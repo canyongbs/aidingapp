@@ -41,6 +41,7 @@ use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -53,6 +54,7 @@ class ServiceRequestFactory extends Factory
     {
         return [
             'respondent_id' => Contact::factory(),
+            'service_request_number' => app(ServiceRequestNumberGenerator::class)->generate(),
             'title' => str($this->faker->words(asText: true))->headline()->toString(),
             'close_details' => $this->faker->sentence(),
             'division_id' => Division::inRandomOrder()->first()->id ?? Division::factory(),

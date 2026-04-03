@@ -48,9 +48,12 @@ use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
 use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
+use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
+use App\Features\ServiceRequestEmailThreading;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV2;
 use Aws\Kms\KmsClient;
@@ -61,6 +64,7 @@ use Exception;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
@@ -103,206 +107,30 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 new SesS3InboundSpamOrVirusDetected($this->emailFilePath, $parser->getHeader('X-SES-Spam-Verdict'), $parser->getHeader('X-SES-Virus-Verdict')),
             );
 
-            $matchedTenants = collect($parser->getAddresses('to'))
-                ->pluck('address')
-                ->mapToGroups(function (string $address) {
-                    $localPart = filter_var($address, FILTER_VALIDATE_EMAIL) ? explode('@', $address)[0] : null;
-
-                    if ($localPart === null) {
-                        return null;
-                    }
-
-                    $tenant = Tenant::query()
-                        ->where(
-                            DB::raw('LOWER(domain)'),
-                            'like',
-                            strtolower("{$localPart}.%")
-                        )
-                        ->first();
-
-                    if ($tenant) {
-                        return ['engagements' => $tenant];
-                    }
-
-                    preg_match('/([a-z0-9\-]+)\-([a-z0-9]+)/', $localPart, $matches);
-
-                    if (isset($matches[1]) && isset($matches[2])) {
-                        $tenantDomain = mb_strtolower($matches[1]);
-                        $typeDomain = mb_strtolower($matches[2]);
-
-                        $serviceRequestTypeDomain = TenantServiceRequestTypeDomain::query()
-                            ->where(
-                                DB::raw('LOWER(domain)'),
-                                $typeDomain
-                            )
-                            ->whereRelation('tenant', 'domain', 'like', "{$tenantDomain}.%")
-                            ->first();
-
-                        if ($serviceRequestTypeDomain) {
-                            return ['service_request' => $serviceRequestTypeDomain];
-                        }
-                    }
-
-                    return null;
-                })
-                ->filter();
+            $classified = $this->classifyAddresses($parser);
 
             throw_if(
-                $matchedTenants->isEmpty(),
+                $classified->isEmpty(),
                 new UnableToDetectTenantFromSesS3EmailPayload($this->emailFilePath),
             );
 
             $sender = $parser->getAddresses('from')[0]['address'];
 
-            $matchedTenants->get('engagements')?->each(function (Tenant $tenant) use ($parser, $content, $sender) {
-                $tenant->execute(function () use ($parser, $content, $sender) {
-                    $contacts = Contact::query()
-                        ->where('email', $sender)
-                        ->get();
+            $classified->each(function (array $entry) use ($parser, $content, $sender) {
+                $type = $entry['type'];
+                $tenant = $entry['tenant'];
+                $srTypeDomain = $entry['srTypeDomain'] ?? null;
 
-                    if ($contacts->isEmpty()) {
-                        UnmatchedInboundCommunication::create([
-                            'type' => EngagementResponseType::Email,
-                            'subject' => $parser->getHeader('subject'),
-                            'body' => $parser->getMessageBody('htmlEmbedded'),
-                            'occurred_at' => $parser->getHeader('date'),
-                            'sender' => $sender,
-                        ]);
-
-                        Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
-
-                        DB::commit();
-
-                        return;
-                    }
-
-                    $contacts->each(function (Contact $contact) use ($parser, $content) {
-                        /** @var EngagementResponse $engagementResponse */
-                        $engagementResponse = $contact->engagementResponses()
-                            ->create([
-                                'subject' => $parser->getHeader('subject'),
-                                'content' => $parser->getMessageBody('htmlEmbedded'),
-                                'sent_at' => $parser->getHeader('date'),
-                                'type' => EngagementResponseType::Email,
-                                'raw' => $content,
-                            ]);
-
-                        collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse) {
-                            $engagementResponse->addMediaFromStream($attachment->getStream())
-                                ->setName($attachment->getFilename())
-                                ->setFileName($attachment->getFilename())
-                                ->toMediaCollection('attachments');
-                        });
-                    });
-
-                    Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
-
-                    DB::commit();
-                });
+                match ($type) {
+                    'engagement' => $this->handleEngagement($tenant, $parser, $content, $sender),
+                    'service_request_reply' => $this->handleServiceRequestReply($tenant, $parser, $sender),
+                    'service_request_type' => $this->handleServiceRequestType($srTypeDomain, $parser, $sender),
+                    'legacy' => $this->handleLegacyAddress($tenant, $parser, $sender),
+                    default => null,
+                };
             });
 
-            $matchedTenants->get('service_request')?->each(function (TenantServiceRequestTypeDomain $serviceRequestTypeDomain) use ($parser, $sender) {
-                $serviceRequestTypeDomain->tenant->execute(function () use ($serviceRequestTypeDomain, $parser, $sender) {
-                    $serviceRequestType = $serviceRequestTypeDomain->serviceRequestType;
-
-                    if (is_null($serviceRequestType)) {
-                        throw new SesS3InboundServiceRequestTypeNotFound(
-                            $this->emailFilePath,
-                            $serviceRequestTypeDomain
-                        );
-                    }
-
-                    if (! $serviceRequestType->is_email_automatic_creation_enabled) {
-                        Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
-
-                        return;
-                    }
-
-                    $contacts = Contact::query()
-                        ->where('email', $sender)
-                        ->get();
-
-                    if ($contacts->isEmpty()) {
-                        // If no contacts are found, we will try to find an organization with the same domain
-                        $domain = Str::afterLast($sender, '@');
-
-                        $organization = Organization::query()
-                            ->whereRaw('LOWER(?) = ANY (SELECT LOWER(value) FROM jsonb_array_elements_text(domains))', [mb_strtolower($domain)])
-                            ->first();
-
-                        if (! $organization || $serviceRequestType->is_email_automatic_creation_contact_create_enabled === false) {
-                            Notification::route('mail', $sender)
-                                ->notifyNow(new IneligibleContactSesS3InboundEmailServiceRequestNotification(
-                                    $serviceRequestTypeDomain,
-                                    $parser->getMessageBody('htmlEmbedded')
-                                ));
-
-                            Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
-
-                            return;
-                        }
-
-                        $senderName = $parser->getAddresses('from')[0]['display'];
-
-                        $firstName = Str::before($senderName, ' ') ?: 'Unknown';
-                        $lastName = Str::after($senderName, ' ') ?: 'Unknown';
-                        $fullName = $firstName . ' ' . $lastName;
-
-                        // If an organization domain is found, we will create a new contact with the email address
-                        $contact = Contact::query()
-                            ->make([
-                                'email' => $sender,
-                                'first_name' => $firstName,
-                                'last_name' => $lastName,
-                                'full_name' => $fullName,
-                            ]);
-
-                        $type = ContactType::query()
-                            ->where('classification', SystemContactClassification::New)
-                            ->firstOrFail();
-
-                        $contact->type()->associate($type);
-
-                        $contact->organization()->associate($organization);
-
-                        $contact->save();
-
-                        $contacts = $contacts->add($contact);
-                    }
-
-                    $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser) {
-                        $serviceRequest = $contact->serviceRequests()
-                            ->make([
-                                'title' => $parser->getHeader('subject'),
-                                'close_details' => $parser->getMessageBody('text'),
-                            ]);
-
-                        $serviceRequestStatus = ServiceRequestStatus::query()
-                            ->where('classification', SystemServiceRequestClassification::Open)
-                            ->where('name', 'New')
-                            ->where('is_system_protected', true)
-                            ->firstOrFail();
-
-                        $serviceRequest->status()->associate($serviceRequestStatus);
-                        $serviceRequest->status_updated_at = CarbonImmutable::now();
-
-                        $serviceRequest->respondent()->associate($contact);
-
-                        $serviceRequest->priority()->associate($serviceRequestType->email_automatic_creation_priority_id);
-
-                        $serviceRequest->saveOrFail();
-
-                        foreach ($parser->getAttachments(false) as $attachment) {
-                            $serviceRequest->addMediaFromStream($attachment->getStream())
-                                ->setName($attachment->getFilename())
-                                ->setFileName($attachment->getFilename())
-                                ->toMediaCollection('uploads');
-                        }
-                    });
-
-                    Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
-                });
-            });
+            Storage::disk('s3-inbound-email')->delete($this->emailFilePath);
 
             DB::commit();
         } catch (
@@ -334,6 +162,330 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             SesS3InboundSpamOrVirusDetected::class => $this->moveFile('/spam-or-virus-detected'),
             default => $this->moveFile('/failed'),
         };
+    }
+
+    /**
+     * Classify inbound email addresses into routing groups.
+     *
+     * @return Collection<int, array{type: string, tenant: Tenant, srTypeDomain?: TenantServiceRequestTypeDomain}>
+     */
+    protected function classifyAddresses(Parser $parser): Collection
+    {
+        return collect($parser->getAddresses('to'))
+            ->pluck('address')
+            ->map(function (string $address) {
+                $localPart = filter_var($address, FILTER_VALIDATE_EMAIL) ? explode('@', $address)[0] : null;
+
+                if ($localPart === null) {
+                    return null;
+                }
+
+                $localPartLower = mb_strtolower($localPart);
+
+                // noreply — discard immediately
+                // TODO: Future auto-reply to noreply address
+                if ($localPartLower === 'noreply') {
+                    return null;
+                }
+
+                // {tenant}-msg — engagement path
+                if (preg_match('/^(.+)-msg$/', $localPartLower, $matches)) {
+                    $tenant = $this->resolveTenant($matches[1]);
+
+                    if ($tenant) {
+                        return ['type' => 'engagement', 'tenant' => $tenant];
+                    }
+                }
+
+                // {tenant}-sr-{type} — new SR creation for type (must check before {tenant}-sr)
+                if (preg_match('/^(.+)-sr-(.+)$/', $localPartLower, $matches)) {
+                    $tenantSubdomain = $matches[1];
+                    $typeDomain = $matches[2];
+
+                    $serviceRequestTypeDomain = TenantServiceRequestTypeDomain::query()
+                        ->where(DB::raw('LOWER(domain)'), $typeDomain)
+                        ->whereRelation('tenant', 'domain', 'like', "{$tenantSubdomain}.%")
+                        ->first();
+
+                    if ($serviceRequestTypeDomain) {
+                        return [
+                            'type' => 'service_request_type',
+                            'tenant' => $serviceRequestTypeDomain->tenant,
+                            'srTypeDomain' => $serviceRequestTypeDomain,
+                        ];
+                    }
+                }
+
+                // {tenant}-sr — SR reply path (header matching)
+                if (preg_match('/^(.+)-sr$/', $localPartLower, $matches)) {
+                    $tenant = $this->resolveTenant($matches[1]);
+
+                    if ($tenant) {
+                        return ['type' => 'service_request_reply', 'tenant' => $tenant];
+                    }
+                }
+
+                // Legacy: bare {tenant} — create UnmatchedInboundCommunication
+                $tenant = $this->resolveTenant($localPartLower);
+
+                if ($tenant) {
+                    return ['type' => 'legacy', 'tenant' => $tenant];
+                }
+
+                return null;
+            })
+            ->filter()
+            ->values();
+    }
+
+    protected function resolveTenant(string $subdomain): ?Tenant
+    {
+        return Tenant::query()
+            ->where(
+                DB::raw('LOWER(domain)'),
+                'like',
+                strtolower("{$subdomain}.%")
+            )
+            ->first();
+    }
+
+    protected function handleEngagement(Tenant $tenant, Parser $parser, string $content, string $sender): void
+    {
+        $tenant->execute(function () use ($parser, $content, $sender) {
+            $contacts = Contact::query()
+                ->where('email', $sender)
+                ->get();
+
+            if ($contacts->isEmpty()) {
+                UnmatchedInboundCommunication::create([
+                    'type' => EngagementResponseType::Email,
+                    'subject' => $parser->getHeader('subject'),
+                    'body' => $parser->getMessageBody('htmlEmbedded'),
+                    'occurred_at' => $parser->getHeader('date'),
+                    'sender' => $sender,
+                ]);
+
+                return;
+            }
+
+            $contacts->each(function (Contact $contact) use ($parser, $content) {
+                /** @var EngagementResponse $engagementResponse */
+                $engagementResponse = $contact->engagementResponses()
+                    ->create([
+                        'subject' => $parser->getHeader('subject'),
+                        'content' => $parser->getMessageBody('htmlEmbedded'),
+                        'sent_at' => $parser->getHeader('date'),
+                        'type' => EngagementResponseType::Email,
+                        'raw' => $content,
+                    ]);
+
+                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse) {
+                    $engagementResponse->addMediaFromStream($attachment->getStream())
+                        ->setName($attachment->getFilename())
+                        ->setFileName($attachment->getFilename())
+                        ->toMediaCollection('attachments');
+                });
+            });
+        });
+    }
+
+    protected function handleServiceRequestReply(Tenant $tenant, Parser $parser, string $sender): void
+    {
+        $tenant->execute(function () use ($parser, $sender) {
+            // TODO: FeatureFlag Cleanup - Remove this check after ServiceRequestEmailThreading is removed
+            if (! ServiceRequestEmailThreading::active()) {
+                // FF not active — can't do header matching, ignore the email
+                return;
+            }
+
+            $serviceRequest = $this->resolveServiceRequestFromHeaders($parser);
+
+            if (! $serviceRequest) {
+                // TODO: Future auto-reply informing sender that the system could not match their email to an existing Service Request
+                return;
+            }
+
+            // Verify sender matches the SR respondent
+            if (mb_strtolower($sender) !== mb_strtolower($serviceRequest->respondent->email)) {
+                // TODO: Future auto-reply informing sender of mismatch
+                return;
+            }
+
+            // Create SR Update — do NOT change status (even if closed)
+            $serviceRequest->serviceRequestUpdates()->create([
+                'update' => $parser->getMessageBody('text') ?: $parser->getMessageBody('html'),
+                'internal' => false,
+                'created_by_id' => $serviceRequest->respondent->getKey(),
+                'created_by_type' => $serviceRequest->respondent->getMorphClass(),
+            ]);
+        });
+    }
+
+    protected function resolveServiceRequestFromHeaders(Parser $parser): ?ServiceRequest
+    {
+        $inboundDomain = config('mail.from.root_domain');
+
+        // Try In-Reply-To header first
+        $inReplyTo = $parser->getHeader('In-Reply-To');
+
+        if ($inReplyTo) {
+            // Strip angle brackets
+            $messageId = trim($inReplyTo, '<> ');
+
+            $outbound = OutboundEmailMessageId::query()
+                ->where('message_id', $messageId)
+                ->first();
+
+            if ($outbound) {
+                $trackable = $outbound->trackable;
+
+                if ($trackable instanceof ServiceRequest) {
+                    return $trackable;
+                }
+            }
+        }
+
+        // Try References header
+        $references = $parser->getHeader('References');
+
+        if ($references) {
+            // Extract all Message-IDs from References header
+            preg_match_all('/<([^>]+)>/', $references, $matches);
+
+            if (! empty($matches[1])) {
+                // Filter to our domain and look up
+                $ourMessageIds = collect($matches[1])
+                    ->filter(fn (string $id) => str_contains($id, $inboundDomain));
+
+                if ($ourMessageIds->isNotEmpty()) {
+                    $outbound = OutboundEmailMessageId::query()
+                        ->whereIn('message_id', $ourMessageIds->all())
+                        ->orderByDesc('id')
+                        ->first();
+
+                    if ($outbound) {
+                        $trackable = $outbound->trackable;
+
+                        if ($trackable instanceof ServiceRequest) {
+                            return $trackable;
+                        }
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    protected function handleServiceRequestType(TenantServiceRequestTypeDomain $serviceRequestTypeDomain, Parser $parser, string $sender): void
+    {
+        $serviceRequestTypeDomain->tenant->execute(function () use ($serviceRequestTypeDomain, $parser, $sender) {
+            $serviceRequestType = $serviceRequestTypeDomain->serviceRequestType;
+
+            if (is_null($serviceRequestType)) {
+                throw new SesS3InboundServiceRequestTypeNotFound(
+                    $this->emailFilePath,
+                    $serviceRequestTypeDomain
+                );
+            }
+
+            if (! $serviceRequestType->is_email_automatic_creation_enabled) {
+                return;
+            }
+
+            $contacts = Contact::query()
+                ->where('email', $sender)
+                ->get();
+
+            if ($contacts->isEmpty()) {
+                // If no contacts are found, we will try to find an organization with the same domain
+                $domain = Str::afterLast($sender, '@');
+
+                $organization = Organization::query()
+                    ->whereRaw('LOWER(?) = ANY (SELECT LOWER(value) FROM jsonb_array_elements_text(domains))', [mb_strtolower($domain)])
+                    ->first();
+
+                if (! $organization || $serviceRequestType->is_email_automatic_creation_contact_create_enabled === false) {
+                    Notification::route('mail', $sender)
+                        ->notifyNow(new IneligibleContactSesS3InboundEmailServiceRequestNotification(
+                            $serviceRequestTypeDomain,
+                            $parser->getMessageBody('htmlEmbedded')
+                        ));
+
+                    return;
+                }
+
+                $senderName = $parser->getAddresses('from')[0]['display'];
+
+                $firstName = Str::before($senderName, ' ') ?: 'Unknown';
+                $lastName = Str::after($senderName, ' ') ?: 'Unknown';
+                $fullName = $firstName . ' ' . $lastName;
+
+                // If an organization domain is found, we will create a new contact with the email address
+                $contact = Contact::query()
+                    ->make([
+                        'email' => $sender,
+                        'first_name' => $firstName,
+                        'last_name' => $lastName,
+                        'full_name' => $fullName,
+                    ]);
+
+                $type = ContactType::query()
+                    ->where('classification', SystemContactClassification::New)
+                    ->firstOrFail();
+
+                $contact->type()->associate($type);
+
+                $contact->organization()->associate($organization);
+
+                $contact->save();
+
+                $contacts = $contacts->add($contact);
+            }
+
+            $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser) {
+                $serviceRequest = $contact->serviceRequests()
+                    ->make([
+                        'title' => $parser->getHeader('subject'),
+                        'close_details' => $parser->getMessageBody('text'),
+                    ]);
+
+                $serviceRequestStatus = ServiceRequestStatus::query()
+                    ->where('classification', SystemServiceRequestClassification::Open)
+                    ->where('name', 'New')
+                    ->where('is_system_protected', true)
+                    ->firstOrFail();
+
+                $serviceRequest->status()->associate($serviceRequestStatus);
+                $serviceRequest->status_updated_at = CarbonImmutable::now();
+
+                $serviceRequest->respondent()->associate($contact);
+
+                $serviceRequest->priority()->associate($serviceRequestType->email_automatic_creation_priority_id);
+
+                $serviceRequest->saveOrFail();
+
+                foreach ($parser->getAttachments(false) as $attachment) {
+                    $serviceRequest->addMediaFromStream($attachment->getStream())
+                        ->setName($attachment->getFilename())
+                        ->setFileName($attachment->getFilename())
+                        ->toMediaCollection('uploads');
+                }
+            });
+        });
+    }
+
+    protected function handleLegacyAddress(Tenant $tenant, Parser $parser, string $sender): void
+    {
+        $tenant->execute(function () use ($parser, $sender) {
+            UnmatchedInboundCommunication::create([
+                'type' => EngagementResponseType::Email,
+                'subject' => $parser->getHeader('subject'),
+                'body' => $parser->getMessageBody('htmlEmbedded'),
+                'occurred_at' => $parser->getHeader('date'),
+                'sender' => $sender,
+            ]);
+        });
     }
 
     protected function getContent(): string

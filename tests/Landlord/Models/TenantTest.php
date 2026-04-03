@@ -34,66 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+use App\Models\Tenant;
 
-use App\Multitenancy\DataTransferObjects\TenantConfig;
-use App\Settings\DisplaySettings;
-use Database\Factories\TenantFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
-use Spatie\Multitenancy\Models\Tenant as SpatieTenant;
+it('extracts subdomain from a standard three-part domain', function () {
+    $tenant = Tenant::query()->firstOrFail();
 
-/**
- * @property TenantConfig $config
- *
- * @mixin IdeHelperTenant
- */
-class Tenant extends SpatieTenant
-{
-    use UsesLandlordConnection;
-    use HasUuids;
-    use SoftDeletes;
+    // Test tenant has domain 'test.aidingapp.local'
+    expect($tenant->getSubdomain())->toBe('test');
+});
 
-    /** @use HasFactory<TenantFactory> */
-    use HasFactory;
+it('extracts subdomain from a two-level TLD domain', function () {
+    $tenant = Tenant::factory()->make([
+        'domain' => 'mycampus.example.com',
+    ]);
 
-    protected $fillable = [
-        'name',
-        'domain',
-        'config',
-        'setup_complete',
-    ];
+    expect($tenant->getSubdomain())->toBe('mycampus');
+});
 
-    protected $casts = [
-        'setup_complete' => 'boolean',
-        'config' => TenantConfig::class . ':encrypted',
-    ];
+it('extracts multi-level subdomain correctly', function () {
+    $tenant = Tenant::factory()->make([
+        'domain' => 'a.b.example.com',
+    ]);
 
-    public function getTimezone(): string
-    {
-        if (filled($settingsTimezone = app(DisplaySettings::class)->timezone)) {
-            return $settingsTimezone;
-        }
-
-        return config('app.timezone');
-    }
-
-    public function getSubdomain(): string
-    {
-        preg_match('/^(.+)\.[^.]+\.[^.]+$/', $this->domain, $matches);
-
-        return $matches[1];
-    }
-
-    public function getEngagementFromAddress(): string
-    {
-        return $this->getSubdomain() . '-msg@' . config('mail.from.root_domain');
-    }
-
-    public function getServiceRequestFromAddress(): string
-    {
-        return $this->getSubdomain() . '-sr@' . config('mail.from.root_domain');
-    }
-}
+    expect($tenant->getSubdomain())->toBe('a.b');
+});

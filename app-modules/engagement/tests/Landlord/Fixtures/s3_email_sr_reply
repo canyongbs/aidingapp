@@ -1,7 +1,7 @@
 Return-Path: <kevin.ullyott@canyongbs.com>
 Received: from NAM12-MW2-obe.outbound.protection.outlook.com (mail-mw2nam12on2109.outbound.protection.outlook.com [40.107.244.109])
  by inbound-smtp.us-west-2.amazonaws.com with SMTP id bq8ij3scgtpdh688k59udb2bhpnscr5e4uvio4g1
- for test-msg@mail.aiding.app;
+ for test-sr@mail.aiding.app;
  Thu, 20 Feb 2025 20:25:41 +0000 (UTC)
 X-SES-Spam-Verdict: PASS
 X-SES-Virus-Verdict: PASS
@@ -31,13 +31,15 @@ Received: from SA6PR18MB6369.namprd18.prod.outlook.com
  ([fe80::faa6:ac23:58ac:326%4]) with mapi id 15.20.8466.015; Thu, 20 Feb 2025
  20:25:37 +0000
 From: Kevin Ullyott <kevin.ullyott@canyongbs.com>
-To: "test-msg@mail.aiding.app" <test-msg@mail.aiding.app>
-Subject: This is a test
+To: "test-sr@mail.aiding.app" <test-sr@mail.aiding.app>
+Subject: Re: This is a test
 Thread-Topic: This is a test
 Thread-Index: AQHbg9WEpn3yUlYsU0Gu23YRry9VFQ==
 Date: Thu, 20 Feb 2025 20:25:37 +0000
 Message-ID:
  <SA6PR18MB6369D9D2914876A74436FC6BE5C42@SA6PR18MB6369.namprd18.prod.outlook.com>
+In-Reply-To: <SR-TEST123456.1.1740000000000@mail.aiding.app>
+References: <SR-TEST123456.1.1740000000000@mail.aiding.app>
 Accept-Language: en-US
 Content-Language: en-US
 X-MS-Has-Attach: yes

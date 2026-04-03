@@ -36,74 +36,34 @@
 
 namespace AidingApp\Notification\Models;
 
-use AidingApp\Notification\Database\Factories\EmailMessageFactory;
-use AidingApp\Notification\Models\Contracts\Message;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
-/**
- * @mixin IdeHelperEmailMessage
- */
-class EmailMessage extends BaseModel implements Message
+class OutboundEmailMessageId extends Model
 {
-    /** @use HasFactory<EmailMessageFactory> */
-    use HasFactory;
+    use HasUuids;
+    use UsesTenantConnection;
 
     protected $fillable = [
-        'notification_class',
-        'external_reference_id',
-        'content',
-        'quota_usage',
-        'recipient_id',
-        'recipient_type',
-        'outbound_message_id',
-    ];
-
-    protected $casts = [
-        'content' => 'array',
+        'message_id',
     ];
 
     /**
-     * @return MorphTo<Model, $this>
+     * @return BelongsTo<EmailMessage, $this>
      */
-    public function related(): MorphTo
+    public function emailMessage(): BelongsTo
     {
-        return $this->morphTo(
-            name: 'related',
-            type: 'related_type',
-            id: 'related_id',
-        );
+        return $this->belongsTo(EmailMessage::class, 'message_id', 'outbound_message_id');
     }
 
     /**
      * @return MorphTo<Model, $this>
      */
-    public function recipient(): MorphTo
+    public function trackable(): MorphTo
     {
-        return $this->morphTo(
-            name: 'recipient',
-            type: 'recipient_type',
-            id: 'recipient_id',
-        );
-    }
-
-    /**
-     * @return HasMany<EmailMessageEvent, $this>
-     */
-    public function events(): HasMany
-    {
-        return $this->hasMany(EmailMessageEvent::class);
-    }
-
-    /**
-     * @return HasOne<OutboundEmailMessageId, $this>
-     */
-    public function outboundEmailMessageId(): HasOne
-    {
-        return $this->hasOne(OutboundEmailMessageId::class, 'message_id', 'outbound_message_id');
+        return $this->morphTo();
     }
 }

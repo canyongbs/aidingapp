@@ -34,66 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+use App\Features\ServiceRequestEmailThreading;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-use App\Multitenancy\DataTransferObjects\TenantConfig;
-use App\Settings\DisplaySettings;
-use Database\Factories\TenantFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
-use Spatie\Multitenancy\Models\Tenant as SpatieTenant;
-
-/**
- * @property TenantConfig $config
- *
- * @mixin IdeHelperTenant
- */
-class Tenant extends SpatieTenant
-{
-    use UsesLandlordConnection;
-    use HasUuids;
-    use SoftDeletes;
-
-    /** @use HasFactory<TenantFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-        'domain',
-        'config',
-        'setup_complete',
-    ];
-
-    protected $casts = [
-        'setup_complete' => 'boolean',
-        'config' => TenantConfig::class . ':encrypted',
-    ];
-
-    public function getTimezone(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        if (filled($settingsTimezone = app(DisplaySettings::class)->timezone)) {
-            return $settingsTimezone;
-        }
+        DB::transaction(function () {
+            Schema::create('outbound_email_message_ids', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->string('message_id')->index();
+                $table->uuidMorphs('trackable');
+                $table->timestamps();
+            });
 
-        return config('app.timezone');
+            Schema::table('email_messages', function (Blueprint $table) {
+                $table->string('outbound_message_id')->nullable();
+            });
+
+            ServiceRequestEmailThreading::activate();
+        });
     }
 
-    public function getSubdomain(): string
+    public function down(): void
     {
-        preg_match('/^(.+)\.[^.]+\.[^.]+$/', $this->domain, $matches);
+        DB::transaction(function () {
+            ServiceRequestEmailThreading::deactivate();
 
-        return $matches[1];
-    }
+            Schema::table('email_messages', function (Blueprint $table) {
+                $table->dropColumn('outbound_message_id');
+            });
 
-    public function getEngagementFromAddress(): string
-    {
-        return $this->getSubdomain() . '-msg@' . config('mail.from.root_domain');
+            Schema::dropIfExists('outbound_email_message_ids');
+        });
     }
-
-    public function getServiceRequestFromAddress(): string
-    {
-        return $this->getSubdomain() . '-sr@' . config('mail.from.root_domain');
-    }
-}
+};

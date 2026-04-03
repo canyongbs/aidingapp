@@ -1,7 +1,7 @@
 Return-Path: <kevin.ullyott@canyongbs.com>
 Received: from NAM12-DM6-obe.outbound.protection.outlook.com (mail-dm6nam12on2115.outbound.protection.outlook.com [40.107.243.115])
  by inbound-smtp.us-west-2.amazonaws.com with SMTP id pon399k47pc5no3btfkftoqnhpns98r9pu6hs801
- for test@mail-dev.aiding.app;
+ for test-msg@mail.aiding.app;
  Tue, 08 Jul 2025 03:08:35 +0000 (UTC)
 X-SES-Spam-Verdict: PASS
 X-SES-Virus-Verdict: PASS
@@ -31,7 +31,7 @@ Received: from BL1PPF9BA3F0D7D.namprd18.prod.outlook.com
  ([fe80::be79:247:cbe1:b280%4]) with mapi id 15.20.8901.021; Tue, 8 Jul 2025
  03:08:29 +0000
 From: Kevin Ullyott <kevin.ullyott@canyongbs.com>
-To: "test@mail-dev.aiding.app" <test@mail-dev.aiding.app>
+To: "test-msg@mail.aiding.app" <test-msg@mail.aiding.app>
 Subject: This is a test
 Thread-Topic: This is a test
 Thread-Index: AQHb77ViTll0ysTD1ka8PtKL6Za2uw==

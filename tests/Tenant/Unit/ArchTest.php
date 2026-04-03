@@ -34,11 +34,10 @@
 </COPYRIGHT>
 */
 
-use AidingApp\InAppCommunication\Models\Conversation;
-use AidingApp\InAppCommunication\Models\ConversationParticipant;
-use AidingApp\InAppCommunication\Models\Message;
 use App\Concerns\EditPageRedirection;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Model;
 use InterNACHI\Modular\Support\ModuleConfig;
 use InterNACHI\Modular\Support\ModuleRegistry;
@@ -48,33 +47,53 @@ arch('All Core Settings classes should have defaults for all properties')
     ->expect('App\Settings')
     ->toHaveDefaultsForAllProperties();
 
-arch('All Core Models should not use HasUuids trait')
-    ->expect('App\Models')
-    ->extending(Model::class)
-    ->not->toUseTrait('Illuminate\Database\Eloquent\Concerns\HasUuids')
-    ->ignoring([Conversation::class, ConversationParticipant::class, Message::class]);
-
 arch('All Core Factories should not use the fake global function')
     ->expect('Database\Factories')
     ->not->toUse('fake');
 
+$legacyV4UuidModels = require __DIR__ . '/legacy-v4-uuid-models.php';
+
+arch('All Core Models should not use HasVersion4Uuids trait')
+    ->expect('App\Models')
+    ->extending(Model::class)
+    ->not->toUseTrait(HasVersion4Uuids::class)
+    ->ignoring($legacyV4UuidModels);
+
 app(ModuleRegistry::class, [
     'modules_path' => 'app-modules',
     'cache_path' => 'cache/modules.php',
-])->modules()->each(function (ModuleConfig $module) {
+])->modules()->each(function (ModuleConfig $module) use ($legacyV4UuidModels) {
     arch("All {$module->name} Settings classes should have defaults for all properties")
         ->expect($module->namespace() . 'Settings')
         ->toHaveDefaultsForAllProperties();
 
-    arch("All {$module->name} Models should not use HasUuids trait")
+    arch("All {$module->name} Models should not use HasVersion4Uuids trait")
         ->expect($module->namespace() . 'Models')
         ->extending(Model::class)
-        ->not->toUseTrait('Illuminate\Database\Eloquent\Concerns\HasUuids')
-        ->ignoring([Conversation::class, ConversationParticipant::class, Message::class]);
+        ->not->toUseTrait(HasVersion4Uuids::class)
+        ->ignoring($legacyV4UuidModels);
 
     arch("All {$module->name} Factories should not use the fake global function")
         ->expect($module->namespace() . 'Database\Factories')
         ->not->toUse('fake');
+});
+
+test('Legacy models must not use HasUuids (UUIDv7)', function () {
+    $legacyModels = require __DIR__ . '/legacy-v4-uuid-models.php';
+
+    foreach ($legacyModels as $class) {
+        $traits = class_uses_recursive($class);
+
+        if (! in_array(HasUuids::class, $traits)) {
+            continue;
+        }
+
+        Assert::assertContains(
+            HasVersion4Uuids::class,
+            $traits,
+            "Class [{$class}] uses HasUuids (UUIDv7) directly. Legacy models must use HasVersion4Uuids instead.",
+        );
+    }
 });
 
 test('pages extending EditRecord have the EditPageRedirection test', function () {
