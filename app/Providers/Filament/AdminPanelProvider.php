@@ -41,6 +41,8 @@ use AidingApp\Theme\Settings\ThemeSettings;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\ProductHealth;
+use App\Health\Checks\AzureCredentialsExpiringCheck;
+use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Tenant;
 use App\Multitenancy\Http\Middleware\NeedsTenant;
 use Filament\Actions\Action;
@@ -56,16 +58,21 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\Column;
+use Filament\View\PanelsRenderHook;
 use FilamentTiptapEditor\TiptapEditor;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
+use Spatie\Health\Enums\Status;
 use Spatie\Multitenancy\Http\Middleware\EnsureValidTenantSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -196,6 +203,20 @@ class AdminPanelProvider extends PanelProvider
                     ->modalWidth(Width::Small)
                     ->icon('heroicon-s-information-circle'),
             ])
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_AFTER,
+                function (): ?Htmlable {
+                    $credentialsCheck = HealthCheckResultHistoryItem::where('check_name', app(AzureCredentialsExpiringCheck::class)->getName())
+                        ->latest()
+                        ->first();
+
+                    if ($credentialsCheck?->status !== Status::warning()->value) {
+                        return null;
+                    }
+
+                    return new HtmlString(Blade::render('<livewire:sso-credentials-expiring-alert />'));
+                },
+            )
             ->globalSearchResourceOptIn();
     }
 

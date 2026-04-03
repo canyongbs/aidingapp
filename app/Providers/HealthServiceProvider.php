@@ -36,6 +36,8 @@
 
 namespace App\Providers;
 
+use AidingApp\Authorization\Settings\AzureSsoSettings;
+use App\Health\Checks\AzureCredentialsExpiringCheck;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Health\Checks\Checks\CacheCheck;
 use Spatie\Health\Checks\Checks\DatabaseCheck;
@@ -82,6 +84,16 @@ class HealthServiceProvider extends ServiceProvider
             QueueCheck::new()
                 ->failAfterMinutes(3),
             RedisCheck::new(),
+            AzureCredentialsExpiringCheck::new()
+                ->if(function () {
+                    $azureSsoSettings = app(AzureSsoSettings::class);
+
+                    return $azureSsoSettings->is_enabled &&
+                    ! is_null($azureSsoSettings->client_id) &&
+                    ! is_null($azureSsoSettings->client_secret) &&
+                    ! is_null($azureSsoSettings->tenant_id);
+                })
+                ->daily(),
             // ScheduleCheck::new()
             //     ->heartbeatMaxAgeInMinutes(2),
         ]);
