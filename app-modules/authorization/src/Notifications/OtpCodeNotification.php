@@ -34,28 +34,39 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Http\Controllers\GenerateOtpLoginCodeController;
-use App\Http\Controllers\SetAzureSsoSettingController;
-use App\Http\Controllers\UtilizationMetricsApiController;
-use App\Multitenancy\Http\Middleware\CheckOlympusKey;
-use Illuminate\Support\Facades\Route;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
+namespace AidingApp\Authorization\Notifications;
 
-Route::group(['prefix' => 'v1', 'as' => 'api.', 'middleware' => ['auth:sanctum']], function () {});
+use AidingApp\Notification\Notifications\Attributes\SystemNotification;
+use AidingApp\Notification\Notifications\Messages\MailMessage;
+use App\Models\User;
+use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
 
-Route::middleware([
-    EnsureFrontendRequestsAreStateful::class,
-    CheckOlympusKey::class,
-])->group(function () {
-    Route::post('/azure-sso/update', SetAzureSsoSettingController::class)
-        ->name('azure-sso.update');
+#[SystemNotification]
+class OtpCodeNotification extends Notification
+{
+    use Queueable;
 
-    Route::get('/health', HealthCheckJsonResultsController::class)
-        ->name('health');
+    public function __construct(
+        protected int $code,
+    ) {}
 
-    Route::get('/utilization-metrics', UtilizationMetricsApiController::class)
-        ->name('utilization-metrics');
+    /**
+     * @return array<int, string>
+     */
+    public function via(User $notifiable): array
+    {
+        return ['mail'];
+    }
 
-    Route::post('/otp-code', GenerateOtpLoginCodeController::class)->name('otp-code.generate');
-});
+    public function toMail(User $notifiable): MailMessage
+    {
+        return MailMessage::make()
+            ->subject('Your Login Verification Code')
+            ->greeting('Hello ' . $notifiable->name . ',')
+            ->line('Your one-time login verification code is:')
+            ->line("**{$this->code}**")
+            ->line('This code will expire in 20 minutes.')
+            ->line('If you did not request this code, please ignore this email.');
+    }
+}

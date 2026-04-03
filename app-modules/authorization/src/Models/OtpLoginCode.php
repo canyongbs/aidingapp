@@ -34,23 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Tests\Tenant\Feature\Http\Controllers\RequestFactories;
+namespace AidingApp\Authorization\Models;
 
-use App\Models\Authenticatable;
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\Authorization\Database\Factories\OtpLoginCodeFactory;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\MassPrunable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
-class GenerateLoginMagicLinkRequestFactory extends RequestFactory
+/**
+ * @mixin IdeHelperOtpLoginCode
+ */
+class OtpLoginCode extends Model
 {
-    public function definition(): array
+    /** @use HasFactory<OtpLoginCodeFactory> */
+    use HasFactory;
+
+    use HasUuids;
+    use UsesTenantConnection;
+    use MassPrunable;
+
+    protected $fillable = [];
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
     {
-        return [
-            'email' => $this->faker->safeEmail(),
-            'name' => $this->faker->name(),
-            'type' => $this->faker->randomElement([
-                Authenticatable::SUPER_ADMIN_ROLE,
-                Authenticatable::PARTNER_ADMIN_ROLE,
-                Authenticatable::AI_ADMIN_ROLE,
-            ]),
-        ];
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return Builder<OtpLoginCode>
+     */
+    public function prunable(): Builder
+    {
+        return static::where('created_at', '<=', now()->subMinutes(20))
+            ->orWhereNotNull('used_at');
     }
 }

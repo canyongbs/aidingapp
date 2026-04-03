@@ -34,28 +34,24 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Http\Controllers\GenerateOtpLoginCodeController;
-use App\Http\Controllers\SetAzureSsoSettingController;
-use App\Http\Controllers\UtilizationMetricsApiController;
-use App\Multitenancy\Http\Middleware\CheckOlympusKey;
-use Illuminate\Support\Facades\Route;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-Route::group(['prefix' => 'v1', 'as' => 'api.', 'middleware' => ['auth:sanctum']], function () {});
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::create('otp_login_codes', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->text('code');
+            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
+            $table->timestamp('used_at')->nullable();
+            $table->timestamps();
+        });
+    }
 
-Route::middleware([
-    EnsureFrontendRequestsAreStateful::class,
-    CheckOlympusKey::class,
-])->group(function () {
-    Route::post('/azure-sso/update', SetAzureSsoSettingController::class)
-        ->name('azure-sso.update');
-
-    Route::get('/health', HealthCheckJsonResultsController::class)
-        ->name('health');
-
-    Route::get('/utilization-metrics', UtilizationMetricsApiController::class)
-        ->name('utilization-metrics');
-
-    Route::post('/otp-code', GenerateOtpLoginCodeController::class)->name('otp-code.generate');
-});
+    public function down(): void
+    {
+        Schema::dropIfExists('otp_login_codes');
+    }
+};

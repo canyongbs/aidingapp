@@ -34,34 +34,55 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Models;
+namespace AidingApp\Authorization\Http\Controllers;
 
-use AidingApp\Authorization\Database\Factories\LoginMagicLinkFactory;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
+use AidingApp\Authorization\Models\OtpLoginCode;
+use Filament\Facades\Filament;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Throwable;
 
-/**
- * @mixin IdeHelperLoginMagicLink
- */
-class LoginMagicLink extends Model
+class VerifyOtpLoginCodeController
 {
-    /** @use HasFactory<LoginMagicLinkFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use UsesTenantConnection;
-
-    protected $fillable = [];
-
     /**
-     * @return BelongsTo<User, $this>
+     * @throws Throwable
      */
-    public function user(): BelongsTo
+    public function __invoke(Request $request, OtpLoginCode $otpCode): RedirectResponse|Response
     {
-        return $this->belongsTo(User::class);
+        if ($request->getMethod() === 'HEAD') {
+            // Protection against link scanning bots, like Microsoft Outlook.
+            return response()->noContent();
+        }
+
+        abort_if(
+            boolean: now()->greaterThanOrEqualTo($otpCode->created_at->addMinutes(20))
+                || $otpCode->used_at !== null,
+            code: 403,
+            message: 'This OTP code has already been used or has expired. Please request a new one.'
+        );
+
+        $request->validate([
+            'code' => ['required', 'digits:6'],
+        ]);
+
+        if (! Hash::check($request->input('code'), $otpCode->code)) {
+            return back()->withErrors([
+                'code' => 'The OTP code you entered is incorrect. Please try again.',
+            ]);
+        }
+
+        $otpCode->used_at = now();
+        $otpCode->saveOrFail();
+
+        $user = $otpCode->user;
+
+        $panel = Filament::getPanel('admin');
+
+        Auth::guard($panel->getAuthGuard())->login($user);
+
+        return redirect()->to($panel->getHomeUrl());
     }
 }

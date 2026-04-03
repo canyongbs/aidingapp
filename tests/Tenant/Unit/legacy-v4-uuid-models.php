@@ -46,7 +46,6 @@ use AidingApp\Ai\Models\Prompt;
 use AidingApp\Ai\Models\PromptType;
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Audit\Models\Audit;
-use AidingApp\Authorization\Models\LoginMagicLink;
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Authorization\Models\Role;
@@ -178,7 +177,6 @@ return [
     PromptType::class,
     Alert::class,
     Audit::class,
-    LoginMagicLink::class,
     Permission::class,
     PermissionGroup::class,
     Role::class,

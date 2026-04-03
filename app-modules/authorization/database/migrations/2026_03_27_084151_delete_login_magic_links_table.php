@@ -34,28 +34,34 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Http\Controllers\GenerateOtpLoginCodeController;
-use App\Http\Controllers\SetAzureSsoSettingController;
-use App\Http\Controllers\UtilizationMetricsApiController;
-use App\Multitenancy\Http\Middleware\CheckOlympusKey;
-use Illuminate\Support\Facades\Route;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
+use App\Features\OtpCodeLoginFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-Route::group(['prefix' => 'v1', 'as' => 'api.', 'middleware' => ['auth:sanctum']], function () {});
+return new class () extends Migration {
+    public function up(): void
+    {
+        DB::transaction(function () {
+            Schema::dropIfExists('login_magic_links');
 
-Route::middleware([
-    EnsureFrontendRequestsAreStateful::class,
-    CheckOlympusKey::class,
-])->group(function () {
-    Route::post('/azure-sso/update', SetAzureSsoSettingController::class)
-        ->name('azure-sso.update');
+            OtpCodeLoginFeature::activate();
+        });
+    }
 
-    Route::get('/health', HealthCheckJsonResultsController::class)
-        ->name('health');
+    public function down(): void
+    {
+        DB::transaction(function () {
+            OtpCodeLoginFeature::deactivate();
 
-    Route::get('/utilization-metrics', UtilizationMetricsApiController::class)
-        ->name('utilization-metrics');
-
-    Route::post('/otp-code', GenerateOtpLoginCodeController::class)->name('otp-code.generate');
-});
+            Schema::create('login_magic_links', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->text('code');
+                $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
+                $table->timestamp('used_at')->nullable();
+                $table->timestamps();
+            });
+        });
+    }
+};

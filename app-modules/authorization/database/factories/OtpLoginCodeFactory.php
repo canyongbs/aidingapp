@@ -36,17 +36,17 @@
 
 namespace AidingApp\Authorization\Database\Factories;
 
-use AidingApp\Authorization\Models\LoginMagicLink;
+use AidingApp\Authorization\Models\OtpLoginCode;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 /**
- * @extends Factory<LoginMagicLink>
+ * @extends Factory<OtpLoginCode>
  */
-class LoginMagicLinkFactory extends Factory
+class OtpLoginCodeFactory extends Factory
 {
     /**
      * @return array<string, mixed>
@@ -54,25 +54,29 @@ class LoginMagicLinkFactory extends Factory
     public function definition(): array
     {
         return [
-            'code' => Hash::make(Str::random()),
+            'code' => Hash::make((string) random_int(100000, 999999)),
             'user_id' => User::factory(),
         ];
     }
 
     /**
-     * @return Factory<LoginMagicLink>
+     * @return Factory<OtpLoginCode>
      */
-    public function withCode(string $code): Factory
+    public function withCode(int $code): Factory
     {
+        if ($code < 100000 || $code > 999999) {
+            throw new InvalidArgumentException('OTP code must be a 6-digit integer between 100000 and 999999.');
+        }
+
         return $this->state(function (array $attributes) use ($code) {
             return [
-                'code' => Hash::make($code),
+                'code' => Hash::make((string) $code),
             ];
         });
     }
 
     /**
-     * @return Factory<LoginMagicLink>
+     * @return Factory<OtpLoginCode>
      */
     public function used(?Carbon $when = null): Factory
     {

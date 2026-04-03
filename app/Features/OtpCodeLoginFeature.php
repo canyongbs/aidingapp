@@ -34,26 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Http\Requests;
+namespace App\Features;
 
-use App\Models\Authenticatable;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use App\Support\AbstractFeatureFlag;
 
-class GenerateLoginMagicLinkRequest extends FormRequest
+class OtpCodeLoginFeature extends AbstractFeatureFlag
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'email' => ['required', 'email'],
-            'name' => ['required', 'string', 'max:255'],
-            'type' => ['required', 'string', Rule::in([Authenticatable::SUPER_ADMIN_ROLE, Authenticatable::PARTNER_ADMIN_ROLE, Authenticatable::AI_ADMIN_ROLE])],
-        ];
+        return false;
     }
 }
