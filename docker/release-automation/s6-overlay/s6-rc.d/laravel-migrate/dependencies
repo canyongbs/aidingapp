@@ -1,4 +1,3 @@
 runas-user
 fix-permissions
-laravel-octane
-nginx
+startup-caching
