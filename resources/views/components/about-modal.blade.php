@@ -31,28 +31,18 @@
     
     </COPYRIGHT>
 --}}
-<div class="flex w-full flex-col">
-    <div class="mt-4 flex w-full justify-center">
-        <img
-            class="hidden h-7 dark:block"
-            src="{{ Vite::asset('resources/svg/CGBS_Logo_FullColor_Dark.svg') }}"
-            alt="{{ config('app.name') }}"
-        />
-        <img
-            class="block h-7 dark:hidden"
-            src="{{ Vite::asset('resources/svg/CGBS_Logo_FullColor_Light.svg') }}"
-            alt="{{ config('app.name') }}"
-        />
+<div class="space-y-4 text-center">
+    <div>
+        <p class="text-sm text-gray-600 dark:text-gray-300">
+            <strong>AI-Powered Enterprise Helpdesk</strong>
+            <br />
+            Empowering organizations to provide the best service possible.
+        </p>
     </div>
-
-    <div class="flex w-full justify-center pb-4 pt-2">
-        <span class="w-11/12 text-center text-xs lg:w-3/4 xl:w-7/12">
-            © 2015-{{ date('Y') }} Canyon GBS Inc. All Rights Reserved. Canyon GBS&#174; and Aiding App&#174; are
-            trademarks of Canyon GBS Inc. For more information or inquiries, please visit our website at
-            <a class="text-blue-600 underline dark:text-blue-400" href="https://canyongbs.com/">
-                https://canyongbs.com
-            </a>
-            .
-        </span>
+    <div class="text-xs text-gray-600 dark:text-gray-300">
+        <p>© 2015-{{ date('Y') }} Canyon GBS Inc. All rights reserved.</p>
+    </div>
+    <div class="text-xs text-gray-600 dark:text-gray-300">
+        <p>The product is audited annually and is ISO 27001, ISO 42001, SOC 2 and HIPAA compliant.</p>
     </div>
 </div>

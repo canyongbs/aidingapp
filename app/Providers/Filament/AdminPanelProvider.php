@@ -54,6 +54,7 @@ use Filament\Infolists\Components\Entry;
 use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
+use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\Column;
 use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
@@ -186,6 +187,14 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->userMenuItems([
                 'profile' => fn (Action $action) => $action->url(fn () => EditProfile::getUrl()),
+                Action::make('about')
+                    ->label('About')
+                    ->modalHeading('Aiding App® by Canyon GBS')
+                    ->modalDescription('Version ' . config('sentry.release'))
+                    ->modalContent(fn () => view('components.about-modal'))
+                    ->modalFooterActions([])
+                    ->modalWidth(Width::Small)
+                    ->icon('heroicon-s-information-circle'),
             ])
             ->globalSearchResourceOptIn();
     }
