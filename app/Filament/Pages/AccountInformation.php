@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -36,57 +36,80 @@
 
 namespace App\Filament\Pages;
 
-use App\Settings\DisplaySettings;
-use CanyonGBS\Common\Filament\Forms\Components\TimezoneSelect;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 /**
  * @property Schema $form
  */
-class Timezone extends ProfilePage
+class AccountInformation extends ProfilePage
 {
-    protected static ?string $slug = 'timezone';
+    protected static ?string $slug = 'account-information';
 
-    protected static ?string $title = 'Timezone';
+    protected static ?string $title = 'Account Information';
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 20;
 
     public static function shouldRegisterNavigation(): bool
     {
         return true;
     }
 
-    public function getFormActions(): array
-    {
-        return [
-            $this->getSaveFormAction(),
-            $this->getCancelFormAction(),
-        ];
-    }
-
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Section::make('Timezone')
-                    ->description('Update your timezone.')
+                Section::make('Account Information')
+                    ->description('Update your account password.')
                     ->schema([
-                        TimezoneSelect::make('timezone')
-                            ->required()
-                            ->selectablePlaceholder(false)
-                            ->helperText(function (): string {
-                                $timezone = config('app.timezone');
-
-                                if (
-                                    filled($displaySettingsTimezone = app(DisplaySettings::class)->timezone)
-                                ) {
-                                    $timezone = $displaySettingsTimezone;
-                                }
-
-                                return "Default: {$timezone}";
-                            }),
+                        TextInput::make('password')
+                            ->label('New Password')
+                            ->password()
+                            ->revealable()
+                            ->dehydrated(fn ($state) => filled($state))
+                            ->nullable()
+                            ->rule(Password::default()),
+                        TextInput::make('passwordConfirmation')
+                            ->label('Confirm New Password')
+                            ->password()
+                            ->revealable()
+                            ->same('password')
+                            ->dehydrated(false)
+                            ->nullable(),
                     ]),
             ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    public function mutateFormDataBeforeFill(array $data): array
+    {
+        $data['password'] = null;
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    public function mutateFormDataBeforeSave(array $data): array
+    {
+        if (filled($data['password'] ?? null)) {
+            $data['password'] = Hash::make($data['password']);
+        } else {
+            unset($data['password']);
+        }
+
+        unset($data['passwordConfirmation']);
+
+        return $data;
     }
 }

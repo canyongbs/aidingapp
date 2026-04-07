@@ -41,23 +41,18 @@ use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\TimePicker;
-use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Pages\Page;
-use Filament\Schemas\Components\Actions;
-use Filament\Schemas\Components\Flex;
-use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\Alignment;
-use Filament\Support\Enums\VerticalAlignment;
 use Filament\Support\Exceptions\Halt;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property Schema $form
+ */
 class ProfilePage extends Page
 {
     use InteractsWithFormActions;
@@ -68,6 +63,11 @@ class ProfilePage extends Page
 
     /** @var array<string, mixed> $data */
     public ?array $data = [];
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 
     public function mount(): void
     {
@@ -237,66 +237,5 @@ class ProfilePage extends Page
     protected function hasFullWidthFormActions(): bool
     {
         return false;
-    }
-
-    /**
-     * @return array<string, Grid>
-     */
-    protected function getHoursForDays(string $key): array
-    {
-        return collect([
-            'sunday',
-            'monday',
-            'tuesday',
-            'wednesday',
-            'thursday',
-            'friday',
-            'saturday',
-        ])->map(
-            fn ($day) => Flex::make([
-                Toggle::make("{$key}.{$day}.enabled")
-                    ->label(str($day)->ucfirst())
-                    ->inline(false)
-                    ->live(),
-                Flex::make([
-                    TimePicker::make("{$key}.{$day}.starts_at")
-                        ->required()
-                        ->visible(fn (Get $get) => $get("{$key}.{$day}.enabled")),
-                    TimePicker::make("{$key}.{$day}.ends_at")
-                        ->required()
-                        ->visible(fn (Get $get) => $get("{$key}.{$day}.enabled")),
-                ]),
-
-                Actions::make([
-                    Action::make("copy_time_from_{$day}_{$key}")
-                        ->label('Copy to All')
-                        ->visible(fn (Get $get) => $get("{$key}.{$day}.enabled"))
-                        ->link()
-                        ->color('blue')
-                        ->extraAttributes(['class' => 'fi-action-copytime-link'])
-                        ->action(function (Get $get, Set $set) use ($day, $key) {
-                            $start = $get("{$key}.{$day}.starts_at");
-                            $end = $get("{$key}.{$day}.ends_at");
-
-                            collect(['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'])
-                                ->filter(fn ($targetDay) => $targetDay !== $day)
-                                ->each(function (string $targetDay) use ($get, $set, $key, $start, $end) {
-                                    if ($get("{$key}.{$targetDay}.enabled") === false) {
-                                        return;
-                                    }
-                                    $set("{$key}.{$targetDay}.starts_at", $start);
-                                    $set("{$key}.{$targetDay}.ends_at", $end);
-                                });
-
-                            Notification::make()
-                                ->title('Copied time to all days')
-                                ->success()
-                                ->send();
-                        }),
-                ]),
-            ])
-                ->from('md')
-                ->verticalAlignment(VerticalAlignment::End)
-        )->toArray();
     }
 }

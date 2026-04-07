@@ -42,6 +42,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
+/**
+ * @mixin IdeHelperOutboundEmailMessageId
+ */
 class OutboundEmailMessageId extends Model
 {
     use HasUuids;

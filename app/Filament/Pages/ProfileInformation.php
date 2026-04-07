@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -36,56 +36,55 @@
 
 namespace App\Filament\Pages;
 
-use App\Settings\DisplaySettings;
-use CanyonGBS\Common\Filament\Forms\Components\TimezoneSelect;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 /**
  * @property Schema $form
  */
-class Timezone extends ProfilePage
+class ProfileInformation extends ProfilePage
 {
-    protected static ?string $slug = 'timezone';
+    protected static ?string $slug = 'profile-information';
 
-    protected static ?string $title = 'Timezone';
+    protected static ?string $title = 'Profile Information';
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 10;
 
     public static function shouldRegisterNavigation(): bool
     {
         return true;
     }
 
-    public function getFormActions(): array
-    {
-        return [
-            $this->getSaveFormAction(),
-            $this->getCancelFormAction(),
-        ];
-    }
-
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Section::make('Timezone')
-                    ->description('Update your timezone.')
+                Section::make('Profile Information')
+                    ->description('Update your profile information.')
                     ->schema([
-                        TimezoneSelect::make('timezone')
-                            ->required()
-                            ->selectablePlaceholder(false)
-                            ->helperText(function (): string {
-                                $timezone = config('app.timezone');
-
-                                if (
-                                    filled($displaySettingsTimezone = app(DisplaySettings::class)->timezone)
-                                ) {
-                                    $timezone = $displaySettingsTimezone;
-                                }
-
-                                return "Default: {$timezone}";
-                            }),
+                        SpatieMediaLibraryFileUpload::make('avatar')
+                            ->label('Avatar')
+                            ->collection('avatar')
+                            ->image()
+                            ->imageEditor()
+                            ->circleCropper()
+                            ->columnSpanFull(),
+                        TextInput::make('job_title')
+                            ->label('Job Title')
+                            ->string()
+                            ->maxLength(255),
+                        Select::make('pronouns_id')
+                            ->label('Pronouns')
+                            ->relationship('pronouns', 'label')
+                            ->searchable()
+                            ->nullable(),
+                        PhoneInput::make('phone_number')
+                            ->label('Phone Number')
+                            ->nullable(),
                     ]),
             ]);
     }
