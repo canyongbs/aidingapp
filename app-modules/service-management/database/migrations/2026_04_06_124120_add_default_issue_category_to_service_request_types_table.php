@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
 use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -44,23 +44,23 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-      DB::transaction(function () {
-          Schema::table('service_request_types', function (Blueprint $table) {
-              $table->string('default_issue_category')->initial(ServiceRequestIssueCategory::Request->value);
-          });
+        DB::transaction(function () {
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->string('default_issue_category')->initial(ServiceRequestIssueCategory::Request->value);
+            });
 
-          ServiceRequestTypeDefaultIssueCategoryFeature::activate();
-      });
+            ServiceRequestTypeDefaultIssueCategoryFeature::activate();
+        });
     }
 
     public function down(): void
     {
-      DB::transaction(function () {
-          ServiceRequestTypeDefaultIssueCategoryFeature::deactivate();
+        DB::transaction(function () {
+            ServiceRequestTypeDefaultIssueCategoryFeature::deactivate();
 
-          Schema::table('service_request_types', function (Blueprint $table) {
-              $table->dropColumn('default_issue_category');
-          });
-      });
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->dropColumn('default_issue_category');
+            });
+        });
     }
 };
