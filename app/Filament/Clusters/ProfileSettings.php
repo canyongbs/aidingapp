@@ -36,16 +36,14 @@
 
 namespace App\Filament\Clusters;
 
-use BackedEnum;
 use Filament\Clusters\Cluster;
-use UnitEnum;
 
 class ProfileSettings extends Cluster
 {
-  protected static ?string $title = 'Profile Settings';
+    protected static ?string $title = 'Profile Settings';
 
-  public static function shouldRegisterNavigation(): bool
-  {
-    return false;
-  }
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
 }

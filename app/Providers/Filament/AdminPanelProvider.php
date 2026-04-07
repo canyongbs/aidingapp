@@ -38,8 +38,8 @@ namespace App\Providers\Filament;
 
 use AidingApp\Authorization\Filament\Pages\Auth\Login;
 use AidingApp\Theme\Settings\ThemeSettings;
+use App\Filament\Clusters\ProfileSettings;
 use App\Filament\Pages\Dashboard;
-use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\ProductHealth;
 use App\Models\Tenant;
 use App\Multitenancy\Http\Middleware\NeedsTenant;
@@ -68,7 +68,6 @@ use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
 use Spatie\Multitenancy\Http\Middleware\EnsureValidTenantSession;
-use App\Filament\Clusters\ProfileSettings;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -76,12 +75,12 @@ class AdminPanelProvider extends PanelProvider
     {
         parent::register();
 
-        Field::configureUsing(fn($field) => $field->translateLabel());
-        Entry::configureUsing(fn($entry) => $entry->translateLabel());
-        Column::configureUsing(fn($column) => $column->translateLabel());
-        ExportAction::configureUsing(fn(ExportAction $action) => $action->maxRows(100000));
-        ImportAction::configureUsing(fn(ImportAction $action) => $action->maxRows(100000));
-        TiptapEditor::configureUsing(fn(TiptapEditor $editor) => $editor->gridLayouts([
+        Field::configureUsing(fn ($field) => $field->translateLabel());
+        Entry::configureUsing(fn ($entry) => $entry->translateLabel());
+        Column::configureUsing(fn ($column) => $column->translateLabel());
+        ExportAction::configureUsing(fn (ExportAction $action) => $action->maxRows(100000));
+        ImportAction::configureUsing(fn (ImportAction $action) => $action->maxRows(100000));
+        TiptapEditor::configureUsing(fn (TiptapEditor $editor) => $editor->gridLayouts([
             'two-columns',
             'three-columns',
             'four-columns',
@@ -190,13 +189,13 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 MenuItem::make()
                     ->label('Profile Settings')
-                    ->url(fn() => ProfileSettings::getUrl())
+                    ->url(fn () => ProfileSettings::getUrl())
                     ->icon('heroicon-s-cog-6-tooth'),
                 Action::make('about')
                     ->label('About')
                     ->modalHeading('Aiding App® by Canyon GBS')
                     ->modalDescription('Version ' . config('sentry.release'))
-                    ->modalContent(fn() => view('components.about-modal'))
+                    ->modalContent(fn () => view('components.about-modal'))
                     ->modalFooterActions([])
                     ->modalWidth(Width::Small)
                     ->icon('heroicon-s-information-circle'),
