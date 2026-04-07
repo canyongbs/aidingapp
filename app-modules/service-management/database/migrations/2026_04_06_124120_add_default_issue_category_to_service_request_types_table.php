@@ -34,55 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
-
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
-use BladeUI\Icons\Factory as BladeUIIconsFactory;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Facades\File;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-/**
- * @extends Factory<ServiceRequestType>
- */
-class ServiceRequestTypeFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => str($this->faker->unique()->word())->ucfirst()->toString(),
-            'description' => $this->faker->optional()->sentences(2, true),
-            'icon' => $this->faker->optional()->randomElement($this->icons()),
-            ...(ServiceRequestTypeDefaultIssueCategoryFeature::active()
-                ? ['default_issue_category' => $this->faker->randomElement(ServiceRequestIssueCategory::cases())]
-                : []),
-        ];
+      DB::transaction(function () {
+          Schema::table('service_request_types', function (Blueprint $table) {
+              $table->string('default_issue_category')->initial(ServiceRequestIssueCategory::Request->value);
+          });
+
+          ServiceRequestTypeDefaultIssueCategoryFeature::activate();
+      });
     }
 
-    /**
-     * @return array<string>
-     */
-    private function icons(): array
+    public function down(): void
     {
-        return cache()->remember('heroicon-factory-options', now()->addMinutes(5), function (): array {
-            $paths = app(BladeUIIconsFactory::class)->all()['heroicons']['paths'];
+      DB::transaction(function () {
+          ServiceRequestTypeDefaultIssueCategoryFeature::deactivate();
 
-            $options = [];
-
-            foreach ($paths as $path) {
-                foreach (File::files($path) as $file) {
-                    $id = $file->getFilenameWithoutExtension();
-
-                    if (! str($id)->startsWith('o-')) {
-                        continue;
-                    }
-
-                    $options[] = "heroicon-{$id}";
-                }
-            }
-
-            return $options;
-        });
+          Schema::table('service_request_types', function (Blueprint $table) {
+              $table->dropColumn('default_issue_category');
+          });
+      });
     }
-}
+};

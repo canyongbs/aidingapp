@@ -38,16 +38,19 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 
 use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\Ai\Settings\AiResolutionSettings;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
+use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
 use App\Filament\Forms\Components\IconSelect;
 use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -72,7 +75,7 @@ class EditServiceRequestType extends EditRecord
         return $schema
             ->components([
                 Section::make()
-                    ->columns()
+                    ->columns(3)
                     ->schema([
                         TextInput::make('name')
                             ->label('Name')
@@ -83,6 +86,13 @@ class EditServiceRequestType extends EditRecord
                                 modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed(),
                             ),
                         IconSelect::make('icon'),
+                        Select::make('default_issue_category')
+                            ->label('Default Issue Category')
+                            ->options(ServiceRequestIssueCategory::class)
+                            ->enum(ServiceRequestIssueCategory::class)
+                            ->required(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active())
+                            ->dehydrated(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active())
+                            ->visible(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active()),
                         Group::make()
                             ->schema([
                                 Toggle::make('has_enabled_feedback_collection')

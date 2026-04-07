@@ -38,10 +38,13 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 
 use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\Ai\Settings\AiResolutionSettings;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
+use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
 use App\Filament\Forms\Components\IconSelect;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -62,7 +65,7 @@ class CreateServiceRequestType extends CreateRecord
         return $schema
             ->components([
                 Section::make()
-                    ->columns()
+                    ->columns(3)
                     ->schema([
                         TextInput::make('name')
                             ->label('Name')
@@ -70,6 +73,13 @@ class CreateServiceRequestType extends CreateRecord
                             ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())
                             ->string(),
                         IconSelect::make('icon'),
+                        Select::make('default_issue_category')
+                            ->label('Default Issue Category')
+                            ->options(ServiceRequestIssueCategory::class)
+                            ->enum(ServiceRequestIssueCategory::class)
+                            ->required(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active())
+                            ->dehydrated(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active())
+                            ->visible(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active()),
                         Group::make()
                             ->schema([
                                 Toggle::make('has_enabled_feedback_collection')
