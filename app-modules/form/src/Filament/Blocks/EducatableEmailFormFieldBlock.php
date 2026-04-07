@@ -38,29 +38,27 @@ namespace AidingApp\Form\Filament\Blocks;
 
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
 use AidingApp\Form\Models\SubmissibleField;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\TextInput as FilamentTextInput;
-use Filament\Schemas\Components\Component;
 
 class EducatableEmailFormFieldBlock extends FormFieldBlock
 {
-    public ?string $label = 'Filler email address';
-
-    public string $rendered = 'form::blocks.submissions.educatable-email';
-
-    public ?string $icon = 'heroicon-m-user';
+    public static string $rendered = 'form::blocks.submissions.educatable-email';
 
     public static function type(): string
     {
         return 'educatable_email';
     }
 
-    /**
-     * @return array<Component>
-     */
-    public function getFormSchema(): array
+    public static function getLabel(): string
     {
-        return [
+        return 'Filler email address';
+    }
+
+    public static function configureEditorAction(Action $action): Action
+    {
+        return $action->schema([
             FilamentTextInput::make('label')
                 ->required()
                 ->string()
@@ -69,7 +67,7 @@ class EducatableEmailFormFieldBlock extends FormFieldBlock
             Checkbox::make('isRequired')
                 ->label('Required')
                 ->default(true),
-        ];
+        ]);
     }
 
     /**

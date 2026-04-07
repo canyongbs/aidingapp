@@ -43,9 +43,7 @@ use Filament\Schemas\Components\Component;
 
 class SelectFormFieldBlock extends FormFieldBlock
 {
-    public string $rendered = 'form::blocks.submissions.select';
-
-    public ?string $icon = 'heroicon-m-queue-list';
+    public static string $rendered = 'form::blocks.submissions.select';
 
     public static function type(): string
     {
@@ -55,7 +53,7 @@ class SelectFormFieldBlock extends FormFieldBlock
     /**
      * @return array<Component>
      */
-    public function fields(): array
+    public static function fields(): array
     {
         return [
             TextInput::make('placeholder')

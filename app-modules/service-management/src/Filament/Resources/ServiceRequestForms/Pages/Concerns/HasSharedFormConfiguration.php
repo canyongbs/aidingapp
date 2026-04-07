@@ -55,7 +55,7 @@ use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
-use FilamentTiptapEditor\TiptapEditor;
+use Filament\Forms\Components\RichEditor;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
 trait HasSharedFormConfiguration
@@ -151,19 +151,24 @@ trait HasSharedFormConfiguration
         ];
     }
 
-    public function fieldBuilder(): TiptapEditor
+    public function fieldBuilder(): RichEditor
     {
-        return TiptapEditor::make('content')
-            ->blocks(FormFieldBlockRegistry::get())
-            ->tools(['bold', 'italic', 'small', '|', 'heading', 'bullet-list', 'ordered-list', 'hr', '|', 'link', 'grid', 'blocks'])
+        return RichEditor::make('content')
+            ->customBlocks(FormFieldBlockRegistry::get())
+            ->toolbarButtons([
+                ['bold', 'italic', 'small'],
+                ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'bulletList', 'orderedList', 'horizontalRule'],
+                ['link', 'grid'],
+                ['customBlocks'],
+            ])
+            ->activePanel('customBlocks')
+            ->json()
             ->placeholder('Drag blocks here to build your service request form')
             ->hiddenLabel()
-            ->saveRelationshipsUsing(function (TiptapEditor $component, ServiceRequestForm | ServiceRequestFormStep $record) {
+            ->saveRelationshipsUsing(function (RichEditor $component, ServiceRequestForm | ServiceRequestFormStep $record) {
                 if ($component->isDisabled()) {
                     return;
                 }
-
-                $record->wasRecentlyCreated && $component->processImages();
 
                 $serviceRequestForm = $record instanceof ServiceRequestForm ? $record : $record->submissible;
                 $serviceRequestFormStep = $record instanceof ServiceRequestFormStep ? $record : null;
@@ -175,11 +180,8 @@ trait HasSharedFormConfiguration
                     ->when($serviceRequestFormStep, fn (EloquentBuilder $query) => $query->whereBelongsTo($serviceRequestFormStep, 'step'))
                     ->delete();
 
-                $content = [];
-
-                if (filled($component->getState())) {
-                    $content = $component->decodeBlocks($component->getJSON(decoded: true));
-                }
+                $state = $component->getState();
+                $content = is_array($state) ? $state : ['type' => 'doc', 'content' => []];
 
                 $content['content'] = $this->saveFieldsFromComponents(
                     $serviceRequestForm,
@@ -204,37 +206,29 @@ trait HasSharedFormConfiguration
                 continue;
             }
 
-            if ($component['type'] !== 'tiptapBlock') {
+            if ($component['type'] !== 'customBlock') {
                 continue;
             }
 
-            $componentAttributes = $component['attrs'] ?? [];
+            $blockType = $component['attrs']['id'] ?? null;
+            $config = $component['attrs']['config'] ?? [];
+            $fieldId = $config['fieldId'] ?? null;
+            $label = $config['label'] ?? $blockType;
+            $isRequired = $config['isRequired'] ?? false;
 
-            if (array_key_exists('id', $componentAttributes)) {
-                $id = $componentAttributes['id'] ?? null;
-                unset($componentAttributes['id']);
-            }
-
-            if (array_key_exists('label', $componentAttributes['data'])) {
-                $label = $componentAttributes['data']['label'] ?? null;
-                unset($componentAttributes['data']['label']);
-            }
-
-            if (array_key_exists('isRequired', $componentAttributes['data'])) {
-                $isRequired = $componentAttributes['data']['isRequired'] ?? null;
-                unset($componentAttributes['data']['isRequired']);
-            }
+            $fieldConfig = $config;
+            unset($fieldConfig['label'], $fieldConfig['isRequired'], $fieldConfig['fieldId']);
 
             /** @var ServiceRequestFormField $field */
-            $field = $serviceRequestForm->fields()->findOrNew($id ?? null);
+            $field = $serviceRequestForm->fields()->findOrNew($fieldId);
             $field->step()->associate($serviceRequestFormStep);
-            $field->label = $label ?? $componentAttributes['type'];
-            $field->is_required = $isRequired ?? false;
-            $field->type = $componentAttributes['type'];
-            $field->config = $componentAttributes['data'];
+            $field->label = $label;
+            $field->is_required = $isRequired;
+            $field->type = $blockType;
+            $field->config = $fieldConfig;
             $field->save();
 
-            $components[$componentKey]['attrs']['id'] = $field->id;
+            $components[$componentKey]['attrs']['config']['fieldId'] = $field->id;
         }
 
         return $components;

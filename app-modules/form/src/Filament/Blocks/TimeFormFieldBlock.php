@@ -40,18 +40,11 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class TimeFormFieldBlock extends FormFieldBlock
 {
-    public string $rendered = 'form::blocks.submissions.time';
-
-    public ?string $icon = 'heroicon-m-clock';
+    public static string $rendered = 'form::blocks.submissions.time';
 
     public static function type(): string
     {
         return 'time';
-    }
-
-    public function fields(): array
-    {
-        return [];
     }
 
     /**

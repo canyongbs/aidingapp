@@ -44,13 +44,9 @@ use Filament\Schemas\Components\Component;
 
 class RadioFormFieldBlock extends FormFieldBlock
 {
-    public string $width = '2xl';
+    public static string $preview = 'form::blocks.previews.radio';
 
-    public string $preview = 'form::blocks.previews.radio';
-
-    public string $rendered = 'form::blocks.submissions.radio';
-
-    public ?string $icon = 'heroicon-m-list-bullet';
+    public static string $rendered = 'form::blocks.submissions.radio';
 
     public static function type(): string
     {
@@ -60,7 +56,7 @@ class RadioFormFieldBlock extends FormFieldBlock
     /**
      * @return array<Component>
      */
-    public function fields(): array
+    public static function fields(): array
     {
         return [
             Repeater::make('options')

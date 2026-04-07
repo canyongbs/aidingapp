@@ -109,7 +109,7 @@ class GenerateServiceRequestFilamentFormSchema
                 'paragraph' => $this->renderParagraph($blocks, $component, $fields),
                 'small' => $this->renderSmall($blocks, $component, $fields),
                 'text' => null, // Handled by parent components
-                'tiptapBlock' => $this->renderTiptapBlock($blocks, $component, $fields),
+                'customBlock' => $this->renderCustomBlock($blocks, $component, $fields),
                 default => null,
             };
 
@@ -130,14 +130,9 @@ class GenerateServiceRequestFilamentFormSchema
      */
     public function grid(array $blocks, array $component, ?Collection $fields): array
     {
-        $columns = match ($component['attrs']['type'] ?? null) {
-            'asymetric-left-thirds' => ['md' => 3],
-            'asymetric-right-thirds' => ['md' => 3],
-            'asymetric-left-fourths' => ['md' => 4],
-            'asymetric-right-fourths' => ['md' => 4],
-            'fixed', 'responsive' => ['md' => $component['attrs']['cols'] ?? 2],
-            default => ['md' => 2],
-        };
+        $dataCols = (int) ($component['attrs']['data-cols'] ?? 2);
+
+        $columns = ['md' => $dataCols];
 
         return [
             Grid::make($columns)
@@ -150,10 +145,11 @@ class GenerateServiceRequestFilamentFormSchema
      * @param  array<string, mixed>  $component
      * @param  Collection<string, SubmissibleField>|null  $fields
      */
-    protected function renderTiptapBlock(array $blocks, array $component, ?Collection $fields): ?Component
+    protected function renderCustomBlock(array $blocks, array $component, ?Collection $fields): ?Component
     {
-        $fieldId = $component['attrs']['id'] ?? null;
-        $blockType = $component['attrs']['type'] ?? null;
+        $blockType = $component['attrs']['id'] ?? null;
+        $config = $component['attrs']['config'] ?? [];
+        $fieldId = $config['fieldId'] ?? null;
 
         if (! $fieldId || ! $blockType) {
             return null;

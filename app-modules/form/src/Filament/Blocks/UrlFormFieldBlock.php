@@ -40,20 +40,16 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class UrlFormFieldBlock extends FormFieldBlock
 {
-    public string $rendered = 'form::blocks.submissions.url';
-
-    public ?string $label = 'URL';
-
-    public ?string $icon = 'heroicon-m-link';
+    public static string $rendered = 'form::blocks.submissions.url';
 
     public static function type(): string
     {
         return 'url';
     }
 
-    public function fields(): array
+    public static function getLabel(): string
     {
-        return [];
+        return 'URL';
     }
 
     /**

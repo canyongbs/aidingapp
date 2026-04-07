@@ -40,18 +40,11 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class TextAreaFormFieldBlock extends FormFieldBlock
 {
-    public string $preview = 'form::blocks.previews.textarea';
-
-    public ?string $icon = 'heroicon-m-bars-3-center-left';
+    public static string $preview = 'form::blocks.previews.textarea';
 
     public static function type(): string
     {
         return 'text_area';
-    }
-
-    public function fields(): array
-    {
-        return [];
     }
 
     /**

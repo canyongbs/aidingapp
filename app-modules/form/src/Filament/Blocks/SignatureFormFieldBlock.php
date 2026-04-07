@@ -40,20 +40,13 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class SignatureFormFieldBlock extends FormFieldBlock
 {
-    public string $preview = 'form::blocks.previews.signature';
+    public static string $preview = 'form::blocks.previews.signature';
 
-    public string $rendered = 'form::blocks.submissions.signature';
-
-    public ?string $icon = 'heroicon-m-pencil';
+    public static string $rendered = 'form::blocks.submissions.signature';
 
     public static function type(): string
     {
         return 'signature';
-    }
-
-    public function fields(): array
-    {
-        return [];
     }
 
     /**

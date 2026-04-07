@@ -40,18 +40,11 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class DateFormFieldBlock extends FormFieldBlock
 {
-    public string $rendered = 'form::blocks.submissions.date';
-
-    public ?string $icon = 'heroicon-m-calendar';
+    public static string $rendered = 'form::blocks.submissions.date';
 
     public static function type(): string
     {
         return 'date';
-    }
-
-    public function fields(): array
-    {
-        return [];
     }
 
     /**

@@ -40,19 +40,11 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class UploadFormFieldBlock extends FormFieldBlock
 {
-    public ?string $icon = 'heroicon-m-document-arrow-up';
-
-    //Don't use in filament
     public static bool $internal = true;
 
     public static function type(): string
     {
         return 'upload';
-    }
-
-    public function fields(): array
-    {
-        return [];
     }
 
     /**

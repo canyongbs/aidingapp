@@ -40,20 +40,13 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class CheckboxFormFieldBlock extends FormFieldBlock
 {
-    public string $preview = 'form::blocks.previews.checkbox';
+    public static string $preview = 'form::blocks.previews.checkbox';
 
-    public string $rendered = 'form::blocks.submissions.checkbox';
-
-    public ?string $icon = 'heroicon-m-check-circle';
+    public static string $rendered = 'form::blocks.submissions.checkbox';
 
     public static function type(): string
     {
         return 'checkbox';
-    }
-
-    public function fields(): array
-    {
-        return [];
     }
 
     /**

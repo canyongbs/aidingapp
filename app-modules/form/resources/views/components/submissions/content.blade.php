@@ -39,17 +39,20 @@
 
 @php
     use AidingApp\Form\Actions\ResolveBlockRegistry;
-    use AidingApp\Form\Actions\InjectSubmissionStateIntoTipTapContent;
+    use AidingApp\Form\Actions\InjectSubmissionStateIntoRichContent;
+    use Filament\Forms\Components\RichEditor\RichContentRenderer;
 
     $blocks = app(ResolveBlockRegistry::class)($submission->submissible);
 
-    $content['content'] = app(InjectSubmissionStateIntoTipTapContent::class)(
+    $content['content'] = app(InjectSubmissionStateIntoRichContent::class)(
         $submission,
         $content['content'] ?? [],
         $blocks,
     );
+
+    $customBlockClasses = collect($blocks)->values()->all();
 @endphp
 
 <div class="prose max-w-none dark:prose-invert">
-    {!! tiptap_converter()->blocks($blocks)->asHTML($content) !!}
+    {!! RichContentRenderer::make($content)->customBlocks($customBlockClasses)->toHtml() !!}
 </div>
