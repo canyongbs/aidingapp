@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\CreateServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -156,4 +157,21 @@ test('CreateServiceRequestType is gated with proper feature access control', fun
     assertCount(1, ServiceRequestType::all());
 
     assertDatabaseHas(ServiceRequestType::class, $request->toArray());
+});
+
+test('CreateServiceRequestType is creating default_issue_category when form saved', function () {
+    asSuperAdmin();
+
+    livewire(CreateServiceRequestType::class)
+        ->fillForm([
+            'name' => 'Test Type',
+            'default_issue_category' => ServiceRequestIssueCategory::Incident->value,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(ServiceRequestType::class, [
+        'name' => 'Test Type',
+        'default_issue_category' => ServiceRequestIssueCategory::Incident->value,
+    ]);
 });

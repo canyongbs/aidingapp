@@ -34,18 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
-use Worksome\RequestFactories\RequestFactory;
+use App\Support\AbstractFeatureFlag;
 
-class EditServiceRequestTypeRequestFactory extends RequestFactory
+class ServiceRequestTypeDefaultIssueCategoryFeature extends AbstractFeatureFlag
 {
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'name' => $this->faker->name(),
-            'default_issue_category' => $this->faker->randomElement(ServiceRequestIssueCategory::cases())->value,
-        ];
+        return false;
     }
 }

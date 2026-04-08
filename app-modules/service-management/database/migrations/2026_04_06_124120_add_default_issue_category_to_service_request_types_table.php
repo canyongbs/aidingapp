@@ -34,18 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
-
 use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
-use Worksome\RequestFactories\RequestFactory;
+use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-class EditServiceRequestTypeRequestFactory extends RequestFactory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => $this->faker->name(),
-            'default_issue_category' => $this->faker->randomElement(ServiceRequestIssueCategory::cases())->value,
-        ];
+        DB::transaction(function () {
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->string('default_issue_category')->initial(ServiceRequestIssueCategory::Request->value);
+            });
+
+            ServiceRequestTypeDefaultIssueCategoryFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            ServiceRequestTypeDefaultIssueCategoryFeature::deactivate();
+
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->dropColumn('default_issue_category');
+            });
+        });
+    }
+};

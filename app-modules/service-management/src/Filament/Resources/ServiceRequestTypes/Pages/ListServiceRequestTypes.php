@@ -36,9 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
 
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -173,6 +175,9 @@ class ListServiceRequestTypes extends ListRecords
                         'name' => trim($newType['name']),
                         'category_id' => $categoryId,
                         'sort' => $newType['sort'],
+                        ...(ServiceRequestTypeDefaultIssueCategoryFeature::active()
+                            ? ['default_issue_category' => ServiceRequestIssueCategory::Request]
+                            : []),
                     ]);
 
                     $type->priorities()->createMany([

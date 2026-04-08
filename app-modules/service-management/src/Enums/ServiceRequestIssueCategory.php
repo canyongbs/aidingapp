@@ -34,18 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+namespace AidingApp\ServiceManagement\Enums;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
-use Worksome\RequestFactories\RequestFactory;
+use Filament\Support\Contracts\HasLabel;
 
-class EditServiceRequestTypeRequestFactory extends RequestFactory
+enum ServiceRequestIssueCategory: string implements HasLabel
 {
-    public function definition(): array
+    case Incident = 'incident';
+
+    case Request = 'request';
+
+    public function getLabel(): string
     {
-        return [
-            'name' => $this->faker->name(),
-            'default_issue_category' => $this->faker->randomElement(ServiceRequestIssueCategory::cases())->value,
-        ];
+        return match ($this) {
+            self::Incident => 'Incident',
+            self::Request => 'Request',
+        };
     }
 }
