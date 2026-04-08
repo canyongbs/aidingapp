@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
@@ -110,6 +111,46 @@ test('A successful action on the EditServiceRequest page', function () {
         ->toEqual($request->get('status_id'))
         ->and($serviceRequest->priority->id)
         ->toEqual($request->get('priority_id'));
+});
+
+test('A successful action on the EditServiceRequest page with issue category', function () {
+    $serviceRequest = ServiceRequest::factory([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->id,
+        'issue_category' => ServiceRequestIssueCategory::Request,
+    ])->create();
+
+    asSuperAdmin()
+        ->get(
+            ServiceRequestResource::getUrl('edit', [
+                'record' => $serviceRequest->getRouteKey(),
+            ])
+        )
+        ->assertSuccessful();
+
+    $request = collect(EditServiceRequestRequestFactory::new([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::InProgress,
+        ])->id,
+        'issue_category' => ServiceRequestIssueCategory::Incident->value,
+    ])->create());
+
+    livewire(EditServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $serviceRequest->refresh();
+
+    expect($serviceRequest->issue_category)->toBe(ServiceRequestIssueCategory::Incident);
+
+    assertDatabaseHas(ServiceRequest::class, [
+        'id' => $serviceRequest->getKey(),
+        'issue_category' => ServiceRequestIssueCategory::Incident->value,
+    ]);
 });
 
 test('check if time to resolution has correct value when status is changed', function () {

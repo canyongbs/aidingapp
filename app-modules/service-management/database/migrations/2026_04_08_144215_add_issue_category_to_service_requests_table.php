@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS LLC respects the intellectual property rights of others and expects the
       same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
@@ -34,40 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\DataTransferObjects;
-
 use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
-use Spatie\LaravelData\Data;
-use Spatie\LaravelData\Optional;
+use App\Features\ServiceRequestIssueCategoryFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-class ServiceRequestDataObject extends Data
-{
-    public function __construct(
-        public string|Optional $division_id,
-        public string|Optional $status_id,
-        public string $type_id,
-        public string|Optional $priority_id,
-        public string|Optional $title,
-        public string|Optional $close_details,
-        public string $respondent_id,
-        public ServiceRequestIssueCategory|Optional $issue_category,
-    ) {}
-
-    public static function fromData(array $data): static
+return new class () extends Migration {
+    public function up(): void
     {
-        return new self(
-            division_id: $data['division_id'] ?? Optional::create(),
-            status_id: $data['status_id'] ?? Optional::create(),
-            type_id: $data['type_id'],
-            priority_id: $data['priority_id'] ?? Optional::create(),
-            title: $data['title'] ?? Optional::create(),
-            close_details: $data['close_details'] ?? Optional::create(),
-            respondent_id: $data['respondent_id'],
-            issue_category: isset($data['issue_category'])
-              ? ($data['issue_category'] instanceof ServiceRequestIssueCategory
-                ? $data['issue_category']
-                : ServiceRequestIssueCategory::from($data['issue_category']))
-              : Optional::create(),
-        );
+        DB::transaction(function () {
+            Schema::table('service_requests', function (Blueprint $table) {
+                $table->string('issue_category')->initial(ServiceRequestIssueCategory::Request->value);
+            });
+
+            ServiceRequestIssueCategoryFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            ServiceRequestIssueCategoryFeature::deactivate();
+
+            Schema::table('service_requests', function (Blueprint $table) {
+                $table->dropColumn('issue_category');
+            });
+        });
+    }
+};

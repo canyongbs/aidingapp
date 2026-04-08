@@ -37,6 +37,7 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\CreateServiceRequest;
@@ -100,6 +101,36 @@ test('A successful action on the CreateServiceRequest page', function () {
         ->toEqual($request->get('status_id'))
         ->and($serviceRequest->priority->id)
         ->toEqual($request->get('priority_id'));
+});
+
+test('A successful action on the CreateServiceRequest page with issue category', function () {
+    asSuperAdmin()
+        ->get(
+            ServiceRequestResource::getUrl('create')
+        )
+        ->assertSuccessful();
+
+    $request = collect(CreateServiceRequestRequestFactory::new()->create());
+
+    livewire(CreateServiceRequest::class)
+        ->fillForm($request->toArray())
+        ->fillForm([
+            'respondent_id' => Contact::factory()->create()->getKey(),
+            'issue_category' => ServiceRequestIssueCategory::Incident->value,
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $serviceRequest = ServiceRequest::query()->latest('id')->first();
+
+    expect($serviceRequest)->not()->toBeNull()
+        ->and($serviceRequest?->issue_category)
+        ->toBe(ServiceRequestIssueCategory::Incident);
+
+    assertDatabaseHas(ServiceRequest::class, [
+        'id' => $serviceRequest?->getKey(),
+        'issue_category' => ServiceRequestIssueCategory::Incident->value,
+    ]);
 });
 
 test('CreateServiceRequest requires valid data', function ($data, $errors, $setup = null) {

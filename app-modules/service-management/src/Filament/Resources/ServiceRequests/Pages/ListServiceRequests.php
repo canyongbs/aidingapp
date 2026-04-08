@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\AddServiceRequestUpdateBulkAction;
@@ -48,6 +49,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Tables\Columns\IdColumn;
+use App\Features\ServiceRequestIssueCategoryFeature;
 use App\Models\Scopes\EducatableSort;
 use App\Models\User;
 use Filament\Actions\BulkActionGroup;
@@ -111,6 +113,12 @@ class ListServiceRequests extends ListRecords
                     ->color(fn (ServiceRequest $record): string => $record->status->color->value)
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('issue_category')
+                    ->label('Category')
+                    ->badge()
+                    ->sortable()
+                    ->toggleable()
+                    ->visible(fn (): bool => ServiceRequestIssueCategoryFeature::active()),    
                 TextColumn::make('respondent.display_name')
                     ->label('Related To')
                     ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
@@ -166,6 +174,14 @@ class ListServiceRequests extends ListRecords
                     )
                     ->multiple()
                     ->preload(),
+                SelectFilter::make('issue_category')
+                    ->label('Category')
+                    ->options(ServiceRequestIssueCategory::class)
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        filled($data['value']),
+                        fn (Builder $query) => $query->where('issue_category', $data['value'])
+                    ))
+                    ->visible(fn (): bool => ServiceRequestIssueCategoryFeature::active()),
                 SelectFilter::make('organization')
                     ->options(Organization::pluck('name', 'id')->toArray())
                     ->modifyQueryUsing(fn (Builder $query, $state): Builder => $query->when(

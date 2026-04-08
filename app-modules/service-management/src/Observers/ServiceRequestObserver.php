@@ -41,6 +41,7 @@ use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
@@ -53,8 +54,10 @@ use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestStatus
 use AidingApp\ServiceManagement\Notifications\ServiceRequestClosed;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
+use App\Features\ServiceRequestIssueCategoryFeature;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Gate;
@@ -66,6 +69,20 @@ class ServiceRequestObserver
     public function creating(ServiceRequest $serviceRequest): void
     {
         $serviceRequest->service_request_number ??= app(ServiceRequestNumberGenerator::class)->generate();
+
+        if (
+            ServiceRequestIssueCategoryFeature::active() &&
+            is_null($serviceRequest->issue_category)
+        ) {
+            $defaultIssueCategory = ServiceRequestPriority::query()
+                ->whereKey($serviceRequest->priority_id)
+                ->with('type:id,default_issue_category')
+                ->first()
+                ?->type
+                ?->default_issue_category;
+
+            $serviceRequest->issue_category = $defaultIssueCategory ?? ServiceRequestIssueCategory::Request;
+        }
     }
 
     public function created(ServiceRequest $serviceRequest): void

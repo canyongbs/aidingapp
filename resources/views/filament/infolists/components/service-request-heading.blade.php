@@ -34,18 +34,27 @@
 
 @props([
     'serviceRequestNumber',
+    'issueCategory' => null,
 ])
 
-<span>
-    Service Request: {{ $serviceRequestNumber }}
-    <button
-        class="relative -top-0.5 cursor-pointer align-middle text-gray-400 hover:text-gray-500"
-        type="button"
-        x-on:click="
-            window.navigator.clipboard.writeText('{{ $serviceRequestNumber }}')
-            $tooltip('Copied!', { timeout: 1500 })
-        "
-    >
-        <x-heroicon-o-clipboard-document class="inline h-4 w-4" />
-    </button>
-</span>
+<div class="inline-flex flex-col gap-1">
+    <span>
+        Service Request: {{ $serviceRequestNumber }}
+        <button
+            class="relative -top-0.5 cursor-pointer align-middle text-gray-400 hover:text-gray-500"
+            type="button"
+            x-on:click="
+                window.navigator.clipboard.writeText('{{ $serviceRequestNumber }}')
+                $tooltip('Copied!', { timeout: 1500 })
+            "
+        >
+            <x-heroicon-o-clipboard-document class="inline h-4 w-4" />
+        </button>
+    </span>
+
+    @if ($issueCategory)
+        <x-filament::badge :color="$issueCategory->getColor()" class="w-fit">
+            {{ $issueCategory->getLabel() }}
+        </x-filament::badge>
+    @endif
+</div>
