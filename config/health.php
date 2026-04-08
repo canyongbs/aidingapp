@@ -156,4 +156,6 @@ return [
      * in Horizon's silenced jobs screen.
      */
     'silence_health_queue_job' => true,
+
+    'treat_skipped_as_failure' => false,
 ];
