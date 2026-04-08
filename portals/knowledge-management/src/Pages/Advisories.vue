@@ -114,7 +114,9 @@
     const fetchAdvisories = async () => {
         loading.value = true;
         try {
-            const response = await get(`${props.apiUrl}/advisories?page=${currentPage.value}&per_page=${perPage.value}`);
+            const response = await get(
+                `${props.apiUrl}/advisories?page=${currentPage.value}&per_page=${perPage.value}`,
+            );
 
             let data = response.data.data;
 
