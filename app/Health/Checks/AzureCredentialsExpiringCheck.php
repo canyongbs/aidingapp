@@ -77,7 +77,7 @@ class AzureCredentialsExpiringCheck extends Check
                 return Str::startsWith($azureSsoSettings->client_secret, $item->hint);
             });
 
-            if($credentials->isEmpty()) {
+            if ($credentials->isEmpty()) {
                 throw new NoMatchingCredentialsException();
             }
 
