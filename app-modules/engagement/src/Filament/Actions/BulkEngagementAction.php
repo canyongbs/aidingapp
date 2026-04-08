@@ -38,10 +38,15 @@ namespace AidingApp\Engagement\Filament\Actions;
 
 use AidingApp\Engagement\Actions\CreateEngagementBatch;
 use AidingApp\Engagement\DataTransferObjects\EngagementCreationData;
-use AidingApp\Engagement\Filament\Schemas\EngagementFields;
+use AidingApp\Engagement\Filament\Schemas\Components\EngagementBodyInput;
+use AidingApp\Engagement\Filament\Schemas\Components\EngagementChannelSelect;
+use AidingApp\Engagement\Filament\Schemas\Components\EngagementScheduledAtDateTimePicker;
+use AidingApp\Engagement\Filament\Schemas\Components\EngagementSendLaterToggle;
+use AidingApp\Engagement\Filament\Schemas\Components\EngagementSubjectInput;
 use AidingApp\Engagement\Models\EngagementBatch;
 use AidingApp\Notification\Enums\NotificationChannel;
 use Filament\Actions\BulkAction;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Wizard\Step;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Carbon;
@@ -60,24 +65,27 @@ class BulkEngagementAction
             ->steps([
                 Step::make('Choose your delivery method')
                     ->schema([
-                        EngagementFields::getDeliveryMethodField(),
+                        EngagementChannelSelect::make(),
                     ]),
                 Step::make('Engagement Details')
                     ->description("Add the details that will be sent to the selected {$context}")
-                    ->schema(
-                        EngagementFields::getContentSchema(
+                    ->schema([
+                        EngagementSubjectInput::make(),
+                        EngagementBodyInput::make(),
+                        Actions::make([
                             BulkDraftWithAiAction::make()
                                 ->mergeTags([
                                     'contact full name',
                                     'contact email',
-                                ])
-                        )
-                    ),
+                                ]),
+                        ]),
+                    ]),
                 Step::make('Schedule')
                     ->description('Choose when you would like to send this engagement.')
-                    ->schema(
-                        EngagementFields::getScheduleSchema()
-                    ),
+                    ->schema([
+                        EngagementSendLaterToggle::make(),
+                        EngagementScheduledAtDateTimePicker::make(),
+                    ]),
             ])
             ->action(function (Collection $records, array $data, Schema $schema) {
                 $channel = NotificationChannel::parse($data['channel']);

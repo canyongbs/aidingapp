@@ -38,18 +38,33 @@ namespace AidingApp\Engagement\Filament\Actions;
 
 use AidingApp\Engagement\Actions\CreateEngagement;
 use AidingApp\Engagement\DataTransferObjects\EngagementCreationData;
-use AidingApp\Engagement\Filament\Schemas\EngagementFields;
+use AidingApp\Engagement\Filament\Schemas\Components\EngagementBodyInput;
+use AidingApp\Engagement\Filament\Schemas\Components\EngagementScheduledAtDateTimePicker;
+use AidingApp\Engagement\Filament\Schemas\Components\EngagementSendLaterToggle;
+use AidingApp\Engagement\Filament\Schemas\Components\EngagementSubjectInput;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Notification\Enums\NotificationChannel;
+use Closure;
+use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
-class RelationManagerSendEngagementAction extends CreateAction
+class SendEngagementAction extends Action
 {
+    protected bool $showDraftWithAi = true;
+
+    protected bool $isRelationManagerAction = false;
+
+    protected ?Closure $resolveRecipientsUsing = null;
+
+    protected ?Closure $draftWithAiActionUsing = null;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -64,22 +79,7 @@ class RelationManagerSendEngagementAction extends CreateAction
 
                 return auth()->user()->can('create', [Engagement::class, null]);
             })
-            ->schema(fn (Schema $schema) => $schema->components([
-                Fieldset::make('Content')
-                    ->schema(
-                        EngagementFields::getContentSchema(
-                            RelationManagerDraftWithAiAction::make()
-                                ->mergeTags([
-                                    'contact full name',
-                                    'contact email',
-                                ])
-                        )
-                    ),
-                Fieldset::make('Send your email')
-                    ->schema(
-                        EngagementFields::getScheduleSchema('By default, this email will send as soon as it is created unless you schedule it to send later.')
-                    ),
-            ]))
+            ->schema(fn(): array => $this->getFormSchema())
             ->action(function (array $data, Schema $schema, RelationManager $livewire) {
                 $data['body'] ??= ['type' => 'doc', 'content' => []];
 
@@ -104,13 +104,97 @@ class RelationManagerSendEngagementAction extends CreateAction
                     ->color('gray')
                     ->cancelParentActions()
                     ->requiresConfirmation()
-                    ->action(fn () => null)
-                    ->modalSubmitAction(fn (Action $action) => $action->color('danger')),
+                    ->action(fn() => null)
+                    ->modalSubmitAction(fn(Action $action) => $action->color('danger')),
             ]);
     }
 
     public static function getDefaultName(): ?string
     {
         return 'engage';
+    }
+
+    protected function getFormSchema(): array
+    {
+        return [
+            Fieldset::make('Content')
+                ->schema([
+                    EngagementSubjectInput::make(),
+                    EngagementBodyInput::make(),
+                    Actions::make([
+                        RelationManagerDraftWithAiAction::make()
+                            ->mergeTags([
+                                'contact full name',
+                                'contact email',
+                            ]),
+                    ]),
+                ]),
+            Fieldset::make('Send your email')
+                ->schema([
+                    EngagementSendLaterToggle::make()
+                        ->helperText('By default, this email will send as soon as it is created unless you schedule it to send later.'),
+                    EngagementScheduledAtDateTimePicker::make(),
+                ]),
+        ];
+    }
+
+    protected function relationManagerAction(bool $isRelationManagerAction = false): static
+    {
+        $this->isRelationManagerAction = $isRelationManagerAction;
+
+        return $this;
+    }
+
+    protected function getDraftWithAiAction(): Action
+    {
+        if ($this->draftWithAiActionUsing) {
+            return $this->evaluate($this->draftWithAiActionUsing);
+        }
+    
+        return RelationManagerDraftWithAiAction::make()
+            ->mergeTags(static::getDefaultMergeTags());
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return Collection<int, Model&CanBeNotified>
+     */
+    protected function resolveRecipients(array $data): Collection
+    {
+        if ($this->resolveRecipientsUsing) {
+            return $this->evaluate($this->resolveRecipientsUsing);
+        }
+
+        $contact = Contact::find($data['concern_id']);
+
+        if (! $contact) {
+            throw new Exception('Contact not found');
+        }
+
+        /** @var Collection<int, Model&CanBeNotified> $recipients */
+        $recipients = collect([$contact]);
+
+        return $recipients;
+    }
+    
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    protected function createEngagement(array $data, Schema $schema): void
+    {
+        $subject = is_array($data['subject'] ?? null) ? $data['subject'] : ['type' => 'doc', 'content' => []];
+        $body = is_array($data['body'] ?? null) ? $data['body'] : ['type' => 'doc', 'content' => []];
+
+
+        app(CreateEngagement::class)->execute(new EngagementCreationData(
+            user: auth()->user(),
+            recipient: $livewire->getOwnerRecord(),
+            channel: NotificationChannel::Email,
+            subject: $subject,
+            body: $body,
+            scheduledAt: ($data['send_later'] ?? false) ? Carbon::parse($data['scheduled_at'] ?? null) : null,
+            schema: $schema,
+        ));
     }
 }

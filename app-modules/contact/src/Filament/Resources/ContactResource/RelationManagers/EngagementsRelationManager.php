@@ -37,6 +37,7 @@
 namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
 use AidingApp\Engagement\Filament\Actions\RelationManagerSendEngagementAction;
+use AidingApp\Engagement\Filament\Actions\SendEngagementAction;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Notification\Enums\NotificationChannel;
@@ -191,7 +192,7 @@ class EngagementsRelationManager extends RelationManager
                     ->sortable(),
             ])
             ->headerActions([
-                RelationManagerSendEngagementAction::make(),
+                SendEngagementAction::make(),
             ])
             ->recordActions([
                 ViewAction::make()
