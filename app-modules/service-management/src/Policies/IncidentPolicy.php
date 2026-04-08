@@ -60,7 +60,7 @@ class IncidentPolicy
     {
         return $authenticatable->canOrElse(
             abilities: RenameIncidentsFeature::active() ? 'advisory.view-any' : 'incident.view-any',
-            denyResponse: 'You do not have permission to view any incidents.'
+            denyResponse: 'You do not have permission to view any ' . RenameIncidentsFeature::active() ? 'advisories' : 'incidents' . '.'
         );
     }
 
@@ -68,7 +68,7 @@ class IncidentPolicy
     {
         return $authenticatable->canOrElse(
             abilities: [RenameIncidentsFeature::active() ? 'advisory.*.view' : 'incident.*.view'],
-            denyResponse: 'You do not have permission to view this incident.'
+            denyResponse: 'You do not have permission to view this ' . RenameIncidentsFeature::active() ? 'advisory' : 'incident' . '.'
         );
     }
 
@@ -76,7 +76,7 @@ class IncidentPolicy
     {
         return $authenticatable->canOrElse(
             abilities: RenameIncidentsFeature::active() ? 'advisory.create' : 'incident.create',
-            denyResponse: 'You do not have permission to create incidents.'
+            denyResponse: 'You do not have permission to create ' . RenameIncidentsFeature::active() ? 'advisories' : 'incidents' . '.'
         );
     }
 
@@ -84,7 +84,7 @@ class IncidentPolicy
     {
         return $authenticatable->canOrElse(
             abilities: [RenameIncidentsFeature::active() ? 'advisory.*.update' : 'incident.*.update'],
-            denyResponse: 'You do not have permission to update this incident.'
+            denyResponse: 'You do not have permission to update this ' . RenameIncidentsFeature::active() ? 'advisory' : 'incident' . '.'
         );
     }
 
@@ -92,7 +92,7 @@ class IncidentPolicy
     {
         return $authenticatable->canOrElse(
             abilities: [RenameIncidentsFeature::active() ? 'advisory.*.delete' : 'incident.*.delete'],
-            denyResponse: 'You do not have permission to delete this incident.'
+            denyResponse: 'You do not have permission to delete this ' . RenameIncidentsFeature::active() ? 'advisory' : 'incident' . '.'
         );
     }
 
@@ -100,7 +100,7 @@ class IncidentPolicy
     {
         return $authenticatable->canOrElse(
             abilities: [RenameIncidentsFeature::active() ? 'advisory.*.restore' : 'incident.*.restore'],
-            denyResponse: 'You do not have permission to restore this incident.'
+            denyResponse: 'You do not have permission to restore this ' . RenameIncidentsFeature::active() ? 'advisory' : 'incident' . '.'
         );
     }
 
@@ -108,7 +108,7 @@ class IncidentPolicy
     {
         return $authenticatable->canOrElse(
             abilities: [RenameIncidentsFeature::active() ? 'advisory.*.force-delete' : 'incident.*.force-delete'],
-            denyResponse: 'You do not have permission to permanently delete this incident.'
+            denyResponse: 'You do not have permission to permanently delete this ' . RenameIncidentsFeature::active() ? 'advisory' : 'incident' . '.'
         );
     }
 

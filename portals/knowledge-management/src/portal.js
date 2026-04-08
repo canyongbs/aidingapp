@@ -109,9 +109,9 @@ customElements.define(
                         meta: { requiresAuth: true },
                     },
                     {
-                        path: baseUrl + '/incidents',
-                        name: 'incidents',
-                        component: () => import('./Pages/Incidents.vue'),
+                        path: baseUrl + '/advisories',
+                        name: 'advisories',
+                        component: () => import('./Pages/Advisories.vue'),
                         meta: { requiresAuth: true },
                     },
                     {

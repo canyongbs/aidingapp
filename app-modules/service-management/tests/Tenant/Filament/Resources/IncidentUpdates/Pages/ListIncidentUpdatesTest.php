@@ -92,23 +92,23 @@ test('ListIncidentUpdates is gated with proper feature access control', function
 
     actingAs($user);
 
-    //Service management false, advisories false, no incident permissions
+    //Service management false, advisories false, no advisory permissions
     get(IncidentUpdateResource::getUrl())->assertForbidden();
 
-    //Service management true, advisories false, no incident permissions
+    //Service management true, advisories false, no advisory permissions
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
     get(IncidentUpdateResource::getUrl())->assertForbidden();
 
-    //Service management false, advisories true, no incident permissions
+    //Service management false, advisories true, no advisory permissions
     $settings->data->addons->serviceManagement = false;
     $settings->data->addons->incidentManagement = true;
     $settings->save();
 
     get(IncidentUpdateResource::getUrl())->assertForbidden();
 
-    //Service management false, advisories false, incident permissions
+    //Service management false, advisories false, advisory permissions
     $user->givePermissionTo('advisory_update.view-any');
 
     $settings->data->addons->serviceManagement = false;
@@ -117,21 +117,21 @@ test('ListIncidentUpdates is gated with proper feature access control', function
 
     get(IncidentUpdateResource::getUrl())->assertForbidden();
 
-    //Service management true, advisories false, incident permissions
+    //Service management true, advisories false, advisory permissions
     $settings->data->addons->serviceManagement = true;
     $settings->data->addons->incidentManagement = false;
     $settings->save();
 
     get(IncidentUpdateResource::getUrl())->assertForbidden();
 
-    //Service management false, advisories true, incident permissions
+    //Service management false, advisories true, advisory permissions
     $settings->data->addons->serviceManagement = false;
     $settings->data->addons->incidentManagement = true;
     $settings->save();
 
     get(IncidentUpdateResource::getUrl())->assertForbidden();
 
-    //Service management true, advisories true, incident permissions
+    //Service management true, advisories true, advisory permissions
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 

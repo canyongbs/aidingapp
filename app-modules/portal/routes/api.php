@@ -155,9 +155,9 @@ Route::prefix('api')
                     ->middleware(['auth:sanctum'])
                     ->name('product.licenses');
 
-                Route::get('/incidents', IncidentController::class)
+                Route::get('/advisories', IncidentController::class)
                     ->middleware(['auth:sanctum'])
-                    ->name('incidents');
+                    ->name('advisories');
                 Route::get('/status', ServiceMonitorStatusController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('status');

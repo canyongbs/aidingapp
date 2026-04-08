@@ -99,9 +99,9 @@
         },
         {
             label: 'Advisories',
-            routeName: 'incidents',
+            routeName: 'advisories',
             visible: user !== null,
-            command: () => router.push({ name: 'incidents' }),
+            command: () => router.push({ name: 'advisories' }),
         },
         {
             label: 'Assets',
