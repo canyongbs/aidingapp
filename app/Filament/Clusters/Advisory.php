@@ -40,7 +40,7 @@ use BackedEnum;
 use Filament\Clusters\Cluster;
 use UnitEnum;
 
-class IncidentManagement extends Cluster
+class Advisory extends Cluster
 {
     protected static string | UnitEnum | null $navigationGroup = 'Settings';
 

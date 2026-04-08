@@ -55,6 +55,8 @@ class IncidentResource extends Resource
 
     protected static ?string $label = 'Advisory';
 
+    protected static ?string $slug = 'advisories';
+
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-m-clipboard-document-list';
 
     protected static string | UnitEnum | null $navigationGroup = 'Service Management';
