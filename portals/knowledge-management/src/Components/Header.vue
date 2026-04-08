@@ -98,7 +98,7 @@
             command: () => router.push({ name: 'status' }),
         },
         {
-            label: 'Incidents',
+            label: 'Advisories',
             routeName: 'incidents',
             visible: user !== null,
             command: () => router.push({ name: 'incidents' }),

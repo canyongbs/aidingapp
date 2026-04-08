@@ -48,5 +48,5 @@ class IncidentManagement extends Cluster
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static ?string $title = 'Incident Management';
+    protected static ?string $title = 'Advisories';
 }

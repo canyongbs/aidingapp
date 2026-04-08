@@ -143,7 +143,7 @@ class ManageLicenseSettings extends SettingsPage
                             Toggle::make('data.addons.projectManagement')
                                 ->label('Project Management'),
                             Toggle::make('data.addons.incidentManagement')
-                                ->label('Incident Management'),
+                                ->label('Advisories'),
                         ]
                     ),
             ])

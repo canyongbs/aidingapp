@@ -49,11 +49,11 @@ class IncidentManagement extends Dashboard
 
     protected static string | UnitEnum | null $navigationGroup = 'Service Management';
 
-    protected static ?string $navigationLabel = 'Incident Management';
+    protected static ?string $navigationLabel = 'Advisories';
 
-    protected static ?string $title = 'Incident Management';
+    protected static ?string $title = 'Advisories';
 
-    protected static string $routePath = 'incident-management';
+    protected static string $routePath = 'advisories';
 
     protected string $view = 'filament.pages.coming-soon';
 

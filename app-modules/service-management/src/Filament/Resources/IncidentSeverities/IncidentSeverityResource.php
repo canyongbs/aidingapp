@@ -52,6 +52,8 @@ class IncidentSeverityResource extends Resource
 
     protected static ?string $navigationLabel = 'Severities';
 
+    protected static ?string $label = 'Advisory Severity';
+
     protected static ?int $navigationSort = 10;
 
     public static function getPages(): array

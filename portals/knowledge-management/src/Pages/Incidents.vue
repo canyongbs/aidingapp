@@ -134,10 +134,10 @@
 </script>
 <template>
     <Page>
-        <template #heading> Incident History </template>
+        <template #heading> Advisory History </template>
 
         <template #breadcrumbs>
-            <Breadcrumbs :currentCrumb="'Incidents'" />
+            <Breadcrumbs :currentCrumb="'Advisories'" />
         </template>
 
         <div class="mb-6 bg-white shadow-xs rounded-lg p-4" v-for="(incident, index) in incidents" :key="index">
@@ -173,7 +173,7 @@
         </div>
 
         <EmptyState v-if="!loading && incidents.length === 0">
-            <template #heading>There are no incidents to display.</template>
+            <template #heading>There are no advisories to display.</template>
             <template #actions>
                 <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
                     Return Home
