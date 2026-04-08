@@ -46,6 +46,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Notifications\Concerns\FetchServiceRequestTemplate;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
@@ -54,7 +55,6 @@ use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestStatus
 use AidingApp\ServiceManagement\Notifications\ServiceRequestClosed;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
 use App\Features\ServiceRequestIssueCategoryFeature;
