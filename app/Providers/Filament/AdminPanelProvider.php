@@ -38,8 +38,8 @@ namespace App\Providers\Filament;
 
 use AidingApp\Authorization\Filament\Pages\Auth\Login;
 use AidingApp\Theme\Settings\ThemeSettings;
+use App\Filament\Clusters\ProfileSettings;
 use App\Filament\Pages\Dashboard;
-use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\ProductHealth;
 use App\Models\Tenant;
 use App\Multitenancy\Http\Middleware\NeedsTenant;
@@ -51,6 +51,7 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Infolists\Components\Entry;
+use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -186,7 +187,10 @@ class AdminPanelProvider extends PanelProvider
                 FilamentFullCalendarPlugin::make(),
             ])
             ->userMenuItems([
-                'profile' => fn (Action $action) => $action->url(fn () => EditProfile::getUrl()),
+                MenuItem::make()
+                    ->label('Profile Settings')
+                    ->url(fn () => ProfileSettings::getUrl())
+                    ->icon('heroicon-s-cog-6-tooth'),
                 Action::make('about')
                     ->label('About')
                     ->modalHeading('Aiding App® by Canyon GBS')

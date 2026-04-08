@@ -34,21 +34,16 @@
 </COPYRIGHT>
 */
 
-// Example migration test, leave commented out for future use as a template/example
-//describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
-//    it('properly changed the data', function () {
-//        isolatedMigration(
-//            '2025_01_01_165527_tmp_data_do_a_thing',
-//            function () {
-//                // Setup data before migration
-//
-//                // Run the migration
-//                $migrate = Artisan::call('migrate', ['--path' => 'app/database/migrations/2025_01_01_165527_tmp_data_do_a_thing.php']);
-//                // Confirm migration ran successfully
-//                expect($migrate)->toBe(Command::SUCCESS);
-//
-//                // Add any assertions to verify the migration's effects
-//            }
-//        );
-//    });
-//});
+namespace App\Filament\Clusters;
+
+use Filament\Clusters\Cluster;
+
+class ProfileSettings extends Cluster
+{
+    protected static ?string $title = 'Profile Settings';
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+}
