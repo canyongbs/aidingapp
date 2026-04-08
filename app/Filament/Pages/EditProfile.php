@@ -38,6 +38,7 @@ namespace App\Filament\Pages;
 
 use App\Models\User;
 use App\Settings\DisplaySettings;
+use CanyonGBS\Common\Filament\Forms\Components\TimezoneSelect;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
@@ -65,7 +66,6 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
-use Tapp\FilamentTimezoneField\Forms\Components\TimezoneSelect;
 
 /**
  * @property Schema $form

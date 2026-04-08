@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a483c2f9e8c60af39dcebeafacc34e9f",
+    "content-hash": "ff0694577d3818ea2bd6fe12aaa1d883",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -1649,16 +1649,16 @@
         },
         {
             "name": "canyongbs/filament-tiptap-editor",
-            "version": "2.3.4",
+            "version": "2.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canyongbs/filament-tiptap-editor.git",
-                "reference": "13bedc168de98abe9ea0553317d4fb7449018e03"
+                "reference": "266954dc9f970beb7e062b483402bfb1fc88215f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canyongbs/filament-tiptap-editor/zipball/13bedc168de98abe9ea0553317d4fb7449018e03",
-                "reference": "13bedc168de98abe9ea0553317d4fb7449018e03",
+                "url": "https://api.github.com/repos/canyongbs/filament-tiptap-editor/zipball/266954dc9f970beb7e062b483402bfb1fc88215f",
+                "reference": "266954dc9f970beb7e062b483402bfb1fc88215f",
                 "shasum": ""
             },
             "require": {
@@ -1719,9 +1719,9 @@
             ],
             "support": {
                 "issues": "https://github.com/canyongbs/filament-tiptap-editor/issues",
-                "source": "https://github.com/canyongbs/filament-tiptap-editor/tree/2.3.4"
+                "source": "https://github.com/canyongbs/filament-tiptap-editor/tree/2.3.6"
             },
-            "time": "2026-03-12T09:48:52+00:00"
+            "time": "2026-04-08T00:33:35+00:00"
         },
         {
             "name": "canyongbs/model-state-machine",
@@ -15256,16 +15256,16 @@
         },
         {
             "name": "symfony/intl",
-            "version": "v7.4.6",
+            "version": "v7.4.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/intl.git",
-                "reference": "6d6a398b18f73b3110140dbb030dcee2ae4ea81f"
+                "reference": "7cfb7792d580dea833647420afd5f2f98df8457b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/intl/zipball/6d6a398b18f73b3110140dbb030dcee2ae4ea81f",
-                "reference": "6d6a398b18f73b3110140dbb030dcee2ae4ea81f",
+                "url": "https://api.github.com/repos/symfony/intl/zipball/7cfb7792d580dea833647420afd5f2f98df8457b",
+                "reference": "7cfb7792d580dea833647420afd5f2f98df8457b",
                 "shasum": ""
             },
             "require": {
@@ -15322,7 +15322,7 @@
                 "localization"
             ],
             "support": {
-                "source": "https://github.com/symfony/intl/tree/v7.4.6"
+                "source": "https://github.com/symfony/intl/tree/v7.4.8"
             },
             "funding": [
                 {
@@ -15342,7 +15342,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-02-09T09:33:46+00:00"
+            "time": "2026-03-30T12:55:43+00:00"
         },
         {
             "name": "symfony/mailer",
