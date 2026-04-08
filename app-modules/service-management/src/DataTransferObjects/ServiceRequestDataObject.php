@@ -50,7 +50,7 @@ class ServiceRequestDataObject extends Data
         public string|Optional $title,
         public string|Optional $close_details,
         public string $respondent_id,
-        public ServiceRequestIssueCategory|Optional $issue_category,
+        public ServiceRequestIssueCategory|Optional $issue_category, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
     ) {}
 
     public static function fromData(array $data): static

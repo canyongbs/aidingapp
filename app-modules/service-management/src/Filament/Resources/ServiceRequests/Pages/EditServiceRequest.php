@@ -130,7 +130,7 @@ class EditServiceRequest extends EditRecord
                                             ->orderBy('name')
                                             ->pluck('name', 'id')
                                     )
-                                    ->afterStateUpdated(function ($state, Set $set) {
+                                    ->afterStateUpdated(function (?string $state, Set $set) {
                                         $set('priority_id', null);
 
                                         if (ServiceRequestIssueCategoryFeature::active() && $state) {

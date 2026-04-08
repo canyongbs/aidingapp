@@ -69,7 +69,8 @@ class ServiceRequestObserver
         $serviceRequest->service_request_number ??= app(ServiceRequestNumberGenerator::class)->generate();
 
         if (
-            ServiceRequestIssueCategoryFeature::active() &&
+            ServiceRequestIssueCategoryFeature::active() && // @phpstan-ignore booleanAnd.alwaysFalse
+            /** @phpstan-ignore function.impossibleType (Because this is in an observer it is possible that issue_category is null before the model is persisted) */
             is_null($serviceRequest->issue_category)
         ) {
             $serviceRequest->issue_category = $serviceRequest->priority->type->default_issue_category;
