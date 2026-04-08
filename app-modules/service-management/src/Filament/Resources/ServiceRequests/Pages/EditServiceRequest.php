@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -46,8 +47,10 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Concerns\EditPageRedirection;
+use App\Features\ServiceRequestIssueCategoryFeature;
 use CanyonGBS\Common\Filament\Support\HideDeletedExceptSelectedFromSelectOptions;
 use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
@@ -127,7 +130,17 @@ class EditServiceRequest extends EditRecord
                                             ->orderBy('name')
                                             ->pluck('name', 'id')
                                     )
-                                    ->afterStateUpdated(fn (Set $set) => $set('priority_id', null))
+                                    ->afterStateUpdated(function (?string $state, Set $set) {
+                                        $set('priority_id', null);
+
+                                        if (ServiceRequestIssueCategoryFeature::active() && $state) {
+                                            $type = ServiceRequestType::find($state);
+
+                                            if ($type?->default_issue_category) {
+                                                $set('issue_category', $type->default_issue_category->value);
+                                            }
+                                        }
+                                    })
                                     ->label('Type')
                                     ->required()
                                     ->rule(new ManagedServiceRequestType())
@@ -145,6 +158,13 @@ class EditServiceRequest extends EditRecord
                                     ->exists(ServiceRequestPriority::class, 'id')
                                     ->visible(fn (Get $get): bool => filled($get('type_id'))),
                             ]),
+                        Radio::make('issue_category')
+                            ->label('Issue Category')
+                            ->options(ServiceRequestIssueCategory::class)
+                            ->enum(ServiceRequestIssueCategory::class)
+                            ->inline()
+                            ->inlineLabel(false)
+                            ->visible(fn (): bool => ServiceRequestIssueCategoryFeature::active()),
                         TextInput::make('title')
                             ->required()
                             ->string()

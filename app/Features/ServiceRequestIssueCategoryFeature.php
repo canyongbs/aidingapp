@@ -34,35 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace App\Features;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @extends Factory<ServiceRequest>
- */
-class ServiceRequestFactory extends Factory
+class ServiceRequestIssueCategoryFeature extends AbstractFeatureFlag
 {
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'respondent_id' => Contact::factory(),
-            'service_request_number' => app(ServiceRequestNumberGenerator::class)->generate(),
-            'title' => str($this->faker->words(asText: true))->headline()->toString(),
-            'close_details' => $this->faker->sentence(),
-            'division_id' => Division::inRandomOrder()->first()->id ?? Division::factory(),
-            'status_id' => ServiceRequestStatus::inRandomOrder()->first() ?? ServiceRequestStatus::factory(),
-            'priority_id' => ServiceRequestPriority::inRandomOrder()->first() ?? ServiceRequestPriority::factory(),
-            'issue_category' => $this->faker->randomElement(ServiceRequestIssueCategory::cases()),
-            'created_by_id' => User::factory(),
-        ];
+        return false;
     }
 }

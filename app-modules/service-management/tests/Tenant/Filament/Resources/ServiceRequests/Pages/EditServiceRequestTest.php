@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
@@ -109,7 +110,9 @@ test('A successful action on the EditServiceRequest page', function () {
         ->and($serviceRequest->status->id)
         ->toEqual($request->get('status_id'))
         ->and($serviceRequest->priority->id)
-        ->toEqual($request->get('priority_id'));
+        ->toEqual($request->get('priority_id'))
+        ->and($serviceRequest->issue_category)
+        ->toEqual($request->get('issue_category'));
 });
 
 test('check if time to resolution has correct value when status is changed', function () {
@@ -207,6 +210,38 @@ test('EditServiceRequest requires valid data', function ($data, $errors, $setup 
         'close_details is not a string' => [EditServiceRequestRequestFactory::new()->state(['close_details' => 1]), ['close_details' => 'string']],
     ]
 );
+
+test('type afterStateUpdated sets issue_category from default_issue_category', function () {
+    asSuperAdmin();
+
+    $serviceRequestType = ServiceRequestType::factory()->create([
+        'default_issue_category' => ServiceRequestIssueCategory::Incident,
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+        'issue_category' => ServiceRequestIssueCategory::Request,
+    ])->create();
+
+    $newType = ServiceRequestType::factory()->create([
+        'default_issue_category' => ServiceRequestIssueCategory::Incident,
+    ]);
+
+    livewire(EditServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->fillForm([
+            'type_id' => $newType->getKey(),
+        ])
+        ->assertFormSet([
+            'issue_category' => ServiceRequestIssueCategory::Incident,
+        ]);
+});
 
 // Permission Tests
 

@@ -36,9 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Enums;
 
+use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 
-enum ServiceRequestIssueCategory: string implements HasLabel
+enum ServiceRequestIssueCategory: string implements HasColor, HasLabel
 {
     case Incident = 'incident';
 
@@ -49,6 +50,14 @@ enum ServiceRequestIssueCategory: string implements HasLabel
         return match ($this) {
             self::Incident => 'Incident',
             self::Request => 'Request',
+        };
+    }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Incident => 'danger',
+            self::Request => 'primary',
         };
     }
 }

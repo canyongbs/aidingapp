@@ -41,6 +41,7 @@ use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
@@ -49,6 +50,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
+use App\Features\ServiceRequestIssueCategoryFeature;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -113,9 +116,17 @@ class CreateServiceRequest extends CreateRecord
                                     })
                                         ->pluck('name', 'id'))
                                     ->rule(new ManagedServiceRequestType())
-                                    ->afterStateUpdated(function (Set $set, CreateServiceRequest $livewire) {
+                                    ->afterStateUpdated(function (?string $state, Set $set, CreateServiceRequest $livewire) {
                                         $set('priority_id', null);
                                         $livewire->form->getComponent('dynamicTypeFields')?->getChildSchema()->fill();
+
+                                        if (ServiceRequestIssueCategoryFeature::active() && $state) {
+                                            $type = ServiceRequestType::find($state);
+
+                                            if ($type?->default_issue_category) {
+                                                $set('issue_category', $type->default_issue_category->value);
+                                            }
+                                        }
                                     })
                                     ->label('Type')
                                     ->required()
@@ -134,6 +145,14 @@ class CreateServiceRequest extends CreateRecord
                                     ->visible(fn (Get $get): bool => filled($get('type_id')))
                                     ->columnSpan(2),
                             ]),
+                        Radio::make('issue_category')
+                            ->label('Issue Category')
+                            ->options(ServiceRequestIssueCategory::class)
+                            ->enum(ServiceRequestIssueCategory::class)
+                            ->inline()
+                            ->inlineLabel(false)
+                            ->required()
+                            ->visible(fn (): bool => ServiceRequestIssueCategoryFeature::active()),
                         TextInput::make('title')
                             ->required()
                             ->string()

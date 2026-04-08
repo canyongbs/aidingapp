@@ -34,35 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
-
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Features\ServiceRequestIssueCategoryFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-/**
- * @extends Factory<ServiceRequest>
- */
-class ServiceRequestFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'respondent_id' => Contact::factory(),
-            'service_request_number' => app(ServiceRequestNumberGenerator::class)->generate(),
-            'title' => str($this->faker->words(asText: true))->headline()->toString(),
-            'close_details' => $this->faker->sentence(),
-            'division_id' => Division::inRandomOrder()->first()->id ?? Division::factory(),
-            'status_id' => ServiceRequestStatus::inRandomOrder()->first() ?? ServiceRequestStatus::factory(),
-            'priority_id' => ServiceRequestPriority::inRandomOrder()->first() ?? ServiceRequestPriority::factory(),
-            'issue_category' => $this->faker->randomElement(ServiceRequestIssueCategory::cases()),
-            'created_by_id' => User::factory(),
-        ];
+        DB::transaction(function () {
+            Schema::table('service_requests', function (Blueprint $table) {
+                $table->string('issue_category')->initial(ServiceRequestIssueCategory::Request->value);
+            });
+
+            ServiceRequestIssueCategoryFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            ServiceRequestIssueCategoryFeature::deactivate();
+
+            Schema::table('service_requests', function (Blueprint $table) {
+                $table->dropColumn('issue_category');
+            });
+        });
+    }
+};
