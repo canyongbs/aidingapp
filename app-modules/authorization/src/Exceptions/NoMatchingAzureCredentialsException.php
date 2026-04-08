@@ -38,7 +38,7 @@ namespace AidingApp\Authorization\Exceptions;
 
 use Exception;
 
-class NoMatchingCredentialsException extends Exception
+class NoMatchingAzureCredentialsException extends Exception
 {
     public function __construct()
     {
