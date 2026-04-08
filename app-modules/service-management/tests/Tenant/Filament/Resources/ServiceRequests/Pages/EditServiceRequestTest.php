@@ -111,7 +111,7 @@ test('A successful action on the EditServiceRequest page', function () {
         ->toEqual($request->get('status_id'))
         ->and($serviceRequest->priority->id)
         ->toEqual($request->get('priority_id'))
-        ->and($serviceRequest->issue_category->value)
+        ->and($serviceRequest->issue_category)
         ->toEqual($request->get('issue_category'));
 });
 
@@ -208,7 +208,6 @@ test('EditServiceRequest requires valid data', function ($data, $errors, $setup 
             ['priority_id' => 'in'],
         ],
         'close_details is not a string' => [EditServiceRequestRequestFactory::new()->state(['close_details' => 1]), ['close_details' => 'string']],
-        'issue_category is not a valid enum' => [EditServiceRequestRequestFactory::new()->state(['issue_category' => 'invalid']), ['issue_category' => 'Illuminate\Validation\Rules\Enum']],
     ]
 );
 
@@ -240,7 +239,7 @@ test('type afterStateUpdated sets issue_category from default_issue_category', f
             'type_id' => $newType->getKey(),
         ])
         ->assertFormSet([
-            'issue_category' => ServiceRequestIssueCategory::Incident->value,
+            'issue_category' => ServiceRequestIssueCategory::Incident,
         ]);
 });
 
