@@ -130,7 +130,17 @@ class EditServiceRequest extends EditRecord
                                             ->orderBy('name')
                                             ->pluck('name', 'id')
                                     )
-                                    ->afterStateUpdated(fn (Set $set) => $set('priority_id', null))
+                                    ->afterStateUpdated(function ($state, Set $set) {
+                                        $set('priority_id', null);
+
+                                        if (ServiceRequestIssueCategoryFeature::active() && $state) {
+                                            $type = ServiceRequestType::find($state);
+
+                                            if ($type?->default_issue_category) {
+                                                $set('issue_category', $type->default_issue_category->value);
+                                            }
+                                        }
+                                    })
                                     ->label('Type')
                                     ->required()
                                     ->rule(new ManagedServiceRequestType())
