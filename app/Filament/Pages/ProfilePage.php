@@ -105,15 +105,6 @@ class ProfilePage extends Page
             return;
         }
 
-        if (request()->hasSession() && array_key_exists('password', $data)) {
-            request()->session()->put([
-                'password_hash_' . Filament::getAuthGuard() => $data['password'],
-            ]);
-        }
-
-        $this->data['password'] = null;
-        $this->data['passwordConfirmation'] = null;
-
         $this->getSavedNotification()?->send();
 
         $this->dispatch('refresh-branding-bar');
