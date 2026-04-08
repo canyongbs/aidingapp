@@ -36,9 +36,11 @@
 
 namespace App\Filament\Pages;
 
+use App\Models\User;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -61,6 +63,9 @@ class ProfileInformation extends ProfilePage
 
     public function form(Schema $schema): Schema
     {
+        /** @var User $user */
+        $user = auth()->user();
+
         return $schema
             ->components([
                 Section::make('Profile Information')
@@ -72,7 +77,16 @@ class ProfileInformation extends ProfilePage
                             ->image()
                             ->imageEditor()
                             ->circleCropper()
-                            ->columnSpanFull(),
+                            ->hidden($user->is_external)
+                            ->columnSpanFull()
+                            ->visibility('private')
+                            ->disk('s3')
+                            ->collection('avatar')
+                            ->avatar(),
+                        TextEntry::make('external_avatar')
+                            ->label('Avatar')
+                            ->state('Your authentication into this application is managed through single sign on (SSO). Please update your profile picture in your source authentication system and then logout and login here to persist that update into this application.')
+                            ->visible($user->is_external),
                         TextInput::make('job_title')
                             ->label('Job Title')
                             ->string()
