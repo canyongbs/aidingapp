@@ -47,7 +47,6 @@ use AidingApp\Notification\Enums\NotificationChannel;
 use Closure;
 use Exception;
 use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Fieldset;
@@ -79,7 +78,7 @@ class SendEngagementAction extends Action
 
                 return auth()->user()->can('create', [Engagement::class, null]);
             })
-            ->schema(fn(): array => $this->getFormSchema())
+            ->schema(fn (): array => $this->getFormSchema())
             ->action(function (array $data, Schema $schema, RelationManager $livewire) {
                 $data['body'] ??= ['type' => 'doc', 'content' => []];
 
@@ -104,8 +103,8 @@ class SendEngagementAction extends Action
                     ->color('gray')
                     ->cancelParentActions()
                     ->requiresConfirmation()
-                    ->action(fn() => null)
-                    ->modalSubmitAction(fn(Action $action) => $action->color('danger')),
+                    ->action(fn () => null)
+                    ->modalSubmitAction(fn (Action $action) => $action->color('danger')),
             ]);
     }
 
@@ -150,7 +149,7 @@ class SendEngagementAction extends Action
         if ($this->draftWithAiActionUsing) {
             return $this->evaluate($this->draftWithAiActionUsing);
         }
-    
+
         return RelationManagerDraftWithAiAction::make()
             ->mergeTags(static::getDefaultMergeTags());
     }
@@ -177,7 +176,7 @@ class SendEngagementAction extends Action
 
         return $recipients;
     }
-    
+
     /**
      * @param  array<string, mixed>  $data
      */
@@ -185,7 +184,6 @@ class SendEngagementAction extends Action
     {
         $subject = is_array($data['subject'] ?? null) ? $data['subject'] : ['type' => 'doc', 'content' => []];
         $body = is_array($data['body'] ?? null) ? $data['body'] : ['type' => 'doc', 'content' => []];
-
 
         app(CreateEngagement::class)->execute(new EngagementCreationData(
             user: auth()->user(),
