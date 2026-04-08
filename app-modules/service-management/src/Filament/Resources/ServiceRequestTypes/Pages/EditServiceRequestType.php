@@ -90,8 +90,7 @@ class EditServiceRequestType extends EditRecord
                             ->label('Default Issue Category')
                             ->options(ServiceRequestIssueCategory::class)
                             ->enum(ServiceRequestIssueCategory::class)
-                            ->required(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active())
-                            ->dehydrated(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active())
+                            ->required()
                             ->visible(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active()),
                         Group::make()
                             ->schema([

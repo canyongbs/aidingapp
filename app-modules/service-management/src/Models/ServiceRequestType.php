@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
 use AidingApp\Team\Models\Team;
-use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
@@ -129,6 +128,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'has_enabled_feedback_collection' => 'boolean',
         'has_enabled_csat' => 'boolean',
         'has_enabled_nps' => 'boolean',
+        'default_issue_category' => ServiceRequestIssueCategory::class,
         'assignment_type' => ServiceRequestTypeAssignmentTypes::class,
         'is_managers_service_request_created_email_enabled' => 'boolean',
         'is_managers_service_request_created_notification_enabled' => 'boolean',
@@ -302,15 +302,5 @@ class ServiceRequestType extends BaseModel implements Auditable
     protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
-    }
-
-    /**
-     * TODO: ServiceRequestTypeDefaultIssueCategoryFeature Cleanup - After ServiceRequestTypeDefaultIssueCategoryFeature is removed: please move default_issue_category back to $cast property
-     */
-    protected function casts(): array
-    {
-        return ServiceRequestTypeDefaultIssueCategoryFeature::active()
-            ? ['default_issue_category' => ServiceRequestIssueCategory::class]
-            : [];
     }
 }

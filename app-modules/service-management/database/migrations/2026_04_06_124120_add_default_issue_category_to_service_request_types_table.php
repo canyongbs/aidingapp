@@ -37,9 +37,9 @@
 use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
 use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
