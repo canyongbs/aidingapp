@@ -41,12 +41,10 @@ use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Notifications\Concerns\FetchServiceRequestTemplate;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
@@ -74,14 +72,7 @@ class ServiceRequestObserver
             ServiceRequestIssueCategoryFeature::active() &&
             is_null($serviceRequest->issue_category)
         ) {
-            $defaultIssueCategory = ServiceRequestPriority::query()
-                ->whereKey($serviceRequest->priority_id)
-                ->with('type:id,default_issue_category')
-                ->first()
-                ?->type
-                ?->default_issue_category;
-
-            $serviceRequest->issue_category = $defaultIssueCategory ?? ServiceRequestIssueCategory::Request;
+            $serviceRequest->issue_category = $serviceRequest->priority->type->default_issue_category;
         }
     }
 
