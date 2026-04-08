@@ -40,7 +40,7 @@
     import BaseButton from '../Components/ui/BaseButton.vue';
     import { consumer } from '../Services/Consumer';
 
-    const incidents = ref([]);
+    const advisories = ref([]);
     const { get } = consumer();
     const loading = ref(true);
     const currentPage = ref(1);
@@ -58,7 +58,7 @@
     });
 
     onMounted(() => {
-        fetchIncidents();
+        fetchAdvisories();
     });
 
     const formatDate = (date) => {
@@ -78,7 +78,7 @@
     const loadMore = () => {
         if (nextPageUrl.value) {
             currentPage.value++;
-            fetchIncidents();
+            fetchAdvisories();
         }
     };
 
@@ -111,14 +111,14 @@
         return allowedColors[severity?.color] || 'text-gray-600';
     };
 
-    const fetchIncidents = async () => {
+    const fetchAdvisories = async () => {
         loading.value = true;
         try {
-            const response = await get(`${props.apiUrl}/incidents?page=${currentPage.value}&per_page=${perPage.value}`);
+            const response = await get(`${props.apiUrl}/advisories?page=${currentPage.value}&per_page=${perPage.value}`);
 
             let data = response.data.data;
 
-            incidents.value.push(...data.data);
+            advisories.value.push(...data.data);
             currentPage.value = data.current_page;
             nextPageUrl.value = data.next_page_url;
             prevPageUrl.value = data.prev_page_url;
@@ -127,7 +127,7 @@
             hasMore.value = nextPageUrl.value !== null;
             loading.value = false;
         } catch (error) {
-            incidents.value = [];
+            advisories.value = [];
             loading.value = false;
         }
     };
@@ -140,24 +140,24 @@
             <Breadcrumbs :currentCrumb="'Advisories'" />
         </template>
 
-        <div class="mb-6 bg-white shadow-xs rounded-lg p-4" v-for="(incident, index) in incidents" :key="index">
+        <div class="mb-6 bg-white shadow-xs rounded-lg p-4" v-for="(advisory, index) in advisories" :key="index">
             <time class="mb-1 text-lg font-semibold leading-none text-black">{{
-                formatDate(incident.created_at)
+                formatDate(advisory.created_at)
             }}</time>
-            <h3 class="text-lg font-semibold" :class="severityTextColor(incident.severity)">
-                {{ incident.title }}
+            <h3 class="text-lg font-semibold" :class="severityTextColor(advisory.severity)">
+                {{ advisory.title }}
             </h3>
             <p class="text-sm text-gray-500">
-                {{ incident.description }}
+                {{ advisory.description }}
             </p>
             <span
                 class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm mb-5"
-                v-if="incident.status"
-                >{{ incident.status.name }}</span
+                v-if="advisory.status"
+                >{{ advisory.status.name }}</span
             >
-            <hr class="my-4" v-if="incident.incident_updates?.length" />
-            <ol class="relative border-s border-gray-200" v-if="incident.incident_updates?.length">
-                <li class="mb-8 ms-4" v-for="updateData in incident.incident_updates" :key="updateData.id">
+            <hr class="my-4" v-if="advisory.advisory_updates?.length" />
+            <ol class="relative border-s border-gray-200" v-if="advisory.advisory_updates?.length">
+                <li class="mb-8 ms-4" v-for="updateData in advisory.advisory_updates" :key="updateData.id">
                     <div class="absolute w-3 h-3 bg-gray-200 rounded-lg mt-1.5 -inset-s-1.5 border border-white"></div>
 
                     <time class="mb-1 text-sm font-normal leading-none text-gray-400">{{
@@ -172,7 +172,7 @@
             <BaseButton variant="primary" size="md" @click="loadMore"> Load More </BaseButton>
         </div>
 
-        <EmptyState v-if="!loading && incidents.length === 0">
+        <EmptyState v-if="!loading && advisories.length === 0">
             <template #heading>There are no advisories to display.</template>
             <template #actions>
                 <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
