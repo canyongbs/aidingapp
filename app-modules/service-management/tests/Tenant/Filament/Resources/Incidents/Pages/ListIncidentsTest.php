@@ -54,7 +54,7 @@ test('ListIncidents is gated with proper access control', function () {
             IncidentResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('incident.view-any');
+    $user->givePermissionTo('advisory.view-any');
 
     actingAs($user)
         ->get(
@@ -70,7 +70,7 @@ it('is gated with proper access control', function () {
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('incident.view-any');
+    $user->givePermissionTo('advisory.view-any');
 
     actingAs($user);
 
@@ -79,11 +79,11 @@ it('is gated with proper access control', function () {
     $settings->data->addons->incidentManagement = true;
     $settings->save();
 
-    $user->revokePermissionTo('incident.view-any');
+    $user->revokePermissionTo('advisory.view-any');
 
     get(ListIncidents::getUrl())->assertForbidden();
 
-    $user->givePermissionTo('incident.view-any');
+    $user->givePermissionTo('advisory.view-any');
 
     get(ListIncidents::getUrl())->assertSuccessful();
 });
@@ -96,7 +96,7 @@ test('can list records', function () {
             IncidentResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('incident.view-any');
+    $user->givePermissionTo('advisory.view-any');
 
     $records = Incident::factory()->count(5)->create();
 
@@ -111,8 +111,8 @@ test('bulk delete Incidents', function () {
 
     actingAs($user);
 
-    $user->givePermissionTo('incident.view-any');
-    $user->givePermissionTo('incident.*.delete');
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.*.delete');
 
     $incidents = Incident::factory()->count(10)->create();
 

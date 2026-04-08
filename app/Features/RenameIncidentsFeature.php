@@ -34,37 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages\CreateIncidentStatus;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages\EditIncidentStatus;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages\ListIncidentStatuses;
-use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages\ViewIncidentStatus;
-use AidingApp\ServiceManagement\Models\IncidentStatus;
-use App\Filament\Clusters\Advisory;
-use Filament\Resources\Resource;
+use App\Support\AbstractFeatureFlag;
 
-class IncidentStatusResource extends Resource
+class RenameIncidentsFeature extends AbstractFeatureFlag
 {
-    protected static ?string $model = IncidentStatus::class;
-
-    protected static ?string $cluster = Advisory::class;
-
-    protected static ?string $navigationLabel = 'Statuses';
-
-    protected static ?string $label = 'Advisory Status';
-
-    protected static ?string $slug = 'advisory-statuses';
-
-    protected static ?int $navigationSort = 20;
-
-    public static function getPages(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'index' => ListIncidentStatuses::route('/'),
-            'create' => CreateIncidentStatus::route('/create'),
-            'view' => ViewIncidentStatus::route('/{record}'),
-            'edit' => EditIncidentStatus::route('/{record}/edit'),
-        ];
+        return false;
     }
 }

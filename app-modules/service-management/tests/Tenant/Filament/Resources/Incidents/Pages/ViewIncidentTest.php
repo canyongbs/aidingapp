@@ -46,8 +46,8 @@ test('The correct details are displayed on the ViewIncident page', function () {
 
     actingAs($user);
 
-    $user->givePermissionTo('incident.view-any');
-    $user->givePermissionTo('incident.*.view');
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.*.view');
 
     $incident = Incident::factory()->create();
 

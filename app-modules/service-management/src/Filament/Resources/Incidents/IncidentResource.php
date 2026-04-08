@@ -51,7 +51,11 @@ class IncidentResource extends Resource
 {
     protected static ?string $model = Incident::class;
 
-    protected static ?string $navigationLabel = 'Incident Management';
+    protected static ?string $navigationLabel = 'Advisories';
+
+    protected static ?string $label = 'Advisory';
+
+    protected static ?string $slug = 'advisories';
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-m-clipboard-document-list';
 
@@ -59,7 +63,7 @@ class IncidentResource extends Resource
 
     protected static ?int $navigationSort = 60;
 
-    protected static ?string $breadcrumb = 'Incident Management';
+    protected static ?string $breadcrumb = 'Advisories';
 
     public static function getRecordSubNavigation(Page $page): array
     {

@@ -66,7 +66,7 @@ test('Can fetch all incidents with updates', function () {
         ->has(IncidentUpdate::factory()->count(2), 'incidentUpdates')
         ->create();
 
-    $url = URL::signedRoute(name: 'api.portal.incidents', absolute: false);
+    $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
     $response = get($url);
 
     $response->assertStatus(200);

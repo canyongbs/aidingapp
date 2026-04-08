@@ -41,16 +41,20 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities\Pages\Edit
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities\Pages\ListIncidentSeverities;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentSeverities\Pages\ViewIncidentSeverity;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
-use App\Filament\Clusters\IncidentManagement;
+use App\Filament\Clusters\Advisory;
 use Filament\Resources\Resource;
 
 class IncidentSeverityResource extends Resource
 {
     protected static ?string $model = IncidentSeverity::class;
 
-    protected static ?string $cluster = IncidentManagement::class;
+    protected static ?string $cluster = Advisory::class;
 
     protected static ?string $navigationLabel = 'Severities';
+
+    protected static ?string $label = 'Advisory Severity';
+
+    protected static ?string $slug = 'advisory-severities';
 
     protected static ?int $navigationSort = 10;
 

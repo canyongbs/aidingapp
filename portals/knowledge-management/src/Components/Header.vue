@@ -98,10 +98,10 @@
             command: () => router.push({ name: 'status' }),
         },
         {
-            label: 'Incidents',
-            routeName: 'incidents',
+            label: 'Advisories',
+            routeName: 'advisories',
             visible: user !== null,
-            command: () => router.push({ name: 'incidents' }),
+            command: () => router.push({ name: 'advisories' }),
         },
         {
             label: 'Assets',

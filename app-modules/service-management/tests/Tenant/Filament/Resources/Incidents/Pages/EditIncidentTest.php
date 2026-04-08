@@ -61,8 +61,8 @@ test('EditIncident is gated with proper access control', function () {
     ])
         ->assertForbidden();
 
-    $user->givePermissionTo('incident.view-any');
-    $user->givePermissionTo('incident.*.update');
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.*.update');
 
     actingAs($user)
         ->get(
@@ -92,8 +92,8 @@ test('EditIncident validates the inputs', function ($data, $errors) {
 
     actingAs($user);
 
-    $user->givePermissionTo('incident.view-any');
-    $user->givePermissionTo('incident.*.update');
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.*.update');
 
     $incident = Incident::factory()->create();
 
@@ -157,15 +157,15 @@ test('delete action visible with proper access control', function () {
 
     actingAs($user);
 
-    $user->givePermissionTo('incident.view-any');
-    $user->givePermissionTo('incident.*.update');
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.*.update');
 
     livewire(EditIncident::class, [
         'record' => $incident->getRouteKey(),
     ])
         ->assertActionHidden(DeleteAction::class);
 
-    $user->givePermissionTo('incident.*.delete');
+    $user->givePermissionTo('advisory.*.delete');
 
     livewire(EditIncident::class, [
         'record' => $incident->getRouteKey(),
