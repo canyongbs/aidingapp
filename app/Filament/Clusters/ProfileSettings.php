@@ -34,39 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Models;
+namespace App\Filament\Clusters;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
+use Filament\Clusters\Cluster;
 
-/**
- * @mixin IdeHelperOutboundEmailMessageId
- */
-class OutboundEmailMessageId extends Model
+class ProfileSettings extends Cluster
 {
-    use HasUuids;
-    use UsesTenantConnection;
+    protected static ?string $title = 'Profile Settings';
 
-    protected $fillable = [
-        'message_id',
-    ];
-
-    /**
-     * @return BelongsTo<EmailMessage, $this>
-     */
-    public function emailMessage(): BelongsTo
+    public static function shouldRegisterNavigation(): bool
     {
-        return $this->belongsTo(EmailMessage::class, 'message_id', 'outbound_message_id');
-    }
-
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function trackable(): MorphTo
-    {
-        return $this->morphTo();
+        return false;
     }
 }

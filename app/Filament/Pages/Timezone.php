@@ -34,39 +34,51 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Models;
+namespace App\Filament\Pages;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
+use App\Settings\DisplaySettings;
+use CanyonGBS\Common\Filament\Forms\Components\TimezoneSelect;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
 /**
- * @mixin IdeHelperOutboundEmailMessageId
+ * @property Schema $form
  */
-class OutboundEmailMessageId extends Model
+class Timezone extends ProfilePage
 {
-    use HasUuids;
-    use UsesTenantConnection;
+    protected static ?string $slug = 'timezone';
 
-    protected $fillable = [
-        'message_id',
-    ];
+    protected static ?string $title = 'Timezone';
 
-    /**
-     * @return BelongsTo<EmailMessage, $this>
-     */
-    public function emailMessage(): BelongsTo
+    protected static ?int $navigationSort = 30;
+
+    public static function shouldRegisterNavigation(): bool
     {
-        return $this->belongsTo(EmailMessage::class, 'message_id', 'outbound_message_id');
+        return true;
     }
 
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function trackable(): MorphTo
+    public function form(Schema $schema): Schema
     {
-        return $this->morphTo();
+        return $schema
+            ->components([
+                Section::make('Timezone')
+                    ->description('Update your timezone.')
+                    ->schema([
+                        TimezoneSelect::make('timezone')
+                            ->required()
+                            ->selectablePlaceholder(false)
+                            ->helperText(function (): string {
+                                $timezone = config('app.timezone');
+
+                                if (
+                                    filled($displaySettingsTimezone = app(DisplaySettings::class)->timezone)
+                                ) {
+                                    $timezone = $displaySettingsTimezone;
+                                }
+
+                                return "Default: {$timezone}";
+                            }),
+                    ]),
+            ]);
     }
 }
