@@ -84,7 +84,7 @@ class IncidentUpdatePolicy
     public function update(Authenticatable $authenticatable, IncidentUpdate $incidentUpdate): Response
     {
         if ($incidentUpdate->incident?->status?->classification === SystemIncidentStatusClassification::Resolved) {
-            return RenameIncidentsFeature::active() ? Response::deny('Resolved advisories cannot be edited.') :Response::deny('Resolved incidents cannot be edited.');
+            return RenameIncidentsFeature::active() ? Response::deny('Resolved advisories cannot be edited.') : Response::deny('Resolved incidents cannot be edited.');
         }
 
         return $authenticatable->canOrElse(
