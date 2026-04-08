@@ -36,6 +36,7 @@
 
 namespace App\Health\Checks;
 
+use AidingApp\Authorization\Exceptions\NoMatchingCredentialsException;
 use AidingApp\Authorization\Settings\AzureSsoSettings;
 use Carbon\Carbon;
 use Exception;
@@ -53,25 +54,32 @@ class AzureCredentialsExpiringCheck extends Check
         try {
             $azureSsoSettings = app(AzureSsoSettings::class);
 
-            $response = Http::asForm()->post(
-                'https://login.microsoftonline.com/' . $azureSsoSettings->tenant_id . '/oauth2/v2.0/token',
-                [
-                    'client_id' => $azureSsoSettings->client_id,
-                    'client_secret' => $azureSsoSettings->client_secret,
-                    'grant_type' => 'client_credentials',
-                    'scope' => 'https://graph.microsoft.com/.default',
-                ]
-            );
+            $response = Http::asForm()
+                ->post(
+                    'https://login.microsoftonline.com/' . $azureSsoSettings->tenant_id . '/oauth2/v2.0/token',
+                    [
+                        'client_id' => $azureSsoSettings->client_id,
+                        'client_secret' => $azureSsoSettings->client_secret,
+                        'grant_type' => 'client_credentials',
+                        'scope' => 'https://graph.microsoft.com/.default',
+                    ]
+                )
+                ->throw();
 
             $data = Http::withToken($response->object()->access_token)
-                ->get("https://graph.microsoft.com/v1.0/applications(appId='{$azureSsoSettings->client_id}')" . '?$select=passwordCredentials');
+                ->get("https://graph.microsoft.com/v1.0/applications(appId='{$azureSsoSettings->client_id}')" . '?$select=passwordCredentials')
+                ->throw();
 
             /** @var Collection<int, stdClass> $passwordCredentials */
             $passwordCredentials = $data->object()->passwordCredentials;
 
             $credentials = collect($passwordCredentials)->filter(function (stdClass $item) use ($azureSsoSettings) {
-                return is_null($item->hint) || Str::startsWith($azureSsoSettings->client_secret, $item->hint);
+                return Str::startsWith($azureSsoSettings->client_secret, $item->hint);
             });
+
+            if($credentials->isEmpty()) {
+                throw new NoMatchingCredentialsException();
+            }
 
             if (count($credentials) > 1) {
                 $endDateTime = Carbon::parse($credentials->sortBy(fn (stdClass $item) => Carbon::parse($item->endDateTime))->first()->endDateTime);
