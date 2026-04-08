@@ -48,8 +48,8 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceReques
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Filament\Tables\Columns\IdColumn;
 use App\Features\ServiceRequestIssueCategoryFeature;
+use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
 use App\Models\User;
 use Filament\Actions\BulkActionGroup;
@@ -118,7 +118,7 @@ class ListServiceRequests extends ListRecords
                     ->badge()
                     ->sortable()
                     ->toggleable()
-                    ->visible(fn (): bool => ServiceRequestIssueCategoryFeature::active()),    
+                    ->visible(fn (): bool => ServiceRequestIssueCategoryFeature::active()),
                 TextColumn::make('respondent.display_name')
                     ->label('Related To')
                     ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
