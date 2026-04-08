@@ -46,9 +46,9 @@ return new class () extends SettingsMigration {
         DB::transaction(function () {
             $this->migrator->inGroup('azure_sso', function (SettingsBlueprint $blueprint): void {
                 try {
-                  $blueprint->add('is_expiration_notice_enabled', false);
+                    $blueprint->add('is_expiration_notice_enabled', false);
                 } catch (SettingAlreadyExists $exception) {
-                  // do nothing
+                    // do nothing
                 }
             });
 

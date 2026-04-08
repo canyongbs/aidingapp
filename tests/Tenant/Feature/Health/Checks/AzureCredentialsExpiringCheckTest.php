@@ -38,7 +38,6 @@ use AidingApp\Authorization\Exceptions\NoMatchingAzureCredentialsException;
 use AidingApp\Authorization\Settings\AzureSsoSettings;
 use App\Health\Checks\AzureCredentialsExpiringCheck;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Http;
 use Spatie\Health\Enums\Status;
