@@ -57,14 +57,6 @@ class Timezone extends ProfilePage
         return true;
     }
 
-    public function getFormActions(): array
-    {
-        return [
-            $this->getSaveFormAction(),
-            $this->getCancelFormAction(),
-        ];
-    }
-
     public function form(Schema $schema): Schema
     {
         return $schema
