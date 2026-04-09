@@ -47,7 +47,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Concerns\EditPageRedirection;
-use App\Features\ServiceRequestIssueCategoryFeature;
 use CanyonGBS\Common\Filament\Support\HideDeletedExceptSelectedFromSelectOptions;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Radio;
@@ -133,7 +132,7 @@ class EditServiceRequest extends EditRecord
                                     ->afterStateUpdated(function (?string $state, Set $set) {
                                         $set('priority_id', null);
 
-                                        if (ServiceRequestIssueCategoryFeature::active() && $state) {
+                                        if ($state) {
                                             $type = ServiceRequestType::find($state);
 
                                             if ($type?->default_issue_category) {
@@ -163,8 +162,7 @@ class EditServiceRequest extends EditRecord
                             ->options(ServiceRequestIssueCategory::class)
                             ->enum(ServiceRequestIssueCategory::class)
                             ->inline()
-                            ->inlineLabel(false)
-                            ->visible(fn (): bool => ServiceRequestIssueCategoryFeature::active()),
+                            ->inlineLabel(false),
                         TextInput::make('title')
                             ->required()
                             ->string()
