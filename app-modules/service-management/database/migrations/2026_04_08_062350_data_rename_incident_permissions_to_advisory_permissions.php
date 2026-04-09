@@ -80,7 +80,6 @@ return new class () extends Migration {
                 'Incident' => 'Advisory',
                 'Incident Update' => 'Advisory Update',
             ]);
-
         });
     }
 
