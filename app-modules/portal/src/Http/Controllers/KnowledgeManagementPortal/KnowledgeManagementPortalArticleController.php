@@ -122,6 +122,9 @@ class KnowledgeManagementPortalArticleController extends Controller
         ]);
     }
 
+    /**
+     * @param  array<string, mixed>|null  $content
+     */
     protected static function generateTableOfContents(?array $content, int $maxDepth = 3): string
     {
         if (blank($content) || ! isset($content['content'])) {
@@ -165,8 +168,11 @@ class KnowledgeManagementPortalArticleController extends Controller
                 $level = $node['attrs']['level'] ?? 1;
 
                 if ($level <= $maxDepth) {
-                    $text = collect($node['content'] ?? [])
-                        ->map(fn (array $node) => $node['text'] ?? null)
+                    /** @var array<int, array<string, mixed>> $children */
+                    $children = $node['content'] ?? [];
+
+                    $text = collect($children)
+                        ->map(fn (array $node): ?string => $node['text'] ?? null)
                         ->implode(' ');
 
                     $id = $node['attrs']['id'] ?? str($text)->kebab()->toString();

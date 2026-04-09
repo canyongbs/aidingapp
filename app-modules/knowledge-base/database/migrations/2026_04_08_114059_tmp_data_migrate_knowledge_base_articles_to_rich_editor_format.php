@@ -94,9 +94,7 @@ return new class () extends Migration {
             $node['content'] = $this->unwrapRemovedNodes($node['content']);
 
             foreach ($node['content'] as &$child) {
-                if (is_array($child)) {
-                    $this->processNodes($child, $changed);
-                }
+                $this->processNodes($child, $changed);
             }
 
             // Clean up any nodes marked for removal during recursion
@@ -178,7 +176,7 @@ return new class () extends Migration {
             }
         }
 
-        return array_values($result);
+        return $result;
     }
 
     /**
