@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\DB;
 use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
 use Spatie\LaravelSettings\Migrations\SettingsBlueprint;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
