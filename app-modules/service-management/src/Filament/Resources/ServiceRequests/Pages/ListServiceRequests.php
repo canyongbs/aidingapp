@@ -48,7 +48,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceReques
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Features\ServiceRequestIssueCategoryFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
 use App\Models\User;
@@ -117,8 +116,7 @@ class ListServiceRequests extends ListRecords
                     ->label('Category')
                     ->badge()
                     ->sortable()
-                    ->toggleable()
-                    ->visible(fn (): bool => ServiceRequestIssueCategoryFeature::active()),
+                    ->toggleable(),
                 TextColumn::make('respondent.display_name')
                     ->label('Related To')
                     ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
@@ -180,8 +178,7 @@ class ListServiceRequests extends ListRecords
                     ->query(fn (Builder $query, array $data): Builder => $query->when(
                         filled($data['value']),
                         fn (Builder $query) => $query->where('issue_category', $data['value'])
-                    ))
-                    ->visible(fn (): bool => ServiceRequestIssueCategoryFeature::active()),
+                    )),
                 SelectFilter::make('organization')
                     ->options(Organization::pluck('name', 'id')->toArray())
                     ->modifyQueryUsing(fn (Builder $query, $state): Builder => $query->when(
