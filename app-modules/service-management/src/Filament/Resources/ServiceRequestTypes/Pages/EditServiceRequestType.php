@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRe
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
-use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
 use App\Filament\Forms\Components\IconSelect;
 use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\Action;
@@ -90,8 +89,7 @@ class EditServiceRequestType extends EditRecord
                             ->label('Default Issue Category')
                             ->options(ServiceRequestIssueCategory::class)
                             ->enum(ServiceRequestIssueCategory::class)
-                            ->required()
-                            ->visible(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active()),
+                            ->required(),
                         Group::make()
                             ->schema([
                                 Toggle::make('has_enabled_feedback_collection')
