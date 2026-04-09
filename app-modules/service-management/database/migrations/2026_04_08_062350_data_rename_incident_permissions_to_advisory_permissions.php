@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\RenameIncidentsFeature;
 use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
@@ -81,16 +80,12 @@ return new class () extends Migration {
                 'Incident' => 'Advisory',
                 'Incident Update' => 'Advisory Update',
             ]);
-
-            RenameIncidentsFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            RenameIncidentsFeature::deactivate();
-
             collect($this->guards)->each(function (string $guard) {
                 $this->renamePermissions(array_flip($this->permissions), $guard);
             });

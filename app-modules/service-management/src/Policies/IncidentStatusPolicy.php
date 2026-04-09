@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Policies;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
-use App\Features\RenameIncidentsFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -60,7 +59,7 @@ class IncidentStatusPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.view-any',
-            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to view any advisory statuses.' : 'You do not have permission to view any incident statuses.'
+            denyResponse: 'You do not have permission to view any advisory statuses.'
         );
     }
 
@@ -68,7 +67,7 @@ class IncidentStatusPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.view',
-            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to view this advisory status.' : 'You do not have permission to view this incident status.'
+            denyResponse: 'You do not have permission to view this advisory status.'
         );
     }
 
@@ -76,7 +75,7 @@ class IncidentStatusPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.create',
-            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to create any advisory statuses.' : 'You do not have permission to create any incident statuses.'
+            denyResponse: 'You do not have permission to create any advisory statuses.'
         );
     }
 
@@ -84,19 +83,19 @@ class IncidentStatusPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.update',
-            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to update this advisory status.' : 'You do not have permission to update this incident status.'
+            denyResponse: 'You do not have permission to update this advisory status.'
         );
     }
 
     public function delete(Authenticatable $authenticatable, IncidentStatus $incidentStatus): Response
     {
         if ($incidentStatus->incidents()->exists()) {
-            return RenameIncidentsFeature::active() ? Response::deny('The advisory status cannot be deleted because it is associated with a advisory.') : Response::deny('The incident status cannot be deleted because it is associated with a incident.');
+            return Response::deny('The advisory status cannot be deleted because it is associated with a advisory.');
         }
 
         return $authenticatable->canOrElse(
             abilities: 'settings.*.delete',
-            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to delete this advisory status.' : 'You do not have permission to delete this incident status.'
+            denyResponse: 'You do not have permission to delete this advisory status.'
         );
     }
 
@@ -104,19 +103,19 @@ class IncidentStatusPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.restore',
-            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to restore this advisory status.' : 'You do not have permission to restore this incident status.'
+            denyResponse: 'You do not have permission to restore this advisory status.'
         );
     }
 
     public function forceDelete(Authenticatable $authenticatable, IncidentStatus $incidentStatus): Response
     {
         if ($incidentStatus->incidents()->exists()) {
-            return RenameIncidentsFeature::active() ? Response::deny('The advisory status cannot be deleted because it is associated with a advisory.') : Response::deny('The incident status cannot be deleted because it is associated with a incident.');
+            return Response::deny('The advisory status cannot be deleted because it is associated with a advisory.');
         }
 
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
-            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to permanently delete this advisory status.' : 'You do not have permission to permanently delete this incident status.'
+            denyResponse: 'You do not have permission to permanently delete this advisory status.'
         );
     }
 

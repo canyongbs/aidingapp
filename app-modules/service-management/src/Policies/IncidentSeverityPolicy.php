@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Policies;
 use AidingApp\ServiceManagement\Models\IncidentSeverity;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
-use App\Features\RenameIncidentsFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -60,7 +59,7 @@ class IncidentSeverityPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.view-any',
-            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to view any advisory severities.' : 'You do not have permission to view any incident severities.'
+            denyResponse: 'You do not have permission to view any advisory severities.'
         );
     }
 
@@ -68,7 +67,7 @@ class IncidentSeverityPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.view',
-            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to view this advisory severity.' : 'You do not have permission to view this incident severity.'
+            denyResponse: 'You do not have permission to view this advisory severity.'
         );
     }
 
@@ -76,7 +75,7 @@ class IncidentSeverityPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.create',
-            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to create advisory severities.' : 'You do not have permission to create incident severities.'
+            denyResponse: 'You do not have permission to create advisory severities.'
         );
     }
 
@@ -84,19 +83,19 @@ class IncidentSeverityPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.update',
-            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to update this advisory severity.' : 'You do not have permission to update this incident severity.'
+            denyResponse: 'You do not have permission to update this advisory severity.'
         );
     }
 
     public function delete(Authenticatable $authenticatable, IncidentSeverity $incidentSeverity): Response
     {
         if ($incidentSeverity->incidents()->exists()) {
-            return RenameIncidentsFeature::active() ? Response::deny('The advisory severity cannot be deleted because it is associated with a advisory.') : Response::deny('The incident severity cannot be deleted because it is associated with a incident.');
+            return Response::deny('The advisory severity cannot be deleted because it is associated with a advisory.');
         }
 
         return $authenticatable->canOrElse(
             abilities: 'settings.*.delete',
-            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to delete this advisory severity.' : 'You do not have permission to delete this incident severity.'
+            denyResponse: 'You do not have permission to delete this advisory severity.'
         );
     }
 
@@ -104,19 +103,19 @@ class IncidentSeverityPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.restore',
-            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to restore this advisory severity.' : 'You do not have permission to restore this incident severity.'
+            denyResponse: 'You do not have permission to restore this advisory severity.'
         );
     }
 
     public function forceDelete(Authenticatable $authenticatable, IncidentSeverity $incidentSeverity): Response
     {
         if ($incidentSeverity->incidents()->exists()) {
-            return RenameIncidentsFeature::active() ? Response::deny('The advisory severity cannot be deleted because it is associated with a advisory.') : Response::deny('The incident severity cannot be deleted because it is associated with a incident.');
+            return Response::deny('The advisory severity cannot be deleted because it is associated with a advisory.');
         }
 
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
-            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to permanently delete this advisory severity.' : 'You do not have permission to permanently delete this incident severity.'
+            denyResponse: 'You do not have permission to permanently delete this advisory severity.'
         );
     }
 
