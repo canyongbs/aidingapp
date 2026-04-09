@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\ServiceRe
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
-use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
@@ -72,8 +71,7 @@ class ViewServiceRequestType extends ViewRecord
                             ->label('Category')
                             ->placeholder('None'),
                         TextEntry::make('default_issue_category')
-                            ->label('Default Issue Category')
-                            ->visible(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active()),
+                            ->label('Default Issue Category'),
                         TextEntry::make('form.name')
                             ->label('Form')
                             ->hidden(fn (ServiceRequestType $record) => ! $record->form)
