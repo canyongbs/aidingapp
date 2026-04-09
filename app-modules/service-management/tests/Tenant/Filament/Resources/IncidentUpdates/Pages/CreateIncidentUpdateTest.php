@@ -103,8 +103,8 @@ test('CreateIncidentUpdate is gated with proper access control', function () {
     livewire(CreateIncidentUpdate::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('incident_update.view-any');
-    $user->givePermissionTo('incident_update.create');
+    $user->givePermissionTo('advisory_update.view-any');
+    $user->givePermissionTo('advisory_update.create');
 
     actingAs($user)
         ->get(
@@ -132,8 +132,8 @@ test('CreateIncidentUpdate is gated with proper feature access control', functio
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('incident_update.view-any');
-    $user->givePermissionTo('incident_update.create');
+    $user->givePermissionTo('advisory_update.view-any');
+    $user->givePermissionTo('advisory_update.create');
 
     actingAs($user)
         ->get(

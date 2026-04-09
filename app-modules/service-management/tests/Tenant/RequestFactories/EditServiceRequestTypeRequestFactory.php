@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use Worksome\RequestFactories\RequestFactory;
 
 class EditServiceRequestTypeRequestFactory extends RequestFactory
@@ -44,6 +45,7 @@ class EditServiceRequestTypeRequestFactory extends RequestFactory
     {
         return [
             'name' => $this->faker->name(),
+            'default_issue_category' => $this->faker->randomElement(ServiceRequestIssueCategory::cases())->value,
         ];
     }
 }

@@ -34,65 +34,33 @@
 </COPYRIGHT>
 */
 
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        $this->processTable('email_templates', 'content');
-        $this->processTable('engagements', 'body');
-        $this->processTable('engagement_batches', 'body');
+        DB::transaction(function () {
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->string('default_issue_category')->initial(ServiceRequestIssueCategory::Request->value);
+            });
+
+            ServiceRequestTypeDefaultIssueCategoryFeature::activate();
+        });
     }
 
-    public function down(): void {}
-
-    protected function processTable(string $table, string $column): void
+    public function down(): void
     {
-        DB::table($table)
-            ->whereNotNull($column)
-            ->eachById(function (object $record) use ($table, $column) {
-                $body = json_decode($record->{$column}, associative: true);
+        DB::transaction(function () {
+            ServiceRequestTypeDefaultIssueCategoryFeature::deactivate();
 
-                if (! is_array($body)) {
-                    return;
-                }
-
-                $changed = false;
-
-                $this->processNodes($body, $changed);
-
-                if (! $changed) {
-                    return;
-                }
-
-                DB::table($table)
-                    ->where('id', $record->id)
-                    ->update([$column => json_encode($body)]);
-            }, 100);
-    }
-
-    /**
-     * @param array<mixed> $node
-     */
-    protected function processNodes(array &$node, bool &$changed): void
-    {
-        if (($node['type'] ?? null) === 'image') {
-            $width = $node['attrs']['width'] ?? null;
-
-            if (is_numeric($width) && $width > 500) {
-                $node['attrs']['width'] = null;
-                $node['attrs']['height'] = null;
-                $changed = true;
-            }
-        }
-
-        if (isset($node['content']) && is_array($node['content'])) {
-            foreach ($node['content'] as &$child) {
-                if (is_array($child)) {
-                    $this->processNodes($child, $changed);
-                }
-            }
-        }
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->dropColumn('default_issue_category');
+            });
+        });
     }
 };

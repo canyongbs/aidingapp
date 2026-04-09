@@ -34,19 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace App\Features;
 
-use BackedEnum;
-use Filament\Clusters\Cluster;
-use UnitEnum;
+use App\Support\AbstractFeatureFlag;
 
-class IncidentManagement extends Cluster
+class ServiceRequestTypeDefaultIssueCategoryFeature extends AbstractFeatureFlag
 {
-    protected static string | UnitEnum | null $navigationGroup = 'Settings';
-
-    protected static ?int $navigationSort = 50;
-
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
-
-    protected static ?string $title = 'Incident Management';
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
 }

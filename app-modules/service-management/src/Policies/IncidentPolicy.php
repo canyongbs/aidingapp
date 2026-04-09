@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Policies;
 use AidingApp\ServiceManagement\Models\Incident;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
+use App\Features\RenameIncidentsFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -58,56 +59,56 @@ class IncidentPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'incident.view-any',
-            denyResponse: 'You do not have permission to view any incidents.'
+            abilities: RenameIncidentsFeature::active() ? 'advisory.view-any' : 'incident.view-any',
+            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to view any advisories.' : 'You do not have permission to view any incidents.'
         );
     }
 
     public function view(Authenticatable $authenticatable, Incident $incident): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["incident.{$incident->getKey()}.view"],
-            denyResponse: 'You do not have permission to view this incident.'
+            abilities: [RenameIncidentsFeature::active() ? 'advisory.*.view' : 'incident.*.view'],
+            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to view this advisory.' : 'You do not have permission to view this incident.'
         );
     }
 
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'incident.create',
-            denyResponse: 'You do not have permission to create incidents.'
+            abilities: RenameIncidentsFeature::active() ? 'advisory.create' : 'incident.create',
+            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to create advisories.' : 'You do not have permission to view any incidents.'
         );
     }
 
     public function update(Authenticatable $authenticatable, Incident $incident): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["incident.{$incident->getKey()}.update"],
-            denyResponse: 'You do not have permission to update this incident.'
+            abilities: [RenameIncidentsFeature::active() ? 'advisory.*.update' : 'incident.*.update'],
+            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to update this advisory.' : 'You do not have permission to update this incident.'
         );
     }
 
     public function delete(Authenticatable $authenticatable, Incident $incident): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["incident.{$incident->getKey()}.delete"],
-            denyResponse: 'You do not have permission to delete this incident.'
+            abilities: [RenameIncidentsFeature::active() ? 'advisory.*.delete' : 'incident.*.delete'],
+            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to delete this advisory.' : 'You do not have permission to delete this incident.'
         );
     }
 
     public function restore(Authenticatable $authenticatable, Incident $incident): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["incident.{$incident->getKey()}.restore"],
-            denyResponse: 'You do not have permission to restore this incident.'
+            abilities: [RenameIncidentsFeature::active() ? 'advisory.*.restore' : 'incident.*.restore'],
+            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to restore this advisory.' : 'You do not have permission to restore this incident.'
         );
     }
 
     public function forceDelete(Authenticatable $authenticatable, Incident $incident): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["incident.{$incident->getKey()}.force-delete"],
-            denyResponse: 'You do not have permission to permanently delete this incident.'
+            abilities: [RenameIncidentsFeature::active() ? 'advisory.*.force-delete' : 'incident.*.force-delete'],
+            denyResponse: RenameIncidentsFeature::active() ? 'You do not have permission to permanently delete this advisory.' : 'You do not have permission to permanently delete this incident.'
         );
     }
 

@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
 use AidingApp\Division\Models\Division;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Worksome\RequestFactories\RequestFactory;
 
@@ -48,6 +49,7 @@ class EditServiceRequestRequestFactory extends RequestFactory
             'division_id' => Division::inRandomOrder()->first()?->id ?? Division::factory()->create()->id,
             'status_id' => ServiceRequestStatus::factory()->create()->id,
             'close_details' => $this->faker->sentence,
+            'issue_category' => fake()->randomElement(ServiceRequestIssueCategory::cases()),
         ];
     }
 }

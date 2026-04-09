@@ -41,16 +41,20 @@ use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages\EditIn
 use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages\ListIncidentStatuses;
 use AidingApp\ServiceManagement\Filament\Resources\IncidentStatuses\Pages\ViewIncidentStatus;
 use AidingApp\ServiceManagement\Models\IncidentStatus;
-use App\Filament\Clusters\IncidentManagement;
+use App\Filament\Clusters\Advisory;
 use Filament\Resources\Resource;
 
 class IncidentStatusResource extends Resource
 {
     protected static ?string $model = IncidentStatus::class;
 
-    protected static ?string $cluster = IncidentManagement::class;
+    protected static ?string $cluster = Advisory::class;
 
     protected static ?string $navigationLabel = 'Statuses';
+
+    protected static ?string $label = 'Advisory Status';
+
+    protected static ?string $slug = 'advisory-statuses';
 
     protected static ?int $navigationSort = 20;
 

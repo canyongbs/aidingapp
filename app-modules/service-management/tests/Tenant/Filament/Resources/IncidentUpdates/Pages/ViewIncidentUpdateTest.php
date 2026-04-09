@@ -78,8 +78,8 @@ test('ViewIncidentUpdate is gated with proper access control', function () {
             ])
         )->assertForbidden();
 
-    $user->givePermissionTo('incident_update.view-any');
-    $user->givePermissionTo('incident_update.*.view');
+    $user->givePermissionTo('advisory_update.view-any');
+    $user->givePermissionTo('advisory_update.*.view');
 
     actingAs($user)
         ->get(
@@ -98,8 +98,8 @@ test('ViewIncidentUpdate is gated with proper feature access control', function 
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('incident_update.view-any');
-    $user->givePermissionTo('incident_update.*.view');
+    $user->givePermissionTo('advisory_update.view-any');
+    $user->givePermissionTo('advisory_update.*.view');
 
     $incidentUpdate = IncidentUpdate::factory()->create();
 

@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeFactory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
 use AidingApp\Team\Models\Team;
@@ -77,6 +78,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'has_enabled_nps',
         'description',
         'icon',
+        'default_issue_category',
         'assignment_type',
         'is_managers_service_request_created_email_enabled',
         'is_managers_service_request_created_notification_enabled',
@@ -126,6 +128,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'has_enabled_feedback_collection' => 'boolean',
         'has_enabled_csat' => 'boolean',
         'has_enabled_nps' => 'boolean',
+        'default_issue_category' => ServiceRequestIssueCategory::class,
         'assignment_type' => ServiceRequestTypeAssignmentTypes::class,
         'is_managers_service_request_created_email_enabled' => 'boolean',
         'is_managers_service_request_created_notification_enabled' => 'boolean',

@@ -31,10 +31,14 @@
     
     </COPYRIGHT>
 --}}
-<x-filament-panels::page>
-    <form class="flex flex-col gap-6" wire:submit="save">
-        {{ $this->form }}
+@php
+    use Filament\Support\Colors\Color;
+@endphp
 
-        <x-filament::actions :actions="$this->getFormActions()" :full-width="$this->hasFullWidthFormActions()" />
-    </form>
-</x-filament-panels::page>
+<div
+    class="bg-custom-600 sticky top-16 z-10 flex h-10 items-center px-6 py-2 text-sm font-medium text-white"
+    style="--color-600: {{ Color::all()[$color->value][600] }}"
+    wire:loading.remove
+>
+    The single sign-on key will expire within 45 days and must be updated to prevent service interruption.
+</div>

@@ -57,8 +57,8 @@ test('CreateIncident is gated with proper access control', function () {
     livewire(CreateIncident::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('incident.view-any');
-    $user->givePermissionTo('incident.create');
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.create');
 
     actingAs($user)
         ->get(

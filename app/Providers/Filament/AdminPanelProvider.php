@@ -38,9 +38,11 @@ namespace App\Providers\Filament;
 
 use AidingApp\Authorization\Filament\Pages\Auth\Login;
 use AidingApp\Theme\Settings\ThemeSettings;
+use App\Filament\Clusters\ProfileSettings;
 use App\Filament\Pages\Dashboard;
-use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\ProductHealth;
+use App\Health\Checks\AzureCredentialsExpiringCheck;
+use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Tenant;
 use App\Multitenancy\Http\Middleware\NeedsTenant;
 use Filament\Actions\Action;
@@ -51,21 +53,28 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Infolists\Components\Entry;
+use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\Column;
+use Filament\View\PanelsRenderHook;
 use FilamentTiptapEditor\TiptapEditor;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
+use Spatie\Health\Enums\Status;
 use Spatie\Multitenancy\Http\Middleware\EnsureValidTenantSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -186,7 +195,10 @@ class AdminPanelProvider extends PanelProvider
                 FilamentFullCalendarPlugin::make(),
             ])
             ->userMenuItems([
-                'profile' => fn (Action $action) => $action->url(fn () => EditProfile::getUrl()),
+                MenuItem::make()
+                    ->label('Profile Settings')
+                    ->url(fn () => ProfileSettings::getUrl())
+                    ->icon('heroicon-s-cog-6-tooth'),
                 Action::make('about')
                     ->label('About')
                     ->modalHeading('Aiding App® by Canyon GBS')
@@ -196,6 +208,24 @@ class AdminPanelProvider extends PanelProvider
                     ->modalWidth(Width::Small)
                     ->icon('heroicon-s-information-circle'),
             ])
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_AFTER,
+                function (): ?Htmlable {
+                    $showBanner = Cache::remember('azure_credentials_expiring', now()->addDay(), function () {
+                        $credentialsCheck = HealthCheckResultHistoryItem::where('check_name', app(AzureCredentialsExpiringCheck::class)->getName())
+                            ->latest()
+                            ->first();
+
+                        if ($credentialsCheck?->status !== Status::warning()->value) {
+                            return false;
+                        }
+
+                        return true;
+                    });
+
+                    return $showBanner ? new HtmlString(Blade::render('<livewire:sso-credentials-expiring-alert />')) : null;
+                },
+            )
             ->globalSearchResourceOptIn();
     }
 

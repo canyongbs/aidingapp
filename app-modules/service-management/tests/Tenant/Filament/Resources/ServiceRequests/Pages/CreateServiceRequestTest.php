@@ -37,6 +37,7 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\CreateServiceRequest;
@@ -99,7 +100,9 @@ test('A successful action on the CreateServiceRequest page', function () {
         ->and($serviceRequest->status->id)
         ->toEqual($request->get('status_id'))
         ->and($serviceRequest->priority->id)
-        ->toEqual($request->get('priority_id'));
+        ->toEqual($request->get('priority_id'))
+        ->and($serviceRequest->issue_category)
+        ->toEqual($request->get('issue_category'));
 });
 
 test('CreateServiceRequest requires valid data', function ($data, $errors, $setup = null) {
@@ -138,6 +141,22 @@ test('CreateServiceRequest requires valid data', function ($data, $errors, $setu
         'close_details is not a string' => [CreateServiceRequestRequestFactory::new()->state(['close_details' => 1]), ['close_details' => 'string']],
     ]
 );
+
+test('type afterStateUpdated sets issue_category from default_issue_category', function () {
+    asSuperAdmin();
+
+    $serviceRequestType = ServiceRequestType::factory()->create([
+        'default_issue_category' => ServiceRequestIssueCategory::Incident,
+    ]);
+
+    livewire(CreateServiceRequest::class)
+        ->fillForm([
+            'type_id' => $serviceRequestType->getKey(),
+        ])
+        ->assertFormSet([
+            'issue_category' => ServiceRequestIssueCategory::Incident,
+        ]);
+});
 
 // Permission Tests
 

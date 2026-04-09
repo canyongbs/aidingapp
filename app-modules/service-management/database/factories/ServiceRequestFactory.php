@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -60,6 +61,7 @@ class ServiceRequestFactory extends Factory
             'division_id' => Division::inRandomOrder()->first()->id ?? Division::factory(),
             'status_id' => ServiceRequestStatus::inRandomOrder()->first() ?? ServiceRequestStatus::factory(),
             'priority_id' => ServiceRequestPriority::inRandomOrder()->first() ?? ServiceRequestPriority::factory(),
+            'issue_category' => $this->faker->randomElement(ServiceRequestIssueCategory::cases()),
             'created_by_id' => User::factory(),
         ];
     }
