@@ -50,7 +50,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
-use App\Features\ServiceRequestIssueCategoryFeature;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -120,7 +119,7 @@ class CreateServiceRequest extends CreateRecord
                                         $set('priority_id', null);
                                         $livewire->form->getComponent('dynamicTypeFields')?->getChildSchema()->fill();
 
-                                        if (ServiceRequestIssueCategoryFeature::active() && $state) {
+                                        if ($state) {
                                             $type = ServiceRequestType::find($state);
 
                                             if ($type?->default_issue_category) {
@@ -151,8 +150,7 @@ class CreateServiceRequest extends CreateRecord
                             ->enum(ServiceRequestIssueCategory::class)
                             ->inline()
                             ->inlineLabel(false)
-                            ->required()
-                            ->visible(fn (): bool => ServiceRequestIssueCategoryFeature::active()),
+                            ->required(),
                         TextInput::make('title')
                             ->required()
                             ->string()
