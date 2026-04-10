@@ -119,7 +119,8 @@ class ViewKnowledgeBaseItem extends ViewRecord
                             ->visible(KnowledgeBaseItemConcernFeature::active())
                             ->schema([
                                 Livewire::make(KnowledgeBaseItemConcernsTable::class, ['record' => $this->getRecord()]),
-                            ]),
+                            ])
+                            ->id('concerns'),
                     ])
                     ->columnSpanFull()
                     ->persistTabInQueryString(),

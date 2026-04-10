@@ -39,7 +39,7 @@ namespace AidingApp\KnowledgeBase\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseItemConcernFactory;
 use AidingApp\KnowledgeBase\Enums\ConcernStatus;
-use AidingApp\KnowledgeBase\Observers\KnowledgeBaseItemConernObserver;
+use AidingApp\KnowledgeBase\Observers\KnowledgeBaseItemConcernObserver;
 use App\Models\BaseModel;
 use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -52,7 +52,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 /**
  * @mixin IdeHelperKnowledgeBaseItemConcern
  */
-#[ObservedBy(KnowledgeBaseItemConernObserver::class)]
+#[ObservedBy(KnowledgeBaseItemConcernObserver::class)]
 class KnowledgeBaseItemConcern extends BaseModel implements Auditable
 {
     /** @use HasFactory<KnowledgeBaseItemConcernFactory> */

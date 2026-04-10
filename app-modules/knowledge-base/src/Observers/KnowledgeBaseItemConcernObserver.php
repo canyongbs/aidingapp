@@ -37,20 +37,31 @@
 namespace AidingApp\KnowledgeBase\Observers;
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
+use AidingApp\KnowledgeBase\Notifications\AlertManagerConcernCreated;
+use AidingApp\KnowledgeBase\Notifications\AlertManagerConcernStatusChanged;
 use AidingApp\KnowledgeBase\Notifications\KnowledgeBaseItemConcernCreated;
 use AidingApp\KnowledgeBase\Notifications\KnowledgeBaseItemConcernStatusChanged;
+use App\Models\User;
 
-class KnowledgeBaseItemConernObserver
+class KnowledgeBaseItemConcernObserver
 {
     public function created(KnowledgeBaseItemConcern $knowledgeBaseItemConcern): void
     {
         $knowledgeBaseItemConcern->createdBy->notifyNow(new KnowledgeBaseItemConcernCreated($knowledgeBaseItemConcern));
+
+        $knowledgeBaseItemConcern->knowledgeBaseItem->managers->each(
+          fn (User $user) => $user->notifyNow(new AlertManagerConcernCreated($knowledgeBaseItemConcern))
+        );
     }
 
     public function updated(KnowledgeBaseItemConcern $knowledgeBaseItemConcern): void
     {
         if ($knowledgeBaseItemConcern->wasChanged('status')) {
             $knowledgeBaseItemConcern->createdBy->notifyNow(new KnowledgeBaseItemConcernStatusChanged($knowledgeBaseItemConcern));
+
+            $knowledgeBaseItemConcern->knowledgeBaseItem->managers->each(
+              fn (User $user) => $user->notifyNow(new AlertManagerConcernStatusChanged($knowledgeBaseItemConcern, $knowledgeBaseItemConcern->getOriginal('status')))
+            );
         }
     }
 }
