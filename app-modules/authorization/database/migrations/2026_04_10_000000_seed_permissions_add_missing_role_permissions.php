@@ -42,6 +42,9 @@ use Illuminate\Support\Facades\DB;
 return new class () extends Migration {
     use CanModifyPermissions;
 
+    /**
+     * @var array<string, string>
+     */
     private array $permissions = [
         'role.create' => 'Role',
         'role.*.update' => 'Role',
@@ -50,7 +53,10 @@ return new class () extends Migration {
         'role.*.force-delete' => 'Role',
     ];
 
-    private array $guards = ['web', 'api'];
+    /**
+     * @var array<string>
+     */
+    private array $guards = ['web'];
 
     public function up(): void
     {
