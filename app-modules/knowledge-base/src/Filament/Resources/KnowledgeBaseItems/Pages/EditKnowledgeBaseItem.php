@@ -43,6 +43,7 @@ use App\Concerns\EditPageRedirection;
 use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
 use Filament\Actions\Action as BaseAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
@@ -51,7 +52,6 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
-use FilamentTiptapEditor\TiptapEditor;
 
 class EditKnowledgeBaseItem extends EditRecord
 {
@@ -98,12 +98,22 @@ class EditKnowledgeBaseItem extends EditRecord
                             ->offColor('gray'),
                     ]),
                 View::make('knowledge-base::filament.pages.badges'),
-                TiptapEditor::make('article_details')
+                RichEditor::make('article_details')
                     ->label('Article Details')
+                    ->json()
+                    ->toolbarButtons([
+                        ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
+                        ['h2', 'h3'],
+                        ['textColor', 'highlight', 'lead', 'small', 'clearFormatting'],
+                        ['alignStart', 'alignCenter', 'alignEnd'],
+                        ['blockquote', 'code', 'codeBlock', 'bulletList', 'orderedList', 'horizontalRule'],
+                        ['grid', 'table', 'details', 'attachFiles', 'video'],
+                        ['undo', 'redo'],
+                    ])
+                    ->resizableImages()
                     ->columnSpanFull()
                     ->extraInputAttributes([
                         'style' => 'min-height: 32rem;',
-                        'class' => 'text-gray-900 dark:bg-gray-800 dark:text-gray-100 border-2 dark:border-0 border-gray-200 rounded-none mx-4 my-2 px-8 py-4',
                     ]),
                 Actions::make([
                     DraftKnowledgeBaseItemWithAiAction::make(),
