@@ -36,7 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
@@ -176,7 +176,7 @@ class ListServiceRequestTypes extends ListRecords
                         'category_id' => $categoryId,
                         'sort' => $newType['sort'],
                         ...(ServiceRequestTypeDefaultIssueCategoryFeature::active()
-                            ? ['default_issue_category' => ServiceRequestIssueCategory::Request]
+                            ? ['default_category' => ServiceRequestCategory::Request]
                             : []),
                     ]);
 

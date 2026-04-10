@@ -35,7 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\EditServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -188,27 +188,27 @@ test('EditServiceRequestType is gated with proper feature access control', funct
     assertEquals($request['name'], $serviceRequestType->fresh()->name);
 });
 
-test('EditServiceRequestType is updating default_issue_category when form saved', function () {
+test('EditServiceRequestType is updating default_category when form saved', function () {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create([
-        'default_issue_category' => ServiceRequestIssueCategory::Incident,
+        'default_category' => ServiceRequestCategory::Incident,
     ]);
 
     livewire(EditServiceRequestType::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertFormSet([
-            'default_issue_category' => ServiceRequestIssueCategory::Incident,
+            'default_category' => ServiceRequestCategory::Incident,
         ])
         ->fillForm([
-            'default_issue_category' => ServiceRequestIssueCategory::Request->value,
+            'default_category' => ServiceRequestCategory::Request->value,
         ])
         ->call('save')
         ->assertHasNoFormErrors();
 
     assertDatabaseHas(ServiceRequestType::class, [
         'id' => $serviceRequestType->id,
-        'default_issue_category' => ServiceRequestIssueCategory::Request->value,
+        'default_category' => ServiceRequestCategory::Request->value,
     ]);
 });

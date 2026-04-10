@@ -39,7 +39,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceMan
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
@@ -186,14 +186,14 @@ test('category column is displayed on the ListServiceRequests page', function ()
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create([
-        'issue_category' => ServiceRequestIssueCategory::Incident,
+        'category' => ServiceRequestCategory::Incident,
     ]);
 
     livewire(ListServiceRequests::class)
         ->assertSuccessful()
         ->assertTableColumnStateSet(
-            'issue_category',
-            ServiceRequestIssueCategory::Incident,
+            'category',
+            ServiceRequestCategory::Incident,
             $serviceRequest
         );
 });
@@ -204,18 +204,18 @@ test('can filter service request by category', function () {
     $incidentServiceRequests = ServiceRequest::factory()
         ->count(2)
         ->create([
-            'issue_category' => ServiceRequestIssueCategory::Incident,
+            'category' => ServiceRequestCategory::Incident,
         ]);
 
     $requestServiceRequests = ServiceRequest::factory()
         ->count(2)
         ->create([
-            'issue_category' => ServiceRequestIssueCategory::Request,
+            'category' => ServiceRequestCategory::Request,
         ]);
 
     livewire(ListServiceRequests::class)
         ->assertCanSeeTableRecords($incidentServiceRequests->merge($requestServiceRequests))
-        ->filterTable('issue_category', ServiceRequestIssueCategory::Incident->value)
+        ->filterTable('category', ServiceRequestCategory::Incident->value)
         ->assertCanSeeTableRecords($incidentServiceRequests)
         ->assertCanNotSeeTableRecords($requestServiceRequests);
 });

@@ -38,7 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 
 use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\Ai\Settings\AiResolutionSettings;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
@@ -73,10 +73,10 @@ class CreateServiceRequestType extends CreateRecord
                             ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())
                             ->string(),
                         IconSelect::make('icon'),
-                        Select::make('default_issue_category')
-                            ->label('Default Issue Category')
-                            ->options(ServiceRequestIssueCategory::class)
-                            ->enum(ServiceRequestIssueCategory::class)
+                        Select::make('default_category')
+                            ->label('Default Category')
+                            ->options(ServiceRequestCategory::class)
+                            ->enum(ServiceRequestCategory::class)
                             ->required()
                             ->visible(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active()),
                         Group::make()

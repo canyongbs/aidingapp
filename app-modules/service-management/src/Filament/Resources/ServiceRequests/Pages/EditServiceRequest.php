@@ -39,7 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -136,8 +136,8 @@ class EditServiceRequest extends EditRecord
                                         if (ServiceRequestIssueCategoryFeature::active() && $state) {
                                             $type = ServiceRequestType::find($state);
 
-                                            if ($type?->default_issue_category) {
-                                                $set('issue_category', $type->default_issue_category->value);
+                                            if ($type?->default_category) {
+                                                $set('category', $type->default_category->value);
                                             }
                                         }
                                     })
@@ -158,10 +158,10 @@ class EditServiceRequest extends EditRecord
                                     ->exists(ServiceRequestPriority::class, 'id')
                                     ->visible(fn (Get $get): bool => filled($get('type_id'))),
                             ]),
-                        Radio::make('issue_category')
-                            ->label('Issue Category')
-                            ->options(ServiceRequestIssueCategory::class)
-                            ->enum(ServiceRequestIssueCategory::class)
+                        Radio::make('category')
+                            ->label('Category')
+                            ->options(ServiceRequestCategory::class)
+                            ->enum(ServiceRequestCategory::class)
                             ->inline()
                             ->inlineLabel(false)
                             ->visible(fn (): bool => ServiceRequestIssueCategoryFeature::active()),

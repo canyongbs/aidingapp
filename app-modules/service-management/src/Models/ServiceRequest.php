@@ -43,7 +43,7 @@ use AidingApp\Division\Models\Division;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
@@ -103,7 +103,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'is_ai_resolution_successful',
         'is_draft',
         'portal_assistant_thread_id',
-        'issue_category',
+        'category',
     ];
 
     protected $casts = [
@@ -115,7 +115,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'is_ai_resolution_attempted' => 'boolean',
         'is_ai_resolution_successful' => 'boolean',
         'is_draft' => 'boolean',
-        'issue_category' => ServiceRequestIssueCategory::class,
+        'category' => ServiceRequestCategory::class,
     ];
 
     public function registerMediaCollections(): void

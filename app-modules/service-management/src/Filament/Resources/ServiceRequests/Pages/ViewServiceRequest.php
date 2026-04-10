@@ -82,8 +82,8 @@ class ViewServiceRequest extends ViewRecord
                     ->heading(fn (ServiceRequest $record): HtmlString => new HtmlString(
                         view('filament.infolists.components.service-request-heading', [
                             'serviceRequestNumber' => $record->service_request_number,
-                            'issueCategory' => ServiceRequestIssueCategoryFeature::active()
-                                ? $record->issue_category
+                            'category' => ServiceRequestIssueCategoryFeature::active()
+                                ? $record->category
                                 : null,
                         ])->render()
                     ))

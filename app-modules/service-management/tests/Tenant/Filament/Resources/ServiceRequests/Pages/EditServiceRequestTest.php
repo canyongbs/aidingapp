@@ -36,7 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
@@ -111,8 +111,8 @@ test('A successful action on the EditServiceRequest page', function () {
         ->toEqual($request->get('status_id'))
         ->and($serviceRequest->priority->id)
         ->toEqual($request->get('priority_id'))
-        ->and($serviceRequest->issue_category)
-        ->toEqual($request->get('issue_category'));
+        ->and($serviceRequest->category)
+        ->toEqual($request->get('category'));
 });
 
 test('check if time to resolution has correct value when status is changed', function () {
@@ -211,11 +211,11 @@ test('EditServiceRequest requires valid data', function ($data, $errors, $setup 
     ]
 );
 
-test('type afterStateUpdated sets issue_category from default_issue_category', function () {
+test('type afterStateUpdated sets category from default_category', function () {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create([
-        'default_issue_category' => ServiceRequestIssueCategory::Incident,
+        'default_category' => ServiceRequestCategory::Incident,
     ]);
 
     $serviceRequest = ServiceRequest::factory()->state([
@@ -225,11 +225,11 @@ test('type afterStateUpdated sets issue_category from default_issue_category', f
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
-        'issue_category' => ServiceRequestIssueCategory::Request,
+        'category' => ServiceRequestCategory::Request,
     ])->create();
 
     $newType = ServiceRequestType::factory()->create([
-        'default_issue_category' => ServiceRequestIssueCategory::Incident,
+        'default_category' => ServiceRequestCategory::Incident,
     ]);
 
     livewire(EditServiceRequest::class, [
@@ -239,7 +239,7 @@ test('type afterStateUpdated sets issue_category from default_issue_category', f
             'type_id' => $newType->getKey(),
         ])
         ->assertFormSet([
-            'issue_category' => ServiceRequestIssueCategory::Incident,
+            'category' => ServiceRequestCategory::Incident,
         ]);
 });
 

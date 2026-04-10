@@ -36,7 +36,7 @@
 
 namespace AidingApp\ServiceManagement\DataTransferObjects;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Optional;
 
@@ -50,7 +50,7 @@ class ServiceRequestDataObject extends Data
         public string|Optional $title,
         public string|Optional $close_details,
         public string $respondent_id,
-        public ServiceRequestIssueCategory|Optional $issue_category, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
+        public ServiceRequestCategory|Optional $category, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
     ) {}
 
     public static function fromData(array $data): static
@@ -63,10 +63,10 @@ class ServiceRequestDataObject extends Data
             title: $data['title'] ?? Optional::create(),
             close_details: $data['close_details'] ?? Optional::create(),
             respondent_id: $data['respondent_id'],
-            issue_category: isset($data['issue_category'])
-              ? ($data['issue_category'] instanceof ServiceRequestIssueCategory
-                ? $data['issue_category']
-                : ServiceRequestIssueCategory::from($data['issue_category']))
+            category: isset($data['category'])
+              ? ($data['category'] instanceof ServiceRequestCategory
+                ? $data['category']
+                : ServiceRequestCategory::from($data['category']))
               : Optional::create(),
         );
     }

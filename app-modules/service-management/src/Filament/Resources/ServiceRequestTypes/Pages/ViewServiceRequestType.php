@@ -69,10 +69,10 @@ class ViewServiceRequestType extends ViewRecord
                             ->state(fn (ServiceRequestType $record): string => str($record->icon)->after('heroicon-o-')->headline()->toString())
                             ->icon(fn (ServiceRequestType $record): string => $record->icon),
                         TextEntry::make('category.name')
-                            ->label('Category')
+                            ->label('Service Request Area')
                             ->placeholder('None'),
-                        TextEntry::make('default_issue_category')
-                            ->label('Default Issue Category')
+                        TextEntry::make('default_category')
+                            ->label('Default Category')
                             ->visible(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active()),
                         TextEntry::make('form.name')
                             ->label('Form')

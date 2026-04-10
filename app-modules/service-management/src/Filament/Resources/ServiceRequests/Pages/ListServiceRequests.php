@@ -39,7 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\AddServiceRequestUpdateBulkAction;
@@ -113,7 +113,7 @@ class ListServiceRequests extends ListRecords
                     ->color(fn (ServiceRequest $record): string => $record->status->color->value)
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make('issue_category')
+                TextColumn::make('category')
                     ->label('Category')
                     ->badge()
                     ->sortable()
@@ -174,12 +174,12 @@ class ListServiceRequests extends ListRecords
                     )
                     ->multiple()
                     ->preload(),
-                SelectFilter::make('issue_category')
+                SelectFilter::make('category')
                     ->label('Category')
-                    ->options(ServiceRequestIssueCategory::class)
+                    ->options(ServiceRequestCategory::class)
                     ->query(fn (Builder $query, array $data): Builder => $query->when(
                         filled($data['value']),
-                        fn (Builder $query) => $query->where('issue_category', $data['value'])
+                        fn (Builder $query) => $query->where('category', $data['value'])
                     ))
                     ->visible(fn (): bool => ServiceRequestIssueCategoryFeature::active()),
                 SelectFilter::make('organization')

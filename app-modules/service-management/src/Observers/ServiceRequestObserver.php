@@ -70,10 +70,10 @@ class ServiceRequestObserver
 
         if (
             ServiceRequestIssueCategoryFeature::active() && // @phpstan-ignore booleanAnd.alwaysFalse
-            /** @phpstan-ignore function.impossibleType (Because this is in an observer it is possible that issue_category is null before the model is persisted) */
-            is_null($serviceRequest->issue_category)
+            /** @phpstan-ignore function.impossibleType (Because this is in an observer it is possible that category is null before the model is persisted) */
+            is_null($serviceRequest->category)
         ) {
-            $serviceRequest->issue_category = $serviceRequest->priority->type->default_issue_category;
+            $serviceRequest->category = $serviceRequest->priority->type->default_category;
         }
     }
 
