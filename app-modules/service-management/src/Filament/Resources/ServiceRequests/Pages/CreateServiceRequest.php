@@ -146,7 +146,7 @@ class CreateServiceRequest extends CreateRecord
                                     ->columnSpan(2),
                             ]),
                         Radio::make('category')
-                            ->label('Category1')
+                            ->label('Category')
                             ->options(ServiceRequestCategory::class)
                             ->enum(ServiceRequestCategory::class)
                             ->inline()

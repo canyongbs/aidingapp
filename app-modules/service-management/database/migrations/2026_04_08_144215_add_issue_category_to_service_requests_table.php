@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use App\Features\ServiceRequestIssueCategoryFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
@@ -46,7 +46,7 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::table('service_requests', function (Blueprint $table) {
-                $table->string('issue_category')->initial(ServiceRequestIssueCategory::Request->value);
+                $table->string('issue_category')->initial(ServiceRequestCategory::Request->value);
             });
 
             ServiceRequestIssueCategoryFeature::activate();
