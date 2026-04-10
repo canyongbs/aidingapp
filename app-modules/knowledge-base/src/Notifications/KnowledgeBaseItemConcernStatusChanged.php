@@ -65,7 +65,7 @@ class KnowledgeBaseItemConcernStatusChanged extends Notification
     {
         $knowledgeBaseItem = $this->knowledgeBaseItemConcern->knowledgeBaseItem;
 
-        $url = KnowledgeBaseItemResource::getUrl('view', [$record => $knowledgeBaseItem->getKey()]);
+        $url = KnowledgeBaseItemResource::getUrl('view', ['record' => $knowledgeBaseItem->getKey()]);
 
         $link = new HtmlString("<a href='{$url}' target='_blank' class='underline'>{$knowledgeBaseItem->title}</a>");
 

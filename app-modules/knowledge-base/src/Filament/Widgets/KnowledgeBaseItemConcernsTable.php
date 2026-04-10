@@ -44,12 +44,13 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
+use Livewire\Attributes\On;
 
 class KnowledgeBaseItemConcernsTable extends TableWidget
 {
     public KnowledgeBaseItem $record;
 
-    protected statis ?string $heading = 'Concerns Raised';
+    protected static ?string $heading = 'Concerns Raised';
 
     public function mount(KnowledgeBaseItem $record): void
     {
@@ -62,7 +63,7 @@ class KnowledgeBaseItemConcernsTable extends TableWidget
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn() => KnowledgeBaseItemConcern::whereBelongsTo($this->record, 'knowledgeBaseItem'))
+            ->query(fn () => KnowledgeBaseItemConcern::whereBelongsTo($this->record, 'knowledgeBaseItem'))
             ->columns([
                 TextColumn::make('createdBy.name')
                     ->label('Name'),
@@ -82,6 +83,6 @@ class KnowledgeBaseItemConcernsTable extends TableWidget
                     ->multiple()
                     ->options(ConcernStatus::class)
                     ->default([ConcernStatus::New->value]),
-            ])
+            ]);
     }
 }

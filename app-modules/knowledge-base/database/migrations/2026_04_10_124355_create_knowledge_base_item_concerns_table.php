@@ -51,7 +51,7 @@ return new class () extends Migration {
                 $table->string('status');
                 $table->foreignUuid('created_by_id')->constrained('users');
                 $table->foreignUuid('last_updated_by_id')->constrained('users');
-                $table->foreignUuid('knowledge_base_item_id')->constrained('knowledge_base_items');
+                $table->foreignUuid('knowledge_base_item_id')->constrained('knowledge_base_articles');
 
                 $table->timestamps();
                 $table->softDeletes();

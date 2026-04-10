@@ -50,6 +50,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
 #[ObservedBy(KnowledgeBaseItemConernObserver::class)]
+/**
+ * @mixin IdeHelperKnowledgeBaseItemConcern
+ */
 class KnowledgeBaseItemConcern extends BaseModel implements Auditable
 {
     /** @use HasFactory<KnowledgeBaseItemConcernFactory> */

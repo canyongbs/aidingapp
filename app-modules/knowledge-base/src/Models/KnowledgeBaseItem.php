@@ -171,7 +171,7 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     /**
      * @return HasMany<KnowledgeBaseItemConcern, $this>
      */
-    public function conerns(): HasMany
+    public function concerns(): HasMany
     {
         return $this->hasMany(KnowledgeBaseItemConcern::class);
     }
