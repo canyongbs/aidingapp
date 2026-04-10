@@ -124,7 +124,7 @@ class ServiceRequestFeedback extends Dashboard
                 ->schema([
                     Select::make('serviceRequestTypes')
                         ->label('Service Request Type Filter')
-                        ->options(ServiceRequestType::query() /* @phpstan-ignore method.notFound */
+                        ->options(ServiceRequestType::query()
                             ->withoutArchived()
                             ->orderBy('name')
                             ->pluck('name', 'id'))

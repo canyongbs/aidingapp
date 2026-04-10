@@ -87,11 +87,11 @@ class ListServiceRequestTypes extends ListRecords
                 'children' => function (HasMany $query) {
                     $query->orderBy('sort')
                         ->with([/** @phpstan-ignore argument.type */
-                            'types' => fn (HasMany $typeQuery) => $typeQuery->withoutArchived()->orderBy('sort')->withCount('serviceRequests'), /** @phpstan-ignore method.notFound */
+                            'types' => fn ($typeQuery) => $typeQuery->withoutArchived()->orderBy('sort')->withCount('serviceRequests'),
                             'children' => function (HasMany $childQuery) {
                                 $childQuery->orderBy('sort')
                                     ->with([/** @phpstan-ignore argument.type */
-                                        'types' => fn (HasMany $typeQuery) => $typeQuery->withoutArchived()->orderBy('sort')->withCount('serviceRequests'), /** @phpstan-ignore method.notFound */
+                                        'types' => fn ($typeQuery) => $typeQuery->withoutArchived()->orderBy('sort')->withCount('serviceRequests'),
                                     ])
                                     ->withCount('descendantServiceRequests');
                             },
@@ -105,7 +105,7 @@ class ListServiceRequestTypes extends ListRecords
             ->orderBy('sort')
             ->get();
 
-        $uncategorizedTypes = ServiceRequestType::query() /** @phpstan-ignore method.notFound */
+        $uncategorizedTypes = ServiceRequestType::query()
             ->withoutArchived()
             ->whereNull('category_id')
             ->orderBy('sort')

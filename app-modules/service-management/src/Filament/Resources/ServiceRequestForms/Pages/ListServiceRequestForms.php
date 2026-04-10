@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pag
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\ServiceRequestFormResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -54,7 +55,13 @@ class ListServiceRequestForms extends ListRecords
     public function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->withoutArchived()->whereHas('type', fn (Builder $query) => $query->withoutArchived())) /** @phpstan-ignore method.notFound, method.notFound */
+            ->modifyQueryUsing(function (Builder $query) {
+                /** @var Builder<ServiceRequestForm> $query */
+                return $query->withoutArchived()->whereHas('type', function (Builder $query) {
+                    /** @var Builder<ServiceRequestType> $query */ // @phpstan-ignore varTag.nativeType
+                    $query->withoutArchived();
+                });
+            })
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('name'),
