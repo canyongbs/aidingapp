@@ -44,6 +44,7 @@ use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
 use Filament\Actions\Action as BaseAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
@@ -103,11 +104,12 @@ class EditKnowledgeBaseItem extends EditRecord
                     ->json()
                     ->toolbarButtons([
                         ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
-                        ['h2', 'h3'],
-                        ['textColor', 'highlight', 'lead', 'small', 'clearFormatting'],
+                        [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])->textualButtons(), 'blockquote', 'code', 'codeBlock', 'bulletList', 'orderedList', 'horizontalRule'],
                         ['alignStart', 'alignCenter', 'alignEnd'],
-                        ['blockquote', 'code', 'codeBlock', 'bulletList', 'orderedList', 'horizontalRule'],
-                        ['grid', 'table', 'details', 'attachFiles', 'video'],
+                        ['textColor', 'highlight', 'lead', 'small'],
+                        ['attachFiles', 'video'],
+                        ['grid', 'table', 'details'],
+                        ['clearFormatting'],
                         ['undo', 'redo'],
                     ])
                     ->resizableImages()
