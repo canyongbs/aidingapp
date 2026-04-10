@@ -49,10 +49,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
-#[ObservedBy(KnowledgeBaseItemConernObserver::class)]
 /**
  * @mixin IdeHelperKnowledgeBaseItemConcern
  */
+#[ObservedBy(KnowledgeBaseItemConernObserver::class)]
 class KnowledgeBaseItemConcern extends BaseModel implements Auditable
 {
     /** @use HasFactory<KnowledgeBaseItemConcernFactory> */
