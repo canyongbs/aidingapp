@@ -32,7 +32,10 @@
     </COPYRIGHT>
 --}}
 @php
+    use App\Features\ServiceRequestCategoryRenameFeature;
     use Filament\Support\Facades\FilamentAsset;
+
+    $isRenamed = ServiceRequestCategoryRenameFeature::active();
 @endphp
 
 <x-filament-panels::page
@@ -116,12 +119,12 @@
 
         {{-- Top Action Buttons --}}
         <div class="flex flex-col items-center justify-end gap-4 sm:flex-row sm:items-center" x-show="canEdit">
-            {{-- Add Category/Type Buttons (Right) --}}
+            {{-- Add Service Request Area/Type Buttons (Right) --}}
             <div class="flex w-full justify-end gap-3 sm:w-auto">
-                {{-- Add Category Button --}}
+                {{-- Add Service Request Area Button --}}
                 <div id="show-category-wrapper">
                     <x-filament::button id="show-category-btn" type="button" color="gray" outlined="true" size="sm">
-                        Add Category
+                        {{ $isRenamed ? 'Add Service Request Area' : 'Add Category' }}
                     </x-filament::button>
                     <div
                         class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"
@@ -133,7 +136,7 @@
                                 class="focus:border-primary-500 focus:ring-primary-500 block h-8 w-full rounded-lg border-gray-300 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 id="new-category-name"
                                 type="text"
-                                placeholder="Name of new category"
+                                placeholder="{{ $isRenamed ? 'Name of new service request area' : 'Name of new category' }}"
                             />
                         </div>
                         <div class="flex gap-2">
@@ -210,9 +213,12 @@
                         @svg('heroicon-m-inbox', 'class="h-12 w-12 text-gray-400 dark:text-gray-400"')
                     </div>
 
-                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">No types or categories yet</h3>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        {{ $isRenamed ? 'No types or service request areas yet' : 'No types or categories yet' }}
+                    </h3>
                     <p class="max-w-xl text-sm text-gray-600 dark:text-gray-400">
-                        Create a category or add a type to get started. Use the buttons below to add your first items.
+                        {{ $isRenamed ? 'Create a service request area or add a type to get started.' : 'Create a category or add a type to get started.' }}
+                        Use the buttons below to add your first items.
                     </p>
                 </div>
             </div>

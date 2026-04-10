@@ -38,12 +38,12 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 
 use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\Ai\Settings\AiResolutionSettings;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
-use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Filament\Forms\Components\IconSelect;
 use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\Action;
@@ -86,12 +86,11 @@ class EditServiceRequestType extends EditRecord
                                 modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed(),
                             ),
                         IconSelect::make('icon'),
-                        Select::make('default_issue_category')
-                            ->label('Default Issue Category')
-                            ->options(ServiceRequestIssueCategory::class)
-                            ->enum(ServiceRequestIssueCategory::class)
-                            ->required()
-                            ->visible(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active()),
+                        Select::make(ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category')
+                            ->label(ServiceRequestCategoryRenameFeature::active() ? 'Default Category' : 'Default Issue Category')
+                            ->options(ServiceRequestCategory::class)
+                            ->enum(ServiceRequestCategory::class)
+                            ->required(),
                         Group::make()
                             ->schema([
                                 Toggle::make('has_enabled_feedback_collection')

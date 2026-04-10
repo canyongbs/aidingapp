@@ -38,7 +38,7 @@ namespace App\Features;
 
 use App\Support\AbstractFeatureFlag;
 
-class ServiceRequestTypeDefaultIssueCategoryFeature extends AbstractFeatureFlag
+class ServiceRequestCategoryRenameFeature extends AbstractFeatureFlag
 {
     public function resolve(mixed $scope): mixed
     {

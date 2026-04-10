@@ -34,30 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+use App\Features\ServiceRequestCategoryRenameFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use Filament\Support\Contracts\HasColor;
-use Filament\Support\Contracts\HasLabel;
-
-enum ServiceRequestIssueCategory: string implements HasColor, HasLabel
-{
-    case Incident = 'incident';
-
-    case Request = 'request';
-
-    public function getLabel(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return match ($this) {
-            self::Incident => 'Incident',
-            self::Request => 'Request',
-        };
+        DB::transaction(function () {
+            Schema::table('service_requests', function (Blueprint $table) {
+                $table->renameColumn('issue_category', 'category');
+            });
+
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->renameColumn('default_issue_category', 'default_category');
+            });
+
+            ServiceRequestCategoryRenameFeature::activate();
+        });
     }
 
-    public function getColor(): string
+    public function down(): void
     {
-        return match ($this) {
-            self::Incident => 'danger',
-            self::Request => 'primary',
-        };
+        DB::transaction(function () {
+            ServiceRequestCategoryRenameFeature::deactivate();
+
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->renameColumn('default_category', 'default_issue_category');
+            });
+
+            Schema::table('service_requests', function (Blueprint $table) {
+                $table->renameColumn('category', 'issue_category');
+            });
+        });
     }
-}
+};

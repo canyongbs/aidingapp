@@ -35,11 +35,12 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\EditServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestTypeRequestFactory;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -48,6 +49,11 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertEquals;
 use function Tests\asSuperAdmin;
+
+// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
+beforeEach(function () {
+    ServiceRequestCategoryRenameFeature::activate();
+});
 
 test('A successful action on the EditServiceRequestType page', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -188,27 +194,27 @@ test('EditServiceRequestType is gated with proper feature access control', funct
     assertEquals($request['name'], $serviceRequestType->fresh()->name);
 });
 
-test('EditServiceRequestType is updating default_issue_category when form saved', function () {
+test('EditServiceRequestType is updating default_category when form saved', function () {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create([
-        'default_issue_category' => ServiceRequestIssueCategory::Incident,
+        'default_category' => ServiceRequestCategory::Incident,
     ]);
 
     livewire(EditServiceRequestType::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertFormSet([
-            'default_issue_category' => ServiceRequestIssueCategory::Incident,
+            'default_category' => ServiceRequestCategory::Incident,
         ])
         ->fillForm([
-            'default_issue_category' => ServiceRequestIssueCategory::Request->value,
+            'default_category' => ServiceRequestCategory::Request->value,
         ])
         ->call('save')
         ->assertHasNoFormErrors();
 
     assertDatabaseHas(ServiceRequestType::class, [
         'id' => $serviceRequestType->id,
-        'default_issue_category' => ServiceRequestIssueCategory::Request->value,
+        'default_category' => ServiceRequestCategory::Request->value,
     ]);
 });

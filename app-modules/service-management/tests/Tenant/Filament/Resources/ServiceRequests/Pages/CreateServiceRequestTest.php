@@ -37,7 +37,7 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\CreateServiceRequest;
@@ -48,6 +48,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestRequestFactory;
 use AidingApp\Team\Models\Team;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\Select;
@@ -60,6 +61,11 @@ use function Pest\Laravel\travelTo;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
+
+// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
+beforeEach(function () {
+    ServiceRequestCategoryRenameFeature::activate();
+});
 
 test('A successful action on the CreateServiceRequest page', function () {
     asSuperAdmin()
@@ -101,8 +107,8 @@ test('A successful action on the CreateServiceRequest page', function () {
         ->toEqual($request->get('status_id'))
         ->and($serviceRequest->priority->id)
         ->toEqual($request->get('priority_id'))
-        ->and($serviceRequest->issue_category)
-        ->toEqual($request->get('issue_category'));
+        ->and($serviceRequest->category)
+        ->toEqual($request->get('category'));
 });
 
 test('CreateServiceRequest requires valid data', function ($data, $errors, $setup = null) {
@@ -142,11 +148,11 @@ test('CreateServiceRequest requires valid data', function ($data, $errors, $setu
     ]
 );
 
-test('type afterStateUpdated sets issue_category from default_issue_category', function () {
+test('type afterStateUpdated sets category from default_category', function () {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create([
-        'default_issue_category' => ServiceRequestIssueCategory::Incident,
+        'default_category' => ServiceRequestCategory::Incident,
     ]);
 
     livewire(CreateServiceRequest::class)
@@ -154,7 +160,7 @@ test('type afterStateUpdated sets issue_category from default_issue_category', f
             'type_id' => $serviceRequestType->getKey(),
         ])
         ->assertFormSet([
-            'issue_category' => ServiceRequestIssueCategory::Incident,
+            'category' => ServiceRequestCategory::Incident,
         ]);
 });
 

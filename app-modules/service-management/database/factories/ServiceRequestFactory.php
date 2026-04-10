@@ -38,11 +38,12 @@ namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -61,7 +62,7 @@ class ServiceRequestFactory extends Factory
             'division_id' => Division::inRandomOrder()->first()->id ?? Division::factory(),
             'status_id' => ServiceRequestStatus::inRandomOrder()->first() ?? ServiceRequestStatus::factory(),
             'priority_id' => ServiceRequestPriority::inRandomOrder()->first() ?? ServiceRequestPriority::factory(),
-            'issue_category' => $this->faker->randomElement(ServiceRequestIssueCategory::cases()),
+            (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => $this->faker->randomElement(ServiceRequestCategory::cases()),
             'created_by_id' => User::factory(),
         ];
     }

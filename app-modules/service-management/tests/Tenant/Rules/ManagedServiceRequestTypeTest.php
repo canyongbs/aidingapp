@@ -37,11 +37,17 @@
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use AidingApp\Team\Models\Team;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
+
+// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
+beforeEach(function () {
+    ServiceRequestCategoryRenameFeature::activate();
+});
 
 test('super admin passes ManagedServiceRequestType rule for any type', function () {
     asSuperAdmin();

@@ -36,7 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use Worksome\RequestFactories\RequestFactory;
 
 class EditServiceRequestTypeRequestFactory extends RequestFactory
@@ -45,7 +46,7 @@ class EditServiceRequestTypeRequestFactory extends RequestFactory
     {
         return [
             'name' => $this->faker->name(),
-            'default_issue_category' => $this->faker->randomElement(ServiceRequestIssueCategory::cases())->value,
+            (ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category') => $this->faker->randomElement(ServiceRequestCategory::cases())->value,
         ];
     }
 }

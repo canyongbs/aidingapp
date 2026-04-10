@@ -34,33 +34,23 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
-use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_types', function (Blueprint $table) {
-                $table->string('default_issue_category')->initial(ServiceRequestIssueCategory::Request->value);
-            });
-
-            ServiceRequestTypeDefaultIssueCategoryFeature::activate();
+        Schema::table('service_request_types', function (Blueprint $table) {
+            $table->string('default_issue_category')->initial(ServiceRequestCategory::Request->value);
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            ServiceRequestTypeDefaultIssueCategoryFeature::deactivate();
-
-            Schema::table('service_request_types', function (Blueprint $table) {
-                $table->dropColumn('default_issue_category');
-            });
+        Schema::table('service_request_types', function (Blueprint $table) {
+            $table->dropColumn('default_issue_category');
         });
     }
 };
