@@ -36,7 +36,7 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
-use AidingApp\KnowledgeBase\Filament\Resources\Actions\CreateConcernAction;
+use AidingApp\KnowledgeBase\Filament\Actions\CreateConcernAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
@@ -109,6 +109,10 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                     ->label('Category'),
                                 TextEntry::make('division.name')
                                     ->label('Division'),
+                                TextEntry::make('managers')
+                                    ->visible(KnowledgeBaseItemConcernFeature::active())
+                                    ->label('Managers')
+                                    ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->managers->pluck('name')->join(', ')),
                             ])
                             ->id('metadata'),
                         Tab::make('Concerns')

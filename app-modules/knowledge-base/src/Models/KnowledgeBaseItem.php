@@ -45,6 +45,7 @@ use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use App\Models\BaseModel;
 use App\Models\Concerns\InteractsWithTags;
 use App\Models\Contracts\HasTags;
+use App\Models\User;
 use CanyonGBS\Common\Filament\Forms\RichContentPlugins\VideoRichContentPlugin;
 use DateTimeInterface;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
@@ -174,6 +175,17 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     public function concerns(): HasMany
     {
         return $this->hasMany(KnowledgeBaseItemConcern::class);
+    }
+
+    /**
+     * @return BelongsToMany<User, $this, ManagerKnowledgeBaseItem>
+     */
+    public function managers(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(User::class, 'manager_knowledge_base_items', 'knowledge_base_item_id', 'manager_id')
+            ->using(ManagerKnowledgeBaseItem::class)
+            ->withTimestamps();
     }
 
     public function getKey(): string

@@ -37,11 +37,13 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
 use AidingApp\Division\Models\Division;
+use AidingApp\KnowledgeBase\Filament\Actions\AssignManagerBulkAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use App\Features\KnowledgeBaseItemConcernFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\TagsForClass;
 use Filament\Actions\BulkActionGroup;
@@ -262,6 +264,7 @@ class ListKnowledgeBaseItems extends ListRecords
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
+                    AssignManagerBulkAction::make()->visible(KnowledgeBaseItemConcernFeature::active()),
                     DeleteBulkAction::make(),
                 ]),
             ])

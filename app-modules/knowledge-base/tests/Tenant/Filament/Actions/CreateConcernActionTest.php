@@ -36,7 +36,7 @@
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ViewKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\Actions\RequestFactories\CreateConcernActionRequestFactory;
+use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Actions\RequestFactories\CreateConcernActionRequestFactory;
 
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;

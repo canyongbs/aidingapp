@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\Actions;
+namespace AidingApp\KnowledgeBase\Filament\Actions;
 
 use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\Actions\RequestFactories;
+namespace AidingApp\KnowledgeBase\Tests\Tenant\Filament\Actions\RequestFactories;
 
 use Worksome\RequestFactories\RequestFactory;
 

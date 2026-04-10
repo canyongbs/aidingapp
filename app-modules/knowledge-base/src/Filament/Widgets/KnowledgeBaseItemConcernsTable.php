@@ -37,7 +37,7 @@
 namespace AidingApp\KnowledgeBase\Filament\Widgets;
 
 use AidingApp\KnowledgeBase\Enums\ConcernStatus;
-use AidingApp\KnowledgeBase\Filament\Resources\Actions\ChangeConcernStatusAction;
+use AidingApp\KnowledgeBase\Filament\Actions\ChangeConcernStatusAction;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
 use Filament\Tables\Columns\TextColumn;
