@@ -36,12 +36,16 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
+use AidingApp\KnowledgeBase\Filament\Resources\Actions\CreateConcernAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
+use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use App\Features\KnowledgeBaseItemConcernFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\View;
@@ -107,6 +111,11 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                     ->label('Division'),
                             ])
                             ->id('metadata'),
+                        Tab::make('Concerns')
+                            ->visible(KnowledgeBaseItemConcernFeature::active())
+                            ->schema([
+                                Livewire::make(KnowledgeBaseItemConcernsTable::class, ['record' => $this->getRecord()]),
+                            ]),
                     ])
                     ->columnSpanFull()
                     ->persistTabInQueryString(),
@@ -116,6 +125,7 @@ class ViewKnowledgeBaseItem extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            CreateConcernAction::make(),
             EditAction::make(),
             DeleteAction::make(),
         ];

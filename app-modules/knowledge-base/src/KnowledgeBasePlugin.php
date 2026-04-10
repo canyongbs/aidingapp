@@ -36,6 +36,7 @@
 
 namespace AidingApp\KnowledgeBase;
 
+use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 
@@ -51,7 +52,8 @@ class KnowledgeBasePlugin implements Plugin
         $panel->discoverResources(
             in: __DIR__ . '/Filament/Resources',
             for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        );
+        )
+          ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
     }
 
     public function boot(Panel $panel): void {}

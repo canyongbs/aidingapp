@@ -39,6 +39,7 @@ namespace AidingApp\KnowledgeBase\Providers;
 use AidingApp\KnowledgeBase\KnowledgeBasePlugin;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use Filament\Panel;
@@ -59,6 +60,7 @@ class KnowledgeBaseServiceProvider extends ServiceProvider
             'knowledge_base_category' => KnowledgeBaseCategory::class,
             'knowledge_base_quality' => KnowledgeBaseQuality::class,
             'knowledge_base_status' => KnowledgeBaseStatus::class,
+            'knowledge_base_item_concern' => KnowledgeBaseItemConcern::class,
         ]);
     }
 }
