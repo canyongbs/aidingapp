@@ -70,10 +70,10 @@ class KnowledgeManagementPortalArticleController extends Controller
             return response()->json([], 401);
         }
 
-        $content = $article->article_details ? tiptap_converter()->record($article, attribute: 'article_details')->asHTML($article->article_details) : '';
+        $content = $article->article_details ? $article->renderRichContent('article_details') : '';
 
         if ($article->has_table_of_contents) {
-            $tableOfContents = tiptap_converter()->asTOC($article->article_details);
+            $tableOfContents = static::generateTableOfContents($article->article_details);
 
             if (filled($tableOfContents)) {
                 $content = '<h2>Table of Contents</h2><div class="prose-toc">' . $tableOfContents . '</div>' . $content;
@@ -120,5 +120,76 @@ class KnowledgeManagementPortalArticleController extends Controller
             'portal_view_count' => $article->portal_view_count,
             'helpful_vote_percentage' => $helpfulVotePercentage,
         ]);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $content
+     */
+    protected static function generateTableOfContents(?array $content, int $maxDepth = 3): string
+    {
+        if (blank($content) || ! isset($content['content'])) {
+            return '';
+        }
+
+        $headings = static::extractHeadings($content['content'], $maxDepth);
+
+        if (empty($headings)) {
+            return '';
+        }
+
+        $result = '<ul>';
+        $prev = $headings[0]['level'];
+
+        foreach ($headings as $item) {
+            $prev <= $item['level'] ?: $result .= str_repeat('</ul>', $prev - $item['level']);
+            $prev >= $item['level'] ?: $result .= '<ul>';
+
+            $result .= '<li><a href="#' . $item['id'] . '">' . e($item['text']) . '</a></li>';
+
+            $prev = $item['level'];
+        }
+
+        $result .= '</ul>';
+
+        return $result;
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $nodes
+     *
+     * @return array<int, array{level: int, id: string, text: string}>
+     */
+    protected static function extractHeadings(array $nodes, int $maxDepth): array
+    {
+        $headings = [];
+
+        foreach ($nodes as $node) {
+            if (($node['type'] ?? null) === 'heading') {
+                $level = $node['attrs']['level'] ?? 1;
+
+                if ($level <= $maxDepth) {
+                    /** @var array<int, array<string, mixed>> $children */
+                    $children = $node['content'] ?? [];
+
+                    $text = collect($children)
+                        ->map(fn (array $node): ?string => $node['text'] ?? null)
+                        ->implode(' ');
+
+                    $id = $node['attrs']['id'] ?? str($text)->kebab()->toString();
+
+                    $headings[] = [
+                        'level' => $level,
+                        'id' => $id,
+                        'text' => $text,
+                    ];
+                }
+            }
+
+            if (! empty($node['content'])) {
+                $headings = [...$headings, ...static::extractHeadings($node['content'], $maxDepth)];
+            }
+        }
+
+        return $headings;
     }
 }

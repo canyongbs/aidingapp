@@ -45,7 +45,11 @@ use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use App\Models\BaseModel;
 use App\Models\Concerns\InteractsWithTags;
 use App\Models\Contracts\HasTags;
+use CanyonGBS\Common\Filament\Forms\RichContentPlugins\VideoRichContentPlugin;
 use DateTimeInterface;
+use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
+use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
+use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
@@ -62,11 +66,12 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @mixin IdeHelperKnowledgeBaseItem
  */
 #[ObservedBy([KnowledgeBaseItemObserver::class])]
-class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia, HasTags
+class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia, HasRichContent, HasTags
 {
     use AuditableTrait;
     use HasUuids;
     use InteractsWithMedia;
+    use InteractsWithRichContent;
     use SoftDeletes;
     use InteractsWithTags;
 
@@ -129,6 +134,19 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('article_details');
+    }
+
+    public function setUpRichContent(): void
+    {
+        $this->registerRichContent('article_details')
+            ->fileAttachmentsDisk('s3-public')
+            ->fileAttachmentProvider(
+                SpatieMediaLibraryFileAttachmentProvider::make()
+                    ->collection('article_details')
+            )
+            ->plugins([
+                VideoRichContentPlugin::make(),
+            ]);
     }
 
     /**
