@@ -34,30 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace App\Features;
 
-use Filament\Support\Contracts\HasColor;
-use Filament\Support\Contracts\HasLabel;
+use App\Support\AbstractFeatureFlag;
 
-enum ServiceRequestIssueCategory: string implements HasColor, HasLabel
+class ServiceRequestCategoryRenameFeature extends AbstractFeatureFlag
 {
-    case Incident = 'incident';
-
-    case Request = 'request';
-
-    public function getLabel(): string
+    public function resolve(mixed $scope): mixed
     {
-        return match ($this) {
-            self::Incident => 'Incident',
-            self::Request => 'Request',
-        };
-    }
-
-    public function getColor(): string
-    {
-        return match ($this) {
-            self::Incident => 'danger',
-            self::Request => 'primary',
-        };
+        return false;
     }
 }

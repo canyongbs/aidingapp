@@ -39,7 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -47,6 +47,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Concerns\EditPageRedirection;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use CanyonGBS\Common\Filament\Support\HideDeletedExceptSelectedFromSelectOptions;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Radio;
@@ -134,9 +135,11 @@ class EditServiceRequest extends EditRecord
 
                                         if ($state) {
                                             $type = ServiceRequestType::find($state);
+                                            $defaultCategoryColumn = ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category';
+                                            $categoryField = ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category';
 
-                                            if ($type?->default_issue_category) {
-                                                $set('issue_category', $type->default_issue_category->value);
+                                            if ($type?->$defaultCategoryColumn) { /** @phpstan-ignore property.notFound */
+                                                $set($categoryField, $type->$defaultCategoryColumn->value); /** @phpstan-ignore property.notFound */
                                             }
                                         }
                                     })
@@ -157,10 +160,10 @@ class EditServiceRequest extends EditRecord
                                     ->exists(ServiceRequestPriority::class, 'id')
                                     ->visible(fn (Get $get): bool => filled($get('type_id'))),
                             ]),
-                        Radio::make('issue_category')
-                            ->label('Issue Category')
-                            ->options(ServiceRequestIssueCategory::class)
-                            ->enum(ServiceRequestIssueCategory::class)
+                        Radio::make(ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category')
+                            ->label(ServiceRequestCategoryRenameFeature::active() ? 'Category' : 'Issue Category')
+                            ->options(ServiceRequestCategory::class)
+                            ->enum(ServiceRequestCategory::class)
                             ->inline()
                             ->inlineLabel(false),
                         TextInput::make('title')

@@ -37,6 +37,12 @@
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ServiceRequestCategoryRenameFeature;
+
+// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
+beforeEach(function () {
+    ServiceRequestCategoryRenameFeature::activate();
+});
 
 it('trackable relationship returns the correct model', function () {
     $serviceRequest = ServiceRequest::factory()->create();

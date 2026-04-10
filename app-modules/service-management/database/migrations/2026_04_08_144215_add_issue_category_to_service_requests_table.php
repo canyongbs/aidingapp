@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use Illuminate\Database\Migrations\Migration;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
@@ -43,7 +43,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('service_requests', function (Blueprint $table) {
-            $table->string('issue_category')->initial(ServiceRequestIssueCategory::Request->value);
+            $table->string('issue_category')->initial(ServiceRequestCategory::Request->value);
         });
     }
 

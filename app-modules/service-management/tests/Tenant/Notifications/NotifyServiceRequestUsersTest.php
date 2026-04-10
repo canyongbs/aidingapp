@@ -44,8 +44,14 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use AidingApp\Team\Models\Team;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
+
+// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
+beforeEach(function () {
+    ServiceRequestCategoryRenameFeature::activate();
+});
 
 it('can notify a user if they belong to a team managing a service request type', function () {
     Notification::fake();
