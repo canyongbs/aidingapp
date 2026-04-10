@@ -78,19 +78,19 @@ it('can filter concerns by status', function () {
     $newConcerns = KnowledgeBaseItemConcern::factory()
         ->count(3)
         ->state(['status' => ConcernStatus::New])
-        ->for($knowledgeBaseItem, 'knowledge$knowledgeBaseItem')
+        ->for($knowledgeBaseItem, 'knowledgeBaseItem')
         ->create();
 
     $archivedConcerns = KnowledgeBaseItemConcern::factory()
         ->count(3)
         ->state(['status' => ConcernStatus::Archived])
-        ->for($knowledgeBaseItem, 'knowledge$knowledgeBaseItem')
+        ->for($knowledgeBaseItem, 'knowledgeBaseItem')
         ->create();
 
     $resolvedConcerns = KnowledgeBaseItemConcern::factory()
         ->count(3)
         ->state(['status' => ConcernStatus::Resolved])
-        ->for($knowledgeBaseItem, 'knowledge$knowledgeBaseItem')
+        ->for($knowledgeBaseItem, 'knowledgeBaseItem')
         ->create();
 
     livewire(KnowledgeBaseItemConcernsTable::class, ['record' => $knowledgeBaseItem])
