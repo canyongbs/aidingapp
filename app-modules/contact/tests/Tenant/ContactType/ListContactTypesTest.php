@@ -38,11 +38,17 @@ use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\ListContactTypes;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
+
+// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
+beforeEach(function () {
+    ServiceRequestCategoryRenameFeature::activate();
+});
 
 test('The correct details are displayed on the ListContactTypes page', function () {
     $contactTypes = ContactType::factory()

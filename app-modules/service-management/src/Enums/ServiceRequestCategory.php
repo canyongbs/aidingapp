@@ -34,19 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+namespace AidingApp\ServiceManagement\Enums;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use App\Features\ServiceRequestCategoryRenameFeature;
-use Worksome\RequestFactories\RequestFactory;
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasLabel;
 
-class EditServiceRequestTypeRequestFactory extends RequestFactory
+enum ServiceRequestCategory: string implements HasColor, HasLabel
 {
-    public function definition(): array
+    case Incident = 'incident';
+
+    case Request = 'request';
+
+    public function getLabel(): string
     {
-        return [
-            'name' => $this->faker->name(),
-            (ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category') => $this->faker->randomElement(ServiceRequestCategory::cases())->value,
-        ];
+        return match ($this) {
+            self::Incident => 'Incident',
+            self::Request => 'Request',
+        };
+    }
+
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Incident => 'danger',
+            self::Request => 'primary',
+        };
     }
 }

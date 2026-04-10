@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\ServiceRe
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
@@ -68,10 +69,10 @@ class ViewServiceRequestType extends ViewRecord
                             ->state(fn (ServiceRequestType $record): string => str($record->icon)->after('heroicon-o-')->headline()->toString())
                             ->icon(fn (ServiceRequestType $record): string => $record->icon),
                         TextEntry::make('category.name')
-                            ->label('Category')
+                            ->label(ServiceRequestCategoryRenameFeature::active() ? 'Service Request Area' : 'Category')
                             ->placeholder('None'),
-                        TextEntry::make('default_issue_category')
-                            ->label('Default Issue Category'),
+                        TextEntry::make(ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category')
+                            ->label(ServiceRequestCategoryRenameFeature::active() ? 'Default Category' : 'Default Issue Category'),
                         TextEntry::make('form.name')
                             ->label('Form')
                             ->hidden(fn (ServiceRequestType $record) => ! $record->form)

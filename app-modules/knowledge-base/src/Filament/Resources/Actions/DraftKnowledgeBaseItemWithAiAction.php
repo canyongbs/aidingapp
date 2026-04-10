@@ -42,6 +42,7 @@ use AidingApp\Ai\Models\AiAssistant;
 use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Action;
+use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
@@ -121,7 +122,9 @@ class DraftKnowledgeBaseItemWithAiAction extends Action
                     ->before("\n")
                     ->trim());
 
-                $set('article_details', (string) str($content)->after("\n")->markdown());
+                $set('article_details', RichContentRenderer::make(
+                    (string) str($content)->after("\n")->markdown()
+                )->toArray());
             });
     }
 

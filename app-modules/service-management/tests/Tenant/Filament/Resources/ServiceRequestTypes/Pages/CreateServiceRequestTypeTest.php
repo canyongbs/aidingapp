@@ -35,11 +35,12 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\CreateServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestTypeRequestFactory;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -49,6 +50,11 @@ use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Tests\asSuperAdmin;
+
+// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
+beforeEach(function () {
+    ServiceRequestCategoryRenameFeature::activate();
+});
 
 test('A successful action on the CreateServiceRequestType page', function () {
     asSuperAdmin()
@@ -159,19 +165,19 @@ test('CreateServiceRequestType is gated with proper feature access control', fun
     assertDatabaseHas(ServiceRequestType::class, $request->toArray());
 });
 
-test('CreateServiceRequestType is creating default_issue_category when form saved', function () {
+test('CreateServiceRequestType is creating default_category when form saved', function () {
     asSuperAdmin();
 
     livewire(CreateServiceRequestType::class)
         ->fillForm([
             'name' => 'Test Type',
-            'default_issue_category' => ServiceRequestIssueCategory::Incident->value,
+            'default_category' => ServiceRequestCategory::Incident->value,
         ])
         ->call('create')
         ->assertHasNoFormErrors();
 
     assertDatabaseHas(ServiceRequestType::class, [
         'name' => 'Test Type',
-        'default_issue_category' => ServiceRequestIssueCategory::Incident->value,
+        'default_category' => ServiceRequestCategory::Incident->value,
     ]);
 });

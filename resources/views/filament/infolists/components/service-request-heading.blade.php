@@ -34,7 +34,7 @@
 
 @props([
     'serviceRequestNumber',
-    'issueCategory' => null,
+    'category' => null,
 ])
 
 <div class="inline-flex flex-col gap-1">
@@ -52,9 +52,9 @@
         </button>
     </span>
 
-    @if ($issueCategory)
-        <x-filament::badge :color="$issueCategory->getColor()" class="w-fit">
-            {{ $issueCategory->getLabel() }}
+    @if ($category)
+        <x-filament::badge :color="$category->getColor()" class="w-fit">
+            {{ $category->getLabel() }}
         </x-filament::badge>
     @endif
 </div>
