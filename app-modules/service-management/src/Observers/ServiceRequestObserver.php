@@ -72,8 +72,8 @@ class ServiceRequestObserver
         $defaultCategoryColumn = ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category';
 
         /** @phpstan-ignore function.impossibleType (Because this is in an observer it is possible that category is null before the model is persisted) */
-        if (is_null($serviceRequest->$categoryColumn)) {
-            $serviceRequest->$categoryColumn = $serviceRequest->priority->type->$defaultCategoryColumn;
+        if (is_null($serviceRequest->$categoryColumn)) { /** @phpstan-ignore property.notFound */
+            $serviceRequest->$categoryColumn = $serviceRequest->priority->type->$defaultCategoryColumn; /** @phpstan-ignore property.notFound */
         }
     }
 

@@ -138,8 +138,8 @@ class EditServiceRequest extends EditRecord
                                             $defaultCategoryColumn = ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category';
                                             $categoryField = ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category';
 
-                                            if ($type?->$defaultCategoryColumn) {
-                                                $set($categoryField, $type->$defaultCategoryColumn->value);
+                                            if ($type?->$defaultCategoryColumn) { /** @phpstan-ignore property.notFound */
+                                                $set($categoryField, $type->$defaultCategoryColumn->value); /** @phpstan-ignore property.notFound */
                                             }
                                         }
                                     })
