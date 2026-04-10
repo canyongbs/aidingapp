@@ -44,13 +44,13 @@ use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -107,24 +107,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'issue_category',
         'category',
     ];
-
-    /**
-     * TODO: ServiceRequestCategoryRenameFeature Cleanup - After ServiceRequestCategoryRenameFeature is removed: rename 'category' cast back to $casts property and remove 'issue_category' from $fillable.
-     */
-    protected function casts(): array
-    {
-        return [
-            'status_updated_at' => 'immutable_datetime',
-            'time_to_resolution' => 'integer',
-            'survey_sent_at' => 'datetime',
-            'reminder_sent_at' => 'datetime',
-            'ai_resolution_confidence_score' => 'integer',
-            'is_ai_resolution_attempted' => 'boolean',
-            'is_ai_resolution_successful' => 'boolean',
-            'is_draft' => 'boolean',
-            (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::class,
-        ];
-    }
 
     public function registerMediaCollections(): void
     {
@@ -436,6 +418,24 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     public function isResolved(): bool
     {
         return $this->status->classification === SystemServiceRequestClassification::Closed;
+    }
+
+    /**
+     * TODO: ServiceRequestCategoryRenameFeature Cleanup - After ServiceRequestCategoryRenameFeature is removed: rename 'category' cast back to $casts property and remove 'issue_category' from $fillable.
+     */
+    protected function casts(): array
+    {
+        return [
+            'status_updated_at' => 'immutable_datetime',
+            'time_to_resolution' => 'integer',
+            'survey_sent_at' => 'datetime',
+            'reminder_sent_at' => 'datetime',
+            'ai_resolution_confidence_score' => 'integer',
+            'is_ai_resolution_attempted' => 'boolean',
+            'is_ai_resolution_successful' => 'boolean',
+            'is_draft' => 'boolean',
+            (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::class,
+        ];
     }
 
     protected static function booted(): void

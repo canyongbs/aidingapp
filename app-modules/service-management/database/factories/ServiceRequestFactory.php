@@ -39,11 +39,11 @@ namespace AidingApp\ServiceManagement\Database\Factories;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

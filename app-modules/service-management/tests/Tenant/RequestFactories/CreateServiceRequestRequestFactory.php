@@ -39,9 +39,9 @@ namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use Worksome\RequestFactories\RequestFactory;
 
 class CreateServiceRequestRequestFactory extends RequestFactory

@@ -39,10 +39,10 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
 use AidingApp\Team\Models\Team;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
@@ -125,57 +125,6 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_ai_clarification_enabled',
         'is_ai_resolution_enabled',
     ];
-
-    /**
-     * TODO: ServiceRequestCategoryRenameFeature Cleanup - After ServiceRequestCategoryRenameFeature is removed: rename 'default_category' cast back to $casts property and remove 'default_issue_category' from $fillable.
-     */
-    protected function casts(): array
-    {
-        return [
-            'has_enabled_feedback_collection' => 'boolean',
-            'has_enabled_csat' => 'boolean',
-            'has_enabled_nps' => 'boolean',
-            (ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category') => ServiceRequestCategory::class,
-            'assignment_type' => ServiceRequestTypeAssignmentTypes::class,
-            'is_managers_service_request_created_email_enabled' => 'boolean',
-            'is_managers_service_request_created_notification_enabled' => 'boolean',
-            'is_managers_service_request_assigned_email_enabled' => 'boolean',
-            'is_managers_service_request_assigned_notification_enabled' => 'boolean',
-            'is_managers_service_request_closed_email_enabled' => 'boolean',
-            'is_managers_service_request_closed_notification_enabled' => 'boolean',
-            'is_auditors_service_request_created_email_enabled' => 'boolean',
-            'is_auditors_service_request_created_notification_enabled' => 'boolean',
-            'is_auditors_service_request_assigned_email_enabled' => 'boolean',
-            'is_auditors_service_request_assigned_notification_enabled' => 'boolean',
-            'is_auditors_service_request_closed_email_enabled' => 'boolean',
-            'is_auditors_service_request_closed_notification_enabled' => 'boolean',
-            'is_managers_service_request_update_email_enabled' => 'boolean',
-            'is_managers_service_request_update_notification_enabled' => 'boolean',
-            'is_managers_service_request_status_change_email_enabled' => 'boolean',
-            'is_managers_service_request_status_change_notification_enabled' => 'boolean',
-            'is_auditors_service_request_update_email_enabled' => 'boolean',
-            'is_auditors_service_request_update_notification_enabled' => 'boolean',
-            'is_auditors_service_request_status_change_email_enabled' => 'boolean',
-            'is_auditors_service_request_status_change_notification_enabled' => 'boolean',
-            'is_customers_service_request_created_email_enabled' => 'boolean',
-            'is_customers_service_request_created_notification_enabled' => 'boolean',
-            'is_customers_service_request_assigned_email_enabled' => 'boolean',
-            'is_customers_service_request_assigned_notification_enabled' => 'boolean',
-            'is_customers_service_request_update_email_enabled' => 'boolean',
-            'is_customers_service_request_update_notification_enabled' => 'boolean',
-            'is_customers_service_request_status_change_email_enabled' => 'boolean',
-            'is_customers_service_request_status_change_notification_enabled' => 'boolean',
-            'is_customers_service_request_closed_email_enabled' => 'boolean',
-            'is_customers_service_request_closed_notification_enabled' => 'boolean',
-            'is_customers_survey_response_email_enabled' => 'boolean',
-            'is_email_automatic_creation_enabled' => 'boolean',
-            'is_email_automatic_creation_contact_create_enabled' => 'boolean',
-            'is_reminders_enabled' => 'boolean',
-            'sort' => 'integer',
-            'is_ai_clarification_enabled' => 'boolean',
-            'is_ai_resolution_enabled' => 'boolean',
-        ];
-    }
 
     public function serviceRequests(): HasManyThrough
     {
@@ -305,6 +254,57 @@ class ServiceRequestType extends BaseModel implements Auditable
     public function category(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestTypeCategory::class, 'category_id');
+    }
+
+    /**
+     * TODO: ServiceRequestCategoryRenameFeature Cleanup - After ServiceRequestCategoryRenameFeature is removed: rename 'default_category' cast back to $casts property and remove 'default_issue_category' from $fillable.
+     */
+    protected function casts(): array
+    {
+        return [
+            'has_enabled_feedback_collection' => 'boolean',
+            'has_enabled_csat' => 'boolean',
+            'has_enabled_nps' => 'boolean',
+            (ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category') => ServiceRequestCategory::class,
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::class,
+            'is_managers_service_request_created_email_enabled' => 'boolean',
+            'is_managers_service_request_created_notification_enabled' => 'boolean',
+            'is_managers_service_request_assigned_email_enabled' => 'boolean',
+            'is_managers_service_request_assigned_notification_enabled' => 'boolean',
+            'is_managers_service_request_closed_email_enabled' => 'boolean',
+            'is_managers_service_request_closed_notification_enabled' => 'boolean',
+            'is_auditors_service_request_created_email_enabled' => 'boolean',
+            'is_auditors_service_request_created_notification_enabled' => 'boolean',
+            'is_auditors_service_request_assigned_email_enabled' => 'boolean',
+            'is_auditors_service_request_assigned_notification_enabled' => 'boolean',
+            'is_auditors_service_request_closed_email_enabled' => 'boolean',
+            'is_auditors_service_request_closed_notification_enabled' => 'boolean',
+            'is_managers_service_request_update_email_enabled' => 'boolean',
+            'is_managers_service_request_update_notification_enabled' => 'boolean',
+            'is_managers_service_request_status_change_email_enabled' => 'boolean',
+            'is_managers_service_request_status_change_notification_enabled' => 'boolean',
+            'is_auditors_service_request_update_email_enabled' => 'boolean',
+            'is_auditors_service_request_update_notification_enabled' => 'boolean',
+            'is_auditors_service_request_status_change_email_enabled' => 'boolean',
+            'is_auditors_service_request_status_change_notification_enabled' => 'boolean',
+            'is_customers_service_request_created_email_enabled' => 'boolean',
+            'is_customers_service_request_created_notification_enabled' => 'boolean',
+            'is_customers_service_request_assigned_email_enabled' => 'boolean',
+            'is_customers_service_request_assigned_notification_enabled' => 'boolean',
+            'is_customers_service_request_update_email_enabled' => 'boolean',
+            'is_customers_service_request_update_notification_enabled' => 'boolean',
+            'is_customers_service_request_status_change_email_enabled' => 'boolean',
+            'is_customers_service_request_status_change_notification_enabled' => 'boolean',
+            'is_customers_service_request_closed_email_enabled' => 'boolean',
+            'is_customers_service_request_closed_notification_enabled' => 'boolean',
+            'is_customers_survey_response_email_enabled' => 'boolean',
+            'is_email_automatic_creation_enabled' => 'boolean',
+            'is_email_automatic_creation_contact_create_enabled' => 'boolean',
+            'is_reminders_enabled' => 'boolean',
+            'sort' => 'integer',
+            'is_ai_clarification_enabled' => 'boolean',
+            'is_ai_resolution_enabled' => 'boolean',
+        ];
     }
 
     protected function serializeDate(DateTimeInterface $date): string
