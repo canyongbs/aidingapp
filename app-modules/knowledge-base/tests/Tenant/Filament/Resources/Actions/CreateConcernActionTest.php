@@ -55,6 +55,6 @@ it('can create a concern properly', function () {
 
     $knowledgeBaseItem->refresh();
 
-    expect($knowledgeBaseItem->conerns()->count())->toBe(1);
-    expect($knowledgeBaseItem->conerns()->first()->description)->toBe($data['description']);
+    expect($knowledgeBaseItem->concerns()->count())->toBe(1);
+    expect($knowledgeBaseItem->concerns()->first()->description)->toBe($data['description']);
 });
