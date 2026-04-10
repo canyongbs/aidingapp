@@ -36,8 +36,14 @@
 
 use AidingApp\Audit\Settings\AuditSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ServiceRequestCategoryRenameFeature;
 
 use function Tests\asSuperAdmin;
+
+// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
+beforeEach(function () {
+    ServiceRequestCategoryRenameFeature::activate();
+});
 
 test('Audit logs are only created if the Model is not set to be excluded from Auditing by audit settings', function () {
     asSuperAdmin();
