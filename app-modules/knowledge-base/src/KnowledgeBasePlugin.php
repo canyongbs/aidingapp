@@ -53,7 +53,7 @@ class KnowledgeBasePlugin implements Plugin
             in: __DIR__ . '/Filament/Resources',
             for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
         )
-          ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
+            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
     }
 
     public function boot(Panel $panel): void {}
