@@ -209,7 +209,7 @@ class EditKnowledgeBaseItem extends EditRecord
                                     ->exists((new Division())->getTable(), (new Division())->getKeyName()),
                             ]),
                     ])
-                    ->columnSpanFull(),
+                    ->columnSpanFull(),                
             ]);
     }
 

@@ -55,7 +55,6 @@ class ViewKnowledgeBaseItem extends ViewRecord
     public function getTitle(): string|Htmlable
     {
         assert($this->record instanceof KnowledgeBaseItem);
-
         return $this->record->title;
     }
 
