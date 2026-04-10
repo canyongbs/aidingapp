@@ -50,7 +50,7 @@ class KnowledgeBaseItemConcernObserver
         $knowledgeBaseItemConcern->createdBy->notifyNow(new KnowledgeBaseItemConcernCreated($knowledgeBaseItemConcern));
 
         $knowledgeBaseItemConcern->knowledgeBaseItem->managers->each(
-          fn (User $user) => $user->notifyNow(new AlertManagerConcernCreated($knowledgeBaseItemConcern))
+            fn (User $user) => $user->notifyNow(new AlertManagerConcernCreated($knowledgeBaseItemConcern))
         );
     }
 
@@ -60,7 +60,7 @@ class KnowledgeBaseItemConcernObserver
             $knowledgeBaseItemConcern->createdBy->notifyNow(new KnowledgeBaseItemConcernStatusChanged($knowledgeBaseItemConcern));
 
             $knowledgeBaseItemConcern->knowledgeBaseItem->managers->each(
-              fn (User $user) => $user->notifyNow(new AlertManagerConcernStatusChanged($knowledgeBaseItemConcern, $knowledgeBaseItemConcern->getOriginal('status')))
+                fn (User $user) => $user->notifyNow(new AlertManagerConcernStatusChanged($knowledgeBaseItemConcern, $knowledgeBaseItemConcern->getOriginal('status')))
             );
         }
     }
