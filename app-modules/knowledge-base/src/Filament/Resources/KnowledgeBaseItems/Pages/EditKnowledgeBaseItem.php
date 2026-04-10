@@ -83,6 +83,7 @@ class EditKnowledgeBaseItem extends EditRecord
                             ->schema([
                                 RichEditor::make('article_details')
                                     ->label('Article Details')
+                                    ->hiddenLabel()
                                     ->json()
                                     ->toolbarButtons([
                                         ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
