@@ -42,7 +42,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
-use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -73,12 +73,11 @@ class CreateServiceRequestType extends CreateRecord
                             ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())
                             ->string(),
                         IconSelect::make('icon'),
-                        Select::make('default_category')
-                            ->label('Default Category')
+                        Select::make(ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category')
+                            ->label(ServiceRequestCategoryRenameFeature::active() ? 'Default Category' : 'Default Issue Category')
                             ->options(ServiceRequestCategory::class)
                             ->enum(ServiceRequestCategory::class)
-                            ->required()
-                            ->visible(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active()),
+                            ->required(),
                         Group::make()
                             ->schema([
                                 Toggle::make('has_enabled_feedback_collection')

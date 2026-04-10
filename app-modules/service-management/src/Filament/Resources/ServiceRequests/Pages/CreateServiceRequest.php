@@ -50,7 +50,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
-use App\Features\ServiceRequestIssueCategoryFeature;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -120,11 +120,13 @@ class CreateServiceRequest extends CreateRecord
                                         $set('priority_id', null);
                                         $livewire->form->getComponent('dynamicTypeFields')?->getChildSchema()->fill();
 
-                                        if (ServiceRequestIssueCategoryFeature::active() && $state) {
+                                        if ($state) {
                                             $type = ServiceRequestType::find($state);
+                                            $defaultCategoryColumn = ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category';
+                                            $categoryField = ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category';
 
-                                            if ($type?->default_category) {
-                                                $set('category', $type->default_category->value);
+                                            if ($type?->$defaultCategoryColumn) {
+                                                $set($categoryField, $type->$defaultCategoryColumn->value);
                                             }
                                         }
                                     })
@@ -145,14 +147,13 @@ class CreateServiceRequest extends CreateRecord
                                     ->visible(fn (Get $get): bool => filled($get('type_id')))
                                     ->columnSpan(2),
                             ]),
-                        Radio::make('category')
-                            ->label('Category')
+                        Radio::make(ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category')
+                            ->label(ServiceRequestCategoryRenameFeature::active() ? 'Category' : 'Issue Category')
                             ->options(ServiceRequestCategory::class)
                             ->enum(ServiceRequestCategory::class)
                             ->inline()
                             ->inlineLabel(false)
-                            ->required()
-                            ->visible(fn (): bool => ServiceRequestIssueCategoryFeature::active()),
+                            ->required(),
                         TextInput::make('title')
                             ->required()
                             ->string()

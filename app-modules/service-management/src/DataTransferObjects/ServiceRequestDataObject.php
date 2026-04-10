@@ -63,11 +63,16 @@ class ServiceRequestDataObject extends Data
             title: $data['title'] ?? Optional::create(),
             close_details: $data['close_details'] ?? Optional::create(),
             respondent_id: $data['respondent_id'],
+            // TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove the 'issue_category' fallback branch below, keeping only the 'category' check.
             category: isset($data['category'])
               ? ($data['category'] instanceof ServiceRequestCategory
                 ? $data['category']
                 : ServiceRequestCategory::from($data['category']))
-              : Optional::create(),
+              : (isset($data['issue_category'])
+                ? ($data['issue_category'] instanceof ServiceRequestCategory
+                  ? $data['issue_category']
+                  : ServiceRequestCategory::from($data['issue_category']))
+                : Optional::create()),
         );
     }
 }

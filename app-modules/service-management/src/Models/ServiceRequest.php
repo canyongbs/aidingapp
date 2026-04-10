@@ -44,6 +44,7 @@ use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
@@ -103,20 +104,27 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'is_ai_resolution_successful',
         'is_draft',
         'portal_assistant_thread_id',
+        'issue_category',
         'category',
     ];
 
-    protected $casts = [
-        'status_updated_at' => 'immutable_datetime',
-        'time_to_resolution' => 'integer',
-        'survey_sent_at' => 'datetime',
-        'reminder_sent_at' => 'datetime',
-        'ai_resolution_confidence_score' => 'integer',
-        'is_ai_resolution_attempted' => 'boolean',
-        'is_ai_resolution_successful' => 'boolean',
-        'is_draft' => 'boolean',
-        'category' => ServiceRequestCategory::class,
-    ];
+    /**
+     * TODO: ServiceRequestCategoryRenameFeature Cleanup - After ServiceRequestCategoryRenameFeature is removed: rename 'category' cast back to $casts property and remove 'issue_category' from $fillable.
+     */
+    protected function casts(): array
+    {
+        return [
+            'status_updated_at' => 'immutable_datetime',
+            'time_to_resolution' => 'integer',
+            'survey_sent_at' => 'datetime',
+            'reminder_sent_at' => 'datetime',
+            'ai_resolution_confidence_score' => 'integer',
+            'is_ai_resolution_attempted' => 'boolean',
+            'is_ai_resolution_successful' => 'boolean',
+            'is_draft' => 'boolean',
+            (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::class,
+        ];
+    }
 
     public function registerMediaCollections(): void
     {

@@ -43,7 +43,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRe
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
-use App\Features\ServiceRequestTypeDefaultIssueCategoryFeature;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Filament\Forms\Components\IconSelect;
 use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\Action;
@@ -86,12 +86,11 @@ class EditServiceRequestType extends EditRecord
                                 modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed(),
                             ),
                         IconSelect::make('icon'),
-                        Select::make('default_category')
-                            ->label('Default Category')
+                        Select::make(ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category')
+                            ->label(ServiceRequestCategoryRenameFeature::active() ? 'Default Category' : 'Default Issue Category')
                             ->options(ServiceRequestCategory::class)
                             ->enum(ServiceRequestCategory::class)
-                            ->required()
-                            ->visible(fn (): bool => ServiceRequestTypeDefaultIssueCategoryFeature::active()),
+                            ->required(),
                         Group::make()
                             ->schema([
                                 Toggle::make('has_enabled_feedback_collection')

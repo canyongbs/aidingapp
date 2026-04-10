@@ -34,30 +34,40 @@
 </COPYRIGHT>
 */
 
+use App\Features\ServiceRequestCategoryRenameFeature;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_requests', function (Blueprint $table) {
-            $table->renameColumn('issue_category', 'category');
-        });
+        DB::transaction(function () {
+            Schema::table('service_requests', function (Blueprint $table) {
+                $table->renameColumn('issue_category', 'category');
+            });
 
-        Schema::table('service_request_types', function (Blueprint $table) {
-            $table->renameColumn('default_issue_category', 'default_category');
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->renameColumn('default_issue_category', 'default_category');
+            });
+
+            ServiceRequestCategoryRenameFeature::activate();
         });
     }
 
     public function down(): void
     {
-        Schema::table('service_request_types', function (Blueprint $table) {
-            $table->renameColumn('default_category', 'default_issue_category');
-        });
+        DB::transaction(function () {
+            ServiceRequestCategoryRenameFeature::deactivate();
 
-        Schema::table('service_requests', function (Blueprint $table) {
-            $table->renameColumn('category', 'issue_category');
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->renameColumn('default_category', 'default_issue_category');
+            });
+
+            Schema::table('service_requests', function (Blueprint $table) {
+                $table->renameColumn('category', 'issue_category');
+            });
         });
     }
 };

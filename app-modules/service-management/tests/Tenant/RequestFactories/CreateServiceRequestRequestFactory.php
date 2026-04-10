@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Worksome\RequestFactories\RequestFactory;
@@ -57,7 +58,7 @@ class CreateServiceRequestRequestFactory extends RequestFactory
             'priority_id' => ServiceRequestPriority::factory()->create()->getKey(),
             'respondent_id' => Contact::factory()->create()->getKey(),
             'close_details' => fake()->sentence(),
-            'category' => fake()->randomElement(ServiceRequestCategory::cases()),
+            (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => fake()->randomElement(ServiceRequestCategory::cases()),
         ];
     }
 }

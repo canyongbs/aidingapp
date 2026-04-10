@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use BladeUI\Icons\Factory as BladeUIIconsFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -53,7 +54,7 @@ class ServiceRequestTypeFactory extends Factory
             'name' => str($this->faker->unique()->word())->ucfirst()->toString(),
             'description' => $this->faker->optional()->sentences(2, true),
             'icon' => $this->faker->optional()->randomElement($this->icons()),
-            'default_category' => $this->faker->randomElement(ServiceRequestCategory::cases()),
+            (ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category') => $this->faker->randomElement(ServiceRequestCategory::cases()),
         ];
     }
 
