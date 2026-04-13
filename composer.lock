@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "677aac2591124ce9a42e955fd4f3985e",
+    "content-hash": "4c4491b62139cff5563cc8a08f0fe6c8",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -1589,16 +1589,16 @@
         },
         {
             "name": "canyongbs/common",
-            "version": "2.11.0",
+            "version": "2.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canyongbs/common.git",
-                "reference": "a41556275d5edf796959f053c66d0c911e23492e"
+                "reference": "a5ad946e1befe6e1849425171d4f954d3a76bc99"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canyongbs/common/zipball/a41556275d5edf796959f053c66d0c911e23492e",
-                "reference": "a41556275d5edf796959f053c66d0c911e23492e",
+                "url": "https://api.github.com/repos/canyongbs/common/zipball/a5ad946e1befe6e1849425171d4f954d3a76bc99",
+                "reference": "a5ad946e1befe6e1849425171d4f954d3a76bc99",
                 "shasum": ""
             },
             "require": {
@@ -1644,9 +1644,9 @@
             ],
             "support": {
                 "issues": "https://github.com/canyongbs/common/issues",
-                "source": "https://github.com/canyongbs/common/tree/2.11.0"
+                "source": "https://github.com/canyongbs/common/tree/2.12.0"
             },
-            "time": "2026-04-10T09:08:07+00:00"
+            "time": "2026-04-13T09:46:32+00:00"
         },
         {
             "name": "canyongbs/filament-tiptap-editor",
