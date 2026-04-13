@@ -44,25 +44,69 @@ class AssetManagementPortalController extends Controller
 {
     public function __invoke(Request $request): JsonResponse
     {
-        $checkedInAssets = auth('contact')->user()->assetCheckIns()
-            ->with(
-                'asset:id,name,serial_number,description,type_id',
-                'asset.type:id,name'
-            )
-            ->get();
+        $contact = auth('contact')->user();
 
-        $checkedOutAssets = auth('contact')->user()->assetCheckOuts()
-            ->whereNull('asset_check_in_id')
+        $filter = $request->input('filter', 'all');
+
+        $query = $contact->assetCheckOuts()
             ->with([
-                'asset:id,name,serial_number,description,type_id',
+                'asset:id,name,serial_number,description,type_id,location_id,purchase_date',
                 'asset.type:id,name',
-            ])
-            ->get();
+                'asset.location:id,name',
+                'checkIn:id,checked_in_at',
+            ]);
+
+        $totalCount = (clone $query)->count();
+        $checkedOutCount = (clone $query)->whereNull('asset_check_in_id')->count();
+        $availableCount = (clone $query)->whereNotNull('asset_check_in_id')->count();
+
+        $filteredQuery = match ($filter) {
+            'checked_out' => (clone $query)->whereNull('asset_check_in_id'),
+            'available' => (clone $query)->whereNotNull('asset_check_in_id'),
+            default => $query,
+        };
+
+        $paginator = $filteredQuery
+            ->orderByDesc('checked_out_at')
+            ->paginate(10);
+
+        $items = $paginator->getCollection()->map(function ($checkOut) {
+            return [
+                'id' => $checkOut->getKey(),
+                'status' => $checkOut->asset_check_in_id ? 'available' : 'checked_out',
+                'last_activity' => $checkOut->asset_check_in_id ? 'Return' : 'Checkout',
+                'asset' => $checkOut->asset ? [
+                    'id' => $checkOut->asset->getKey(),
+                    'name' => $checkOut->asset->name,
+                    'description' => $checkOut->asset->description,
+                    'serial_number' => $checkOut->asset->serial_number,
+                    'purchase_age' => $checkOut->asset->purchase_date ? $checkOut->asset->purchase_age : null,
+                    'type' => $checkOut->asset->type
+                        ? ['name' => $checkOut->asset->type->name]
+                        : null,
+                    'location' => $checkOut->asset->location
+                        ? ['name' => $checkOut->asset->location->name]
+                        : null,
+                ] : null,
+            ];
+        });
 
         return response()->json([
             'success' => true,
-            'checkedInAssets' => $checkedInAssets,
-            'checkedOutAssets' => $checkedOutAssets,
+            'data' => [
+                'data' => $items,
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'from' => $paginator->firstItem() ?? 0,
+                'to' => $paginator->lastItem() ?? 0,
+                'total' => $paginator->total(),
+                'per_page' => $paginator->perPage(),
+            ],
+            'counts' => [
+                'total' => $totalCount,
+                'checked_out' => $checkedOutCount,
+                'available' => $availableCount,
+            ],
         ]);
     }
 }
