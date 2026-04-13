@@ -43,11 +43,14 @@ use Filament\Schemas\Components\Component;
 
 class SelectFormFieldBlock extends FormFieldBlock
 {
-    public static string $rendered = 'form::blocks.submissions.select';
-
     public static function type(): string
     {
         return 'select';
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.select';
     }
 
     /**

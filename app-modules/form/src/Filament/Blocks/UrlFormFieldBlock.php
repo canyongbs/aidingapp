@@ -40,11 +40,14 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class UrlFormFieldBlock extends FormFieldBlock
 {
-    public static string $rendered = 'form::blocks.submissions.url';
-
     public static function type(): string
     {
         return 'url';
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.url';
     }
 
     public static function getLabel(): string

@@ -44,13 +44,19 @@ use Filament\Schemas\Components\Component;
 
 class RadioFormFieldBlock extends FormFieldBlock
 {
-    public static string $preview = 'form::blocks.previews.radio';
-
-    public static string $rendered = 'form::blocks.submissions.radio';
-
     public static function type(): string
     {
         return 'radio';
+    }
+
+    protected static function previewView(): string
+    {
+        return 'form::blocks.previews.radio';
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.radio';
     }
 
     /**

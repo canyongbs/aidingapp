@@ -40,11 +40,14 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class NumberFormFieldBlock extends FormFieldBlock
 {
-    public static string $rendered = 'form::blocks.submissions.number';
-
     public static function type(): string
     {
         return 'number';
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.number';
     }
 
     /**

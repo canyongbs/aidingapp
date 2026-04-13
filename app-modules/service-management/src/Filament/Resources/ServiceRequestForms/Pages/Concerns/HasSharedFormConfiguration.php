@@ -46,6 +46,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use CanyonGBS\Common\Filament\Support\HideDeletedAndArchivedExceptSelectedFromSelectOptions;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
@@ -55,7 +57,6 @@ use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Forms\Components\RichEditor;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 
 trait HasSharedFormConfiguration
@@ -156,16 +157,16 @@ trait HasSharedFormConfiguration
         return RichEditor::make('content')
             ->customBlocks(FormFieldBlockRegistry::get())
             ->toolbarButtons([
-                ['bold', 'italic', 'small'],
-                ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'bulletList', 'orderedList', 'horizontalRule'],
-                ['link', 'grid'],
+                ['bold', 'italic', 'small', 'link'],
+                [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])->textualButtons(), 'bulletList', 'orderedList', 'horizontalRule'],
+                ['grid'],
                 ['customBlocks'],
             ])
             ->activePanel('customBlocks')
             ->json()
             ->placeholder('Drag blocks here to build your service request form')
             ->hiddenLabel()
-            ->saveRelationshipsUsing(function (RichEditor $component, ServiceRequestForm | ServiceRequestFormStep $record) {
+            ->saveRelationshipsBeforeChildrenUsing(function (RichEditor $component, ServiceRequestForm | ServiceRequestFormStep $record) {
                 if ($component->isDisabled()) {
                     return;
                 }

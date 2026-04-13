@@ -41,6 +41,12 @@ use AidingApp\Form\Models\Submission;
 
 class InjectSubmissionStateIntoRichContent
 {
+    /**
+     * @param  array<int, mixed> $content
+     * @param  array<string, class-string> $blocks
+     *
+     * @return array<int, mixed>
+     */
     public function __invoke(Submission $submission, array $content, array $blocks): array
     {
         foreach ($content as $componentKey => $component) {
@@ -82,7 +88,7 @@ class InjectSubmissionStateIntoRichContent
 
             $content[$componentKey]['attrs']['config'] = [
                 ...$component['attrs']['config'],
-                ...$block::getSubmissionState($field->pivot->response),
+                ...$block::getSubmissionState($field, $field->pivot->response), /** @phpstan-ignore property.notFound */
             ];
         }
 

@@ -40,11 +40,14 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class TextAreaFormFieldBlock extends FormFieldBlock
 {
-    public static string $preview = 'form::blocks.previews.textarea';
-
     public static function type(): string
     {
         return 'text_area';
+    }
+
+    protected static function previewView(): string
+    {
+        return 'form::blocks.previews.textarea';
     }
 
     /**

@@ -44,11 +44,14 @@ use Filament\Forms\Components\TextInput as FilamentTextInput;
 
 class EducatableEmailFormFieldBlock extends FormFieldBlock
 {
-    public static string $rendered = 'form::blocks.submissions.educatable-email';
-
     public static function type(): string
     {
         return 'educatable_email';
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.educatable-email';
     }
 
     public static function getLabel(): string
@@ -94,7 +97,7 @@ class EducatableEmailFormFieldBlock extends FormFieldBlock
     /**
      * @return array<string, mixed>
      */
-    public static function getSubmissionState(mixed $response): array
+    public static function getSubmissionState(SubmissibleField $field, mixed $response): array
     {
         $author = app(ResolveSubmissionAuthorFromEmail::class)($response);
 

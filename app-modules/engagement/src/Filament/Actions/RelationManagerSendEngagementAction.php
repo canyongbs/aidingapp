@@ -47,6 +47,7 @@ use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -87,7 +88,7 @@ class RelationManagerSendEngagementAction extends CreateAction
                             ->columnSpanFull(),
                         RichEditor::make('body')
                             ->label('Body')
-                            ->toolbarButtons([['bold', 'italic', 'small', 'link'], ['h1', 'h2', 'h3', 'bulletList', 'orderedList', 'horizontalRule', 'attachFiles'], ['mergeTags']])
+                            ->toolbarButtons([['bold', 'italic', 'small', 'link'], [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3'])->textualButtons(), 'bulletList', 'orderedList', 'horizontalRule', 'attachFiles'], ['mergeTags']])
                             ->activePanel('mergeTags')
                             ->resizableImages()
                             ->required()

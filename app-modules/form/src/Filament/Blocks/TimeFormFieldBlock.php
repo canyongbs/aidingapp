@@ -40,11 +40,14 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class TimeFormFieldBlock extends FormFieldBlock
 {
-    public static string $rendered = 'form::blocks.submissions.time';
-
     public static function type(): string
     {
         return 'time';
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.time';
     }
 
     /**

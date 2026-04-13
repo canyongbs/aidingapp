@@ -39,15 +39,12 @@ namespace AidingApp\Form\Filament\Blocks;
 use AidingApp\Form\Models\SubmissibleField;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\RichEditor\RichContentCustomBlock;
 use Filament\Forms\Components\TextInput;
 
 abstract class FormFieldBlock extends RichContentCustomBlock
 {
-    public static string $preview = 'form::blocks.previews.default';
-
-    public static string $rendered = 'form::blocks.submissions.default';
-
     public static bool $internal = false;
 
     abstract public static function type(): string;
@@ -59,7 +56,8 @@ abstract class FormFieldBlock extends RichContentCustomBlock
 
     public static function getLabel(): string
     {
-        return (string) str(static::getId())
+        return (string) str(static::type())
+            ->afterLast('.')
             ->kebab()
             ->replace(['-', '_'], ' ')
             ->ucfirst();
@@ -68,8 +66,13 @@ abstract class FormFieldBlock extends RichContentCustomBlock
     public static function configureEditorAction(Action $action): Action
     {
         return $action->schema([
+            Hidden::make('fieldId'),
             TextInput::make('label')
                 ->required()
+                ->string()
+                ->maxLength(255),
+            TextInput::make('description')
+                ->label('Field Description')
                 ->string()
                 ->maxLength(255),
             Checkbox::make('isRequired')
@@ -85,12 +88,12 @@ abstract class FormFieldBlock extends RichContentCustomBlock
 
     public static function toPreviewHtml(array $config): ?string
     {
-        return view(static::$preview, $config)->render();
+        return view(static::previewView(), $config)->render();
     }
 
     public static function toHtml(array $config, array $data): ?string
     {
-        return view(static::$rendered, [...$config, ...$data])->render();
+        return view(static::renderedView(), $config)->render();
     }
 
     public static function fields(): array
@@ -105,10 +108,36 @@ abstract class FormFieldBlock extends RichContentCustomBlock
         return [];
     }
 
-    public static function getSubmissionState(mixed $response): array
+    public static function getSubmissionState(SubmissibleField $field, mixed $response): array
     {
         return [
             'response' => $response,
         ];
+    }
+
+    protected static function previewView(): string
+    {
+        return 'form::blocks.previews.default';
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.default';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected static function getDescriptionSectionsSchema(SubmissibleField $field, string $sectionType = 'help'): array
+    {
+        if (blank($field->config['description'] ?? null)) {
+            return [];
+        }
+
+        return match ($sectionType) {
+            'help' => ['help' => $field->config['description']],
+            'legend' => ['legend' => $field->config['description']],
+            default => [],
+        };
     }
 }

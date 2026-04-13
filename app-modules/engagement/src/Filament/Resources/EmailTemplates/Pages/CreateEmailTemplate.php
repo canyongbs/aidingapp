@@ -38,6 +38,7 @@ namespace AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages;
 
 use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
@@ -60,7 +61,7 @@ class CreateEmailTemplate extends CreateRecord
                 Textarea::make('description')
                     ->string(),
                 RichEditor::make('content')
-                    ->toolbarButtons([['bold', 'italic', 'small', 'link'], ['h1', 'h2', 'h3', 'bulletList', 'orderedList', 'horizontalRule', 'attachFiles'], ['mergeTags']])
+                    ->toolbarButtons([['bold', 'italic', 'small', 'link'], [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3'])->textualButtons(), 'bulletList', 'orderedList', 'horizontalRule', 'attachFiles'], ['mergeTags']])
                     ->activePanel('mergeTags')
                     ->resizableImages()
                     ->columnSpanFull()
