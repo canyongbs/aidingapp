@@ -6,12 +6,205 @@ on:
 
 env:
     AWS_REGION: 'us-west-2'
-    ECR_REPOSITORY: 'aidingapp'
 
 jobs:
-    deploy:
-        name: Deploy
+    build-web:
+        name: Build Web Image
         runs-on: ubuntu-22.04
+        environment: staging
+        outputs:
+            image: ${{ steps.build-image.outputs.image }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #6.0.2
+              with:
+                  submodules: true
+                  ref: ${{ github.head_ref }}
+                  token: ${{ secrets.PAT }}
+
+            - name: Login to Docker Hub
+              uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 #4.1.0
+              with:
+                  username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 #6.1.0
+              with:
+                  aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ env.AWS_REGION }}
+
+            - name: Login to Amazon ECR
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@f2e9fc6c2b355c1890b65e6f6f0e2ac3e6e22f78 #2.1.2
+
+            - name: Build, tag, and push image to Amazon ECR
+              id: build-image
+              env:
+                  ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+                  IMAGE_TAG: ${{ github.event.release.tag_name }}
+                  ECR_REPOSITORY: 'aidingapp'
+              run: |
+                  # Build a docker container and
+                  # push it to ECR so that it can
+                  # be deployed to ECS.
+                  docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --target web-deploy --platform linux/amd64 --build-arg USER_ID=9999 --build-arg GROUP_ID=9999 .
+                  docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+                  echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    deploy-web:
+        name: Deploy Web Service
+        runs-on: ubuntu-22.04
+        needs: [build-web, deploy-worker]
+        environment: staging
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #6.0.2
+              with:
+                  submodules: true
+                  ref: ${{ github.head_ref }}
+                  token: ${{ secrets.PAT }}
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 #6.1.0
+              with:
+                  aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ env.AWS_REGION }}
+
+            - name: Fill in the new image ID in the Amazon ECS task definition
+              id: task-def
+              uses: aws-actions/amazon-ecs-render-task-definition@77954e213ba1f9f9cb016b86a1d4f6fcdea0d57e #1.8.4
+              with:
+                  task-definition: 'docker/devops/ecs/aidingapp/aidingapp-dev-task-definition.json'
+                  container-name: 'app'
+                  image: ${{ needs.build-web.outputs.image }}
+
+            - name: Deploy Amazon ECS task definition
+              id: task-deploy
+              uses: aws-actions/amazon-ecs-deploy-task-definition@fc8fc60f3a60ffd500fcb13b209c59d221ac8c8c #2.6.1
+              with:
+                  task-definition: ${{ steps.task-def.outputs.task-definition }}
+                  service: 'aidingapp-dev-service'
+                  cluster: 'aidingapp-dev'
+                  wait-for-service-stability: true
+
+            - name: Check if deployment was successful
+              id: check-deployment
+              run: |
+                  CURRENT_TASK_DEF_ARN=$(aws ecs describe-services --cluster aidingapp-dev --services aidingapp-dev-service --query services[0].deployments[0].taskDefinition | jq -r ".")
+                  NEW_TASK_DEF_ARN=${{ steps.task-deploy.outputs.task-definition-arn }}
+                  echo "Current task arn: $CURRENT_TASK_DEF_ARN"
+                  echo "New task arn: $NEW_TASK_DEF_ARN"
+                  if [ "$CURRENT_TASK_DEF_ARN" != "$NEW_TASK_DEF_ARN" ]; then
+                    echo "Deployment failed."
+                    exit 1
+                  fi
+
+    build-worker:
+        name: Build Worker Image
+        runs-on: ubuntu-22.04
+        environment: staging
+        outputs:
+            image: ${{ steps.build-image.outputs.image }}
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #6.0.2
+              with:
+                  submodules: true
+                  ref: ${{ github.head_ref }}
+                  token: ${{ secrets.PAT }}
+
+            - name: Login to Docker Hub
+              uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 #4.1.0
+              with:
+                  username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 #6.1.0
+              with:
+                  aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ env.AWS_REGION }}
+
+            - name: Login to Amazon ECR
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@f2e9fc6c2b355c1890b65e6f6f0e2ac3e6e22f78 #2.1.2
+
+            - name: Build, tag, and push image to Amazon ECR
+              id: build-image
+              env:
+                  ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+                  IMAGE_TAG: ${{ github.event.release.tag_name }}
+                  ECR_REPOSITORY: 'aidingapp/worker'
+              run: |
+                  # Build a docker container and
+                  # push it to ECR so that it can
+                  # be deployed to ECS.
+                  docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --target worker-deploy --platform linux/amd64 --build-arg USER_ID=9999 --build-arg GROUP_ID=9999 .
+                  docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+                  echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    deploy-worker:
+        name: Deploy Worker Service
+        runs-on: ubuntu-22.04
+        needs: [build-worker]
+        environment: staging
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #6.0.2
+              with:
+                  submodules: true
+                  ref: ${{ github.head_ref }}
+                  token: ${{ secrets.PAT }}
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 #6.1.0
+              with:
+                  aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ env.AWS_REGION }}
+
+            - name: Fill in the new image ID in the Amazon ECS task definition
+              id: task-def
+              uses: aws-actions/amazon-ecs-render-task-definition@77954e213ba1f9f9cb016b86a1d4f6fcdea0d57e #1.8.4
+              with:
+                  task-definition: 'docker/devops/ecs/aidingapp/aidingapp-worker-dev-task-definition.json'
+                  container-name: 'worker'
+                  image: ${{ needs.build-worker.outputs.image }}
+
+            - name: Deploy Amazon ECS task definition
+              id: task-deploy
+              uses: aws-actions/amazon-ecs-deploy-task-definition@fc8fc60f3a60ffd500fcb13b209c59d221ac8c8c #2.6.1
+              with:
+                  task-definition: ${{ steps.task-def.outputs.task-definition }}
+                  service: 'aidingapp-worker-dev-service'
+                  cluster: 'aidingapp-dev'
+                  wait-for-service-stability: true
+
+            - name: Check if deployment was successful
+              id: check-deployment
+              run: |
+                  CURRENT_TASK_DEF_ARN=$(aws ecs describe-services --cluster aidingapp-dev --services aidingapp-worker-dev-service --query services[0].deployments[0].taskDefinition | jq -r ".")
+                  NEW_TASK_DEF_ARN=${{ steps.task-deploy.outputs.task-definition-arn }}
+                  echo "Current task arn: $CURRENT_TASK_DEF_ARN"
+                  echo "New task arn: $NEW_TASK_DEF_ARN"
+                  if [ "$CURRENT_TASK_DEF_ARN" != "$NEW_TASK_DEF_ARN" ]; then
+                    echo "Deployment failed."
+                    exit 1
+                  fi
+
+    build-scheduler:
+        name: Build Scheduler Image
+        runs-on: ubuntu-22.04
+        outputs:
+            image: ${{ steps.build-image.outputs.image }}
         environment: staging
 
         steps:
@@ -44,26 +237,149 @@ jobs:
               env:
                   ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
                   IMAGE_TAG: ${{ github.event.release.tag_name }}
+                  ECR_REPOSITORY: 'aidingapp/scheduler'
               run: |
                   # Build a docker container and
                   # push it to ECR so that it can
                   # be deployed to ECS.
-                  docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --target deploy --platform linux/amd64 --build-arg USER_ID=9999 --build-arg GROUP_ID=9999 .
+                  docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --target scheduler-deploy --platform linux/amd64 --build-arg USER_ID=9999 --build-arg GROUP_ID=9999 .
                   docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
                   echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    deploy-scheduler:
+        name: Deploy Scheduler Service
+        runs-on: ubuntu-22.04
+        needs: [build-scheduler, deploy-worker]
+        environment: staging
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #6.0.2
+              with:
+                  submodules: true
+                  ref: ${{ github.head_ref }}
+                  token: ${{ secrets.PAT }}
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 #6.1.0
+              with:
+                  aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ env.AWS_REGION }}
 
             - name: Fill in the new image ID in the Amazon ECS task definition
               id: task-def
               uses: aws-actions/amazon-ecs-render-task-definition@77954e213ba1f9f9cb016b86a1d4f6fcdea0d57e #1.8.4
               with:
-                  task-definition: 'docker/devops/ecs/aidingapp/aidingapp-dev-task-definition.json'
-                  container-name: 'app'
-                  image: ${{ steps.build-image.outputs.image }}
+                  task-definition: 'docker/devops/ecs/aidingapp/aidingapp-scheduler-dev-task-definition.json'
+                  container-name: 'scheduler'
+                  image: ${{ needs.build-scheduler.outputs.image }}
+
+            - name: Deploy Amazon ECS task definition
+              id: task-deploy
+              uses: aws-actions/amazon-ecs-deploy-task-definition@fc8fc60f3a60ffd500fcb13b209c59d221ac8c8c #2.6.1
+              with:
+                  task-definition: ${{ steps.task-def.outputs.task-definition }}
+                  service: 'aidingapp-scheduler-dev-service'
+                  cluster: 'aidingapp-dev'
+                  wait-for-service-stability: true
+
+            - name: Check if deployment was successful
+              id: check-deployment
+              run: |
+                  CURRENT_TASK_DEF_ARN=$(aws ecs describe-services --cluster aidingapp-dev --services aidingapp-scheduler-dev-service --query services[0].deployments[0].taskDefinition | jq -r ".")
+                  NEW_TASK_DEF_ARN=${{ steps.task-deploy.outputs.task-definition-arn }}
+                  echo "Current task arn: $CURRENT_TASK_DEF_ARN"
+                  echo "New task arn: $NEW_TASK_DEF_ARN"
+                  if [ "$CURRENT_TASK_DEF_ARN" != "$NEW_TASK_DEF_ARN" ]; then
+                    echo "Deployment failed."
+                    exit 1
+                  fi
+
+    build-release-automation:
+        name: Build Release Automation Image
+        runs-on: ubuntu-22.04
+        outputs:
+            image: ${{ steps.build-image.outputs.image }}
+        environment: staging
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #6.0.2
+              with:
+                  submodules: true
+                  ref: ${{ github.head_ref }}
+                  token: ${{ secrets.PAT }}
+
+            - name: Login to Docker Hub
+              uses: docker/login-action@4907a6ddec9925e35a0a9e82d7399ccc52663121 #4.1.0
+              with:
+                  username: ${{ secrets.DOCKERHUB_USERNAME }}
+                  password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 #6.1.0
+              with:
+                  aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ env.AWS_REGION }}
+
+            - name: Login to Amazon ECR
+              id: login-ecr
+              uses: aws-actions/amazon-ecr-login@f2e9fc6c2b355c1890b65e6f6f0e2ac3e6e22f78 #2.1.2
+
+            - name: Build, tag, and push image to Amazon ECR
+              id: build-image
+              env:
+                  ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+                  IMAGE_TAG: ${{ github.event.release.tag_name }}
+                  ECR_REPOSITORY: 'aidingapp/release-automation'
+              run: |
+                  # Build a docker container and
+                  # push it to ECR so that it can
+                  # be deployed to ECS.
+                  docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --target release-automation --platform linux/amd64 --build-arg USER_ID=9999 --build-arg GROUP_ID=9999 .
+                  docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+                  echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+    deploy-release-automation:
+        name: Deploy and Run Release Automation Service
+        needs: [deploy-web, deploy-worker, deploy-scheduler, build-release-automation]
+        runs-on: ubuntu-22.04
+        environment: staging
+
+        steps:
+            - name: Checkout
+              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #6.0.2
+              with:
+                  submodules: true
+                  ref: ${{ github.head_ref }}
+                  token: ${{ secrets.PAT }}
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 #6.1.0
+              with:
+                  aws-access-key-id: ${{ secrets.DEV_AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.DEV_AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ env.AWS_REGION }}
+
+            - name: Fill in the new image ID in the Amazon ECS task definition
+              id: task-def
+              uses: aws-actions/amazon-ecs-render-task-definition@77954e213ba1f9f9cb016b86a1d4f6fcdea0d57e #1.8.4
+              with:
+                  task-definition: 'docker/devops/ecs/aidingapp/aidingapp-release-automation-dev-task-definition.json'
+                  container-name: 'release-automation'
+                  image: ${{ needs.build-release-automation.outputs.image }}
 
             - name: Deploy Amazon ECS task definition
               uses: aws-actions/amazon-ecs-deploy-task-definition@fc8fc60f3a60ffd500fcb13b209c59d221ac8c8c #2.6.1
               with:
                   task-definition: ${{ steps.task-def.outputs.task-definition }}
-                  service: 'aidingapp-dev-service'
                   cluster: 'aidingapp-dev'
-                  wait-for-service-stability: true
+                  desired-count: 1
+                  run-task: true
+                  run-task-security-groups: ${{ secrets.RELEASE_AUTOMATION_SECURITY_GROUPS }}
+                  run-task-subnets: ${{ secrets.RELEASE_AUTOMATION_SUBNETS }}
+                  run-task-assign-public-IP: 'DISABLED'
+                  run-task-launch-type: 'FARGATE'
+                  wait-for-task-stopped: true
