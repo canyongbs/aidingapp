@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8d7aee98711fff47177516cbbfe2a89d",
+    "content-hash": "ddf5d70314c5b9721d12a4e726eef8ea",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -1589,16 +1589,16 @@
         },
         {
             "name": "canyongbs/common",
-            "version": "2.10.0",
+            "version": "2.12.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canyongbs/common.git",
-                "reference": "e11e31a52b946078043fd2ee7a2fdf4f43993d25"
+                "reference": "61445c39aa590cf5c2c64a570d9e8c5b141a9d59"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canyongbs/common/zipball/e11e31a52b946078043fd2ee7a2fdf4f43993d25",
-                "reference": "e11e31a52b946078043fd2ee7a2fdf4f43993d25",
+                "url": "https://api.github.com/repos/canyongbs/common/zipball/61445c39aa590cf5c2c64a570d9e8c5b141a9d59",
+                "reference": "61445c39aa590cf5c2c64a570d9e8c5b141a9d59",
                 "shasum": ""
             },
             "require": {
@@ -1609,6 +1609,7 @@
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.75",
+                "larastan/larastan": "^3.0",
                 "orchestra/testbench": "^10.4",
                 "orrison/meliorstan": "^0.3.2",
                 "pestphp/pest": "^3.8.5",
@@ -1643,9 +1644,9 @@
             ],
             "support": {
                 "issues": "https://github.com/canyongbs/common/issues",
-                "source": "https://github.com/canyongbs/common/tree/2.10.0"
+                "source": "https://github.com/canyongbs/common/tree/2.12.1"
             },
-            "time": "2026-04-08T16:56:33+00:00"
+            "time": "2026-04-13T14:27:06+00:00"
         },
         {
             "name": "canyongbs/filament-tiptap-editor",

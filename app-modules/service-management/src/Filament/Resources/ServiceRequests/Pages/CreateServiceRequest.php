@@ -107,7 +107,7 @@ class CreateServiceRequest extends CreateRecord
                                     ->exists((new ServiceRequestStatus())->getTable(), 'id')
                                     ->columnSpan(fn (Get $get): int => filled($get('type_id')) ? 2 : 3),
                                 Select::make('type_id')
-                                    ->options(ServiceRequestType::query()->withoutArchived()->when(! auth()->user()->isSuperAdmin(), function (Builder $query) { /** @phpstan-ignore method.notFound */
+                                    ->options(ServiceRequestType::query()->withoutArchived()->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                         $query->whereHas('managerUsers', function (Builder $query): void {
                                             $query->where('users.id', auth()->user()->getKey());
                                         })->orWhereHas('managerTeams', function (Builder $query): void {

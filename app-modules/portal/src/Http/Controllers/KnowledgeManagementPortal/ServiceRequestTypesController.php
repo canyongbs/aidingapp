@@ -49,7 +49,7 @@ class ServiceRequestTypesController extends Controller
         // render top-level categories/types and navigate into subcategories without
         // additional requests.
         $categories = ServiceRequestTypeCategory::query()->orderBy('sort')->get();
-        $types = ServiceRequestType::query()->withoutArchived()->orderBy('sort')->get(); /* @phpstan-ignore method.notFound */
+        $types = ServiceRequestType::query()->withoutArchived()->orderBy('sort')->get();
 
         $catsById = [];
 

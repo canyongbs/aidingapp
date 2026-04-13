@@ -112,9 +112,9 @@ class EditServiceRequest extends EditRecord
                                     ->disableOptionWhen(fn (string $value) => $disabledStatuses->contains($value)),
                                 Select::make('type_id')
                                     ->options(
-                                        fn (ServiceRequest $record) => ServiceRequestType::query() // @phpstan-ignore method.notFound
+                                        fn (ServiceRequest $record) => ServiceRequestType::query()
                                             ->where(
-                                                fn (Builder $query) => $query // @phpstan-ignore method.notFound
+                                                fn (Builder $query) => $query
                                                     ->withoutArchived()
                                                     ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                                         $query->where(function (Builder $query) {
