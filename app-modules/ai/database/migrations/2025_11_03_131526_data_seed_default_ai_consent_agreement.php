@@ -49,7 +49,7 @@ return new class () extends Migration {
                 'body' => <<<EOT
                     PLEASE READ THIS POLICY CAREFULLY. BY CLICKING "I ACCEPT" OR OTHERWISE USING ANY PART OF THIS ENTERPRISE ARTIFICIAL INTELLIGENCE (“AI”) ASSISTANT TOOL, YOU ARE AGREEING TO THE TERMS OF THIS POLICY. If you do not agree to these terms, please do not use this AI Assistant tool.
 
-                    Welcome to Canyon GBS's AI Assistant Tool. This Acceptable Use Policy ("Policy”) governs the use of generative AI assistant tools (“AI Assistant Tool”), including but not limited to the Aiding App by Canyon GBS™, by all employees (“You” or “Your”). By using the AI Assistant Tool, You agree to comply with this Policy. Failure to comply may result in disciplinary action, up to and including termination of access and legal consequences.
+                    Welcome to Canyon GBS's AI Assistant Tool. This Acceptable Use Policy ("Policy”) governs the use of generative AI assistant tools (“AI Assistant Tool”), including but not limited to the Aiding App by Canyon GBS®, by all employees (“You” or “Your”). By using the AI Assistant Tool, You agree to comply with this Policy. Failure to comply may result in disciplinary action, up to and including termination of access and legal consequences.
 
                     Acceptable Uses
 

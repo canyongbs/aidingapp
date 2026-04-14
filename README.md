@@ -19,7 +19,7 @@
 
 👋 Welcome!\
 \
-This repository includes the software solution known as **Aiding App™** created by Canyon GBS™. \
+This repository includes the software solution known as **Aiding App®** created by Canyon GBS®. \
 \
 The helpdesk technology featured in this repository is offerred as a fully managed and supported, ISO 27001:2022 certified, SaaS offerring to through Canyon GBS LLC. Additionally, the software is released here as source-available under the Elastic License 2.0 (see the [license file](./LICENSE) for more details.)\
 \
@@ -27,7 +27,7 @@ _Note: This software is developed, under copyright, and trademarked by Canyon GB
 
 ## Key Features
 
-**Aiding App™** is a cutting-edge, helpdesk solution designed to streamline and enhance the efficiency of support services. It provides an intuitive, feature-rich platform for managing various aspects of customer support and service delivery.
+**Aiding App®** is a cutting-edge, helpdesk solution designed to streamline and enhance the efficiency of support services. It provides an intuitive, feature-rich platform for managing various aspects of customer support and service delivery.
 
 - Contact Management
 - Service Requests

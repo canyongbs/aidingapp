@@ -169,7 +169,7 @@
                 @if ($footer ?? null)
                 {!! $footer !!}
                 @else
-                    This email was sent using Aiding App™. <br /> <br /> © 2016-{{ date('Y') }} Canyon GBS LLC. All Rights Reserved. Canyon GBS™ and Aiding App™ are trademarks of Canyon GBS LLC.
+                    This email was sent using Aiding App®. <br /> <br /> © 2016-{{ date('Y') }} Canyon GBS LLC. All Rights Reserved. Canyon GBS® and Aiding App® are trademarks of Canyon GBS LLC.
                 @endif    
                 </td>
                 </tr>
