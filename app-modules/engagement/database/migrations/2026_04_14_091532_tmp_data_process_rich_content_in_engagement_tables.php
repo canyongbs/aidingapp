@@ -42,9 +42,7 @@ return new class () extends Migration {
     {
         $tables = [
             ['table' => 'email_templates', 'column' => 'content'],
-            ['table' => 'engagements', 'column' => 'subject'],
             ['table' => 'engagements', 'column' => 'body'],
-            ['table' => 'engagement_batches', 'column' => 'subject'],
             ['table' => 'engagement_batches', 'column' => 'body'],
         ];
 
