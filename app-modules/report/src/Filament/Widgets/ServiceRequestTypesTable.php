@@ -93,6 +93,24 @@ class ServiceRequestTypesTable extends BaseWidget
                                 fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
                             );
                         },
+                    ])
+                    ->withCount([
+                        'serviceRequests as incident_count' => function (Builder $query) use ($startDate, $endDate) {
+                            $query->where('service_requests.issue_category', 'incident');
+                            $query->when(
+                                $startDate && $endDate,
+                                fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
+                            );
+                        },
+                    ])
+                    ->withCount([
+                        'serviceRequests as request_count' => function (Builder $query) use ($startDate, $endDate) {
+                            $query->where('service_requests.issue_category', 'request');
+                            $query->when(
+                                $startDate && $endDate,
+                                fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
+                            );
+                        },
                     ]);
 
                     if ($startDate && $endDate) {
@@ -113,6 +131,10 @@ class ServiceRequestTypesTable extends BaseWidget
                     ->label('Type'),
                 TextColumn::make('service_requests_count')
                     ->label('Count'),
+                TextColumn::make('incident_count')
+                    ->label('Incidents'),
+                TextColumn::make('request_count')
+                    ->label('Requests'),
                 TextColumn::make('service_requests_avg_time_to_resolution')
                     ->formatStateUsing(function (?float $state) {
                         $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds((float) $state));

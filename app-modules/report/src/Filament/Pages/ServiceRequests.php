@@ -37,6 +37,7 @@
 namespace AidingApp\Report\Filament\Pages;
 
 use AidingApp\Report\Filament\Widgets\RefreshWidget;
+use AidingApp\Report\Filament\Widgets\ServiceRequestCategoryDistributionDonutChart;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsOverTimeBarChart;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsStats;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsTable;
@@ -52,7 +53,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
-use UnitEnum;
 
 class ServiceRequests extends Dashboard
 {
@@ -60,7 +60,7 @@ class ServiceRequests extends Dashboard
 
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
+    protected static string | \UnitEnum | null $navigationGroup = 'Service Management';
 
     protected static ?string $navigationLabel = 'Service Requests';
 
@@ -121,6 +121,7 @@ class ServiceRequests extends Dashboard
             RefreshWidget::make(['cacheTag' => $this->cacheTag]),
             ServiceRequestsStats::make(['cacheTag' => $this->cacheTag]),
             ServiceRequestStatusDistributionDonutChart::make(['cacheTag' => $this->cacheTag]),
+            ServiceRequestCategoryDistributionDonutChart::make(['cacheTag' => $this->cacheTag]),
             ServiceRequestsOverTimeBarChart::make(['cacheTag' => $this->cacheTag]),
             ServiceRequestTypesTable::make(['cacheTag' => $this->cacheTag]),
             ServiceRequestsTable::make(['cacheTag' => $this->cacheTag]),

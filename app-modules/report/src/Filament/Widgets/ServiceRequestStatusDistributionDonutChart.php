@@ -51,7 +51,7 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
 
     protected ?string $maxHeight = '200px';
 
-    protected int | string | array $columnSpan = 'full';
+    protected int | string | array $columnSpan = 2;
 
     public function getOptions(): array
     {

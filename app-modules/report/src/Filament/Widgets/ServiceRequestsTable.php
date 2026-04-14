@@ -39,6 +39,7 @@ namespace AidingApp\Report\Filament\Widgets;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Report\Filament\Exports\ServiceRequestsExporter;
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -84,6 +85,7 @@ class ServiceRequestsTable extends BaseWidget
     {
         $startDate = $this->getStartDate();
         $endDate = $this->getEndDate();
+        $category = $this->pageFilters['category'] ?? null;
 
         return $table
             ->query(
@@ -98,6 +100,10 @@ class ServiceRequestsTable extends BaseWidget
                         $startDate && $endDate,
                         fn (Builder $query) => $query->whereBetween('created_at', [$startDate, $endDate])
                     )
+                    ->when(
+                        filled($category),
+                        fn (Builder $query) => $query->where('issue_category', $category)
+                    )
                     ->orderBy('created_at', 'desc')
             )
             ->columns([
@@ -108,7 +114,8 @@ class ServiceRequestsTable extends BaseWidget
                     ->description(fn (ServiceRequest $record): string => Str::limit($record->title, 40)),
                 TextColumn::make('priority.type.name')
                     ->label('Type')
-                    ->searchable(),
+                    ->searchable()
+                    ->description(fn (ServiceRequest $record): string => $record->issue_category?->getLabel() ?? ''),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->searchable()
@@ -170,6 +177,14 @@ class ServiceRequestsTable extends BaseWidget
                     ->placeholder(''),
             ])
             ->filters([
+                SelectFilter::make('issue_category')
+                    ->label('Category')
+                    ->options(
+                        collect(ServiceRequestIssueCategory::cases())
+                            ->mapWithKeys(fn (ServiceRequestIssueCategory $case) => [$case->value => $case->getLabel()])
+                            ->toArray()
+                    )
+                    ->native(false),
                 SelectFilter::make('type')
                     ->relationship('priority.type', 'name')
                     ->searchable()
