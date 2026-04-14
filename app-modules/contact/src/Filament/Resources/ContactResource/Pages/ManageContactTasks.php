@@ -120,6 +120,7 @@ class ManageContactTasks extends BaseTaskRelationManager
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->slideOver()
                     ->using(function (array $data, string $model): Model {
                         $data = collect($data);
 
@@ -137,7 +138,7 @@ class ManageContactTasks extends BaseTaskRelationManager
             ])
             ->recordActions([
                 TaskViewAction::make(),
-                EditAction::make(),
+                EditAction::make()->slideOver(),
                 DeleteAction::make(),
             ])
             ->recordUrl(null);

@@ -163,6 +163,7 @@ class ListKnowledgeBaseItems extends ListRecords
             ->recordActions([
                 EditAction::make(),
                 ReplicateAction::make()
+                    ->slideOver()
                     ->schema([
                         Section::make()
                             ->schema([
@@ -276,6 +277,7 @@ class ListKnowledgeBaseItems extends ListRecords
                 ->disabled(fn (): bool => ! auth()->user()->can('knowledge_base_item.create'))
                 ->modalHeading('New Article')
                 ->createAnother(false)
+                ->slideOver()
                 ->successRedirectUrl(fn (Model $record): string => KnowledgeBaseItemResource::getUrl('edit', ['record' => $record])),
         ];
     }

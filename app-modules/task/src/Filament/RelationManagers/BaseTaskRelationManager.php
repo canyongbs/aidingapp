@@ -173,6 +173,7 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->slideOver()
                     ->using(function (array $data, string $model): Model {
                         $data = collect($data);
 
@@ -190,7 +191,7 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
             ])
             ->recordActions([
                 TaskViewAction::make(),
-                EditAction::make(),
+                EditAction::make()->slideOver(),
                 DetachAction::make(),
             ])
             ->recordUrl(null)

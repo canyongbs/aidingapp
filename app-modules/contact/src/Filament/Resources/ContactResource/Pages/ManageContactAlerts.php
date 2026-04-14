@@ -151,11 +151,13 @@ class ManageContactAlerts extends ManageRelatedRecords
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->slideOver()
                     ->modalHeading('Create Concern'),
             ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
+                    ->slideOver()
                     ->modalHeading('Edit Concern'),
                 DeleteAction::make(),
             ])

@@ -162,6 +162,7 @@ class ManageTasks extends ManageRelatedRecords
             ->headerActions([
                 CreateAction::make()
                     ->authorize('create', Task::class)
+                    ->slideOver()
                     ->schema([
                         Fieldset::make('Confidentiality')
                             ->schema([
@@ -212,6 +213,7 @@ class ManageTasks extends ManageRelatedRecords
                 TaskViewAction::make()
                     ->authorize('view', Task::class),
                 EditAction::make()
+                    ->slideOver()
                     ->schema(fn () => $this->editFormFields())
                     ->authorize('update', Task::class),
                 DeleteAction::make()

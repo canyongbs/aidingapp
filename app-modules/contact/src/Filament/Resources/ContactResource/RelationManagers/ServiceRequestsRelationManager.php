@@ -239,11 +239,13 @@ class ServiceRequestsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->modalHeading('Create new service request')
+                    ->slideOver()
                     ->using(fn (array $data): Model => $this->handleRecordCreation($data)),
             ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
+                    ->slideOver()
                     ->mutateRecordDataUsing(function (array $data, $record) {
                         $data['type_id'] = $record?->priority?->type_id;
 

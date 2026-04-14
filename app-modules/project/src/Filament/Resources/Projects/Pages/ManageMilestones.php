@@ -107,10 +107,12 @@ class ManageMilestones extends ManageRelatedRecords
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->slideOver()
                     ->authorize('create', $this->getOwnerRecord()),
             ])
             ->recordActions([
                 EditAction::make()
+                    ->slideOver()
                     ->authorize('update', $this->getOwnerRecord()),
                 DeleteAction::make()
                     ->authorize('update', $this->getOwnerRecord()),

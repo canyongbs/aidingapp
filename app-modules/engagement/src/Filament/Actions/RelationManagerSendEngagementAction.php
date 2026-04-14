@@ -71,6 +71,7 @@ class RelationManagerSendEngagementAction extends CreateAction
         $this->icon('heroicon-m-chat-bubble-bottom-center-text')
             ->label('New')
             ->modalHeading('Create new email')
+            ->slideOver()
             ->model(Engagement::class)
             ->authorize(function (RelationManager $livewire) {
                 $ownerRecord = $livewire->getOwnerRecord();
