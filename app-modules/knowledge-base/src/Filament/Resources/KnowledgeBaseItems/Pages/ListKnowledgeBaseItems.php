@@ -47,7 +47,6 @@ use App\Models\Scopes\TagsForClass;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
