@@ -99,7 +99,7 @@ class EducatableEmailFormFieldBlock extends FormFieldBlock
     /**
      * @return array<string, mixed>
      */
-    public static function getSubmissionState(SubmissibleField $field, mixed $response): array
+    public static function getSubmissionState(mixed $response): array
     {
         $author = app(ResolveSubmissionAuthorFromEmail::class)($response);
 

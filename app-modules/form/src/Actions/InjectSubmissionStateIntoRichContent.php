@@ -88,7 +88,7 @@ class InjectSubmissionStateIntoRichContent
 
             $content[$componentKey]['attrs']['config'] = [
                 ...$component['attrs']['config'],
-                ...$block::getSubmissionState($field, $field->pivot->response), /** @phpstan-ignore property.notFound */
+                ...$block::getSubmissionState($field->pivot->response), /** @phpstan-ignore property.notFound */
             ];
         }
 

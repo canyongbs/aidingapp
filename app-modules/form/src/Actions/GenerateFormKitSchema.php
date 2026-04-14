@@ -74,7 +74,7 @@ class GenerateFormKitSchema
                 'paragraph' => ['$el' => 'p', 'children' => $this->content($blocks, $component['content'] ?? [], $fields)],
                 'small' => ['$el' => 'small', 'children' => $this->content($blocks, $component['content'] ?? [], $fields)],
                 'text' => $this->text($component),
-                'customBlock' => ($field = ($fields[$component['attrs']['config']['fieldId'] ?? ''] ?? null)) ? ($blocks[$component['attrs']['id'] ?? ''] ?? null)?->getFormKitSchema($field) ?? [] : [],
+                'customBlock' => ($field = ($fields[$component['attrs']['config']['fieldId'] ?? ''] ?? null)) ? (($block = ($blocks[$component['attrs']['id'] ?? ''] ?? null)) ? $block::getFormKitSchema($field) : []) : [],
                 default => [],
             },
             $content,

@@ -71,10 +71,6 @@ abstract class FormFieldBlock extends RichContentCustomBlock
                 ->required()
                 ->string()
                 ->maxLength(255),
-            TextInput::make('description')
-                ->label('Field Description')
-                ->string()
-                ->maxLength(255),
             Checkbox::make('isRequired')
                 ->label('Required'),
             ...static::fields(),
@@ -108,7 +104,7 @@ abstract class FormFieldBlock extends RichContentCustomBlock
         return [];
     }
 
-    public static function getSubmissionState(SubmissibleField $field, mixed $response): array
+    public static function getSubmissionState(mixed $response): array
     {
         return [
             'response' => $response,
@@ -123,21 +119,5 @@ abstract class FormFieldBlock extends RichContentCustomBlock
     protected static function renderedView(): string
     {
         return 'form::blocks.submissions.default';
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected static function getDescriptionSectionsSchema(SubmissibleField $field, string $sectionType = 'help'): array
-    {
-        if (blank($field->config['description'] ?? null)) {
-            return [];
-        }
-
-        return match ($sectionType) {
-            'help' => ['help' => $field->config['description']],
-            'legend' => ['legend' => $field->config['description']],
-            default => [],
-        };
     }
 }

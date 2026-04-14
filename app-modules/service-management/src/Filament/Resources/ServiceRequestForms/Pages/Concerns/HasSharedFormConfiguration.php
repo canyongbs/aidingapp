@@ -166,7 +166,7 @@ trait HasSharedFormConfiguration
             ->json()
             ->placeholder('Drag blocks here to build your service request form')
             ->hiddenLabel()
-            ->saveRelationshipsBeforeChildrenUsing(function (RichEditor $component, ServiceRequestForm | ServiceRequestFormStep $record) {
+            ->saveRelationshipsUsing(function (RichEditor $component, ServiceRequestForm | ServiceRequestFormStep $record) {
                 if ($component->isDisabled()) {
                     return;
                 }
