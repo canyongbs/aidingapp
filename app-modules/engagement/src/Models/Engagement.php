@@ -237,19 +237,11 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
     }
 
     /**
-     * @param class-string $type
-     *
-     * @return array<string>
+     * @return array<int, string>
      */
-    public static function getMergeTags(string $type): array
+    public static function getMergeTags(): array
     {
-        return match ($type) {
-            Contact::class => [
-                'contact full name',
-                'contact email',
-            ],
-            default => [],
-        };
+        return array_keys((new self())->getMergeData());
     }
 
     public function getDeliveryMethod(): NotificationChannel
@@ -262,6 +254,7 @@ class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasD
         $this->registerRichContent('body')
             ->fileAttachmentsDisk('s3-public')
             ->fileAttachmentProvider(SpatieMediaLibraryFileAttachmentProvider::make())
+            ->fileAttachmentsVisibility('public')
             ->mergeTags($this->getMergeData());
     }
 }

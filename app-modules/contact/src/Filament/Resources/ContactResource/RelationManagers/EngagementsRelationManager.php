@@ -84,6 +84,8 @@ class EngagementsRelationManager extends RelationManager
                                             ->hidden(fn ($state): bool => blank($state))
                                             ->columnSpanFull(),
                                         TextEntry::make('body')
+                                            ->html()
+                                            ->extraAttributes(['class' => 'fi-prose'])
                                             ->getStateUsing(fn (Timeline $record): HtmlString => $record->timelineable->getBody())
                                             ->columnSpanFull(),
                                     ]),
@@ -137,6 +139,8 @@ class EngagementsRelationManager extends RelationManager
                             ->hidden(fn ($state): bool => blank($state))
                             ->columnSpanFull(),
                         TextEntry::make('body')
+                            ->html()
+                            ->extraAttributes(['class' => 'fi-prose'])
                             ->getStateUsing(fn (Timeline $record): HtmlString => $record->timelineable->getBody())
                             ->columnSpanFull(),
                     ]),

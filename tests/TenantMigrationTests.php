@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Engagement\Models\EmailTemplate;
+use AidingApp\Engagement\Models\Engagement;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
@@ -451,6 +453,98 @@ test('2026_04_08_114059_tmp_data_migrate_knowledge_base_articles_to_rich_editor_
             expect($content['content'][0]['content'][0]['marks'][0]['attrs']['data-color'])->toBe('#ff0000');
             /** @phpstan-ignore-next-line */
             expect($content['content'][0]['content'][0]['marks'][0]['attrs'])->not->toHaveKey('color');
+        }
+    );
+});
+
+/** @return array<string, mixed> */
+function textColorContent(): array
+{
+    return [
+        'type' => 'doc',
+        'content' => [
+            [
+                'type' => 'paragraph',
+                'attrs' => ['textAlign' => 'start'],
+                'content' => [
+                    [
+                        'type' => 'text',
+                        'text' => 'Hello world',
+                        'marks' => [
+                            [
+                                'type' => 'textStyle',
+                                'attrs' => [
+                                    'color' => '#ff0000',
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+            [
+                'type' => 'paragraph',
+                'attrs' => ['textAlign' => 'start'],
+                'content' => [
+                    [
+                        'type' => 'text',
+                        'text' => 'No color',
+                        'marks' => [
+                            [
+                                'type' => 'bold',
+                            ],
+                        ],
+                    ],
+                ],
+            ],
+        ],
+    ];
+}
+
+test('2026_04_14_091532_tmp_data_process_rich_content_in_engagement_tables transforms textStyle marks to textColor', function () {
+    isolatedMigration(
+        '2026_04_14_091532_tmp_data_process_rich_content_in_engagement_tables',
+        function () {
+            $emailTemplate = EmailTemplate::factory()->createQuietly([
+                'content' => textColorContent(),
+            ]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_04_14_091532_tmp_data_process_rich_content_in_engagement_tables.php']);
+
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $content = json_decode((string) DB::table('email_templates')->where('id', $emailTemplate->id)->value('content'), associative: true); /** @phpstan-ignore-line */
+
+            // textStyle mark should be transformed to textColor with data-color attr
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['content'][0]['marks'][0]['type'])->toBe('textColor');
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['content'][0]['marks'][0]['attrs']['data-color'])->toBe('#ff0000');
+
+            // bold mark should be unchanged
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][1]['content'][0]['marks'][0]['type'])->toBe('bold');
+        }
+    );
+});
+
+test('2026_04_14_091532_tmp_data_process_rich_content_in_engagement_tables transforms textStyle marks in engagements', function () {
+    isolatedMigration(
+        '2026_04_14_091532_tmp_data_process_rich_content_in_engagement_tables',
+        function () {
+            $engagement = Engagement::factory()->createQuietly([
+                'body' => textColorContent(),
+            ]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_04_14_091532_tmp_data_process_rich_content_in_engagement_tables.php']);
+
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $body = json_decode((string) DB::table('engagements')->where('id', $engagement->id)->value('body'), associative: true); /** @phpstan-ignore-line */
+
+            /** @phpstan-ignore-next-line */
+            expect($body['content'][0]['content'][0]['marks'][0]['type'])->toBe('textColor');
+            /** @phpstan-ignore-next-line */
+            expect($body['content'][0]['content'][0]['marks'][0]['attrs']['data-color'])->toBe('#ff0000');
         }
     );
 });
