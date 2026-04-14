@@ -36,19 +36,16 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\SLAs\RelationManagers;
 
+use AidingApp\ServiceManagement\Filament\Actions\TableSelectAssociateAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Filament\Tables\ServiceRequestPrioritiesTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\AssociateAction;
 use Filament\Actions\DissociateAction;
 use Filament\Actions\DissociateBulkAction;
-use Filament\Forms\Components\Select;
 use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Arr;
 
 class ServiceRequestPrioritiesRelationManager extends RelationManager
 {
@@ -78,23 +75,9 @@ class ServiceRequestPrioritiesRelationManager extends RelationManager
                     ->sortable(),
             ])
             ->headerActions([
-                AssociateAction::make()
-                    ->recordSelectOptionsQuery(fn (Builder $query, AssociateAction $action) => $query->where('type_id', Arr::last($this->mountedActions)['data']['type_id'] ?? null)->orderBy('order'))
-                    ->preloadRecordSelect()
-                    ->form(fn (AssociateAction $action): array => [
-                        Select::make('type_id')
-                            ->relationship(
-                                'type',
-                                'name',
-                                fn (Builder $query) => $query->whereRelation('priorities', 'sla_id', null),
-                            )
-                            ->searchable()
-                            ->preload()
-                            ->required()
-                            ->live(),
-                        $action->getRecordSelect()
-                            ->visible(fn (Get $get): bool => filled($get('type_id'))),
-                    ]),
+                TableSelectAssociateAction::make()
+                    ->multiple()
+                    ->tableSelect(ServiceRequestPrioritiesTable::class),
             ])
             ->recordActions([
                 DissociateAction::make(),
