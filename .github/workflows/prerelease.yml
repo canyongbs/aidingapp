@@ -57,7 +57,7 @@ jobs:
     deploy-web:
         name: Deploy Web Service
         runs-on: ubuntu-22.04
-        needs: [build-web, deploy-worker]
+        needs: [build-web]
         environment: staging
 
         steps:
