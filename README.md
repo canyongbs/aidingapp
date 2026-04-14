@@ -9,7 +9,7 @@
 
 <!-- PROJECT LOGO -->
 
-[![Canyon GBS GitHub Header Image!](https://s3.us-west-2.amazonaws.com/canyongbs.com/LinkedIn-CompanyCoverImage.png 'Canyyon GBS GitHub Header Image')](https://canyongbs.com)\
+[![Canyon GBS GitHub Header Image!](https://s3.us-west-2.amazonaws.com/canyongbs.com/LinkedIn-CompanyCoverImage.png 'Canyon GBS GitHub Header Image')](https://canyongbs.com)\
 \
 [Click here to visit the Canyon GBS Website](https://canyongbs.com/)
 
@@ -21,9 +21,9 @@
 \
 This repository includes the software solution known as **Aiding App®** created by Canyon GBS®. \
 \
-The helpdesk technology featured in this repository is offerred as a fully managed and supported, ISO 27001:2022 certified, SaaS offerring to through Canyon GBS LLC. Additionally, the software is released here as source-available under the Elastic License 2.0 (see the [license file](./LICENSE) for more details.)\
+The helpdesk technology featured in this repository is offered as a fully managed and supported, ISO 27001:2022 certified, SaaS offering to through Canyon GBS Inc. Additionally, the software is released here as source-available under the Elastic License 2.0 (see the [license file](./LICENSE) for more details.)\
 \
-_Note: This software is developed, under copyright, and trademarked by Canyon GBS LLC ([canyongbs.com](https://canyongbs.com))._
+_Note: This software is developed, under copyright, and trademarked by Canyon GBS Inc. ([canyongbs.com](https://canyongbs.com))._
 
 ## Key Features
 
@@ -102,7 +102,7 @@ For DIY customers, please open your feature request or issue using [GitHub Issue
 
 ## Contributing
 
-The software for this project is created and managed by a professional engineering team inside Canyon GBS LLC.\
+The software for this project is created and managed by a professional engineering team inside Canyon GBS Inc.\
 \
 All contributions to the project must be pre-approved in order to ensure product integrity. Create an issue with the correct "Change Type" label, and include the details of your proposed change. A member of the product team at Canyon GBS will review, and if approved, you may fork the repo and create a pull request. Once complete, engineering at Canyon GBS will review for quality assurance prior to merging the PR. You may be asked to make changes in order to meet our quality standards for the project.
 
@@ -123,7 +123,7 @@ _Don't forget to ⭐ the project to show your support! Thanks again!_
 
 ## License
 
-This software is developed by Canyon GBS LLC who is the copyright and trademark holder for this project. The source code itself is distributed under the Elastic License 2.0. See [License](./LICENSE) for more details.
+This software is developed by Canyon GBS Inc. who is the copyright and trademark holder for this project. The source code itself is distributed under the Elastic License 2.0. See [License](./LICENSE) for more details.
 
 ## Contact Information
 
