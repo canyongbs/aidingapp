@@ -181,8 +181,15 @@ trait HasSharedFormConfiguration
                     ->when($serviceRequestFormStep, fn (EloquentBuilder $query) => $query->whereBelongsTo($serviceRequestFormStep, 'step'))
                     ->delete();
 
-                $state = $component->getState();
-                $content = is_array($state) ? $state : ['type' => 'doc', 'content' => []];
+                $content = $component->getState();
+
+                if (is_string($content)) {
+                    $content = json_decode($content, true);
+                }
+
+                if (! is_array($content)) {
+                    $content = [];
+                }
 
                 $content['content'] = $this->saveFieldsFromComponents(
                     $serviceRequestForm,
@@ -192,6 +199,8 @@ trait HasSharedFormConfiguration
 
                 $record->content = $content;
                 $record->save();
+
+                $component->state($content);
             })
             ->dehydrated(false)
             ->columnSpanFull()
