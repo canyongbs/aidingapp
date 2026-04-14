@@ -105,7 +105,7 @@ it('resolves merge tags in the body html', function () {
     ]);
 
     expect((string) $engagement->getBody())
-        ->toBe('<p>Dear Jane Doe, welcome!</p>');
+        ->toBe('<p>Dear <span data-type="mergeTag" data-id="contact full name">Jane Doe</span>, welcome!</p>');
 });
 
 it('resolves contact merge tags in the body', function () {
