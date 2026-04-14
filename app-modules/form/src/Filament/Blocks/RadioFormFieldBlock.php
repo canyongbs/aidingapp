@@ -57,16 +57,6 @@ class RadioFormFieldBlock extends FormFieldBlock
             ->modalWidth(Width::TwoExtraLarge);
     }
 
-    protected static function previewView(): string
-    {
-        return 'form::blocks.previews.radio';
-    }
-
-    protected static function renderedView(): string
-    {
-        return 'form::blocks.submissions.radio';
-    }
-
     /**
      * @return array<Component>
      */
@@ -120,5 +110,15 @@ class RadioFormFieldBlock extends FormFieldBlock
             'string',
             'in:' . implode(',', $values),
         ];
+    }
+
+    protected static function previewView(): string
+    {
+        return 'form::blocks.previews.radio';
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.radio';
     }
 }

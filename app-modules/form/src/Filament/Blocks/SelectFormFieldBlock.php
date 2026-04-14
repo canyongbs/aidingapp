@@ -48,11 +48,6 @@ class SelectFormFieldBlock extends FormFieldBlock
         return 'select';
     }
 
-    protected static function renderedView(): string
-    {
-        return 'form::blocks.submissions.select';
-    }
-
     /**
      * @return array<Component>
      */
@@ -92,5 +87,10 @@ class SelectFormFieldBlock extends FormFieldBlock
             'string',
             'in:' . collect((array) $field->config['options'])->keys()->join(','),
         ];
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.select';
     }
 }

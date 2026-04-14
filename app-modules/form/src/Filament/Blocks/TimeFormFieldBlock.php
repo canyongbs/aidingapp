@@ -45,11 +45,6 @@ class TimeFormFieldBlock extends FormFieldBlock
         return 'time';
     }
 
-    protected static function renderedView(): string
-    {
-        return 'form::blocks.submissions.time';
-    }
-
     /**
      * @return array<string, string>
      */
@@ -61,5 +56,10 @@ class TimeFormFieldBlock extends FormFieldBlock
             'name' => $field->getKey(),
             ...($field->is_required ? ['validation' => 'required'] : []),
         ];
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.time';
     }
 }

@@ -45,11 +45,6 @@ class NumberFormFieldBlock extends FormFieldBlock
         return 'number';
     }
 
-    protected static function renderedView(): string
-    {
-        return 'form::blocks.submissions.number';
-    }
-
     /**
      * @return array<string, string>
      */
@@ -69,5 +64,10 @@ class NumberFormFieldBlock extends FormFieldBlock
     public static function getValidationRules(SubmissibleField $field): array
     {
         return ['numeric'];
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.number';
     }
 }

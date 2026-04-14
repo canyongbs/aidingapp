@@ -45,11 +45,6 @@ class DateFormFieldBlock extends FormFieldBlock
         return 'date';
     }
 
-    protected static function renderedView(): string
-    {
-        return 'form::blocks.submissions.date';
-    }
-
     /**
      * @return array<string, string>
      */
@@ -69,5 +64,10 @@ class DateFormFieldBlock extends FormFieldBlock
     public static function getValidationRules(SubmissibleField $field): array
     {
         return ['date'];
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.date';
     }
 }

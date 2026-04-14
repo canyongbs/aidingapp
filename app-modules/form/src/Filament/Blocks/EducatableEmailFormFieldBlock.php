@@ -50,11 +50,6 @@ class EducatableEmailFormFieldBlock extends FormFieldBlock
         return 'educatable_email';
     }
 
-    protected static function renderedView(): string
-    {
-        return 'form::blocks.submissions.educatable-email';
-    }
-
     public static function getLabel(): string
     {
         return 'Filler email address';
@@ -108,5 +103,10 @@ class EducatableEmailFormFieldBlock extends FormFieldBlock
             'authorKey' => $author ? $author->getKey() : null,
             'authorType' => $author ? $author::class : null,
         ];
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.educatable-email';
     }
 }

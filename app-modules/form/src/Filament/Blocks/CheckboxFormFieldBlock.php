@@ -45,16 +45,6 @@ class CheckboxFormFieldBlock extends FormFieldBlock
         return 'checkbox';
     }
 
-    protected static function previewView(): string
-    {
-        return 'form::blocks.previews.checkbox';
-    }
-
-    protected static function renderedView(): string
-    {
-        return 'form::blocks.submissions.checkbox';
-    }
-
     /**
      * @return array<string, string>
      */
@@ -74,5 +64,15 @@ class CheckboxFormFieldBlock extends FormFieldBlock
     public static function getValidationRules(SubmissibleField $field): array
     {
         return ['boolean'];
+    }
+
+    protected static function previewView(): string
+    {
+        return 'form::blocks.previews.checkbox';
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.checkbox';
     }
 }

@@ -45,11 +45,6 @@ class UrlFormFieldBlock extends FormFieldBlock
         return 'url';
     }
 
-    protected static function renderedView(): string
-    {
-        return 'form::blocks.submissions.url';
-    }
-
     public static function getLabel(): string
     {
         return 'URL';
@@ -74,5 +69,10 @@ class UrlFormFieldBlock extends FormFieldBlock
     public static function getValidationRules(SubmissibleField $field): array
     {
         return ['url', 'max:255'];
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.url';
     }
 }

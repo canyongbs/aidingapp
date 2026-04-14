@@ -45,16 +45,6 @@ class SignatureFormFieldBlock extends FormFieldBlock
         return 'signature';
     }
 
-    protected static function previewView(): string
-    {
-        return 'form::blocks.previews.signature';
-    }
-
-    protected static function renderedView(): string
-    {
-        return 'form::blocks.submissions.signature';
-    }
-
     /**
      * @return array<string, string>
      */
@@ -66,5 +56,15 @@ class SignatureFormFieldBlock extends FormFieldBlock
             'name' => $field->getKey(),
             ...($field->is_required ? ['validation' => 'required'] : []),
         ];
+    }
+
+    protected static function previewView(): string
+    {
+        return 'form::blocks.previews.signature';
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.signature';
     }
 }
