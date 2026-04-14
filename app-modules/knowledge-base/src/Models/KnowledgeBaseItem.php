@@ -140,6 +140,7 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     {
         $this->registerRichContent('article_details')
             ->fileAttachmentsDisk('s3-public')
+            ->fileAttachmentsVisibility('public')
             ->fileAttachmentProvider(
                 SpatieMediaLibraryFileAttachmentProvider::make()
                     ->collection('article_details')
