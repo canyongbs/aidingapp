@@ -119,6 +119,10 @@ class GenerateServiceRequestForm
      */
     protected function addFieldToStep(ServiceRequestFormStep $step, array $block): void
     {
+        if (($block['type'] ?? null) !== 'customBlock') {
+            return;
+        }
+
         $config = $block['attrs']['config'] ?? [];
 
         $fieldConfig = $config;
