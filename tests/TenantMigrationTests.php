@@ -548,3 +548,251 @@ test('2026_04_14_091532_tmp_data_process_rich_content_in_engagement_tables trans
         }
     );
 });
+
+test('2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms transforms tiptapBlock to customBlock', function () {
+    isolatedMigration(
+        '2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms',
+        function () {
+            $id = fake()->uuid();
+
+            DB::table('service_request_forms')->insert([
+                'id' => $id,
+                'name' => 'Test Form',
+                'content' => json_encode([
+                    'type' => 'doc',
+                    'content' => [
+                        [
+                            'type' => 'tiptapBlock',
+                            'attrs' => [
+                                'id' => 'field-uuid-123',
+                                'type' => 'text_input',
+                                'data' => [
+                                    'label' => 'Full Name',
+                                    'isRequired' => true,
+                                ],
+                            ],
+                        ],
+                    ],
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms.php']);
+
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $content = json_decode((string) DB::table('service_request_forms')->where('id', $id)->value('content'), associative: true);
+
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['type'])->toBe('customBlock');
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['attrs']['id'])->toBe('text_input');
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['attrs']['config']['fieldId'])->toBe('field-uuid-123');
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['attrs']['config']['label'])->toBe('Full Name');
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['attrs']['config']['isRequired'])->toBeTrue();
+        }
+    );
+});
+
+test('2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms transforms grid attributes', function () {
+    isolatedMigration(
+        '2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms',
+        function () {
+            $id = fake()->uuid();
+
+            DB::table('service_request_forms')->insert([
+                'id' => $id,
+                'name' => 'Test Grid Form',
+                'content' => json_encode([
+                    'type' => 'doc',
+                    'content' => [
+                        [
+                            'type' => 'grid',
+                            'attrs' => ['type' => 'responsive', 'cols' => '3'],
+                            'content' => [
+                                ['type' => 'gridColumn', 'attrs' => [], 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Col 1']]]]],
+                                ['type' => 'gridColumn', 'attrs' => [], 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Col 2']]]]],
+                                ['type' => 'gridColumn', 'attrs' => [], 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Col 3']]]]],
+                            ],
+                        ],
+                    ],
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms.php']);
+
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $content = json_decode((string) DB::table('service_request_forms')->where('id', $id)->value('content'), associative: true);
+
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['attrs']['data-cols'])->toBe('3');
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['attrs']['data-from-breakpoint'])->toBe('lg');
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['content'][0]['attrs']['data-col-span'])->toBe('1');
+        }
+    );
+});
+
+test('2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms transforms asymmetric grid', function () {
+    isolatedMigration(
+        '2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms',
+        function () {
+            $id = fake()->uuid();
+
+            DB::table('service_request_forms')->insert([
+                'id' => $id,
+                'name' => 'Test Asymmetric Form',
+                'content' => json_encode([
+                    'type' => 'doc',
+                    'content' => [
+                        [
+                            'type' => 'grid',
+                            'attrs' => ['type' => 'asymetric-left-thirds', 'cols' => '2'],
+                            'content' => [
+                                ['type' => 'gridColumn', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Left']]]]],
+                                ['type' => 'gridColumn', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Right']]]]],
+                            ],
+                        ],
+                    ],
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms.php']);
+
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $content = json_decode((string) DB::table('service_request_forms')->where('id', $id)->value('content'), associative: true);
+
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['attrs']['data-cols'])->toBe('3');
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['attrs']['data-from-breakpoint'])->toBe('lg');
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['content'][0]['attrs']['data-col-span'])->toBe('1');
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['content'][1]['attrs']['data-col-span'])->toBe('2');
+        }
+    );
+});
+
+test('2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms does not modify unchanged content', function () {
+    isolatedMigration(
+        '2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms',
+        function () {
+            $id = fake()->uuid();
+            $originalContent = [
+                'type' => 'doc',
+                'content' => [
+                    [
+                        'type' => 'paragraph',
+                        'content' => [['type' => 'text', 'text' => 'Simple text']],
+                    ],
+                ],
+            ];
+
+            DB::table('service_request_forms')->insert([
+                'id' => $id,
+                'name' => 'Test Unchanged Form',
+                'content' => json_encode($originalContent),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms.php']);
+
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $content = json_decode((string) DB::table('service_request_forms')->where('id', $id)->value('content'), associative: true);
+            expect($content)->toBe($originalContent);
+        }
+    );
+});
+
+test('2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms transforms blocks inside grid', function () {
+    isolatedMigration(
+        '2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms',
+        function () {
+            $id = fake()->uuid();
+
+            DB::table('service_request_forms')->insert([
+                'id' => $id,
+                'name' => 'Test Nested Form',
+                'content' => json_encode([
+                    'type' => 'doc',
+                    'content' => [
+                        [
+                            'type' => 'grid',
+                            'attrs' => ['type' => 'responsive', 'cols' => '2'],
+                            'content' => [
+                                [
+                                    'type' => 'gridColumn',
+                                    'attrs' => [],
+                                    'content' => [
+                                        [
+                                            'type' => 'tiptapBlock',
+                                            'attrs' => [
+                                                'id' => 'field-1',
+                                                'type' => 'email',
+                                                'data' => ['label' => 'Email', 'isRequired' => true],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                                [
+                                    'type' => 'gridColumn',
+                                    'attrs' => [],
+                                    'content' => [
+                                        [
+                                            'type' => 'tiptapBlock',
+                                            'attrs' => [
+                                                'id' => 'field-2',
+                                                'type' => 'tel',
+                                                'data' => ['label' => 'Phone', 'isRequired' => false],
+                                            ],
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ]),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_04_07_115050_tmp_data_migrate_tiptap_blocks_to_custom_blocks_in_service_request_forms.php']);
+
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $content = json_decode((string) DB::table('service_request_forms')->where('id', $id)->value('content'), associative: true);
+
+            // Grid should be transformed
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['attrs']['data-cols'])->toBe('2');
+
+            // Nested blocks should be transformed
+            /** @phpstan-ignore-next-line */
+            $col1Block = $content['content'][0]['content'][0]['content'][0];
+            expect($col1Block['type'])->toBe('customBlock');
+            expect($col1Block['attrs']['id'])->toBe('email');
+            expect($col1Block['attrs']['config']['fieldId'])->toBe('field-1');
+            expect($col1Block['attrs']['config']['label'])->toBe('Email');
+
+            /** @phpstan-ignore-next-line */
+            $col2Block = $content['content'][0]['content'][1]['content'][0];
+            expect($col2Block['type'])->toBe('customBlock');
+            expect($col2Block['attrs']['id'])->toBe('tel');
+            expect($col2Block['attrs']['config']['fieldId'])->toBe('field-2');
+        }
+    );
+});
