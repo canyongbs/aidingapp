@@ -36,6 +36,7 @@ import { createPinia } from 'pinia';
 import PrimeVue from 'primevue/config';
 import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
+import VueSignaturePad from 'vue-signature-pad';
 import App from './App.vue';
 import config from './formkit.config.js';
 import './portal.css';
@@ -49,6 +50,7 @@ customElements.define(
             const pinia = createPinia();
 
             app.use(pinia);
+            app.use(VueSignaturePad);
             app.use(PrimeVue, {
                 theme: 'none',
             });

@@ -527,11 +527,12 @@
                         </div>
                     </div>
 
-                    <FormKitSchema
-                        :schema="schema"
-                        :data="data"
+                    <div
+                        class="prose max-w-none"
                         v-show="!isGeneratingQuestions && !isEvaluatingAiResolution && !showAiResolutionStep"
-                    />
+                    >
+                        <FormKitSchema :schema="schema" :data="data" />
+                    </div>
                 </main>
             </Page>
         </div>
