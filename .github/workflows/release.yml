@@ -150,55 +150,55 @@ jobs:
                   docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
                   echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-    deploy-worker:
-        name: Deploy Worker Service
-        runs-on: ubuntu-22.04
-        needs: [build-worker]
-        environment: production
+    # deploy-worker:
+    #     name: Deploy Worker Service
+    #     runs-on: ubuntu-22.04
+    #     needs: [build-worker]
+    #     environment: production
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #6.0.2
-              with:
-                  submodules: true
-                  ref: ${{ github.head_ref }}
-                  token: ${{ secrets.PAT }}
+    #     steps:
+    #         - name: Checkout
+    #           uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #6.0.2
+    #           with:
+    #               submodules: true
+    #               ref: ${{ github.head_ref }}
+    #               token: ${{ secrets.PAT }}
 
-            - name: Configure AWS credentials
-              uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 #6.1.0
-              with:
-                  aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-                  aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
-                  aws-region: ${{ env.AWS_REGION }}
+    #         - name: Configure AWS credentials
+    #           uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 #6.1.0
+    #           with:
+    #               aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+    #               aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+    #               aws-region: ${{ env.AWS_REGION }}
 
-            - name: Fill in the new image ID in the Amazon ECS task definition
-              id: task-def
-              uses: aws-actions/amazon-ecs-render-task-definition@77954e213ba1f9f9cb016b86a1d4f6fcdea0d57e #1.8.4
-              with:
-                  task-definition: 'docker/devops/ecs/aidingapp/aidingapp-worker-prod-task-definition.json'
-                  container-name: 'worker'
-                  image: ${{ needs.build-worker.outputs.image }}
+    #         - name: Fill in the new image ID in the Amazon ECS task definition
+    #           id: task-def
+    #           uses: aws-actions/amazon-ecs-render-task-definition@77954e213ba1f9f9cb016b86a1d4f6fcdea0d57e #1.8.4
+    #           with:
+    #               task-definition: 'docker/devops/ecs/aidingapp/aidingapp-worker-prod-task-definition.json'
+    #               container-name: 'worker'
+    #               image: ${{ needs.build-worker.outputs.image }}
 
-            - name: Deploy Amazon ECS task definition
-              id: task-deploy
-              uses: aws-actions/amazon-ecs-deploy-task-definition@fc8fc60f3a60ffd500fcb13b209c59d221ac8c8c #2.6.1
-              with:
-                  task-definition: ${{ steps.task-def.outputs.task-definition }}
-                  service: 'aidingapp-worker-prod-service'
-                  cluster: 'aidingapp-prod'
-                  wait-for-service-stability: true
+    #         - name: Deploy Amazon ECS task definition
+    #           id: task-deploy
+    #           uses: aws-actions/amazon-ecs-deploy-task-definition@fc8fc60f3a60ffd500fcb13b209c59d221ac8c8c #2.6.1
+    #           with:
+    #               task-definition: ${{ steps.task-def.outputs.task-definition }}
+    #               service: 'aidingapp-worker-prod-service'
+    #               cluster: 'aidingapp-prod'
+    #               wait-for-service-stability: true
 
-            - name: Check if deployment was successful
-              id: check-deployment
-              run: |
-                  CURRENT_TASK_DEF_ARN=$(aws ecs describe-services --cluster aidingapp-prod --services aidingapp-worker-prod-service --query services[0].deployments[0].taskDefinition | jq -r ".")
-                  NEW_TASK_DEF_ARN=${{ steps.task-deploy.outputs.task-definition-arn }}
-                  echo "Current task arn: $CURRENT_TASK_DEF_ARN"
-                  echo "New task arn: $NEW_TASK_DEF_ARN"
-                  if [ "$CURRENT_TASK_DEF_ARN" != "$NEW_TASK_DEF_ARN" ]; then
-                    echo "Deployment failed."
-                    exit 1
-                  fi
+    #         - name: Check if deployment was successful
+    #           id: check-deployment
+    #           run: |
+    #               CURRENT_TASK_DEF_ARN=$(aws ecs describe-services --cluster aidingapp-prod --services aidingapp-worker-prod-service --query services[0].deployments[0].taskDefinition | jq -r ".")
+    #               NEW_TASK_DEF_ARN=${{ steps.task-deploy.outputs.task-definition-arn }}
+    #               echo "Current task arn: $CURRENT_TASK_DEF_ARN"
+    #               echo "New task arn: $NEW_TASK_DEF_ARN"
+    #               if [ "$CURRENT_TASK_DEF_ARN" != "$NEW_TASK_DEF_ARN" ]; then
+    #                 echo "Deployment failed."
+    #                 exit 1
+    #               fi
 
     build-scheduler:
         name: Build Scheduler Image
@@ -246,55 +246,55 @@ jobs:
                   docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
                   echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-    deploy-scheduler:
-        name: Deploy Scheduler Service
-        runs-on: ubuntu-22.04
-        needs: [build-scheduler, deploy-worker]
-        environment: production
+    # deploy-scheduler:
+    #     name: Deploy Scheduler Service
+    #     runs-on: ubuntu-22.04
+    #     needs: [build-scheduler, deploy-worker]
+    #     environment: production
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #6.0.2
-              with:
-                  submodules: true
-                  ref: ${{ github.head_ref }}
-                  token: ${{ secrets.PAT }}
+    #     steps:
+    #         - name: Checkout
+    #           uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #6.0.2
+    #           with:
+    #               submodules: true
+    #               ref: ${{ github.head_ref }}
+    #               token: ${{ secrets.PAT }}
 
-            - name: Configure AWS credentials
-              uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 #6.1.0
-              with:
-                  aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-                  aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
-                  aws-region: ${{ env.AWS_REGION }}
+    #         - name: Configure AWS credentials
+    #           uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 #6.1.0
+    #           with:
+    #               aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+    #               aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+    #               aws-region: ${{ env.AWS_REGION }}
 
-            - name: Fill in the new image ID in the Amazon ECS task definition
-              id: task-def
-              uses: aws-actions/amazon-ecs-render-task-definition@77954e213ba1f9f9cb016b86a1d4f6fcdea0d57e #1.8.4
-              with:
-                  task-definition: 'docker/devops/ecs/aidingapp/aidingapp-scheduler-prod-task-definition.json'
-                  container-name: 'scheduler'
-                  image: ${{ needs.build-scheduler.outputs.image }}
+    #         - name: Fill in the new image ID in the Amazon ECS task definition
+    #           id: task-def
+    #           uses: aws-actions/amazon-ecs-render-task-definition@77954e213ba1f9f9cb016b86a1d4f6fcdea0d57e #1.8.4
+    #           with:
+    #               task-definition: 'docker/devops/ecs/aidingapp/aidingapp-scheduler-prod-task-definition.json'
+    #               container-name: 'scheduler'
+    #               image: ${{ needs.build-scheduler.outputs.image }}
 
-            - name: Deploy Amazon ECS task definition
-              id: task-deploy
-              uses: aws-actions/amazon-ecs-deploy-task-definition@fc8fc60f3a60ffd500fcb13b209c59d221ac8c8c #2.6.1
-              with:
-                  task-definition: ${{ steps.task-def.outputs.task-definition }}
-                  service: 'aidingapp-scheduler-prod-service'
-                  cluster: 'aidingapp-prod'
-                  wait-for-service-stability: true
+    #         - name: Deploy Amazon ECS task definition
+    #           id: task-deploy
+    #           uses: aws-actions/amazon-ecs-deploy-task-definition@fc8fc60f3a60ffd500fcb13b209c59d221ac8c8c #2.6.1
+    #           with:
+    #               task-definition: ${{ steps.task-def.outputs.task-definition }}
+    #               service: 'aidingapp-scheduler-prod-service'
+    #               cluster: 'aidingapp-prod'
+    #               wait-for-service-stability: true
 
-            - name: Check if deployment was successful
-              id: check-deployment
-              run: |
-                  CURRENT_TASK_DEF_ARN=$(aws ecs describe-services --cluster aidingapp-prod --services aidingapp-scheduler-prod-service --query services[0].deployments[0].taskDefinition | jq -r ".")
-                  NEW_TASK_DEF_ARN=${{ steps.task-deploy.outputs.task-definition-arn }}
-                  echo "Current task arn: $CURRENT_TASK_DEF_ARN"
-                  echo "New task arn: $NEW_TASK_DEF_ARN"
-                  if [ "$CURRENT_TASK_DEF_ARN" != "$NEW_TASK_DEF_ARN" ]; then
-                    echo "Deployment failed."
-                    exit 1
-                  fi
+    #         - name: Check if deployment was successful
+    #           id: check-deployment
+    #           run: |
+    #               CURRENT_TASK_DEF_ARN=$(aws ecs describe-services --cluster aidingapp-prod --services aidingapp-scheduler-prod-service --query services[0].deployments[0].taskDefinition | jq -r ".")
+    #               NEW_TASK_DEF_ARN=${{ steps.task-deploy.outputs.task-definition-arn }}
+    #               echo "Current task arn: $CURRENT_TASK_DEF_ARN"
+    #               echo "New task arn: $NEW_TASK_DEF_ARN"
+    #               if [ "$CURRENT_TASK_DEF_ARN" != "$NEW_TASK_DEF_ARN" ]; then
+    #                 echo "Deployment failed."
+    #                 exit 1
+    #               fi
 
     build-release-automation:
         name: Build Release Automation Image
@@ -342,44 +342,44 @@ jobs:
                   docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
                   echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
-    deploy-release-automation:
-        name: Deploy and Run Release Automation Service
-        needs: [deploy-web, deploy-worker, deploy-scheduler, build-release-automation]
-        runs-on: ubuntu-22.04
-        environment: production
+    # deploy-release-automation:
+    #     name: Deploy and Run Release Automation Service
+    #     needs: [deploy-web, deploy-worker, deploy-scheduler, build-release-automation]
+    #     runs-on: ubuntu-22.04
+    #     environment: production
 
-        steps:
-            - name: Checkout
-              uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #6.0.2
-              with:
-                  submodules: true
-                  ref: ${{ github.head_ref }}
-                  token: ${{ secrets.PAT }}
+    #     steps:
+    #         - name: Checkout
+    #           uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd #6.0.2
+    #           with:
+    #               submodules: true
+    #               ref: ${{ github.head_ref }}
+    #               token: ${{ secrets.PAT }}
 
-            - name: Configure AWS credentials
-              uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 #6.1.0
-              with:
-                  aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
-                  aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
-                  aws-region: ${{ env.AWS_REGION }}
+    #         - name: Configure AWS credentials
+    #           uses: aws-actions/configure-aws-credentials@ec61189d14ec14c8efccab744f656cffd0e33f37 #6.1.0
+    #           with:
+    #               aws-access-key-id: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
+    #               aws-secret-access-key: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
+    #               aws-region: ${{ env.AWS_REGION }}
 
-            - name: Fill in the new image ID in the Amazon ECS task definition
-              id: task-def
-              uses: aws-actions/amazon-ecs-render-task-definition@77954e213ba1f9f9cb016b86a1d4f6fcdea0d57e #1.8.4
-              with:
-                  task-definition: 'docker/devops/ecs/aidingapp/aidingapp-release-automation-prod-task-definition.json'
-                  container-name: 'release-automation'
-                  image: ${{ needs.build-release-automation.outputs.image }}
+    #         - name: Fill in the new image ID in the Amazon ECS task definition
+    #           id: task-def
+    #           uses: aws-actions/amazon-ecs-render-task-definition@77954e213ba1f9f9cb016b86a1d4f6fcdea0d57e #1.8.4
+    #           with:
+    #               task-definition: 'docker/devops/ecs/aidingapp/aidingapp-release-automation-prod-task-definition.json'
+    #               container-name: 'release-automation'
+    #               image: ${{ needs.build-release-automation.outputs.image }}
 
-            - name: Deploy Amazon ECS task definition
-              uses: aws-actions/amazon-ecs-deploy-task-definition@fc8fc60f3a60ffd500fcb13b209c59d221ac8c8c #2.6.1
-              with:
-                  task-definition: ${{ steps.task-def.outputs.task-definition }}
-                  cluster: 'aidingapp-prod'
-                  desired-count: 1
-                  run-task: true
-                  run-task-security-groups: ${{ secrets.RELEASE_AUTOMATION_SECURITY_GROUPS }}
-                  run-task-subnets: ${{ secrets.RELEASE_AUTOMATION_SUBNETS }}
-                  run-task-assign-public-IP: 'DISABLED'
-                  run-task-launch-type: 'FARGATE'
-                  wait-for-task-stopped: true
+    #         - name: Deploy Amazon ECS task definition
+    #           uses: aws-actions/amazon-ecs-deploy-task-definition@fc8fc60f3a60ffd500fcb13b209c59d221ac8c8c #2.6.1
+    #           with:
+    #               task-definition: ${{ steps.task-def.outputs.task-definition }}
+    #               cluster: 'aidingapp-prod'
+    #               desired-count: 1
+    #               run-task: true
+    #               run-task-security-groups: ${{ secrets.RELEASE_AUTOMATION_SECURITY_GROUPS }}
+    #               run-task-subnets: ${{ secrets.RELEASE_AUTOMATION_SUBNETS }}
+    #               run-task-assign-public-IP: 'DISABLED'
+    #               run-task-launch-type: 'FARGATE'
+    #               wait-for-task-stopped: true
