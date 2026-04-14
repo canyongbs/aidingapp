@@ -46,11 +46,7 @@
 
     $blocks = app(ResolveBlockRegistry::class)($submission->submissible);
 
-    $content['content'] = app(InjectSubmissionStateIntoRichContent::class)(
-        $submission,
-        $content['content'] ?? [],
-        $blocks,
-    );
+    $content['content'] = app(InjectSubmissionStateIntoRichContent::class)($submission, $content['content'] ?? [], $blocks);
 
     $sanitizeSubmissionHtml = function (string $html): string {
         $config = app(HtmlSanitizerConfig::class)
@@ -62,5 +58,5 @@
 @endphp
 
 <div class="prose max-w-none dark:prose-invert">
-    {!! $sanitizeSubmissionHtml(RichContentRenderer::make($content)->customBlocks(array_values($blocks))->toUnsafeHtml()) !!}
+    {!! $sanitizeSubmissionHtml( RichContentRenderer::make($content)->customBlocks(array_values($blocks))->toUnsafeHtml(),) !!}
 </div>
