@@ -39,6 +39,7 @@ namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\CreateKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\EditKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ListKnowledgeBaseItems;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ViewKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -110,6 +111,7 @@ class KnowledgeBaseItemResource extends Resource
     {
         return [
             'index' => ListKnowledgeBaseItems::route('/'),
+            'view' => ViewKnowledgeBaseItem::route('/{record}'),
             'edit' => EditKnowledgeBaseItem::route('/{record}/edit'),
         ];
     }

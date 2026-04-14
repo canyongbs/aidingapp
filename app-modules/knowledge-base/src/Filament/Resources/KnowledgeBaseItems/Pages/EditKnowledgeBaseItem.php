@@ -36,23 +36,32 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
+use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Filament\Resources\Actions\DraftKnowledgeBaseItemWithAiAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Concerns\EditPageRedirection;
 use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
+use App\Models\Scopes\TagsForClass;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\Action as BaseAction;
-use Filament\Actions\EditAction;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Actions;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\View;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class EditKnowledgeBaseItem extends EditRecord
 {
@@ -65,61 +74,136 @@ class EditKnowledgeBaseItem extends EditRecord
     {
         return $schema
             ->components([
-                Section::make()
-                    ->schema([
-                        TextInput::make('title')
-                            ->label('Article Title')
-                            ->required()
-                            ->string()
-                            ->suffixAction(
-                                BaseAction::make('saveArticleTitle')
-                                    ->icon('heroicon-o-check')
-                                    ->action(function (KnowledgeBaseItem $record, string $state) {
-                                        if ($record->title === $state) {
-                                            return;
-                                        }
+                Tabs::make()
+                    ->tabs([
+                        Tab::make('Content')
+                            ->label('Resource')
+                            ->schema([
+                                RichEditor::make('article_details')
+                                    ->label('Article Details')
+                                    ->hiddenLabel()
+                                    ->json()
+                                    ->toolbarButtons([
+                                        ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
+                                        [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])->textualButtons(), 'blockquote', 'code', 'codeBlock', 'bulletList', 'orderedList', 'horizontalRule'],
+                                        ['alignStart', 'alignCenter', 'alignEnd'],
+                                        ['textColor', 'highlight', 'lead', 'small'],
+                                        ['attachFiles', 'video'],
+                                        ['grid', 'table', 'details'],
+                                        ['clearFormatting'],
+                                        ['undo', 'redo'],
+                                    ])
+                                    ->resizableImages()
+                                    ->columnSpanFull()
+                                    ->extraInputAttributes([
+                                        'style' => 'min-height: 32rem;',
+                                    ]),
+                                Actions::make([
+                                    DraftKnowledgeBaseItemWithAiAction::make(),
+                                ]),
+                            ]),
+                        Tab::make('Properties')
+                            ->schema([
+                                TextInput::make('title')
+                                    ->label('Article Title')
+                                    ->required()
+                                    ->string()
+                                    ->suffixAction(
+                                        BaseAction::make('saveArticleTitle')
+                                            ->icon('heroicon-o-check')
+                                            ->action(function (KnowledgeBaseItem $record, string $state) {
+                                                if ($record->title === $state) {
+                                                    return;
+                                                }
 
-                                        $record->update([
-                                            'title' => $state,
-                                        ]);
+                                                $record->update([
+                                                    'title' => $state,
+                                                ]);
 
-                                        if ($record->wasChanged('title')) {
-                                            Notification::make()
-                                                ->title("Title successfully updated to '{$record->title}'")
-                                                ->success()
-                                                ->duration(3000)
-                                                ->send();
-                                        }
-                                    }),
-                            ),
-                        Toggle::make('has_table_of_contents')
-                            ->label('Table of Contents')
-                            ->default(false)
-                            ->onColor('success')
-                            ->offColor('gray'),
-                    ]),
-                View::make('knowledge-base::filament.pages.badges'),
-                RichEditor::make('article_details')
-                    ->label('Article Details')
-                    ->json()
-                    ->toolbarButtons([
-                        ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
-                        [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])->textualButtons(), 'blockquote', 'code', 'codeBlock', 'bulletList', 'orderedList', 'horizontalRule'],
-                        ['alignStart', 'alignCenter', 'alignEnd'],
-                        ['textColor', 'highlight', 'lead', 'small'],
-                        ['attachFiles', 'video'],
-                        ['grid', 'table', 'details'],
-                        ['clearFormatting'],
-                        ['undo', 'redo'],
+                                                if ($record->wasChanged('title')) {
+                                                    Notification::make()
+                                                        ->title("Title successfully updated to '{$record->title}'")
+                                                        ->success()
+                                                        ->duration(3000)
+                                                        ->send();
+                                                }
+                                            }),
+                                    )
+                                    ->columnSpanFull(),
+                                Toggle::make('has_table_of_contents')
+                                    ->label('Table of Contents')
+                                    ->default(false)
+                                    ->onColor('success')
+                                    ->offColor('gray'),
+                                Textarea::make('notes')
+                                    ->label('Notes')
+                                    ->columnSpanFull()
+                                    ->extraInputAttributes(['style' => 'min-height: 12rem;']),
+                                Grid::make(2)
+                                    ->schema([
+                                        Toggle::make('public')
+                                            ->label('Public')
+                                            ->default(false)
+                                            ->onColor('success')
+                                            ->offColor('gray'),
+                                        Toggle::make('is_featured')
+                                            ->label('Featured')
+                                            ->default(false)
+                                            ->onColor('success')
+                                            ->offColor('gray'),
+                                    ]),
+                                Select::make('tags')
+                                    ->relationship(
+                                        'tags',
+                                        'name',
+                                        fn (Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->multiple()
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(2),
+                        Tab::make('Metadata')
+                            ->schema([
+                                Select::make('quality_id')
+                                    ->label('Quality')
+                                    ->relationship('quality', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->exists((new KnowledgeBaseQuality())->getTable(), (new KnowledgeBaseQuality())->getKeyName()),
+                                Select::make('status_id')
+                                    ->label('Status')
+                                    ->relationship('status', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->exists((new KnowledgeBaseStatus())->getTable(), (new KnowledgeBaseStatus())->getKeyName()),
+                                SelectTree::make('category_id')
+                                    ->label('Category')
+                                    ->required()
+                                    ->relationship(
+                                        'category',
+                                        'name',
+                                        'parent_id',
+                                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('name'),
+                                        modifyChildQueryUsing: fn (Builder $query) => $query->orderBy('name'),
+                                    )
+                                    ->enableBranchNode()
+                                    ->searchable()
+                                    ->exists((new KnowledgeBaseCategory())->getTable(), (new KnowledgeBaseCategory())->getKeyName()),
+                                Select::make('division')
+                                    ->label('Division')
+                                    ->multiple()
+                                    ->relationship('division', 'name')
+                                    ->searchable(['name', 'code'])
+                                    ->preload()
+                                    ->default(fn () => Division::count() === 1 ? Division::query()->first()?->getKey() : null)
+                                    ->visible(fn (): bool => Division::count() > 1)
+                                    ->dehydratedWhenHidden()
+                                    ->exists((new Division())->getTable(), (new Division())->getKeyName()),
+                            ]),
                     ])
-                    ->resizableImages()
-                    ->columnSpanFull()
-                    ->extraInputAttributes([
-                        'style' => 'min-height: 32rem;',
-                    ]),
-                Actions::make([
-                    DraftKnowledgeBaseItemWithAiAction::make(),
-                ]),
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -143,13 +227,6 @@ class EditKnowledgeBaseItem extends EditRecord
                 ->button()
                 ->color('primary')
                 ->label('Save'),
-            EditAction::make()
-                ->label('Article Information')
-                ->button()
-                ->outlined()
-                ->record($this->record)
-                ->schema(resolve(EditKnowledgeBaseItemMetadata::class)->form())
-                ->successNotificationTitle('Article properties successfully updated'),
         ];
     }
 }

@@ -161,7 +161,6 @@ class ListKnowledgeBaseItems extends ListRecords
                     }),
             ], layout: FiltersLayout::BeforeContent)
             ->recordActions([
-                EditAction::make(),
                 ReplicateAction::make()
                     ->schema([
                         Section::make()

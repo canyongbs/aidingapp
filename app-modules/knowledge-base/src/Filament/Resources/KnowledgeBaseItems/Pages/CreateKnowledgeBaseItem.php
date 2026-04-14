@@ -128,9 +128,9 @@ class CreateKnowledgeBaseItem extends CreateRecord
                             ->relationship('division', 'name')
                             ->searchable(['name', 'code'])
                             ->preload()
-                            ->default(fn () => Division::count() === 1 ? Division::query()->first()?->getKey() : null)
+                            ->default(fn () => [Division::count() === 1 ? Division::query()->first()?->getKey() : null])
                             ->visible(fn (): bool => Division::count() > 1)
-                            ->dehydratedWhenHidden()
+                            ->saveRelationshipsWhenHidden()
                             ->exists((new Division())->getTable(), (new Division())->getKeyName()),
                     ]),
             ]);
