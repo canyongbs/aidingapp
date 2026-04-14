@@ -40,6 +40,7 @@ use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
 use AidingApp\Form\Models\SubmissibleField;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\TextInput as FilamentTextInput;
 
 class EducatableEmailFormFieldBlock extends FormFieldBlock
@@ -62,6 +63,7 @@ class EducatableEmailFormFieldBlock extends FormFieldBlock
     public static function configureEditorAction(Action $action): Action
     {
         return $action->schema([
+            Hidden::make('fieldId'),
             FilamentTextInput::make('label')
                 ->required()
                 ->string()

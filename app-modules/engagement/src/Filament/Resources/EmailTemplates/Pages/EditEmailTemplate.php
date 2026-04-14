@@ -40,7 +40,6 @@ use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource
 use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
@@ -64,7 +63,7 @@ class EditEmailTemplate extends EditRecord
                 Textarea::make('description')
                     ->string(),
                 RichEditor::make('content')
-                    ->toolbarButtons([['bold', 'italic', 'small', 'link'], [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3'])->textualButtons(), 'bulletList', 'orderedList', 'horizontalRule', 'attachFiles'], ['mergeTags']])
+                    ->toolbarButtons([['bold', 'italic', 'small', 'link'], ['h1', 'h2', 'h3', 'bulletList', 'orderedList', 'horizontalRule', 'attachFiles'], ['mergeTags']])
                     ->activePanel('mergeTags')
                     ->resizableImages()
                     ->columnSpanFull()
