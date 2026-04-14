@@ -47,6 +47,7 @@ class AssetManagementPortalController extends Controller
         $contact = auth('contact')->user();
 
         $filter = $request->input('filter', 'all');
+        $search = $request->input('search', '');
 
         $query = $contact->assetCheckOuts()
             ->with([
@@ -66,6 +67,16 @@ class AssetManagementPortalController extends Controller
             default => $query,
         };
 
+        if ($search !== '') {
+            $filteredQuery->whereHas('asset', function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhere('serial_number', 'like', '%' . $search . '%')
+                    ->orWhereHas('type', function ($q) use ($search) {
+                        $q->where('name', 'like', '%' . $search . '%');
+                    });
+            });
+        }
+
         $paginator = $filteredQuery
             ->orderByDesc('checked_out_at')
             ->paginate(10);
@@ -80,7 +91,20 @@ class AssetManagementPortalController extends Controller
                     'name' => $checkOut->asset->name,
                     'description' => $checkOut->asset->description,
                     'serial_number' => $checkOut->asset->serial_number,
-                    'purchase_age' => $checkOut->asset->purchase_date ? $checkOut->asset->purchase_age : null,
+                    'purchase_age' => $checkOut->asset->purchase_date
+                        ? (function () use ($checkOut) {
+                            $date = $checkOut->asset->purchase_date;
+
+                            if ($date->isFuture()) {
+                                return '0 Years 0 Months';
+                            }
+
+                            $diff = $date->roundMonth()->diff(now());
+
+                            return $diff->y . ' ' . ($diff->y === 1 ? 'Year' : 'Years') . ' ' .
+                                $diff->m . ' ' . ($diff->m === 1 ? 'Month' : 'Months');
+                        })()
+                        : null,
                     'type' => $checkOut->asset->type
                         ? ['name' => $checkOut->asset->type->name]
                         : null,

@@ -74,6 +74,7 @@
             const response = await get(`${props.apiUrl}/assets`, {
                 filter: activeFilter.value,
                 page,
+                ...(searchQuery.value.trim() ? { search: searchQuery.value.trim() } : {}),
             });
 
             const envelope = response.data;
@@ -97,18 +98,13 @@
 
     watch(activeFilter, () => fetchAssets(1));
 
-    onMounted(() => fetchAssets(1));
-
-    const filteredAssets = computed(() => {
-        const q = searchQuery.value.trim().toLowerCase();
-        if (!q) return assets.value;
-        return assets.value.filter(
-            (item) =>
-                item.asset?.name?.toLowerCase().includes(q) ||
-                (item.asset?.serial_number && item.asset.serial_number.toLowerCase().includes(q)) ||
-                item.asset?.type?.name?.toLowerCase().includes(q),
-        );
+    const searchDebounce = ref(null);
+    watch(searchQuery, () => {
+        clearTimeout(searchDebounce.value);
+        searchDebounce.value = setTimeout(() => fetchAssets(1), 400);
     });
+
+    onMounted(() => fetchAssets(1));
 
     function truncate(str, n = 30) {
         if (!str) return '';
@@ -296,7 +292,7 @@
             </div>
 
             <div
-                v-else-if="filteredAssets.length === 0"
+                v-else-if="assets.length === 0"
                 key="empty"
                 role="status"
                 class="mt-1 flex flex-col items-center justify-center gap-4 py-20 rounded-[var(--rounding-lg)] border border-dashed border-gray-200 bg-white text-center"
@@ -356,7 +352,7 @@
                         </thead>
                         <tbody class="divide-y divide-gray-100 bg-white">
                             <tr
-                                v-for="(item, idx) in filteredAssets"
+                                v-for="(item, idx) in assets"
                                 :key="item.id"
                                 class="asset-row transition-colors duration-100 hover:bg-gray-50/70"
                                 :style="{ '--row-delay': `${idx * 30}ms` }"
