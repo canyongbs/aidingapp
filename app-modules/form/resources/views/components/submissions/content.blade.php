@@ -50,7 +50,9 @@
         $blocks,
     );
 
-    $customBlockClasses = collect($blocks)->values()->all();
+    $customBlockClasses = collect($blocks)
+        ->values()
+        ->all();
 @endphp
 
 <div class="prose max-w-none dark:prose-invert">
