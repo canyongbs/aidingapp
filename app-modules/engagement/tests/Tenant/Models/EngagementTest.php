@@ -126,6 +126,6 @@ it('resolves contact merge tags in the body', function () {
     ]);
 
     expect((string) $engagement->getBody())
-        ->toContain($contact->full_name)
-        ->toContain($contact->email);
+        ->toContain(htmlentities($contact->full_name))
+        ->toContain(htmlentities($contact->email));
 });
