@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Actions;
 use Closure;
 use Filament\Actions\AssociateAction;
 use Filament\Forms\Components\TableSelect;
+use Filament\Resources\RelationManagers\RelationManager;
 
 class TableSelectAssociateAction extends AssociateAction
 {
@@ -73,7 +74,10 @@ class TableSelectAssociateAction extends AssociateAction
     {
         $table = $this->getTable();
         $relationship = $table->getRelationship();
-        $relationshipName = $table->getLivewire()::getRelationshipName();
+
+        $livewire = $table->getLivewire();
+        assert($livewire instanceof RelationManager);
+        $relationshipName = $livewire::getRelationshipName();
 
         return TableSelect::make('recordId')
             ->label(__('filament-actions::associate.single.modal.fields.record_id.label'))
