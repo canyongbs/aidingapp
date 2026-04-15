@@ -53,7 +53,6 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
-use App\Features\ServiceRequestEmailThreading;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV2;
 use Aws\Kms\KmsClient;
@@ -120,10 +119,11 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 $type = $entry['type'];
                 $tenant = $entry['tenant'];
                 $srTypeDomain = $entry['srTypeDomain'] ?? null;
+                $srNumber = $entry['sr_number'] ?? null;
 
                 match ($type) {
                     'engagement' => $this->handleEngagement($tenant, $parser, $content, $sender),
-                    'service_request_reply' => $this->handleServiceRequestReply($tenant, $parser, $sender),
+                    'service_request_reply' => $this->handleServiceRequestReply($tenant, $parser, $sender, $srNumber),
                     'service_request_type' => $this->handleServiceRequestType($srTypeDomain, $parser, $sender),
                     'legacy' => $this->handleLegacyAddress($tenant, $parser, $sender),
                     default => null,
@@ -167,10 +167,11 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
     /**
      * Classify inbound email addresses into routing groups.
      *
-     * @return Collection<int, array{type: string, tenant: Tenant, srTypeDomain?: TenantServiceRequestTypeDomain}>
+     * @return Collection<int, array{type: string, tenant: Tenant, srTypeDomain?: TenantServiceRequestTypeDomain, sr_number?: string}>
      */
     protected function classifyAddresses(Parser $parser): Collection
     {
+        /** @var Collection<int, array{type: string, tenant: Tenant, srTypeDomain?: TenantServiceRequestTypeDomain, sr_number?: string}> */
         return collect($parser->getAddresses('to'))
             ->pluck('address')
             ->map(function (string $address) {
@@ -216,12 +217,12 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     }
                 }
 
-                // {tenant}-sr — SR reply path (header matching)
-                if (preg_match('/^(.+)-sr$/', $localPartLower, $matches)) {
+                // {tenant}-sr or {tenant}-sr+{sr_number} — SR reply path
+                if (preg_match('/^(.+)-sr(?:\+(.+))?$/', $localPartLower, $matches)) {
                     $tenant = $this->resolveTenant($matches[1]);
 
                     if ($tenant) {
-                        return ['type' => 'service_request_reply', 'tenant' => $tenant];
+                        return ['type' => 'service_request_reply', 'tenant' => $tenant, ...isset($matches[2]) ? ['sr_number' => $matches[2]] : []];
                     }
                 }
 
@@ -289,16 +290,27 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         });
     }
 
-    protected function handleServiceRequestReply(Tenant $tenant, Parser $parser, string $sender): void
+    protected function handleServiceRequestReply(Tenant $tenant, Parser $parser, string $sender, ?string $srNumber = null): void
     {
-        $tenant->execute(function () use ($parser, $sender) {
-            // TODO: FeatureFlag Cleanup - Remove this check after ServiceRequestEmailThreading is removed
-            if (! ServiceRequestEmailThreading::active()) {
-                // FF not active — can't do header matching, ignore the email
-                return;
+        $tenant->execute(function () use ($parser, $sender, $srNumber) {
+            $serviceRequest = null;
+
+            // Strategy 1: Plus-addressed SR number
+            if ($srNumber) {
+                $serviceRequest = ServiceRequest::query()
+                    ->where('service_request_number', mb_strtoupper($srNumber))
+                    ->first();
             }
 
-            $serviceRequest = $this->resolveServiceRequestFromHeaders($parser);
+            // Strategy 2: In-Reply-To / References header matching
+            if (! $serviceRequest) {
+                $serviceRequest = $this->resolveServiceRequestFromHeaders($parser);
+            }
+
+            // Strategy 3: Body reference matching
+            if (! $serviceRequest) {
+                $serviceRequest = $this->resolveServiceRequestFromBody($parser);
+            }
 
             if (! $serviceRequest) {
                 // TODO: Future auto-reply informing sender that the system could not match their email to an existing Service Request
@@ -323,14 +335,12 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
     protected function resolveServiceRequestFromHeaders(Parser $parser): ?ServiceRequest
     {
-        $inboundDomain = config('mail.from.root_domain');
-
         // Try In-Reply-To header first
         $inReplyTo = $parser->getHeader('In-Reply-To');
 
         if ($inReplyTo) {
-            // Strip angle brackets
-            $messageId = trim($inReplyTo, '<> ');
+            // Strip angle brackets and domain to get the raw SES ID
+            $messageId = Str::before(trim($inReplyTo, '<> '), '@');
 
             $outbound = OutboundEmailMessageId::query()
                 ->where('message_id', $messageId)
@@ -349,27 +359,51 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         $references = $parser->getHeader('References');
 
         if ($references) {
-            // Extract all Message-IDs from References header
+            // Extract all Message-IDs from References header, strip domains to get raw SES IDs
             preg_match_all('/<([^>]+)>/', $references, $matches);
 
             if (! empty($matches[1])) {
-                // Filter to our domain and look up
-                $ourMessageIds = collect($matches[1])
-                    ->filter(fn (string $id) => str_contains($id, $inboundDomain));
+                $rawIds = collect($matches[1])
+                    ->map(fn (string $id) => Str::before($id, '@'))
+                    ->all();
 
-                if ($ourMessageIds->isNotEmpty()) {
-                    $outbound = OutboundEmailMessageId::query()
-                        ->whereIn('message_id', $ourMessageIds->all())
-                        ->orderByDesc('id')
-                        ->first();
+                $outbound = OutboundEmailMessageId::query()
+                    ->whereIn('message_id', $rawIds)
+                    ->orderByDesc('id')
+                    ->first();
 
-                    if ($outbound) {
-                        $trackable = $outbound->trackable;
+                if ($outbound) {
+                    $trackable = $outbound->trackable;
 
-                        if ($trackable instanceof ServiceRequest) {
-                            return $trackable;
-                        }
+                    if ($trackable instanceof ServiceRequest) {
+                        return $trackable;
                     }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    protected function resolveServiceRequestFromBody(Parser $parser): ?ServiceRequest
+    {
+        $body = $parser->getMessageBody('text') ?: $parser->getMessageBody('html');
+
+        if (! $body) {
+            return null;
+        }
+
+        if (preg_match_all('/\[REF:([A-Z0-9]+)\]/', $body, $matches)) {
+            $srNumbers = array_unique($matches[1]);
+
+            // Use the first unique match (nearest to top of body = most relevant)
+            foreach ($srNumbers as $srNumber) {
+                $serviceRequest = ServiceRequest::query()
+                    ->where('service_request_number', $srNumber)
+                    ->first();
+
+                if ($serviceRequest) {
+                    return $serviceRequest;
                 }
             }
         }

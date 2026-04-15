@@ -36,17 +36,15 @@
 
 namespace AidingApp\ServiceManagement\Notifications\Concerns;
 
+use AidingApp\Notification\DataTransferObjects\EmailChannelResultData;
 use AidingApp\Notification\DataTransferObjects\NotificationResultData;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\Contracts\Message;
 use AidingApp\Notification\Models\EmailMessage;
-use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\ServiceRequestEmailThreading;
 use App\Models\Tenant;
 use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Messages\MailMessage;
-use Symfony\Component\Mime\Email;
 
 trait SetsServiceRequestEmailHeaders
 {
@@ -56,78 +54,41 @@ trait SetsServiceRequestEmailHeaders
         object $notifiable
     ): void {
         $tenant = Tenant::current();
-        $srFromAddress = $tenant->getServiceRequestFromAddress();
 
-        $mailMessage->from($srFromAddress, config('mail.from.name'));
-        $mailMessage->replyTo($srFromAddress);
+        $serviceRequest = $this->getServiceRequest();
 
-        // TODO: FeatureFlag Cleanup - Remove this check after ServiceRequestEmailThreading is removed
-        if (! ServiceRequestEmailThreading::active()) {
+        $srPlusAddress = sprintf(
+            '%s-sr+%s@%s',
+            $tenant->getSubdomain(),
+            $serviceRequest->service_request_number,
+            config('mail.from.root_domain'),
+        );
+
+        $mailMessage->from($srPlusAddress, config('mail.from.name'));
+        $mailMessage->replyTo($srPlusAddress);
+
+        $mailMessage->line('[REF:' . $serviceRequest->service_request_number . ']');
+    }
+
+    public function afterSendServiceRequestEmailThreading(AnonymousNotifiable|CanBeNotified $notifiable, Message $emailMessage, NotificationResultData $result): void
+    {
+        if (! $result->success || ! $emailMessage instanceof EmailMessage) {
+            return;
+        }
+
+        if (! $result instanceof EmailChannelResultData || ! filled($result->messageId)) {
             return;
         }
 
         $serviceRequest = $this->getServiceRequest();
 
-        $messageId = $this->generateServiceRequestMessageId($serviceRequest);
-        $references = $this->buildServiceRequestReferencesChain($serviceRequest);
-
-        $mailMessage->withSymfonyMessage(function (Email $email) use ($messageId, $references) {
-            $email->getHeaders()->remove('Message-ID');
-            $email->getHeaders()->addIdHeader('Message-ID', $messageId);
-
-            if ($references) {
-                $email->getHeaders()->addTextHeader('References', $references);
-            }
-        });
-
-        $emailMessage->outbound_message_id = $messageId;
+        $emailMessage->outbound_message_id = $result->messageId;
         $emailMessage->save();
-    }
 
-    public function afterSendServiceRequestEmailThreading(AnonymousNotifiable|CanBeNotified $notifiable, Message $emailMessage, NotificationResultData $result): void
-    {
-        // TODO: FeatureFlag Cleanup - Remove this check after ServiceRequestEmailThreading is removed
-        if (! ServiceRequestEmailThreading::active()) {
-            return;
-        }
-
-        if ($result->success && $emailMessage instanceof EmailMessage && $emailMessage->outbound_message_id) {
-            $serviceRequest = $this->getServiceRequest();
-
-            $serviceRequest->outboundEmailMessageIds()->create([
-                'message_id' => $emailMessage->outbound_message_id,
-            ]);
-        }
+        $serviceRequest->outboundEmailMessageIds()->create([
+            'message_id' => $result->messageId,
+        ]);
     }
 
     abstract protected function getServiceRequest(): ServiceRequest;
-
-    protected function generateServiceRequestMessageId(ServiceRequest $serviceRequest): string
-    {
-        $sequence = OutboundEmailMessageId::query()
-            ->where('trackable_id', $serviceRequest->getKey())
-            ->where('trackable_type', $serviceRequest->getMorphClass())
-            ->count() + 1;
-
-        return sprintf(
-            '%s.%d.%d@%s',
-            $serviceRequest->service_request_number,
-            $sequence,
-            now()->getTimestampMs(),
-            config('mail.from.root_domain'),
-        );
-    }
-
-    protected function buildServiceRequestReferencesChain(ServiceRequest $serviceRequest): ?string
-    {
-        $messageIds = OutboundEmailMessageId::query()
-            ->where('trackable_id', $serviceRequest->getKey())
-            ->where('trackable_type', $serviceRequest->getMorphClass())
-            ->orderBy('id')
-            ->pluck('message_id')
-            ->map(fn (string $id) => "<{$id}>")
-            ->implode(' ');
-
-        return $messageIds ?: null;
-    }
 }

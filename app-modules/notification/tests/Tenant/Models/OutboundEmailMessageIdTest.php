@@ -48,7 +48,7 @@ it('trackable relationship returns the correct model', function () {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $outbound = $serviceRequest->outboundEmailMessageIds()->create([
-        'message_id' => 'test.1.1000@mail.aiding.app',
+        'message_id' => '0101019d9205135c-e21c7d7b-f8bc-44fa-9c51-46d5decf9c65-000000',
     ]);
 
     $outbound->refresh();
@@ -59,12 +59,12 @@ it('trackable relationship returns the correct model', function () {
 
 it('emailMessage relationship returns the correct EmailMessage', function () {
     $emailMessage = EmailMessage::factory()->create([
-        'outbound_message_id' => 'test.1.1000@mail.aiding.app',
+        'outbound_message_id' => '0101019d9205135c-e21c7d7b-f8bc-44fa-9c51-46d5decf9c65-000000',
     ]);
 
     $outbound = ServiceRequest::factory()->create()
         ->outboundEmailMessageIds()->create([
-            'message_id' => 'test.1.1000@mail.aiding.app',
+            'message_id' => '0101019d9205135c-e21c7d7b-f8bc-44fa-9c51-46d5decf9c65-000000',
         ]);
 
     $outbound->refresh();
@@ -77,11 +77,11 @@ it('EmailMessage outboundEmailMessageId relationship returns the correct Outboun
     $serviceRequest = ServiceRequest::factory()->create();
 
     $outbound = $serviceRequest->outboundEmailMessageIds()->create([
-        'message_id' => 'test.1.1000@mail.aiding.app',
+        'message_id' => '0101019d9205135c-e21c7d7b-f8bc-44fa-9c51-46d5decf9c65-000000',
     ]);
 
     $emailMessage = EmailMessage::factory()->create([
-        'outbound_message_id' => 'test.1.1000@mail.aiding.app',
+        'outbound_message_id' => '0101019d9205135c-e21c7d7b-f8bc-44fa-9c51-46d5decf9c65-000000',
     ]);
 
     $emailMessage->refresh();

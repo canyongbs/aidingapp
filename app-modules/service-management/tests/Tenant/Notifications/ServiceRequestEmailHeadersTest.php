@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Notification\DataTransferObjects\EmailChannelResultData;
 use AidingApp\Notification\DataTransferObjects\NotificationResultData;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpenedNotification;
 use App\Features\ServiceRequestCategoryRenameFeature;
-use App\Features\ServiceRequestEmailThreading;
 use App\Models\Tenant;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Facades\Event;
@@ -51,11 +51,7 @@ beforeEach(function () {
 });
 
 describe('Unit-level customizeOutboundMail', function () {
-    beforeEach(function () {
-        ServiceRequestEmailThreading::activate();
-    });
-
-    it('sets the from address to the tenant SR address', function () {
+    it('sets the from address to the plus-addressed SR address', function () {
         $tenant = Tenant::current();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -68,13 +64,18 @@ describe('Unit-level customizeOutboundMail', function () {
 
         $notification->customizeOutboundMail($mailMessage, $emailMessage, $serviceRequest->respondent);
 
-        $expectedAddress = $tenant->getServiceRequestFromAddress();
+        $expectedAddress = sprintf(
+            '%s-sr+%s@%s',
+            $tenant->getSubdomain(),
+            $serviceRequest->service_request_number,
+            config('mail.from.root_domain'),
+        );
 
         expect($mailMessage->from[0])->toBe($expectedAddress)
             ->and($mailMessage->from[1])->toBe(config('mail.from.name'));
     });
 
-    it('sets the reply-to address to the tenant SR address', function () {
+    it('sets the reply-to address with plus-addressed SR number', function () {
         $tenant = Tenant::current();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -87,13 +88,18 @@ describe('Unit-level customizeOutboundMail', function () {
 
         $notification->customizeOutboundMail($mailMessage, $emailMessage, $serviceRequest->respondent);
 
-        $expectedAddress = $tenant->getServiceRequestFromAddress();
+        $expectedAddress = sprintf(
+            '%s-sr+%s@%s',
+            $tenant->getSubdomain(),
+            $serviceRequest->service_request_number,
+            config('mail.from.root_domain'),
+        );
 
         expect($mailMessage->replyTo)->toHaveCount(1)
             ->and($mailMessage->replyTo[0][0])->toBe($expectedAddress);
     });
 
-    it('generates a custom Message-ID and saves outbound_message_id', function () {
+    it('includes a visible body reference with the SR number', function () {
         $serviceRequest = ServiceRequest::factory()->create();
 
         $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
@@ -104,25 +110,25 @@ describe('Unit-level customizeOutboundMail', function () {
 
         $notification->customizeOutboundMail($mailMessage, $emailMessage, $serviceRequest->respondent);
 
-        $emailMessage->refresh();
+        $mailArray = $mailMessage->toArray();
 
-        expect($emailMessage->outbound_message_id)->not->toBeNull()
-            ->and($emailMessage->outbound_message_id)->toContain($serviceRequest->service_request_number)
-            ->and($emailMessage->outbound_message_id)->toContain(config('mail.from.root_domain'));
+        $bodyRef = '[REF:' . $serviceRequest->service_request_number . ']';
+
+        expect(collect($mailArray['introLines'] ?? [])->merge($mailArray['outroLines'] ?? []))
+            ->toContain($bodyRef);
     });
 
-    it('creates an OutboundEmailMessageId record after successful send', function () {
+    it('creates an OutboundEmailMessageId record after successful send with messageId', function () {
         $serviceRequest = ServiceRequest::factory()->create();
 
         $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
 
-        $mailMessage = $notification->toMail($serviceRequest->respondent);
-
         $emailMessage = EmailMessage::factory()->create();
 
-        $notification->customizeOutboundMail($mailMessage, $emailMessage, $serviceRequest->respondent);
-
-        $result = new NotificationResultData(success: true);
+        $result = new EmailChannelResultData(
+            success: true,
+            messageId: '0101019d9205135c-e21c7d7b-f8bc-44fa-9c51-46d5decf9c65-000000',
+        );
 
         $notification->afterSend($serviceRequest->respondent, $emailMessage, $result);
 
@@ -130,9 +136,13 @@ describe('Unit-level customizeOutboundMail', function () {
 
         $outbound = OutboundEmailMessageId::first();
 
-        expect($outbound->message_id)->toBe($emailMessage->outbound_message_id)
+        expect($outbound->message_id)->toBe('0101019d9205135c-e21c7d7b-f8bc-44fa-9c51-46d5decf9c65-000000')
             ->and($outbound->trackable_id)->toBe($serviceRequest->getKey())
             ->and($outbound->trackable_type)->toBe($serviceRequest->getMorphClass());
+
+        $emailMessage->refresh();
+
+        expect($emailMessage->outbound_message_id)->toBe('0101019d9205135c-e21c7d7b-f8bc-44fa-9c51-46d5decf9c65-000000');
     });
 
     it('does not create an OutboundEmailMessageId record after failed send', function () {
@@ -140,67 +150,25 @@ describe('Unit-level customizeOutboundMail', function () {
 
         $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
 
-        $mailMessage = $notification->toMail($serviceRequest->respondent);
-
         $emailMessage = EmailMessage::factory()->create();
 
-        $notification->customizeOutboundMail($mailMessage, $emailMessage, $serviceRequest->respondent);
-
-        $result = new NotificationResultData(success: false);
+        $result = new EmailChannelResultData(
+            success: false,
+            messageId: '0101019d9205135c-e21c7d7b-f8bc-44fa-9c51-46d5decf9c65-000000',
+        );
 
         $notification->afterSend($serviceRequest->respondent, $emailMessage, $result);
 
         expect(OutboundEmailMessageId::count())->toBe(0);
     });
 
-    it('builds a References chain from existing outbound message IDs', function () {
-        $serviceRequest = ServiceRequest::factory()->create();
-
-        // Create some existing outbound message IDs
-        $serviceRequest->outboundEmailMessageIds()->create([
-            'message_id' => 'SR-FIRST.1.1000@mail.aiding.app',
-        ]);
-
-        $serviceRequest->outboundEmailMessageIds()->create([
-            'message_id' => 'SR-FIRST.2.2000@mail.aiding.app',
-        ]);
-
-        $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
-
-        $mailMessage = $notification->toMail($serviceRequest->respondent);
-
-        $emailMessage = EmailMessage::factory()->create();
-
-        $notification->customizeOutboundMail($mailMessage, $emailMessage, $serviceRequest->respondent);
-
-        // The Message-ID should be the 3rd in sequence
-        expect($emailMessage->outbound_message_id)->toContain('.3.');
-    });
-
-    // TODO: FeatureFlag Cleanup - This test can be removed when ServiceRequestEmailThreading is removed
-    it('does not set custom Message-ID or References when feature flag is disabled', function () {
-        ServiceRequestEmailThreading::deactivate();
-
+    it('does not create an OutboundEmailMessageId record when messageId is null', function () {
         $serviceRequest = ServiceRequest::factory()->create();
 
         $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
 
-        $mailMessage = $notification->toMail($serviceRequest->respondent);
-
         $emailMessage = EmailMessage::factory()->create();
 
-        $notification->customizeOutboundMail($mailMessage, $emailMessage, $serviceRequest->respondent);
-
-        $emailMessage->refresh();
-
-        // From and reply-to should still be set
-        $tenant = Tenant::current();
-        $expectedAddress = $tenant->getServiceRequestFromAddress();
-
-        expect($mailMessage->from[0])->toBe($expectedAddress)
-            ->and($emailMessage->outbound_message_id)->toBeNull();
-
-        // afterSend should not create record
         $result = new NotificationResultData(success: true);
 
         $notification->afterSend($serviceRequest->respondent, $emailMessage, $result);
@@ -210,10 +178,6 @@ describe('Unit-level customizeOutboundMail', function () {
 });
 
 describe('Full notification send flow', function () {
-    beforeEach(function () {
-        ServiceRequestEmailThreading::activate();
-    });
-
     it('sets the from address on the actual outgoing email', function () {
         Event::fake([MessageSending::class]);
 
@@ -225,7 +189,12 @@ describe('Full notification send flow', function () {
 
         $serviceRequest->respondent->notifyNow($notification);
 
-        $expectedAddress = $tenant->getServiceRequestFromAddress();
+        $expectedAddress = sprintf(
+            '%s-sr+%s@%s',
+            $tenant->getSubdomain(),
+            $serviceRequest->service_request_number,
+            config('mail.from.root_domain'),
+        );
 
         Event::assertDispatched(MessageSending::class, function (MessageSending $event) use ($expectedAddress) {
             $from = $event->message->getFrom();
@@ -235,7 +204,7 @@ describe('Full notification send flow', function () {
         });
     });
 
-    it('sets the reply-to address on the actual outgoing email', function () {
+    it('sets the reply-to address with plus-addressed SR number on the actual outgoing email', function () {
         Event::fake([MessageSending::class]);
 
         $tenant = Tenant::current();
@@ -246,7 +215,12 @@ describe('Full notification send flow', function () {
 
         $serviceRequest->respondent->notifyNow($notification);
 
-        $expectedAddress = $tenant->getServiceRequestFromAddress();
+        $expectedAddress = sprintf(
+            '%s-sr+%s@%s',
+            $tenant->getSubdomain(),
+            $serviceRequest->service_request_number,
+            config('mail.from.root_domain'),
+        );
 
         Event::assertDispatched(MessageSending::class, function (MessageSending $event) use ($expectedAddress) {
             $replyTo = $event->message->getReplyTo();
@@ -256,7 +230,7 @@ describe('Full notification send flow', function () {
         });
     });
 
-    it('sets a custom Message-ID containing the service request number on the actual outgoing email', function () {
+    it('includes the body reference in the actual outgoing email', function () {
         Event::fake([MessageSending::class]);
 
         $serviceRequest = ServiceRequest::withoutEvents(fn () => ServiceRequest::factory()->create());
@@ -265,100 +239,12 @@ describe('Full notification send flow', function () {
 
         $serviceRequest->respondent->notifyNow($notification);
 
-        $rootDomain = config('mail.from.root_domain');
+        $bodyRef = '[REF:' . $serviceRequest->service_request_number . ']';
 
-        Event::assertDispatched(MessageSending::class, function (MessageSending $event) use ($serviceRequest, $rootDomain) {
-            $messageIdHeader = $event->message->getHeaders()->get('Message-ID');
+        Event::assertDispatched(MessageSending::class, function (MessageSending $event) use ($bodyRef) {
+            $body = $event->message->getHtmlBody() ?? $event->message->getTextBody() ?? '';
 
-            if (! $messageIdHeader) {
-                return false;
-            }
-
-            $messageId = $messageIdHeader->getBodyAsString();
-
-            return str_contains($messageId, $serviceRequest->service_request_number)
-                && str_contains($messageId, $rootDomain);
-        });
-    });
-
-    it('includes a References header with prior message IDs on the actual outgoing email', function () {
-        Event::fake([MessageSending::class]);
-
-        $serviceRequest = ServiceRequest::withoutEvents(fn () => ServiceRequest::factory()->create());
-
-        $serviceRequest->outboundEmailMessageIds()->create([
-            'message_id' => 'SR-FIRST.1.1000@mail.aiding.app',
-        ]);
-
-        $serviceRequest->outboundEmailMessageIds()->create([
-            'message_id' => 'SR-FIRST.2.2000@mail.aiding.app',
-        ]);
-
-        $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
-
-        $serviceRequest->respondent->notifyNow($notification);
-
-        Event::assertDispatched(MessageSending::class, function (MessageSending $event) {
-            $referencesHeader = $event->message->getHeaders()->get('References');
-
-            if (! $referencesHeader) {
-                return false;
-            }
-
-            $references = $referencesHeader->getBodyAsString();
-
-            return str_contains($references, '<SR-FIRST.1.1000@mail.aiding.app>')
-                && str_contains($references, '<SR-FIRST.2.2000@mail.aiding.app>');
-        });
-    });
-
-    it('creates an OutboundEmailMessageId record after a successful send', function () {
-        $serviceRequest = ServiceRequest::withoutEvents(fn () => ServiceRequest::factory()->create());
-
-        $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
-
-        $serviceRequest->respondent->notifyNow($notification);
-
-        expect(OutboundEmailMessageId::count())->toBe(1);
-
-        $outbound = OutboundEmailMessageId::first();
-
-        expect($outbound->trackable_id)->toBe($serviceRequest->getKey())
-            ->and($outbound->trackable_type)->toBe($serviceRequest->getMorphClass())
-            ->and($outbound->message_id)->toContain($serviceRequest->service_request_number);
-    });
-
-    // TODO: FeatureFlag Cleanup - This test can be removed when ServiceRequestEmailThreading is removed
-    it('does not set custom Message-ID or References on the actual email when feature flag is disabled', function () {
-        Event::fake([MessageSending::class]);
-
-        ServiceRequestEmailThreading::deactivate();
-
-        $serviceRequest = ServiceRequest::withoutEvents(fn () => ServiceRequest::factory()->create());
-
-        $serviceRequest->outboundEmailMessageIds()->create([
-            'message_id' => 'SR-FIRST.1.1000@mail.aiding.app',
-        ]);
-
-        $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
-
-        $serviceRequest->respondent->notifyNow($notification);
-
-        $tenant = Tenant::current();
-        $expectedAddress = $tenant->getServiceRequestFromAddress();
-
-        Event::assertDispatched(MessageSending::class, function (MessageSending $event) use ($expectedAddress, $serviceRequest) {
-            $from = $event->message->getFrom();
-            $fromMatches = count($from) === 1 && $from[0]->getAddress() === $expectedAddress;
-
-            $messageIdHeader = $event->message->getHeaders()->get('Message-ID');
-            $messageId = $messageIdHeader?->getBodyAsString() ?? '';
-            $noCustomMessageId = ! str_contains($messageId, $serviceRequest->service_request_number);
-
-            $referencesHeader = $event->message->getHeaders()->get('References');
-            $noReferences = $referencesHeader === null;
-
-            return $fromMatches && $noCustomMessageId && $noReferences;
+            return str_contains($body, $bodyRef);
         });
     });
 });
