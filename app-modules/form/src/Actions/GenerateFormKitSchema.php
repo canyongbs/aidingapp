@@ -74,7 +74,7 @@ class GenerateFormKitSchema
                 'paragraph' => ['$el' => 'p', 'children' => $this->content($blocks, $component['content'] ?? [], $fields)],
                 'small' => ['$el' => 'small', 'children' => $this->content($blocks, $component['content'] ?? [], $fields)],
                 'text' => $this->text($component),
-                'tiptapBlock' => ($field = ($fields[$component['attrs']['id']] ?? null)) ? $blocks[$component['attrs']['type']]::getFormKitSchema($field) : [],
+                'customBlock' => ($field = ($fields[$component['attrs']['config']['fieldId'] ?? ''] ?? null)) ? (($block = ($blocks[$component['attrs']['id'] ?? ''] ?? null)) ? $block::getFormKitSchema($field) : []) : [],
                 default => [],
             },
             $content,
@@ -83,22 +83,38 @@ class GenerateFormKitSchema
 
     public function grid(array $blocks, array $component, ?Collection $fields): array
     {
+        $dataCols = $component['attrs']['data-cols'] ?? '2';
+        $fromBreakpoint = $component['attrs']['data-from-breakpoint'] ?? 'lg';
+        $children = $component['content'] ?? [];
+
+        $colSpans = array_map(
+            fn ($child) => (int) ($child['attrs']['data-col-span'] ?? 1),
+            $children,
+        );
+        $isAsymmetric = count(array_unique($colSpans)) > 1;
+
+        if ($isAsymmetric && $dataCols === '3') {
+            $cssClass = $colSpans[0] < $colSpans[1]
+                ? 'asymetric-grid-left-thirds'
+                : 'asymetric-grid-right-thirds';
+        } elseif ($isAsymmetric && $dataCols === '4') {
+            $cssClass = $colSpans[0] < $colSpans[1]
+                ? 'asymetric-grid-left-fourths'
+                : 'asymetric-grid-right-fourths';
+        } elseif ($fromBreakpoint === 'default') {
+            $cssClass = 'fixed-grid-' . $dataCols;
+        } else {
+            $cssClass = 'responsive-grid-' . $dataCols;
+        }
+
         return [
             '$el' => 'div',
             'attrs' => [
                 'class' => [
-                    ...match ($component['attrs']['type']) {
-                        'asymetric-left-thirds' => ['asymetric-grid-left-thirds' => true],
-                        'asymetric-right-thirds' => ['asymetric-grid-right-thirds' => true],
-                        'asymetric-left-fourths' => ['asymetric-grid-left-fourths' => true],
-                        'asymetric-right-fourths' => ['asymetric-grid-right-fourths' => true],
-                        'fixed' => ['fixed-grid-' . $component['attrs']['cols'] => true],
-                        'responsive' => ['responsive-grid-' . $component['attrs']['cols'] => true],
-                        default => [],
-                    },
+                    $cssClass => true,
                 ],
             ],
-            'children' => $this->content($blocks, $component['content'], $fields),
+            'children' => $this->content($blocks, $children, $fields),
         ];
     }
 

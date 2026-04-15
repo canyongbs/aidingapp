@@ -40,20 +40,9 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class CheckboxFormFieldBlock extends FormFieldBlock
 {
-    public string $preview = 'form::blocks.previews.checkbox';
-
-    public string $rendered = 'form::blocks.submissions.checkbox';
-
-    public ?string $icon = 'heroicon-m-check-circle';
-
     public static function type(): string
     {
         return 'checkbox';
-    }
-
-    public function fields(): array
-    {
-        return [];
     }
 
     /**
@@ -75,5 +64,15 @@ class CheckboxFormFieldBlock extends FormFieldBlock
     public static function getValidationRules(SubmissibleField $field): array
     {
         return ['boolean'];
+    }
+
+    protected static function previewView(): string
+    {
+        return 'form::blocks.previews.checkbox';
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.checkbox';
     }
 }

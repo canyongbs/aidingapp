@@ -40,18 +40,9 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class TextAreaFormFieldBlock extends FormFieldBlock
 {
-    public string $preview = 'form::blocks.previews.textarea';
-
-    public ?string $icon = 'heroicon-m-bars-3-center-left';
-
     public static function type(): string
     {
         return 'text_area';
-    }
-
-    public function fields(): array
-    {
-        return [];
     }
 
     /**
@@ -73,5 +64,10 @@ class TextAreaFormFieldBlock extends FormFieldBlock
     public static function getValidationRules(SubmissibleField $field): array
     {
         return ['string', 'max:65535'];
+    }
+
+    protected static function previewView(): string
+    {
+        return 'form::blocks.previews.textarea';
     }
 }

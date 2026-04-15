@@ -40,18 +40,9 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class NumberFormFieldBlock extends FormFieldBlock
 {
-    public string $rendered = 'form::blocks.submissions.number';
-
-    public ?string $icon = 'heroicon-m-variable';
-
     public static function type(): string
     {
         return 'number';
-    }
-
-    public function fields(): array
-    {
-        return [];
     }
 
     /**
@@ -73,5 +64,10 @@ class NumberFormFieldBlock extends FormFieldBlock
     public static function getValidationRules(SubmissibleField $field): array
     {
         return ['numeric'];
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.number';
     }
 }

@@ -39,8 +39,14 @@ namespace AidingApp\Form\Actions;
 use AidingApp\Form\Models\SubmissibleField;
 use AidingApp\Form\Models\Submission;
 
-class InjectSubmissionStateIntoTipTapContent
+class InjectSubmissionStateIntoRichContent
 {
+    /**
+     * @param  array<int, mixed> $content
+     * @param  array<string, class-string> $blocks
+     *
+     * @return array<int, mixed>
+     */
     public function __invoke(Submission $submission, array $content, array $blocks): array
     {
         foreach ($content as $componentKey => $component) {
@@ -54,32 +60,35 @@ class InjectSubmissionStateIntoTipTapContent
                 continue;
             }
 
-            if (($component['type'] ?? null) !== 'tiptapBlock') {
+            if (($component['type'] ?? null) !== 'customBlock') {
                 continue;
             }
 
             $componentAttributes = $component['attrs'] ?? [];
+            $config = $componentAttributes['config'] ?? [];
+            $fieldId = $config['fieldId'] ?? null;
 
-            if (blank($componentAttributes['id'] ?? null)) {
+            if (blank($fieldId)) {
                 continue;
             }
 
-            $block = $blocks[$componentAttributes['type']] ?? null;
+            $blockType = $componentAttributes['id'] ?? null;
+            $block = $blocks[$blockType] ?? null;
 
             if (blank($block)) {
                 continue;
             }
 
             $field = $submission->fields
-                ->first(fn (SubmissibleField $field): bool => $field->getKey() === $componentAttributes['id']);
+                ->first(fn (SubmissibleField $field): bool => $field->getKey() === $fieldId);
 
             if (! $field) {
                 continue;
             }
 
-            $content[$componentKey]['attrs']['data'] = [
-                ...$component['attrs']['data'],
-                ...$block::getSubmissionState($field->pivot->response),
+            $content[$componentKey]['attrs']['config'] = [
+                ...$component['attrs']['config'],
+                ...$block::getSubmissionState($field->pivot->response), /** @phpstan-ignore property.notFound */
             ];
         }
 

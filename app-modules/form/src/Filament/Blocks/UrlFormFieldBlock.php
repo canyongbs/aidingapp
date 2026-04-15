@@ -40,20 +40,14 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class UrlFormFieldBlock extends FormFieldBlock
 {
-    public string $rendered = 'form::blocks.submissions.url';
-
-    public ?string $label = 'URL';
-
-    public ?string $icon = 'heroicon-m-link';
-
     public static function type(): string
     {
         return 'url';
     }
 
-    public function fields(): array
+    public static function getLabel(): string
     {
-        return [];
+        return 'URL';
     }
 
     /**
@@ -75,5 +69,10 @@ class UrlFormFieldBlock extends FormFieldBlock
     public static function getValidationRules(SubmissibleField $field): array
     {
         return ['url', 'max:255'];
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.url';
     }
 }

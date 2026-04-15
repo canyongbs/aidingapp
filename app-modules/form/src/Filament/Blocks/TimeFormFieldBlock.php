@@ -40,18 +40,9 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class TimeFormFieldBlock extends FormFieldBlock
 {
-    public string $rendered = 'form::blocks.submissions.time';
-
-    public ?string $icon = 'heroicon-m-clock';
-
     public static function type(): string
     {
         return 'time';
-    }
-
-    public function fields(): array
-    {
-        return [];
     }
 
     /**
@@ -65,5 +56,10 @@ class TimeFormFieldBlock extends FormFieldBlock
             'name' => $field->getKey(),
             ...($field->is_required ? ['validation' => 'required'] : []),
         ];
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.time';
     }
 }

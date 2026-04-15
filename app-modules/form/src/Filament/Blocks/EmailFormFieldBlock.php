@@ -40,18 +40,14 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class EmailFormFieldBlock extends FormFieldBlock
 {
-    public ?string $label = 'Email address';
-
-    public ?string $icon = 'heroicon-m-at-symbol';
-
     public static function type(): string
     {
         return 'email';
     }
 
-    public function fields(): array
+    public static function getLabel(): string
     {
-        return [];
+        return 'Email address';
     }
 
     /**

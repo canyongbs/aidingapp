@@ -37,30 +37,30 @@
 namespace AidingApp\Form\Filament\Blocks;
 
 use AidingApp\Form\Models\SubmissibleField;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
+use Filament\Support\Enums\Width;
 
 class RadioFormFieldBlock extends FormFieldBlock
 {
-    public string $width = '2xl';
-
-    public string $preview = 'form::blocks.previews.radio';
-
-    public string $rendered = 'form::blocks.submissions.radio';
-
-    public ?string $icon = 'heroicon-m-list-bullet';
-
     public static function type(): string
     {
         return 'radio';
     }
 
+    public static function configureEditorAction(Action $action): Action
+    {
+        return parent::configureEditorAction($action)
+            ->modalWidth(Width::TwoExtraLarge);
+    }
+
     /**
      * @return array<Component>
      */
-    public function fields(): array
+    public static function fields(): array
     {
         return [
             Repeater::make('options')
@@ -110,5 +110,15 @@ class RadioFormFieldBlock extends FormFieldBlock
             'string',
             'in:' . implode(',', $values),
         ];
+    }
+
+    protected static function previewView(): string
+    {
+        return 'form::blocks.previews.radio';
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.radio';
     }
 }

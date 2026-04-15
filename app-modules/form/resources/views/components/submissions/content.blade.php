@@ -39,17 +39,24 @@
 
 @php
     use AidingApp\Form\Actions\ResolveBlockRegistry;
-    use AidingApp\Form\Actions\InjectSubmissionStateIntoTipTapContent;
+    use AidingApp\Form\Actions\InjectSubmissionStateIntoRichContent;
+    use Filament\Forms\Components\RichEditor\RichContentRenderer;
+    use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
+    use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
     $blocks = app(ResolveBlockRegistry::class)($submission->submissible);
 
-    $content['content'] = app(InjectSubmissionStateIntoTipTapContent::class)(
-        $submission,
-        $content['content'] ?? [],
-        $blocks,
-    );
+    $content['content'] = app(InjectSubmissionStateIntoRichContent::class)($submission, $content['content'] ?? [], $blocks);
+
+    $sanitizeSubmissionHtml = function (string $html): string {
+        $config = app(HtmlSanitizerConfig::class)
+            ->allowElement('svg', ['xmlns', 'fill', 'viewBox', 'stroke-width', 'stroke', 'aria-hidden', 'class', 'data-slot'])
+            ->allowElement('path', ['fill-rule', 'clip-rule', 'd', 'stroke-linecap', 'stroke-linejoin']);
+
+        return (new HtmlSanitizer($config))->sanitize($html);
+    };
 @endphp
 
 <div class="prose max-w-none dark:prose-invert">
-    {!! tiptap_converter()->blocks($blocks)->asHTML($content) !!}
+    {!! $sanitizeSubmissionHtml( RichContentRenderer::make($content)->customBlocks(array_values($blocks))->toUnsafeHtml(),) !!}
 </div>

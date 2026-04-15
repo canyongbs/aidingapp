@@ -40,20 +40,9 @@ use AidingApp\Form\Models\SubmissibleField;
 
 class SignatureFormFieldBlock extends FormFieldBlock
 {
-    public string $preview = 'form::blocks.previews.signature';
-
-    public string $rendered = 'form::blocks.submissions.signature';
-
-    public ?string $icon = 'heroicon-m-pencil';
-
     public static function type(): string
     {
         return 'signature';
-    }
-
-    public function fields(): array
-    {
-        return [];
     }
 
     /**
@@ -67,5 +56,15 @@ class SignatureFormFieldBlock extends FormFieldBlock
             'name' => $field->getKey(),
             ...($field->is_required ? ['validation' => 'required'] : []),
         ];
+    }
+
+    protected static function previewView(): string
+    {
+        return 'form::blocks.previews.signature';
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.signature';
     }
 }

@@ -119,18 +119,23 @@ class GenerateServiceRequestForm
      */
     protected function addFieldToStep(ServiceRequestFormStep $step, array $block): void
     {
-        /** @var array<string, mixed> $attrs */
-        $attrs = $block['attrs'];
-        $attributes = collect($attrs);
+        if (($block['type'] ?? null) !== 'customBlock') {
+            return;
+        }
+
+        $config = $block['attrs']['config'] ?? [];
+
+        $fieldConfig = $config;
+        unset($fieldConfig['fieldId'], $fieldConfig['label'], $fieldConfig['isRequired']);
 
         $step->fields->push(
             (new ServiceRequestFormField())
                 ->forceFill([
-                    'id' => $attributes->pull('id'),
-                    'type' => $attributes->pull('type'),
-                    'label' => $attributes->pull('data.label'),
-                    'is_required' => $attributes->pull('data.isRequired'),
-                    'config' => $attributes->pull('data'),
+                    'id' => $config['fieldId'] ?? null,
+                    'type' => $block['attrs']['id'],
+                    'label' => $config['label'] ?? null,
+                    'is_required' => $config['isRequired'] ?? false,
+                    'config' => $fieldConfig,
                 ])
         );
     }
@@ -143,11 +148,11 @@ class GenerateServiceRequestForm
     protected function formatBlock(string $label, string $type, bool $required = true, array $data = []): array
     {
         return [
-            'type' => 'tiptapBlock',
+            'type' => 'customBlock',
             'attrs' => [
-                'id' => str($label)->slug()->toString(),
-                'type' => $type,
-                'data' => [
+                'id' => $type,
+                'config' => [
+                    'fieldId' => str($label)->slug()->toString(),
                     'label' => $label,
                     'isRequired' => $required,
                     ...$data,
