@@ -60,6 +60,7 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -197,9 +198,13 @@ class EditKnowledgeBaseItem extends EditRecord
                                     ->relationship('division', 'name')
                                     ->searchable(['name', 'code'])
                                     ->preload()
-                                    ->default(fn () => Division::count() === 1 ? Division::query()->first()?->getKey() : null)
+                                    ->afterStateHydrated(function (array $state, Set $set) {
+                                        if(empty($state)) {
+                                            $set('division', [Division::count() === 1 ? Division::query()->first()?->getKey() : null]);
+                                        }
+                                    })
                                     ->visible(fn (): bool => Division::count() > 1)
-                                    ->dehydratedWhenHidden()
+                                    ->saveRelationshipsWhenHidden()
                                     ->exists((new Division())->getTable(), (new Division())->getKeyName()),
                             ]),
                     ])
