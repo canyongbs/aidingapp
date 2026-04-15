@@ -34,7 +34,6 @@
 <script setup>
     import { computed, onMounted, ref, watch } from 'vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
     import Pagination from '../Components/Pagination.vue';
     import { consumer } from '../Services/Consumer';
@@ -126,7 +125,9 @@
                             {{ counts.total }}
                         </p>
                     </div>
-                    <span class="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-xl bg-[rgba(var(--primary-50),1)]">
+                    <span
+                        class="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-xl bg-[rgba(var(--primary-50),1)]"
+                    >
                         <svg
                             class="w-5 h-5 text-[rgba(var(--primary-500),1)]"
                             fill="none"
@@ -307,7 +308,9 @@
             >
                 <div class="overflow-x-auto rounded-t-[var(--rounding-lg)] border border-gray-200 shadow-xs">
                     <table class="w-full text-sm text-left text-gray-600">
-                        <thead class="border-b border-gray-200 bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
+                        <thead
+                            class="border-b border-gray-200 bg-gray-50 text-xs uppercase tracking-wider text-gray-500"
+                        >
                             <tr>
                                 <th scope="col" class="px-4 py-3 font-semibold w-64">Name</th>
                                 <th scope="col" class="px-4 py-3 font-semibold">Device Type &amp; Age</th>
@@ -342,11 +345,15 @@
 
                                 <td class="px-4 py-4 text-gray-600">
                                     <p class="font-medium text-gray-800">{{ item.asset?.type?.name ?? '—' }}</p>
-                                    <p v-if="item.asset?.purchase_age" class="mt-0.5 text-xs text-gray-400">{{ item.asset.purchase_age }}</p>
+                                    <p v-if="item.asset?.purchase_age" class="mt-0.5 text-xs text-gray-400">
+                                        {{ item.asset.purchase_age }}
+                                    </p>
                                 </td>
 
                                 <td class="px-4 py-4">
-                                    <span class="rounded border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-xs text-gray-500">
+                                    <span
+                                        class="rounded border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-xs text-gray-500"
+                                    >
                                         {{ serialDisplay(item.asset) }}
                                     </span>
                                 </td>
@@ -367,7 +374,10 @@
                                         v-else
                                         class="inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-800"
                                     >
-                                        <span class="h-1.5 w-1.5 flex-shrink-0 animate-pulse rounded-full bg-orange-500" aria-hidden="true"></span>
+                                        <span
+                                            class="h-1.5 w-1.5 flex-shrink-0 animate-pulse rounded-full bg-orange-500"
+                                            aria-hidden="true"
+                                        ></span>
                                         Checked Out
                                     </span>
                                 </td>
@@ -397,22 +407,30 @@
 </template>
 
 <style>
-.assets-fade-enter-active,
-.assets-fade-leave-active {
-    transition: opacity 0.16s ease, transform 0.16s ease;
-}
-.assets-fade-enter-from,
-.assets-fade-leave-to {
-    opacity: 0;
-    transform: translateY(5px);
-}
+    .assets-fade-enter-active,
+    .assets-fade-leave-active {
+        transition:
+            opacity 0.16s ease,
+            transform 0.16s ease;
+    }
+    .assets-fade-enter-from,
+    .assets-fade-leave-to {
+        opacity: 0;
+        transform: translateY(5px);
+    }
 
-@keyframes assetRowIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.asset-row {
-    animation: assetRowIn 0.2s ease both;
-    animation-delay: var(--row-delay, 0ms);
-}
+    @keyframes assetRowIn {
+        from {
+            opacity: 0;
+            transform: translateY(5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .asset-row {
+        animation: assetRowIn 0.2s ease both;
+        animation-delay: var(--row-delay, 0ms);
+    }
 </style>
