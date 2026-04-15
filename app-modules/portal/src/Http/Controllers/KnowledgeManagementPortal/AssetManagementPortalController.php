@@ -47,7 +47,6 @@ class AssetManagementPortalController extends Controller
         $contact = auth('contact')->user();
 
         $filter = $request->input('filter', 'all');
-        $search = $request->input('search', '');
 
         $query = $contact->assetCheckOuts()
             ->with([
@@ -59,23 +58,13 @@ class AssetManagementPortalController extends Controller
 
         $totalCount = (clone $query)->count();
         $checkedOutCount = (clone $query)->whereNull('asset_check_in_id')->count();
-        $availableCount = (clone $query)->whereNotNull('asset_check_in_id')->count();
+        $returnedCount = (clone $query)->whereNotNull('asset_check_in_id')->count();
 
         $filteredQuery = match ($filter) {
             'checked_out' => (clone $query)->whereNull('asset_check_in_id'),
-            'available' => (clone $query)->whereNotNull('asset_check_in_id'),
+            'returned' => (clone $query)->whereNotNull('asset_check_in_id'),
             default => $query,
         };
-
-        if ($search !== '') {
-            $filteredQuery->whereHas('asset', function ($q) use ($search) {
-                $q->where('name', 'like', '%' . $search . '%')
-                    ->orWhere('serial_number', 'like', '%' . $search . '%')
-                    ->orWhereHas('type', function ($q) use ($search) {
-                        $q->where('name', 'like', '%' . $search . '%');
-                    });
-            });
-        }
 
         $paginator = $filteredQuery
             ->orderByDesc('checked_out_at')
@@ -84,7 +73,7 @@ class AssetManagementPortalController extends Controller
         $items = $paginator->getCollection()->map(function ($checkOut) {
             return [
                 'id' => $checkOut->getKey(),
-                'status' => $checkOut->asset_check_in_id ? 'available' : 'checked_out',
+                'status' => $checkOut->asset_check_in_id ? 'returned' : 'checked_out',
                 'last_activity' => $checkOut->asset_check_in_id ? 'Return' : 'Checkout',
                 'asset' => $checkOut->asset ? [
                     'id' => $checkOut->asset->getKey(),
@@ -129,7 +118,7 @@ class AssetManagementPortalController extends Controller
             'counts' => [
                 'total' => $totalCount,
                 'checked_out' => $checkedOutCount,
-                'available' => $availableCount,
+                'returned' => $returnedCount,
             ],
         ]);
     }

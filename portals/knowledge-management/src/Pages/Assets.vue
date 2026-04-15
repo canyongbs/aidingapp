@@ -49,11 +49,10 @@
     const { get } = consumer();
 
     const activeFilter = ref('all');
-    const searchQuery = ref('');
     const loading = ref(true);
 
     const assets = ref([]);
-    const counts = ref({ total: 0, checked_out: 0, available: 0 });
+    const counts = ref({ total: 0, checked_out: 0, returned: 0 });
 
     const currentPage = ref(1);
     const lastPage = ref(1);
@@ -62,9 +61,9 @@
     const totalItems = ref(0);
 
     const tabs = computed(() => [
-        { key: 'all', label: 'All Assets' },
-        { key: 'available', label: 'Available' },
+        { key: 'all', label: 'All' },
         { key: 'checked_out', label: 'Checked Out' },
+        { key: 'returned', label: 'Returned' },
     ]);
 
     async function fetchAssets(page = 1) {
@@ -74,14 +73,13 @@
             const response = await get(`${props.apiUrl}/assets`, {
                 filter: activeFilter.value,
                 page,
-                ...(searchQuery.value.trim() ? { search: searchQuery.value.trim() } : {}),
             });
 
             const envelope = response.data;
             const paged = envelope.data;
 
             assets.value = paged.data ?? [];
-            counts.value = envelope.counts ?? { total: 0, checked_out: 0, available: 0 };
+            counts.value = envelope.counts ?? { total: 0, checked_out: 0, returned: 0 };
 
             currentPage.value = paged.current_page ?? 1;
             lastPage.value = paged.last_page ?? 1;
@@ -98,12 +96,6 @@
 
     watch(activeFilter, () => fetchAssets(1));
 
-    const searchDebounce = ref(null);
-    watch(searchQuery, () => {
-        clearTimeout(searchDebounce.value);
-        searchDebounce.value = setTimeout(() => fetchAssets(1), 400);
-    });
-
     onMounted(() => fetchAssets(1));
 
     function truncate(str, n = 30) {
@@ -112,8 +104,8 @@
     }
 
     function serialDisplay(asset) {
-        const s = asset?.serial_number;
-        return s && String(s).trim() ? String(s).trim() : 'N/A';
+        const serial = asset?.serial_number;
+        return serial && String(serial).trim() ? String(serial).trim() : 'N/A';
     }
 </script>
 
@@ -129,7 +121,7 @@
             <div class="p-5 bg-white rounded-[var(--rounding-lg)] border border-gray-200 shadow-xs">
                 <div class="flex items-start justify-between gap-3">
                     <div>
-                        <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">All Assets</p>
+                        <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Total</p>
                         <p class="text-4xl font-bold leading-none tabular-nums text-gray-800">
                             {{ counts.total }}
                         </p>
@@ -147,33 +139,6 @@
                                 stroke-linecap="round"
                                 stroke-linejoin="round"
                                 d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-                            />
-                        </svg>
-                    </span>
-                </div>
-            </div>
-
-            <div class="p-5 bg-white rounded-[var(--rounding-lg)] border border-gray-200 shadow-xs">
-                <div class="flex items-start justify-between gap-3">
-                    <div>
-                        <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Available</p>
-                        <p class="text-4xl font-bold leading-none tabular-nums text-gray-800">
-                            {{ counts.available }}
-                        </p>
-                    </div>
-                    <span class="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-xl bg-green-50">
-                        <svg
-                            class="w-5 h-5 text-green-500"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                            stroke-width="1.8"
-                            aria-hidden="true"
-                        >
-                            <path
-                                stroke-linecap="round"
-                                stroke-linejoin="round"
-                                d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
                             />
                         </svg>
                     </span>
@@ -206,52 +171,56 @@
                     </span>
                 </div>
             </div>
+
+            <div class="p-5 bg-white rounded-[var(--rounding-lg)] border border-gray-200 shadow-xs">
+                <div class="flex items-start justify-between gap-3">
+                    <div>
+                        <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Returned</p>
+                        <p class="text-4xl font-bold leading-none tabular-nums text-gray-800">
+                            {{ counts.returned }}
+                        </p>
+                    </div>
+                    <span class="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-xl bg-green-50">
+                        <svg
+                            class="w-5 h-5 text-green-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                            stroke-width="1.8"
+                            aria-hidden="true"
+                        >
+                            <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
+                            />
+                        </svg>
+                    </span>
+                </div>
+            </div>
         </div>
 
-        <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-2">
-            <div class="border-b border-gray-200">
-                <ul class="flex flex-wrap -mb-px" role="tablist" aria-label="Asset filter tabs">
-                    <li v-for="tab in tabs" :key="tab.key" role="presentation">
-                        <button
-                            type="button"
-                            role="tab"
-                            :id="`assets-tab-${tab.key}`"
-                            :aria-selected="activeFilter === tab.key"
-                            :aria-controls="`assets-panel-${tab.key}`"
-                            @click="activeFilter = tab.key"
-                            :class="[
-                                'inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
-                                activeFilter === tab.key
-                                    ? 'border-[rgba(var(--primary-500),1)] text-[rgba(var(--primary-600),1)]'
-                                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
-                            ]"
-                        >
-                            {{ tab.label }}
-                        </button>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="relative w-full sm:w-72 pb-1">
-                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                    <svg class="w-4 h-4 text-gray-400" fill="none" viewBox="0 0 20 20" aria-hidden="true">
-                        <path
-                            stroke="currentColor"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            stroke-width="2"
-                            d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
-                        />
-                    </svg>
-                </div>
-                <input
-                    v-model="searchQuery"
-                    type="search"
-                    aria-label="Search assets by name, type, or serial number"
-                    placeholder="Search assets…"
-                    class="block w-full py-2 pl-10 pr-4 text-sm text-gray-900 bg-white border border-gray-300 rounded-[var(--rounding)] transition focus:outline-none focus:ring-2 focus:ring-[rgba(var(--primary-500),1)] focus:border-[rgba(var(--primary-500),1)]"
-                />
-            </div>
+        <div class="border-b border-gray-200 mb-2">
+            <ul class="flex flex-wrap -mb-px" role="tablist" aria-label="Asset filter tabs">
+                <li v-for="tab in tabs" :key="tab.key" role="presentation">
+                    <button
+                        type="button"
+                        role="tab"
+                        :id="`assets-tab-${tab.key}`"
+                        :aria-selected="activeFilter === tab.key"
+                        :aria-controls="`assets-panel-${tab.key}`"
+                        @click="activeFilter = tab.key"
+                        :class="[
+                            'inline-flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap',
+                            activeFilter === tab.key
+                                ? 'border-[rgba(var(--primary-500),1)] text-[rgba(var(--primary-600),1)]'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                        ]"
+                    >
+                        {{ tab.label }}
+                    </button>
+                </li>
+            </ul>
         </div>
 
         <Transition name="assets-fade" mode="out-in">
@@ -315,14 +284,12 @@
                 </span>
                 <div>
                     <p class="text-base font-semibold text-gray-700">
-                        <template v-if="searchQuery">No results for "{{ searchQuery }}"</template>
-                        <template v-else-if="activeFilter === 'available'">No available assets</template>
+                        <template v-if="activeFilter === 'returned'">No returned assets</template>
                         <template v-else-if="activeFilter === 'checked_out'">No assets currently checked out</template>
                         <template v-else>No assets found</template>
                     </p>
                     <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">
-                        <template v-if="searchQuery">Try a different name, type, or serial number.</template>
-                        <template v-else-if="activeFilter === 'available'">No assets have been returned yet.</template>
+                        <template v-if="activeFilter === 'returned'">No assets have been returned yet.</template>
                         <template v-else-if="activeFilter === 'checked_out'">You don't currently have any assets checked out.</template>
                         <template v-else>No assets have been assigned to your account.</template>
                     </p>
@@ -390,11 +357,11 @@
 
                                 <td class="px-4 py-4">
                                     <span
-                                        v-if="item.status === 'available'"
+                                        v-if="item.status === 'returned'"
                                         class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-800"
                                     >
                                         <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-green-500" aria-hidden="true"></span>
-                                        Available
+                                        Returned
                                     </span>
                                     <span
                                         v-else
