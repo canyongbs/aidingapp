@@ -217,21 +217,12 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     }
                 }
 
-                // {tenant}-sr+{sr_number} — SR reply path with plus-addressed SR number
-                if (preg_match('/^(.+)-sr\+(.+)$/', $localPartLower, $matches)) {
+                // {tenant}-sr or {tenant}-sr+{sr_number} — SR reply path
+                if (preg_match('/^(.+)-sr(?:\+(.+))?$/', $localPartLower, $matches)) {
                     $tenant = $this->resolveTenant($matches[1]);
 
                     if ($tenant) {
-                        return ['type' => 'service_request_reply', 'tenant' => $tenant, 'sr_number' => $matches[2]];
-                    }
-                }
-
-                // {tenant}-sr — SR reply path (header/body matching)
-                if (preg_match('/^(.+)-sr$/', $localPartLower, $matches)) {
-                    $tenant = $this->resolveTenant($matches[1]);
-
-                    if ($tenant) {
-                        return ['type' => 'service_request_reply', 'tenant' => $tenant];
+                        return ['type' => 'service_request_reply', 'tenant' => $tenant, ...isset($matches[2]) ? ['sr_number' => $matches[2]] : []];
                     }
                 }
 
