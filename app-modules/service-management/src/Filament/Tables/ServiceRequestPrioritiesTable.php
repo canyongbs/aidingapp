@@ -48,22 +48,19 @@ class ServiceRequestPrioritiesTable
     {
         return $table
             ->query(fn (): Builder => ServiceRequestPriority::query()->whereNull('sla_id'))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->whereNull('sla_id'))
             ->columns([
-                TextColumn::make('type.name')
-                    ->label('Type')
+                TextColumn::make('name')
+                    ->label('Name')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('order')
                     ->label('Priority Order')
                     ->sortable(),
-                TextColumn::make('name')
-                    ->label('Name')
-                    ->searchable()
-                    ->sortable(),
             ])
             ->defaultGroup(
                 Group::make('type.name')
-                    ->label('Service Request Type')
+                    ->label('')
                     ->collapsible(),
             );
     }
