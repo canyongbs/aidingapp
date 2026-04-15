@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -72,7 +72,7 @@ test('ListIncidentUpdates is gated with proper access control', function () {
             IncidentUpdateResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('incident_update.view-any');
+    $user->givePermissionTo('advisory_update.view-any');
 
     actingAs($user)
         ->get(
@@ -92,24 +92,24 @@ test('ListIncidentUpdates is gated with proper feature access control', function
 
     actingAs($user);
 
-    //Service management false, incident management false, no incident permissions
+    //Service management false, advisories false, no advisory permissions
     get(IncidentUpdateResource::getUrl())->assertForbidden();
 
-    //Service management true, incident management false, no incident permissions
+    //Service management true, advisories false, no advisory permissions
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
     get(IncidentUpdateResource::getUrl())->assertForbidden();
 
-    //Service management false, incident management true, no incident permissions
+    //Service management false, advisories true, no advisory permissions
     $settings->data->addons->serviceManagement = false;
     $settings->data->addons->incidentManagement = true;
     $settings->save();
 
     get(IncidentUpdateResource::getUrl())->assertForbidden();
 
-    //Service management false, incident management false, incident permissions
-    $user->givePermissionTo('incident_update.view-any');
+    //Service management false, advisories false, advisory permissions
+    $user->givePermissionTo('advisory_update.view-any');
 
     $settings->data->addons->serviceManagement = false;
     $settings->data->addons->incidentManagement = false;
@@ -117,21 +117,21 @@ test('ListIncidentUpdates is gated with proper feature access control', function
 
     get(IncidentUpdateResource::getUrl())->assertForbidden();
 
-    //Service management true, incident management false, incident permissions
+    //Service management true, advisories false, advisory permissions
     $settings->data->addons->serviceManagement = true;
     $settings->data->addons->incidentManagement = false;
     $settings->save();
 
     get(IncidentUpdateResource::getUrl())->assertForbidden();
 
-    //Service management false, incident management true, incident permissions
+    //Service management false, advisories true, advisory permissions
     $settings->data->addons->serviceManagement = false;
     $settings->data->addons->incidentManagement = true;
     $settings->save();
 
     get(IncidentUpdateResource::getUrl())->assertForbidden();
 
-    //Service management true, incident management true, incident permissions
+    //Service management true, advisories true, advisory permissions
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 

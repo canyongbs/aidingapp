@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -55,8 +55,8 @@ enum PermissionDescription: string
     case Engagement = 'This permission group enables the display of the Timeline feature in various navigation groups. Permission options include view timelines.';
     case EngagementFile = 'This permission group enables the display and management of the Engagement File feature in the primary navigation group Engagement Features. Permission options include create, view, update, and delete engagement files. Note: Users cannot access this feature.';
     case EngagementResponse = 'This permission group enables the display of the Engagement Response feature. Permission options include view engagement responses. Note: Users cannot access this feature.';
-    case Incident = 'This permission group enables the display and management of the Incident feature in the primary navigtion group Service Management. Permission options include create, view, update, and delete incidents.';
-    case IncidentUpdate = 'This permission group enables the display and management of the Incident Update feature in the tertiary navigation group View Incident. Permission options include create, view, update, and delete incident updates.';
+    case Advisory = 'This permission group enables the display and management of the Advisory feature in the primary navigation group Service Management. Permission options include create, view, update, and delete advisories.';
+    case AdvisoryUpdate = 'This permission group enables the display and management of the Advisory Update feature in the tertiary navigation group View Advisory. Permission options include create, view, update, and delete advisory updates.';
     case KnowledgeBaseItem = 'This permission group enables the display and management of the Knowledge Base Item feature in the primary navigation group Service Management. Permission options include create, view, update, and delete knowledge base items.';
     case License = 'This permission group enables the management of the License feature. Permission options include bulk assigning licesnes.';
     case MaintenanceActivity = 'This permission group enables the display and management of the Maintenance Activity feature in the tertiary navigation group View Asset. Permission options include create, view, and update maintenance activity.';

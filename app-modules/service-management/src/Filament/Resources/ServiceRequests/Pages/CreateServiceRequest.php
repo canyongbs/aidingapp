@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -41,6 +41,7 @@ use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
@@ -49,6 +50,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
+use App\Features\ServiceRequestCategoryRenameFeature;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -104,7 +107,7 @@ class CreateServiceRequest extends CreateRecord
                                     ->exists((new ServiceRequestStatus())->getTable(), 'id')
                                     ->columnSpan(fn (Get $get): int => filled($get('type_id')) ? 2 : 3),
                                 Select::make('type_id')
-                                    ->options(ServiceRequestType::query()->withoutArchived()->when(! auth()->user()->isSuperAdmin(), function (Builder $query) { /** @phpstan-ignore method.notFound */
+                                    ->options(ServiceRequestType::query()->withoutArchived()->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                         $query->whereHas('managerUsers', function (Builder $query): void {
                                             $query->where('users.id', auth()->user()->getKey());
                                         })->orWhereHas('managerTeams', function (Builder $query): void {
@@ -113,9 +116,19 @@ class CreateServiceRequest extends CreateRecord
                                     })
                                         ->pluck('name', 'id'))
                                     ->rule(new ManagedServiceRequestType())
-                                    ->afterStateUpdated(function (Set $set, CreateServiceRequest $livewire) {
+                                    ->afterStateUpdated(function (?string $state, Set $set, CreateServiceRequest $livewire) {
                                         $set('priority_id', null);
                                         $livewire->form->getComponent('dynamicTypeFields')?->getChildSchema()->fill();
+
+                                        if ($state) {
+                                            $type = ServiceRequestType::find($state);
+                                            $defaultCategoryColumn = ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category';
+                                            $categoryField = ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category';
+
+                                            if ($type?->$defaultCategoryColumn) { /** @phpstan-ignore property.notFound */
+                                                $set($categoryField, $type->$defaultCategoryColumn->value); /** @phpstan-ignore property.notFound */
+                                            }
+                                        }
                                     })
                                     ->label('Type')
                                     ->required()
@@ -134,6 +147,13 @@ class CreateServiceRequest extends CreateRecord
                                     ->visible(fn (Get $get): bool => filled($get('type_id')))
                                     ->columnSpan(2),
                             ]),
+                        Radio::make(ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category')
+                            ->label(ServiceRequestCategoryRenameFeature::active() ? 'Category' : 'Issue Category')
+                            ->options(ServiceRequestCategory::class)
+                            ->enum(ServiceRequestCategory::class)
+                            ->inline()
+                            ->inlineLabel(false)
+                            ->required(),
                         TextInput::make('title')
                             ->required()
                             ->string()

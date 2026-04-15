@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -37,57 +37,65 @@
 namespace AidingApp\Form\Filament\Blocks;
 
 use AidingApp\Form\Models\SubmissibleField;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\RichEditor\RichContentCustomBlock;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Component;
-use FilamentTiptapEditor\TiptapBlock;
 
-abstract class FormFieldBlock extends TiptapBlock
+abstract class FormFieldBlock extends RichContentCustomBlock
 {
-    public string $preview = 'form::blocks.previews.default';
-
-    public string $rendered = 'form::blocks.submissions.default';
-
-    public ?string $icon = 'heroicon-m-cube';
-
     public static bool $internal = false;
 
-    /**
-     * @return array<Component>
-     */
-    public function getFormSchema(): array
+    abstract public static function type(): string;
+
+    public static function getId(): string
     {
-        return [
-            TextInput::make('label')
-                ->required()
-                ->string()
-                ->maxLength(255),
-            Checkbox::make('isRequired')
-                ->label('Required'),
-            ...$this->fields(),
-        ];
+        return static::type();
     }
 
-    public function getLabel(): string
+    public static function getLabel(): string
     {
-        return $this->label ?? (string) str(static::type())
+        return (string) str(static::type())
             ->afterLast('.')
             ->kebab()
             ->replace(['-', '_'], ' ')
             ->ucfirst();
     }
 
-    public function getIdentifier(): string
+    public static function configureEditorAction(Action $action): Action
     {
-        return static::type();
+        return $action->schema([
+            Hidden::make('fieldId'),
+            TextInput::make('label')
+                ->required()
+                ->string()
+                ->maxLength(255),
+            Checkbox::make('isRequired')
+                ->label('Required'),
+            ...static::fields(),
+        ]);
     }
 
-    public function fields(): array
+    public static function getPreviewLabel(array $config): string
+    {
+        return $config['label'] ?? static::getLabel();
+    }
+
+    public static function toPreviewHtml(array $config): ?string
+    {
+        return view(static::previewView(), $config)->render();
+    }
+
+    public static function toHtml(array $config, array $data): ?string
+    {
+        return view(static::renderedView(), $config)->render();
+    }
+
+    public static function fields(): array
     {
         return [];
     }
-
-    abstract public static function type(): string;
 
     abstract public static function getFormKitSchema(SubmissibleField $field): array;
 
@@ -101,5 +109,15 @@ abstract class FormFieldBlock extends TiptapBlock
         return [
             'response' => $response,
         ];
+    }
+
+    protected static function previewView(): string
+    {
+        return 'form::blocks.previews.default';
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.default';
     }
 }

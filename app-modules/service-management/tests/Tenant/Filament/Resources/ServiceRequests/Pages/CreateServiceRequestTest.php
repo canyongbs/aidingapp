@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -37,6 +37,7 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\CreateServiceRequest;
@@ -47,6 +48,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestRequestFactory;
 use AidingApp\Team\Models\Team;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\Select;
@@ -59,6 +61,11 @@ use function Pest\Laravel\travelTo;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
+
+// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
+beforeEach(function () {
+    ServiceRequestCategoryRenameFeature::activate();
+});
 
 test('A successful action on the CreateServiceRequest page', function () {
     asSuperAdmin()
@@ -99,7 +106,9 @@ test('A successful action on the CreateServiceRequest page', function () {
         ->and($serviceRequest->status->id)
         ->toEqual($request->get('status_id'))
         ->and($serviceRequest->priority->id)
-        ->toEqual($request->get('priority_id'));
+        ->toEqual($request->get('priority_id'))
+        ->and($serviceRequest->category)
+        ->toEqual($request->get('category'));
 });
 
 test('CreateServiceRequest requires valid data', function ($data, $errors, $setup = null) {
@@ -138,6 +147,22 @@ test('CreateServiceRequest requires valid data', function ($data, $errors, $setu
         'close_details is not a string' => [CreateServiceRequestRequestFactory::new()->state(['close_details' => 1]), ['close_details' => 'string']],
     ]
 );
+
+test('type afterStateUpdated sets category from default_category', function () {
+    asSuperAdmin();
+
+    $serviceRequestType = ServiceRequestType::factory()->create([
+        'default_category' => ServiceRequestCategory::Incident,
+    ]);
+
+    livewire(CreateServiceRequest::class)
+        ->fillForm([
+            'type_id' => $serviceRequestType->getKey(),
+        ])
+        ->assertFormSet([
+            'category' => ServiceRequestCategory::Incident,
+        ]);
+});
 
 // Permission Tests
 

@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -58,56 +58,56 @@ class IncidentPolicy
     public function viewAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'incident.view-any',
-            denyResponse: 'You do not have permission to view any incidents.'
+            abilities: 'advisory.view-any',
+            denyResponse: 'You do not have permission to view any advisories.'
         );
     }
 
     public function view(Authenticatable $authenticatable, Incident $incident): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["incident.{$incident->getKey()}.view"],
-            denyResponse: 'You do not have permission to view this incident.'
+            abilities: ['advisory.*.view'],
+            denyResponse: 'You do not have permission to view this advisory.'
         );
     }
 
     public function create(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
-            abilities: 'incident.create',
-            denyResponse: 'You do not have permission to create incidents.'
+            abilities: 'advisory.create',
+            denyResponse: 'You do not have permission to create advisories.'
         );
     }
 
     public function update(Authenticatable $authenticatable, Incident $incident): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["incident.{$incident->getKey()}.update"],
-            denyResponse: 'You do not have permission to update this incident.'
+            abilities: ['advisory.*.update'],
+            denyResponse: 'You do not have permission to update this advisory.'
         );
     }
 
     public function delete(Authenticatable $authenticatable, Incident $incident): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["incident.{$incident->getKey()}.delete"],
-            denyResponse: 'You do not have permission to delete this incident.'
+            abilities: ['advisory.*.delete'],
+            denyResponse: 'You do not have permission to delete this advisory.'
         );
     }
 
     public function restore(Authenticatable $authenticatable, Incident $incident): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["incident.{$incident->getKey()}.restore"],
-            denyResponse: 'You do not have permission to restore this incident.'
+            abilities: ['advisory.*.restore'],
+            denyResponse: 'You do not have permission to restore this advisory.'
         );
     }
 
     public function forceDelete(Authenticatable $authenticatable, Incident $incident): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["incident.{$incident->getKey()}.force-delete"],
-            denyResponse: 'You do not have permission to permanently delete this incident.'
+            abilities: ['advisory.*.force-delete'],
+            denyResponse: 'You do not have permission to permanently delete this advisory.'
         );
     }
 

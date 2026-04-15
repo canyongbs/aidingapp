@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -38,9 +38,11 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeFactory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
 use AidingApp\Team\Models\Team;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
@@ -77,6 +79,8 @@ class ServiceRequestType extends BaseModel implements Auditable
         'has_enabled_nps',
         'description',
         'icon',
+        'default_issue_category',
+        'default_category',
         'assignment_type',
         'is_managers_service_request_created_email_enabled',
         'is_managers_service_request_created_notification_enabled',
@@ -122,50 +126,6 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_ai_resolution_enabled',
     ];
 
-    protected $casts = [
-        'has_enabled_feedback_collection' => 'boolean',
-        'has_enabled_csat' => 'boolean',
-        'has_enabled_nps' => 'boolean',
-        'assignment_type' => ServiceRequestTypeAssignmentTypes::class,
-        'is_managers_service_request_created_email_enabled' => 'boolean',
-        'is_managers_service_request_created_notification_enabled' => 'boolean',
-        'is_managers_service_request_assigned_email_enabled' => 'boolean',
-        'is_managers_service_request_assigned_notification_enabled' => 'boolean',
-        'is_managers_service_request_closed_email_enabled' => 'boolean',
-        'is_managers_service_request_closed_notification_enabled' => 'boolean',
-        'is_auditors_service_request_created_email_enabled' => 'boolean',
-        'is_auditors_service_request_created_notification_enabled' => 'boolean',
-        'is_auditors_service_request_assigned_email_enabled' => 'boolean',
-        'is_auditors_service_request_assigned_notification_enabled' => 'boolean',
-        'is_auditors_service_request_closed_email_enabled' => 'boolean',
-        'is_auditors_service_request_closed_notification_enabled' => 'boolean',
-        'is_managers_service_request_update_email_enabled' => 'boolean',
-        'is_managers_service_request_update_notification_enabled' => 'boolean',
-        'is_managers_service_request_status_change_email_enabled' => 'boolean',
-        'is_managers_service_request_status_change_notification_enabled' => 'boolean',
-        'is_auditors_service_request_update_email_enabled' => 'boolean',
-        'is_auditors_service_request_update_notification_enabled' => 'boolean',
-        'is_auditors_service_request_status_change_email_enabled' => 'boolean',
-        'is_auditors_service_request_status_change_notification_enabled' => 'boolean',
-        'is_customers_service_request_created_email_enabled' => 'boolean',
-        'is_customers_service_request_created_notification_enabled' => 'boolean',
-        'is_customers_service_request_assigned_email_enabled' => 'boolean',
-        'is_customers_service_request_assigned_notification_enabled' => 'boolean',
-        'is_customers_service_request_update_email_enabled' => 'boolean',
-        'is_customers_service_request_update_notification_enabled' => 'boolean',
-        'is_customers_service_request_status_change_email_enabled' => 'boolean',
-        'is_customers_service_request_status_change_notification_enabled' => 'boolean',
-        'is_customers_service_request_closed_email_enabled' => 'boolean',
-        'is_customers_service_request_closed_notification_enabled' => 'boolean',
-        'is_customers_survey_response_email_enabled' => 'boolean',
-        'is_email_automatic_creation_enabled' => 'boolean',
-        'is_email_automatic_creation_contact_create_enabled' => 'boolean',
-        'is_reminders_enabled' => 'boolean',
-        'sort' => 'integer',
-        'is_ai_clarification_enabled' => 'boolean',
-        'is_ai_resolution_enabled' => 'boolean',
-    ];
-
     public function serviceRequests(): HasManyThrough
     {
         return $this->through('priorities')->has('serviceRequests');
@@ -184,7 +144,7 @@ class ServiceRequestType extends BaseModel implements Auditable
      */
     public function form(): HasOne
     {
-        return $this->hasOne(ServiceRequestForm::class, 'service_request_type_id') /** @phpstan-ignore method.notFound */
+        return $this->hasOne(ServiceRequestForm::class, 'service_request_type_id')
             ->withoutArchived();
     }
 
@@ -294,6 +254,57 @@ class ServiceRequestType extends BaseModel implements Auditable
     public function category(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestTypeCategory::class, 'category_id');
+    }
+
+    /**
+     * TODO: ServiceRequestCategoryRenameFeature Cleanup - After ServiceRequestCategoryRenameFeature is removed: rename 'default_category' cast back to $casts property and remove 'default_issue_category' from $fillable.
+     */
+    protected function casts(): array
+    {
+        return [
+            'has_enabled_feedback_collection' => 'boolean',
+            'has_enabled_csat' => 'boolean',
+            'has_enabled_nps' => 'boolean',
+            (ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category') => ServiceRequestCategory::class,
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::class,
+            'is_managers_service_request_created_email_enabled' => 'boolean',
+            'is_managers_service_request_created_notification_enabled' => 'boolean',
+            'is_managers_service_request_assigned_email_enabled' => 'boolean',
+            'is_managers_service_request_assigned_notification_enabled' => 'boolean',
+            'is_managers_service_request_closed_email_enabled' => 'boolean',
+            'is_managers_service_request_closed_notification_enabled' => 'boolean',
+            'is_auditors_service_request_created_email_enabled' => 'boolean',
+            'is_auditors_service_request_created_notification_enabled' => 'boolean',
+            'is_auditors_service_request_assigned_email_enabled' => 'boolean',
+            'is_auditors_service_request_assigned_notification_enabled' => 'boolean',
+            'is_auditors_service_request_closed_email_enabled' => 'boolean',
+            'is_auditors_service_request_closed_notification_enabled' => 'boolean',
+            'is_managers_service_request_update_email_enabled' => 'boolean',
+            'is_managers_service_request_update_notification_enabled' => 'boolean',
+            'is_managers_service_request_status_change_email_enabled' => 'boolean',
+            'is_managers_service_request_status_change_notification_enabled' => 'boolean',
+            'is_auditors_service_request_update_email_enabled' => 'boolean',
+            'is_auditors_service_request_update_notification_enabled' => 'boolean',
+            'is_auditors_service_request_status_change_email_enabled' => 'boolean',
+            'is_auditors_service_request_status_change_notification_enabled' => 'boolean',
+            'is_customers_service_request_created_email_enabled' => 'boolean',
+            'is_customers_service_request_created_notification_enabled' => 'boolean',
+            'is_customers_service_request_assigned_email_enabled' => 'boolean',
+            'is_customers_service_request_assigned_notification_enabled' => 'boolean',
+            'is_customers_service_request_update_email_enabled' => 'boolean',
+            'is_customers_service_request_update_notification_enabled' => 'boolean',
+            'is_customers_service_request_status_change_email_enabled' => 'boolean',
+            'is_customers_service_request_status_change_notification_enabled' => 'boolean',
+            'is_customers_service_request_closed_email_enabled' => 'boolean',
+            'is_customers_service_request_closed_notification_enabled' => 'boolean',
+            'is_customers_survey_response_email_enabled' => 'boolean',
+            'is_email_automatic_creation_enabled' => 'boolean',
+            'is_email_automatic_creation_contact_create_enabled' => 'boolean',
+            'is_reminders_enabled' => 'boolean',
+            'sort' => 'integer',
+            'is_ai_clarification_enabled' => 'boolean',
+            'is_ai_resolution_enabled' => 'boolean',
+        ];
     }
 
     protected function serializeDate(DateTimeInterface $date): string

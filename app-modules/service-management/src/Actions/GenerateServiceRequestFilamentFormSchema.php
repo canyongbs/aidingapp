@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -109,7 +109,7 @@ class GenerateServiceRequestFilamentFormSchema
                 'paragraph' => $this->renderParagraph($blocks, $component, $fields),
                 'small' => $this->renderSmall($blocks, $component, $fields),
                 'text' => null, // Handled by parent components
-                'tiptapBlock' => $this->renderTiptapBlock($blocks, $component, $fields),
+                'customBlock' => $this->renderCustomBlock($blocks, $component, $fields),
                 default => null,
             };
 
@@ -130,14 +130,9 @@ class GenerateServiceRequestFilamentFormSchema
      */
     public function grid(array $blocks, array $component, ?Collection $fields): array
     {
-        $columns = match ($component['attrs']['type'] ?? null) {
-            'asymetric-left-thirds' => ['md' => 3],
-            'asymetric-right-thirds' => ['md' => 3],
-            'asymetric-left-fourths' => ['md' => 4],
-            'asymetric-right-fourths' => ['md' => 4],
-            'fixed', 'responsive' => ['md' => $component['attrs']['cols'] ?? 2],
-            default => ['md' => 2],
-        };
+        $dataCols = (int) ($component['attrs']['data-cols'] ?? 2);
+
+        $columns = ['md' => $dataCols];
 
         return [
             Grid::make($columns)
@@ -150,10 +145,11 @@ class GenerateServiceRequestFilamentFormSchema
      * @param  array<string, mixed>  $component
      * @param  Collection<string, SubmissibleField>|null  $fields
      */
-    protected function renderTiptapBlock(array $blocks, array $component, ?Collection $fields): ?Component
+    protected function renderCustomBlock(array $blocks, array $component, ?Collection $fields): ?Component
     {
-        $fieldId = $component['attrs']['id'] ?? null;
-        $blockType = $component['attrs']['type'] ?? null;
+        $blockType = $component['attrs']['id'] ?? null;
+        $config = $component['attrs']['config'] ?? [];
+        $fieldId = $config['fieldId'] ?? null;
 
         if (! $fieldId || ! $blockType) {
             return null;

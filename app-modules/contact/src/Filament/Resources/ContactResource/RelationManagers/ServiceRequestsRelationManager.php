@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -110,9 +110,9 @@ class ServiceRequestsRelationManager extends RelationManager
                     ->schema([
                         Select::make('type_id')
                             ->options(
-                                fn (?ServiceRequest $record) => ServiceRequestType::query() // @phpstan-ignore method.notFound
+                                fn (?ServiceRequest $record) => ServiceRequestType::query()
                                     ->where(
-                                        fn (Builder $query) => $query // @phpstan-ignore method.notFound
+                                        fn (Builder $query) => $query
                                             ->withoutArchived()
                                             ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                                 $query->where(function (Builder $query) {
@@ -239,11 +239,13 @@ class ServiceRequestsRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->modalHeading('Create new service request')
+                    ->slideOver()
                     ->using(fn (array $data): Model => $this->handleRecordCreation($data)),
             ])
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
+                    ->slideOver()
                     ->mutateRecordDataUsing(function (array $data, $record) {
                         $data['type_id'] = $record?->priority?->type_id;
 

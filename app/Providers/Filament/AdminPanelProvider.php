@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -38,9 +38,11 @@ namespace App\Providers\Filament;
 
 use AidingApp\Authorization\Filament\Pages\Auth\Login;
 use AidingApp\Theme\Settings\ThemeSettings;
+use App\Filament\Clusters\ProfileSettings;
 use App\Filament\Pages\Dashboard;
-use App\Filament\Pages\EditProfile;
 use App\Filament\Pages\ProductHealth;
+use App\Health\Checks\AzureCredentialsExpiringCheck;
+use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Tenant;
 use App\Multitenancy\Http\Middleware\NeedsTenant;
 use Filament\Actions\Action;
@@ -51,21 +53,28 @@ use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Infolists\Components\Entry;
+use Filament\Navigation\MenuItem;
 use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Enums\Width;
 use Filament\Tables\Columns\Column;
+use Filament\View\PanelsRenderHook;
 use FilamentTiptapEditor\TiptapEditor;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
 use ShuvroRoy\FilamentSpatieLaravelHealth\FilamentSpatieLaravelHealthPlugin;
+use Spatie\Health\Enums\Status;
 use Spatie\Multitenancy\Http\Middleware\EnsureValidTenantSession;
 
 class AdminPanelProvider extends PanelProvider
@@ -186,7 +195,10 @@ class AdminPanelProvider extends PanelProvider
                 FilamentFullCalendarPlugin::make(),
             ])
             ->userMenuItems([
-                'profile' => fn (Action $action) => $action->url(fn () => EditProfile::getUrl()),
+                MenuItem::make()
+                    ->label('Profile Settings')
+                    ->url(fn () => ProfileSettings::getUrl())
+                    ->icon('heroicon-s-cog-6-tooth'),
                 Action::make('about')
                     ->label('About')
                     ->modalHeading('Aiding App® by Canyon GBS')
@@ -196,6 +208,24 @@ class AdminPanelProvider extends PanelProvider
                     ->modalWidth(Width::Small)
                     ->icon('heroicon-s-information-circle'),
             ])
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_AFTER,
+                function (): ?Htmlable {
+                    $showBanner = Cache::remember('azure_credentials_expiring', now()->addDay(), function () {
+                        $credentialsCheck = HealthCheckResultHistoryItem::where('check_name', app(AzureCredentialsExpiringCheck::class)->getName())
+                            ->latest()
+                            ->first();
+
+                        if ($credentialsCheck?->status !== Status::warning()->value) {
+                            return false;
+                        }
+
+                        return true;
+                    });
+
+                    return $showBanner ? new HtmlString(Blade::render('<livewire:sso-credentials-expiring-alert />')) : null;
+                },
+            )
             ->globalSearchResourceOptIn();
     }
 

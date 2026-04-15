@@ -1,0 +1,232 @@
+<?php
+
+/*
+<COPYRIGHT>
+
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
+
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+
+    Notice:
+
+    - You may not provide the software to third parties as a hosted or managed
+      service, where the service provides users with access to any substantial set of
+      the features or functionality of the software.
+    - You may not move, change, disable, or circumvent the license key functionality
+      in the software, and you may not remove or obscure any functionality in the
+      software that is protected by the license key.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      to applicable law.
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
+      vigorously.
+    - The software solution, including services, infrastructure, and code, is offered as a
+      Software as a Service (SaaS) by Canyon GBS Inc.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
+
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+
+</COPYRIGHT>
+*/
+
+namespace App\Filament\Pages;
+
+use App\Filament\Clusters\ProfileSettings;
+use Exception;
+use Filament\Actions\Action;
+use Filament\Actions\ActionGroup;
+use Filament\Facades\Filament;
+use Filament\Notifications\Notification;
+use Filament\Pages\Concerns\InteractsWithFormActions;
+use Filament\Pages\Page;
+use Filament\Schemas\Schema;
+use Filament\Support\Enums\Alignment;
+use Filament\Support\Exceptions\Halt;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
+
+/**
+ * @property Schema $form
+ */
+class ProfilePage extends Page
+{
+    use InteractsWithFormActions;
+
+    protected string $view = 'filament.pages.profile-save';
+
+    protected static ?string $cluster = ProfileSettings::class;
+
+    /** @var array<string, mixed> $data */
+    public ?array $data = [];
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
+    }
+
+    public function mount(): void
+    {
+        $this->fillForm();
+    }
+
+    public function getUser(): Authenticatable|Model
+    {
+        $user = Filament::auth()->user();
+
+        if (! $user instanceof Model) {
+            throw new Exception('The authenticated user object must be an Eloquent model to allow the profile page to update it.');
+        }
+
+        return $user;
+    }
+
+    public function save(): void
+    {
+        try {
+            $this->callHook('beforeValidate');
+
+            $data = $this->form->getState();
+
+            $this->callHook('afterValidate');
+
+            $data = $this->mutateFormDataBeforeSave($data);
+
+            $this->callHook('beforeSave');
+
+            $this->handleRecordUpdate($this->getUser(), $data);
+
+            $this->callHook('afterSave');
+        } catch (Halt $exception) {
+            return;
+        }
+
+        $this->getSavedNotification()?->send();
+
+        $this->dispatch('refresh-branding-bar');
+
+        if ($redirectUrl = $this->getRedirectUrl()) {
+            $this->redirect($redirectUrl);
+        }
+    }
+
+    public function getFormActionsAlignment(): string
+    {
+        return Alignment::Start->value;
+    }
+
+    public function fillForm(): void
+    {
+        $data = $this->getUser()->attributesToArray();
+
+        $this->callHook('beforeFill');
+
+        $data = $this->mutateFormDataBeforeFill($data);
+
+        $this->form->fill($data);
+
+        $this->callHook('afterFill');
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    public function mutateFormDataBeforeFill(array $data): array
+    {
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    public function mutateFormDataBeforeSave(array $data): array
+    {
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function handleRecordUpdate(Model $record, array $data): Model
+    {
+        $record->update($data);
+
+        return $record;
+    }
+
+    public function getSavedNotification(): ?Notification
+    {
+        $title = $this->getSavedNotificationTitle();
+
+        if (blank($title)) {
+            return null;
+        }
+
+        return Notification::make()
+            ->success()
+            ->title($this->getSavedNotificationTitle());
+    }
+
+    public function getSavedNotificationTitle(): ?string
+    {
+        return __('filament-panels::auth/pages/edit-profile.notifications.saved.title');
+    }
+
+    public function getRedirectUrl(): ?string
+    {
+        return null;
+    }
+
+    /**
+     * @return array<Action | ActionGroup>
+     */
+    public function getFormActions(): array
+    {
+        return [
+            $this->getSaveFormAction(),
+            $this->getCancelFormAction(),
+        ];
+    }
+
+    public function getCancelFormAction(): Action
+    {
+        return Action::make('cancel')
+            ->label(__('filament-panels::auth/pages/edit-profile.actions.cancel.label'))
+            ->url(filament()->getUrl())
+            ->color('gray');
+    }
+
+    public function getSaveFormAction(): Action
+    {
+        return Action::make('save')
+            ->label('Save')
+            ->submit('save')
+            ->keyBindings(['mod+s']);
+    }
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema;
+    }
+
+    public function defaultForm(Schema $schema): Schema
+    {
+        return $schema
+            ->operation('edit')
+            ->model($this->getUser())
+            ->statePath('data');
+    }
+
+    protected function hasFullWidthFormActions(): bool
+    {
+        return false;
+    }
+}

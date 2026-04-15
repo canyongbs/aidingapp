@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -45,7 +45,11 @@ use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use App\Models\BaseModel;
 use App\Models\Concerns\InteractsWithTags;
 use App\Models\Contracts\HasTags;
+use CanyonGBS\Common\Filament\Forms\RichContentPlugins\VideoRichContentPlugin;
 use DateTimeInterface;
+use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
+use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
+use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
@@ -62,11 +66,12 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  * @mixin IdeHelperKnowledgeBaseItem
  */
 #[ObservedBy([KnowledgeBaseItemObserver::class])]
-class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia, HasTags
+class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia, HasRichContent, HasTags
 {
     use AuditableTrait;
     use HasUuids;
     use InteractsWithMedia;
+    use InteractsWithRichContent;
     use SoftDeletes;
     use InteractsWithTags;
 
@@ -129,6 +134,20 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('article_details');
+    }
+
+    public function setUpRichContent(): void
+    {
+        $this->registerRichContent('article_details')
+            ->fileAttachmentsDisk('s3-public')
+            ->fileAttachmentsVisibility('public')
+            ->fileAttachmentProvider(
+                SpatieMediaLibraryFileAttachmentProvider::make()
+                    ->collection('article_details')
+            )
+            ->plugins([
+                VideoRichContentPlugin::make(),
+            ]);
     }
 
     /**

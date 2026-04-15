@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -108,22 +108,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
 
     protected $casts = [
         'is_external' => 'boolean',
-        'is_bio_visible_on_profile' => 'boolean',
-        'are_pronouns_visible_on_profile' => 'boolean',
-        'are_teams_visible_on_profile' => 'boolean',
-        'is_division_visible_on_profile' => 'boolean',
         'email_verified_at' => 'datetime',
-        'has_enabled_public_profile' => 'boolean',
-        'office_hours_are_enabled' => 'boolean',
-        'office_hours' => 'array',
-        'out_of_office_is_enabled' => 'boolean',
-        'out_of_office_starts_at' => 'datetime',
-        'out_of_office_ends_at' => 'datetime',
-        'is_email_visible_on_profile' => 'boolean',
-        'is_phone_number_visible_on_profile' => 'boolean',
-        'working_hours_are_enabled' => 'boolean',
-        'are_working_hours_visible_on_profile' => 'boolean',
-        'working_hours' => 'array',
     ];
 
     protected $fillable = [
@@ -134,26 +119,10 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'locale',
         'type',
         'is_external',
-        'bio',
-        'is_bio_visible_on_profile',
-        'are_pronouns_visible_on_profile',
         'avatar_url',
-        'are_teams_visible_on_profile',
         'timezone',
-        'is_division_visible_on_profile',
-        'has_enabled_public_profile',
-        'public_profile_slug',
-        'office_hours_are_enabled',
-        'office_hours',
-        'out_of_office_is_enabled',
-        'out_of_office_starts_at',
-        'out_of_office_ends_at',
-        'is_email_visible_on_profile',
         'phone_number',
-        'is_phone_number_visible_on_profile',
-        'working_hours_are_enabled',
-        'are_working_hours_visible_on_profile',
-        'working_hours',
+        'pronouns_id',
         'job_title',
         'work_number',
         'work_extension',

@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\ServiceRe
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
@@ -68,8 +69,10 @@ class ViewServiceRequestType extends ViewRecord
                             ->state(fn (ServiceRequestType $record): string => str($record->icon)->after('heroicon-o-')->headline()->toString())
                             ->icon(fn (ServiceRequestType $record): string => $record->icon),
                         TextEntry::make('category.name')
-                            ->label('Category')
+                            ->label(ServiceRequestCategoryRenameFeature::active() ? 'Service Request Area' : 'Category')
                             ->placeholder('None'),
+                        TextEntry::make(ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category')
+                            ->label(ServiceRequestCategoryRenameFeature::active() ? 'Default Category' : 'Default Issue Category'),
                         TextEntry::make('form.name')
                             ->label('Form')
                             ->hidden(fn (ServiceRequestType $record) => ! $record->form)

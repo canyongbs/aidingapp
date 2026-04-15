@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -59,7 +59,7 @@ class IncidentStatusPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.view-any',
-            denyResponse: 'You do not have permission to view any incident statuses.'
+            denyResponse: 'You do not have permission to view any advisory statuses.'
         );
     }
 
@@ -67,7 +67,7 @@ class IncidentStatusPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.view',
-            denyResponse: 'You do not have permission to view this incident status.'
+            denyResponse: 'You do not have permission to view this advisory status.'
         );
     }
 
@@ -75,7 +75,7 @@ class IncidentStatusPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.create',
-            denyResponse: 'You do not have permission to create incident statuses.'
+            denyResponse: 'You do not have permission to create any advisory statuses.'
         );
     }
 
@@ -83,19 +83,19 @@ class IncidentStatusPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.update',
-            denyResponse: 'You do not have permission to update this incident status.'
+            denyResponse: 'You do not have permission to update this advisory status.'
         );
     }
 
     public function delete(Authenticatable $authenticatable, IncidentStatus $incidentStatus): Response
     {
         if ($incidentStatus->incidents()->exists()) {
-            return Response::deny('The incident status cannot be deleted because it is associated with a incident.');
+            return Response::deny('The advisory status cannot be deleted because it is associated with a advisory.');
         }
 
         return $authenticatable->canOrElse(
             abilities: 'settings.*.delete',
-            denyResponse: 'You do not have permission to delete this incident status.'
+            denyResponse: 'You do not have permission to delete this advisory status.'
         );
     }
 
@@ -103,19 +103,19 @@ class IncidentStatusPolicy
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.restore',
-            denyResponse: 'You do not have permission to restore this incident status.'
+            denyResponse: 'You do not have permission to restore this advisory status.'
         );
     }
 
     public function forceDelete(Authenticatable $authenticatable, IncidentStatus $incidentStatus): Response
     {
         if ($incidentStatus->incidents()->exists()) {
-            return Response::deny('The incident status cannot be deleted because it is associated with a incident.');
+            return Response::deny('The advisory status cannot be deleted because it is associated with a advisory.');
         }
 
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
-            denyResponse: 'You do not have permission to permanently delete this incident status.'
+            denyResponse: 'You do not have permission to permanently delete this advisory status.'
         );
     }
 

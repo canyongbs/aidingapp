@@ -1,7 +1,7 @@
 {
     "name": "canyongbs/aidingapp",
     "type": "project",
-    "description": "Aiding App™ by Canyon GBS™ is a Conversational AI and CRM ecosystem solution built specifically for postsecondary education use, adding features, functionality, and sector capabilities.",
+    "description": "Aiding App® by Canyon GBS® is a Conversational AI and CRM ecosystem solution built specifically for postsecondary education use, adding features, functionality, and sector capabilities.",
     "keywords": [
         "higher",
         "education",
@@ -46,9 +46,9 @@
         "canyon-gbs/project": "*",
         "canyon-gbs/purchasing": "*",
         "canyon-gbs/report": "*",
-        "canyongbs/common": "^2.9.1",
-        "canyongbs/filament-tiptap-editor": "^2.3.4",
-        "canyongbs/model-state-machine": "^2.0.5",
+        "canyongbs/common": "^2.12.1",
+        "canyongbs/filament-tiptap-editor": "^2.3.8",
+        "canyongbs/model-state-machine": "^2.0.6",
         "cknow/laravel-money": "^8.1",
         "codewithdennis/filament-select-tree": "^4.0",
         "composer/composer": "^2.7",
@@ -93,7 +93,6 @@
         "staudenmeir/belongs-to-through": "^2.5",
         "staudenmeir/eloquent-has-many-deep": "^1.19",
         "stechstudio/filament-impersonate": "^4.0",
-        "tapp/filament-timezone-field": "^3.0",
         "tpetry/laravel-postgresql-enhanced": "^3.5.1",
         "ysfkaya/filament-phone-input": "^4.1.2"
     },

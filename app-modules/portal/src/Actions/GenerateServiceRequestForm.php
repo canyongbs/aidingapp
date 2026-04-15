@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -119,18 +119,23 @@ class GenerateServiceRequestForm
      */
     protected function addFieldToStep(ServiceRequestFormStep $step, array $block): void
     {
-        /** @var array<string, mixed> $attrs */
-        $attrs = $block['attrs'];
-        $attributes = collect($attrs);
+        if (($block['type'] ?? null) !== 'customBlock') {
+            return;
+        }
+
+        $config = $block['attrs']['config'] ?? [];
+
+        $fieldConfig = $config;
+        unset($fieldConfig['fieldId'], $fieldConfig['label'], $fieldConfig['isRequired']);
 
         $step->fields->push(
             (new ServiceRequestFormField())
                 ->forceFill([
-                    'id' => $attributes->pull('id'),
-                    'type' => $attributes->pull('type'),
-                    'label' => $attributes->pull('data.label'),
-                    'is_required' => $attributes->pull('data.isRequired'),
-                    'config' => $attributes->pull('data'),
+                    'id' => $config['fieldId'] ?? null,
+                    'type' => $block['attrs']['id'],
+                    'label' => $config['label'] ?? null,
+                    'is_required' => $config['isRequired'] ?? false,
+                    'config' => $fieldConfig,
                 ])
         );
     }
@@ -143,11 +148,11 @@ class GenerateServiceRequestForm
     protected function formatBlock(string $label, string $type, bool $required = true, array $data = []): array
     {
         return [
-            'type' => 'tiptapBlock',
+            'type' => 'customBlock',
             'attrs' => [
-                'id' => str($label)->slug()->toString(),
-                'type' => $type,
-                'data' => [
+                'id' => $type,
+                'config' => [
+                    'fieldId' => str($label)->slug()->toString(),
                     'label' => $label,
                     'isRequired' => $required,
                     ...$data,

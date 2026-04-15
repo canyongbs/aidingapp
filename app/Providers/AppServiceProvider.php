@@ -3,9 +3,9 @@
 /*
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -19,12 +19,12 @@
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -61,6 +61,7 @@ use Laravel\Pennant\Feature;
 use function Sentry\configureScope;
 
 use Sentry\State\Scope;
+use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -71,6 +72,20 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(ImportCsv::class, ImportCsvOverride::class);
         $this->app->bind(PrepareCsvExport::class, PrepareCsvExportOverride::class);
+
+        $this->app->extend(
+            HtmlSanitizerConfig::class,
+            fn (HtmlSanitizerConfig $config): HtmlSanitizerConfig => $config
+                ->allowElement('iframe', ['src', 'width', 'height', 'frameborder', 'allowfullscreen', 'allow'])
+                ->allowAttribute('data-video-embed', allowedElements: '*')
+                ->allowAttribute('data-video-type', allowedElements: '*')
+                ->allowAttribute('data-video-src', allowedElements: '*')
+                ->allowAttribute('data-video-width', allowedElements: '*')
+                ->allowAttribute('data-video-height', allowedElements: '*')
+                ->allowAttribute('controls', allowedElements: 'video')
+                ->allowAttribute('src', allowedElements: ['img', 'video', 'source', 'iframe'])
+                ->allowAttribute('type', allowedElements: 'source'),
+        );
     }
 
     /**
