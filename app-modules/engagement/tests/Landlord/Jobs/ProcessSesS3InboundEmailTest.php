@@ -1404,8 +1404,18 @@ describe('Service request reply threading', function () {
         $content = str_replace('In-Reply-To: <SR-TEST123456.1.1740000000000@mail.aiding.app>', '', $content);
         $content = str_replace('References: <SR-TEST123456.1.1740000000000@mail.aiding.app>', '', $content);
 
-        // Add body reference
-        $content = str_replace('Hello there! This should be put in S3!', "Hello there! This should be put in S3!\n\n[REF:{$serviceRequest->service_request_number}]", $content);
+        // Add body reference to both text/plain and text/html parts
+        $bodyRef = "[REF:{$serviceRequest->service_request_number}]";
+        $content = str_replace(
+            'Hello there! This should be put in S3!</div>',
+            "Hello there! This should be put in S3!<br>{$bodyRef}</div>",
+            $content,
+        );
+        $content = str_replace(
+            "Hello there! This should be put in S3!\n",
+            "Hello there! This should be put in S3!\n\n{$bodyRef}\n",
+            $content,
+        );
 
         $file = UploadedFile::fake()->createWithContent('s3_email', $content);
 
