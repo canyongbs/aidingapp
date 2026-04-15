@@ -94,24 +94,24 @@ class ServiceRequestTypesTable extends BaseWidget
                             );
                         },
                     ])
-                    ->withCount([
-                        'serviceRequests as incident_count' => function (Builder $query) use ($startDate, $endDate) {
-                            $query->where('service_requests.issue_category', 'incident');
-                            $query->when(
-                                $startDate && $endDate,
-                                fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
-                            );
-                        },
-                    ])
-                    ->withCount([
-                        'serviceRequests as request_count' => function (Builder $query) use ($startDate, $endDate) {
-                            $query->where('service_requests.issue_category', 'request');
-                            $query->when(
-                                $startDate && $endDate,
-                                fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
-                            );
-                        },
-                    ]);
+                        ->withCount([
+                            'serviceRequests as incident_count' => function (Builder $query) use ($startDate, $endDate) {
+                                $query->where('service_requests.issue_category', 'incident');
+                                $query->when(
+                                    $startDate && $endDate,
+                                    fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
+                                );
+                            },
+                        ])
+                        ->withCount([
+                            'serviceRequests as request_count' => function (Builder $query) use ($startDate, $endDate) {
+                                $query->where('service_requests.issue_category', 'request');
+                                $query->when(
+                                    $startDate && $endDate,
+                                    fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
+                                );
+                            },
+                        ]);
 
                     if ($startDate && $endDate) {
                         $query->withAvg([
