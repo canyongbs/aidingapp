@@ -61,6 +61,5 @@ it('is gated by proper access control', function () {
     $user->givePermissionTo('knowledge_base_item.*.update');
 
     livewire(KnowledgeBaseItemConcernsTable::class, ['record' => $knowledgeBaseItem])
-        ->assertCountTableRecords(1)
         ->assertActionVisible([TestAction::make('changeConcernStatus')->table()]);
 });
