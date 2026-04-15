@@ -195,6 +195,7 @@ class EngagementsRelationManager extends RelationManager
             ])
             ->recordActions([
                 ViewAction::make()
+                    ->slideOver()
                     ->modalHeading(function (Timeline $record) {
                         /** @var HasDeliveryMethod $timelineable */
                         $timelineable = $record->timelineable;

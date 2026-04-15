@@ -149,11 +149,11 @@ class ManageProductLicenses extends ManageRelatedRecords
                     ->label('Status'),
             ])
             ->headerActions([
-                CreateAction::make(),
+                CreateAction::make()->slideOver(),
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
+                EditAction::make()->slideOver(),
                 DeleteAction::make(),
             ])
             ->toolbarActions([

@@ -92,7 +92,7 @@ abstract class TimelinePage extends Page
 
         return $this->currentRecordToView
             ->timeline()
-            ->modalViewAction();
+            ->modalViewAction()->slideOver();
     }
 
     public static function canAccess(array $parameters = []): bool
