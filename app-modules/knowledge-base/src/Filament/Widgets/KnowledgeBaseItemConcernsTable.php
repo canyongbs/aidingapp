@@ -76,7 +76,7 @@ class KnowledgeBaseItemConcernsTable extends TableWidget
             ])
             ->recordActions([
                 ChangeConcernStatusAction::make()
-                    ->authorize('update', $this->record),
+                    ->authorize(fn () => auth()->user()->can('update', $this->record)),
             ])
             ->filters([
                 SelectFilter::make('status')

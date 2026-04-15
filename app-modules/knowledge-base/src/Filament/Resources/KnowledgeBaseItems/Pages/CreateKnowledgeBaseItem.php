@@ -44,7 +44,6 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Features\KnowledgeBaseItemConcernFeature;
 use App\Models\Scopes\TagsForClass;
-use App\Models\User;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -137,7 +136,6 @@ class CreateKnowledgeBaseItem extends CreateRecord
                         Select::make('manager_ids')
                             ->visible(KnowledgeBaseItemConcernFeature::active())
                             ->label('Managers')
-                            ->options(fn (): array => User::query()->limit(50)->pluck('name', 'id')->all())
                             ->relationship('managers', 'name')
                             ->multiple()
                             ->searchable()
