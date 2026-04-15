@@ -34,27 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+namespace AidingApp\KnowledgeBase\Notifications;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use AidingApp\KnowledgeBase\Enums\ConcernStatus;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
+use App\Models\User;
+use Filament\Notifications\Notification as FilamentNotification;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\HtmlString;
 
-class KnowledgeBasePlugin implements Plugin
+class AlertManagerConcernStatusChanged extends Notification implements ShouldQueue
 {
-    public function getId(): string
+    use Queueable;
+
+    public function __construct(public KnowledgeBaseItemConcern $knowledgeBaseItemConcern, public ConcernStatus $oldStatus) {}
+
+    /**
+     * @return array<int, string>
+     */
+    public function via(User $notifiable): array
     {
-        return 'knowledge-base';
+        return ['database'];
     }
 
-    public function register(Panel $panel): void
+    /**
+     * @return array<string, mixed>
+     */
+    public function toDatabase(User $notifiable): array
     {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
-    }
+        $knowledgeBaseItem = $this->knowledgeBaseItemConcern->knowledgeBaseItem;
 
-    public function boot(Panel $panel): void {}
+        $url = KnowledgeBaseItemResource::getUrl('view', ['record' => $knowledgeBaseItem->getKey(), 'tab' => 'concerns']);
+
+        $link = new HtmlString("<a href='{$url}' target='_blnk' class='underline'>{$knowledgeBaseItem->title}</a>");
+
+        return FilamentNotification::make()
+            ->title("The status of a concern has changed from {$this->oldStatus->getLabel()} to {$this->knowledgeBaseItemConcern->status->getLabel()} by {$this->knowledgeBaseItemConcern->lastUpdatedBy->name} on the resource hub article {$link}.")
+            ->getDatabaseMessage();
+    }
 }

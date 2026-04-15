@@ -34,33 +34,55 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Providers;
+namespace AidingApp\KnowledgeBase\Filament\Widgets;
 
-use AidingApp\KnowledgeBase\KnowledgeBasePlugin;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Enums\ConcernStatus;
+use AidingApp\KnowledgeBase\Filament\Actions\ChangeConcernStatusAction;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Filament\Widgets\TableWidget;
+use Livewire\Attributes\On;
 
-class KnowledgeBaseServiceProvider extends ServiceProvider
+class KnowledgeBaseItemConcernsTable extends TableWidget
 {
-    public function register(): void
+    public KnowledgeBaseItem $record;
+
+    protected static ?string $heading = 'Concerns Raised';
+
+    public function mount(KnowledgeBaseItem $record): void
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new KnowledgeBasePlugin()));
+        $this->record = $record;
     }
 
-    public function boot(): void
+    #[On('concern-created')]
+    public function conernCreated(): void {}
+
+    public function table(Table $table): Table
     {
-        Relation::morphMap([
-            'knowledge_base_item' => KnowledgeBaseItem::class,
-            'knowledge_base_category' => KnowledgeBaseCategory::class,
-            'knowledge_base_quality' => KnowledgeBaseQuality::class,
-            'knowledge_base_status' => KnowledgeBaseStatus::class,
-            'knowledge_base_item_concern' => KnowledgeBaseItemConcern::class,
-        ]);
+        return $table
+            ->query(fn () => KnowledgeBaseItemConcern::whereBelongsTo($this->record, 'knowledgeBaseItem'))
+            ->columns([
+                TextColumn::make('createdBy.name')
+                    ->label('Name'),
+                TextColumn::make('description')
+                    ->label('Concern'),
+                TextColumn::make('created_at')
+                    ->label('Date')
+                    ->date(),
+                TextColumn::make('status'),
+            ])
+            ->recordActions([
+                ChangeConcernStatusAction::make()
+                    ->authorize(fn () => auth()->user()->can('update', $this->record)),
+            ])
+            ->filters([
+                SelectFilter::make('status')
+                    ->multiple()
+                    ->options(ConcernStatus::class)
+                    ->default([ConcernStatus::New->value]),
+            ]);
     }
 }

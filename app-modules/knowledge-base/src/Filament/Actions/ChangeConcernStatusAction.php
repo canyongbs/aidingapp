@@ -34,27 +34,39 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+namespace AidingApp\KnowledgeBase\Filament\Actions;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use AidingApp\KnowledgeBase\Enums\ConcernStatus;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
 
-class KnowledgeBasePlugin implements Plugin
+class ChangeConcernStatusAction extends Action
 {
-    public function getId(): string
+    protected function setUp(): void
     {
-        return 'knowledge-base';
+        parent::setUp();
+
+        $this
+            ->label('Change Status')
+            ->button()
+            ->outlined()
+            ->modalDescription('Select what status this concern should have.')
+            ->schema([
+                Select::make('status')
+                    ->options(ConcernStatus::class)
+                    ->enum(ConcernStatus::class)
+                    ->default(fn (KnowledgeBaseItemConcern $record) => $record->status->value),
+            ])
+            ->action(function (array $data, KnowledgeBaseItemConcern $record): void {
+                $record->status = $data['status'];
+
+                $record->save();
+            });
     }
 
-    public function register(Panel $panel): void
+    public static function getDefaultName(): ?string
     {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
+        return 'changeConcernStatus';
     }
-
-    public function boot(Panel $panel): void {}
 }

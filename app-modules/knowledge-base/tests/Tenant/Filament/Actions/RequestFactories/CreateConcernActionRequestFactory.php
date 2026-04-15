@@ -34,27 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+namespace AidingApp\KnowledgeBase\Tests\Tenant\Filament\Actions\RequestFactories;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use Worksome\RequestFactories\RequestFactory;
 
-class KnowledgeBasePlugin implements Plugin
+class CreateConcernActionRequestFactory extends RequestFactory
 {
-    public function getId(): string
+    public function definition(): array
     {
-        return 'knowledge-base';
+        return [
+            'description' => $this->faker->words(3, true),
+        ];
     }
-
-    public function register(Panel $panel): void
-    {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
-    }
-
-    public function boot(Panel $panel): void {}
 }

@@ -34,27 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+use App\Features\KnowledgeBaseItemConcernFeature;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
-
-class KnowledgeBasePlugin implements Plugin
-{
-    public function getId(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return 'knowledge-base';
+        KnowledgeBaseItemConcernFeature::activate();
     }
 
-    public function register(Panel $panel): void
+    public function down(): void
     {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
+        KnowledgeBaseItemConcernFeature::deactivate();
     }
-
-    public function boot(Panel $panel): void {}
-}
+};

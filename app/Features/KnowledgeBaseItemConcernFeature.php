@@ -34,27 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+namespace App\Features;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use App\Support\AbstractFeatureFlag;
 
-class KnowledgeBasePlugin implements Plugin
+class KnowledgeBaseItemConcernFeature extends AbstractFeatureFlag
 {
-    public function getId(): string
+    public function resolve(mixed $scope): mixed
     {
-        return 'knowledge-base';
+        return false;
     }
-
-    public function register(Panel $panel): void
-    {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
-    }
-
-    public function boot(Panel $panel): void {}
 }

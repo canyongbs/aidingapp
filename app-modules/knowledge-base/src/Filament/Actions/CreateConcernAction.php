@@ -34,27 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+namespace AidingApp\KnowledgeBase\Filament\Actions;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use AidingApp\KnowledgeBase\Enums\ConcernStatus;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use App\Features\KnowledgeBaseItemConcernFeature;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Textarea;
+use Filament\Pages\Page;
 
-class KnowledgeBasePlugin implements Plugin
+class CreateConcernAction extends Action
 {
-    public function getId(): string
+    protected function setUp(): void
     {
-        return 'knowledge-base';
+        parent::setUp();
+
+        $this
+            ->visible(KnowledgeBaseItemConcernFeature::active())
+            ->label('Raise Concern')
+            ->button()
+            ->modalDescription('Please articulate the concern you have with this knowledge base item. You may enter up to 100 characters in the box below.')
+            ->schema([
+                Textarea::make('description')
+                    ->hiddenLabel()
+                    ->maxLength(100)
+                    ->required(),
+            ])
+            ->action(function (array $data, KnowledgeBaseItem $record, Page $livewire): void {
+                $record->concerns()->create([
+                    'description' => $data['description'],
+                    'status' => ConcernStatus::New,
+                ]);
+
+                $livewire->dispatch('concern-created');
+            });
     }
 
-    public function register(Panel $panel): void
+    public static function getDefaultName(): ?string
     {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
+        return 'raiseConcern';
     }
-
-    public function boot(Panel $panel): void {}
 }

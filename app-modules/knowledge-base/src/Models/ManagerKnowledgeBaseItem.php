@@ -34,27 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+namespace AidingApp\KnowledgeBase\Models;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class KnowledgeBasePlugin implements Plugin
+/**
+ * @mixin IdeHelperManagerKnowledgeBaseItem
+ */
+class ManagerKnowledgeBaseItem extends Pivot
 {
-    public function getId(): string
+    use HasUuids;
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function manager(): BelongsTo
     {
-        return 'knowledge-base';
+        return $this->belongsTo(User::class, 'manager_id');
     }
 
-    public function register(Panel $panel): void
+    /**
+     * @return BelongsTo<KnowledgeBaseItem, $this>
+     */
+    public function knowledgeBaseItem(): BelongsTo
     {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
+        return $this->belongsTo(KnowledgeBaseItem::class);
     }
-
-    public function boot(Panel $panel): void {}
 }
