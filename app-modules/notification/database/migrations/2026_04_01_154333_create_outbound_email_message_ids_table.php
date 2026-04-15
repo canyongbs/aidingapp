@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestEmailThreading;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -54,16 +53,12 @@ return new class () extends Migration {
             Schema::table('email_messages', function (Blueprint $table) {
                 $table->string('outbound_message_id')->nullable();
             });
-
-            ServiceRequestEmailThreading::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            ServiceRequestEmailThreading::deactivate();
-
             Schema::table('email_messages', function (Blueprint $table) {
                 $table->dropColumn('outbound_message_id');
             });
