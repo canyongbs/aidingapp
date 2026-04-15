@@ -76,6 +76,7 @@ class ServiceRequestPrioritiesRelationManager extends RelationManager
             ])
             ->headerActions([
                 TableSelectAssociateAction::make()
+                    ->slideOver()
                     ->multiple()
                     ->tableSelect(ServiceRequestPrioritiesTable::class),
             ])
