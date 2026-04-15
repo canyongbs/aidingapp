@@ -199,7 +199,7 @@ class EditKnowledgeBaseItem extends EditRecord
                                     ->searchable(['name', 'code'])
                                     ->preload()
                                     ->afterStateHydrated(function (array $state, Set $set) {
-                                        if(empty($state)) {
+                                        if (empty($state)) {
                                             $set('division', [Division::count() === 1 ? Division::query()->first()?->getKey() : null]);
                                         }
                                     })
