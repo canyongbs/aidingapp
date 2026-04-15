@@ -291,7 +291,9 @@
                     </p>
                     <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">
                         <template v-if="activeFilter === 'returned'">No assets have been returned yet.</template>
-                        <template v-else-if="activeFilter === 'checked_out'">You don't currently have any assets checked out.</template>
+                        <template v-else-if="activeFilter === 'checked_out'"
+                            >You don't currently have any assets checked out.</template
+                        >
                         <template v-else>No assets have been assigned to your account.</template>
                     </p>
                 </div>
@@ -367,7 +369,10 @@
                                         v-if="item.status === 'returned'"
                                         class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-800"
                                     >
-                                        <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-green-500" aria-hidden="true"></span>
+                                        <span
+                                            class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-green-500"
+                                            aria-hidden="true"
+                                        ></span>
                                         Returned
                                     </span>
                                     <span
