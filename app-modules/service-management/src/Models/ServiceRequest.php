@@ -44,6 +44,7 @@ use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsException;
@@ -71,7 +72,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 /**
- * @property \AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory $issue_category
+ * @property ServiceRequestIssueCategory $issue_category
  * @property-read Contact $respondent
  *
  * @mixin IdeHelperServiceRequest
