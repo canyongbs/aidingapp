@@ -71,11 +71,13 @@ class AssetManagementPortalController extends Controller
             ->paginate(10);
 
         $items = $paginator->getCollection()->map(function ($checkOut) {
+            $isReturned = !empty($checkOut->asset_check_in_id);
+
             return [
                 'id' => $checkOut->getKey(),
-                'status' => $checkOut->asset_check_in_id ? 'returned' : 'checked_out',
-                'last_activity' => $checkOut->asset_check_in_id ? 'Return' : 'Checkout',
-                'asset' => $checkOut->asset ? [
+                'status' => $isReturned ? 'returned' : 'checked_out',
+                'last_activity' => $isReturned ? 'Return' : 'Checkout',
+                'asset' => [
                     'id' => $checkOut->asset->getKey(),
                     'name' => $checkOut->asset->name,
                     'description' => $checkOut->asset->description,
@@ -94,13 +96,13 @@ class AssetManagementPortalController extends Controller
                                 $diff->m . ' ' . ($diff->m === 1 ? 'Month' : 'Months');
                         })()
                         : null,
-                    'type' => $checkOut->asset->type
-                        ? ['name' => $checkOut->asset->type->name]
-                        : null,
-                    'location' => $checkOut->asset->location
-                        ? ['name' => $checkOut->asset->location->name]
-                        : null,
-                ] : null,
+                    'type' => [
+                        'name' => $checkOut->asset->type->name,
+                    ],
+                    'location' => [
+                        'name' => $checkOut->asset->location->name,
+                    ],
+                ],
             ];
         });
 
