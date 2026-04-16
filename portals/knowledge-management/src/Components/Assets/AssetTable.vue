@@ -1,9 +1,9 @@
 <!--
 <COPYRIGHT>
 
-    Copyright © 2016-2026, Canyon GBS LLC. All rights reserved.
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
-    Aiding App™ is licensed under the Elastic License 2.0. For more details,
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
     see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
@@ -15,14 +15,14 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
-    - Canyon GBS LLC respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS™ and Aiding App™ are registered trademarks of
-      Canyon GBS LLC, and we are committed to enforcing and protecting our trademarks
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS LLC.
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -150,7 +150,9 @@
                 </p>
                 <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">
                     <template v-if="activeFilter === 'returned'">No assets have been returned yet.</template>
-                    <template v-else-if="activeFilter === 'checked_out'">You don't currently have any assets checked out.</template>
+                    <template v-else-if="activeFilter === 'checked_out'"
+                        >You don't currently have any assets checked out.</template
+                    >
                     <template v-else>No assets have been assigned to your account.</template>
                 </p>
             </div>
@@ -202,11 +204,15 @@
 
                             <td class="px-4 py-4 text-gray-600">
                                 <p class="font-medium text-gray-800">{{ item.asset?.type?.name ?? '—' }}</p>
-                                <p v-if="item.asset?.purchase_age" class="mt-0.5 text-xs text-gray-400">{{ item.asset.purchase_age }}</p>
+                                <p v-if="item.asset?.purchase_age" class="mt-0.5 text-xs text-gray-400">
+                                    {{ item.asset.purchase_age }}
+                                </p>
                             </td>
 
                             <td class="px-4 py-4">
-                                <span class="rounded border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-xs text-gray-500">
+                                <span
+                                    class="rounded border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-xs text-gray-500"
+                                >
                                     {{ serialDisplay(item.asset) }}
                                 </span>
                             </td>
@@ -220,14 +226,20 @@
                                     v-if="item.status === 'returned'"
                                     class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-800"
                                 >
-                                    <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-green-500" aria-hidden="true"></span>
+                                    <span
+                                        class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-green-500"
+                                        aria-hidden="true"
+                                    ></span>
                                     Returned
                                 </span>
                                 <span
                                     v-else
                                     class="inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-800"
                                 >
-                                    <span class="h-1.5 w-1.5 flex-shrink-0 animate-pulse rounded-full bg-orange-500" aria-hidden="true"></span>
+                                    <span
+                                        class="h-1.5 w-1.5 flex-shrink-0 animate-pulse rounded-full bg-orange-500"
+                                        aria-hidden="true"
+                                    ></span>
                                     Checked Out
                                 </span>
                             </td>
@@ -256,22 +268,30 @@
 </template>
 
 <style>
-.assets-fade-enter-active,
-.assets-fade-leave-active {
-    transition: opacity 0.16s ease, transform 0.16s ease;
-}
-.assets-fade-enter-from,
-.assets-fade-leave-to {
-    opacity: 0;
-    transform: translateY(5px);
-}
+    .assets-fade-enter-active,
+    .assets-fade-leave-active {
+        transition:
+            opacity 0.16s ease,
+            transform 0.16s ease;
+    }
+    .assets-fade-enter-from,
+    .assets-fade-leave-to {
+        opacity: 0;
+        transform: translateY(5px);
+    }
 
-@keyframes assetRowIn {
-    from { opacity: 0; transform: translateY(5px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-.asset-row {
-    animation: assetRowIn 0.2s ease both;
-    animation-delay: var(--row-delay, 0ms);
-}
+    @keyframes assetRowIn {
+        from {
+            opacity: 0;
+            transform: translateY(5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .asset-row {
+        animation: assetRowIn 0.2s ease both;
+        animation-delay: var(--row-delay, 0ms);
+    }
 </style>
