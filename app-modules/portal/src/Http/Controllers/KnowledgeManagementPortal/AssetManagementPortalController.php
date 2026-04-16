@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -70,7 +71,7 @@ class AssetManagementPortalController extends Controller
             ->orderByDesc('checked_out_at')
             ->paginate(10);
 
-        $items = $paginator->getCollection()->map(function ($checkOut) {
+        $items = $paginator->getCollection()->map(function (AssetCheckOut $checkOut) {
             $isReturned = !empty($checkOut->asset_check_in_id);
 
             return [
@@ -82,20 +83,18 @@ class AssetManagementPortalController extends Controller
                     'name' => $checkOut->asset->name,
                     'description' => $checkOut->asset->description,
                     'serial_number' => $checkOut->asset->serial_number,
-                    'purchase_age' => $checkOut->asset->purchase_date
-                        ? (function () use ($checkOut) {
-                            $date = $checkOut->asset->purchase_date;
+                    'purchase_age' => (function () use ($checkOut) {
+                        $date = $checkOut->asset->purchase_date;
 
-                            if ($date->isFuture()) {
-                                return '0 Years 0 Months';
-                            }
+                        if ($date->isFuture()) {
+                            return '0 Years 0 Months';
+                        }
 
-                            $diff = $date->roundMonth()->diff(now());
+                        $diff = $date->roundMonth()->diff(now());
 
-                            return $diff->y . ' ' . ($diff->y === 1 ? 'Year' : 'Years') . ' ' .
-                                $diff->m . ' ' . ($diff->m === 1 ? 'Month' : 'Months');
-                        })()
-                        : null,
+                        return $diff->y . ' ' . ($diff->y === 1 ? 'Year' : 'Years') . ' ' .
+                            $diff->m . ' ' . ($diff->m === 1 ? 'Month' : 'Months');
+                    })(),
                     'type' => [
                         'name' => $checkOut->asset->type->name,
                     ],
