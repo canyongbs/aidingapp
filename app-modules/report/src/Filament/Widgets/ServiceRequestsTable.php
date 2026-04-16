@@ -115,7 +115,7 @@ class ServiceRequestsTable extends BaseWidget
                 TextColumn::make('priority.type.name')
                     ->label('Type')
                     ->searchable()
-                    ->description(fn (ServiceRequest $record): string => $record->issue_category?->getLabel() ?? ''),
+                    ->description(fn (ServiceRequest $record): string => (string) $record->issue_category->getLabel()),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->searchable()

@@ -59,7 +59,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * @property ServiceRequestIssueCategory|null $default_issue_category
+ * @property \AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory|null $default_issue_category
  *
  * @mixin IdeHelperServiceRequestType
  */
