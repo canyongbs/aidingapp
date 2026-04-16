@@ -35,7 +35,7 @@
 */
 
 use AidingApp\Report\Filament\Widgets\ServiceRequestTypesTable;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -153,13 +153,13 @@ it('shows correct incident and request counts per type', function () {
     ServiceRequest::factory()->count(3)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestIssueCategory::Incident,
+        'issue_category' => ServiceRequestCategory::Incident,
     ])->create();
 
     ServiceRequest::factory()->count(5)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestIssueCategory::Request,
+        'issue_category' => ServiceRequestCategory::Request,
     ])->create();
 
     livewire(ServiceRequestTypesTable::class, [
@@ -182,13 +182,13 @@ it('incident and request counts are not affected by the category page filter', f
     ServiceRequest::factory()->count(4)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestIssueCategory::Incident,
+        'issue_category' => ServiceRequestCategory::Incident,
     ])->create();
 
     ServiceRequest::factory()->count(2)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestIssueCategory::Request,
+        'issue_category' => ServiceRequestCategory::Request,
     ])->create();
 
     // With category page filter set to Incident:
@@ -196,7 +196,7 @@ it('incident and request counts are not affected by the category page filter', f
     // Incidents = 4, Requests = 2 (always the full breakdown)
     livewire(ServiceRequestTypesTable::class, [
         'cacheTag' => 'test-service-request-types-category-filter-independence',
-        'pageFilters' => ['category' => ServiceRequestIssueCategory::Incident->value],
+        'pageFilters' => ['category' => ServiceRequestCategory::Incident->value],
     ])
         ->assertTableColumnFormattedStateSet('service_requests_count', '6', record: $type)
         ->assertTableColumnFormattedStateSet('incident_count', '4', record: $type)

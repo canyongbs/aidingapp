@@ -36,7 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsTable;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -195,14 +195,14 @@ it('filters records by category using the table-level category filter', function
     $incidentRequest = ServiceRequest::factory()->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestIssueCategory::Incident,
+        'issue_category' => ServiceRequestCategory::Incident,
         'respondent_id' => Contact::factory(),
     ])->create();
 
     $requestRequest = ServiceRequest::factory()->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestIssueCategory::Request,
+        'issue_category' => ServiceRequestCategory::Request,
         'respondent_id' => Contact::factory(),
     ])->create();
 
@@ -210,7 +210,7 @@ it('filters records by category using the table-level category filter', function
         'cacheTag' => 'test-service-requests-table-category-filter',
         'pageFilters' => [],
     ])
-        ->filterTable('issue_category', ServiceRequestIssueCategory::Incident->value)
+        ->filterTable('issue_category', ServiceRequestCategory::Incident->value)
         ->assertCanSeeTableRecords(collect([$incidentRequest]))
         ->assertCanNotSeeTableRecords(collect([$requestRequest]));
 });

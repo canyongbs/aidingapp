@@ -37,7 +37,7 @@
 namespace AidingApp\Report\Filament\Widgets;
 
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -112,7 +112,7 @@ class ServiceRequestCategoryDistributionDonutChart extends ChartReportWidget
     {
         $counts = [];
 
-        foreach (ServiceRequestIssueCategory::cases() as $case) {
+        foreach (ServiceRequestCategory::cases() as $case) {
             $query = ServiceRequest::where('issue_category', $case->value);
 
             if ($startDate && $endDate) {

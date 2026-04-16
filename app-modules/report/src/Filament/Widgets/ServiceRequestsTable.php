@@ -39,7 +39,7 @@ namespace AidingApp\Report\Filament\Widgets;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Report\Filament\Exports\ServiceRequestsExporter;
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -179,7 +179,7 @@ class ServiceRequestsTable extends BaseWidget
             ->filters([
                 SelectFilter::make('issue_category')
                     ->label('Category')
-                    ->options(ServiceRequestIssueCategory::class)
+                    ->options(ServiceRequestCategory::class)
                     ->native(false),
                 SelectFilter::make('type')
                     ->relationship('priority.type', 'name')

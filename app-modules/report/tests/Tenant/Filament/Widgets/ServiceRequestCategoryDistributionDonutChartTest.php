@@ -35,7 +35,7 @@
 */
 
 use AidingApp\Report\Filament\Widgets\ServiceRequestCategoryDistributionDonutChart;
-use AidingApp\ServiceManagement\Enums\ServiceRequestIssueCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -52,14 +52,14 @@ it('returns correct category distribution within the given date range', function
     ServiceRequest::factory()->count(3)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestIssueCategory::Incident,
+        'issue_category' => ServiceRequestCategory::Incident,
         'created_at' => now()->subDays(7),
     ])->create();
 
     ServiceRequest::factory()->count(5)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestIssueCategory::Request,
+        'issue_category' => ServiceRequestCategory::Request,
         'created_at' => now()->subDays(6),
     ])->create();
 
@@ -67,7 +67,7 @@ it('returns correct category distribution within the given date range', function
     ServiceRequest::factory()->count(2)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestIssueCategory::Incident,
+        'issue_category' => ServiceRequestCategory::Incident,
         'created_at' => now()->subDays(20),
     ])->create();
 
@@ -87,8 +87,8 @@ it('returns correct category distribution within the given date range', function
     $labels = $data['labels']->toArray();
     $counts = $data['datasets'][0]['data']->toArray();
 
-    $incidentIndex = array_search(ServiceRequestIssueCategory::Incident->getLabel(), $labels);
-    $requestIndex = array_search(ServiceRequestIssueCategory::Request->getLabel(), $labels);
+    $incidentIndex = array_search(ServiceRequestCategory::Incident->getLabel(), $labels);
+    $requestIndex = array_search(ServiceRequestCategory::Request->getLabel(), $labels);
 
     expect($incidentIndex)->not->toBeFalse()
         ->and($requestIndex)->not->toBeFalse()
@@ -104,14 +104,14 @@ it('returns correct category distribution when no date filters are applied', fun
     ServiceRequest::factory()->count(4)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestIssueCategory::Incident,
+        'issue_category' => ServiceRequestCategory::Incident,
         'created_at' => now()->subDays(3),
     ])->create();
 
     ServiceRequest::factory()->count(7)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestIssueCategory::Request,
+        'issue_category' => ServiceRequestCategory::Request,
         'created_at' => now()->subMonths(1),
     ])->create();
 
@@ -124,8 +124,8 @@ it('returns correct category distribution when no date filters are applied', fun
     $labels = $data['labels']->toArray();
     $counts = $data['datasets'][0]['data']->toArray();
 
-    $incidentIndex = array_search(ServiceRequestIssueCategory::Incident->getLabel(), $labels);
-    $requestIndex = array_search(ServiceRequestIssueCategory::Request->getLabel(), $labels);
+    $incidentIndex = array_search(ServiceRequestCategory::Incident->getLabel(), $labels);
+    $requestIndex = array_search(ServiceRequestCategory::Request->getLabel(), $labels);
 
     expect($counts[$incidentIndex])->toBe(4)
         ->and($counts[$requestIndex])->toBe(7);
@@ -139,21 +139,21 @@ it('category page filter does not affect the chart — it always shows all categ
     ServiceRequest::factory()->count(5)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestIssueCategory::Incident,
+        'issue_category' => ServiceRequestCategory::Incident,
         'created_at' => now()->subDays(2),
     ])->create();
 
     ServiceRequest::factory()->count(3)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestIssueCategory::Request,
+        'issue_category' => ServiceRequestCategory::Request,
         'created_at' => now()->subDays(2),
     ])->create();
 
     $widget = new ServiceRequestCategoryDistributionDonutChart();
     $widget->cacheTag = 'test-category-distribution-category-filter';
     // Even with a stale category in pageFilters, the chart ignores it
-    $widget->pageFilters = ['category' => ServiceRequestIssueCategory::Incident->value];
+    $widget->pageFilters = ['category' => ServiceRequestCategory::Incident->value];
 
     $data = $widget->getData();
 
@@ -161,11 +161,11 @@ it('category page filter does not affect the chart — it always shows all categ
     $counts = $data['datasets'][0]['data']->toArray();
 
     // Both categories must appear — chart is not filtered by category
-    expect($labels)->toContain(ServiceRequestIssueCategory::Incident->getLabel())
-        ->and($labels)->toContain(ServiceRequestIssueCategory::Request->getLabel());
+    expect($labels)->toContain(ServiceRequestCategory::Incident->getLabel())
+        ->and($labels)->toContain(ServiceRequestCategory::Request->getLabel());
 
-    $incidentIndex = array_search(ServiceRequestIssueCategory::Incident->getLabel(), $labels);
-    $requestIndex = array_search(ServiceRequestIssueCategory::Request->getLabel(), $labels);
+    $incidentIndex = array_search(ServiceRequestCategory::Incident->getLabel(), $labels);
+    $requestIndex = array_search(ServiceRequestCategory::Request->getLabel(), $labels);
     expect($counts[$incidentIndex])->toBe(5)
         ->and($counts[$requestIndex])->toBe(3);
 });
@@ -179,7 +179,7 @@ it('excludes zero-count categories from the chart', function () {
     ServiceRequest::factory()->count(2)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestIssueCategory::Incident,
+        'issue_category' => ServiceRequestCategory::Incident,
         'created_at' => now()->subDays(1),
     ])->create();
 
@@ -191,6 +191,6 @@ it('excludes zero-count categories from the chart', function () {
 
     $labels = $data['labels']->toArray();
 
-    expect($labels)->toContain(ServiceRequestIssueCategory::Incident->getLabel())
-        ->and($labels)->not->toContain(ServiceRequestIssueCategory::Request->getLabel());
+    expect($labels)->toContain(ServiceRequestCategory::Incident->getLabel())
+        ->and($labels)->not->toContain(ServiceRequestCategory::Request->getLabel());
 });
