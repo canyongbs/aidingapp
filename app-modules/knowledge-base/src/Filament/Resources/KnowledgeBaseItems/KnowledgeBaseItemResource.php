@@ -99,7 +99,7 @@ class KnowledgeBaseItemResource extends Resource
      */
     public static function getGlobalSearchResultUrl(Model $record): ?string
     {
-        return static::getUrl('edit', ['record' => $record]);
+        return static::getUrl('view', ['record' => $record]);
     }
 
     public static function form(Schema $schema): Schema

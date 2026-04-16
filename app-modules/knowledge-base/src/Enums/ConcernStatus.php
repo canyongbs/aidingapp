@@ -34,27 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+namespace AidingApp\KnowledgeBase\Enums;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use Filament\Support\Contracts\HasLabel;
 
-class KnowledgeBasePlugin implements Plugin
+enum ConcernStatus: string implements HasLabel
 {
-    public function getId(): string
-    {
-        return 'knowledge-base';
-    }
+    case New = 'new';
 
-    public function register(Panel $panel): void
-    {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
-    }
+    case Resolved = 'resolved';
 
-    public function boot(Panel $panel): void {}
+    case Archived = 'archived';
+
+    public function getLabel(): string
+    {
+        return $this->name;
+    }
 }

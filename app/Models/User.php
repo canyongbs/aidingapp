@@ -40,6 +40,8 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\ManagerKnowledgeBaseItem;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectAuditorUser;
@@ -243,6 +245,17 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public function serviceRequestTypeIndividualAssignment(): HasMany
     {
         return $this->hasMany(ServiceRequestType::class, 'assignment_type_individual_id', 'id');
+    }
+
+    /**
+     * @return BelongsToMany<KnowledgeBaseItem, $this, ManagerKnowledgeBaseItem>
+     */
+    public function managedKnowledgeBaseArticles(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(KnowledgeBaseItem::class, 'manager_knowledge_base_items', 'manager_id', 'knowledge_base_item_id')
+            ->using(ManagerKnowledgeBaseItem::class)
+            ->withTimestamps();
     }
 
     public function canAccessPanel(Panel $panel): bool

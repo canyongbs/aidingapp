@@ -34,27 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+namespace AidingApp\KnowledgeBase\Database\Factories;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use AidingApp\KnowledgeBase\Enums\ConcernStatus;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class KnowledgeBasePlugin implements Plugin
+/**
+ * @extends Factory<KnowledgeBaseItemConcern>
+ */
+class KnowledgeBaseItemConcernFactory extends Factory
 {
-    public function getId(): string
+    /**
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
-        return 'knowledge-base';
+        return [
+            'description' => $this->faker->words(3, true),
+            'created_by_id' => User::factory(),
+            'status' => $this->faker->randomElement(ConcernStatus::cases()),
+            'knowledge_base_item_id' => KnowledgeBaseItem::factory(),
+        ];
     }
-
-    public function register(Panel $panel): void
-    {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
-    }
-
-    public function boot(Panel $panel): void {}
 }

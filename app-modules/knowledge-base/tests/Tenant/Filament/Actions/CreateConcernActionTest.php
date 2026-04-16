@@ -34,27 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ViewKnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Actions\RequestFactories\CreateConcernActionRequestFactory;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
-class KnowledgeBasePlugin implements Plugin
-{
-    public function getId(): string
-    {
-        return 'knowledge-base';
-    }
+it('can create a concern properly', function () {
+    asSuperAdmin();
 
-    public function register(Panel $panel): void
-    {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
-    }
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
 
-    public function boot(Panel $panel): void {}
-}
+    $data = CreateConcernActionRequestFactory::new()->create();
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getKey()])
+        ->callAction('raiseConcern', [
+            'description' => $data['description'],
+        ]);
+
+    $knowledgeBaseItem->refresh();
+
+    expect($knowledgeBaseItem->concerns()->count())->toBe(1);
+    expect($knowledgeBaseItem->concerns()->first()->description)->toBe($data['description']);
+});

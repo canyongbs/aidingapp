@@ -53,7 +53,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
 use App\Actions\Paths\ModulePath;
 use App\Features\ServiceRequestCategoryRenameFeature;
-use App\Features\ServiceRequestEmailThreading;
 use App\Models\Tenant;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
@@ -1089,10 +1088,8 @@ describe('Service request reply threading', function () {
                 'respondent_id' => $contact->getKey(),
             ]);
 
-            $messageId = "{$serviceRequest->service_request_number}.1.1740000000000@mail.aiding.app";
-
             $serviceRequest->outboundEmailMessageIds()->create([
-                'message_id' => $messageId,
+                'message_id' => "{$serviceRequest->service_request_number}.1.1740000000000",
             ]);
 
             return [$contact, $serviceRequest];
@@ -1159,10 +1156,8 @@ describe('Service request reply threading', function () {
                 'respondent_id' => $contact->getKey(),
             ]);
 
-            $messageId = "{$serviceRequest->service_request_number}.1.1740000000000@mail.aiding.app";
-
             $serviceRequest->outboundEmailMessageIds()->create([
-                'message_id' => $messageId,
+                'message_id' => "{$serviceRequest->service_request_number}.1.1740000000000",
             ]);
 
             return [$contact, $serviceRequest];
@@ -1219,7 +1214,7 @@ describe('Service request reply threading', function () {
 
         assert($tenant instanceof Tenant);
 
-        $messageId = $tenant->execute(function () {
+        $rawMessageId = $tenant->execute(function () {
             // Contact email does NOT match the fixture sender (kevin.ullyott@canyongbs.com)
             $contact = Contact::factory()->create([
                 'email' => 'someone.else@example.com',
@@ -1229,14 +1224,14 @@ describe('Service request reply threading', function () {
                 'respondent_id' => $contact->getKey(),
             ]);
 
-            $messageId = "{$serviceRequest->service_request_number}.1.1740000000000@mail.aiding.app";
-
             $serviceRequest->outboundEmailMessageIds()->create([
-                'message_id' => $messageId,
+                'message_id' => "{$serviceRequest->service_request_number}.1.1740000000000",
             ]);
 
-            return $messageId;
+            return "{$serviceRequest->service_request_number}.1.1740000000000";
         });
+
+        $messageId = "{$rawMessageId}@mail.aiding.app";
 
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
@@ -1314,15 +1309,12 @@ describe('Service request reply threading', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    // TODO: FeatureFlag Cleanup - This test can be removed when ServiceRequestEmailThreading is removed
-    it('SR reply is ignored when ServiceRequestEmailThreading feature flag is disabled', function () {
+    it('SR reply resolves via plus-addressed SR number in To address', function () {
         $tenant = Tenant::query()->firstOrFail();
 
         assert($tenant instanceof Tenant);
 
-        $messageId = $tenant->execute(function () {
-            ServiceRequestEmailThreading::deactivate();
-
+        [$contact, $serviceRequest] = $tenant->execute(function () {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -1331,13 +1323,7 @@ describe('Service request reply threading', function () {
                 'respondent_id' => $contact->getKey(),
             ]);
 
-            $messageId = "{$serviceRequest->service_request_number}.1.1740000000000@mail.aiding.app";
-
-            $serviceRequest->outboundEmailMessageIds()->create([
-                'message_id' => $messageId,
-            ]);
-
-            return $messageId;
+            return [$contact, $serviceRequest];
         });
 
         Storage::fake('s3');
@@ -1349,9 +1335,85 @@ describe('Service request reply threading', function () {
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_sr_reply'));
 
+        // Replace To address to use plus-addressed format
+        $subdomain = $tenant->getSubdomain();
+        $plusAddress = "{$subdomain}-sr+{$serviceRequest->service_request_number}@mail.aiding.app";
+        $content = str_replace('test-sr@mail.aiding.app', $plusAddress, $content);
+
+        // Remove In-Reply-To and References so only plus-code is viable
+        $content = str_replace('In-Reply-To: <SR-TEST123456.1.1740000000000@mail.aiding.app>', '', $content);
+        $content = str_replace('References: <SR-TEST123456.1.1740000000000@mail.aiding.app>', '', $content);
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        /** @var ProcessSesS3InboundEmail $mock */
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        invade($mock)->emailFilePath = 's3_email';
+
+        $mock->handle();
+
+        $tenant->makeCurrent();
+
+        assertDatabaseCount(ServiceRequestUpdate::class, 1);
+        assertDatabaseHas(ServiceRequestUpdate::class, [
+            'service_request_id' => $serviceRequest->getKey(),
+            'internal' => false,
+            'created_by_id' => $contact->getKey(),
+            'created_by_type' => $contact->getMorphClass(),
+        ]);
+
+        $filesystem->assertMissing('s3_email');
+    });
+
+    it('SR reply resolves via body reference when no plus-code or headers match', function () {
+        $tenant = Tenant::query()->firstOrFail();
+
+        assert($tenant instanceof Tenant);
+
+        [$contact, $serviceRequest] = $tenant->execute(function () {
+            $contact = Contact::factory()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+            ]);
+
+            $serviceRequest = ServiceRequest::factory()->create([
+                'respondent_id' => $contact->getKey(),
+            ]);
+
+            return [$contact, $serviceRequest];
+        });
+
+        Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        assert($filesystem instanceof FilesystemAdapter);
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_sr_reply'));
+
+        // Remove In-Reply-To and References so headers won't match
+        $content = str_replace('In-Reply-To: <SR-TEST123456.1.1740000000000@mail.aiding.app>', '', $content);
+        $content = str_replace('References: <SR-TEST123456.1.1740000000000@mail.aiding.app>', '', $content);
+
+        // Add body reference to both text/plain and text/html parts
+        $bodyRef = "[REF:{$serviceRequest->service_request_number}]";
         $content = str_replace(
-            'SR-TEST123456.1.1740000000000@mail.aiding.app',
-            $messageId,
+            'Hello there! This should be put in S3!</div>',
+            "Hello there! This should be put in S3!<br>{$bodyRef}</div>",
+            $content,
+        );
+        $content = str_replace(
+            "Hello there! This should be put in S3!\n",
+            "Hello there! This should be put in S3!\n\n{$bodyRef}\n",
             $content,
         );
 
@@ -1374,6 +1436,53 @@ describe('Service request reply threading', function () {
 
         $tenant->makeCurrent();
 
+        assertDatabaseCount(ServiceRequestUpdate::class, 1);
+        assertDatabaseHas(ServiceRequestUpdate::class, [
+            'service_request_id' => $serviceRequest->getKey(),
+            'internal' => false,
+            'created_by_id' => $contact->getKey(),
+            'created_by_type' => $contact->getMorphClass(),
+        ]);
+
+        $filesystem->assertMissing('s3_email');
+    });
+
+    it('SR reply falls through all strategies gracefully when none match', function () {
+        Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        assert($filesystem instanceof FilesystemAdapter);
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_sr_reply'));
+
+        // Remove In-Reply-To and References so headers won't match
+        $content = str_replace('In-Reply-To: <SR-TEST123456.1.1740000000000@mail.aiding.app>', '', $content);
+        $content = str_replace('References: <SR-TEST123456.1.1740000000000@mail.aiding.app>', '', $content);
+
+        // No body reference either - all strategies fail
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        /** @var ProcessSesS3InboundEmail $mock */
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        invade($mock)->emailFilePath = 's3_email';
+
+        $mock->handle();
+
+        $tenant = Tenant::query()->first();
+
+        $tenant->makeCurrent();
+
         assertDatabaseEmpty(ServiceRequestUpdate::class);
 
         $filesystem->assertMissing('s3_email');
@@ -1393,11 +1502,9 @@ describe('Service request reply threading', function () {
                 'respondent_id' => $contact->getKey(),
             ]);
 
-            $messageId = "{$serviceRequest->service_request_number}.1.1740000000000@mail.aiding.app";
-
             // Create an OutboundEmailMessageId that matches the References header but NOT In-Reply-To
             $serviceRequest->outboundEmailMessageIds()->create([
-                'message_id' => $messageId,
+                'message_id' => "{$serviceRequest->service_request_number}.1.1740000000000",
             ]);
 
             return [$contact, $serviceRequest];

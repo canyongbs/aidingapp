@@ -34,27 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
-
 use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
+use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 
-class KnowledgeBasePlugin implements Plugin
-{
-    public function getId(): string
-    {
-        return 'knowledge-base';
-    }
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
-    public function register(Panel $panel): void
-    {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
-    }
+it('is gated by proper access control', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('knowledge_base_item.view-any');
 
-    public function boot(Panel $panel): void {}
-}
+    asSuperAdmin();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
+    KnowledgeBaseItemConcern::factory()->for($knowledgeBaseItem)->create();
+
+    actingAs($user);
+
+    livewire(KnowledgeBaseItemConcernsTable::class, ['record' => $knowledgeBaseItem])
+        ->assertActionHidden([TestAction::make('changeConcernStatus')->table()]);
+
+    $user->givePermissionTo('knowledge_base_item.*.update');
+
+    livewire(KnowledgeBaseItemConcernsTable::class, ['record' => $knowledgeBaseItem])
+        ->assertActionVisible([TestAction::make('changeConcernStatus')->table()]);
+});

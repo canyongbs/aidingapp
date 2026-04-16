@@ -34,27 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+namespace AidingApp\KnowledgeBase\Observers;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
+use AidingApp\KnowledgeBase\Notifications\AlertManagerConcernCreated;
+use AidingApp\KnowledgeBase\Notifications\AlertManagerConcernStatusChanged;
+use AidingApp\KnowledgeBase\Notifications\KnowledgeBaseItemConcernCreated;
+use AidingApp\KnowledgeBase\Notifications\KnowledgeBaseItemConcernStatusChanged;
+use App\Models\User;
 
-class KnowledgeBasePlugin implements Plugin
+class KnowledgeBaseItemConcernObserver
 {
-    public function getId(): string
+    public function created(KnowledgeBaseItemConcern $knowledgeBaseItemConcern): void
     {
-        return 'knowledge-base';
+        $knowledgeBaseItemConcern->createdBy->notifyNow(new KnowledgeBaseItemConcernCreated($knowledgeBaseItemConcern));
+
+        $knowledgeBaseItemConcern->knowledgeBaseItem->managers->each(
+            fn (User $user) => $user->notifyNow(new AlertManagerConcernCreated($knowledgeBaseItemConcern))
+        );
     }
 
-    public function register(Panel $panel): void
+    public function updated(KnowledgeBaseItemConcern $knowledgeBaseItemConcern): void
     {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
-    }
+        if ($knowledgeBaseItemConcern->wasChanged('status')) {
+            $knowledgeBaseItemConcern->createdBy->notifyNow(new KnowledgeBaseItemConcernStatusChanged($knowledgeBaseItemConcern));
 
-    public function boot(Panel $panel): void {}
+            $knowledgeBaseItemConcern->knowledgeBaseItem->managers->each(
+                fn (User $user) => $user->notifyNow(new AlertManagerConcernStatusChanged($knowledgeBaseItemConcern, $knowledgeBaseItemConcern->getOriginal('status')))
+            );
+        }
+    }
 }

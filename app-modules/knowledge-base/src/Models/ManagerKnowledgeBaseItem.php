@@ -34,14 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\KnowledgeBase\Models;
 
-use App\Support\AbstractFeatureFlag;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ServiceRequestEmailThreading extends AbstractFeatureFlag
+/**
+ * @mixin IdeHelperManagerKnowledgeBaseItem
+ */
+class ManagerKnowledgeBaseItem extends Pivot
 {
-    public function resolve(mixed $scope): mixed
+    use HasUuids;
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function manager(): BelongsTo
     {
-        return false;
+        return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    /**
+     * @return BelongsTo<KnowledgeBaseItem, $this>
+     */
+    public function knowledgeBaseItem(): BelongsTo
+    {
+        return $this->belongsTo(KnowledgeBaseItem::class);
     }
 }

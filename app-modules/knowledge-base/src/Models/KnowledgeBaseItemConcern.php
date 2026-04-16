@@ -34,27 +34,49 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+namespace AidingApp\KnowledgeBase\Models;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseItemConcernFactory;
+use AidingApp\KnowledgeBase\Enums\ConcernStatus;
+use AidingApp\KnowledgeBase\Observers\KnowledgeBaseItemConcernObserver;
+use App\Models\BaseModel;
+use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class KnowledgeBasePlugin implements Plugin
+/**
+ * @mixin IdeHelperKnowledgeBaseItemConcern
+ */
+#[ObservedBy(KnowledgeBaseItemConcernObserver::class)]
+class KnowledgeBaseItemConcern extends BaseModel implements Auditable
 {
-    public function getId(): string
-    {
-        return 'knowledge-base';
-    }
+    /** @use HasFactory<KnowledgeBaseItemConcernFactory> */
+    use HasFactory;
 
-    public function register(Panel $panel): void
-    {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
-    }
+    use SoftDeletes;
+    use AuditableTrait;
+    use HasUuids;
+    use HasUserSaveTracking;
 
-    public function boot(Panel $panel): void {}
+    protected $fillable = [
+        'description',
+        'status',
+    ];
+
+    protected $casts = [
+        'status' => ConcernStatus::class,
+    ];
+
+    /**
+     * @return BelongsTo<KnowledgeBaseItem, $this>
+     */
+    public function knowledgeBaseItem(): BelongsTo
+    {
+        return $this->belongsTo(KnowledgeBaseItem::class);
+    }
 }

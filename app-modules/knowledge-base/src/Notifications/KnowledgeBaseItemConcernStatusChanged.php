@@ -34,27 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+namespace AidingApp\KnowledgeBase\Notifications;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
+use App\Models\User;
+use Filament\Notifications\Notification as FilamentNotification;
+use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
+use Illuminate\Support\HtmlString;
 
-class KnowledgeBasePlugin implements Plugin
+class KnowledgeBaseItemConcernStatusChanged extends Notification
 {
-    public function getId(): string
+    use Queueable;
+
+    public function __construct(public KnowledgeBaseItemConcern $knowledgeBaseItemConcern) {}
+
+    /**
+     * @return array<int, string>
+     */
+    public function via(User $notifiable): array
     {
-        return 'knowledge-base';
+        return ['database'];
     }
 
-    public function register(Panel $panel): void
+    /**
+     * @return array<string, mixed>
+     */
+    public function toDatabase(User $notifiable): array
     {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
-    }
+        $knowledgeBaseItem = $this->knowledgeBaseItemConcern->knowledgeBaseItem;
 
-    public function boot(Panel $panel): void {}
+        $url = KnowledgeBaseItemResource::getUrl('view', ['record' => $knowledgeBaseItem->getKey()]);
+
+        $link = new HtmlString("<a href='{$url}' target='_blank' class='underline'>{$knowledgeBaseItem->title}</a>");
+
+        return FilamentNotification::make()
+            ->title("The status has been changed to {$this->knowledgeBaseItemConcern->status->getLabel()} on a knowledge base item you raised a concern on {$link}.")
+            ->success()
+            ->getDatabaseMessage();
+    }
 }

@@ -58,6 +58,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use ReflectionClass;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Message;
 use Throwable;
 
 class MailChannel extends BaseMailChannel
@@ -149,6 +150,16 @@ class MailChannel extends BaseMailChannel
                 if ($sentMessage ?? null) {
                     $result->success = true;
                     $result->recipients = $sentMessage->getEnvelope()->getRecipients();
+
+                    $originalMessage = $sentMessage->getOriginalMessage();
+
+                    if ($originalMessage instanceof Message) {
+                        $sesMessageId = $originalMessage->getHeaders()->get('X-SES-Message-ID');
+
+                        if ($sesMessageId) {
+                            $result->messageId = $sesMessageId->getBodyAsString();
+                        }
+                    }
                 }
             } else {
                 $result = new EmailChannelResultData(

@@ -34,27 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
-
-class KnowledgeBasePlugin implements Plugin
-{
-    public function getId(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return 'knowledge-base';
+        Schema::create('knowledge_base_item_concerns', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->string('description');
+            $table->string('status');
+            $table->foreignUuid('created_by_id')->constrained('users');
+            $table->foreignUuid('last_updated_by_id')->constrained('users');
+            $table->foreignUuid('knowledge_base_item_id')->constrained('knowledge_base_articles');
+
+            $table->timestamps();
+            $table->softDeletes();
+        });
     }
 
-    public function register(Panel $panel): void
+    public function down(): void
     {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
+        Schema::dropIfExists('knowledge_base_item_concerns');
     }
-
-    public function boot(Panel $panel): void {}
-}
+};
