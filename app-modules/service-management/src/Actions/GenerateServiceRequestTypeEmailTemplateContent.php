@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
 use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
+use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 
@@ -49,15 +50,39 @@ class GenerateServiceRequestTypeEmailTemplateContent
      */
     public function __invoke(string|array $content, array $mergeData, Model $record, string $recordAttribute): HtmlString
     {
-        $content = tiptap_converter()
-            ->mergeTagsMap($mergeData)
-            ->record($record, $recordAttribute)
-            ->blocks([
+        $content = RichContentRenderer::make($content)
+            ->fileAttachmentsDisk('s3-public')
+            ->mergeTags($mergeData)
+            ->customBlocks([
                 ServiceRequestTypeEmailTemplateButtonBlock::class,
                 SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
             ])
-            ->asHTML($content);
+            ->toHtml();
 
-        return str($content)->sanitizeHtml()->toHtmlString();
+        // Convert CSS variable-based styles to inline styles for email client compatibility.
+        // The RichEditor uses CSS custom properties that email clients don't support.
+
+        // Text colors: style="--color: #hex; --dark-color: #hex" → style="color: #hex"
+        $content = preg_replace(
+            '/style="--color:\s*([^;]+);\s*--dark-color:\s*[^"]*"/',
+            'style="color: $1"',
+            $content,
+        );
+
+        // Grid layout: style="--cols: repeat(X, ...)" → style="display: table; width: 100%"
+        $content = preg_replace(
+            '/style="--cols:\s*[^"]*"/',
+            'style="display: table; width: 100%; table-layout: fixed;"',
+            $content,
+        );
+
+        // Grid columns: style="--col-span: span X / span X" → style="display: table-cell; vertical-align: top; padding: 0 8px"
+        $content = preg_replace(
+            '/style="--col-span:\s*[^"]*"/',
+            'style="display: table-cell; vertical-align: top; padding: 0 8px;"',
+            $content,
+        );
+
+        return str($content)->toHtmlString();
     }
 }

@@ -36,29 +36,26 @@
 
 namespace AidingApp\ServiceManagement\Filament\Blocks;
 
+use Filament\Actions\Action;
+use Filament\Forms\Components\RichEditor\RichContentCustomBlock;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Component;
-use FilamentTiptapEditor\TiptapBlock;
 
-class SurveyResponseEmailTemplateTakeSurveyButtonBlock extends TiptapBlock
+class SurveyResponseEmailTemplateTakeSurveyButtonBlock extends RichContentCustomBlock
 {
-    public string $preview = 'service-management::blocks.previews.take-survey-link';
-
-    public string $rendered = 'service-management::blocks.rendered.take-survey-link';
-
-    public ?string $icon = null;
-
-    public ?string $label = 'Take Survey';
-
-    public string $width = 'md';
-
-    /**
-     * @return array<int, Component>
-     */
-    public function getFormSchema(): array
+    public static function getId(): string
     {
-        return [
+        return 'surveyResponseEmailTemplateTakeSurveyButtonBlock';
+    }
+
+    public static function getLabel(): string
+    {
+        return 'Take Survey';
+    }
+
+    public static function configureEditorAction(Action $action): Action
+    {
+        return $action->schema([
             TextInput::make('label')
                 ->label('Button Label')
                 ->required()
@@ -75,6 +72,31 @@ class SurveyResponseEmailTemplateTakeSurveyButtonBlock extends TiptapBlock
                 ->default('center')
                 ->required()
                 ->placeholder('Enter the button alignment (e.g. left, right, center)'),
-        ];
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $config
+     */
+    public static function getPreviewLabel(array $config): string
+    {
+        return $config['label'] ?? 'Take Survey';
+    }
+
+    /**
+     * @param  array<string, mixed>  $config
+     */
+    public static function toPreviewHtml(array $config): ?string
+    {
+        return view('service-management::blocks.previews.take-survey-link', $config)->render();
+    }
+
+    /**
+     * @param  array<string, mixed>  $config
+     * @param  array<string, mixed>  $data
+     */
+    public static function toHtml(array $config, array $data): ?string
+    {
+        return view('service-management::blocks.rendered.take-survey-link', $config)->render();
     }
 }

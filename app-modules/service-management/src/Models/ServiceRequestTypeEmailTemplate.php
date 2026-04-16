@@ -40,22 +40,31 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeEmailTemplateFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
+use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
+use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
+use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
+use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * @mixin IdeHelperServiceRequestTypeEmailTemplate
  */
-class ServiceRequestTypeEmailTemplate extends Model implements Auditable
+class ServiceRequestTypeEmailTemplate extends Model implements Auditable, HasMedia, HasRichContent
 {
     /** @use HasFactory<ServiceRequestTypeEmailTemplateFactory> */
     use HasFactory;
 
     use HasUuids;
     use AuditableTrait;
+    use InteractsWithMedia;
+    use InteractsWithRichContent;
 
     protected $fillable = [
         'service_request_type_id',
@@ -78,5 +87,41 @@ class ServiceRequestTypeEmailTemplate extends Model implements Auditable
     public function serviceRequestType(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestType::class);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function getMergeTags(): array
+    {
+        return [
+            'contact name' => '{{ contact name }}',
+            'service request number' => '{{ service request number }}',
+            'created date' => '{{ created date }}',
+            'updated date' => '{{ updated date }}',
+            'status' => '{{ status }}',
+            'assigned staff name' => '{{ assigned staff name }}',
+            'title' => '{{ title }}',
+            'description' => '{{ description }}',
+            'type' => '{{ type }}',
+            'recent update' => '{{ recent update }}',
+        ];
+    }
+
+    public function setUpRichContent(): void
+    {
+        $mergeTags = static::getMergeTags();
+
+        $this->registerRichContent('subject')
+            ->mergeTags($mergeTags);
+
+        $this->registerRichContent('body')
+            ->fileAttachmentsDisk('s3-public')
+            ->fileAttachmentProvider(SpatieMediaLibraryFileAttachmentProvider::make())
+            ->mergeTags($mergeTags)
+            ->customBlocks([
+                ServiceRequestTypeEmailTemplateButtonBlock::class,
+                SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
+            ]);
     }
 }

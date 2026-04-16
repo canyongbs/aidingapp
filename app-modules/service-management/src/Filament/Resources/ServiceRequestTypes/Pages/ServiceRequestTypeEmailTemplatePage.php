@@ -44,11 +44,13 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRe
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Concerns\EditPageRedirection;
+use CanyonGBS\Common\Filament\Forms\RichContentPlugins\VideoRichContentPlugin;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -131,46 +133,52 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
         $this->getSavedNotification()->send();
     }
 
-    /** @return array<int, TiptapEditor> */
+    /** @return array<int, RichEditor> */
     protected function getEmailTemplateFormSchema(ServiceRequestTypeEmailTemplateRole $role): array
     {
-        $mergeTags = [
-            'contact name',
-            'service request number',
-            'created date',
-            'updated date',
-            'status',
-            'assigned staff name',
-            'title',
-            'description',
-            'type',
-        ];
+        $mergeTags = array_keys(ServiceRequestTypeEmailTemplate::getMergeTags());
 
-        if ($this->type === ServiceRequestEmailTemplateType::Update) {
-            $mergeTags[] = 'recent update';
+        if ($this->type !== ServiceRequestEmailTemplateType::Update) {
+            $mergeTags = array_values(array_diff($mergeTags, ['recent update']));
         }
 
         return [
-            TiptapEditor::make('subject')
+            RichEditor::make('subject')
                 ->label('Subject')
                 ->placeholder('Enter the email subject here...')
                 ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
-                ->disableToolbarMenus()
+                ->toolbarButtons([])
                 ->mergeTags($mergeTags)
-                ->showMergeTagsInBlocksPanel(false)
-                ->helperText('You may use “merge tags” to substitute information about a service request into your subject line. Insert a “{{“ in the subject line field to see a list of available merge tags'),
-
-            TiptapEditor::make('body')
+                ->helperText('You may use “merge tags” to substitute information about a service request into your subject line. Insert a “{{“ in the subject line field to see a list of available merge tags')
+                ->json(),
+            RichEditor::make('body')
                 ->label('Body')
-                ->profile('email_template')
                 ->placeholder('Enter the email body here...')
                 ->extraInputAttributes(['style' => 'min-height: 12rem;'])
+                ->toolbarButtons([
+                    ['bold', 'italic', 'underline', 'strike', 'superscript', 'subscript', 'link'],
+                    [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])->textualButtons(), 'blockquote', 'code', 'codeBlock', 'bulletList', 'orderedList', 'horizontalRule'],
+                    ['alignStart', 'alignCenter', 'alignEnd'],
+                    ['textColor', 'highlight', 'lead', 'small'],
+                    ['attachFiles', 'video'],
+                    ['grid', 'table', 'details'],
+                    ['mergeTags', 'customBlocks'],
+                    ['clearFormatting'],
+                    ['undo', 'redo'],
+                ])
                 ->mergeTags($mergeTags)
-                ->blocks([
+                ->activePanel('mergeTags')
+                ->customBlocks([
                     ServiceRequestTypeEmailTemplateButtonBlock::class,
                     SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
                 ])
-                ->columnSpanFull(),
+                ->plugins([
+                    VideoRichContentPlugin::make(),
+                ])
+                ->fileAttachmentsDisk('s3-public')
+                ->resizableImages()
+                ->columnSpanFull()
+                ->json(),
         ];
     }
 

@@ -54,7 +54,7 @@ trait HandlesServiceRequestTemplateContent
     public function getBody($body, ?ServiceRequestTypeEmailTemplateRole $urlType = null, ?string $timezone = null): HtmlString
     {
         if (is_array($body)) {
-            $body = $this->injectButtonUrlIntoTiptapContent($body, $urlType);
+            $body = $this->injectButtonUrlIntoContent($body, $urlType);
         }
 
         return app(GenerateServiceRequestTypeEmailTemplateContent::class)(
@@ -106,7 +106,7 @@ trait HandlesServiceRequestTemplateContent
      *
      * @return array<string, mixed>
      */
-    protected function injectButtonUrlIntoTiptapContent(array $content, ?ServiceRequestTypeEmailTemplateRole $urlType = null): array
+    protected function injectButtonUrlIntoContent(array $content, ?ServiceRequestTypeEmailTemplateRole $urlType = null): array
     {
         if (! isset($content['content']) || ! is_array($content['content'])) {
             return $content;
@@ -114,23 +114,23 @@ trait HandlesServiceRequestTemplateContent
 
         $content['content'] = array_map(function (array $block) use ($urlType) {
             if (
-                $block['type'] === 'tiptapBlock' &&
-                ($block['attrs']['type'] ?? null) === 'serviceRequestTypeEmailTemplateButtonBlock'
+                $block['type'] === 'customBlock' &&
+                ($block['attrs']['id'] ?? null) === 'serviceRequestTypeEmailTemplateButtonBlock'
             ) {
-                $block['attrs']['data']['url'] = $urlType == ServiceRequestTypeEmailTemplateRole::Customer ? route('portal.service-request.show', $this->serviceRequest) : ServiceRequestResource::getUrl('view', [
+                $block['attrs']['config']['url'] = $urlType == ServiceRequestTypeEmailTemplateRole::Customer ? route('portal.service-request.show', $this->serviceRequest) : ServiceRequestResource::getUrl('view', [
                     'record' => $this->serviceRequest,
                 ]);
             }
 
             if (
-                $block['type'] === 'tiptapBlock' &&
-                ($block['attrs']['type'] ?? null) === 'surveyResponseEmailTemplateTakeSurveyButtonBlock'
+                $block['type'] === 'customBlock' &&
+                ($block['attrs']['id'] ?? null) === 'surveyResponseEmailTemplateTakeSurveyButtonBlock'
             ) {
-                $block['attrs']['data']['url'] = route('feedback.service.request', $this->serviceRequest);
+                $block['attrs']['config']['url'] = route('feedback.service.request', $this->serviceRequest);
             }
 
             if (isset($block['content']) && is_array($block['content'])) {
-                $block = $this->injectButtonUrlIntoTiptapContent($block);
+                $block = $this->injectButtonUrlIntoContent($block);
             }
 
             return $block;
