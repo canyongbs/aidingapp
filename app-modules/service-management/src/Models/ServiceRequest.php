@@ -71,6 +71,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 /**
+ * @property ServiceRequestIssueCategory $issue_category
  * @property-read Contact $respondent
  *
  * @mixin IdeHelperServiceRequest

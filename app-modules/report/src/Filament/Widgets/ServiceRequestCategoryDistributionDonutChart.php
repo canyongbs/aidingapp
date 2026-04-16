@@ -124,7 +124,7 @@ class ServiceRequestCategoryDistributionDonutChart extends ChartReportWidget
             // Only include non-zero counts in the chart
             if ($count > 0) {
                 $counts[] = [
-                    'label' => $case->getLabel(),
+                    'label' => (string) $case->getLabel(),
                     'count' => $count,
                     'bg_color' => $this->colorToRgb($case->getColor()),
                 ];

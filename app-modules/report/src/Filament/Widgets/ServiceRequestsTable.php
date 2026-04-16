@@ -179,11 +179,7 @@ class ServiceRequestsTable extends BaseWidget
             ->filters([
                 SelectFilter::make('issue_category')
                     ->label('Category')
-                    ->options(
-                        collect(ServiceRequestIssueCategory::cases())
-                            ->mapWithKeys(fn (ServiceRequestIssueCategory $case) => [$case->value => $case->getLabel()])
-                            ->toArray()
-                    )
+                    ->options(ServiceRequestIssueCategory::class)
                     ->native(false),
                 SelectFilter::make('type')
                     ->relationship('priority.type', 'name')
