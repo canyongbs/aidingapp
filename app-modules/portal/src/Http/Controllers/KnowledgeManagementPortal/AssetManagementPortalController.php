@@ -72,7 +72,7 @@ class AssetManagementPortalController extends Controller
             ->paginate(10);
 
         $items = $paginator->getCollection()->map(function (AssetCheckOut $checkOut) {
-            $isReturned = !empty($checkOut->asset_check_in_id);
+            $isReturned = ! empty($checkOut->asset_check_in_id);
 
             return [
                 'id' => $checkOut->getKey(),
