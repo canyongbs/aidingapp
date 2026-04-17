@@ -49,7 +49,6 @@ use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use Closure;
 use Exception;
 use Filament\Actions\Action;
-use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Fieldset;
@@ -75,11 +74,7 @@ class SendEngagementAction extends Action
             ->modalHeading('Create new email')
             ->slideOver()
             ->model(Engagement::class)
-            ->authorize(function (RelationManager $livewire) {
-                $ownerRecord = $livewire->getOwnerRecord();
-
-                return auth()->user()->can('create', [Engagement::class, null]);
-            })
+            ->authorize(fn () => auth()->user()->can('create', [Engagement::class, null]))
             ->schema(fn (): array => $this->getFormSchema())
             ->action(function (array $data, Schema $schema) {
                 $this->createEngagement($data, $schema);
