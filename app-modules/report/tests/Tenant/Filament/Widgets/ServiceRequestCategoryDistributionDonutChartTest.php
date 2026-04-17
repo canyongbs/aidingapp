@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestCategoryRenameFeature;
 
 it('returns correct category distribution within the given date range', function () {
     $startDate = now()->subDays(10);
@@ -52,14 +53,14 @@ it('returns correct category distribution within the given date range', function
     ServiceRequest::factory()->count(3)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestCategory::Incident,
+        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Incident,
         'created_at' => now()->subDays(7),
     ])->create();
 
     ServiceRequest::factory()->count(5)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestCategory::Request,
+        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Request,
         'created_at' => now()->subDays(6),
     ])->create();
 
@@ -67,7 +68,7 @@ it('returns correct category distribution within the given date range', function
     ServiceRequest::factory()->count(2)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestCategory::Incident,
+        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Incident,
         'created_at' => now()->subDays(20),
     ])->create();
 
@@ -104,14 +105,14 @@ it('returns correct category distribution when no date filters are applied', fun
     ServiceRequest::factory()->count(4)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestCategory::Incident,
+        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Incident,
         'created_at' => now()->subDays(3),
     ])->create();
 
     ServiceRequest::factory()->count(7)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestCategory::Request,
+        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Request,
         'created_at' => now()->subMonths(1),
     ])->create();
 
@@ -139,14 +140,14 @@ it('category page filter does not affect the chart — it always shows all categ
     ServiceRequest::factory()->count(5)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestCategory::Incident,
+        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Incident,
         'created_at' => now()->subDays(2),
     ])->create();
 
     ServiceRequest::factory()->count(3)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestCategory::Request,
+        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Request,
         'created_at' => now()->subDays(2),
     ])->create();
 
@@ -179,7 +180,7 @@ it('excludes zero-count categories from the chart', function () {
     ServiceRequest::factory()->count(2)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'issue_category' => ServiceRequestCategory::Incident,
+        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Incident,
         'created_at' => now()->subDays(1),
     ])->create();
 

@@ -41,6 +41,7 @@ use AidingApp\Report\Filament\Exports\ServiceRequestsExporter;
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Filament\Actions\ExportAction;
@@ -102,7 +103,7 @@ class ServiceRequestsTable extends BaseWidget
                     )
                     ->when(
                         filled($category),
-                        fn (Builder $query) => $query->where('issue_category', $category)
+                        fn (Builder $query) => $query->where(ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category', $category)
                     )
                     ->orderBy('created_at', 'desc')
             )
@@ -115,7 +116,9 @@ class ServiceRequestsTable extends BaseWidget
                 TextColumn::make('priority.type.name')
                     ->label('Type')
                     ->searchable()
-                    ->description(fn (ServiceRequest $record): string => (string) $record->issue_category->getLabel()),
+                    ->description(fn (ServiceRequest $record): string => ServiceRequestCategoryRenameFeature::active()
+                        ? (string) $record->category->getLabel()
+                        : (string) $record->issue_category->getLabel()),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->searchable()
@@ -177,7 +180,7 @@ class ServiceRequestsTable extends BaseWidget
                     ->placeholder(''),
             ])
             ->filters([
-                SelectFilter::make('issue_category')
+                SelectFilter::make(ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category')
                     ->label('Category')
                     ->options(ServiceRequestCategory::class)
                     ->native(false),

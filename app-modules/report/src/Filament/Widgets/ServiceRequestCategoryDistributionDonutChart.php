@@ -39,6 +39,7 @@ namespace AidingApp\Report\Filament\Widgets;
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ServiceRequestCategoryRenameFeature;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Collection as BaseCollection;
@@ -112,8 +113,10 @@ class ServiceRequestCategoryDistributionDonutChart extends ChartReportWidget
     {
         $counts = [];
 
+        $categoryColumn = ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category';
+
         foreach (ServiceRequestCategory::cases() as $case) {
-            $query = ServiceRequest::where('issue_category', $case->value);
+            $query = ServiceRequest::where($categoryColumn, $case->value);
 
             if ($startDate && $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate]);
