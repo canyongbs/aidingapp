@@ -40,6 +40,7 @@ use AidingApp\Engagement\Filament\Actions\SendEngagementAction;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Notification\Enums\NotificationChannel;
+use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Timeline\Models\Timeline;
 use Filament\Actions\ViewAction;
@@ -57,6 +58,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 
 class EngagementsRelationManager extends RelationManager
@@ -191,7 +193,17 @@ class EngagementsRelationManager extends RelationManager
                     ->sortable(),
             ])
             ->headerActions([
-                SendEngagementAction::make(),
+                SendEngagementAction::make()
+                    ->resolveRecipientsUsing(function (SendEngagementAction $action): Collection {
+                        $livewire = $action->getLivewire();
+
+                        assert($livewire instanceof RelationManager);
+
+                        /** @var Collection<int, Model&CanBeNotified> $recipients */
+                        $recipients = collect([$livewire->getOwnerRecord()]);
+
+                        return $recipients;
+                    }),
             ])
             ->recordActions([
                 ViewAction::make()
