@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Actions;
 
 use Filament\Forms\Components\RichEditor\RichContentRenderer;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
@@ -47,7 +46,7 @@ class GenerateServiceRequestTypeEmailTemplateSubject
      * @param string|array<int, string|array<string, mixed>> $content
      * @param array<string, mixed> $mergeData
      */
-    public function __invoke(string|array $content, array $mergeData, Model $record, string $recordAttribute): HtmlString
+    public function __invoke(string|array $content, array $mergeData): HtmlString
     {
         $text = RichContentRenderer::make($content)
             ->mergeTags($mergeData)

@@ -60,8 +60,7 @@ trait HandlesServiceRequestTemplateContent
         return app(GenerateServiceRequestTypeEmailTemplateContent::class)(
             $body,
             $this->getMergeData($timezone),
-            $this->serviceRequest,
-            'body',
+            $this->emailTemplate,
         );
     }
 
@@ -74,8 +73,6 @@ trait HandlesServiceRequestTemplateContent
         return app(GenerateServiceRequestTypeEmailTemplateSubject::class)(
             $subject,
             $this->getMergeData($timezone),
-            $this->serviceRequest,
-            'subject',
         );
     }
 

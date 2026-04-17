@@ -36,10 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
-use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
-use Filament\Forms\Components\RichEditor\RichContentRenderer;
-use Illuminate\Database\Eloquent\Model;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use Illuminate\Support\HtmlString;
 
 class GenerateServiceRequestTypeEmailTemplateContent
@@ -48,16 +45,13 @@ class GenerateServiceRequestTypeEmailTemplateContent
      * @param string|array<int, string|array<string, mixed>> $content
      * @param array<string, mixed> $mergeData
      */
-    public function __invoke(string|array $content, array $mergeData, Model $record, string $recordAttribute): HtmlString
+    public function __invoke(string|array $content, array $mergeData, ServiceRequestTypeEmailTemplate $template): HtmlString
     {
-        $content = RichContentRenderer::make($content)
-            ->fileAttachmentsDisk('s3-public')
-            ->mergeTags($mergeData)
-            ->customBlocks([
-                ServiceRequestTypeEmailTemplateButtonBlock::class,
-                SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
-            ])
-            ->toHtml();
+        $template->body = $content;
+
+        $content = $template->getRichContentAttribute('body')
+            ?->mergeTags($mergeData)
+            ->toHtml() ?? '';
 
         // Convert CSS variable-based styles to inline styles for email client compatibility.
         // The RichEditor uses CSS custom properties that email clients don't support.

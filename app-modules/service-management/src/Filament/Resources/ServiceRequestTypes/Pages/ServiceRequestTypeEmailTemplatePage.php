@@ -82,15 +82,27 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
             $roles = [ServiceRequestTypeEmailTemplateRole::Customer];
         }
 
+        /** @var ServiceRequestType $record */
+        $record = $this->getRecord();
+
         return $schema
             ->components([
                 Tabs::make('Email template roles')
                     ->persistTab()
                     ->id('email-template-role-tabs')
                     ->tabs(array_map(
-                        fn (ServiceRequestTypeEmailTemplateRole $role) => Tab::make($role->getLabel())
-                            ->schema($this->getEmailTemplateFormSchema($role))
-                            ->statePath($role->value),
+                        function (ServiceRequestTypeEmailTemplateRole $role) use ($record): Tab {
+                            $template = ServiceRequestTypeEmailTemplate::where([
+                                'service_request_type_id' => $record->getKey(),
+                                'type' => $this->type,
+                                'role' => $role,
+                            ])->first();
+
+                            return Tab::make($role->getLabel())
+                                ->schema($this->getEmailTemplateFormSchema($role))
+                                ->statePath($role->value)
+                                ->model($template ?? ServiceRequestTypeEmailTemplate::class);
+                        },
                         $roles
                     ))
                     ->columnSpanFull(),
@@ -100,17 +112,19 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     public function save(bool $shouldRedirect = true, bool $shouldSendSavedNotification = true): void
     {
         $data = $this->form->getState();
+        $rawData = $this->form->getRawState();
 
         /** @var ServiceRequestType $record */
         $record = $this->getRecord();
 
         foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role) {
             $templateData = $data[$role->value] ?? null;
+            $rawTemplateData = $rawData[$role->value] ?? null;
 
-            if (
-                ! $templateData ||
-                (blank($templateData['subject']) && blank($templateData['body']))
-            ) {
+            $subject = $this->normalizeRichContent($templateData['subject'] ?? $rawTemplateData['subject'] ?? null);
+            $body = $this->normalizeRichContent($templateData['body'] ?? $rawTemplateData['body'] ?? null);
+
+            if (blank($subject) && blank($body)) {
                 continue;
             }
 
@@ -120,17 +134,65 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 'role' => $role,
             ]);
 
-            if (! $template->exists && (blank($templateData['subject']) || blank($templateData['body']))) {
+            if (! $template->exists && (blank($subject) || blank($body))) {
                 continue;
             }
 
-            $template->subject = $templateData['subject'] ?? $template->subject;
-            $template->body = $templateData['body'] ?? $template->body;
+            $wasNew = ! $template->exists;
+
+            $template->subject = $subject ?? $template->subject;
+            $template->body = $body ?? $template->body;
 
             $template->save();
+
+            if ($wasNew) {
+                $this->form->getComponent("email-template-body-{$role->value}")
+                    ?->model($template)
+                    ->saveRelationships();
+            }
         }
 
         $this->getSavedNotification()->send();
+    }
+
+    /**
+     * Returns null when the given rich content is an empty document (no text, images, or custom blocks).
+     *
+     * @param mixed $content
+     *
+     * @return mixed
+     */
+    protected function normalizeRichContent($content)
+    {
+        if (! is_array($content)) {
+            return $content;
+        }
+
+        $hasContent = false;
+
+        $walk = function (array $node) use (&$walk, &$hasContent): void {
+            if (! empty($node['text'])) {
+                $hasContent = true;
+
+                return;
+            }
+
+            if (in_array($node['type'] ?? null, ['image', 'customBlock', 'videoEmbed', 'horizontalRule', 'hardBreak'], true)) {
+                $hasContent = true;
+
+                return;
+            }
+
+            foreach ($node['content'] ?? [] as $child) {
+                if (is_array($child)) {
+                    $walk($child);
+                }
+            }
+        };
+
+        $walk($content);
+
+        return $hasContent ? $content : null;
     }
 
     /** @return array<int, RichEditor> */
@@ -152,6 +214,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->helperText('You may use “merge tags” to substitute information about a service request into your subject line. Insert a “{{“ in the subject line field to see a list of available merge tags')
                 ->json(),
             RichEditor::make('body')
+                ->key("email-template-body-{$role->value}")
                 ->label('Body')
                 ->placeholder('Enter the email body here...')
                 ->extraInputAttributes(['style' => 'min-height: 12rem;'])
