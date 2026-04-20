@@ -40,7 +40,6 @@ use AidingApp\KnowledgeBase\Filament\Actions\CreateConcernAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use App\Features\KnowledgeBaseItemConcernFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
@@ -110,13 +109,11 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                 TextEntry::make('division.name')
                                     ->label('Division'),
                                 TextEntry::make('managers')
-                                    ->visible(KnowledgeBaseItemConcernFeature::active())
                                     ->label('Managers')
                                     ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->managers->pluck('name')->join(', ')),
                             ])
                             ->id('metadata'),
                         Tab::make('Concerns')
-                            ->visible(KnowledgeBaseItemConcernFeature::active())
                             ->schema([
                                 Livewire::make(KnowledgeBaseItemConcernsTable::class, ['record' => $this->getRecord()]),
                             ])
