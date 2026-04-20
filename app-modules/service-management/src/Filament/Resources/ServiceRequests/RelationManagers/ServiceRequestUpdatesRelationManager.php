@@ -75,7 +75,7 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
-        
+
         return $schema
             ->components([
                 Textarea::make('update')
@@ -115,7 +115,7 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                             ->multiple($uploadsMediaCollection->getMaxNumberOfFiles() > 1)
                             ->when($uploadsMediaCollection->getMaxNumberOfFiles(), fn (SpatieMediaLibraryFileUpload $component) => $component->maxFiles($uploadsMediaCollection->getMaxNumberOfFiles()))
                             ->when($uploadsMediaCollection->getMaxFileSizeInMB(), fn (SpatieMediaLibraryFileUpload $component) => $component->maxSize($uploadsMediaCollection->getMaxFileSizeInMB() * 1000))
-                            ->acceptedFileTypes(fn() => $uploadsMediaCollection->getMimes())
+                            ->acceptedFileTypes(fn () => $uploadsMediaCollection->getMimes())
                             ->downloadable(),
                     ]),
             ]);
