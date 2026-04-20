@@ -65,6 +65,6 @@ enum ServiceRequestCategory: string implements HasColor, HasLabel
 
     public function getRgb(): string
     {
-      return Color::convertToRgb(FilamentColor::getColors()[$this->getColor()][500]);
+        return Color::convertToRgb(FilamentColor::getColors()[$this->getColor()][500]);
     }
 }
