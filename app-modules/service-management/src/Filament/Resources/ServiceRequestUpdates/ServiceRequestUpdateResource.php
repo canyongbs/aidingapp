@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates;
 
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\CreateServiceRequestUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\EditServiceRequestUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\ListServiceRequestUpdates;
@@ -49,9 +50,11 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -69,6 +72,8 @@ class ServiceRequestUpdateResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
+        
         return $schema
             ->components([
                 Select::make('service_request_id')
@@ -89,6 +94,18 @@ class ServiceRequestUpdateResource extends Resource
                 Toggle::make('internal')
                     ->label('Internal')
                     ->rule(['boolean']),
+                Section::make('Uploads')
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('uploads')
+                            ->hiddenLabel()
+                            ->visibility('private')
+                            ->collection($uploadsMediaCollection->getName())
+                            ->multiple($uploadsMediaCollection->getMaxNumberOfFiles() > 1)
+                            ->when($uploadsMediaCollection->getMaxNumberOfFiles(), fn (SpatieMediaLibraryFileUpload $component) => $component->maxFiles($uploadsMediaCollection->getMaxNumberOfFiles()))
+                            ->when($uploadsMediaCollection->getMaxFileSizeInMB(), fn (SpatieMediaLibraryFileUpload $component) => $component->maxSize($uploadsMediaCollection->getMaxFileSizeInMB() * 1000))
+                            ->acceptedFileTypes(fn() => $uploadsMediaCollection->getMimes())
+                            ->downloadable(),
+                    ]),
             ]);
     }
 
