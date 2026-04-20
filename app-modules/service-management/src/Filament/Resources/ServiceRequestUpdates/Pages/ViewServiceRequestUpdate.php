@@ -82,7 +82,7 @@ class ViewServiceRequestUpdate extends ViewRecord
     public function infolist(Schema $schema): Schema
     {
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
-        
+
         return $schema
             ->schema([
                 Section::make()
