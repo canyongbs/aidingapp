@@ -43,7 +43,6 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\TagsForClass;
 use Filament\Actions\BulkActionGroup;
