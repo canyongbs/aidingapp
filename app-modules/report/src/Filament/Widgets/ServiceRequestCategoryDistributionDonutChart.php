@@ -129,28 +129,11 @@ class ServiceRequestCategoryDistributionDonutChart extends ChartReportWidget
                 $counts[] = [
                     'label' => (string) $case->getLabel(),
                     'count' => $count,
-                    'bg_color' => $this->colorToRgb($case->getColor()),
+                    'bg_color' => $case->getRgb(),
                 ];
             }
         }
 
         return collect($counts);
-    }
-
-    /**
-     * Convert Filament color name to RGB format
-     */
-    private function colorToRgb(string $color): string
-    {
-        $colorMap = [
-            'danger' => 'rgb(239, 68, 68)',     // red-500
-            'primary' => 'rgb(59, 130, 246)',   // blue-500
-            'success' => 'rgb(34, 197, 94)',    // green-500
-            'warning' => 'rgb(245, 158, 11)',   // amber-500
-            'info' => 'rgb(14, 165, 233)',      // sky-500
-            'gray' => 'rgb(107, 114, 128)',     // gray-500
-        ];
-
-        return $colorMap[$color] ?? 'rgb(59, 130, 246)';
     }
 }

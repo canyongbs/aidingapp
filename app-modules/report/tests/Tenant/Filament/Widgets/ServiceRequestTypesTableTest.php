@@ -171,7 +171,10 @@ it('shows correct incident and request counts per type', function () {
         ->assertTableColumnFormattedStateSet('request_count', '5', record: $type);
 });
 
-it('incident and request counts are not affected by the category page filter', function () {
+it('applies date filters consistently to total, incident, and request counts', function () {
+    $startDate = now()->subDays(10);
+    $endDate = now()->subDays(5);
+
     $type = ServiceRequestType::factory()->create(['name' => 'Network Issues']);
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
 
@@ -179,26 +182,42 @@ it('incident and request counts are not affected by the category page filter', f
         'classification' => SystemServiceRequestClassification::Open,
     ])->create();
 
+    ServiceRequest::factory()->count(2)->state([
+        'priority_id' => $priority->id,
+        'status_id' => $status->id,
+        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Incident,
+        'created_at' => now()->subDays(7),
+    ])->create();
+
+    ServiceRequest::factory()->count(3)->state([
+        'priority_id' => $priority->id,
+        'status_id' => $status->id,
+        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Request,
+        'created_at' => now()->subDays(6),
+    ])->create();
+
     ServiceRequest::factory()->count(4)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
         (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Incident,
+        'created_at' => now()->subDays(20),
     ])->create();
 
-    ServiceRequest::factory()->count(2)->state([
+    ServiceRequest::factory()->count(1)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
         (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Request,
+        'created_at' => now()->subDays(30),
     ])->create();
 
-    // With category page filter set to Incident:
-    // Count = total (6) — category filter does NOT affect the Request Types table
-    // Incidents = 4, Requests = 2 (always the full breakdown)
     livewire(ServiceRequestTypesTable::class, [
-        'cacheTag' => 'test-service-request-types-category-filter-independence',
-        'pageFilters' => ['category' => ServiceRequestCategory::Incident->value],
+        'cacheTag' => 'test-service-request-types-date-filter-invariant',
+        'pageFilters' => [
+            'startDate' => $startDate->toDateString(),
+            'endDate' => $endDate->toDateString(),
+        ],
     ])
-        ->assertTableColumnFormattedStateSet('service_requests_count', '6', record: $type)
-        ->assertTableColumnFormattedStateSet('incident_count', '4', record: $type)
-        ->assertTableColumnFormattedStateSet('request_count', '2', record: $type);
+        ->assertTableColumnFormattedStateSet('service_requests_count', '5', record: $type)
+        ->assertTableColumnFormattedStateSet('incident_count', '2', record: $type)
+        ->assertTableColumnFormattedStateSet('request_count', '3', record: $type);
 });

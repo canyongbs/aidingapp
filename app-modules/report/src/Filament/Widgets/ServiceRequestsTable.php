@@ -86,7 +86,6 @@ class ServiceRequestsTable extends BaseWidget
     {
         $startDate = $this->getStartDate();
         $endDate = $this->getEndDate();
-        $category = $this->pageFilters['category'] ?? null;
 
         return $table
             ->query(
@@ -100,10 +99,6 @@ class ServiceRequestsTable extends BaseWidget
                     ->when(
                         $startDate && $endDate,
                         fn (Builder $query) => $query->whereBetween('created_at', [$startDate, $endDate])
-                    )
-                    ->when(
-                        filled($category),
-                        fn (Builder $query) => $query->where(ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category', $category)
                     )
                     ->orderBy('created_at', 'desc')
             )

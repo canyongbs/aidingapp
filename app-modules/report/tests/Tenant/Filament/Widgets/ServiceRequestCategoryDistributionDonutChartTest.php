@@ -132,45 +132,6 @@ it('returns correct category distribution when no date filters are applied', fun
         ->and($counts[$requestIndex])->toBe(7);
 });
 
-it('category page filter does not affect the chart — it always shows all categories', function () {
-    $type = ServiceRequestType::factory()->create();
-    $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
-    $status = ServiceRequestStatus::factory()->create();
-
-    ServiceRequest::factory()->count(5)->state([
-        'priority_id' => $priority->id,
-        'status_id' => $status->id,
-        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Incident,
-        'created_at' => now()->subDays(2),
-    ])->create();
-
-    ServiceRequest::factory()->count(3)->state([
-        'priority_id' => $priority->id,
-        'status_id' => $status->id,
-        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Request,
-        'created_at' => now()->subDays(2),
-    ])->create();
-
-    $widget = new ServiceRequestCategoryDistributionDonutChart();
-    $widget->cacheTag = 'test-category-distribution-category-filter';
-    // Even with a stale category in pageFilters, the chart ignores it
-    $widget->pageFilters = ['category' => ServiceRequestCategory::Incident->value];
-
-    $data = $widget->getData();
-
-    $labels = $data['labels']->toArray();
-    $counts = $data['datasets'][0]['data']->toArray();
-
-    // Both categories must appear — chart is not filtered by category
-    expect($labels)->toContain(ServiceRequestCategory::Incident->getLabel())
-        ->and($labels)->toContain(ServiceRequestCategory::Request->getLabel());
-
-    $incidentIndex = array_search(ServiceRequestCategory::Incident->getLabel(), $labels);
-    $requestIndex = array_search(ServiceRequestCategory::Request->getLabel(), $labels);
-    expect($counts[$incidentIndex])->toBe(5)
-        ->and($counts[$requestIndex])->toBe(3);
-});
-
 it('excludes zero-count categories from the chart', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();

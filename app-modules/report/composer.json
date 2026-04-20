@@ -5,7 +5,6 @@
     "version": "1.0",
     "license": "proprietary",
     "require": {
-        "canyon-gbs/aiding-app-service-management": "*",
         "filament/filament": "^4.0"
     },
     "autoload": {
