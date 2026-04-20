@@ -39,7 +39,6 @@ namespace AidingApp\Authorization\Http\Controllers;
 use AidingApp\Authorization\Http\Requests\GenerateLoginOtpCodeRequest;
 use AidingApp\Authorization\Models\OtpLoginCode;
 use AidingApp\Authorization\Notifications\OtpCodeNotification;
-use App\Features\OtpCodeLoginFeature;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -56,12 +55,6 @@ class GenerateOtpLoginCodeController
     {
         try {
             DB::beginTransaction();
-
-            if (! OtpCodeLoginFeature::active()) {
-                return response()->json([
-                    'link' => null,
-                ]);
-            }
 
             $data = $request->validated();
 
