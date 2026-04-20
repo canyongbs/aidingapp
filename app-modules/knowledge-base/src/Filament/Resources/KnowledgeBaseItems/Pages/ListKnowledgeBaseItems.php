@@ -242,7 +242,7 @@ class ListKnowledgeBaseItems extends ListRecords
                         $uuidMap = [];
 
                         foreach ($media as $mediaItem) {
-                            $newMedia = $mediaItem->copy($replica, 'article_details', 's3-public');
+                            $newMedia = $mediaItem->copy($replica, 'article_details');
                             $uuidMap[$mediaItem->uuid] = $newMedia->uuid;
                         }
 
