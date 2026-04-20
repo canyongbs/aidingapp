@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestUpdateFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
+use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Timelines\ServiceRequestUpdateTimeline;
@@ -53,16 +54,19 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * @mixin IdeHelperServiceRequestUpdate
  */
 #[ObservedBy([ServiceRequestUpdateObserver::class])]
-class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATimeline
+class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATimeline, HasMedia
 {
     use SoftDeletes;
     use HasUuids;
     use AuditableTrait;
+    use InteractsWithMedia;
 
     /** @use HasFactory<ServiceRequestUpdateFactory> */
     use HasFactory;
@@ -81,6 +85,35 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
         'internal' => 'boolean',
         'update_type' => ServiceRequestUpdateType::class,
     ];
+
+    public function registerMediaCollections(): void
+    {
+        $this->mediaCollections[] = UploadsMediaCollection::create()
+            ->maxFileSizeInMB(10)
+            ->maxNumberOfFiles(6)
+            ->mimes([
+                'application/pdf' => ['pdf'],
+                'application/vnd.ms-excel' => ['xls'],
+                'application/vnd.ms-powerpoint' => ['ppt'],
+                'application/vnd.ms-word' => ['doc'],
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation' => ['pptx'],
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => ['xlsx'],
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => ['docx'],
+                'image/jpeg' => ['jpg', 'jpeg'],
+                'image/pdf' => ['pdf'],
+                'image/png' => ['png'],
+                'text/csv' => ['csv'],
+                'text/markdown' => ['md', 'markdown', 'mkd'],
+                'text/plain' => ['txt', 'text'],
+                'application/octet-stream' => ['log'],
+                '.log' => ['log'],
+                'video/mp4' => ['mp4'],
+                'video/webm' => ['webm'],
+                'video/ogg' => ['ogg'],
+                'video/quicktime' => ['quicktime'],
+                'video/x-msvideo' => ['x-msvideo'],
+            ]);
+    }
 
     /**
      * @return BelongsTo<ServiceRequest, $this>
