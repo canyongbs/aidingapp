@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates;
 
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\Feedback;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageAssignments;
@@ -55,6 +56,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -85,6 +87,8 @@ class ServiceRequestUpdateResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
+        
         return $schema
             ->components([
                 Textarea::make('update')

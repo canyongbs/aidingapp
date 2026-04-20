@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestUpdateFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
+use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Timelines\ServiceRequestUpdateTimeline;

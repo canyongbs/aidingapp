@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Relatio
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Actions\DraftServiceRequestUpdateWithAiAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
@@ -64,6 +65,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Symfony\Component\Stopwatch\Section;
 
 class ServiceRequestUpdatesRelationManager extends RelationManager
 {
@@ -73,6 +75,8 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
+        
         return $schema
             ->components([
                 Textarea::make('update')

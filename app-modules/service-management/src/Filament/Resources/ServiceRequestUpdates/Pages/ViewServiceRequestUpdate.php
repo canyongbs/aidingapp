@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\P
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -80,6 +81,8 @@ class ViewServiceRequestUpdate extends ViewRecord
 
     public function infolist(Schema $schema): Schema
     {
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
+        
         return $schema
             ->schema([
                 Section::make()
