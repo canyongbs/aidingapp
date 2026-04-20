@@ -167,7 +167,7 @@ trait HandlesServiceRequestTemplateContent
 
         $updateText = "{$creatorInfo}\n\n{$updateDate} - {$recentUpdate->update}";
 
-        if($recentUpdate->hasMedia($uploadsMediaCollection->getName())) {
+        if ($recentUpdate->hasMedia($uploadsMediaCollection->getName())) {
             $updateText .= "\n\nNote: Files were attached with this update. Please login the service portal to see the files.";
         }
 
