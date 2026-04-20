@@ -97,6 +97,9 @@ class SurveyResponseEmailTemplateTakeSurveyButtonBlock extends RichContentCustom
      */
     public static function toHtml(array $config, array $data): ?string
     {
-        return view('service-management::blocks.rendered.take-survey-link', $config)->render();
+        return view('service-management::blocks.rendered.take-survey-link', [
+            ...$config,
+            'url' => $data['feedbackUrl'] ?? null,
+        ])->render();
     }
 }

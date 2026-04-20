@@ -121,12 +121,8 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
             $templateData = $data[$role->value] ?? null;
             $rawTemplateData = $rawData[$role->value] ?? null;
 
-            $subject = $this->normalizeRichContent($templateData['subject'] ?? $rawTemplateData['subject'] ?? null);
-            $body = $this->normalizeRichContent($templateData['body'] ?? $rawTemplateData['body'] ?? null);
-
-            if (blank($subject) && blank($body)) {
-                continue;
-            }
+            $subject = $templateData['subject'] ?? null;
+            $body = $templateData['body'] ?? $this->normalizeRichContent($rawTemplateData['body'] ?? null);
 
             $template = ServiceRequestTypeEmailTemplate::firstOrNew([
                 'service_request_type_id' => $record->getKey(),
@@ -134,14 +130,22 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 'role' => $role,
             ]);
 
-            if (! $template->exists && (blank($subject) || blank($body))) {
+            if (blank($subject) && blank($body)) {
+                if ($template->exists) {
+                    $template->delete();
+                }
+
+                continue;
+            }
+
+            if (! $template->exists && blank($subject)) {
                 continue;
             }
 
             $wasNew = ! $template->exists;
 
-            $template->subject = $subject ?? $template->subject;
-            $template->body = $body ?? $template->body;
+            $template->subject = $subject;
+            $template->body = $body;
 
             $template->save();
 
@@ -204,6 +208,8 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
             $mergeTags = array_values(array_diff($mergeTags, ['recent update']));
         }
 
+        $normalizeEmptyContent = fn ($state) => $this->normalizeRichContent($state);
+
         return [
             RichEditor::make('subject')
                 ->label('Subject')
@@ -212,6 +218,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->toolbarButtons([])
                 ->mergeTags($mergeTags)
                 ->helperText('You may use “merge tags” to substitute information about a service request into your subject line. Insert a “{{“ in the subject line field to see a list of available merge tags')
+                ->dehydrateStateUsing($normalizeEmptyContent)
                 ->json(),
             RichEditor::make('body')
                 ->key("email-template-body-{$role->value}")
@@ -241,6 +248,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->fileAttachmentsDisk('s3-public')
                 ->resizableImages()
                 ->columnSpanFull()
+                ->dehydrateStateUsing($normalizeEmptyContent)
                 ->json(),
         ];
     }

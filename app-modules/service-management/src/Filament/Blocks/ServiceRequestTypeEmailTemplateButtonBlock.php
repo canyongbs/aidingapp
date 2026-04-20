@@ -97,6 +97,9 @@ class ServiceRequestTypeEmailTemplateButtonBlock extends RichContentCustomBlock
      */
     public static function toHtml(array $config, array $data): ?string
     {
-        return view('service-management::blocks.rendered.service-request-link', $config)->render();
+        return view('service-management::blocks.rendered.service-request-link', [
+            ...$config,
+            'url' => $data['serviceRequestUrl'] ?? null,
+        ])->render();
     }
 }

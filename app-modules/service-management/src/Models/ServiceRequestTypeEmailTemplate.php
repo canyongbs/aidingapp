@@ -49,6 +49,8 @@ use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -87,6 +89,67 @@ class ServiceRequestTypeEmailTemplate extends Model implements Auditable, HasMed
     public function serviceRequestType(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestType::class);
+    }
+
+    /**
+     * @param string|array<int, string|array<string, mixed>> $content
+     * @param array<string, mixed> $mergeData
+     * @param array<string, mixed> $customBlockData
+     */
+    public function getBody(string|array $content, array $mergeData, array $customBlockData = []): HtmlString
+    {
+        $this->body = $content;
+
+        $html = $this->getRichContentAttribute('body')
+            ?->customBlocks([
+                ServiceRequestTypeEmailTemplateButtonBlock::class => $customBlockData,
+                SurveyResponseEmailTemplateTakeSurveyButtonBlock::class => $customBlockData,
+            ])
+            ->mergeTags($mergeData)
+            ->toHtml() ?? '';
+
+        // Convert CSS variable-based styles to inline styles for email client compatibility.
+        // Text colors: style="--color: #hex; --dark-color: #hex" → style="color: #hex"
+        $html = preg_replace(
+            '/style="--color:\s*([^;]+);\s*--dark-color:\s*[^"]*"/',
+            'style="color: $1"',
+            $html,
+        );
+
+        // Grid layout: style="--cols: repeat(X, ...)" → style="display: table; width: 100%"
+        $html = preg_replace(
+            '/style="--cols:\s*[^"]*"/',
+            'style="display: table; width: 100%; table-layout: fixed;"',
+            $html,
+        );
+
+        // Grid columns: style="--col-span: span X / span X" → style="display: table-cell; vertical-align: top; padding: 0 8px"
+        $html = preg_replace(
+            '/style="--col-span:\s*[^"]*"/',
+            'style="display: table-cell; vertical-align: top; padding: 0 8px;"',
+            $html,
+        );
+
+        return new HtmlString($html);
+    }
+
+    /**
+     * @param string|array<int, string|array<string, mixed>> $content
+     * @param array<string, mixed> $mergeData
+     */
+    public function getSubject(string|array $content, array $mergeData): HtmlString
+    {
+        $this->subject = $content;
+
+        $text = $this->getRichContentAttribute('subject')
+            ?->mergeTags($mergeData)
+            ->toText() ?? '';
+
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = trim(preg_replace('/\s+/u', ' ', $text));
+        $text = Str::limit($text, 988, '');
+
+        return new HtmlString($text);
     }
 
     /**

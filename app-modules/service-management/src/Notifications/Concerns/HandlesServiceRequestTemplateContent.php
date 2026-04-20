@@ -37,11 +37,10 @@
 namespace AidingApp\ServiceManagement\Notifications\Concerns;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateContent;
-use AidingApp\ServiceManagement\Actions\GenerateServiceRequestTypeEmailTemplateSubject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use App\Models\User;
+use Closure;
 use Illuminate\Support\HtmlString;
 
 trait HandlesServiceRequestTemplateContent
@@ -53,15 +52,12 @@ trait HandlesServiceRequestTemplateContent
      */
     public function getBody($body, ?ServiceRequestTypeEmailTemplateRole $urlType = null, ?string $timezone = null): HtmlString
     {
-        if (is_array($body)) {
-            $body = $this->injectButtonUrlIntoContent($body, $urlType);
-        }
-
-        return app(GenerateServiceRequestTypeEmailTemplateContent::class)(
-            $body,
-            $this->getMergeData($timezone),
-            $this->emailTemplate,
-        );
+        return $this->emailTemplate->getBody($body, $this->getMergeData($timezone), [
+            'serviceRequestUrl' => $urlType === ServiceRequestTypeEmailTemplateRole::Customer
+                ? route('portal.service-request.show', $this->serviceRequest)
+                : ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]),
+            'feedbackUrl' => route('feedback.service.request', $this->serviceRequest),
+        ]);
     }
 
     /**
@@ -70,70 +66,28 @@ trait HandlesServiceRequestTemplateContent
      */
     public function getSubject($subject, ?string $timezone = null): HtmlString
     {
-        return app(GenerateServiceRequestTypeEmailTemplateSubject::class)(
-            $subject,
-            $this->getMergeData($timezone),
-        );
+        return $this->emailTemplate->getSubject($subject, $this->getMergeData($timezone));
     }
 
     /**
      * @param ?string $timezone
      *
-     * @return array<string, string>
+     * @return array<string, Closure>
      */
     public function getMergeData(?string $timezone = null): array
     {
         return [
-            'contact name' => $this->serviceRequest->respondent->{$this->serviceRequest->respondent::displayNameKey()},
-            'service request number' => $this->serviceRequest->service_request_number,
-            'created date' => ! is_null($timezone) ? $this->serviceRequest->created_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $this->serviceRequest->created_at->format('M j, Y \a\t h:i A (T)'),
-            'updated date' => ! is_null($timezone) ? $this->serviceRequest->updated_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $this->serviceRequest->updated_at->format('M j, Y \a\t h:i A (T)'),
-            'assigned staff name' => $this->serviceRequest->assignedTo->user->name ?? 'Unassigned',
-            'status' => $this->serviceRequest->status->name,
-            'title' => $this->serviceRequest->title,
-            'type' => $this->serviceRequest->priority->type->name,
-            'description' => $this->serviceRequest->close_details,
-            'recent update' => $this->getRecentUpdateFormatted($timezone),
+            'contact name' => fn () => $this->serviceRequest->respondent->{$this->serviceRequest->respondent::displayNameKey()},
+            'service request number' => fn () => $this->serviceRequest->service_request_number,
+            'created date' => fn () => ! is_null($timezone) ? $this->serviceRequest->created_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $this->serviceRequest->created_at->format('M j, Y \a\t h:i A (T)'),
+            'updated date' => fn () => ! is_null($timezone) ? $this->serviceRequest->updated_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $this->serviceRequest->updated_at->format('M j, Y \a\t h:i A (T)'),
+            'assigned staff name' => fn () => $this->serviceRequest->assignedTo->user->name ?? 'Unassigned',
+            'status' => fn () => $this->serviceRequest->status->name,
+            'title' => fn () => $this->serviceRequest->title,
+            'type' => fn () => $this->serviceRequest->priority->type->name,
+            'description' => fn () => $this->serviceRequest->close_details,
+            'recent update' => fn () => $this->getRecentUpdateFormatted($timezone),
         ];
-    }
-
-    /**
-     * @param array<string, mixed> $content
-     * @param ?ServiceRequestTypeEmailTemplateRole $urlType
-     *
-     * @return array<string, mixed>
-     */
-    protected function injectButtonUrlIntoContent(array $content, ?ServiceRequestTypeEmailTemplateRole $urlType = null): array
-    {
-        if (! isset($content['content']) || ! is_array($content['content'])) {
-            return $content;
-        }
-
-        $content['content'] = array_map(function (array $block) use ($urlType) {
-            if (
-                $block['type'] === 'customBlock' &&
-                ($block['attrs']['id'] ?? null) === 'serviceRequestTypeEmailTemplateButtonBlock'
-            ) {
-                $block['attrs']['config']['url'] = $urlType == ServiceRequestTypeEmailTemplateRole::Customer ? route('portal.service-request.show', $this->serviceRequest) : ServiceRequestResource::getUrl('view', [
-                    'record' => $this->serviceRequest,
-                ]);
-            }
-
-            if (
-                $block['type'] === 'customBlock' &&
-                ($block['attrs']['id'] ?? null) === 'surveyResponseEmailTemplateTakeSurveyButtonBlock'
-            ) {
-                $block['attrs']['config']['url'] = route('feedback.service.request', $this->serviceRequest);
-            }
-
-            if (isset($block['content']) && is_array($block['content'])) {
-                $block = $this->injectButtonUrlIntoContent($block);
-            }
-
-            return $block;
-        }, $content['content']);
-
-        return $content;
     }
 
     protected function getRecentUpdateFormatted(?string $timezone = null): string
