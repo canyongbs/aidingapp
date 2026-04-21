@@ -214,7 +214,7 @@
 
                         <td class="px-4 py-3.5 align-top">
                             <span
-                                class="rounded-[var(--rounding-sm)] border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-xs text-gray-600"
+                                class="rounded-[var(--rounding-md)] border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-xs text-gray-600"
                             >
                                 {{ serialDisplay(item.asset) }}
                             </span>

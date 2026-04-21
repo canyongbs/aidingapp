@@ -60,7 +60,7 @@
 <template>
     <span
         :class="[
-            'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold ring-1 ring-inset rounded-[var(--rounding-sm)]',
+            'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold ring-1 ring-inset rounded-[var(--rounding-md)]',
             toneClasses,
         ]"
     >
