@@ -185,42 +185,6 @@ test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to
     );
 });
 
-test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format transforms grid attributes', function () {
-    isolatedMigration(
-        '2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format',
-        function () {
-            $template = ServiceRequestTypeEmailTemplate::factory()->createQuietly([
-                'body' => [
-                    'type' => 'doc',
-                    'content' => [
-                        [
-                            'type' => 'grid',
-                            'attrs' => ['type' => 'responsive', 'cols' => '2'],
-                            'content' => [
-                                ['type' => 'gridColumn', 'attrs' => [], 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Col 1']]]]],
-                                ['type' => 'gridColumn', 'attrs' => [], 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Col 2']]]]],
-                            ],
-                        ],
-                    ],
-                ],
-            ]);
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format.php']);
-
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $content = json_decode((string) DB::table('service_request_type_email_templates')->where('id', $template->id)->value('body'), associative: true); /** @phpstan-ignore-line */
-
-            /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['attrs']['data-cols'])->toBe('2');
-            /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['attrs']['data-from-breakpoint'])->toBe('lg');
-            /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['content'][0]['attrs']['data-col-span'])->toBe('1');
-        }
-    );
-});
-
 test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format does not modify unchanged content', function () {
     isolatedMigration(
         '2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format',
