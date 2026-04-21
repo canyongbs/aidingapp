@@ -99,7 +99,7 @@ class ServiceRequestTypeEmailTemplateButtonBlock extends RichContentCustomBlock
     {
         return view('service-management::blocks.rendered.service-request-link', [
             ...$config,
-            'url' => $data['serviceRequestUrl'] ?? null,
+            'url' => $data['url'] ?? null,
         ])->render();
     }
 }

@@ -52,12 +52,14 @@ trait HandlesServiceRequestTemplateContent
      */
     public function getBody($body, ?ServiceRequestTypeEmailTemplateRole $urlType = null, ?string $timezone = null): HtmlString
     {
-        return $this->emailTemplate->getBody($body, $this->getMergeData($timezone), [
-            'serviceRequestUrl' => $urlType === ServiceRequestTypeEmailTemplateRole::Customer
+        return $this->emailTemplate->getBody(
+            $body,
+            $this->getMergeData($timezone),
+            serviceRequestUrl: $urlType === ServiceRequestTypeEmailTemplateRole::Customer
                 ? route('portal.service-request.show', $this->serviceRequest)
                 : ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]),
-            'feedbackUrl' => route('feedback.service.request', $this->serviceRequest),
-        ]);
+            feedbackUrl: route('feedback.service.request', $this->serviceRequest),
+        );
     }
 
     /**

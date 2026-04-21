@@ -94,39 +94,25 @@ class ServiceRequestTypeEmailTemplate extends Model implements Auditable, HasMed
     /**
      * @param string|array<int, string|array<string, mixed>> $content
      * @param array<string, mixed> $mergeData
-     * @param array<string, mixed> $customBlockData
      */
-    public function getBody(string|array $content, array $mergeData, array $customBlockData = []): HtmlString
+    public function getBody(string|array $content, array $mergeData, ?string $serviceRequestUrl = null, ?string $feedbackUrl = null): HtmlString
     {
         $this->body = $content;
 
         $html = $this->getRichContentAttribute('body')
             ?->customBlocks([
-                ServiceRequestTypeEmailTemplateButtonBlock::class => $customBlockData,
-                SurveyResponseEmailTemplateTakeSurveyButtonBlock::class => $customBlockData,
+                ServiceRequestTypeEmailTemplateButtonBlock::class => ['url' => $serviceRequestUrl],
+                SurveyResponseEmailTemplateTakeSurveyButtonBlock::class => ['url' => $feedbackUrl],
             ])
             ->mergeTags($mergeData)
             ->toHtml() ?? '';
 
-        // Convert CSS variable-based styles to inline styles for email client compatibility.
-        // Text colors: style="--color: #hex; --dark-color: #hex" → style="color: #hex"
+        // Convert CSS variable-based text colors to inline color styles for email client compatibility.
+        // The RichEditor renders textColor marks as <span class="color" style="--color: #hex; --dark-color: #hex">
+        // but email clients don't support CSS custom properties.
         $html = preg_replace(
             '/style="--color:\s*([^;]+);\s*--dark-color:\s*[^"]*"/',
             'style="color: $1"',
-            $html,
-        );
-
-        // Grid layout: style="--cols: repeat(X, ...)" → style="display: table; width: 100%"
-        $html = preg_replace(
-            '/style="--cols:\s*[^"]*"/',
-            'style="display: table; width: 100%; table-layout: fixed;"',
-            $html,
-        );
-
-        // Grid columns: style="--col-span: span X / span X" → style="display: table-cell; vertical-align: top; padding: 0 8px"
-        $html = preg_replace(
-            '/style="--col-span:\s*[^"]*"/',
-            'style="display: table-cell; vertical-align: top; padding: 0 8px;"',
             $html,
         );
 

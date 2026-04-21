@@ -158,14 +158,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
         $this->getSavedNotification()->send();
     }
 
-    /**
-     * Returns null when the given rich content is an empty document (no text, images, or custom blocks).
-     *
-     * @param mixed $content
-     *
-     * @return mixed
-     */
-    protected function normalizeRichContent($content)
+    protected function normalizeRichContent(mixed $content): mixed
     {
         if (! is_array($content)) {
             return $content;
@@ -180,7 +173,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 return;
             }
 
-            if (in_array($node['type'] ?? null, ['image', 'customBlock', 'videoEmbed', 'horizontalRule', 'hardBreak'], true)) {
+            if (in_array($node['type'] ?? null, ['image', 'customBlock', 'horizontalRule'], true)) {
                 $hasContent = true;
 
                 return;
@@ -233,7 +226,6 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                     ['undo', 'redo'],
                 ])
                 ->mergeTags($mergeTags)
-                ->activePanel('mergeTags')
                 ->customBlocks([
                     ServiceRequestTypeEmailTemplateButtonBlock::class,
                     SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,

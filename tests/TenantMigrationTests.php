@@ -252,7 +252,7 @@ test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to
     );
 });
 
-test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format transforms youtube', function () {
+test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format removes unsupported video nodes', function () {
     isolatedMigration(
         '2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format',
         function () {
@@ -262,43 +262,19 @@ test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to
                     'content' => [
                         [
                             'type' => 'youtube',
-                            'attrs' => ['src' => 'https://www.youtube.com/embed/dQw4w9WgXcQ', 'width' => 640, 'height' => 480],
+                            'attrs' => ['src' => 'https://www.youtube.com/embed/dQw4w9WgXcQ'],
                         ],
-                    ],
-                ],
-            ]);
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format.php']);
-
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $content = json_decode((string) DB::table('service_request_type_email_templates')->where('id', $template->id)->value('body'), associative: true); /** @phpstan-ignore-line */
-
-            /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['type'])->toBe('videoEmbed');
-            /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['attrs']['src'])->toBe('https://www.youtube.com/embed/dQw4w9WgXcQ');
-            /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['attrs']['type'])->toBe('youtube');
-            /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['attrs']['width'])->toBeNull();
-            /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['attrs']['height'])->toBeNull();
-        }
-    );
-});
-
-test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format transforms vimeo', function () {
-    isolatedMigration(
-        '2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format',
-        function () {
-            $template = ServiceRequestTypeEmailTemplate::factory()->createQuietly([
-                'body' => [
-                    'type' => 'doc',
-                    'content' => [
                         [
                             'type' => 'vimeo',
-                            'attrs' => ['src' => 'https://player.vimeo.com/video/123456789', 'width' => 640, 'height' => 480],
+                            'attrs' => ['src' => 'https://player.vimeo.com/video/123456789'],
+                        ],
+                        [
+                            'type' => 'videoEmbed',
+                            'attrs' => ['src' => 'https://example.com/video.mp4', 'type' => 'video'],
+                        ],
+                        [
+                            'type' => 'paragraph',
+                            'content' => [['type' => 'text', 'text' => 'Keep me']],
                         ],
                     ],
                 ],
@@ -311,9 +287,11 @@ test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to
             $content = json_decode((string) DB::table('service_request_type_email_templates')->where('id', $template->id)->value('body'), associative: true); /** @phpstan-ignore-line */
 
             /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['type'])->toBe('videoEmbed');
+            expect(count($content['content']))->toBe(1);
             /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['attrs']['type'])->toBe('vimeo');
+            expect($content['content'][0]['type'])->toBe('paragraph');
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][0]['content'][0]['text'])->toBe('Keep me');
         }
     );
 });
@@ -418,52 +396,7 @@ test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to
     );
 });
 
-test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format transforms gridBuilder', function () {
-    isolatedMigration(
-        '2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format',
-        function () {
-            $template = ServiceRequestTypeEmailTemplate::factory()->createQuietly([
-                'body' => [
-                    'type' => 'doc',
-                    'content' => [
-                        [
-                            'type' => 'gridBuilder',
-                            'attrs' => ['data-type' => 'responsive', 'data-cols' => 5, 'data-stack-at' => 'sm'],
-                            'content' => [
-                                ['type' => 'gridBuilderColumn', 'attrs' => ['data-col-span' => null], 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => '1']]]]],
-                                ['type' => 'gridBuilderColumn', 'attrs' => ['data-col-span' => null], 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => '2']]]]],
-                                ['type' => 'gridBuilderColumn', 'attrs' => ['data-col-span' => null], 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => '3']]]]],
-                                ['type' => 'gridBuilderColumn', 'attrs' => ['data-col-span' => null], 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => '4']]]]],
-                                ['type' => 'gridBuilderColumn', 'attrs' => ['data-col-span' => null], 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => '5']]]]],
-                            ],
-                        ],
-                    ],
-                ],
-            ]);
-
-            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format.php']);
-
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $content = json_decode((string) DB::table('service_request_type_email_templates')->where('id', $template->id)->value('body'), associative: true); /** @phpstan-ignore-line */
-
-            /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['type'])->toBe('grid');
-            /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['attrs']['data-cols'])->toBe('5');
-            /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['attrs']['data-from-breakpoint'])->toBe('sm');
-            /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['content'][0]['type'])->toBe('gridColumn');
-            /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['content'][0]['attrs']['data-col-span'])->toBe('1');
-            /** @phpstan-ignore-next-line */
-            expect(count($content['content'][0]['content']))->toBe(5);
-        }
-    );
-});
-
-test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format transforms asymmetric grid', function () {
+test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format unwraps grids and preserves inner content', function () {
     isolatedMigration(
         '2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to_rich_editor_format',
         function () {
@@ -473,10 +406,10 @@ test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to
                     'content' => [
                         [
                             'type' => 'grid',
-                            'attrs' => ['type' => 'asymetric-left-thirds', 'cols' => '2'],
+                            'attrs' => ['type' => 'responsive', 'cols' => '2'],
                             'content' => [
-                                ['type' => 'gridColumn', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Left wide']]]]],
-                                ['type' => 'gridColumn', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Right narrow']]]]],
+                                ['type' => 'gridColumn', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Left']]]]],
+                                ['type' => 'gridColumn', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Right']]]]],
                             ],
                         ],
                     ],
@@ -490,11 +423,13 @@ test('2026_04_16_095944_tmp_data_migrate_service_request_type_email_templates_to
             $content = json_decode((string) DB::table('service_request_type_email_templates')->where('id', $template->id)->value('body'), associative: true); /** @phpstan-ignore-line */
 
             /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['attrs']['data-cols'])->toBe('3');
+            expect(count($content['content']))->toBe(2);
             /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['content'][0]['attrs']['data-col-span'])->toBe('2');
+            expect($content['content'][0]['type'])->toBe('paragraph');
             /** @phpstan-ignore-next-line */
-            expect($content['content'][0]['content'][1]['attrs']['data-col-span'])->toBe('1');
+            expect($content['content'][0]['content'][0]['text'])->toBe('Left');
+            /** @phpstan-ignore-next-line */
+            expect($content['content'][1]['content'][0]['text'])->toBe('Right');
         }
     );
 });

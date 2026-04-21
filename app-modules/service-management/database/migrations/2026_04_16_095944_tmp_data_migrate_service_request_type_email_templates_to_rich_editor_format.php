@@ -38,16 +38,40 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
 return new class () extends Migration {
-    private const KNOWN_BLOCK_TYPES = [
+    private const KNOWN_CUSTOM_BLOCKS = [
         'serviceRequestTypeEmailTemplateButtonBlock',
         'surveyResponseEmailTemplateTakeSurveyButtonBlock',
     ];
 
+    /**
+     * Node types no longer supported in email templates. They are unwrapped (children preserved)
+     * or removed entirely if they have no children.
+     */
+    private const UNSUPPORTED_NODE_TYPES = [
+        'hurdle',
+        'grid',
+        'gridColumn',
+        'gridBuilder',
+        'gridBuilderColumn',
+        'details',
+        'detailsSummary',
+        'detailsContent',
+        'youtube',
+        'vimeo',
+        'video',
+        'videoEmbed',
+        'blockquote',
+        'codeBlock',
+        'code',
+        'table',
+        'tableRow',
+        'tableCell',
+        'tableHeader',
+    ];
+
     public function up(): void
     {
-        $columns = ['subject', 'body'];
-
-        foreach ($columns as $column) {
+        foreach (['subject', 'body'] as $column) {
             DB::table('service_request_type_email_templates')
                 ->whereNotNull($column)
                 ->eachById(function (object $record) use ($column) {
@@ -82,18 +106,15 @@ return new class () extends Migration {
     {
         $type = $node['type'] ?? null;
 
-        match ($type) {
-            'tiptapBlock' => $this->transformTiptapBlock($node, $changed),
-            'grid' => $this->transformGrid($node, $changed),
-            'hurdle' => $this->removeNode($node, $changed),
-            'youtube' => $this->transformYoutube($node, $changed),
-            'vimeo' => $this->transformVimeo($node, $changed),
-            'video' => $this->transformVideo($node, $changed),
-            'image' => $this->transformImage($node, $changed),
-            'gridBuilder' => $this->transformGridBuilder($node, $changed),
-            'checkedList' => $this->transformCheckedList($node, $changed),
-            default => null,
-        };
+        if ($type === 'tiptapBlock') {
+            $this->transformTiptapBlock($node, $changed);
+        } elseif ($type === 'checkedList') {
+            $this->transformCheckedList($node, $changed);
+        } elseif ($type === 'image') {
+            $this->transformImage($node, $changed);
+        } elseif (in_array($type, self::UNSUPPORTED_NODE_TYPES, true)) {
+            $this->removeNode($node, $changed);
+        }
 
         if (isset($node['marks']) && is_array($node['marks'])) {
             /** @var array<int, array<string, mixed>> $marks */
@@ -126,7 +147,7 @@ return new class () extends Migration {
         $oldAttrs = $node['attrs'] ?? [];
         $blockType = $oldAttrs['type'] ?? null;
 
-        if (in_array($blockType, self::KNOWN_BLOCK_TYPES, true)) {
+        if (in_array($blockType, self::KNOWN_CUSTOM_BLOCKS, true)) {
             $node['type'] = 'customBlock';
             $node['attrs'] = [
                 'id' => $blockType,
@@ -142,19 +163,9 @@ return new class () extends Migration {
     /**
      * @param  array<string, mixed>  $node
      */
-    protected function transformGrid(array &$node, bool &$changed): void
+    protected function transformCheckedList(array &$node, bool &$changed): void
     {
-        /** @var array<string, mixed> $attrs */
-        $attrs = $node['attrs'] ?? [];
-        $oldType = is_string($attrs['type'] ?? null) ? $attrs['type'] : 'responsive';
-        $oldCols = is_string($attrs['cols'] ?? null) ? $attrs['cols'] : '2';
-
-        [$dataCols, $fromBreakpoint, $colSpans] = $this->mapGridType($oldType, $oldCols);
-
-        $node['attrs'] = [
-            'data-cols' => (string) $dataCols,
-            'data-from-breakpoint' => $fromBreakpoint,
-        ];
+        $node['type'] = 'bulletList';
 
         $changed = true;
 
@@ -162,28 +173,30 @@ return new class () extends Migration {
             return;
         }
 
-        foreach ($node['content'] as $index => &$child) {
-            if (is_array($child) && ($child['type'] ?? null) === 'gridColumn') {
-                $child['attrs'] = $child['attrs'] ?? [];
-                $child['attrs']['data-col-span'] = (string) ($colSpans[$index] ?? 1);
+        foreach ($node['content'] as &$child) {
+            if (is_array($child) && in_array($child['type'] ?? null, ['checkedListItem', 'taskItem', 'listItem'])) {
+                $child['type'] = 'listItem';
+
+                unset($child['attrs']['checked']);
             }
         }
     }
 
     /**
-     * @return array{int, string, array<int>}
+     * @param  array<string, mixed>  $node
      */
-    protected function mapGridType(string $type, string $cols): array
+    protected function transformImage(array &$node, bool &$changed): void
     {
-        $fromBreakpoint = ($type === 'fixed') ? 'sm' : 'lg';
+        /** @var array<string, mixed> $attrs */
+        $attrs = $node['attrs'] ?? [];
+        $width = $attrs['width'] ?? null;
 
-        return match ($type) {
-            'asymetric-left-thirds' => [3, $fromBreakpoint, [2, 1]],
-            'asymetric-right-thirds' => [3, $fromBreakpoint, [1, 2]],
-            'asymetric-left-fourths' => [4, $fromBreakpoint, [3, 1]],
-            'asymetric-right-fourths' => [4, $fromBreakpoint, [1, 3]],
-            default => [(int) $cols, $fromBreakpoint, array_fill(0, (int) $cols, 1)],
-        };
+        if (is_numeric($width) && $width > 500) {
+            $attrs['width'] = null;
+            $attrs['height'] = null;
+            $node['attrs'] = $attrs;
+            $changed = true;
+        }
     }
 
     /**
@@ -219,148 +232,6 @@ return new class () extends Migration {
         }
 
         return $result;
-    }
-
-    /**
-     * @param  array<string, mixed>  $node
-     */
-    protected function transformYoutube(array &$node, bool &$changed): void
-    {
-        $node['type'] = 'videoEmbed';
-
-        /** @var array<string, mixed> $attrs */
-        $attrs = $node['attrs'] ?? [];
-        $src = is_string($attrs['src'] ?? null) ? $attrs['src'] : '';
-
-        $node['attrs'] = [
-            'src' => $src,
-            'type' => 'youtube',
-            'width' => null,
-            'height' => null,
-        ];
-
-        $changed = true;
-    }
-
-    /**
-     * @param  array<string, mixed>  $node
-     */
-    protected function transformVimeo(array &$node, bool &$changed): void
-    {
-        $node['type'] = 'videoEmbed';
-
-        /** @var array<string, mixed> $attrs */
-        $attrs = $node['attrs'] ?? [];
-        $src = is_string($attrs['src'] ?? null) ? $attrs['src'] : '';
-
-        $node['attrs'] = [
-            'src' => $src,
-            'type' => 'vimeo',
-            'width' => null,
-            'height' => null,
-        ];
-
-        $changed = true;
-    }
-
-    /**
-     * @param  array<string, mixed>  $node
-     */
-    protected function transformVideo(array &$node, bool &$changed): void
-    {
-        $node['type'] = 'videoEmbed';
-
-        /** @var array<string, mixed> $attrs */
-        $attrs = $node['attrs'] ?? [];
-        $src = is_string($attrs['src'] ?? null) ? $attrs['src'] : '';
-
-        $node['attrs'] = [
-            'src' => $src,
-            'type' => 'video',
-            'width' => null,
-            'height' => null,
-        ];
-
-        $changed = true;
-    }
-
-    /**
-     * @param  array<string, mixed>  $node
-     */
-    protected function transformImage(array &$node, bool &$changed): void
-    {
-        /** @var array<string, mixed> $attrs */
-        $attrs = $node['attrs'] ?? [];
-        $width = $attrs['width'] ?? null;
-
-        if (is_numeric($width) && $width > 500) {
-            $attrs['width'] = null;
-            $attrs['height'] = null;
-            $node['attrs'] = $attrs;
-            $changed = true;
-        }
-    }
-
-    /**
-     * @param  array<string, mixed>  $node
-     */
-    protected function transformGridBuilder(array &$node, bool &$changed): void
-    {
-        $node['type'] = 'grid';
-
-        /** @var array<string, mixed> $attrs */
-        $attrs = $node['attrs'] ?? [];
-        $rawCols = $attrs['data-cols'] ?? $attrs['cols'] ?? null;
-        $oldCols = is_string($rawCols) || is_int($rawCols) ? $rawCols : '2';
-        $colCount = (int) $oldCols;
-        $stackAt = is_string($attrs['data-stack-at'] ?? null) ? $attrs['data-stack-at'] : 'lg';
-
-        $node['attrs'] = [
-            'data-cols' => (string) $colCount,
-            'data-from-breakpoint' => $stackAt,
-        ];
-
-        $changed = true;
-
-        if (! isset($node['content']) || ! is_array($node['content'])) {
-            return;
-        }
-
-        foreach ($node['content'] as &$child) {
-            if (is_array($child) && ($child['type'] ?? null) === 'gridBuilderColumn') {
-                $child['type'] = 'gridColumn';
-
-                /** @var array<string, mixed> $childAttrs */
-                $childAttrs = $child['attrs'] ?? [];
-                $colSpan = $childAttrs['data-col-span'] ?? $childAttrs['span'] ?? 1;
-
-                $child['attrs'] = [
-                    'data-col-span' => is_scalar($colSpan) ? (string) ($colSpan ?: 1) : '1',
-                ];
-            }
-        }
-    }
-
-    /**
-     * @param  array<string, mixed>  $node
-     */
-    protected function transformCheckedList(array &$node, bool &$changed): void
-    {
-        $node['type'] = 'bulletList';
-
-        $changed = true;
-
-        if (! isset($node['content']) || ! is_array($node['content'])) {
-            return;
-        }
-
-        foreach ($node['content'] as &$child) {
-            if (is_array($child) && in_array($child['type'] ?? null, ['checkedListItem', 'taskItem', 'listItem'])) {
-                $child['type'] = 'listItem';
-
-                unset($child['attrs']['checked']);
-            }
-        }
     }
 
     /**
