@@ -107,7 +107,7 @@ class AssetManagementPortalController extends Controller
 
                             return $diff->y . ' ' . ($diff->y === 1 ? 'Year' : 'Years') . ' ' .
                                 $diff->m . ' ' . ($diff->m === 1 ? 'Month' : 'Months');
-                        })($checkOut->asset->purchase_date) 
+                        })($checkOut->asset->purchase_date)
                         : null,
                     'type' => $checkOut->asset->getRawOriginal('type_id') !== null
                         ? ['name' => $checkOut->asset->type->name]
