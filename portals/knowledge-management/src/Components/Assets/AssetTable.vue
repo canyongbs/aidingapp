@@ -32,9 +32,9 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import BaseTable from '../ui/BaseTable.vue';
     import Pagination from '../Pagination.vue';
     import BaseStatusPill from '../ui/BaseStatusPill.vue';
+    import BaseTable from '../ui/BaseTable.vue';
 
     defineProps({
         assets: {
@@ -170,7 +170,9 @@
             class="mt-1"
         >
             <BaseTable>
-                <thead class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <thead
+                    class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500"
+                >
                     <tr>
                         <th scope="col" class="w-64 px-4 py-3">Name</th>
                         <th scope="col" class="px-4 py-3">Device Type &amp; Age</th>
@@ -187,53 +189,49 @@
                         class="asset-row transition-colors duration-100 hover:bg-gray-50/70"
                         :style="{ '--row-delay': `${idx * 30}ms` }"
                     >
-                            <td class="px-4 py-3.5 align-top">
-                                <p
-                                    class="max-w-[14rem] truncate text-sm font-semibold leading-5 text-gray-900"
-                                    :title="item.asset?.name"
-                                >
-                                    {{ item.asset?.name ?? '—' }}
-                                </p>
-                                <p
-                                    v-if="item.asset?.description"
-                                    class="mt-0.5 max-w-[14rem] truncate text-xs leading-5 text-gray-500"
-                                    :title="item.asset.description"
-                                >
-                                    {{ truncate(item.asset.description, 30) }}
-                                </p>
-                            </td>
+                        <td class="px-4 py-3.5 align-top">
+                            <p
+                                class="max-w-[14rem] truncate text-sm font-semibold leading-5 text-gray-900"
+                                :title="item.asset?.name"
+                            >
+                                {{ item.asset?.name ?? '—' }}
+                            </p>
+                            <p
+                                v-if="item.asset?.description"
+                                class="mt-0.5 max-w-[14rem] truncate text-xs leading-5 text-gray-500"
+                                :title="item.asset.description"
+                            >
+                                {{ truncate(item.asset.description, 30) }}
+                            </p>
+                        </td>
 
-                            <td class="px-4 py-3.5 align-top text-gray-600">
-                                <p class="text-sm font-medium text-gray-800">{{ item.asset?.type?.name ?? '—' }}</p>
-                                <p v-if="item.asset?.purchase_age" class="mt-0.5 text-xs leading-5 text-gray-500">
-                                    {{ item.asset.purchase_age }}
-                                </p>
-                            </td>
+                        <td class="px-4 py-3.5 align-top text-gray-600">
+                            <p class="text-sm font-medium text-gray-800">{{ item.asset?.type?.name ?? '—' }}</p>
+                            <p v-if="item.asset?.purchase_age" class="mt-0.5 text-xs leading-5 text-gray-500">
+                                {{ item.asset.purchase_age }}
+                            </p>
+                        </td>
 
-                            <td class="px-4 py-3.5 align-top">
-                                <span
-                                    class="rounded-[var(--rounding-sm)] border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-xs text-gray-600"
-                                >
-                                    {{ serialDisplay(item.asset) }}
-                                </span>
-                            </td>
+                        <td class="px-4 py-3.5 align-top">
+                            <span
+                                class="rounded-[var(--rounding-sm)] border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-xs text-gray-600"
+                            >
+                                {{ serialDisplay(item.asset) }}
+                            </span>
+                        </td>
 
-                            <td class="px-4 py-3.5 align-top text-sm text-gray-700">
-                                {{ item.asset?.location?.name ?? '—' }}
-                            </td>
+                        <td class="px-4 py-3.5 align-top text-sm text-gray-700">
+                            {{ item.asset?.location?.name ?? '—' }}
+                        </td>
 
-                            <td class="px-4 py-3.5 align-top">
-                                <BaseStatusPill v-if="item.status === 'returned'" tone="success">
-                                    Returned
-                                </BaseStatusPill>
-                                <BaseStatusPill v-else tone="warning" :pulse="true">
-                                    Checked Out
-                                </BaseStatusPill>
-                            </td>
+                        <td class="px-4 py-3.5 align-top">
+                            <BaseStatusPill v-if="item.status === 'returned'" tone="success"> Returned </BaseStatusPill>
+                            <BaseStatusPill v-else tone="warning" :pulse="true"> Checked Out </BaseStatusPill>
+                        </td>
 
-                            <td class="whitespace-nowrap px-4 py-3.5 align-top text-xs font-medium text-gray-600">
-                                {{ item.last_activity ?? '—' }}
-                            </td>
+                        <td class="whitespace-nowrap px-4 py-3.5 align-top text-xs font-medium text-gray-600">
+                            {{ item.last_activity ?? '—' }}
+                        </td>
                     </tr>
                 </tbody>
             </BaseTable>

@@ -96,11 +96,7 @@
                         stroke-width="1.8"
                         aria-hidden="true"
                     >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            :d="card.iconPath"
-                        />
+                        <path stroke-linecap="round" stroke-linejoin="round" :d="card.iconPath" />
                     </svg>
                 </span>
             </div>

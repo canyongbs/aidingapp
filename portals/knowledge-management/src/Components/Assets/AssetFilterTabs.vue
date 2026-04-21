@@ -47,7 +47,7 @@
 </script>
 
 <template>
-  <div class="mb-2 border-b border-gray-200">
+    <div class="mb-2 border-b border-gray-200">
         <ul class="flex flex-wrap -mb-px" role="tablist" aria-label="Asset filter tabs">
             <li v-for="tab in tabs" :key="tab.key" role="presentation">
                 <button
