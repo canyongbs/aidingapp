@@ -71,8 +71,9 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 /**
- * @property \AidingApp\ServiceManagement\Enums\ServiceRequestCategory $category
+ * @property ServiceRequestCategory $category
  * @property-read Contact $respondent
+ *
  * @mixin IdeHelperServiceRequest
  */
 #[ObservedBy([ServiceRequestObserver::class])]
