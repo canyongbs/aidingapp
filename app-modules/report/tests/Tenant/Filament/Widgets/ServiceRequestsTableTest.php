@@ -36,23 +36,18 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsTable;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\User;
 use Filament\Actions\ExportAction;
 use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-
-// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
-beforeEach(function () {
-    ServiceRequestCategoryRenameFeature::activate();
-});
 
 it('returns all service requests information created in given time range', function () {
     $startDate = now()->subDays(10);
@@ -181,4 +176,35 @@ it('can start an export and send a notification', function () {
     ])
         ->callTableAction(ExportAction::class)
         ->assertNotified();
+});
+
+it('filters records by category using the table-level category filter', function () {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
+
+    $status = ServiceRequestStatus::factory()->state([
+        'classification' => SystemServiceRequestClassification::Open,
+    ])->create();
+
+    $incidentRequest = ServiceRequest::factory()->state([
+        'priority_id' => $priority->id,
+        'status_id' => $status->id,
+        'category' => ServiceRequestCategory::Incident,
+        'respondent_id' => Contact::factory(),
+    ])->create();
+
+    $requestRequest = ServiceRequest::factory()->state([
+        'priority_id' => $priority->id,
+        'status_id' => $status->id,
+        'category' => ServiceRequestCategory::Request,
+        'respondent_id' => Contact::factory(),
+    ])->create();
+
+    livewire(ServiceRequestsTable::class, [
+        'cacheTag' => 'test-service-requests-table-category-filter',
+        'pageFilters' => [],
+    ])
+        ->filterTable('category', ServiceRequestCategory::Incident->value)
+        ->assertCanSeeTableRecords(collect([$incidentRequest]))
+        ->assertCanNotSeeTableRecords(collect([$requestRequest]));
 });

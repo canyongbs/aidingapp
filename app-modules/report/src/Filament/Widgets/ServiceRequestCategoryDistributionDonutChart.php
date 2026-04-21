@@ -37,17 +37,17 @@
 namespace AidingApp\Report\Filament\Widgets;
 
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
-class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
+class ServiceRequestCategoryDistributionDonutChart extends ChartReportWidget
 {
     use InteractsWithPageFilters;
 
-    protected ?string $heading = 'Request Status Distribution';
+    protected ?string $heading = 'Request Category Distribution';
 
     protected ?string $maxHeight = '200px';
 
@@ -80,19 +80,19 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
 
         $shouldBypassCache = filled($startDate) || filled($endDate);
 
-        $serviceRequestByStatus = $shouldBypassCache
-            ? $this->getServiceRequestStatusData($startDate, $endDate)
-            : Cache::tags(["{{$this->cacheTag}}"])->remember('service-request-status-distribution', now()->addHours(24), function (): Collection {
-                return $this->getServiceRequestStatusData();
+        $serviceRequestByCategory = $shouldBypassCache
+            ? $this->getServiceRequestCategoryData($startDate, $endDate)
+            : Cache::tags(["{{$this->cacheTag}}"])->remember('service-request-category-distribution', now()->addHours(24), function (): Collection {
+                return $this->getServiceRequestCategoryData();
             });
 
         return [
-            'labels' => $serviceRequestByStatus->pluck('name'),
+            'labels' => $serviceRequestByCategory->pluck('label'),
             'datasets' => [
                 [
-                    'label' => 'My First Dataset',
-                    'data' => $serviceRequestByStatus->pluck('service_requests_count'),
-                    'backgroundColor' => $serviceRequestByStatus->pluck('bg_color'),
+                    'label' => 'Service Requests by Category',
+                    'data' => $serviceRequestByCategory->pluck('count'),
+                    'backgroundColor' => $serviceRequestByCategory->pluck('bg_color'),
                     'hoverOffset' => 4,
                 ],
             ],
@@ -105,23 +105,31 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
     }
 
     /**
-     * @return Collection<int, ServiceRequestStatus>
+     * @return Collection<int, array{label: string, count: int, bg_color: string}>
      */
-    private function getServiceRequestStatusData(?Carbon $startDate = null, ?Carbon $endDate = null): Collection
+    private function getServiceRequestCategoryData(?Carbon $startDate = null, ?Carbon $endDate = null): Collection
     {
-        $serviceRequestByStatusData = ServiceRequestStatus::withCount([
-            'serviceRequests' => function (Builder $query) use ($startDate, $endDate) {
-                $query->when(
-                    $startDate && $endDate,
-                    fn (Builder $query): Builder => $query->whereBetween('created_at', [$startDate, $endDate])
-                );
-            },
-        ])->get(['id', 'name']);
+        $counts = [];
 
-        return $serviceRequestByStatusData->map(function (ServiceRequestStatus $status) {
-            $status['bg_color'] = $status->color->getRgb();
+        foreach (ServiceRequestCategory::cases() as $case) {
+            $query = ServiceRequest::where('category', $case->value);
 
-            return $status;
-        });
+            if ($startDate && $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            }
+
+            $count = $query->count();
+
+            // Only include non-zero counts in the chart
+            if ($count > 0) {
+                $counts[] = [
+                    'label' => (string) $case->getLabel(),
+                    'count' => $count,
+                    'bg_color' => $case->getRgb(),
+                ];
+            }
+        }
+
+        return collect($counts);
     }
 }

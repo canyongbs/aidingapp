@@ -37,6 +37,7 @@
 namespace AidingApp\Report\Filament\Pages;
 
 use AidingApp\Report\Filament\Widgets\RefreshWidget;
+use AidingApp\Report\Filament\Widgets\ServiceRequestCategoryDistributionDonutChart;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsOverTimeBarChart;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsStats;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsTable;
@@ -121,6 +122,7 @@ class ServiceRequests extends Dashboard
             RefreshWidget::make(['cacheTag' => $this->cacheTag]),
             ServiceRequestsStats::make(['cacheTag' => $this->cacheTag]),
             ServiceRequestStatusDistributionDonutChart::make(['cacheTag' => $this->cacheTag]),
+            ServiceRequestCategoryDistributionDonutChart::make(['cacheTag' => $this->cacheTag]),
             ServiceRequestsOverTimeBarChart::make(['cacheTag' => $this->cacheTag]),
             ServiceRequestTypesTable::make(['cacheTag' => $this->cacheTag]),
             ServiceRequestsTable::make(['cacheTag' => $this->cacheTag]),
