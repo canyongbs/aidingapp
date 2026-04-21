@@ -42,7 +42,6 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use App\Features\KnowledgeBaseItemConcernFeature;
 use App\Models\Scopes\TagsForClass;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Forms\Components\Select;
@@ -134,7 +133,6 @@ class CreateKnowledgeBaseItem extends CreateRecord
                             ->saveRelationshipsWhenHidden()
                             ->exists((new Division())->getTable(), (new Division())->getKeyName()),
                         Select::make('manager_ids')
-                            ->visible(KnowledgeBaseItemConcernFeature::active())
                             ->label('Managers')
                             ->relationship('managers', 'name')
                             ->multiple()
