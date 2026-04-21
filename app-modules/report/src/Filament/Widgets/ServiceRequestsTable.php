@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use Filament\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -111,9 +110,7 @@ class ServiceRequestsTable extends BaseWidget
                 TextColumn::make('priority.type.name')
                     ->label('Type')
                     ->searchable()
-                    ->description(fn (ServiceRequest $record): string => ServiceRequestCategoryRenameFeature::active()
-                        ? (string) $record->category->getLabel()
-                        : (string) $record->issue_category->getLabel()),
+                    ->description(fn (ServiceRequest $record): string => (string) $record->category->getLabel()),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->searchable()
@@ -175,7 +172,7 @@ class ServiceRequestsTable extends BaseWidget
                     ->placeholder(''),
             ])
             ->filters([
-                SelectFilter::make(ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category')
+                SelectFilter::make('category')
                     ->label('Category')
                     ->options(ServiceRequestCategory::class)
                     ->native(false),

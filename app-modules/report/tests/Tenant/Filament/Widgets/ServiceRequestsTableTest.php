@@ -42,18 +42,12 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\User;
 use Filament\Actions\ExportAction;
 use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-
-// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
-beforeEach(function () {
-    ServiceRequestCategoryRenameFeature::activate();
-});
 
 it('returns all service requests information created in given time range', function () {
     $startDate = now()->subDays(10);
@@ -195,14 +189,14 @@ it('filters records by category using the table-level category filter', function
     $incidentRequest = ServiceRequest::factory()->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Incident,
+        'category' => ServiceRequestCategory::Incident,
         'respondent_id' => Contact::factory(),
     ])->create();
 
     $requestRequest = ServiceRequest::factory()->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Request,
+        'category' => ServiceRequestCategory::Request,
         'respondent_id' => Contact::factory(),
     ])->create();
 
@@ -210,7 +204,7 @@ it('filters records by category using the table-level category filter', function
         'cacheTag' => 'test-service-requests-table-category-filter',
         'pageFilters' => [],
     ])
-        ->filterTable(ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category', ServiceRequestCategory::Incident->value)
+        ->filterTable('category', ServiceRequestCategory::Incident->value)
         ->assertCanSeeTableRecords(collect([$incidentRequest]))
         ->assertCanNotSeeTableRecords(collect([$requestRequest]));
 });

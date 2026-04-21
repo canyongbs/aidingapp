@@ -41,14 +41,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestCategoryRenameFeature;
 
 use function Pest\Livewire\livewire;
-
-// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
-beforeEach(function () {
-    ServiceRequestCategoryRenameFeature::activate();
-});
 
 it('returns all service request types information created in given time range', function () {
     $startDate = now()->subDays(10);
@@ -153,13 +147,13 @@ it('shows correct incident and request counts per type', function () {
     ServiceRequest::factory()->count(3)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Incident,
+        'category' => ServiceRequestCategory::Incident,
     ])->create();
 
     ServiceRequest::factory()->count(5)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Request,
+        'category' => ServiceRequestCategory::Request,
     ])->create();
 
     livewire(ServiceRequestTypesTable::class, [
@@ -185,28 +179,28 @@ it('applies date filters consistently to total, incident, and request counts', f
     ServiceRequest::factory()->count(2)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Incident,
+        'category' => ServiceRequestCategory::Incident,
         'created_at' => now()->subDays(7),
     ])->create();
 
     ServiceRequest::factory()->count(3)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Request,
+        'category' => ServiceRequestCategory::Request,
         'created_at' => now()->subDays(6),
     ])->create();
 
     ServiceRequest::factory()->count(4)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Incident,
+        'category' => ServiceRequestCategory::Incident,
         'created_at' => now()->subDays(20),
     ])->create();
 
     ServiceRequest::factory()->count(1)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::Request,
+        'category' => ServiceRequestCategory::Request,
         'created_at' => now()->subDays(30),
     ])->create();
 

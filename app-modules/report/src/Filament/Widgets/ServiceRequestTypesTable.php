@@ -38,7 +38,6 @@ namespace AidingApp\Report\Filament\Widgets;
 
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use Carbon\Carbon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -97,7 +96,7 @@ class ServiceRequestTypesTable extends BaseWidget
                     ])
                         ->withCount([
                             'serviceRequests as incident_count' => function (Builder $query) use ($startDate, $endDate) {
-                                $query->where('service_requests.' . (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category'), 'incident');
+                                $query->where('service_requests.category', 'incident');
                                 $query->when(
                                     $startDate && $endDate,
                                     fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
@@ -106,7 +105,7 @@ class ServiceRequestTypesTable extends BaseWidget
                         ])
                         ->withCount([
                             'serviceRequests as request_count' => function (Builder $query) use ($startDate, $endDate) {
-                                $query->where('service_requests.' . (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category'), 'request');
+                                $query->where('service_requests.category', 'request');
                                 $query->when(
                                     $startDate && $endDate,
                                     fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
