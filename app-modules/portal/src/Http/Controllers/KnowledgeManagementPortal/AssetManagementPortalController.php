@@ -96,7 +96,7 @@ class AssetManagementPortalController extends Controller
                     'name' => $checkOut->asset->name,
                     'description' => $checkOut->asset->description,
                     'serial_number' => $checkOut->asset->serial_number,
-                    'purchase_age' => $checkOut->asset->purchase_date 
+                    'purchase_age' => $checkOut->asset->purchase_date
                         ? (function (AssetCheckOut $inner) {
                             $date = $inner->asset->purchase_date;
 
