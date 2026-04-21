@@ -106,9 +106,9 @@ class ServiceRequestCategoryDistributionDonutChart extends ChartReportWidget
     }
 
     /**
-     * @return BaseCollection<int, array{label: string, count: int, bg_color: string}>
+     * @return Collection<int, array{label: string, count: int, bg_color: string}>
      */
-    private function getServiceRequestCategoryData(?Carbon $startDate = null, ?Carbon $endDate = null): BaseCollection
+    private function getServiceRequestCategoryData(?Carbon $startDate = null, ?Carbon $endDate = null): Collection
     {
         $counts = [];
 
