@@ -85,7 +85,7 @@ class AssetManagementPortalController extends Controller
         }
 
         $items = $paginator->getCollection()->map(function (AssetCheckOut $checkOut) {
-            $isReturned = $checkOut->checkIn !== null;
+            $isReturned = (bool) $checkOut->checkIn;
 
             return [
                 'id' => $checkOut->getKey(),
