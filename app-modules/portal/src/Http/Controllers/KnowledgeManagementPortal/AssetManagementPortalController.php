@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\InventoryManagement\Models\AssetCheckIn;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -46,6 +47,8 @@ class AssetManagementPortalController extends Controller
     public function __invoke(Request $request): JsonResponse
     {
         $contact = auth('contact')->user();
+
+        $request->validate(['filter' => 'in:all,checked_out,returned']);
 
         $filter = $request->input('filter', 'all');
 
@@ -67,12 +70,22 @@ class AssetManagementPortalController extends Controller
             default => $query,
         };
 
-        $paginator = $filteredQuery
-            ->orderByDesc('checked_out_at')
-            ->paginate(10);
+        if ($filter === 'returned') {
+            $paginator = $filteredQuery
+                ->orderByDesc(
+                    AssetCheckIn::select('checked_in_at')
+                        ->whereColumn('asset_check_ins.id', 'asset_check_outs.asset_check_in_id')
+                        ->limit(1)
+                )
+                ->paginate(10);
+        } else {
+            $paginator = $filteredQuery
+                ->orderByDesc('checked_out_at')
+                ->paginate(10);
+        }
 
         $items = $paginator->getCollection()->map(function (AssetCheckOut $checkOut) {
-            $isReturned = !empty($checkOut->asset_check_in_id);
+            $isReturned = ! is_null($checkOut->asset_check_in_id);
 
             return [
                 'id' => $checkOut->getKey(),
@@ -83,32 +96,33 @@ class AssetManagementPortalController extends Controller
                     'name' => $checkOut->asset->name,
                     'description' => $checkOut->asset->description,
                     'serial_number' => $checkOut->asset->serial_number,
-                    'purchase_age' => (function () use ($checkOut) {
-                        $date = $checkOut->asset->purchase_date;
+                    'purchase_age' => ! is_null($checkOut->asset->purchase_date)
+                        ? (function (AssetCheckOut $inner) {
+                            $date = $inner->asset->purchase_date;
 
-                        if ($date->isFuture()) {
-                            return '0 Years 0 Months';
-                        }
+                            if ($date->isFuture()) {
+                                return '0 Years 0 Months';
+                            }
 
-                        $diff = $date->roundMonth()->diff(now());
+                            $diff = $date->roundMonth()->diff(now());
 
-                        return $diff->y . ' ' . ($diff->y === 1 ? 'Year' : 'Years') . ' ' .
-                            $diff->m . ' ' . ($diff->m === 1 ? 'Month' : 'Months');
-                    })(),
-                    'type' => [
-                        'name' => $checkOut->asset->type->name,
-                    ],
-                    'location' => [
-                        'name' => $checkOut->asset->location->name,
-                    ],
+                            return $diff->y . ' ' . ($diff->y === 1 ? 'Year' : 'Years') . ' ' .
+                                $diff->m . ' ' . ($diff->m === 1 ? 'Month' : 'Months');
+                        })($checkOut)
+                        : null,
+                    'type' => ! is_null($checkOut->asset->type_id)
+                        ? ['name' => $checkOut->asset->type->name]
+                        : null,
+                    'location' => ! is_null($checkOut->asset->location_id)
+                        ? ['name' => $checkOut->asset->location->name]
+                        : null,
                 ],
             ];
         });
 
         return response()->json([
-            'success' => true,
-            'data' => [
-                'data' => $items,
+            'data' => $items,
+            'meta' => [
                 'current_page' => $paginator->currentPage(),
                 'last_page' => $paginator->lastPage(),
                 'from' => $paginator->firstItem() ?? 0,

@@ -32,7 +32,9 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import BaseTable from '../ui/BaseTable.vue';
     import Pagination from '../Pagination.vue';
+    import BaseStatusPill from '../ui/BaseStatusPill.vue';
 
     defineProps({
         assets: {
@@ -90,7 +92,7 @@
             role="status"
             aria-busy="true"
             aria-label="Loading assets"
-            class="animate-pulse overflow-x-auto rounded-[var(--rounding-lg)] border border-gray-200 mt-1"
+            class="mt-1 animate-pulse overflow-x-auto rounded-[var(--rounding-lg)] border border-gray-200"
         >
             <table class="w-full text-sm text-left">
                 <thead class="border-b border-gray-200 bg-gray-50">
@@ -167,90 +169,74 @@
             aria-live="polite"
             class="mt-1"
         >
-            <div class="overflow-x-auto rounded-t-[var(--rounding-lg)] border border-gray-200 shadow-xs">
-                <table class="w-full text-sm text-left text-gray-600">
-                    <thead class="border-b border-gray-200 bg-gray-50 text-xs uppercase tracking-wider text-gray-500">
-                        <tr>
-                            <th scope="col" class="px-4 py-3 font-semibold w-64">Name</th>
-                            <th scope="col" class="px-4 py-3 font-semibold">Device Type &amp; Age</th>
-                            <th scope="col" class="px-4 py-3 font-semibold">Serial Number</th>
-                            <th scope="col" class="px-4 py-3 font-semibold">Location</th>
-                            <th scope="col" class="px-4 py-3 font-semibold">Status</th>
-                            <th scope="col" class="px-4 py-3 font-semibold">Last Activity</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 bg-white">
-                        <tr
-                            v-for="(item, idx) in assets"
-                            :key="item.id"
-                            class="asset-row transition-colors duration-100 hover:bg-gray-50/70"
-                            :style="{ '--row-delay': `${idx * 30}ms` }"
-                        >
-                            <td class="px-4 py-4">
+            <BaseTable>
+                <thead class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <tr>
+                        <th scope="col" class="w-64 px-4 py-3">Name</th>
+                        <th scope="col" class="px-4 py-3">Device Type &amp; Age</th>
+                        <th scope="col" class="px-4 py-3">Serial Number</th>
+                        <th scope="col" class="px-4 py-3">Location</th>
+                        <th scope="col" class="px-4 py-3">Status</th>
+                        <th scope="col" class="px-4 py-3">Last Activity</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100 bg-white">
+                    <tr
+                        v-for="(item, idx) in assets"
+                        :key="item.id"
+                        class="asset-row transition-colors duration-100 hover:bg-gray-50/70"
+                        :style="{ '--row-delay': `${idx * 30}ms` }"
+                    >
+                            <td class="px-4 py-3.5 align-top">
                                 <p
-                                    class="max-w-[14rem] truncate font-semibold leading-tight text-gray-900"
+                                    class="max-w-[14rem] truncate text-sm font-semibold leading-5 text-gray-900"
                                     :title="item.asset?.name"
                                 >
-                                    {{ truncate(item.asset?.name ?? '—', 30) }}
+                                    {{ item.asset?.name ?? '—' }}
                                 </p>
                                 <p
                                     v-if="item.asset?.description"
-                                    class="mt-0.5 max-w-[14rem] truncate text-xs leading-snug text-gray-400"
+                                    class="mt-0.5 max-w-[14rem] truncate text-xs leading-5 text-gray-500"
                                     :title="item.asset.description"
                                 >
                                     {{ truncate(item.asset.description, 30) }}
                                 </p>
                             </td>
 
-                            <td class="px-4 py-4 text-gray-600">
-                                <p class="font-medium text-gray-800">{{ item.asset?.type?.name ?? '—' }}</p>
-                                <p v-if="item.asset?.purchase_age" class="mt-0.5 text-xs text-gray-400">
+                            <td class="px-4 py-3.5 align-top text-gray-600">
+                                <p class="text-sm font-medium text-gray-800">{{ item.asset?.type?.name ?? '—' }}</p>
+                                <p v-if="item.asset?.purchase_age" class="mt-0.5 text-xs leading-5 text-gray-500">
                                     {{ item.asset.purchase_age }}
                                 </p>
                             </td>
 
-                            <td class="px-4 py-4">
+                            <td class="px-4 py-3.5 align-top">
                                 <span
-                                    class="rounded border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-xs text-gray-500"
+                                    class="rounded-[var(--rounding-sm)] border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-xs text-gray-600"
                                 >
                                     {{ serialDisplay(item.asset) }}
                                 </span>
                             </td>
 
-                            <td class="px-4 py-4 text-sm text-gray-600">
+                            <td class="px-4 py-3.5 align-top text-sm text-gray-700">
                                 {{ item.asset?.location?.name ?? '—' }}
                             </td>
 
-                            <td class="px-4 py-4">
-                                <span
-                                    v-if="item.status === 'returned'"
-                                    class="inline-flex items-center gap-1.5 rounded-full bg-green-100 px-2.5 py-1 text-xs font-semibold text-green-800"
-                                >
-                                    <span
-                                        class="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-green-500"
-                                        aria-hidden="true"
-                                    ></span>
+                            <td class="px-4 py-3.5 align-top">
+                                <BaseStatusPill v-if="item.status === 'returned'" tone="success">
                                     Returned
-                                </span>
-                                <span
-                                    v-else
-                                    class="inline-flex items-center gap-1.5 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-semibold text-orange-800"
-                                >
-                                    <span
-                                        class="h-1.5 w-1.5 flex-shrink-0 animate-pulse rounded-full bg-orange-500"
-                                        aria-hidden="true"
-                                    ></span>
+                                </BaseStatusPill>
+                                <BaseStatusPill v-else tone="warning" :pulse="true">
                                     Checked Out
-                                </span>
+                                </BaseStatusPill>
                             </td>
 
-                            <td class="whitespace-nowrap px-4 py-4 text-xs text-gray-600">
+                            <td class="whitespace-nowrap px-4 py-3.5 align-top text-xs font-medium text-gray-600">
                                 {{ item.last_activity ?? '—' }}
                             </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+                    </tr>
+                </tbody>
+            </BaseTable>
 
             <Pagination
                 v-if="lastPage > 1"

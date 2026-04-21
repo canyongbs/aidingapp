@@ -32,41 +32,46 @@
 </COPYRIGHT>
 -->
 <script setup>
-    defineProps({
-        tabs: {
-            type: Array,
-            required: true,
-        },
-        modelValue: {
+    import { computed } from 'vue';
+
+    const props = defineProps({
+        tone: {
             type: String,
-            required: true,
+            default: 'neutral',
+            validator: (v) => ['success', 'warning', 'neutral'].includes(v),
+        },
+        pulse: {
+            type: Boolean,
+            default: false,
         },
     });
 
-    const emit = defineEmits(['update:modelValue']);
+    const toneClasses = computed(() => {
+        const classes = {
+            success: 'bg-green-100 text-green-800 ring-green-600/20',
+            warning: 'bg-orange-100 text-orange-800 ring-orange-600/20',
+            neutral: 'bg-gray-100 text-gray-700 ring-gray-500/20',
+        };
+
+        return classes[props.tone] ?? classes.neutral;
+    });
 </script>
 
 <template>
-  <div class="mb-2 border-b border-gray-200">
-        <ul class="flex flex-wrap -mb-px" role="tablist" aria-label="Asset filter tabs">
-            <li v-for="tab in tabs" :key="tab.key" role="presentation">
-                <button
-                    type="button"
-                    role="tab"
-                    :id="`assets-tab-${tab.key}`"
-                    :aria-selected="modelValue === tab.key"
-                    :aria-controls="`assets-panel-${tab.key}`"
-                    @click="emit('update:modelValue', tab.key)"
-                    :class="[
-                        'inline-flex items-center whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold leading-5 transition-colors',
-                        modelValue === tab.key
-                            ? 'border-[rgba(var(--primary-500),1)] text-[rgba(var(--primary-600),1)]'
-                            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                    ]"
-                >
-                    {{ tab.label }}
-                </button>
-            </li>
-        </ul>
-    </div>
+    <span
+        :class="[
+            'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold ring-1 ring-inset rounded-[var(--rounding-sm)]',
+            toneClasses,
+        ]"
+    >
+        <span
+            :class="[
+                'h-1.5 w-1.5 rounded-full flex-shrink-0',
+                tone === 'success' ? 'bg-green-500' : tone === 'warning' ? 'bg-orange-500' : 'bg-gray-500',
+                pulse ? 'animate-pulse' : '',
+            ]"
+            aria-hidden="true"
+        />
+        <slot />
+    </span>
 </template>

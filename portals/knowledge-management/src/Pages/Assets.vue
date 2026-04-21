@@ -77,16 +77,15 @@
             });
 
             const envelope = response.data;
-            const paged = envelope.data;
 
-            assets.value = paged.data ?? [];
+            assets.value = envelope.data ?? [];
             counts.value = envelope.counts ?? { total: 0, checked_out: 0, returned: 0 };
 
-            currentPage.value = paged.current_page ?? 1;
-            lastPage.value = paged.last_page ?? 1;
-            fromItem.value = paged.from ?? 0;
-            toItem.value = paged.to ?? 0;
-            totalItems.value = paged.total ?? 0;
+            currentPage.value = envelope.meta?.current_page ?? 1;
+            lastPage.value = envelope.meta?.last_page ?? 1;
+            fromItem.value = envelope.meta?.from ?? 0;
+            toItem.value = envelope.meta?.to ?? 0;
+            totalItems.value = envelope.meta?.total ?? 0;
         } catch (error) {
             assets.value = [];
             console.error('Error fetching assets:', error);

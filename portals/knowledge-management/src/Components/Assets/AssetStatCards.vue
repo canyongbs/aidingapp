@@ -32,29 +32,64 @@
 </COPYRIGHT>
 -->
 <script setup>
-    defineProps({
+    import { computed } from 'vue';
+    import BaseCard from '../ui/BaseCard.vue';
+
+    const props = defineProps({
         counts: {
             type: Object,
             required: true,
         },
     });
+
+    const cards = computed(() => [
+        {
+            key: 'total',
+            label: 'Total Assets',
+            value: props.counts.total,
+            iconBg: 'bg-[rgba(var(--primary-50),1)]',
+            iconColor: 'text-[rgba(var(--primary-500),1)]',
+            iconPath:
+                'M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z',
+        },
+        {
+            key: 'checked_out',
+            label: 'Checked Out',
+            value: props.counts.checked_out,
+            iconBg: 'bg-orange-50',
+            iconColor: 'text-orange-500',
+            iconPath:
+                'M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75',
+        },
+        {
+            key: 'returned',
+            label: 'Returned',
+            value: props.counts.returned,
+            iconBg: 'bg-green-50',
+            iconColor: 'text-green-500',
+            iconPath: 'M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3',
+        },
+    ]);
 </script>
 
 <template>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-2">
-        <div class="p-5 bg-white rounded-[var(--rounding-lg)] border border-gray-200 shadow-xs">
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-2">
+        <BaseCard v-for="card in cards" :key="card.key" class="transition-colors hover:border-gray-300">
             <div class="flex items-start justify-between gap-3">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Total</p>
-                    <p class="text-4xl font-bold leading-none tabular-nums text-gray-800">
-                        {{ counts.total }}
+                    <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">{{ card.label }}</p>
+                    <p class="text-4xl font-semibold leading-none tabular-nums text-gray-900">
+                        {{ card.value }}
                     </p>
                 </div>
                 <span
-                    class="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-xl bg-[rgba(var(--primary-50),1)]"
+                    :class="[
+                        'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[var(--rounding-md)]',
+                        card.iconBg,
+                    ]"
                 >
                     <svg
-                        class="w-5 h-5 text-[rgba(var(--primary-500),1)]"
+                        :class="['h-5 w-5', card.iconColor]"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -64,65 +99,11 @@
                         <path
                             stroke-linecap="round"
                             stroke-linejoin="round"
-                            d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                            :d="card.iconPath"
                         />
                     </svg>
                 </span>
             </div>
-        </div>
-
-        <div class="p-5 bg-white rounded-[var(--rounding-lg)] border border-gray-200 shadow-xs">
-            <div class="flex items-start justify-between gap-3">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Checked Out</p>
-                    <p class="text-4xl font-bold leading-none tabular-nums text-gray-800">
-                        {{ counts.checked_out }}
-                    </p>
-                </div>
-                <span class="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-xl bg-orange-50">
-                    <svg
-                        class="w-5 h-5 text-orange-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        aria-hidden="true"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
-                        />
-                    </svg>
-                </span>
-            </div>
-        </div>
-
-        <div class="p-5 bg-white rounded-[var(--rounding-lg)] border border-gray-200 shadow-xs">
-            <div class="flex items-start justify-between gap-3">
-                <div>
-                    <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 mb-1">Returned</p>
-                    <p class="text-4xl font-bold leading-none tabular-nums text-gray-800">
-                        {{ counts.returned }}
-                    </p>
-                </div>
-                <span class="flex-shrink-0 flex items-center justify-center w-11 h-11 rounded-xl bg-green-50">
-                    <svg
-                        class="w-5 h-5 text-green-500"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        stroke-width="1.8"
-                        aria-hidden="true"
-                    >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
-                        />
-                    </svg>
-                </span>
-            </div>
-        </div>
+        </BaseCard>
     </div>
 </template>
