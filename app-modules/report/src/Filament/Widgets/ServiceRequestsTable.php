@@ -39,6 +39,7 @@ namespace AidingApp\Report\Filament\Widgets;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Report\Filament\Exports\ServiceRequestsExporter;
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -108,7 +109,8 @@ class ServiceRequestsTable extends BaseWidget
                     ->description(fn (ServiceRequest $record): string => Str::limit($record->title, 40)),
                 TextColumn::make('priority.type.name')
                     ->label('Type')
-                    ->searchable(),
+                    ->searchable()
+                    ->description(fn (ServiceRequest $record): string => (string) $record->category->getLabel()),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->searchable()
@@ -170,6 +172,10 @@ class ServiceRequestsTable extends BaseWidget
                     ->placeholder(''),
             ])
             ->filters([
+                SelectFilter::make('category')
+                    ->label('Category')
+                    ->options(ServiceRequestCategory::class)
+                    ->native(false),
                 SelectFilter::make('type')
                     ->relationship('priority.type', 'name')
                     ->searchable()

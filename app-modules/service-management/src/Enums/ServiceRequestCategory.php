@@ -36,8 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Enums;
 
+use Filament\Support\Colors\Color;
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
+use Filament\Support\Facades\FilamentColor;
 
 enum ServiceRequestCategory: string implements HasColor, HasLabel
 {
@@ -59,5 +61,10 @@ enum ServiceRequestCategory: string implements HasColor, HasLabel
             self::Incident => 'danger',
             self::Request => 'primary',
         };
+    }
+
+    public function getRgb(): string
+    {
+        return Color::convertToRgb(FilamentColor::getColors()[$this->getColor()][500]);
     }
 }
