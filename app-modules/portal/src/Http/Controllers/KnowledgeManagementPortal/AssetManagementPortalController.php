@@ -85,7 +85,7 @@ class AssetManagementPortalController extends Controller
         }
 
         $items = $paginator->getCollection()->map(function (AssetCheckOut $checkOut) {
-            $isReturned = ! is_null($checkOut->asset_check_in_id);
+            $isReturned = $checkOut->checkIn !== null;
 
             return [
                 'id' => $checkOut->getKey(),
@@ -96,7 +96,7 @@ class AssetManagementPortalController extends Controller
                     'name' => $checkOut->asset->name,
                     'description' => $checkOut->asset->description,
                     'serial_number' => $checkOut->asset->serial_number,
-                    'purchase_age' => ! is_null($checkOut->asset->purchase_date)
+                    'purchase_age' => $checkOut->asset->purchase_date 
                         ? (function (AssetCheckOut $inner) {
                             $date = $inner->asset->purchase_date;
 
@@ -110,10 +110,10 @@ class AssetManagementPortalController extends Controller
                                 $diff->m . ' ' . ($diff->m === 1 ? 'Month' : 'Months');
                         })($checkOut)
                         : null,
-                    'type' => ! is_null($checkOut->asset->type_id)
+                    'type' => $checkOut->asset->type
                         ? ['name' => $checkOut->asset->type->name]
                         : null,
-                    'location' => ! is_null($checkOut->asset->location_id)
+                    'location' => $checkOut->asset->location
                         ? ['name' => $checkOut->asset->location->name]
                         : null,
                 ],

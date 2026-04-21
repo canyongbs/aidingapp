@@ -45,7 +45,7 @@
     const cards = computed(() => [
         {
             key: 'total',
-            label: 'Total Assets',
+            label: 'Total',
             value: props.counts.total,
             iconBg: 'bg-[rgba(var(--primary-50),1)]',
             iconColor: 'text-[rgba(var(--primary-500),1)]',
