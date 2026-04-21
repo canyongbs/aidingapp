@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\ServiceRequestCategoryRenameFeature;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Collection as BaseCollection;
 use Illuminate\Support\Facades\Cache;
 
 class ServiceRequestCategoryDistributionDonutChart extends ChartReportWidget
