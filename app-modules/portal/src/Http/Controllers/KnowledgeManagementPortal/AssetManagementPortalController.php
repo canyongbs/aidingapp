@@ -41,6 +41,7 @@ use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class AssetManagementPortalController extends Controller
 {
@@ -96,10 +97,8 @@ class AssetManagementPortalController extends Controller
                     'name' => $checkOut->asset->name,
                     'description' => $checkOut->asset->description,
                     'serial_number' => $checkOut->asset->serial_number,
-                    'purchase_age' => $checkOut->asset->purchase_date
-                        ? (function (AssetCheckOut $inner) {
-                            $date = $inner->asset->purchase_date;
-
+                    'purchase_age' => $checkOut->asset->getRawOriginal('purchase_date') !== null
+                        ? (function (Carbon $date) {
                             if ($date->isFuture()) {
                                 return '0 Years 0 Months';
                             }
@@ -108,12 +107,12 @@ class AssetManagementPortalController extends Controller
 
                             return $diff->y . ' ' . ($diff->y === 1 ? 'Year' : 'Years') . ' ' .
                                 $diff->m . ' ' . ($diff->m === 1 ? 'Month' : 'Months');
-                        })($checkOut)
+                        })($checkOut->asset->purchase_date) 
                         : null,
-                    'type' => $checkOut->asset->type
+                    'type' => $checkOut->asset->getRawOriginal('type_id') !== null
                         ? ['name' => $checkOut->asset->type->name]
                         : null,
-                    'location' => $checkOut->asset->location
+                    'location' => $checkOut->asset->getRawOriginal('location_id') !== null
                         ? ['name' => $checkOut->asset->location->name]
                         : null,
                 ],
