@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRe
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Concerns\EditPageRedirection;
-use CanyonGBS\Common\Filament\Forms\RichContentPlugins\VideoRichContentPlugin;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Resources\Pages\EditRecord;
@@ -226,13 +225,10 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->placeholder('Enter the email body here...')
                 ->extraInputAttributes(['style' => 'min-height: 12rem;'])
                 ->toolbarButtons([
-                    ['bold', 'italic', 'underline', 'strike', 'superscript', 'subscript', 'link'],
-                    [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])->textualButtons(), 'blockquote', 'code', 'codeBlock', 'bulletList', 'orderedList', 'horizontalRule'],
-                    ['alignStart', 'alignCenter', 'alignEnd'],
-                    ['textColor', 'highlight', 'lead', 'small'],
-                    ['attachFiles', 'video'],
-                    ['grid', 'table', 'details'],
-                    ['mergeTags', 'customBlocks'],
+                    ['bold', 'italic', 'link'],
+                    [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])->textualButtons(), 'bulletList', 'orderedList', 'horizontalRule'],
+                    ['textColor', 'small'],
+                    ['attachFiles', 'mergeTags', 'customBlocks'],
                     ['clearFormatting'],
                     ['undo', 'redo'],
                 ])
@@ -241,9 +237,6 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->customBlocks([
                     ServiceRequestTypeEmailTemplateButtonBlock::class,
                     SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
-                ])
-                ->plugins([
-                    VideoRichContentPlugin::make(),
                 ])
                 ->fileAttachmentsDisk('s3-public')
                 ->resizableImages()
