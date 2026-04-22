@@ -76,6 +76,8 @@
     const updateMessage = ref('');
     const files = ref([]);
     const fileInput = ref(null);
+    const files = ref([]);
+    const fileInput = ref(null);
     const validationErrors = ref({});
     const authorizationError = ref(null);
     const currentPage = ref(1);
