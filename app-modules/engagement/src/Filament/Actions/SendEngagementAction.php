@@ -36,7 +36,6 @@
 
 namespace AidingApp\Engagement\Filament\Actions;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Actions\CreateEngagement;
 use AidingApp\Engagement\DataTransferObjects\EngagementCreationData;
 use AidingApp\Engagement\Filament\Schemas\Components\EngagementBodyInput;
@@ -149,8 +148,7 @@ class SendEngagementAction extends Action
                 ]),
             Fieldset::make('Send your email')
                 ->schema([
-                    EngagementSendLaterToggle::make()
-                        ->helperText('By default, this email will send as soon as it is created unless you schedule it to send later.'),
+                    EngagementSendLaterToggle::make(),
                     EngagementScheduledAtDateTimePicker::make(),
                 ]),
         ];
@@ -173,7 +171,7 @@ class SendEngagementAction extends Action
     {
         $body = is_array($data['body'] ?? null) ? $data['body'] : ['type' => 'doc', 'content' => []];
 
-        $recipient = $this->resolveRecipients($data)->first();
+        $recipient = $this->evaluate($this->resolveRecipientsUsing)?->first();
 
         if (! $recipient) {
             throw new Exception('No recipient found');
@@ -188,28 +186,5 @@ class SendEngagementAction extends Action
             scheduledAt: ($data['send_later'] ?? false) ? Carbon::parse($data['scheduled_at'] ?? null) : null,
             schema: $schema,
         ));
-    }
-
-    /**
-     * @param  array<string, mixed>  $data
-     *
-     * @return Collection<int, Model&CanBeNotified>
-     */
-    protected function resolveRecipients(array $data): Collection
-    {
-        if ($this->resolveRecipientsUsing) {
-            return $this->evaluate($this->resolveRecipientsUsing);
-        }
-
-        $contact = Contact::find($data['concern_id']);
-
-        if (! $contact) {
-            throw new Exception('Contact not found');
-        }
-
-        /** @var Collection<int, Model&CanBeNotified> $recipients */
-        $recipients = collect([$contact]);
-
-        return $recipients;
     }
 }

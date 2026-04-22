@@ -43,6 +43,7 @@ class EngagementSendLaterToggle
     public static function make(): Toggle
     {
         return Toggle::make('send_later')
+            ->helperText('By default, this email will send as soon as it is created unless you schedule it to send later.')
             ->reactive();
     }
 }

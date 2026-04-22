@@ -43,6 +43,7 @@ use AidingApp\Engagement\Filament\Schemas\Components\EngagementChannelSelect;
 use AidingApp\Engagement\Filament\Schemas\Components\EngagementScheduledAtDateTimePicker;
 use AidingApp\Engagement\Filament\Schemas\Components\EngagementSendLaterToggle;
 use AidingApp\Engagement\Filament\Schemas\Components\EngagementSubjectInput;
+use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementBatch;
 use AidingApp\Notification\Enums\NotificationChannel;
 use Filament\Actions\BulkAction;
@@ -74,10 +75,7 @@ class BulkEngagementAction
                         EngagementBodyInput::make(),
                         Actions::make([
                             BulkDraftWithAiAction::make()
-                                ->mergeTags([
-                                    'contact full name',
-                                    'contact email',
-                                ]),
+                                ->mergeTags(Engagement::getMergeTags()),
                         ]),
                     ]),
                 Step::make('Schedule')

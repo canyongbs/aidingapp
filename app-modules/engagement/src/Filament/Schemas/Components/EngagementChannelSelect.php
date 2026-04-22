@@ -47,7 +47,6 @@ class EngagementChannelSelect
             ->label('How would you like to send this engagement?')
             ->options(NotificationChannel::getEngagementOptions())
             ->default(NotificationChannel::Email->value)
-            // ->disableOptionWhen(fn (string $value): bool => NotificationChannel::tryFrom($value)?->getCaseDisabled())
             ->selectablePlaceholder(false)
             ->live();
     }
