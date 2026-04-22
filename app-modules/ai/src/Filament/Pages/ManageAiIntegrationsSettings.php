@@ -180,6 +180,10 @@ class ManageAiIntegrationsSettings extends SettingsPage
                                 TextInput::make('open_ai_gpt_54_mini_image_generation_deployment')
                                     ->label('Image generation model'),
                                 Select::make('open_ai_gpt_54_mini_applicable_features')
+                                    ->label('Applicability')
+                                    ->options(AiModelApplicabilityFeature::class)
+                                    ->multiple()
+                                    ->nestedRecursiveRules([Rule::enum(AiModelApplicabilityFeature::class)]),
                             ])->visible(fn () => Gpt54MiniFeature::active()),
                         Section::make('GPT 5.4 nano')
                             ->collapsible()
@@ -207,7 +211,6 @@ class ManageAiIntegrationsSettings extends SettingsPage
                                     ->options(AiModelApplicabilityFeature::class)
                                     ->multiple()
                                     ->nestedRecursiveRules([Rule::enum(AiModelApplicabilityFeature::class)]),
-                            
                             ])->visible(fn () => Gpt54NanoFeature::active()),
                     ]),
                 Section::make('LlamaCloud')
