@@ -137,10 +137,6 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 continue;
             }
 
-            if (! $template->exists && blank($subject)) {
-                continue;
-            }
-
             $wasNew = ! $template->exists;
 
             $template->subject = $subject;

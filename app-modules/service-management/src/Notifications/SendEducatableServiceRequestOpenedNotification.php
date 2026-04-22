@@ -46,7 +46,6 @@ use AidingApp\Notification\Notifications\Contracts\HasOutboundMailCustomization;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use AidingApp\ServiceManagement\Notifications\Concerns\SetsServiceRequestEmailHeaders;
 use App\Models\NotificationSetting;
 use App\Models\Tenant;
@@ -58,7 +57,6 @@ use Illuminate\Notifications\Notification;
 class SendEducatableServiceRequestOpenedNotification extends Notification implements ShouldQueue, HasBeforeSendHook, HasAfterSendHook, HasOutboundMailCustomization
 {
     use Queueable;
-    use HandlesServiceRequestTemplateContent;
     use SetsServiceRequestEmailHeaders;
 
     public function __construct(
@@ -82,24 +80,29 @@ class SendEducatableServiceRequestOpenedNotification extends Notification implem
         $type = $this->serviceRequest->priority->type;
 
         $template = $this->emailTemplate;
-
-        if (! $template) {
-            return MailMessage::make()
-                ->settings($this->resolveNotificationSetting($notifiable))
-                ->subject("{$this->serviceRequest->service_request_number} - is now {$status->name}")
-                ->greeting("Hello {$name},")
-                ->line("A new {$type->name} service request has been created and is now in a {$status->name} status. Your new ticket number is: {$this->serviceRequest->service_request_number}.")
-                ->line('The details of your service request are shown below:')
-                ->lines(str(nl2br($this->serviceRequest->close_details))->explode('<br />'));
-        }
         $timezone = Tenant::current()->getTimezone();
-        $subject = $this->getSubject($template->subject, $timezone);
-        $body = $this->getBody($template->body, null, $timezone);
+        $mergeData = $this->serviceRequest->getTemplateMergeData($timezone);
 
-        return MailMessage::make()
+        $subject = $template?->getSubject($mergeData)?->toHtml();
+        $body = $template?->getBody(
+            $mergeData,
+            serviceRequestUrl: route('portal.service-request.show', $this->serviceRequest),
+            feedbackUrl: route('feedback.service.request', $this->serviceRequest),
+        )?->toHtml();
+
+        $message = MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject(strip_tags($subject))
-            ->content($body);
+            ->subject(filled($subject) ? strip_tags($subject) : "{$this->serviceRequest->service_request_number} - is now {$status->name}");
+
+        if (filled($body)) {
+            return $message->content($body);
+        }
+
+        return $message
+            ->greeting("Hello {$name},")
+            ->line("A new {$type->name} service request has been created and is now in a {$status->name} status. Your new ticket number is: {$this->serviceRequest->service_request_number}.")
+            ->line('The details of your service request are shown below:')
+            ->lines(str(nl2br($this->serviceRequest->close_details))->explode('<br />'));
     }
 
     public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void

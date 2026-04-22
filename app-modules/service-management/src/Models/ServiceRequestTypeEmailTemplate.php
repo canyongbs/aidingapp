@@ -92,12 +92,13 @@ class ServiceRequestTypeEmailTemplate extends Model implements Auditable, HasMed
     }
 
     /**
-     * @param string|array<int, string|array<string, mixed>> $content
      * @param array<string, mixed> $mergeData
      */
-    public function getBody(string|array $content, array $mergeData, ?string $serviceRequestUrl = null, ?string $feedbackUrl = null): HtmlString
+    public function getBody(array $mergeData, ?string $serviceRequestUrl = null, ?string $feedbackUrl = null): ?HtmlString
     {
-        $this->body = $content;
+        if (blank($this->body)) {
+            return null;
+        }
 
         $html = $this->getRichContentAttribute('body')
             ?->customBlocks([
@@ -120,12 +121,13 @@ class ServiceRequestTypeEmailTemplate extends Model implements Auditable, HasMed
     }
 
     /**
-     * @param string|array<int, string|array<string, mixed>> $content
      * @param array<string, mixed> $mergeData
      */
-    public function getSubject(string|array $content, array $mergeData): HtmlString
+    public function getSubject(array $mergeData): ?HtmlString
     {
-        $this->subject = $content;
+        if (blank($this->subject)) {
+            return null;
+        }
 
         $text = $this->getRichContentAttribute('subject')
             ?->mergeTags($mergeData)
@@ -166,6 +168,7 @@ class ServiceRequestTypeEmailTemplate extends Model implements Auditable, HasMed
 
         $this->registerRichContent('body')
             ->fileAttachmentsDisk('s3-public')
+            ->fileAttachmentsVisibility('public')
             ->fileAttachmentProvider(SpatieMediaLibraryFileAttachmentProvider::make())
             ->mergeTags($mergeTags)
             ->customBlocks([

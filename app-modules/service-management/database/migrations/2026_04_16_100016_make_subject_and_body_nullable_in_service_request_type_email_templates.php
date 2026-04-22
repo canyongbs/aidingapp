@@ -42,6 +42,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('service_request_type_email_templates', function (Blueprint $table) {
+            $table->jsonb('subject')->nullable()->change();
             $table->jsonb('body')->nullable()->change();
         });
     }
@@ -49,6 +50,7 @@ return new class () extends Migration {
     public function down(): void
     {
         Schema::table('service_request_type_email_templates', function (Blueprint $table) {
+            $table->jsonb('subject')->nullable(false)->change();
             $table->jsonb('body')->nullable(false)->change();
         });
     }
