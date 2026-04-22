@@ -36,13 +36,14 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\SLAs\RelationManagers;
 
-use AidingApp\ServiceManagement\Filament\Actions\TableSelectAssociateAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Filament\Tables\ServiceRequestPrioritiesTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\AssociateAction;
 use Filament\Actions\DissociateAction;
 use Filament\Actions\DissociateBulkAction;
+use Filament\Forms\Components\TableSelect;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -75,10 +76,18 @@ class ServiceRequestPrioritiesRelationManager extends RelationManager
                     ->sortable(),
             ])
             ->headerActions([
-                TableSelectAssociateAction::make()
+                AssociateAction::make()
                     ->slideOver()
                     ->multiple()
-                    ->tableSelect(ServiceRequestPrioritiesTable::class),
+                    ->schema(fn (AssociateAction $action) => [
+                        TableSelect::make('recordId')
+                            ->hiddenLabel()
+                            ->ignoreRelatedRecords()
+                            ->tableConfiguration(ServiceRequestPrioritiesTable::class)
+                            ->model($action->getTable()->getRelationship()->getParent())
+                            ->relationshipName(static::getRelationshipName())
+                            ->multiple($action->isMultiple()),
+                    ]),
             ])
             ->recordActions([
                 DissociateAction::make(),

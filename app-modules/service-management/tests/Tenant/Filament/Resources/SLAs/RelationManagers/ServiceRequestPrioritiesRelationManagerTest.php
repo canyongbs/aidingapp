@@ -34,12 +34,12 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Actions\TableSelectAssociateAction;
 use AidingApp\ServiceManagement\Filament\Resources\SLAs\Pages\EditSla;
 use AidingApp\ServiceManagement\Filament\Resources\SLAs\RelationManagers\ServiceRequestPrioritiesRelationManager;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\Sla;
+use Filament\Actions\AssociateAction;
 use Filament\Actions\DissociateAction;
 use Filament\Actions\DissociateBulkAction;
 
@@ -133,7 +133,7 @@ it('has the associate action available', function () {
         'ownerRecord' => $sla,
         'pageClass' => EditSla::class,
     ])
-        ->assertTableActionExists(TableSelectAssociateAction::class);
+        ->assertTableActionExists(AssociateAction::class);
 });
 
 it('can associate a single priority to the SLA', function () {
@@ -151,7 +151,7 @@ it('can associate a single priority to the SLA', function () {
         'ownerRecord' => $sla,
         'pageClass' => EditSla::class,
     ])
-        ->callTableAction(TableSelectAssociateAction::class, data: [
+        ->callTableAction(AssociateAction::class, data: [
             'recordId' => [$priority->getKey()],
         ])
         ->assertHasNoTableActionErrors();
@@ -183,7 +183,7 @@ it('can associate multiple priorities to the SLA', function () {
         'ownerRecord' => $sla,
         'pageClass' => EditSla::class,
     ])
-        ->callTableAction(TableSelectAssociateAction::class, data: [
+        ->callTableAction(AssociateAction::class, data: [
             'recordId' => $priorities->pluck('id')->all(),
         ])
         ->assertHasNoTableActionErrors();
@@ -220,7 +220,7 @@ it('can associate priorities from different types to the SLA', function () {
         'ownerRecord' => $sla,
         'pageClass' => EditSla::class,
     ])
-        ->callTableAction(TableSelectAssociateAction::class, data: [
+        ->callTableAction(AssociateAction::class, data: [
             'recordId' => [$priorityA->getKey(), $priorityB->getKey()],
         ])
         ->assertHasNoTableActionErrors();
