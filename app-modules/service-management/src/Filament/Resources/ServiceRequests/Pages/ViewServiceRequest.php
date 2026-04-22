@@ -141,7 +141,6 @@ class ViewServiceRequest extends ViewRecord
                 Section::make('Description')
                     ->schema([
                         TextEntry::make('close_details')
-                            ->label('Description')
                             ->hiddenLabel(),
                     ]),
                 Section::make('Uploads')
