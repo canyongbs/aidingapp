@@ -211,8 +211,8 @@
                         No types or service request areas yet
                     </h3>
                     <p class="max-w-xl text-sm text-gray-600 dark:text-gray-400">
-                        Create a service request area or add a type to get started.
-                        Use the buttons below to add your first items.
+                        Create a service request area or add a type to get started. Use the buttons below to add your
+                        first items.
                     </p>
                 </div>
             </div>
