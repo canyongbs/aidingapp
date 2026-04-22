@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,28 +34,14 @@
 </COPYRIGHT>
 */
 
-return [
-    'gpt_5_base_uri' => env('OPEN_AI_GPT_5_BASE_URI'),
+namespace App\Features;
 
-    'gpt_5_api_key' => env('OPEN_AI_GPT_5_API_KEY'),
+use App\Support\AbstractFeatureFlag;
 
-    'gpt_5_model' => env('OPEN_AI_GPT_5_MODEL'),
-
-    'gpt_5_mini_base_uri' => env('OPEN_AI_GPT_5_MINI_BASE_URI'),
-
-    'gpt_5_mini_api_key' => env('OPEN_AI_GPT_5_MINI_API_KEY'),
-
-    'gpt_5_mini_model' => env('OPEN_AI_GPT_5_MINI_MODEL'),
-
-    'gpt_5_nano_base_uri' => env('OPEN_AI_GPT_5_NANO_BASE_URI'),
-
-    'gpt_5_nano_api_key' => env('OPEN_AI_GPT_5_NANO_API_KEY'),
-
-    'gpt_5_nano_model' => env('OPEN_AI_GPT_5_NANO_MODEL'),
-
-    'gpt_54_mini_base_uri' => env('OPEN_AI_GPT_54_MINI_BASE_URI'),
-
-    'gpt_54_mini_api_key' => env('OPEN_AI_GPT_54_MINI_API_KEY'),
-
-    'gpt_54_mini_model' => env('OPEN_AI_GPT_54_MINI_MODEL'),
-];
+class Gpt54MiniFeature extends AbstractFeatureFlag
+{
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
+}
