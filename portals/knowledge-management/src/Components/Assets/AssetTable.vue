@@ -98,11 +98,7 @@
             class="mt-1"
         />
 
-        <BaseTableEmptyState
-            v-else-if="assets.length === 0"
-            key="empty"
-            class="mt-1"
-        >
+        <BaseTableEmptyState v-else-if="assets.length === 0" key="empty" class="mt-1">
             <template v-if="activeFilter === 'returned'">
                 <p class="text-base font-semibold text-gray-700">No returned assets</p>
                 <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">No assets have been returned yet.</p>
@@ -115,9 +111,7 @@
             </template>
             <template v-else>
                 <p class="text-base font-semibold text-gray-700">No assets found</p>
-                <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">
-                    No assets have been assigned to your account.
-                </p>
+                <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">No assets have been assigned to your account.</p>
             </template>
         </BaseTableEmptyState>
 
@@ -142,16 +136,9 @@
                     </tr>
                 </BaseTableHeader>
                 <BaseTableBody>
-                    <BaseTableRow
-                        v-for="(item, idx) in assets"
-                        :key="item.id"
-                        :delay="idx * 30"
-                    >
+                    <BaseTableRow v-for="(item, idx) in assets" :key="item.id" :delay="idx * 30">
                         <BaseTableCell>
-                            <BaseTableCellText
-                                :text="item.asset?.name"
-                                :sub-text="item.asset?.description"
-                            />
+                            <BaseTableCellText :text="item.asset?.name" :sub-text="item.asset?.description" />
                         </BaseTableCell>
 
                         <BaseTableCell class="text-sm text-gray-600">

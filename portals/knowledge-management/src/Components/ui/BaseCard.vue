@@ -49,14 +49,7 @@
 </script>
 
 <template>
-    <div
-        :class="[
-            'rounded-[var(--rounding-lg)] shadow-xs',
-            bg,
-            bordered && 'border border-gray-200',
-            padded && 'p-5',
-        ]"
-    >
+    <div :class="['rounded-[var(--rounding-lg)] shadow-xs', bg, bordered && 'border border-gray-200', padded && 'p-5']">
         <slot />
     </div>
 </template>

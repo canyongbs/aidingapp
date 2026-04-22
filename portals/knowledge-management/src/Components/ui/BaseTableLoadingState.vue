@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -56,30 +56,21 @@
     <BaseTable role="status" aria-busy="true" class="animate-pulse">
         <BaseTableHeader>
             <tr>
-                <th
-                    v-for="col in columns"
-                    :key="col"
-                    class="px-4 py-3"
-                >
+                <th v-for="col in columns" :key="col" class="px-4 py-3">
                     <div class="h-3 rounded bg-gray-200" :class="col === 1 ? 'w-16' : 'w-20'"></div>
                 </th>
             </tr>
         </BaseTableHeader>
         <BaseTableBody>
             <tr v-for="row in rows" :key="row">
-                <td
-                    v-for="col in columns"
-                    :key="col"
-                    class="px-4 py-4"
-                >
+                <td v-for="col in columns" :key="col" class="px-4 py-4">
                     <div
                         class="h-3 rounded"
-                        :class="[col === 1 ? 'w-40 bg-gray-200' : col % 3 === 0 ? 'w-16 bg-gray-100' : 'w-24 bg-gray-200']"
+                        :class="[
+                            col === 1 ? 'w-40 bg-gray-200' : col % 3 === 0 ? 'w-16 bg-gray-100' : 'w-24 bg-gray-200',
+                        ]"
                     ></div>
-                    <div
-                        v-if="col === 1"
-                        class="mt-2 h-2.5 w-28 rounded bg-gray-100"
-                    ></div>
+                    <div v-if="col === 1" class="mt-2 h-2.5 w-28 rounded bg-gray-100"></div>
                 </td>
             </tr>
         </BaseTableBody>
