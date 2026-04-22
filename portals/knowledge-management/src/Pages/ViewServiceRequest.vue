@@ -74,6 +74,8 @@
     const serviceRequestUpdates = ref([]);
     const loadingResults = ref(false);
     const updateMessage = ref('');
+    const files = ref([]);
+    const fileInput = ref(null);
     const validationErrors = ref({});
     const authorizationError = ref(null);
     const currentPage = ref(1);
@@ -105,6 +107,13 @@
         },
     );
 
+    const handleFiles = (event) => {
+        files.value = [
+            ...files.value,
+            ...Array.from(event.target.files)
+        ]
+    }
+
     function getData(page = 1, fromPagination = false) {
         if (!fromPagination) {
             loadingResults.value = true;
@@ -121,17 +130,35 @@
             setPagination(response.data.serviceRequestUpdates);
         });
     }
+    
     async function submitUpdate() {
         try {
             disableSubmitBtn.value = true;
             const { post } = consumer();
-            const response = await post(props.apiUrl + '/service-request-update/store', {
-                description: updateMessage.value,
-                serviceRequestId: route.params.serviceRequestId,
+            const formData = new FormData();
+
+            formData.append('description', updateMessage.value);
+            formData.append('serviceRequestId', route.params.serviceRequestId);
+            files.value.forEach((file, index) => {
+                formData.append(`files[${index}]`, file);
             });
+
+            const response = await post(
+                props.apiUrl + '/service-request-update/store',
+                formData,
+                {
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                    },
+                }
+            );
             serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
             setPagination(response.data.serviceRequestUpdates);
             updateMessage.value = ''; // Clear the textarea
+            files.value = [];
+            if (fileInput.value) {
+                fileInput.value.value = null;
+            }
         } catch (error) {
             if (error.response && error.response.status === 422) {
                 // 422 Unprocessable Entity, which means validation error
@@ -261,6 +288,9 @@
             <BaseDetailSection label="New Service Request Update">
                 <form @submit.prevent="submitUpdate">
                     <BaseTextarea v-model="updateMessage" :rows="5" placeholder="Enter your update here..." required />
+                    <div class="mb-4">
+                        <input ref="fileInput" type="file" multiple @change="handleFiles" />
+                    </div>
                     <BaseInputError :errors="validationErrors.description ?? []" />
                     <div class="mt-3">
                         <BaseButton type="submit" variant="primary" size="md" :loading="disableSubmitBtn">

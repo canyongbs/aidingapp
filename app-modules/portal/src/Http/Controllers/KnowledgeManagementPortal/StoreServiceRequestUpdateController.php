@@ -55,6 +55,14 @@ class StoreServiceRequestUpdateController extends Controller
 
         $serviceRequestUpdate->save();
 
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $serviceRequestUpdate
+                    ->addMedia($file)
+                    ->toMediaCollection('uploads', config('media-library.disk_name'));
+            }
+        }
+
         $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
 
         $serviceRequestUpdates = $serviceRequest
@@ -72,5 +80,23 @@ class StoreServiceRequestUpdateController extends Controller
             });
 
         return response()->json(['serviceRequestUpdates' => $serviceRequestUpdates], 201);
+    }
+
+    /**
+     * @return array{
+     *   description: array<string>,
+     *   serviceRequestId: array<string>,
+     *   files: array<string>,
+     *   'files.*': array<string>,
+     * }
+     */
+    public function rules(): array
+    {
+        return [
+            'description' => ['required', 'string'],
+            'serviceRequestId' => ['required', 'exists:service_requests,id'],
+            'files' => ['nullable', 'array'],
+            'files.*' => ['file'],
+        ];
     }
 }
