@@ -38,14 +38,8 @@ use AidingApp\ServiceManagement\Jobs\AutoSubmitStaleDraftServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-
-// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
-beforeEach(function () {
-    ServiceRequestCategoryRenameFeature::activate();
-});
 
 it('does nothing when service request is not a draft', function () {
     $type = ServiceRequestType::factory()->create();

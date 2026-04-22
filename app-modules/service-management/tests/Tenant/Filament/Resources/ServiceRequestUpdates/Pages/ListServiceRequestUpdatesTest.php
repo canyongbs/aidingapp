@@ -39,18 +39,12 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\L
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
-
-// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
-beforeEach(function () {
-    ServiceRequestCategoryRenameFeature::activate();
-});
 
 test('The correct details are displayed on the ListServiceRequestUpdates page', function () {
     $serviceRequestUpdates = ServiceRequestUpdate::factory()

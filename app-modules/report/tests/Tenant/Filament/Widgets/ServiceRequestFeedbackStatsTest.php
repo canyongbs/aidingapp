@@ -39,12 +39,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestCategoryRenameFeature;
-
-// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
-beforeEach(function () {
-    ServiceRequestCategoryRenameFeature::activate();
-});
 
 it('returns correct service request statistics within the given date range', function () {
     $startDate = now()->subDays(10);

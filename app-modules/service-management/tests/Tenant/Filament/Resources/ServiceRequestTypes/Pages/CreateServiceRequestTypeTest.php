@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\Cre
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestTypeRequestFactory;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -50,11 +49,6 @@ use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Tests\asSuperAdmin;
-
-// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
-beforeEach(function () {
-    ServiceRequestCategoryRenameFeature::activate();
-});
 
 test('A successful action on the CreateServiceRequestType page', function () {
     asSuperAdmin()
