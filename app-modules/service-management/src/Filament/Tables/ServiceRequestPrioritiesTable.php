@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Filament\Tables;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
