@@ -58,7 +58,6 @@ class ServiceRequestPrioritiesTable
             ])
             ->defaultGroup(
                 Group::make('type.name')
-                    ->label('')
                     ->collapsible(),
             );
     }
