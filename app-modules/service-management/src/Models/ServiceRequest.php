@@ -41,6 +41,7 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
@@ -461,7 +462,15 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
         $updateDate = ! is_null($timezone) ? $recentUpdate->created_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $recentUpdate->created_at->format('M j, Y \a\t h:i A (T)');
 
-        return "{$creatorInfo}\n\n{$updateDate} - {$recentUpdate->update}";
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
+
+        $updateText = "{$creatorInfo}\n\n{$updateDate} - {$recentUpdate->update}";
+
+        if ($recentUpdate->hasMedia($uploadsMediaCollection->getName())) {
+            $updateText .= "\n\nNote: Files were attached with this update. Please login the service portal to see the files.";
+        }
+
+        return $updateText;
     }
 
     protected function casts(): array
