@@ -55,7 +55,6 @@ use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Gate;
@@ -68,12 +67,9 @@ class ServiceRequestObserver
     {
         $serviceRequest->service_request_number ??= app(ServiceRequestNumberGenerator::class)->generate();
 
-        $categoryColumn = ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category';
-        $defaultCategoryColumn = ServiceRequestCategoryRenameFeature::active() ? 'default_category' : 'default_issue_category';
-
         /** @phpstan-ignore function.impossibleType (Because this is in an observer it is possible that category is null before the model is persisted) */
-        if (is_null($serviceRequest->$categoryColumn)) { /** @phpstan-ignore property.notFound */
-            $serviceRequest->$categoryColumn = $serviceRequest->priority->type->$defaultCategoryColumn; /** @phpstan-ignore property.notFound */
+        if (is_null($serviceRequest->category)) {
+            $serviceRequest->category = $serviceRequest->priority->type->default_category;
         }
     }
 
