@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,34 +34,37 @@
 </COPYRIGHT>
 */
 
-return [
-    'gpt_5_base_uri' => env('OPEN_AI_GPT_5_BASE_URI'),
+namespace AidingApp\IntegrationOpenAi\Services;
 
-    'gpt_5_api_key' => env('OPEN_AI_GPT_5_API_KEY'),
+class OpenAiGpt54NanoService extends BaseOpenAiService
+{
+    public function getApiKey(): string
+    {
+        return $this->settings->open_ai_gpt_54_nano_api_key ?? config('integration-open-ai.gpt_54_nano_api_key');
+    }
 
-    'gpt_5_model' => env('OPEN_AI_GPT_5_MODEL'),
+    public function getModel(): string
+    {
+        return $this->settings->open_ai_gpt_54_nano_model ?? config('integration-open-ai.gpt_54_nano_model');
+    }
 
-    'gpt_5_mini_base_uri' => env('OPEN_AI_GPT_5_MINI_BASE_URI'),
+    public function getDeployment(): ?string
+    {
+        return $this->settings->open_ai_gpt_54_nano_base_uri ?? config('integration-open-ai.gpt_54_nano_base_uri');
+    }
 
-    'gpt_5_mini_api_key' => env('OPEN_AI_GPT_5_MINI_API_KEY'),
+    public function getImageGenerationDeployment(): ?string
+    {
+        return $this->settings->open_ai_gpt_54_nano_image_generation_deployment;
+    }
 
-    'gpt_5_mini_model' => env('OPEN_AI_GPT_5_MINI_MODEL'),
+    public function hasTemperature(): bool
+    {
+        return false;
+    }
 
-    'gpt_5_nano_base_uri' => env('OPEN_AI_GPT_5_NANO_BASE_URI'),
-
-    'gpt_5_nano_api_key' => env('OPEN_AI_GPT_5_NANO_API_KEY'),
-
-    'gpt_5_nano_model' => env('OPEN_AI_GPT_5_NANO_MODEL'),
-
-    'gpt_54_mini_base_uri' => env('OPEN_AI_GPT_54_MINI_BASE_URI'),
-
-    'gpt_54_mini_api_key' => env('OPEN_AI_GPT_54_MINI_API_KEY'),
-
-    'gpt_54_mini_model' => env('OPEN_AI_GPT_54_MINI_MODEL'),
-    
-    'gpt_54_nano_base_uri' => env('OPEN_AI_GPT_54_NANO_BASE_URI'),
-
-    'gpt_54_nano_api_key' => env('OPEN_AI_GPT_54_NANO_API_KEY'),
-
-    'gpt_54_nano_model' => env('OPEN_AI_GPT_54_NANO_MODEL'),
-];
+    public function hasReasoning(): bool
+    {
+        return true;
+    }
+}
