@@ -44,11 +44,12 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRe
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Concerns\EditPageRedirection;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
-use FilamentTiptapEditor\TiptapEditor;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
@@ -80,15 +81,27 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
             $roles = [ServiceRequestTypeEmailTemplateRole::Customer];
         }
 
+        /** @var ServiceRequestType $record */
+        $record = $this->getRecord();
+
         return $schema
             ->components([
                 Tabs::make('Email template roles')
                     ->persistTab()
                     ->id('email-template-role-tabs')
                     ->tabs(array_map(
-                        fn (ServiceRequestTypeEmailTemplateRole $role) => Tab::make($role->getLabel())
-                            ->schema($this->getEmailTemplateFormSchema($role))
-                            ->statePath($role->value),
+                        function (ServiceRequestTypeEmailTemplateRole $role) use ($record): Tab {
+                            $template = ServiceRequestTypeEmailTemplate::where([
+                                'service_request_type_id' => $record->getKey(),
+                                'type' => $this->type,
+                                'role' => $role,
+                            ])->first();
+
+                            return Tab::make($role->getLabel())
+                                ->schema($this->getEmailTemplateFormSchema($role))
+                                ->statePath($role->value)
+                                ->model($template ?? ServiceRequestTypeEmailTemplate::class);
+                        },
                         $roles
                     ))
                     ->columnSpanFull(),
@@ -105,12 +118,11 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
         foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role) {
             $templateData = $data[$role->value] ?? null;
 
-            if (
-                ! $templateData ||
-                (blank($templateData['subject']) && blank($templateData['body']))
-            ) {
-                continue;
-            }
+            $subject = $templateData['subject'] ?? null;
+            $body = $templateData['body'] ?? null;
+
+            $bodyComponent = $this->form->getComponent("{$role->value}.email-template-body-{$role->value}");
+            $bodyWasDehydrated = $bodyComponent?->isDehydrated() ?? true;
 
             $template = ServiceRequestTypeEmailTemplate::firstOrNew([
                 'service_request_type_id' => $record->getKey(),
@@ -118,59 +130,126 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 'role' => $role,
             ]);
 
-            if (! $template->exists && (blank($templateData['subject']) || blank($templateData['body']))) {
+            if ($bodyWasDehydrated && blank($subject) && blank($body)) {
+                if ($template->exists) {
+                    $template->delete();
+                }
+
                 continue;
             }
 
-            $template->subject = $templateData['subject'] ?? $template->subject;
-            $template->body = $templateData['body'] ?? $template->body;
+            $template->subject = $subject;
+            $template->body = $body;
 
             $template->save();
+
+            if (! $bodyWasDehydrated && $bodyComponent) {
+                $bodyComponent
+                    ->model($template)
+                    ->saveRelationships();
+            }
         }
 
         $this->getSavedNotification()->send();
     }
 
-    /** @return array<int, TiptapEditor> */
-    protected function getEmailTemplateFormSchema(ServiceRequestTypeEmailTemplateRole $role): array
+    protected function normalizeRichContent(mixed $content): mixed
     {
-        $mergeTags = [
-            'contact name',
-            'service request number',
-            'created date',
-            'updated date',
-            'status',
-            'assigned staff name',
-            'title',
-            'description',
-            'type',
-        ];
-
-        if ($this->type === ServiceRequestEmailTemplateType::Update) {
-            $mergeTags[] = 'recent update';
+        if (! is_array($content)) {
+            return $content;
         }
 
+        $hasContent = false;
+
+        $walk = function (array $node) use (&$walk, &$hasContent): void {
+            if (! empty($node['text'])) {
+                $hasContent = true;
+
+                return;
+            }
+
+            if (in_array($node['type'] ?? null, ['image', 'customBlock', 'horizontalRule'], true)) {
+                $hasContent = true;
+
+                return;
+            }
+
+            foreach ($node['content'] ?? [] as $child) {
+                if (is_array($child)) {
+                    $walk($child);
+                }
+            }
+        };
+
+        $walk($content);
+
+        return $hasContent ? $content : null;
+    }
+
+    /** @return array<int, RichEditor> */
+    protected function getEmailTemplateFormSchema(ServiceRequestTypeEmailTemplateRole $role): array
+    {
+        $mergeTags = array_keys(ServiceRequestTypeEmailTemplate::getMergeTags());
+
+        if ($this->type !== ServiceRequestEmailTemplateType::Update) {
+            $mergeTags = array_values(array_diff($mergeTags, ['recent update']));
+        }
+
+        $normalizeEmptyContent = fn ($state) => $this->normalizeRichContent($state);
+
         return [
-            TiptapEditor::make('subject')
+            RichEditor::make('subject')
                 ->label('Subject')
                 ->placeholder('Enter the email subject here...')
                 ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
-                ->disableToolbarMenus()
+                ->toolbarButtons([])
                 ->mergeTags($mergeTags)
-                ->showMergeTagsInBlocksPanel(false)
-                ->helperText('You may use “merge tags” to substitute information about a service request into your subject line. Insert a “{{“ in the subject line field to see a list of available merge tags'),
-
-            TiptapEditor::make('body')
+                ->helperText('You may use “merge tags” to substitute information about a service request into your subject line. Insert a “{{“ in the subject line field to see a list of available merge tags')
+                ->dehydrateStateUsing($normalizeEmptyContent)
+                ->json(),
+            RichEditor::make('body')
+                ->key("email-template-body-{$role->value}")
                 ->label('Body')
-                ->profile('email_template')
                 ->placeholder('Enter the email body here...')
                 ->extraInputAttributes(['style' => 'min-height: 12rem;'])
+                ->toolbarButtons([
+                    ['bold', 'italic', 'link'],
+                    [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])->textualButtons(), 'bulletList', 'orderedList', 'horizontalRule'],
+                    ['textColor', 'small'],
+                    ['attachFiles', 'mergeTags', 'customBlocks'],
+                    ['clearFormatting'],
+                    ['undo', 'redo'],
+                ])
                 ->mergeTags($mergeTags)
-                ->blocks([
+                ->customBlocks([
                     ServiceRequestTypeEmailTemplateButtonBlock::class,
                     SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
                 ])
-                ->columnSpanFull(),
+                ->fileAttachmentsDisk('s3-public')
+                ->resizableImages()
+                ->columnSpanFull()
+                ->dehydrateStateUsing($normalizeEmptyContent)
+                ->saveRelationshipsUsing(function (RichEditor $component) use ($normalizeEmptyContent): void {
+                    $record = $component->getRecord();
+
+                    if (! $record instanceof ServiceRequestTypeEmailTemplate) {
+                        return;
+                    }
+
+                    if (! $record->wasRecentlyCreated) {
+                        return;
+                    }
+
+                    $fileAttachmentIds = $component->resolveFileAttachmentIds();
+
+                    $attribute = $component->getContentAttribute()->getName();
+                    $record->setAttribute($attribute, $normalizeEmptyContent($component->getState()));
+                    $record->save();
+
+                    $component->getFileAttachmentProvider()
+                        ?->cleanUpFileAttachments(exceptIds: $fileAttachmentIds);
+                })
+                ->json(),
         ];
     }
 

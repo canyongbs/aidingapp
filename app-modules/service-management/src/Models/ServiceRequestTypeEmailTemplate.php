@@ -40,22 +40,33 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeEmailTemplateFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
+use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
+use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
+use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
+use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
 /**
  * @mixin IdeHelperServiceRequestTypeEmailTemplate
  */
-class ServiceRequestTypeEmailTemplate extends Model implements Auditable
+class ServiceRequestTypeEmailTemplate extends Model implements Auditable, HasMedia, HasRichContent
 {
     /** @use HasFactory<ServiceRequestTypeEmailTemplateFactory> */
     use HasFactory;
 
     use HasUuids;
     use AuditableTrait;
+    use InteractsWithMedia;
+    use InteractsWithRichContent;
 
     protected $fillable = [
         'service_request_type_id',
@@ -78,5 +89,91 @@ class ServiceRequestTypeEmailTemplate extends Model implements Auditable
     public function serviceRequestType(): BelongsTo
     {
         return $this->belongsTo(ServiceRequestType::class);
+    }
+
+    /**
+     * @param array<string, mixed> $mergeData
+     */
+    public function getBody(array $mergeData, ?string $serviceRequestUrl = null, ?string $feedbackUrl = null): ?HtmlString
+    {
+        if (blank($this->body)) {
+            return null;
+        }
+
+        $html = $this->getRichContentAttribute('body')
+            ?->customBlocks([
+                ServiceRequestTypeEmailTemplateButtonBlock::class => ['url' => $serviceRequestUrl],
+                SurveyResponseEmailTemplateTakeSurveyButtonBlock::class => ['url' => $feedbackUrl],
+            ])
+            ->mergeTags($mergeData)
+            ->toHtml() ?? '';
+
+        // Convert CSS variable-based text colors to inline color styles for email client compatibility.
+        // The RichEditor renders textColor marks as <span class="color" style="--color: #hex; --dark-color: #hex">
+        // but email clients don't support CSS custom properties.
+        $html = preg_replace(
+            '/style="--color:\s*([^;]+);\s*--dark-color:\s*[^"]*"/',
+            'style="color: $1"',
+            $html,
+        );
+
+        return new HtmlString($html);
+    }
+
+    /**
+     * @param array<string, mixed> $mergeData
+     */
+    public function getSubject(array $mergeData): ?HtmlString
+    {
+        if (blank($this->subject)) {
+            return null;
+        }
+
+        $text = $this->getRichContentAttribute('subject')
+            ?->mergeTags($mergeData)
+            ->toText() ?? '';
+
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = trim(preg_replace('/\s+/u', ' ', $text));
+        $text = Str::limit($text, 988, '');
+
+        return new HtmlString($text);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function getMergeTags(): array
+    {
+        return [
+            'contact name' => '{{ contact name }}',
+            'service request number' => '{{ service request number }}',
+            'created date' => '{{ created date }}',
+            'updated date' => '{{ updated date }}',
+            'status' => '{{ status }}',
+            'assigned staff name' => '{{ assigned staff name }}',
+            'title' => '{{ title }}',
+            'description' => '{{ description }}',
+            'type' => '{{ type }}',
+            'recent update' => '{{ recent update }}',
+        ];
+    }
+
+    public function setUpRichContent(): void
+    {
+        $mergeTags = static::getMergeTags();
+
+        $this->registerRichContent('subject')
+            ->mergeTags($mergeTags);
+
+        $this->registerRichContent('body')
+            ->fileAttachmentsDisk('s3-public')
+            ->fileAttachmentsVisibility('public')
+            ->fileAttachmentProvider(SpatieMediaLibraryFileAttachmentProvider::make())
+            ->mergeTags($mergeTags)
+            ->customBlocks([
+                ServiceRequestTypeEmailTemplateButtonBlock::class,
+                SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
+            ]);
     }
 }

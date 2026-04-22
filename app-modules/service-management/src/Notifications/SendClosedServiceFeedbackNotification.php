@@ -47,7 +47,6 @@ use AidingApp\Notification\Notifications\Contracts\HasOutboundMailCustomization;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use AidingApp\ServiceManagement\Notifications\Concerns\SetsServiceRequestEmailHeaders;
 use App\Models\NotificationSetting;
 use App\Models\Tenant;
@@ -59,7 +58,6 @@ use Illuminate\Notifications\Notification;
 class SendClosedServiceFeedbackNotification extends Notification implements ShouldQueue, HasBeforeSendHook, HasAfterSendHook, HasOutboundMailCustomization
 {
     use Queueable;
-    use HandlesServiceRequestTemplateContent;
     use SetsServiceRequestEmailHeaders;
 
     protected bool $isReminder = false;
@@ -87,37 +85,41 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
     public function toMail(object $notifiable): MailMessage
     {
         $template = $this->emailTemplate;
+        $timezone = Tenant::current()->getTimezone();
+        $mergeData = $this->serviceRequest->getTemplateMergeData($timezone);
 
         $name = match ($notifiable::class) {
             Contact::class => $notifiable->first_name,
             default => '',
         };
 
-        if (! $template) {
-            $mail = MailMessage::make()
-                ->settings($this->resolveNotificationSetting($notifiable))
-                ->subject("Feedback survey for {$this->serviceRequest->service_request_number}")
-                ->greeting("Hi {$name},")
-                ->line('To help us serve you better in the future, we’d love to hear about your experience with our support team.')
-                ->action('Rate Service', route('feedback.service.request', $this->serviceRequest->id))
-                ->line('We appreciate your time and we value your feedback!')
-                ->salutation('Thank you.');
-        } else {
-            $timezone = Tenant::current()->getTimezone();
-            $subject = $this->getSubject($template->subject, $timezone);
-            $body = $this->getBody($template->body, null, $timezone);
+        $subject = $template?->getSubject($mergeData)?->toHtml();
+        $body = $template?->getBody(
+            $mergeData,
+            serviceRequestUrl: route('portal.service-request.show', $this->serviceRequest),
+            feedbackUrl: route('feedback.service.request', $this->serviceRequest),
+        )?->toHtml();
 
-            $mail = MailMessage::make()
-                ->settings($this->resolveNotificationSetting($notifiable))
-                ->subject(strip_tags($subject))
-                ->content($body);
-        }
+        $resolvedSubject = filled($subject) ? strip_tags($subject) : "Feedback survey for {$this->serviceRequest->service_request_number}";
 
         if ($this->isReminder) {
-            $mail->subject('Reminder: ' . $mail->subject);
+            $resolvedSubject = 'Reminder: ' . $resolvedSubject;
         }
 
-        return $mail;
+        $message = MailMessage::make()
+            ->settings($this->resolveNotificationSetting($notifiable))
+            ->subject($resolvedSubject);
+
+        if (filled($body)) {
+            return $message->content($body);
+        }
+
+        return $message
+            ->greeting("Hi {$name},")
+            ->line('To help us serve you better in the future, we’d love to hear about your experience with our support team.')
+            ->action('Rate Service', route('feedback.service.request', $this->serviceRequest->id))
+            ->line('We appreciate your time and we value your feedback!')
+            ->salutation('Thank you.');
     }
 
     public function afterSend(

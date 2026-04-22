@@ -47,7 +47,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceReques
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\NotificationSetting;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
@@ -59,7 +58,6 @@ use InvalidArgumentException;
 class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, HasBeforeSendHook
 {
     use Queueable;
-    use HandlesServiceRequestTemplateContent;
 
     /** @var ServiceRequest */
     public ServiceRequest $serviceRequest;
@@ -92,22 +90,27 @@ class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, Has
     public function toMail(object $notifiable): MailMessage
     {
         $template = $this->emailTemplate;
-
-        if (! $template) {
-            return MailMessage::make()
-                ->settings($this->resolveNotificationSetting($notifiable))
-                ->subject("New update on service request {$this->serviceRequestUpdate->serviceRequest->service_request_number}")
-                ->line("The service request {$this->serviceRequestUpdate->serviceRequest->service_request_number} has a new update.")
-                ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequestUpdate->serviceRequest]));
-        }
         $timezone = $notifiable->getTimezone();
-        $subject = $this->getSubject($template->subject, $timezone);
-        $body = $this->getBody($template->body, null, $timezone);
+        $mergeData = $this->serviceRequest->getTemplateMergeData($timezone);
 
-        return MailMessage::make()
+        $subject = $template?->getSubject($mergeData)?->toHtml();
+        $body = $template?->getBody(
+            $mergeData,
+            serviceRequestUrl: ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]),
+            feedbackUrl: route('feedback.service.request', $this->serviceRequest),
+        )?->toHtml();
+
+        $message = MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject(strip_tags($subject))
-            ->content($body);
+            ->subject(filled($subject) ? strip_tags($subject) : "New update on service request {$this->serviceRequestUpdate->serviceRequest->service_request_number}");
+
+        if (filled($body)) {
+            return $message->content($body);
+        }
+
+        return $message
+            ->line("The service request {$this->serviceRequestUpdate->serviceRequest->service_request_number} has a new update.")
+            ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequestUpdate->serviceRequest]));
     }
 
     /**

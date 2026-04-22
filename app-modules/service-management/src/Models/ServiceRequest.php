@@ -54,6 +54,7 @@ use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Carbon\CarbonInterface;
+use Closure;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -419,6 +420,50 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     public function isResolved(): bool
     {
         return $this->status->classification === SystemServiceRequestClassification::Closed;
+    }
+
+    /**
+     * @return array<string, Closure>
+     */
+    public function getTemplateMergeData(?string $timezone = null): array
+    {
+        return [
+            'contact name' => fn () => $this->respondent->{$this->respondent::displayNameKey()},
+            'service request number' => fn () => $this->service_request_number,
+            'created date' => fn () => ! is_null($timezone) ? $this->created_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $this->created_at->format('M j, Y \a\t h:i A (T)'),
+            'updated date' => fn () => ! is_null($timezone) ? $this->updated_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $this->updated_at->format('M j, Y \a\t h:i A (T)'),
+            'assigned staff name' => fn () => $this->assignedTo->user->name ?? 'Unassigned',
+            'status' => fn () => $this->status->name,
+            'title' => fn () => $this->title,
+            'type' => fn () => $this->priority->type->name,
+            'description' => fn () => $this->close_details,
+            'recent update' => fn () => $this->getRecentUpdateFormatted($timezone),
+        ];
+    }
+
+    public function getRecentUpdateFormatted(?string $timezone = null): string
+    {
+        $recentUpdate = $this->serviceRequestUpdates()
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if (! $recentUpdate) {
+            return 'No updates available';
+        }
+
+        if ($recentUpdate->createdBy instanceof Contact) {
+            $contact = $recentUpdate->createdBy;
+            $organizationName = $contact->organization ? $contact->organization->name : 'N/A';
+            $creatorInfo = "{$contact->full_name} - {$organizationName}";
+        } else {
+            $user = $recentUpdate->createdBy;
+            assert($user instanceof User);
+            $creatorInfo = "{$user->name} - Service Provider";
+        }
+
+        $updateDate = ! is_null($timezone) ? $recentUpdate->created_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $recentUpdate->created_at->format('M j, Y \a\t h:i A (T)');
+
+        return "{$creatorInfo}\n\n{$updateDate} - {$recentUpdate->update}";
     }
 
     /**

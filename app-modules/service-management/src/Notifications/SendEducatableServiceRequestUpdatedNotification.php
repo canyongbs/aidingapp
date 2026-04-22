@@ -44,10 +44,8 @@ use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasOutboundMailCustomization;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use AidingApp\ServiceManagement\Notifications\Concerns\SetsServiceRequestEmailHeaders;
 use App\Models\NotificationSetting;
 use App\Models\Tenant;
@@ -59,7 +57,6 @@ use Illuminate\Notifications\Notification;
 class SendEducatableServiceRequestUpdatedNotification extends Notification implements ShouldQueue, HasBeforeSendHook, HasAfterSendHook, HasOutboundMailCustomization
 {
     use Queueable;
-    use HandlesServiceRequestTemplateContent;
     use SetsServiceRequestEmailHeaders;
 
     public function __construct(
@@ -80,24 +77,28 @@ class SendEducatableServiceRequestUpdatedNotification extends Notification imple
         $name = $notifiable->first_name;
 
         $template = $this->emailTemplate;
+        $timezone = Tenant::current()->getTimezone();
+        $mergeData = $this->serviceRequest->getTemplateMergeData($timezone);
 
-        if (! $template) {
-            return MailMessage::make()
-                ->settings($this->resolveNotificationSetting($notifiable))
-                ->subject("There’s an update on your service request {$this->serviceRequest->service_request_number}")
-                ->greeting("Hello {$name},")
-                ->line("There’s been a new update to your service request {$this->serviceRequest->service_request_number}. Please check the latest details.")
-                ->action('View Service Request', route('portal.service-request.show', $this->serviceRequest));
+        $subject = $template?->getSubject($mergeData)?->toHtml();
+        $body = $template?->getBody(
+            $mergeData,
+            serviceRequestUrl: route('portal.service-request.show', $this->serviceRequest),
+            feedbackUrl: route('feedback.service.request', $this->serviceRequest),
+        )?->toHtml();
+
+        $message = MailMessage::make()
+            ->settings($this->resolveNotificationSetting($notifiable))
+            ->subject(filled($subject) ? strip_tags($subject) : "There’s an update on your service request {$this->serviceRequest->service_request_number}");
+
+        if (filled($body)) {
+            return $message->content($body);
         }
 
-        $timezone = Tenant::current()->getTimezone();
-        $subject = $this->getSubject($template->subject, $timezone);
-        $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer, $timezone);
-
-        return MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject(strip_tags($subject))
-            ->content($body);
+        return $message
+            ->greeting("Hello {$name},")
+            ->line("There’s been a new update to your service request {$this->serviceRequest->service_request_number}. Please check the latest details.")
+            ->action('View Service Request', route('portal.service-request.show', $this->serviceRequest));
     }
 
     public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void

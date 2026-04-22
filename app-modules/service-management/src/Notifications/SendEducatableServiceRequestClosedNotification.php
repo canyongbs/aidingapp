@@ -44,10 +44,8 @@ use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasOutboundMailCustomization;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use AidingApp\ServiceManagement\Notifications\Concerns\SetsServiceRequestEmailHeaders;
 use App\Models\NotificationSetting;
 use App\Models\Tenant;
@@ -60,7 +58,6 @@ use Illuminate\Support\Str;
 class SendEducatableServiceRequestClosedNotification extends Notification implements ShouldQueue, HasBeforeSendHook, HasAfterSendHook, HasOutboundMailCustomization
 {
     use Queueable;
-    use HandlesServiceRequestTemplateContent;
     use SetsServiceRequestEmailHeaders;
 
     public function __construct(
@@ -83,28 +80,33 @@ class SendEducatableServiceRequestClosedNotification extends Notification implem
         $status = $this->serviceRequest->status;
 
         $template = $this->emailTemplate;
-
-        if (! $template) {
-            return MailMessage::make()
-                ->settings($this->resolveNotificationSetting($notifiable))
-                ->subject(__('[Ticket #:ticketno]: Your Issue Has Been Resolved', ['ticketno' => $this->serviceRequest->service_request_number]))
-                ->greeting("Dear {$name},")
-                ->line(__('We wanted to update you that the issue you reported in Ticket #:ticketNo regarding :shortDescription has been :status.', [
-                    'ticketNo' => $this->serviceRequest->service_request_number,
-                    'status' => $status->name,
-                    'shortDescription' => Str::limit($this->serviceRequest->title, 10, '...'),
-                ]))
-                ->line('If you experience any further issues or have additional questions, please do not hesitate to open a new ticket.')
-                ->salutation('Thank you for giving us a chance to help you with your issue.');
-        }
         $timezone = Tenant::current()->getTimezone();
-        $subject = $this->getSubject($template->subject, $timezone);
-        $body = $this->getBody($template->body, ServiceRequestTypeEmailTemplateRole::Customer, $timezone);
+        $mergeData = $this->serviceRequest->getTemplateMergeData($timezone);
 
-        return MailMessage::make()
+        $subject = $template?->getSubject($mergeData)?->toHtml();
+        $body = $template?->getBody(
+            $mergeData,
+            serviceRequestUrl: route('portal.service-request.show', $this->serviceRequest),
+            feedbackUrl: route('feedback.service.request', $this->serviceRequest),
+        )?->toHtml();
+
+        $message = MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject(strip_tags($subject))
-            ->content($body);
+            ->subject(filled($subject) ? strip_tags($subject) : __('[Ticket #:ticketno]: Your Issue Has Been Resolved', ['ticketno' => $this->serviceRequest->service_request_number]));
+
+        if (filled($body)) {
+            return $message->content($body);
+        }
+
+        return $message
+            ->greeting("Dear {$name},")
+            ->line(__('We wanted to update you that the issue you reported in Ticket #:ticketNo regarding :shortDescription has been :status.', [
+                'ticketNo' => $this->serviceRequest->service_request_number,
+                'status' => $status->name,
+                'shortDescription' => Str::limit($this->serviceRequest->title, 10, '...'),
+            ]))
+            ->line('If you experience any further issues or have additional questions, please do not hesitate to open a new ticket.')
+            ->salutation('Thank you for giving us a chance to help you with your issue.');
     }
 
     public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
