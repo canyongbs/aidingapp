@@ -137,18 +137,14 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 continue;
             }
 
-            $wasNew = ! $template->exists;
-
             $template->subject = $subject;
             $template->body = $body;
 
             $template->save();
 
-            if ($wasNew) {
-                $this->form->getComponent("email-template-body-{$role->value}")
-                    ?->model($template)
-                    ->saveRelationships();
-            }
+            $this->form->getComponent("email-template-body-{$role->value}")
+                ?->model($template)
+                ->saveRelationships();
         }
 
         $this->getSavedNotification()->send();
