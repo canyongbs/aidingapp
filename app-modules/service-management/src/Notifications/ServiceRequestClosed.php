@@ -42,7 +42,6 @@ use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use AidingApp\ServiceManagement\Notifications\Concerns\HandlesServiceRequestTemplateContent;
 use App\Models\NotificationSetting;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
@@ -53,7 +52,6 @@ use InvalidArgumentException;
 class ServiceRequestClosed extends BaseNotification implements ShouldQueue
 {
     use Queueable;
-    use HandlesServiceRequestTemplateContent;
 
     /**
      * @param class-string $channel
@@ -81,22 +79,27 @@ class ServiceRequestClosed extends BaseNotification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $template = $this->emailTemplate;
-
-        if (! $template) {
-            return MailMessage::make()
-                ->settings($this->resolveNotificationSetting($notifiable))
-                ->subject("Service request {$this->serviceRequest->service_request_number} closed")
-                ->line("The service request {$this->serviceRequest->service_request_number} has been closed.")
-                ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
-        }
         $timezone = $notifiable->getTimezone();
-        $subject = $this->getSubject($template->subject, $timezone);
-        $body = $this->getBody($template->body, null, $timezone);
+        $mergeData = $this->serviceRequest->getTemplateMergeData($timezone);
 
-        return MailMessage::make()
+        $subject = $template?->getSubject($mergeData)?->toHtml();
+        $body = $template?->getBody(
+            $mergeData,
+            serviceRequestUrl: ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]),
+            feedbackUrl: route('feedback.service.request', $this->serviceRequest),
+        )?->toHtml();
+
+        $message = MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject(strip_tags($subject))
-            ->content($body);
+            ->subject(filled($subject) ? strip_tags($subject) : "Service request {$this->serviceRequest->service_request_number} closed");
+
+        if (filled($body)) {
+            return $message->content($body);
+        }
+
+        return $message
+            ->line("The service request {$this->serviceRequest->service_request_number} has been closed.")
+            ->action('View Service Request', ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]));
     }
 
     /**

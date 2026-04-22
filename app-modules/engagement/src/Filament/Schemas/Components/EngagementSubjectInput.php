@@ -34,34 +34,18 @@
 </COPYRIGHT>
 */
 
-return [
-    'gpt_5_base_uri' => env('OPEN_AI_GPT_5_BASE_URI'),
+namespace AidingApp\Engagement\Filament\Schemas\Components;
 
-    'gpt_5_api_key' => env('OPEN_AI_GPT_5_API_KEY'),
+use Filament\Forms\Components\TextInput;
 
-    'gpt_5_model' => env('OPEN_AI_GPT_5_MODEL'),
-
-    'gpt_5_mini_base_uri' => env('OPEN_AI_GPT_5_MINI_BASE_URI'),
-
-    'gpt_5_mini_api_key' => env('OPEN_AI_GPT_5_MINI_API_KEY'),
-
-    'gpt_5_mini_model' => env('OPEN_AI_GPT_5_MINI_MODEL'),
-
-    'gpt_5_nano_base_uri' => env('OPEN_AI_GPT_5_NANO_BASE_URI'),
-
-    'gpt_5_nano_api_key' => env('OPEN_AI_GPT_5_NANO_API_KEY'),
-
-    'gpt_5_nano_model' => env('OPEN_AI_GPT_5_NANO_MODEL'),
-
-    'gpt_54_mini_base_uri' => env('OPEN_AI_GPT_54_MINI_BASE_URI'),
-
-    'gpt_54_mini_api_key' => env('OPEN_AI_GPT_54_MINI_API_KEY'),
-
-    'gpt_54_mini_model' => env('OPEN_AI_GPT_54_MINI_MODEL'),
-
-    'gpt_54_nano_base_uri' => env('OPEN_AI_GPT_54_NANO_BASE_URI'),
-
-    'gpt_54_nano_api_key' => env('OPEN_AI_GPT_54_NANO_API_KEY'),
-
-    'gpt_54_nano_model' => env('OPEN_AI_GPT_54_NANO_MODEL'),
-];
+class EngagementSubjectInput
+{
+    public static function make(): TextInput
+    {
+        return TextInput::make('subject')
+            ->autofocus()
+            ->required()
+            ->placeholder(__('Subject'))
+            ->columnSpanFull();
+    }
+}

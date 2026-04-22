@@ -34,30 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Actions;
+namespace AidingApp\Engagement\Filament\Schemas\Components;
 
-use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
-use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\HtmlString;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Schemas\Components\Utilities\Get;
 
-class GenerateServiceRequestTypeEmailTemplateContent
+class EngagementScheduledAtDateTimePicker
 {
-    /**
-     * @param string|array<int, string|array<string, mixed>> $content
-     * @param array<string, mixed> $mergeData
-     */
-    public function __invoke(string|array $content, array $mergeData, Model $record, string $recordAttribute): HtmlString
+    public static function make(): DateTimePicker
     {
-        $content = tiptap_converter()
-            ->mergeTagsMap($mergeData)
-            ->record($record, $recordAttribute)
-            ->blocks([
-                ServiceRequestTypeEmailTemplateButtonBlock::class,
-                SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
-            ])
-            ->asHTML($content);
-
-        return str($content)->sanitizeHtml()->toHtmlString();
+        return DateTimePicker::make('scheduled_at')
+            ->required()
+            ->visible(fn (Get $get) => $get('send_later'));
     }
 }

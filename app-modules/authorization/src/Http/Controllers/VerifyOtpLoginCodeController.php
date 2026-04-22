@@ -83,6 +83,6 @@ class VerifyOtpLoginCodeController
 
         Auth::guard($panel->getAuthGuard())->login($user);
 
-        return redirect()->to($panel->getHomeUrl());
+        return redirect()->intended($panel->getHomeUrl());
     }
 }

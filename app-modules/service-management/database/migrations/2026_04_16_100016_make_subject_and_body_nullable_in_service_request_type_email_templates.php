@@ -34,34 +34,24 @@
 </COPYRIGHT>
 */
 
-return [
-    'gpt_5_base_uri' => env('OPEN_AI_GPT_5_BASE_URI'),
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-    'gpt_5_api_key' => env('OPEN_AI_GPT_5_API_KEY'),
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::table('service_request_type_email_templates', function (Blueprint $table) {
+            $table->jsonb('subject')->nullable()->change();
+            $table->jsonb('body')->nullable()->change();
+        });
+    }
 
-    'gpt_5_model' => env('OPEN_AI_GPT_5_MODEL'),
-
-    'gpt_5_mini_base_uri' => env('OPEN_AI_GPT_5_MINI_BASE_URI'),
-
-    'gpt_5_mini_api_key' => env('OPEN_AI_GPT_5_MINI_API_KEY'),
-
-    'gpt_5_mini_model' => env('OPEN_AI_GPT_5_MINI_MODEL'),
-
-    'gpt_5_nano_base_uri' => env('OPEN_AI_GPT_5_NANO_BASE_URI'),
-
-    'gpt_5_nano_api_key' => env('OPEN_AI_GPT_5_NANO_API_KEY'),
-
-    'gpt_5_nano_model' => env('OPEN_AI_GPT_5_NANO_MODEL'),
-
-    'gpt_54_mini_base_uri' => env('OPEN_AI_GPT_54_MINI_BASE_URI'),
-
-    'gpt_54_mini_api_key' => env('OPEN_AI_GPT_54_MINI_API_KEY'),
-
-    'gpt_54_mini_model' => env('OPEN_AI_GPT_54_MINI_MODEL'),
-
-    'gpt_54_nano_base_uri' => env('OPEN_AI_GPT_54_NANO_BASE_URI'),
-
-    'gpt_54_nano_api_key' => env('OPEN_AI_GPT_54_NANO_API_KEY'),
-
-    'gpt_54_nano_model' => env('OPEN_AI_GPT_54_NANO_MODEL'),
-];
+    public function down(): void
+    {
+        Schema::table('service_request_type_email_templates', function (Blueprint $table) {
+            $table->jsonb('subject')->nullable(false)->change();
+            $table->jsonb('body')->nullable(false)->change();
+        });
+    }
+};
