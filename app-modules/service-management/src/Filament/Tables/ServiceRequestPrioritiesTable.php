@@ -47,7 +47,6 @@ class ServiceRequestPrioritiesTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->query(fn (): Builder => ServiceRequestPriority::query()->whereNull('sla_id'))
             ->modifyQueryUsing(fn (Builder $query): Builder => $query->whereNull('sla_id'))
             ->columns([
                 TextColumn::make('name')
