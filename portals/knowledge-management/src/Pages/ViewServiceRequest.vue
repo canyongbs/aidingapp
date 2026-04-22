@@ -108,11 +108,8 @@
     );
 
     const handleFiles = (event) => {
-        files.value = [
-            ...files.value,
-            ...Array.from(event.target.files)
-        ]
-    }
+        files.value = [...files.value, ...Array.from(event.target.files)];
+    };
 
     function getData(page = 1, fromPagination = false) {
         if (!fromPagination) {
@@ -130,7 +127,7 @@
             setPagination(response.data.serviceRequestUpdates);
         });
     }
-    
+
     async function submitUpdate() {
         try {
             disableSubmitBtn.value = true;
@@ -143,15 +140,11 @@
                 formData.append(`files[${index}]`, file);
             });
 
-            const response = await post(
-                props.apiUrl + '/service-request-update/store',
-                formData,
-                {
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
-                }
-            );
+            const response = await post(props.apiUrl + '/service-request-update/store', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
             serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
             setPagination(response.data.serviceRequestUpdates);
             updateMessage.value = ''; // Clear the textarea
