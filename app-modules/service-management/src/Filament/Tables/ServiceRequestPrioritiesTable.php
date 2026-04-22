@@ -59,6 +59,7 @@ class ServiceRequestPrioritiesTable
             ->defaultGroup(
                 Group::make('type.name')
                     ->collapsible(),
-            );
+            )
+            ->searchable(['type.name']);
     }
 }
