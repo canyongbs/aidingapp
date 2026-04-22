@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -33,30 +33,15 @@
 -->
 <script setup>
     defineProps({
-        bordered: {
-            type: Boolean,
-            default: true,
-        },
-        padded: {
-            type: Boolean,
-            default: true,
-        },
-        bg: {
+        scope: {
             type: String,
-            default: 'bg-white',
+            default: 'col',
         },
     });
 </script>
 
 <template>
-    <div
-        :class="[
-            'rounded-[var(--rounding-lg)] shadow-xs',
-            bg,
-            bordered && 'border border-gray-200',
-            padded && 'p-5',
-        ]"
-    >
+    <th :scope="scope" class="px-4 py-3 text-xs font-semibold text-gray-500">
         <slot />
-    </div>
+    </th>
 </template>

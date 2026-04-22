@@ -33,7 +33,7 @@
 -->
 <template>
     <div class="overflow-x-auto rounded-[var(--rounding-lg)] border border-gray-200 bg-white shadow-xs">
-        <table class="w-full text-sm text-left text-gray-600">
+        <table class="w-full text-left text-sm text-gray-600">
             <slot />
         </table>
     </div>

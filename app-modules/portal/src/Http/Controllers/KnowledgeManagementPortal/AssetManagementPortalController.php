@@ -91,7 +91,12 @@ class AssetManagementPortalController extends Controller
             return [
                 'id' => $checkOut->getKey(),
                 'status' => $isReturned ? 'returned' : 'checked_out',
-                'last_activity' => $isReturned ? 'Return' : 'Checkout',
+                'checked_out_at' => $checkOut->getRawOriginal('checked_out_at') !== null
+                    ? $checkOut->checked_out_at->format('M j, Y')
+                    : null,
+                'checked_in_at' => $checkOut->checkIn !== null && $checkOut->checkIn->getRawOriginal('checked_in_at') !== null
+                    ? $checkOut->checkIn->checked_in_at->format('M j, Y')
+                    : null,
                 'asset' => [
                     'id' => $checkOut->asset->getKey(),
                     'name' => $checkOut->asset->name,

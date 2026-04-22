@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -31,32 +31,31 @@
 
 </COPYRIGHT>
 -->
-<script setup>
-    defineProps({
-        bordered: {
-            type: Boolean,
-            default: true,
-        },
-        padded: {
-            type: Boolean,
-            default: true,
-        },
-        bg: {
-            type: String,
-            default: 'bg-white',
-        },
-    });
-</script>
-
 <template>
     <div
-        :class="[
-            'rounded-[var(--rounding-lg)] shadow-xs',
-            bg,
-            bordered && 'border border-gray-200',
-            padded && 'p-5',
-        ]"
+        role="status"
+        class="flex flex-col items-center justify-center gap-4 py-20 rounded-[var(--rounding-lg)] border border-dashed border-gray-200 bg-white text-center"
     >
-        <slot />
+        <slot name="icon">
+            <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
+                <svg
+                    class="h-8 w-8 text-gray-300"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                    aria-hidden="true"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
+                    />
+                </svg>
+            </span>
+        </slot>
+        <div>
+            <slot />
+        </div>
     </div>
 </template>

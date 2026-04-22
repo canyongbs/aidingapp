@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -33,30 +33,36 @@
 -->
 <script setup>
     defineProps({
-        bordered: {
-            type: Boolean,
-            default: true,
-        },
-        padded: {
-            type: Boolean,
-            default: true,
-        },
-        bg: {
-            type: String,
-            default: 'bg-white',
+        delay: {
+            type: Number,
+            default: 0,
         },
     });
 </script>
 
 <template>
-    <div
-        :class="[
-            'rounded-[var(--rounding-lg)] shadow-xs',
-            bg,
-            bordered && 'border border-gray-200',
-            padded && 'p-5',
-        ]"
+    <tr
+        class="base-table-row transition-colors duration-100 hover:bg-gray-50/70"
+        :style="{ '--row-delay': `${delay}ms` }"
     >
         <slot />
-    </div>
+    </tr>
 </template>
+
+<style>
+    @keyframes baseTableRowIn {
+        from {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .base-table-row {
+        animation: baseTableRowIn 0.2s ease both;
+        animation-delay: var(--row-delay, 0ms);
+    }
+</style>

@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -33,30 +33,33 @@
 -->
 <script setup>
     defineProps({
-        bordered: {
-            type: Boolean,
-            default: true,
-        },
-        padded: {
-            type: Boolean,
-            default: true,
-        },
-        bg: {
+        text: {
             type: String,
-            default: 'bg-white',
+            default: null,
+        },
+        subText: {
+            type: String,
+            default: null,
+        },
+        subTextMaxLength: {
+            type: Number,
+            default: 30,
         },
     });
+
+    function truncate(str, max) {
+        if (!str) return '';
+        return str.length > max ? str.slice(0, max) + '\u2026' : str;
+    }
 </script>
 
 <template>
-    <div
-        :class="[
-            'rounded-[var(--rounding-lg)] shadow-xs',
-            bg,
-            bordered && 'border border-gray-200',
-            padded && 'p-5',
-        ]"
-    >
-        <slot />
+    <div>
+        <p class="truncate text-sm leading-5 text-gray-900" :title="text || undefined">
+            {{ text ?? '—' }}
+        </p>
+        <p v-if="subText" class="mt-0.5 text-xs leading-5 text-gray-500" :title="subText">
+            {{ truncate(subText, subTextMaxLength) }}
+        </p>
     </div>
 </template>

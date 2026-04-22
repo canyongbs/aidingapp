@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -32,31 +32,59 @@
 </COPYRIGHT>
 -->
 <script setup>
-    defineProps({
-        bordered: {
-            type: Boolean,
-            default: true,
-        },
-        padded: {
-            type: Boolean,
-            default: true,
-        },
-        bg: {
+    import { computed } from 'vue';
+
+    const props = defineProps({
+        tone: {
             type: String,
-            default: 'bg-white',
+            default: 'neutral',
+            validator: (v) => ['success', 'warning', 'neutral'].includes(v),
+        },
+        pulse: {
+            type: Boolean,
+            default: false,
+        },
+        mono: {
+            type: Boolean,
+            default: false,
         },
     });
+
+    const containerClasses = computed(() => {
+        if (props.mono) {
+            return 'border border-gray-200 bg-gray-50 text-gray-600';
+        }
+        const map = {
+            success: 'bg-green-100 text-green-800 ring-1 ring-inset ring-green-600/20',
+            warning: 'bg-orange-100 text-orange-800 ring-1 ring-inset ring-orange-600/20',
+            neutral: 'bg-gray-100 text-gray-700 ring-1 ring-inset ring-gray-500/20',
+        };
+        return map[props.tone] ?? map.neutral;
+    });
+
+    const dotClass = computed(
+        () =>
+            ({
+                success: 'bg-green-500',
+                warning: 'bg-orange-500',
+                neutral: 'bg-gray-500',
+            })[props.tone] ?? 'bg-gray-400',
+    );
 </script>
 
 <template>
-    <div
+    <span
         :class="[
-            'rounded-[var(--rounding-lg)] shadow-xs',
-            bg,
-            bordered && 'border border-gray-200',
-            padded && 'p-5',
+            'inline-flex items-center gap-1.5 rounded-[var(--rounding-md)] text-xs',
+            mono ? 'px-2 py-0.5 font-mono font-normal' : 'px-2.5 py-1 font-semibold',
+            containerClasses,
         ]"
     >
+        <span
+            v-if="!mono"
+            :class="['h-1.5 w-1.5 flex-shrink-0 rounded-full', dotClass, pulse ? 'animate-pulse' : '']"
+            aria-hidden="true"
+        />
         <slot />
-    </div>
+    </span>
 </template>

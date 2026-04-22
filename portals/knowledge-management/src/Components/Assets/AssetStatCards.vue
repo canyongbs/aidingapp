@@ -33,7 +33,7 @@
 -->
 <script setup>
     import { computed } from 'vue';
-    import BaseCard from '../ui/BaseCard.vue';
+    import BaseStatCard from '../ui/BaseStatCard.vue';
 
     const props = defineProps({
         counts: {
@@ -47,6 +47,7 @@
             key: 'total',
             label: 'Total',
             value: props.counts.total,
+            tone: 'neutral',
             iconBg: 'bg-[rgba(var(--primary-50),1)]',
             iconColor: 'text-[rgba(var(--primary-500),1)]',
             iconPath:
@@ -56,7 +57,8 @@
             key: 'checked_out',
             label: 'Checked Out',
             value: props.counts.checked_out,
-            iconBg: 'bg-orange-50',
+            tone: 'warning',
+            iconBg: 'bg-orange-100',
             iconColor: 'text-orange-500',
             iconPath:
                 'M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75',
@@ -65,7 +67,8 @@
             key: 'returned',
             label: 'Returned',
             value: props.counts.returned,
-            iconBg: 'bg-green-50',
+            tone: 'success',
+            iconBg: 'bg-green-100',
             iconColor: 'text-green-500',
             iconPath: 'M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3',
         },
@@ -74,14 +77,15 @@
 
 <template>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-2">
-        <BaseCard v-for="card in cards" :key="card.key" class="transition-colors hover:border-gray-300">
-            <div class="flex items-start justify-between gap-3">
-                <div>
-                    <p class="mb-1 text-xs font-semibold uppercase tracking-wide text-gray-500">{{ card.label }}</p>
-                    <p class="text-4xl font-semibold leading-none tabular-nums text-gray-900">
-                        {{ card.value }}
-                    </p>
-                </div>
+        <BaseStatCard
+            v-for="card in cards"
+            :key="card.key"
+            :label="card.label"
+            :value="card.value"
+            :tone="card.tone"
+            class="transition-colors hover:border-gray-300"
+        >
+            <template #icon>
                 <span
                     :class="[
                         'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[var(--rounding-md)]',
@@ -99,7 +103,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" :d="card.iconPath" />
                     </svg>
                 </span>
-            </div>
-        </BaseCard>
+            </template>
+        </BaseStatCard>
     </div>
 </template>

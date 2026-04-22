@@ -33,8 +33,16 @@
 -->
 <script setup>
     import Pagination from '../Pagination.vue';
-    import BaseStatusPill from '../ui/BaseStatusPill.vue';
+    import BaseBadge from '../ui/BaseBadge.vue';
     import BaseTable from '../ui/BaseTable.vue';
+    import BaseTableBody from '../ui/BaseTableBody.vue';
+    import BaseTableCell from '../ui/BaseTableCell.vue';
+    import BaseTableCellText from '../ui/BaseTableCellText.vue';
+    import BaseTableEmptyState from '../ui/BaseTableEmptyState.vue';
+    import BaseTableHeader from '../ui/BaseTableHeader.vue';
+    import BaseTableHeaderCell from '../ui/BaseTableHeaderCell.vue';
+    import BaseTableLoadingState from '../ui/BaseTableLoadingState.vue';
+    import BaseTableRow from '../ui/BaseTableRow.vue';
 
     defineProps({
         assets: {
@@ -73,11 +81,6 @@
 
     const emit = defineEmits(['fetchPage']);
 
-    function truncate(str, maxLength = 30) {
-        if (!str) return '';
-        return str.length > maxLength ? str.slice(0, maxLength) + '\u2026' : str;
-    }
-
     function serialDisplay(asset) {
         const serial = asset?.serial_number;
         return serial && String(serial).trim() ? String(serial).trim() : 'N/A';
@@ -86,79 +89,37 @@
 
 <template>
     <Transition name="assets-fade" mode="out-in">
-        <div
+        <BaseTableLoadingState
             v-if="loading"
             key="skeleton"
-            role="status"
-            aria-busy="true"
-            aria-label="Loading assets"
-            class="mt-1 animate-pulse overflow-x-auto rounded-[var(--rounding-lg)] border border-gray-200"
-        >
-            <table class="w-full text-sm text-left">
-                <thead class="border-b border-gray-200 bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-3 w-64"><div class="h-3 w-14 rounded bg-gray-200"></div></th>
-                        <th class="px-4 py-3"><div class="h-3 w-12 rounded bg-gray-200"></div></th>
-                        <th class="px-4 py-3"><div class="h-3 w-24 rounded bg-gray-200"></div></th>
-                        <th class="px-4 py-3"><div class="h-3 w-14 rounded bg-gray-200"></div></th>
-                        <th class="px-4 py-3"><div class="h-3 w-24 rounded bg-gray-200"></div></th>
-                        <th class="px-4 py-3"><div class="h-3 w-20 rounded bg-gray-200"></div></th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 bg-white">
-                    <tr v-for="row in 7" :key="row">
-                        <td class="px-4 py-4">
-                            <div class="mb-2 h-3.5 w-44 rounded bg-gray-200"></div>
-                            <div class="h-2.5 w-56 rounded bg-gray-100"></div>
-                        </td>
-                        <td class="px-4 py-4"><div class="h-3 w-28 rounded bg-gray-200"></div></td>
-                        <td class="px-4 py-4"><div class="h-5 w-24 rounded bg-gray-100"></div></td>
-                        <td class="px-4 py-4"><div class="h-6 w-24 rounded-full bg-gray-100"></div></td>
-                        <td class="px-4 py-4"><div class="h-3 w-24 rounded bg-gray-200"></div></td>
-                        <td class="px-4 py-4"><div class="h-3 w-20 rounded bg-gray-100"></div></td>
-                    </tr>
-                </tbody>
-            </table>
-            <span class="sr-only">Loading assets, please wait…</span>
-        </div>
+            :columns="6"
+            :rows="7"
+            label="Loading assets, please wait…"
+            class="mt-1"
+        />
 
-        <div
+        <BaseTableEmptyState
             v-else-if="assets.length === 0"
             key="empty"
-            role="status"
-            class="mt-1 flex flex-col items-center justify-center gap-4 py-20 rounded-[var(--rounding-lg)] border border-dashed border-gray-200 bg-white text-center"
+            class="mt-1"
         >
-            <span class="flex h-16 w-16 items-center justify-center rounded-2xl bg-gray-100">
-                <svg
-                    class="h-8 w-8 text-gray-300"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    aria-hidden="true"
-                >
-                    <path
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
-                        d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z"
-                    />
-                </svg>
-            </span>
-            <div>
-                <p class="text-base font-semibold text-gray-700">
-                    <template v-if="activeFilter === 'returned'">No returned assets</template>
-                    <template v-else-if="activeFilter === 'checked_out'">No assets currently checked out</template>
-                    <template v-else>No assets found</template>
-                </p>
+            <template v-if="activeFilter === 'returned'">
+                <p class="text-base font-semibold text-gray-700">No returned assets</p>
+                <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">No assets have been returned yet.</p>
+            </template>
+            <template v-else-if="activeFilter === 'checked_out'">
+                <p class="text-base font-semibold text-gray-700">No assets currently checked out</p>
                 <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">
-                    <template v-if="activeFilter === 'returned'">No assets have been returned yet.</template>
-                    <template v-else-if="activeFilter === 'checked_out'"
-                        >You don't currently have any assets checked out.</template
-                    >
-                    <template v-else>No assets have been assigned to your account.</template>
+                    You don't currently have any assets checked out.
                 </p>
-            </div>
-        </div>
+            </template>
+            <template v-else>
+                <p class="text-base font-semibold text-gray-700">No assets found</p>
+                <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">
+                    No assets have been assigned to your account.
+                </p>
+            </template>
+        </BaseTableEmptyState>
 
         <div
             v-else
@@ -170,70 +131,51 @@
             class="mt-1"
         >
             <BaseTable>
-                <thead
-                    class="border-b border-gray-200 bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500"
-                >
+                <BaseTableHeader>
                     <tr>
-                        <th scope="col" class="w-64 px-4 py-3">Name</th>
-                        <th scope="col" class="px-4 py-3">Device Type &amp; Age</th>
-                        <th scope="col" class="px-4 py-3">Serial Number</th>
-                        <th scope="col" class="px-4 py-3">Location</th>
-                        <th scope="col" class="px-4 py-3">Status</th>
-                        <th scope="col" class="px-4 py-3">Last Activity</th>
+                        <BaseTableHeaderCell class="w-64">Name</BaseTableHeaderCell>
+                        <BaseTableHeaderCell>Type</BaseTableHeaderCell>
+                        <BaseTableHeaderCell>Serial Number</BaseTableHeaderCell>
+                        <BaseTableHeaderCell>Status</BaseTableHeaderCell>
+                        <BaseTableHeaderCell>Checkout Date</BaseTableHeaderCell>
+                        <BaseTableHeaderCell>Return Date</BaseTableHeaderCell>
                     </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 bg-white">
-                    <tr
+                </BaseTableHeader>
+                <BaseTableBody>
+                    <BaseTableRow
                         v-for="(item, idx) in assets"
                         :key="item.id"
-                        class="asset-row transition-colors duration-100 hover:bg-gray-50/70"
-                        :style="{ '--row-delay': `${idx * 30}ms` }"
+                        :delay="idx * 30"
                     >
-                        <td class="px-4 py-3.5 align-top">
-                            <p
-                                class="max-w-[14rem] truncate text-sm font-semibold leading-5 text-gray-900"
-                                :title="item.asset?.name"
-                            >
-                                {{ item.asset?.name ?? '—' }}
-                            </p>
-                            <p
-                                v-if="item.asset?.description"
-                                class="mt-0.5 max-w-[14rem] truncate text-xs leading-5 text-gray-500"
-                                :title="item.asset.description"
-                            >
-                                {{ truncate(item.asset.description, 30) }}
-                            </p>
-                        </td>
+                        <BaseTableCell>
+                            <BaseTableCellText
+                                :text="item.asset?.name"
+                                :sub-text="item.asset?.description"
+                            />
+                        </BaseTableCell>
 
-                        <td class="px-4 py-3.5 align-top text-gray-600">
-                            <p class="text-sm font-medium text-gray-800">{{ item.asset?.type?.name ?? '—' }}</p>
-                            <p v-if="item.asset?.purchase_age" class="mt-0.5 text-xs leading-5 text-gray-500">
-                                {{ item.asset.purchase_age }}
-                            </p>
-                        </td>
+                        <BaseTableCell class="text-sm text-gray-600">
+                            {{ item.asset?.type?.name ?? '—' }}
+                        </BaseTableCell>
 
-                        <td class="px-4 py-3.5 align-top">
-                            <span
-                                class="rounded-[var(--rounding-md)] border border-gray-200 bg-gray-50 px-2 py-0.5 font-mono text-xs text-gray-600"
-                            >
-                                {{ serialDisplay(item.asset) }}
-                            </span>
-                        </td>
+                        <BaseTableCell>
+                            <BaseBadge :mono="true">{{ serialDisplay(item.asset) }}</BaseBadge>
+                        </BaseTableCell>
 
-                        <td class="px-4 py-3.5 align-top text-sm text-gray-700">
-                            {{ item.asset?.location?.name ?? '—' }}
-                        </td>
+                        <BaseTableCell>
+                            <BaseBadge v-if="item.status === 'returned'" tone="success">Returned</BaseBadge>
+                            <BaseBadge v-else tone="warning" :pulse="true">Checked Out</BaseBadge>
+                        </BaseTableCell>
 
-                        <td class="px-4 py-3.5 align-top">
-                            <BaseStatusPill v-if="item.status === 'returned'" tone="success"> Returned </BaseStatusPill>
-                            <BaseStatusPill v-else tone="warning" :pulse="true"> Checked Out </BaseStatusPill>
-                        </td>
+                        <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
+                            {{ item.checked_out_at ?? '—' }}
+                        </BaseTableCell>
 
-                        <td class="whitespace-nowrap px-4 py-3.5 align-top text-xs font-medium text-gray-600">
-                            {{ item.last_activity ?? '—' }}
-                        </td>
-                    </tr>
-                </tbody>
+                        <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
+                            {{ item.checked_in_at ?? '' }}
+                        </BaseTableCell>
+                    </BaseTableRow>
+                </BaseTableBody>
             </BaseTable>
 
             <Pagination
@@ -262,20 +204,5 @@
     .assets-fade-leave-to {
         opacity: 0;
         transform: translateY(5px);
-    }
-
-    @keyframes assetRowIn {
-        from {
-            opacity: 0;
-            transform: translateY(5px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    .asset-row {
-        animation: assetRowIn 0.2s ease both;
-        animation-delay: var(--row-delay, 0ms);
     }
 </style>
