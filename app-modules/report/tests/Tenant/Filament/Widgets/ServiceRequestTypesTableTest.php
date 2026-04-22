@@ -35,19 +35,14 @@
 */
 
 use AidingApp\Report\Filament\Widgets\ServiceRequestTypesTable;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestCategoryRenameFeature;
 
 use function Pest\Livewire\livewire;
-
-// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
-beforeEach(function () {
-    ServiceRequestCategoryRenameFeature::activate();
-});
 
 it('returns all service request types information created in given time range', function () {
     $startDate = now()->subDays(10);
@@ -139,4 +134,84 @@ it('returns all service request types when no date filters are applied', functio
             $type1,
             $type2,
         ]));
+});
+
+it('shows correct incident and request counts per type', function () {
+    $type = ServiceRequestType::factory()->create(['name' => 'Access Issues']);
+    $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
+
+    $status = ServiceRequestStatus::factory()->state([
+        'classification' => SystemServiceRequestClassification::Open,
+    ])->create();
+
+    ServiceRequest::factory()->count(3)->state([
+        'priority_id' => $priority->id,
+        'status_id' => $status->id,
+        'category' => ServiceRequestCategory::Incident,
+    ])->create();
+
+    ServiceRequest::factory()->count(5)->state([
+        'priority_id' => $priority->id,
+        'status_id' => $status->id,
+        'category' => ServiceRequestCategory::Request,
+    ])->create();
+
+    livewire(ServiceRequestTypesTable::class, [
+        'cacheTag' => 'test-service-request-types-incident-request-counts',
+        'pageFilters' => [],
+    ])
+        ->assertTableColumnFormattedStateSet('service_requests_count', '8', record: $type)
+        ->assertTableColumnFormattedStateSet('incident_count', '3', record: $type)
+        ->assertTableColumnFormattedStateSet('request_count', '5', record: $type);
+});
+
+it('applies date filters consistently to total, incident, and request counts', function () {
+    $startDate = now()->subDays(10);
+    $endDate = now()->subDays(5);
+
+    $type = ServiceRequestType::factory()->create(['name' => 'Network Issues']);
+    $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
+
+    $status = ServiceRequestStatus::factory()->state([
+        'classification' => SystemServiceRequestClassification::Open,
+    ])->create();
+
+    ServiceRequest::factory()->count(2)->state([
+        'priority_id' => $priority->id,
+        'status_id' => $status->id,
+        'category' => ServiceRequestCategory::Incident,
+        'created_at' => now()->subDays(7),
+    ])->create();
+
+    ServiceRequest::factory()->count(3)->state([
+        'priority_id' => $priority->id,
+        'status_id' => $status->id,
+        'category' => ServiceRequestCategory::Request,
+        'created_at' => now()->subDays(6),
+    ])->create();
+
+    ServiceRequest::factory()->count(4)->state([
+        'priority_id' => $priority->id,
+        'status_id' => $status->id,
+        'category' => ServiceRequestCategory::Incident,
+        'created_at' => now()->subDays(20),
+    ])->create();
+
+    ServiceRequest::factory()->count(1)->state([
+        'priority_id' => $priority->id,
+        'status_id' => $status->id,
+        'category' => ServiceRequestCategory::Request,
+        'created_at' => now()->subDays(30),
+    ])->create();
+
+    livewire(ServiceRequestTypesTable::class, [
+        'cacheTag' => 'test-service-request-types-date-filter-invariant',
+        'pageFilters' => [
+            'startDate' => $startDate->toDateString(),
+            'endDate' => $endDate->toDateString(),
+        ],
+    ])
+        ->assertTableColumnFormattedStateSet('service_requests_count', '5', record: $type)
+        ->assertTableColumnFormattedStateSet('incident_count', '2', record: $type)
+        ->assertTableColumnFormattedStateSet('request_count', '3', record: $type);
 });

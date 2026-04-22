@@ -1,5 +1,5 @@
 ARG BASE_IMAGE="public.ecr.aws/lts/ubuntu:24.04"
-ARG IMAGEMAGICK_VERSION='7.1.2-19'
+ARG IMAGEMAGICK_VERSION='7.1.2-21'
 
 FROM ${BASE_IMAGE} AS setup
 
@@ -294,7 +294,7 @@ RUN apt-get update \
 
 COPY docker/etc/nginx/ /etc/nginx/
 
-COPY --from=ghcr.io/roadrunner-server/roadrunner:2025.1.12 --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
+COPY --from=ghcr.io/roadrunner-server/roadrunner:2025.1.13 --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
 
 COPY --chmod=755 ./docker/web/s6-overlay/ /etc/s6-overlay/
 
