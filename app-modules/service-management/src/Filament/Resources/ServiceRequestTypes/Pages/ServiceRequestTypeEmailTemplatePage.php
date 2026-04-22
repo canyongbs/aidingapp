@@ -111,17 +111,18 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     public function save(bool $shouldRedirect = true, bool $shouldSendSavedNotification = true): void
     {
         $data = $this->form->getState();
-        $rawData = $this->form->getRawState();
 
         /** @var ServiceRequestType $record */
         $record = $this->getRecord();
 
         foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role) {
             $templateData = $data[$role->value] ?? null;
-            $rawTemplateData = $rawData[$role->value] ?? null;
 
             $subject = $templateData['subject'] ?? null;
-            $body = $templateData['body'] ?? $this->normalizeRichContent($rawTemplateData['body'] ?? null);
+            $body = $templateData['body'] ?? null;
+
+            $bodyComponent = $this->form->getComponent("{$role->value}.email-template-body-{$role->value}");
+            $bodyWasDehydrated = $bodyComponent?->isDehydrated() ?? true;
 
             $template = ServiceRequestTypeEmailTemplate::firstOrNew([
                 'service_request_type_id' => $record->getKey(),
@@ -129,7 +130,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 'role' => $role,
             ]);
 
-            if (blank($subject) && blank($body)) {
+            if ($bodyWasDehydrated && blank($subject) && blank($body)) {
                 if ($template->exists) {
                     $template->delete();
                 }
@@ -142,9 +143,11 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
 
             $template->save();
 
-            $this->form->getComponent("email-template-body-{$role->value}")
-                ?->model($template)
-                ->saveRelationships();
+            if (! $bodyWasDehydrated && $bodyComponent) {
+                $bodyComponent
+                    ->model($template)
+                    ->saveRelationships();
+            }
         }
 
         $this->getSavedNotification()->send();
@@ -226,6 +229,26 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
                 ->resizableImages()
                 ->columnSpanFull()
                 ->dehydrateStateUsing($normalizeEmptyContent)
+                ->saveRelationshipsUsing(function (RichEditor $component) use ($normalizeEmptyContent): void {
+                    $record = $component->getRecord();
+
+                    if (! $record instanceof ServiceRequestTypeEmailTemplate) {
+                        return;
+                    }
+
+                    if (! $record->wasRecentlyCreated) {
+                        return;
+                    }
+
+                    $fileAttachmentIds = $component->resolveFileAttachmentIds();
+
+                    $attribute = $component->getContentAttribute()->getName();
+                    $record->setAttribute($attribute, $normalizeEmptyContent($component->getState()));
+                    $record->save();
+
+                    $component->getFileAttachmentProvider()
+                        ?->cleanUpFileAttachments(exceptIds: $fileAttachmentIds);
+                })
                 ->json(),
         ];
     }
