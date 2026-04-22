@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestCategoryRenameFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -51,16 +50,12 @@ return new class () extends Migration {
             Schema::table('service_request_types', function (Blueprint $table) {
                 $table->renameColumn('default_issue_category', 'default_category');
             });
-
-            ServiceRequestCategoryRenameFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            ServiceRequestCategoryRenameFeature::deactivate();
-
             Schema::table('service_request_types', function (Blueprint $table) {
                 $table->renameColumn('default_category', 'default_issue_category');
             });
