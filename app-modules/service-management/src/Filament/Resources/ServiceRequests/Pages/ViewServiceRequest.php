@@ -103,29 +103,47 @@ class ViewServiceRequest extends ViewRecord
                                 TextEntry::make('priority.name')
                                     ->label('Priority'),
                             ])->columns(3),
-                        TextEntry::make('title'),
-                        TextEntry::make('close_details')
-                            ->label('Description')
-                            ->columnSpanFull(),
-                        TextEntry::make('respondent')
-                            ->label('Customer Contact')
-                            ->color('primary')
-                            ->html()
-                            ->state(function (ServiceRequest $record): string {
-                                /** @var Contact $respondent */
-                                $respondent = $record->respondent;
-                                $organizationName = $respondent->organization->name ?? 'Unaffiliated';
+                        Grid::make(3)
+                            ->schema([
+                                TextEntry::make('respondent')
+                                    ->label('Customer Contact')
+                                    ->color('primary')
+                                    ->html()
+                                    ->state(function (ServiceRequest $record): string {
+                                        /** @var Contact $respondent */
+                                        $respondent = $record->respondent;
+                                        $organizationName = $respondent->organization->name ?? 'Unaffiliated';
 
-                                return "{$respondent->{Contact::displayNameKey()}} ({$respondent->type->name})<br>{$organizationName}";
-                            })
-                            ->url(function (ServiceRequest $record) {
-                                /** @var Contact $respondent */
-                                $respondent = $record->respondent;
+                                        return "{$respondent->{Contact::displayNameKey()}} ({$respondent->type->name})<br>{$organizationName}";
+                                    })
+                                    ->url(function (ServiceRequest $record) {
+                                        /** @var Contact $respondent */
+                                        $respondent = $record->respondent;
 
-                                return ContactResource::getUrl('view', ['record' => $respondent->id]);
-                            }),
+                                        return ContactResource::getUrl('view', ['record' => $respondent->id]);
+                                    }),
+                                TextEntry::make('created_at')
+                                    ->label('Created')
+                                    ->dateTime(config('project.datetime_format') ?? 'Y-m-d H:i:s')
+                                    ->hintIcon(null),
+                                TextEntry::make('updated_at')
+                                    ->label('Last Updated')
+                                    ->dateTime(config('project.datetime_format') ?? 'Y-m-d H:i:s')
+                                    ->hintIcon(null),
+                            ])->columns(3),
                     ])
                     ->columns(),
+                Section::make('Title')
+                    ->schema([
+                        TextEntry::make('title')
+                            ->hiddenLabel(),
+                    ]),
+                Section::make('Description')
+                    ->schema([
+                        TextEntry::make('close_details')
+                            ->label('Description')
+                            ->hiddenLabel(),
+                    ]),
                 Section::make('Uploads')
                     ->visible(fn (ServiceRequest $record): bool => $record->hasMedia($uploadsMediaCollection->getName()))
                     ->schema(
