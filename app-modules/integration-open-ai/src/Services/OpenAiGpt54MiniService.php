@@ -34,28 +34,27 @@
 </COPYRIGHT>
 */
 
-return [
-    'gpt_5_base_uri' => env('OPEN_AI_GPT_5_BASE_URI'),
+namespace AidingApp\IntegrationOpenAi\Services;
 
-    'gpt_5_api_key' => env('OPEN_AI_GPT_5_API_KEY'),
+class OpenAiGpt54MiniService extends BaseOpenAiService
+{
+    public function getApiKey(): string
+    {
+        return $this->settings->open_ai_gpt_54_mini_api_key ?? config('integration-open-ai.gpt_54_mini_api_key');
+    }
 
-    'gpt_5_model' => env('OPEN_AI_GPT_5_MODEL'),
+    public function getModel(): string
+    {
+        return $this->settings->open_ai_gpt_54_mini_model ?? config('integration-open-ai.gpt_54_mini_model');
+    }
 
-    'gpt_5_mini_base_uri' => env('OPEN_AI_GPT_5_MINI_BASE_URI'),
+    public function getDeployment(): ?string
+    {
+        return $this->settings->open_ai_gpt_54_mini_base_uri ?? config('integration-open-ai.gpt_54_mini_base_uri');
+    }
 
-    'gpt_5_mini_api_key' => env('OPEN_AI_GPT_5_MINI_API_KEY'),
-
-    'gpt_5_mini_model' => env('OPEN_AI_GPT_5_MINI_MODEL'),
-
-    'gpt_5_nano_base_uri' => env('OPEN_AI_GPT_5_NANO_BASE_URI'),
-
-    'gpt_5_nano_api_key' => env('OPEN_AI_GPT_5_NANO_API_KEY'),
-
-    'gpt_5_nano_model' => env('OPEN_AI_GPT_5_NANO_MODEL'),
-
-    'gpt_54_mini_base_uri' => env('OPEN_AI_GPT_54_MINI_BASE_URI'),
-
-    'gpt_54_mini_api_key' => env('OPEN_AI_GPT_54_MINI_API_KEY'),
-
-    'gpt_54_mini_model' => env('OPEN_AI_GPT_54_MINI_MODEL'),
-];
+    public function getImageGenerationDeployment(): ?string
+    {
+        return $this->settings->open_ai_gpt_54_mini_image_generation_deployment;
+    }
+}
