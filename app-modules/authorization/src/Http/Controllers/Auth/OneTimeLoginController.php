@@ -51,6 +51,6 @@ class OneTimeLoginController extends Controller
 
         auth()->login($user);
 
-        return redirect(Filament::getUrl());
+        return redirect()->intended(Filament::getUrl());
     }
 }
