@@ -110,6 +110,9 @@ class AiIntegrationsSettings extends Settings
      */
     public array $open_ai_gpt_54_mini_applicable_features = [];
 
+    /**
+     * @var array<string>
+     */
     public array $open_ai_gpt_54_nano_applicable_features = [];
 
     public ?string $llamaparse_model_name = null;
