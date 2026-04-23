@@ -108,7 +108,11 @@
     );
 
     const handleFiles = (event) => {
-        files.value = [...files.value, ...Array.from(event.target.files)];
+        const selected = Array.from(event.target.files);
+
+        files.value = [...files.value, ...selected];
+
+        event.target.value = '';
     };
 
     function getData(page = 1, fromPagination = false) {
@@ -281,8 +285,37 @@
             <BaseDetailSection label="New Service Request Update">
                 <form @submit.prevent="submitUpdate">
                     <BaseTextarea v-model="updateMessage" :rows="5" placeholder="Enter your update here..." required />
-                    <div class="mb-4">
-                        <input ref="fileInput" type="file" multiple @change="handleFiles" />
+                    <div class="my-4">
+                            <label class="block font-bold mb-2">
+                                Upload files
+                            </label>
+
+                            <div
+                                class="border-2 rounded-lg p-6 text-center bg-stone-200"
+                                @click="$refs.fileInput.click()"
+                            >
+                                <input
+                                    ref="fileInput"
+                                    type="file"
+                                    multiple
+                                    class="hidden"
+                                    @change="handleFiles"
+                                />
+
+                                <div class="text-gray-900">
+                                    <span>Drop files here or </span>
+                                    <span class="underline hover:cursor-pointer">
+                                        Browse
+                                    </span>
+                                </div>
+
+                                <ul v-if="files.length" class="mt-3 text-sm text-gray-600">
+                                    <li v-for="(file, index) in files" :key="index">
+                                        {{ file.name }}
+                                    </li>
+                                </ul>
+
+                            </div>
                     </div>
                     <BaseInputError :errors="validationErrors.description ?? []" />
                     <div class="mt-3">
