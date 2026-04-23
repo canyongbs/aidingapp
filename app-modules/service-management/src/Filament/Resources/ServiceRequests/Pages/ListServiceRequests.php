@@ -104,6 +104,12 @@ class ListServiceRequests extends ListRecords
                     ->view('filament.tables.columns.service-request.number')
                     ->searchable(['service_request_number', 'title'])
                     ->sortable(),
+                TextColumn::make('division.name')
+                    ->label('Division')
+                    ->searchable()
+                    ->sortable()
+                    ->visible(fn (): bool => Division::count() > 1)
+                    ->toggleable(),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->badge()
@@ -120,12 +126,6 @@ class ListServiceRequests extends ListRecords
                         )
                     )
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
-                    ->toggleable(),
-                TextColumn::make('division.name')
-                    ->label('Division')
-                    ->searchable()
-                    ->sortable()
-                    ->visible(fn (): bool => Division::count() > 1)
                     ->toggleable(),
                 ViewColumn::make('sla')
                     ->label('SLA')
