@@ -109,14 +109,12 @@
     );
 
     const addFiles = (newFiles) => {
-        const existing = new Set(
-            files.value.map(f => `${f.name}-${f.size}-${f.lastModified}`)
-        );
+        const existing = new Set(files.value.map((f) => `${f.name}-${f.size}-${f.lastModified}`));
 
         const duplicates = [];
         const unique = [];
 
-        newFiles.forEach(file => {
+        newFiles.forEach((file) => {
             const key = `${file.name}-${file.size}-${file.lastModified}`;
 
             if (existing.has(key)) {
@@ -130,9 +128,7 @@
         files.value = [...files.value, ...unique];
 
         if (duplicates.length) {
-            validationErrors.value.files = duplicates.map(
-                file => `${file.name} has already been added`
-            );
+            validationErrors.value.files = duplicates.map((file) => `${file.name} has already been added`);
         } else {
             delete validationErrors.value.files;
         }
@@ -372,8 +368,19 @@
                                             class="ml-3 flex items-center justify-center w-7 h-7 !rounded-full text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-600 transition shrink-0"
                                             @click.stop="removeFile(index)"
                                         >
-                                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
+                                            <svg
+                                                class="h-4 w-4"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                                stroke-width="2.5"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    d="M6 6l12 12M6 18L18 6"
+                                                />
                                             </svg>
                                         </button>
                                     </li>
