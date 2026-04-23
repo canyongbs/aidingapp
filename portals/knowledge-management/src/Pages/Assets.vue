@@ -32,17 +32,13 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { onMounted, ref } from 'vue';
-    import AppLoading from '../Components/AppLoading.vue';
+    import { computed, onMounted, ref, watch } from 'vue';
+    import AssetFilterTabs from '../Components/Assets/AssetFilterTabs.vue';
+    import AssetStatCards from '../Components/Assets/AssetStatCards.vue';
+    import AssetTable from '../Components/Assets/AssetTable.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
     import { consumer } from '../Services/Consumer';
-
-    const checkedInAssets = ref({});
-    const checkedOutAssets = ref({});
-    const { get } = consumer();
-    const loading = ref(true);
 
     const props = defineProps({
         apiUrl: {
@@ -51,110 +47,80 @@
         },
     });
 
-    async function getAssets() {
+    const { get } = consumer();
+
+    const activeFilter = ref('all');
+    const loading = ref(true);
+
+    const assets = ref([]);
+    const counts = ref({ total: 0, checked_out: 0, returned: 0 });
+
+    const currentPage = ref(1);
+    const lastPage = ref(1);
+    const fromItem = ref(0);
+    const toItem = ref(0);
+    const totalItems = ref(0);
+
+    const tabs = computed(() => [
+        { key: 'all', label: 'All' },
+        { key: 'checked_out', label: 'Checked Out' },
+        { key: 'returned', label: 'Returned' },
+    ]);
+
+    async function fetchAssets(page = 1) {
         loading.value = true;
-        const response = await get(`${props.apiUrl}/assets`);
 
-        if (response.error) {
-            throw new Error(response.error);
+        try {
+            const response = await get(`${props.apiUrl}/assets`, {
+                filter: activeFilter.value,
+                page,
+            });
+
+            const envelope = response.data;
+
+            assets.value = envelope.data ?? [];
+            counts.value = envelope.counts ?? { total: 0, checked_out: 0, returned: 0 };
+
+            currentPage.value = envelope.meta?.current_page ?? 1;
+            lastPage.value = envelope.meta?.last_page ?? 1;
+            fromItem.value = envelope.meta?.from ?? 0;
+            toItem.value = envelope.meta?.to ?? 0;
+            totalItems.value = envelope.meta?.total ?? 0;
+        } catch (error) {
+            assets.value = [];
+            console.error('Error fetching assets:', error);
+        } finally {
+            loading.value = false;
         }
-
-        return response.data;
     }
 
-    onMounted(async () => {
-        await getAssets()
-            .then((response) => {
-                checkedInAssets.value = response.checkedInAssets;
-                checkedOutAssets.value = response.checkedOutAssets;
-                loading.value = false;
-            })
-            .catch((error) => {
-                if (error.response && (error.response.status === 401 || error.response.status === 404)) {
-                    loading.value = false;
-                } else {
-                    console.error('Error fetching assets:', error);
-                }
-            });
-    });
+    watch(activeFilter, () => fetchAssets(1));
+
+    onMounted(() => fetchAssets(1));
 </script>
 
 <template>
-    <div v-if="loading">
-        <AppLoading />
-    </div>
-    <Page v-else>
-        <template #heading> Assets </template>
+    <Page>
+        <template #heading>Assets</template>
 
         <template #breadcrumbs>
             <Breadcrumbs :currentCrumb="'Assets'" />
         </template>
 
-        <div class="grid divide-y divide-gray-200">
-            <div v-if="checkedOutAssets?.length > 0">
-                <h3 class="text-xl">Assets</h3>
-                <div
-                    class="mt-4 overflow-hidden rounded bg-gray-200 shadow-xs ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
-                >
-                    <div
-                        v-for="checkedOutAsset in checkedOutAssets"
-                        :key="checkedOutAsset?.id"
-                        class="group relative bg-white p-6 focus-within:bg-gray-50"
-                    >
-                        <div class="grid">
-                            <div class="w-full">
-                                <h3 class="text-base font-semibold leading-6 text-gray-900">
-                                    <span class="absolute inset-0" aria-hidden="true" />
-                                    {{ checkedOutAsset.asset?.name }}
-                                </h3>
-                                <div class="mt-2">
-                                    <span class="py-1 text-sm rounded">
-                                        Description: {{ checkedOutAsset.asset?.description }}<br />
-                                        Serial Number: {{ checkedOutAsset.asset?.serial_number }}<br />
-                                        Type: {{ checkedOutAsset.asset?.type?.name }}<br />
-                                        Date Checked Out: {{ checkedOutAsset.formatted_checked_out_at }}<br />
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <EmptyState v-else>
-                <template #heading>There are no checked out assets to display.</template>
-            </EmptyState>
+        <AssetStatCards :counts="counts" />
 
-            <div v-if="checkedInAssets?.length > 0">
-                <h3 class="text-xl">Returned Assets</h3>
-                <div
-                    class="mt-4 overflow-hidden rounded bg-gray-200 shadow-xs ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
-                >
-                    <div
-                        v-for="checkedInAsset in checkedInAssets"
-                        :key="checkedInAsset.id"
-                        class="group relative bg-white p-6 focus-within:bg-gray-50"
-                    >
-                        <div class="grid">
-                            <div class="w-full">
-                                <h3 class="text-base font-semibold leading-6 text-gray-900">
-                                    {{ checkedInAsset.asset?.name }}
-                                </h3>
-                                <div class="mt-2">
-                                    <span class="py-1 text-sm rounded">
-                                        Description: {{ checkedInAsset.asset?.description }}<br />
-                                        Serial Number: {{ checkedInAsset.asset?.serial_number }}<br />
-                                        Type: {{ checkedInAsset.asset?.type?.name }}<br />
-                                        Date Returned: {{ checkedInAsset.formatted_checked_in_at }}<br />
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <EmptyState v-else>
-                <template #heading>There are no checked in assets to display.</template>
-            </EmptyState>
-        </div>
+        <AssetFilterTabs v-model="activeFilter" :tabs="tabs" />
+
+        <AssetTable
+            :assets="assets"
+            :loading="loading"
+            :active-filter="activeFilter"
+            :current-page="currentPage"
+            :last-page="lastPage"
+            :from-item="fromItem"
+            :to-item="toItem"
+            :total-items="totalItems"
+            @fetchPage="fetchAssets"
+        />
     </Page>
 </template>
