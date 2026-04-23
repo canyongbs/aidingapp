@@ -286,27 +286,17 @@
                 <form @submit.prevent="submitUpdate">
                     <BaseTextarea v-model="updateMessage" :rows="5" placeholder="Enter your update here..." required />
                     <div class="my-4">
-                            <label class="block font-bold mb-2">
-                                Upload files
-                            </label>
+                            <label class="block font-bold mb-2"> Upload files </label>
 
                             <div
                                 class="border-2 rounded-lg p-6 text-center bg-stone-200"
                                 @click="$refs.fileInput.click()"
                             >
-                                <input
-                                    ref="fileInput"
-                                    type="file"
-                                    multiple
-                                    class="hidden"
-                                    @change="handleFiles"
-                                />
+                                <input ref="fileInput" type="file" multiple class="hidden" @change="handleFiles" />
 
                                 <div class="text-gray-900">
                                     <span>Drop files here or </span>
-                                    <span class="underline hover:cursor-pointer">
-                                        Browse
-                                    </span>
+                                    <span class="underline hover:cursor-pointer"> Browse </span>
                                 </div>
 
                                 <ul v-if="files.length" class="mt-3 text-sm text-gray-600">
@@ -316,7 +306,7 @@
                                 </ul>
 
                             </div>
-                    </div>
+                        </div>
                     <BaseInputError :errors="validationErrors.description ?? []" />
                     <div class="mt-3">
                         <BaseButton type="submit" variant="primary" size="md" :loading="disableSubmitBtn">
