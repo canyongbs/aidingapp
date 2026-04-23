@@ -52,7 +52,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
 use App\Actions\Paths\ModulePath;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\Tenant;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
@@ -70,11 +69,6 @@ use function Pest\Laravel\partialMock;
 use function Pest\Laravel\seed;
 
 use Spatie\Multitenancy\Events\MadeTenantCurrentEvent;
-
-// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
-beforeEach(function () {
-    ServiceRequestCategoryRenameFeature::activate();
-});
 
 describe('Spam and virus detection', function () {
     it('handles spam verdict failure properly', function () {

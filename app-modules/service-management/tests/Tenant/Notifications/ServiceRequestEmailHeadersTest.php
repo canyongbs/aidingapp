@@ -40,15 +40,9 @@ use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpenedNotification;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\Tenant;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Facades\Event;
-
-// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
-beforeEach(function () {
-    ServiceRequestCategoryRenameFeature::activate();
-});
 
 describe('Unit-level customizeOutboundMail', function () {
     it('sets the from address to the plus-addressed SR address', function () {

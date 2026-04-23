@@ -40,17 +40,11 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\Ser
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Tests\Tenant\Filament\Resources\ServiceRequestTypes\RequestFactories\ServiceRequestTypeEmailTemplateRequestFactory;
-use App\Features\ServiceRequestCategoryRenameFeature;
 
 use function Pest\Laravel\assertDatabaseEmpty;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
-
-// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
-beforeEach(function () {
-    ServiceRequestCategoryRenameFeature::activate();
-});
 
 test('it creates a ServiceRequestTypeEmailTemplate if it did not already exist', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();

@@ -47,7 +47,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestRequestFactory;
 use AidingApp\Team\Models\Team;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Notification;
@@ -59,11 +58,6 @@ use function Pest\Laravel\travel;
 use function Pest\Laravel\travelBack;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
-
-// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove this beforeEach after the feature flag is removed.
-beforeEach(function () {
-    ServiceRequestCategoryRenameFeature::activate();
-});
 
 test('A successful action on the EditServiceRequest page', function () {
     $serviceRequest = ServiceRequest::factory([

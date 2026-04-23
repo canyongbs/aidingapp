@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestLocked;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Filament\Actions\Action;
@@ -82,7 +81,7 @@ class ViewServiceRequest extends ViewRecord
                     ->heading(fn (ServiceRequest $record): HtmlString => new HtmlString(
                         view('filament.infolists.components.service-request-heading', [
                             'serviceRequestNumber' => $record->service_request_number,
-                            'category' => $record->{ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category'}, /** @phpstan-ignore property.notFound */
+                            'category' => $record->category,
                         ])->render()
                     ))
                     ->schema([
