@@ -86,6 +86,7 @@
     const fromRecord = ref(0);
     const toRecord = ref(0);
     const disableSubmitBtn = ref(false);
+    const isDragging = ref(false);
 
     const setPagination = (pagination) => {
         currentPage.value = pagination.current_page;
@@ -107,12 +108,58 @@
         },
     );
 
+    const addFiles = (newFiles) => {
+        const existing = new Set(
+            files.value.map(f => `${f.name}-${f.size}-${f.lastModified}`)
+        );
+
+        const duplicates = [];
+        const unique = [];
+
+        newFiles.forEach(file => {
+            const key = `${file.name}-${file.size}-${file.lastModified}`;
+
+            if (existing.has(key)) {
+                duplicates.push(file);
+            } else {
+                unique.push(file);
+                existing.add(key);
+            }
+        });
+
+        files.value = [...files.value, ...unique];
+
+        if (duplicates.length) {
+            validationErrors.value.files = duplicates.map(
+                file => `${file.name} has already been added`
+            );
+        } else {
+            delete validationErrors.value.files;
+        }
+    };
+
+    const removeFile = (index) => {
+        files.value.splice(index, 1);
+
+        if (!files.value.length) {
+            delete validationErrors.value.files;
+        }
+    };
+
     const handleFiles = (event) => {
         const selected = Array.from(event.target.files);
 
-        files.value = [...files.value, ...selected];
+        addFiles(selected);
 
         event.target.value = '';
+    };
+
+    const handleDrop = (event) => {
+        event.preventDefault();
+        isDragging.value = false;
+
+        const droppedFiles = Array.from(event.dataTransfer.files);
+        addFiles(droppedFiles);
     };
 
     function getData(page = 1, fromPagination = false) {
@@ -286,22 +333,49 @@
                 <form @submit.prevent="submitUpdate">
                     <BaseTextarea v-model="updateMessage" :rows="5" placeholder="Enter your update here..." required />
                     <div class="my-4">
+                        <div class="my-4">
                             <label class="block font-bold mb-2"> Upload files </label>
 
                             <div
-                                class="border-2 rounded-lg p-6 text-center bg-stone-200"
+                                class="rounded-lg p-6 text-center transition"
+                                :class="isDragging ? 'bg-taupe-300' : 'bg-taupe-100'"
                                 @click="$refs.fileInput.click()"
+                                @dragover.prevent="isDragging = true"
+                                @dragenter.prevent="isDragging = true"
+                                @dragleave.prevent="isDragging = false"
+                                @drop.prevent="handleDrop"
                             >
                                 <input ref="fileInput" type="file" multiple class="hidden" @change="handleFiles" />
 
-                                <div class="text-gray-900">
+                                <div class="text-taupe-600">
                                     <span>Drop files here or </span>
                                     <span class="underline hover:cursor-pointer"> Browse </span>
                                 </div>
 
-                                <ul v-if="files.length" class="mt-3 text-sm text-gray-600">
-                                    <li v-for="(file, index) in files" :key="index">
-                                        {{ file.name }}
+                                <ul v-if="files.length" class="mt-4 space-y-2">
+                                    <li
+                                        v-for="(file, index) in files"
+                                        :key="index"
+                                        class="flex items-center justify-between bg-neutral-700 rounded-lg px-3 py-2 shadow-sm"
+                                    >
+                                        <div class="flex flex-col leading-tight items-start">
+                                            <span class="block text-sm text-white truncate">
+                                                {{ file.name }}
+                                            </span>
+                                            <span class="block text-xs text-neutral-400">
+                                                {{ (file.size / 1024).toFixed(1) }} KB
+                                            </span>
+                                        </div>
+
+                                        <button
+                                            type="button"
+                                            class="ml-3 flex items-center justify-center w-7 h-7 !rounded-full text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-600 transition shrink-0"
+                                            @click.stop="removeFile(index)"
+                                        >
+                                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
+                                            </svg>
+                                        </button>
                                     </li>
                                 </ul>
 
@@ -313,6 +387,15 @@
                             Submit Update
                         </BaseButton>
                     </div>
+                        <div v-if="validationErrors.files" class="text-red-500 text-sm">
+                            <p v-for="error in validationErrors.files" :key="error">
+                                {{ error }}
+                            </p>
+                        </div>
+                    </div>
+                    <BaseButton type="submit" variant="primary" size="md" :loading="disableSubmitBtn">
+                        Submit Update
+                    </BaseButton>
                 </form>
             </BaseDetailSection>
 
