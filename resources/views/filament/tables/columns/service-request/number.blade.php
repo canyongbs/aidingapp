@@ -32,7 +32,8 @@
     </COPYRIGHT>
 --}}
 @php
-    /** @var \AidingApp\ServiceManagement\Models\ServiceRequest $record */
+    use Illuminate\Support\Str;
+
     $record = $getRecord();
 @endphp
 
@@ -51,7 +52,7 @@
 
     @if ($record->title)
         <span class="text-xs text-gray-500 dark:text-gray-400">
-            {{ \Illuminate\Support\Str::limit($record->title, 40) }}
+            {{ Str::limit($record->title, 40) }}
         </span>
     @endif
 </div>

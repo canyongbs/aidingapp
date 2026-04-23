@@ -32,7 +32,6 @@
     </COPYRIGHT>
 --}}
 @php
-    /** @var \AidingApp\ServiceManagement\Models\ServiceRequest $record */
     $record = $getRecord();
 
     $type = $record->priority?->type;

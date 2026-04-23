@@ -35,7 +35,6 @@
     use Carbon\Carbon;
     use Illuminate\Support\Str;
 
-    /** @var \AidingApp\ServiceManagement\Models\ServiceRequest $record */
     $record = $getRecord();
 
     $format = function ($date): string {

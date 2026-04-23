@@ -32,13 +32,14 @@
     </COPYRIGHT>
 --}}
 @php
-    /** @var \AidingApp\ServiceManagement\Models\ServiceRequest $record */
+    use AidingApp\Contact\Models\Contact;
+
     $record = $getRecord();
 
     $managers = $record->priority?->type?->managerUsers ?? collect();
 
     $respondent = $record->respondent;
-    $customerName = $respondent?->{\AidingApp\Contact\Models\Contact::displayNameKey()};
+    $customerName = $respondent?->{Contact::displayNameKey()};
     $organizationName = $respondent?->organization?->name;
 @endphp
 

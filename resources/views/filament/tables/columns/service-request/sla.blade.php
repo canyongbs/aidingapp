@@ -32,7 +32,6 @@
     </COPYRIGHT>
 --}}
 @php
-    /** @var \AidingApp\ServiceManagement\Models\ServiceRequest $record */
     $record = $getRecord();
 
     $response = $record->getResponseSlaComplianceStatus();
