@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,20 +30,48 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    import { computed } from 'vue';
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+    const props = defineProps({
+        tone: {
+            type: String,
+            default: 'neutral',
+            validator: (v) => ['success', 'warning', 'neutral'].includes(v),
+        },
+        pulse: {
+            type: Boolean,
+            default: false,
+        },
+    });
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use Worksome\RequestFactories\RequestFactory;
+    const toneClasses = computed(() => {
+        const classes = {
+            success: 'bg-green-100 text-green-800 ring-green-600/20',
+            warning: 'bg-orange-100 text-orange-800 ring-orange-600/20',
+            neutral: 'bg-gray-100 text-gray-700 ring-gray-500/20',
+        };
 
-class CreateServiceRequestTypeRequestFactory extends RequestFactory
-{
-    public function definition(): array
-    {
-        return [
-            'name' => $this->faker->name(),
-            'default_category' => $this->faker->randomElement(ServiceRequestCategory::cases())->value,
-        ];
-    }
-}
+        return classes[props.tone] ?? classes.neutral;
+    });
+</script>
+
+<template>
+    <span
+        :class="[
+            'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold ring-1 ring-inset rounded-[var(--rounding-md)]',
+            toneClasses,
+        ]"
+    >
+        <span
+            :class="[
+                'h-1.5 w-1.5 rounded-full flex-shrink-0',
+                tone === 'success' ? 'bg-green-500' : tone === 'warning' ? 'bg-orange-500' : 'bg-gray-500',
+                pulse ? 'animate-pulse' : '',
+            ]"
+            aria-hidden="true"
+        />
+        <slot />
+    </span>
+</template>

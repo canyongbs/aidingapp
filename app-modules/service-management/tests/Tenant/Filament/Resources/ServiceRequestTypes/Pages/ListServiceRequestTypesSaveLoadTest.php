@@ -37,14 +37,11 @@
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ListServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\ServiceRequestCategoryRenameFeature;
 
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-// TODO: ServiceRequestCategoryRenameFeature Cleanup - Remove the ServiceRequestCategoryRenameFeature::activate() call after the feature flag is removed.
 beforeEach(function () {
-    ServiceRequestCategoryRenameFeature::activate();
     asSuperAdmin();
 });
 

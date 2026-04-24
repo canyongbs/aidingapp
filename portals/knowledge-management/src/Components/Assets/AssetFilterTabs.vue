@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,20 +30,43 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    defineProps({
+        tabs: {
+            type: Array,
+            required: true,
+        },
+        modelValue: {
+            type: String,
+            required: true,
+        },
+    });
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+    const emit = defineEmits(['update:modelValue']);
+</script>
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use Worksome\RequestFactories\RequestFactory;
-
-class CreateServiceRequestTypeRequestFactory extends RequestFactory
-{
-    public function definition(): array
-    {
-        return [
-            'name' => $this->faker->name(),
-            'default_category' => $this->faker->randomElement(ServiceRequestCategory::cases())->value,
-        ];
-    }
-}
+<template>
+    <div class="mb-2 border-b border-gray-200">
+        <ul class="flex flex-wrap -mb-px" role="tablist" aria-label="Asset filter tabs">
+            <li v-for="tab in tabs" :key="tab.key" role="presentation">
+                <button
+                    type="button"
+                    role="tab"
+                    :id="`assets-tab-${tab.key}`"
+                    :aria-selected="modelValue === tab.key"
+                    :aria-controls="`assets-panel-${tab.key}`"
+                    @click="emit('update:modelValue', tab.key)"
+                    :class="[
+                        'inline-flex items-center whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold leading-5 transition-colors',
+                        modelValue === tab.key
+                            ? 'border-[rgba(var(--primary-500),1)] text-[rgba(var(--primary-600),1)]'
+                            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
+                    ]"
+                >
+                    {{ tab.label }}
+                </button>
+            </li>
+        </ul>
+    </div>
+</template>

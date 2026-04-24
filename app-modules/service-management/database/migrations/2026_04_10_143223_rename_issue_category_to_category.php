@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestCategoryRenameFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -51,16 +50,12 @@ return new class () extends Migration {
             Schema::table('service_request_types', function (Blueprint $table) {
                 $table->renameColumn('default_issue_category', 'default_category');
             });
-
-            ServiceRequestCategoryRenameFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            ServiceRequestCategoryRenameFeature::deactivate();
-
             Schema::table('service_request_types', function (Blueprint $table) {
                 $table->renameColumn('default_category', 'default_issue_category');
             });

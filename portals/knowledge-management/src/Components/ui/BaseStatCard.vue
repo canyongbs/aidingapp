@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,20 +30,48 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    import { computed } from 'vue';
+    import BaseCard from './BaseCard.vue';
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+    const props = defineProps({
+        label: {
+            type: String,
+            required: true,
+        },
+        value: {
+            type: [Number, String],
+            required: true,
+        },
+        tone: {
+            type: String,
+            default: 'neutral',
+            validator: (v) => ['neutral', 'warning', 'success', 'danger'].includes(v),
+        },
+    });
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use Worksome\RequestFactories\RequestFactory;
+    const toneConfig = computed(() => {
+        const map = {
+            neutral: { bg: 'bg-white', labelColor: 'text-gray-500', valueColor: 'text-gray-900' },
+            warning: { bg: 'bg-orange-50', labelColor: 'text-orange-600', valueColor: 'text-orange-600' },
+            success: { bg: 'bg-green-50', labelColor: 'text-green-600', valueColor: 'text-green-700' },
+            danger: { bg: 'bg-red-50', labelColor: 'text-red-600', valueColor: 'text-red-600' },
+        };
+        return map[props.tone] ?? map.neutral;
+    });
+</script>
 
-class CreateServiceRequestTypeRequestFactory extends RequestFactory
-{
-    public function definition(): array
-    {
-        return [
-            'name' => $this->faker->name(),
-            'default_category' => $this->faker->randomElement(ServiceRequestCategory::cases())->value,
-        ];
-    }
-}
+<template>
+    <BaseCard :bg="toneConfig.bg">
+        <div class="flex items-start justify-between gap-3">
+            <div>
+                <p class="mb-1 text-xs font-semibold" :class="toneConfig.labelColor">{{ label }}</p>
+                <p class="text-4xl font-semibold leading-none tabular-nums" :class="toneConfig.valueColor">
+                    {{ value }}
+                </p>
+            </div>
+            <slot name="icon" />
+        </div>
+    </BaseCard>
+</template>

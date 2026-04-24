@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,16 +30,39 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    defineProps({
+        delay: {
+            type: Number,
+            default: 0,
+        },
+    });
+</script>
 
-namespace App\Features;
+<template>
+    <tr
+        class="base-table-row transition-colors duration-100 hover:bg-gray-50/70"
+        :style="{ '--row-delay': `${delay}ms` }"
+    >
+        <slot />
+    </tr>
+</template>
 
-use App\Support\AbstractFeatureFlag;
-
-class ServiceRequestCategoryRenameFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
+<style>
+    @keyframes baseTableRowIn {
+        from {
+            opacity: 0;
+            transform: translateY(4px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
-}
+
+    .base-table-row {
+        animation: baseTableRowIn 0.2s ease both;
+        animation-delay: var(--row-delay, 0ms);
+    }
+</style>

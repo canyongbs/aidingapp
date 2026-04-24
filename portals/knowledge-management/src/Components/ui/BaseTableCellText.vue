@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,20 +30,36 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    defineProps({
+        text: {
+            type: String,
+            default: null,
+        },
+        subText: {
+            type: String,
+            default: null,
+        },
+        subTextMaxLength: {
+            type: Number,
+            default: 30,
+        },
+    });
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
-
-use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use Worksome\RequestFactories\RequestFactory;
-
-class CreateServiceRequestTypeRequestFactory extends RequestFactory
-{
-    public function definition(): array
-    {
-        return [
-            'name' => $this->faker->name(),
-            'default_category' => $this->faker->randomElement(ServiceRequestCategory::cases())->value,
-        ];
+    function truncate(str, max) {
+        if (!str) return '';
+        return str.length > max ? str.slice(0, max) + '\u2026' : str;
     }
-}
+</script>
+
+<template>
+    <div>
+        <p class="truncate text-sm leading-5 text-gray-900" :title="text || undefined">
+            {{ text ?? '—' }}
+        </p>
+        <p v-if="subText" class="mt-0.5 text-xs leading-5 text-gray-500" :title="subText">
+            {{ truncate(subText, subTextMaxLength) }}
+        </p>
+    </div>
+</template>

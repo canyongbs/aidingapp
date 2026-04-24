@@ -50,7 +50,6 @@ use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsEx
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -106,7 +105,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'is_ai_resolution_successful',
         'is_draft',
         'portal_assistant_thread_id',
-        'issue_category',
         'category',
     ];
 
@@ -466,9 +464,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         return "{$creatorInfo}\n\n{$updateDate} - {$recentUpdate->update}";
     }
 
-    /**
-     * TODO: ServiceRequestCategoryRenameFeature Cleanup - After ServiceRequestCategoryRenameFeature is removed: rename 'category' cast back to $casts property and remove 'issue_category' from $fillable.
-     */
     protected function casts(): array
     {
         return [
@@ -480,7 +475,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
             'is_ai_resolution_attempted' => 'boolean',
             'is_ai_resolution_successful' => 'boolean',
             'is_draft' => 'boolean',
-            (ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category') => ServiceRequestCategory::class,
+            'category' => ServiceRequestCategory::class,
         ];
     }
 

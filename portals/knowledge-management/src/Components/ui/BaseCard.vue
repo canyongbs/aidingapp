@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,20 +30,26 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    defineProps({
+        bordered: {
+            type: Boolean,
+            default: true,
+        },
+        padded: {
+            type: Boolean,
+            default: true,
+        },
+        bg: {
+            type: String,
+            default: 'bg-white',
+        },
+    });
+</script>
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
-
-use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use Worksome\RequestFactories\RequestFactory;
-
-class CreateServiceRequestTypeRequestFactory extends RequestFactory
-{
-    public function definition(): array
-    {
-        return [
-            'name' => $this->faker->name(),
-            'default_category' => $this->faker->randomElement(ServiceRequestCategory::cases())->value,
-        ];
-    }
-}
+<template>
+    <div :class="['rounded-[var(--rounding-lg)] shadow-xs', bg, bordered && 'border border-gray-200', padded && 'p-5']">
+        <slot />
+    </div>
+</template>

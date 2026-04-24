@@ -38,8 +38,6 @@ namespace AidingApp\Ai\Filament\Pages;
 
 use AidingApp\Ai\Enums\AiModelApplicabilityFeature;
 use AidingApp\Ai\Settings\AiIntegrationsSettings;
-use App\Features\Gpt54MiniFeature;
-use App\Features\Gpt54NanoFeature;
 use App\Filament\Clusters\GlobalArtificialIntelligence;
 use App\Models\User;
 use Filament\Forms\Components\Select;
@@ -184,7 +182,7 @@ class ManageAiIntegrationsSettings extends SettingsPage
                                     ->options(AiModelApplicabilityFeature::class)
                                     ->multiple()
                                     ->nestedRecursiveRules([Rule::enum(AiModelApplicabilityFeature::class)]),
-                            ])->visible(fn () => Gpt54MiniFeature::active()),
+                            ]),
                         Section::make('GPT 5.4 nano')
                             ->collapsible()
                             ->schema([
@@ -211,7 +209,7 @@ class ManageAiIntegrationsSettings extends SettingsPage
                                     ->options(AiModelApplicabilityFeature::class)
                                     ->multiple()
                                     ->nestedRecursiveRules([Rule::enum(AiModelApplicabilityFeature::class)]),
-                            ])->visible(fn () => Gpt54NanoFeature::active()),
+                            ]),
                     ]),
                 Section::make('LlamaCloud')
                     ->collapsible()

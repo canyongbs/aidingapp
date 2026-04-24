@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,16 +30,18 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    defineProps({
+        scope: {
+            type: String,
+            default: 'col',
+        },
+    });
+</script>
 
-namespace App\Features;
-
-use App\Support\AbstractFeatureFlag;
-
-class Gpt54NanoFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
-    }
-}
+<template>
+    <th :scope="scope" class="px-4 py-3 text-xs font-semibold text-gray-500">
+        <slot />
+    </th>
+</template>

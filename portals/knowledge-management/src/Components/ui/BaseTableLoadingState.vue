@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,16 +30,50 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    import BaseTable from './BaseTable.vue';
+    import BaseTableBody from './BaseTableBody.vue';
+    import BaseTableHeader from './BaseTableHeader.vue';
 
-namespace App\Features;
+    defineProps({
+        columns: {
+            type: Number,
+            default: 4,
+        },
+        rows: {
+            type: Number,
+            default: 5,
+        },
+        label: {
+            type: String,
+            default: 'Loading, please wait…',
+        },
+    });
+</script>
 
-use App\Support\AbstractFeatureFlag;
-
-class Gpt54MiniFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
-    }
-}
+<template>
+    <BaseTable role="status" aria-busy="true" class="animate-pulse">
+        <BaseTableHeader>
+            <tr>
+                <th v-for="col in columns" :key="col" class="px-4 py-3">
+                    <div class="h-3 rounded bg-gray-200" :class="col === 1 ? 'w-16' : 'w-20'"></div>
+                </th>
+            </tr>
+        </BaseTableHeader>
+        <BaseTableBody>
+            <tr v-for="row in rows" :key="row">
+                <td v-for="col in columns" :key="col" class="px-4 py-4">
+                    <div
+                        class="h-3 rounded"
+                        :class="[
+                            col === 1 ? 'w-40 bg-gray-200' : col % 3 === 0 ? 'w-16 bg-gray-100' : 'w-24 bg-gray-200',
+                        ]"
+                    ></div>
+                    <div v-if="col === 1" class="mt-2 h-2.5 w-28 rounded bg-gray-100"></div>
+                </td>
+            </tr>
+        </BaseTableBody>
+        <span class="sr-only">{{ label }}</span>
+    </BaseTable>
+</template>

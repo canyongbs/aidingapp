@@ -47,7 +47,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceReques
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Features\ServiceRequestCategoryRenameFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
 use App\Models\User;
@@ -161,13 +160,13 @@ class ListServiceRequests extends ListRecords
                     )
                     ->multiple()
                     ->preload(),
-                SelectFilter::make(ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category')
-                    ->label(ServiceRequestCategoryRenameFeature::active() ? 'Category' : 'Issue Category')
+                SelectFilter::make('category')
+                    ->label('Category')
                     ->options(ServiceRequestCategory::class)
                     ->query(fn (Builder $query, array $data): Builder => $query->when(
                         filled($data['value']),
                         fn (Builder $query) => $query->where(
-                            ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category',
+                            'category',
                             $data['value']
                         )
                     )),
