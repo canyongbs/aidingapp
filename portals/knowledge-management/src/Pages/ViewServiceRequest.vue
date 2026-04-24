@@ -425,7 +425,7 @@
                     <div class="flex-1 whitespace-pre-line px-5 py-4 text-sm text-gray-700">
                         {{ serviceRequestUpdate.update }}
                     </div>
-                        
+
                         <div v-if="serviceRequestUpdate.media && serviceRequestUpdate.media.length" class="mt-3">
                             <ul class="my-3">
                                 <li v-for="mediaItem in serviceRequestUpdate.media" :key="mediaItem.id">
