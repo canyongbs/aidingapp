@@ -49,7 +49,6 @@ return new class () extends Migration {
             $table->text('request')->nullable();
             $table->foreignUuid('thread_id')->constrained('ai_threads')->cascadeOnDelete();
             $table->foreignUuid('user_id')->nullable()->constrained();
-            $table->foreignUuid('prompt_id')->nullable()->constrained();
             $table->timestamps();
             $table->softDeletes();
         });
