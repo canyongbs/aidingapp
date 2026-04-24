@@ -117,7 +117,7 @@
             }
             setPagination(response.data.serviceRequestUpdates);
         });
-    } 
+    }
     async function submitUpdate() {
         try {
             disableSubmitBtn.value = true;
@@ -192,7 +192,10 @@
         <template #rawContent>
             <!-- Error notices -->
             <template v-if="authorizationError || validationErrors.serviceRequestId">
-                <div v-if="authorizationError" class="rounded-[var(--rounding-md)] bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div
+                    v-if="authorizationError"
+                    class="rounded-[var(--rounding-md)] bg-red-50 px-4 py-3 text-sm text-red-700"
+                >
                     {{ authorizationError }}
                 </div>
                 <div
@@ -291,7 +294,9 @@
                             serviceRequestUpdate.created_by_type === 'contact' ? 'bg-white' : 'bg-gray-50',
                         ]"
                     >
-                        <div class="w-28 shrink-0 border-r border-gray-100 px-5 py-4 text-xs leading-relaxed text-gray-400">
+                        <div
+                            class="w-28 shrink-0 border-r border-gray-100 px-5 py-4 text-xs leading-relaxed text-gray-400"
+                        >
                             <div>{{ serviceRequestUpdate.created_at.split(' ')[0] }}</div>
                             <div>{{ serviceRequestUpdate.created_at.split(' ').slice(1).join(' ') }}</div>
                         </div>
