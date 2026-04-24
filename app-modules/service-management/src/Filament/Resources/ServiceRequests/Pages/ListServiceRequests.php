@@ -40,7 +40,6 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\AddServiceRequestUpdateBulkAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\ChangeServiceRequestStatusBulkAction;
@@ -55,18 +54,15 @@ use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 
 class ListServiceRequests extends ListRecords
 {
@@ -80,9 +76,10 @@ class ListServiceRequests extends ListRecords
             ->modifyQueryUsing(fn (Builder $query) => $query->with([
                 'latestInboundServiceRequestUpdate',
                 'latestOutboundServiceRequestUpdate',
-                'priority' => [
-                    'sla',
-                ],
+                'priority.sla',
+                'priority.type.managerUsers',
+                'respondent.organization',
+                'feedback',
                 'status',
             ])
                 ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
@@ -102,25 +99,26 @@ class ListServiceRequests extends ListRecords
                 }))
             ->columns([
                 IdColumn::make(),
-                TextColumn::make('service_request_number')
+                ViewColumn::make('service_request_number')
                     ->label('Service Request #')
+                    ->view('filament.tables.columns.service-request.number')
                     ->searchable(['service_request_number', 'title'])
+                    ->sortable(),
+                TextColumn::make('division.name')
+                    ->label('Division')
+                    ->searchable()
                     ->sortable()
-                    ->description(fn (ServiceRequest $record): string => Str::limit($record->title, 40)),
+                    ->visible(fn (): bool => Division::count() > 1)
+                    ->toggleable(),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->badge()
                     ->color(fn (ServiceRequest $record): string => $record->status->color->value)
                     ->sortable()
                     ->toggleable(),
-                TextColumn::make(ServiceRequestCategoryRenameFeature::active() ? 'category' : 'issue_category')
-                    ->label(ServiceRequestCategoryRenameFeature::active() ? 'Category' : 'Issue Category')
-                    ->badge()
-                    ->sortable()
-                    ->toggleable(),
-                TextColumn::make('respondent.display_name')
+                ViewColumn::make('related_to')
                     ->label('Related To')
-                    ->getStateUsing(fn (ServiceRequest $record) => $record->respondent->{$record->respondent::displayNameKey()})
+                    ->view('filament.tables.columns.service-request.related-to')
                     ->searchable(
                         query: fn (Builder $query, $search) => $query->whereHas(
                             'respondent',
@@ -129,28 +127,18 @@ class ListServiceRequests extends ListRecords
                     )
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
                     ->toggleable(),
-                TextColumn::make('division.name')
-                    ->label('Division')
-                    ->searchable()
-                    ->sortable()
-                    ->visible(fn (): bool => Division::count() > 1)
+                ViewColumn::make('sla')
+                    ->label('SLA')
+                    ->view('filament.tables.columns.service-request.sla')
                     ->toggleable(),
-                TextColumn::make('assignedTo.user.name')
-                    ->label('Assigned To')
-                    ->badge(fn (ServiceRequest $record) => is_null($record->assignedTo))
-                    ->searchable()
-                    ->sortable()
-                    ->default('Unassigned')
+                ViewColumn::make('feedback_summary')
+                    ->label('Feedback')
+                    ->view('filament.tables.columns.service-request.feedback')
                     ->toggleable(),
-                IconColumn::make('response_sla_compliance')
-                    ->label('SLA Response')
-                    ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResponseSlaComplianceStatus())
-                    ->tooltip(fn (ServiceRequest $record): ?string => $record->getResponseSlaComplianceStatus()?->getLabel())
-                    ->toggleable(),
-                IconColumn::make('resolution_sla_compliance')
-                    ->label('SLA Resolution')
-                    ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResolutionSlaComplianceStatus())
-                    ->tooltip(fn (ServiceRequest $record): ?string => $record->getResolutionSlaComplianceStatus()?->getLabel())
+                ViewColumn::make('dates')
+                    ->label('Date')
+                    ->view('filament.tables.columns.service-request.date')
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy('created_at', $direction))
                     ->toggleable(),
             ])
             ->filters([
@@ -229,11 +217,7 @@ class ListServiceRequests extends ListRecords
                             )
                     ),
             ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make()
-                    ->visible(fn (ServiceRequest $record) => $record->status?->classification === SystemServiceRequestClassification::Closed ? false : true),
-            ])
+            ->recordUrl(fn (ServiceRequest $record): string => ServiceRequestResource::getUrl('view', ['record' => $record]))
             ->toolbarActions([
                 BulkActionGroup::make([
                     ChangeServiceRequestStatusBulkAction::make(),
