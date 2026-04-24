@@ -425,6 +425,35 @@
                     <div class="flex-1 whitespace-pre-line px-5 py-4 text-sm text-gray-700">
                         {{ serviceRequestUpdate.update }}
                     </div>
+                        
+                        <div v-if="serviceRequestUpdate.media && serviceRequestUpdate.media.length" class="mt-3">
+                            <ul class="my-3">
+                                <li v-for="mediaItem in serviceRequestUpdate.media" :key="mediaItem.id">
+                                    <a
+                                        :href="mediaItem.url"
+                                        target="_blank"
+                                        download
+                                        class="text-sm flex items-center justify-between rounded-lg border border-gray-100 bg-white px-3 py-2 transition hover:bg-gray-200"
+                                    >
+                                        <div class="flex items-center space-x-2 overflow-hidden">
+                                            <svg
+                                                class="w-4 h-4 shrink-0 opacity-70 group-hover:opacity-100"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                stroke-width="2"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14" />
+                                            </svg>
+
+                                            <span class="text-sm truncate">
+                                                {{ mediaItem.name }}
+                                            </span>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                 </div>
 
                 <template #footer>
