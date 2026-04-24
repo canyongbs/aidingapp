@@ -57,7 +57,7 @@ class ServiceRequestTypesTable extends BaseWidget
 
     protected static ?string $heading = 'Request Types';
 
-    protected static bool $isLazy = false;
+    protected static bool $isLazy = true;
 
     protected static ?string $pollingInterval = null;
 
