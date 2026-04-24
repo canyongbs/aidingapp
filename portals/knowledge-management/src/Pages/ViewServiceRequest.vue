@@ -366,7 +366,7 @@
                                         <button
                                             type="button"
                                             class="ml-3 flex items-center justify-center w-7 h-7 text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-600 transition shrink-0"
-                                            style="border-radius: 9999px;"
+                                            style="border-radius: 9999px"
                                             @click.stop="removeFile(index)"
                                         >
                                             <svg
