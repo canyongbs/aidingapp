@@ -123,11 +123,11 @@ class ViewServiceRequest extends ViewRecord
                                     }),
                                 TextEntry::make('created_at')
                                     ->label('Created')
-                                    ->dateTime(config('project.datetime_format') ?? 'Y-m-d H:i:s')
+                                    ->dateTime('M j, Y g:i A (T)')
                                     ->hintIcon(null),
                                 TextEntry::make('updated_at')
                                     ->label('Last Updated')
-                                    ->dateTime(config('project.datetime_format') ?? 'Y-m-d H:i:s')
+                                    ->dateTime('M j, Y g:i A (T)')
                                     ->hintIcon(null),
                             ])->columns(3),
                     ])
