@@ -35,28 +35,33 @@
 */
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('ai_messages', function (Blueprint $table) {
+        Schema::create('prompts', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('message_id')->nullable();
-            $table->text('content');
-            $table->text('context')->nullable();
-            $table->text('request')->nullable();
-            $table->foreignUuid('thread_id')->constrained('ai_threads')->cascadeOnDelete();
-            $table->foreignUuid('user_id')->nullable()->constrained();
-            $table->foreignUuid('prompt_id')->nullable()->constrained();
+
+            $table->string('title');
+            $table->longText('description')->nullable();
+            $table->longText('prompt');
+
+            $table->foreignUuid('type_id')->constrained('prompt_types')->cascadeOnDelete();
+            $table->foreignUuid('user_id')->nullable()->constrained()->nullOnDelete();
+            $table->boolean('is_smart')->default(false);
+
             $table->timestamps();
             $table->softDeletes();
+
+            $table->uniqueIndex(['title'])->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('ai_messages');
+        Schema::dropIfExists('prompts');
     }
 };
