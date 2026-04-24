@@ -46,8 +46,7 @@
             type: String,
             default: null,
         },
-        pulse: { type: Boolean, default: false },
-        mono:  { type: Boolean, default: false },
+        mono: { type: Boolean, default: false },
     });
 
     const TONE_MAP = {
@@ -60,28 +59,25 @@
     };
 
     const PALETTE = {
-        blue:    { container: 'bg-blue-100 text-blue-800 ring-1 ring-inset ring-blue-600/20',         dot: 'bg-blue-500' },
-        sky:     { container: 'bg-sky-100 text-sky-800 ring-1 ring-inset ring-sky-600/20',             dot: 'bg-sky-500' },
-        indigo:  { container: 'bg-indigo-100 text-indigo-800 ring-1 ring-inset ring-indigo-600/20',   dot: 'bg-indigo-500' },
-        cyan:    { container: 'bg-cyan-100 text-cyan-800 ring-1 ring-inset ring-cyan-600/20',         dot: 'bg-cyan-500' },
-        green:   { container: 'bg-green-100 text-green-800 ring-1 ring-inset ring-green-600/20',      dot: 'bg-green-500' },
-        emerald: { container: 'bg-emerald-100 text-emerald-800 ring-1 ring-inset ring-emerald-600/20', dot: 'bg-emerald-500' },
-        teal:    { container: 'bg-teal-100 text-teal-800 ring-1 ring-inset ring-teal-600/20',         dot: 'bg-teal-500' },
-        lime:    { container: 'bg-lime-100 text-lime-800 ring-1 ring-inset ring-lime-600/20',         dot: 'bg-lime-500' },
-        amber:   { container: 'bg-amber-100 text-amber-800 ring-1 ring-inset ring-amber-600/20',     dot: 'bg-amber-500' },
-        yellow:  { container: 'bg-yellow-100 text-yellow-800 ring-1 ring-inset ring-yellow-600/20',  dot: 'bg-yellow-500' },
-        orange:  { container: 'bg-orange-100 text-orange-800 ring-1 ring-inset ring-orange-600/20',  dot: 'bg-orange-500' },
-        red:     { container: 'bg-red-100 text-red-800 ring-1 ring-inset ring-red-600/20',           dot: 'bg-red-500' },
-        rose:    { container: 'bg-rose-100 text-rose-800 ring-1 ring-inset ring-rose-600/20',         dot: 'bg-rose-500' },
-        pink:    { container: 'bg-pink-100 text-pink-800 ring-1 ring-inset ring-pink-600/20',         dot: 'bg-pink-500' },
-        fuchsia: { container: 'bg-fuchsia-100 text-fuchsia-800 ring-1 ring-inset ring-fuchsia-600/20', dot: 'bg-fuchsia-500' },
-        purple:  { container: 'bg-purple-100 text-purple-800 ring-1 ring-inset ring-purple-600/20',  dot: 'bg-purple-500' },
-        violet:  { container: 'bg-violet-100 text-violet-800 ring-1 ring-inset ring-violet-600/20',  dot: 'bg-violet-500' },
-        gray:    { container: 'bg-gray-100 text-gray-700 ring-1 ring-inset ring-gray-500/20',         dot: 'bg-gray-500' },
-        primary: {
-            container: 'bg-[rgba(var(--primary-50),1)] text-[rgba(var(--primary-700),1)] ring-1 ring-inset ring-[rgba(var(--primary-600),0.2)]',
-            dot: 'bg-[rgba(var(--primary-500),1)]',
-        },
+        blue:    { container: 'bg-blue-100 text-blue-800 ring-1 ring-inset ring-blue-600/20' },
+        sky:     { container: 'bg-sky-100 text-sky-800 ring-1 ring-inset ring-sky-600/20' },
+        indigo:  { container: 'bg-indigo-100 text-indigo-800 ring-1 ring-inset ring-indigo-600/20' },
+        cyan:    { container: 'bg-cyan-100 text-cyan-800 ring-1 ring-inset ring-cyan-600/20' },
+        green:   { container: 'bg-green-100 text-green-800 ring-1 ring-inset ring-green-600/20' },
+        emerald: { container: 'bg-emerald-100 text-emerald-800 ring-1 ring-inset ring-emerald-600/20' },
+        teal:    { container: 'bg-teal-100 text-teal-800 ring-1 ring-inset ring-teal-600/20' },
+        lime:    { container: 'bg-lime-100 text-lime-800 ring-1 ring-inset ring-lime-600/20' },
+        amber:   { container: 'bg-amber-100 text-amber-800 ring-1 ring-inset ring-amber-600/20' },
+        yellow:  { container: 'bg-yellow-100 text-yellow-800 ring-1 ring-inset ring-yellow-600/20' },
+        orange:  { container: 'bg-orange-100 text-orange-800 ring-1 ring-inset ring-orange-600/20' },
+        red:     { container: 'bg-red-100 text-red-800 ring-1 ring-inset ring-red-600/20' },
+        rose:    { container: 'bg-rose-100 text-rose-800 ring-1 ring-inset ring-rose-600/20' },
+        pink:    { container: 'bg-pink-100 text-pink-800 ring-1 ring-inset ring-pink-600/20' },
+        fuchsia: { container: 'bg-fuchsia-100 text-fuchsia-800 ring-1 ring-inset ring-fuchsia-600/20' },
+        purple:  { container: 'bg-purple-100 text-purple-800 ring-1 ring-inset ring-purple-600/20' },
+        violet:  { container: 'bg-violet-100 text-violet-800 ring-1 ring-inset ring-violet-600/20' },
+        gray:    { container: 'bg-gray-100 text-gray-700 ring-1 ring-inset ring-gray-500/20' },
+        primary: { container: 'bg-[rgba(var(--primary-50),1)] text-[rgba(var(--primary-700),1)] ring-1 ring-inset ring-[rgba(var(--primary-600),0.2)]' },
     };
 
     const colorKey = computed(() => (props.color ?? TONE_MAP[props.tone] ?? 'gray').toLowerCase());
@@ -90,26 +86,16 @@
         if (props.mono) return 'border border-gray-200 bg-gray-50 text-gray-600';
         return (PALETTE[colorKey.value] ?? PALETTE.gray).container;
     });
-
-    const dotClass = computed(() => {
-        if (props.mono) return '';
-        return (PALETTE[colorKey.value] ?? PALETTE.gray).dot;
-    });
 </script>
 
 <template>
     <span
         :class="[
-            'inline-flex items-center gap-1.5 rounded-[var(--rounding-md)] text-xs',
+            'inline-flex items-center rounded-[var(--rounding-md)] text-xs',
             mono ? 'px-2 py-0.5 font-mono font-normal' : 'px-2.5 py-1 font-medium',
             containerClasses,
         ]"
     >
-        <span
-            v-if="!mono"
-            :class="['h-1.5 w-1.5 flex-shrink-0 rounded-full', dotClass, pulse ? 'animate-pulse' : '']"
-            aria-hidden="true"
-        />
         <slot />
     </span>
 </template>
