@@ -63,7 +63,6 @@ class AiMessage extends Model
         'request',
         'thread_id',
         'user_id',
-        'prompt_id',
     ];
 
     protected $casts = [
@@ -86,14 +85,6 @@ class AiMessage extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
-    }
-
-    /**
-     * @return BelongsTo<Prompt, $this>
-     */
-    public function prompt(): BelongsTo
-    {
-        return $this->belongsTo(Prompt::class)->withTrashed();
     }
 
     /**

@@ -97,6 +97,22 @@ test('The correct details are displayed on the ListServiceRequests page', functi
         ->assertCanSeeTableRecords($serviceRequests)
         ->assertCountTableRecords(10);
 
+    $component
+        ->assertTableColumnExists('service_request_number')
+        ->assertTableColumnExists('related_to')
+        ->assertTableColumnExists('division.name')
+        ->assertTableColumnExists('sla')
+        ->assertTableColumnExists('feedback_summary')
+        ->assertTableColumnExists('dates')
+        ->assertSee('Manager:')
+        ->assertSee('Customer:')
+        ->assertSee('Response:')
+        ->assertSee('Resolution:')
+        ->assertSee('Created:')
+        ->assertSee('Updated:')
+        ->assertSee('Unassigned')
+        ->assertSeeInOrder(['CSAT:', 'N/A', 'NPS:', 'N/A']);
+
     $serviceRequests->each(
         fn (ServiceRequest $serviceRequest) => $component
             ->assertTableColumnStateSet(
@@ -105,20 +121,16 @@ test('The correct details are displayed on the ListServiceRequests page', functi
                 $serviceRequest
             )
             ->assertTableColumnStateSet(
-                'respondent.display_name',
-                $serviceRequest->respondent->full_name,
-                $serviceRequest
-            )
-            ->assertTableColumnStateSet(
                 'division.name',
                 $serviceRequest->division->name,
                 $serviceRequest
             )
-            ->assertTableColumnStateSet(
-                'assignedTo.user.name',
-                $serviceRequest->assignedTo->user->name,
-                $serviceRequest
-            )
+            ->assertSee($serviceRequest->service_request_number)
+            ->assertSee($serviceRequest->category->getLabel())
+            ->assertSee($serviceRequest->status->name)
+            ->assertSee($serviceRequest->respondent->full_name)
+            ->assertSee($serviceRequest->created_at->format('m-d-Y') . ' (0 days)')
+            ->assertSee($serviceRequest->updated_at->format('m-d-Y') . ' (0 days)')
     );
 });
 
@@ -157,6 +169,22 @@ test('The correct details are displayed on the ListServiceRequests page via dire
         ->assertCanSeeTableRecords($serviceRequests)
         ->assertCountTableRecords(10);
 
+    $component
+        ->assertTableColumnExists('service_request_number')
+        ->assertTableColumnExists('related_to')
+        ->assertTableColumnExists('division.name')
+        ->assertTableColumnExists('sla')
+        ->assertTableColumnExists('feedback_summary')
+        ->assertTableColumnExists('dates')
+        ->assertSee('Manager:')
+        ->assertSee('Customer:')
+        ->assertSee('Response:')
+        ->assertSee('Resolution:')
+        ->assertSee('Created:')
+        ->assertSee('Updated:')
+        ->assertSee($user->name)
+        ->assertSeeInOrder(['CSAT:', 'N/A', 'NPS:', 'N/A']);
+
     $serviceRequests->each(
         fn (ServiceRequest $serviceRequest) => $component
             ->assertTableColumnStateSet(
@@ -165,24 +193,20 @@ test('The correct details are displayed on the ListServiceRequests page via dire
                 $serviceRequest
             )
             ->assertTableColumnStateSet(
-                'respondent.display_name',
-                $serviceRequest->respondent->full_name,
-                $serviceRequest
-            )
-            ->assertTableColumnStateSet(
                 'division.name',
                 $serviceRequest->division->name,
                 $serviceRequest
             )
-            ->assertTableColumnStateSet(
-                'assignedTo.user.name',
-                $serviceRequest->assignedTo->user->name,
-                $serviceRequest
-            )
+            ->assertSee($serviceRequest->service_request_number)
+            ->assertSee($serviceRequest->category->getLabel())
+            ->assertSee($serviceRequest->status->name)
+            ->assertSee($serviceRequest->respondent->full_name)
+            ->assertSee($serviceRequest->created_at->format('m-d-Y') . ' (0 days)')
+            ->assertSee($serviceRequest->updated_at->format('m-d-Y') . ' (0 days)')
     );
 });
 
-test('category column is displayed on the ListServiceRequests page', function () {
+test('category is rendered inline with the service request number on the ListServiceRequests page', function () {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create([
@@ -191,11 +215,9 @@ test('category column is displayed on the ListServiceRequests page', function ()
 
     livewire(ListServiceRequests::class)
         ->assertSuccessful()
-        ->assertTableColumnStateSet(
-            'category',
-            ServiceRequestCategory::Incident,
-            $serviceRequest
-        );
+        ->assertTableColumnExists('service_request_number')
+        ->assertSee($serviceRequest->service_request_number)
+        ->assertSee(ServiceRequestCategory::Incident->getLabel());
 });
 
 test('can filter service request by category', function () {

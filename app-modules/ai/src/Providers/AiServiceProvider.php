@@ -42,8 +42,6 @@ use AidingApp\Ai\Models\AiAssistantFile;
 use AidingApp\Ai\Models\AiMessage;
 use AidingApp\Ai\Models\AiMessageFile;
 use AidingApp\Ai\Models\AiThread;
-use AidingApp\Ai\Models\Prompt;
-use AidingApp\Ai\Models\PromptType;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
@@ -60,8 +58,6 @@ class AiServiceProvider extends ServiceProvider
         Relation::morphMap([
             'ai_assistant' => AiAssistant::class,
             'ai_message' => AiMessage::class,
-            'prompt_type' => PromptType::class,
-            'prompt' => Prompt::class,
             'ai_assistant_file' => AiAssistantFile::class,
             'ai_message_file' => AiMessageFile::class,
             'ai_thread' => AiThread::class,

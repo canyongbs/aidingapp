@@ -36,10 +36,10 @@
 
 namespace AidingApp\IntegrationOpenAi\Prism\AzureOpenAi\Handlers;
 
+use AidingApp\IntegrationOpenAi\Prism\AzureOpenAi\Maps\MessageMap;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Prism\Prism\Providers\OpenAI\Handlers\Structured as BaseStructured;
-use Prism\Prism\Providers\OpenAI\Maps\MessageMap;
 use Prism\Prism\Structured\Request;
 
 class Structured extends BaseStructured
