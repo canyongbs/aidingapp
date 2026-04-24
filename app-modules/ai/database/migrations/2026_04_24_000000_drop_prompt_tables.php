@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,34 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Models;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Ai\Database\Factories\PromptFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+return new class () extends Migration {
+    public function up(): void
+    {
+        DB::transaction(function () {
+            Schema::dropIfExists('prompt_upvotes');
+            Schema::dropIfExists('prompt_uses');
 
-/**
- * @mixin IdeHelperPrompt
- */
-class Prompt extends Model
-{
-    /** @use HasFactory<PromptFactory> */
-    use HasFactory;
+            if (Schema::hasColumn('ai_messages', 'prompt_id')) {
+                Schema::table('ai_messages', function (Blueprint $table) {
+                    $table->dropForeign(['prompt_id']);
+                    $table->dropColumn('prompt_id');
+                });
+            }
 
-    use HasUuids;
-    use SoftDeletes;
+            Schema::dropIfExists('prompts');
+            Schema::dropIfExists('prompt_types');
+        });
+    }
 
-    protected $fillable = [
-        'title',
-        'description',
-        'prompt',
-        'type_id',
-        'is_smart',
-    ];
-
-    protected $casts = [
-        'is_smart' => 'boolean',
-    ];
-}
+    public function down(): void
+    {
+        // This migration is not reversible. The Prompt model and all related code
+        // have been permanently removed from the codebase.
+    }
+};
