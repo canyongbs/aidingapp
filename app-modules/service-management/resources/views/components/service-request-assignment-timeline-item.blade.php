@@ -33,14 +33,42 @@
 --}}
 
 @php
+    use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
     use App\Filament\Resources\Users\UserResource;
+
+    $serviceRequest = $this->recordModel ?? $record->serviceRequest;
+    $serviceRequest->loadMissing(['assignments.user', 'histories']);
+
+    $allAssignments = $serviceRequest->assignments;
+    $initialAssignment = $allAssignments->sortBy('assigned_at')->first();
+    $isInitial = $initialAssignment && $record->id === $initialAssignment->id;
+
+    $previousAssignment = $allAssignments
+        ->reject(fn ($assignment) => $assignment->id === $record->id)
+        ->filter(fn ($assignment) => $assignment->assigned_at <= $record->assigned_at)
+        ->sortByDesc('assigned_at')
+        ->first();
+
+    // If an Unassigned event happened between the previous assignment and this one,
+    // the SR was in an unassigned state right before — this is a fresh Assign, not a Reassign.
+    $cameFromUnassigned = $previousAssignment
+        ? $serviceRequest->histories->contains(fn ($history) =>
+            $history->event_type === ServiceRequestHistory::EVENT_UNASSIGNED
+            && $history->created_at >= $previousAssignment->assigned_at
+            && $history->created_at <= $record->assigned_at
+        )
+        : false;
+
+    $isAssign = $isInitial || ! $previousAssignment?->user || $cameFromUnassigned;
+
+    $createdAt = $record->assigned_at ?? $record->created_at;
 @endphp
 
 <div>
     <div class="flex flex-row justify-between">
         <h3 class="mb-1 flex items-center text-lg font-semibold text-gray-500 dark:text-gray-100">
             <span class="ml-2 flex space-x-2">
-                @if ($record->id === $record->serviceRequest->initialAssignment->id)
+                @if ($isAssign)
                     Service Request Assigned
                 @else
                     Service Request Reassigned
@@ -53,16 +81,25 @@
         </div>
     </div>
 
-    <time class="mb-2 block text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
-        {{ $record->created_at->diffForHumans() }}
-    </time>
+    @include('service-management::components.timeline-time', ['datetime' => $createdAt])
 
     <div
         class="my-4 rounded-lg border-2 border-gray-200 p-2 text-base font-normal text-gray-500 dark:border-gray-800 dark:text-gray-400"
     >
-        Assigned to:
-        <a class="primary underline" href="{{ UserResource::getUrl('view', ['record' => $record->user]) }}">
-            {{ $record->user->name }}
-        </a>
+        @if ($isAssign)
+            Assigned to
+            <a class="primary font-semibold underline" href="{{ UserResource::getUrl('view', ['record' => $record->user]) }}">
+                {{ $record->user->name }}
+            </a>
+        @else
+            Assigned changed from
+            <a class="primary font-semibold underline" href="{{ UserResource::getUrl('view', ['record' => $previousAssignment->user]) }}">
+                {{ $previousAssignment->user->name }}
+            </a>
+            to
+            <a class="primary font-semibold underline" href="{{ UserResource::getUrl('view', ['record' => $record->user]) }}">
+                {{ $record->user->name }}
+            </a>
+        @endif
     </div>
 </div>

@@ -34,57 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Actions;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-
-class CreateServiceRequestHistory implements ShouldQueue
-{
-    use Dispatchable;
-    use InteractsWithQueue;
-    use Queueable;
-    use SerializesModels;
-
-    /**
-     * @var array<int, string>
-     */
-    private const IGNORED_KEYS = [
-        'updated_at',
-        'status_updated_at',
-        'time_to_resolution',
-        'service_request_form_submission_id',
-    ];
-
-    /**
-     * @param array<string, mixed> $changes
-     * @param array<string, mixed> $original
-     */
-    public function __construct(
-        public ServiceRequest $serviceRequest,
-        public array $changes,
-        public array $original,
-        public ?string $actorType = null,
-        public ?string $actorId = null,
-    ) {}
-
-    public function handle(): void
+return new class () extends Migration {
+    public function up(): void
     {
-        foreach ($this->changes as $key => $value) {
-            if (in_array($key, self::IGNORED_KEYS, true)) {
-                continue;
-            }
-
-            $this->serviceRequest->histories()->create([
-                'original_values' => [$key => $this->original[$key] ?? null],
-                'new_values' => [$key => $value],
-                'actor_type' => $this->actorType,
-                'actor_id' => $this->actorId,
-            ]);
-        }
+        Schema::table('service_request_histories', function (Blueprint $table) {
+            $table->string('event_type')->nullable();
+            $table->nullableUuidMorphs('actor');
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('service_request_histories', function (Blueprint $table) {
+            $table->dropMorphs('actor');
+            $table->dropColumn('event_type');
+        });
+    }
+};

@@ -32,10 +32,17 @@
     </COPYRIGHT>
 --}}
 
+@php
+    use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
+
+    $actorName = $record->actorName();
+    $createdAt = $record->created_at;
+@endphp
+
 <div>
     <div class="flex flex-row justify-between">
         <h3 class="mb-1 flex items-center text-lg font-semibold text-gray-500 dark:text-gray-100">
-            <span class="ml-2 flex space-x-2">Service Request Data Changed</span>
+            <span class="ml-2 flex space-x-2">{{ $record->eventTitle() }}</span>
         </h3>
 
         <div>
@@ -43,25 +50,51 @@
         </div>
     </div>
 
-    <time class="mb-2 block text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
-        {{ $record->created_at->diffForHumans() }}
-    </time>
+    @include('service-management::components.timeline-time', ['datetime' => $createdAt])
 
     <div
         class="my-4 rounded-lg border-2 border-gray-200 p-2 text-base font-normal text-gray-500 dark:border-gray-800 dark:text-gray-400"
     >
-        Here's what changed:
+        @switch($record->event_type)
+            @case(ServiceRequestHistory::EVENT_CREATED)
+                <div>Created by <span class="font-semibold">{{ $actorName }}</span></div>
+                @if ($status = $record->snapshotStatus())
+                    <div>Status: <span class="font-semibold">{{ $status->name }}</span></div>
+                @endif
+                @if ($priority = $record->snapshotPriority())
+                    <div>Priority: <span class="font-semibold">{{ $priority->name }}</span></div>
+                @endif
+                @if ($type = $record->snapshotType())
+                    <div>Type: <span class="font-semibold">{{ $type->name }}</span></div>
+                @endif
+                @break
 
-        <ul class="list-inside list-disc">
-            @foreach ($record->new_values_formatted as $key => $value)
-                <li>
-                    <span class="font-semibold">{{ $key }}</span>
-                    changed from
-                    <span class="font-semibold">{{ $record->original_values_formatted[$key] }}</span>
+            @case(ServiceRequestHistory::EVENT_UNASSIGNED)
+                @php
+                    $previous = $record->original_values['previous_user_name'] ?? 'previous assignee';
+                @endphp
+
+                Unassigned from <span class="font-semibold">{{ $previous }}</span>
+                @break
+
+            @default
+                @php
+                    $field = $record->changedField();
+                    $readableKey = $field ? $record->transformReadableKey($field) : null;
+                    $old = $readableKey ? ($record->original_values_formatted[$readableKey] ?? 'NULL') : null;
+                    $new = $readableKey ? ($record->new_values_formatted[$readableKey] ?? 'NULL') : null;
+                @endphp
+
+                @if ($field)
+                    Changed from
+                    <span class="font-semibold">{{ $old }}</span>
                     to
-                    <span class="font-semibold">{{ $value }}</span>
-                </li>
-            @endforeach
-        </ul>
+                    <span class="font-semibold">{{ $new }}</span>
+                    by
+                    <span class="font-semibold">{{ $actorName }}</span>
+                @else
+                    Updated by <span class="font-semibold">{{ $actorName }}</span>
+                @endif
+        @endswitch
     </div>
 </div>

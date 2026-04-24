@@ -42,7 +42,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach ($getState() as $change)
+            @foreach ($getState() ?? [] as $change)
                 <tr class="border-b bg-white dark:border-gray-700 dark:bg-gray-800">
                     <th class="whitespace-nowrap px-6 py-4 font-medium text-gray-900 dark:text-white" scope="row">
                         {{ $change['key'] }}

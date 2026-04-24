@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Notifications\Concerns\FetchServiceRequestTemplate;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
@@ -57,6 +58,7 @@ use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceR
 use App\Enums\Feature;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 
 class ServiceRequestObserver
@@ -75,6 +77,10 @@ class ServiceRequestObserver
 
     public function created(ServiceRequest $serviceRequest): void
     {
+        if (! $serviceRequest->isDraft()) {
+            $this->writeCreatedHistory($serviceRequest);
+        }
+
         if (! $serviceRequest->priority) {
             return;
         }
@@ -154,8 +160,16 @@ class ServiceRequestObserver
 
     public function saved(ServiceRequest $serviceRequest): void
     {
-        if (! $serviceRequest->isDraft()) {
-            CreateServiceRequestHistory::dispatch($serviceRequest, $serviceRequest->getChanges(), $serviceRequest->getOriginal());
+        if (! $serviceRequest->isDraft() && ! $serviceRequest->wasRecentlyCreated) {
+            $actor = $this->resolveActor();
+
+            CreateServiceRequestHistory::dispatch(
+                $serviceRequest,
+                $serviceRequest->getChanges(),
+                $serviceRequest->getOriginal(),
+                $actor?->getMorphClass(),
+                $actor?->getKey(),
+            );
         }
 
         if (! $serviceRequest->priority) {
@@ -300,5 +314,30 @@ class ServiceRequestObserver
                 );
             }
         }
+    }
+
+    private function resolveActor(): ?Model
+    {
+        return auth()->user();
+    }
+
+    private function writeCreatedHistory(ServiceRequest $serviceRequest): void
+    {
+        $actor = $this->resolveActor();
+
+        $serviceRequest->histories()->create([
+            'event_type' => ServiceRequestHistory::EVENT_CREATED,
+            // Cast to object so json_encode writes `{}` rather than `[]` — keeps the stored shape
+            // consistent with field-change rows that use JSON objects.
+            'original_values' => (object) [],
+            'new_values' => [
+                'status_id' => $serviceRequest->status_id,
+                'priority_id' => $serviceRequest->priority_id,
+                'type_id' => $serviceRequest->priority?->type_id,
+                'title' => $serviceRequest->title,
+            ],
+            'actor_type' => $actor?->getMorphClass(),
+            'actor_id' => $actor?->getKey(),
+        ]);
     }
 }
