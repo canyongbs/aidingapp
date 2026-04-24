@@ -49,7 +49,6 @@ abstract class BarChartReportWidget extends ChartWidget
 
     protected ?string $maxHeight = '200px';
 
-
     public function mount(?string $cacheTag = null): void
     {
         parent::mount();

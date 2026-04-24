@@ -48,7 +48,6 @@ class ServiceMonitorTable extends BaseWidget
 {
     protected static ?string $heading = 'Service Monitoring';
 
-
     protected static ?string $pollingInterval = null;
 
     protected int | string | array $columnSpan = [

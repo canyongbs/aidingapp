@@ -57,7 +57,6 @@ class ServiceRequestTypesTable extends BaseWidget
 
     protected static ?string $heading = 'Request Types';
 
-
     protected static ?string $pollingInterval = null;
 
     protected int | string | array $columnSpan = [

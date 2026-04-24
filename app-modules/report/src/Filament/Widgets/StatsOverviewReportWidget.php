@@ -50,7 +50,6 @@ abstract class StatsOverviewReportWidget extends StatsOverviewWidget
 
     protected ?string $pollingInterval = null;
 
-
     public function mount(string $cacheTag): void
     {
         $this->cacheTag = $cacheTag;
