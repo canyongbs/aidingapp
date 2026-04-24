@@ -49,7 +49,6 @@ abstract class BarChartReportWidget extends ChartWidget
 
     protected ?string $maxHeight = '200px';
 
-    protected static bool $isLazy = true;
 
     public function mount(?string $cacheTag = null): void
     {

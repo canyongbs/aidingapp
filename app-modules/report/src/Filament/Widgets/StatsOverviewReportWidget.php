@@ -50,7 +50,6 @@ abstract class StatsOverviewReportWidget extends StatsOverviewWidget
 
     protected ?string $pollingInterval = null;
 
-    protected static bool $isLazy = true;
 
     public function mount(string $cacheTag): void
     {

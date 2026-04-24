@@ -47,7 +47,6 @@ abstract class ChartReportWidget extends ChartWidget
 
     protected ?string $pollingInterval = null;
 
-    protected static bool $isLazy = true;
 
     public function mount(?string $cacheTag = null): void
     {

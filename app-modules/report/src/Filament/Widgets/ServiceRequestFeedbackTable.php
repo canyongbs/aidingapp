@@ -54,7 +54,6 @@ class ServiceRequestFeedbackTable extends BaseWidget
 
     protected static ?string $heading = 'Service Request Feedback';
 
-    protected static bool $isLazy = true;
 
     protected static ?string $pollingInterval = null;
 
