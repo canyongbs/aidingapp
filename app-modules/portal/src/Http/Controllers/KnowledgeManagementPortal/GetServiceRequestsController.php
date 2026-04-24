@@ -126,6 +126,7 @@ class GetServiceRequestsController extends Controller
                         'update' => $serviceRequestUpdate->update,
                         'created_by_type' => $serviceRequestUpdate->created_by_type,
                         'created_at' => $serviceRequestUpdate->created_at->format('m-d-Y g:i A'),
+                        'media' => $serviceRequestUpdate->getUploadedMedia(),
                     ];
                 })
                 ->toArray(),

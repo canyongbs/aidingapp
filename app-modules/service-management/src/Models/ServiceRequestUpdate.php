@@ -56,6 +56,7 @@ use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * @mixin IdeHelperServiceRequestUpdate
@@ -145,6 +146,29 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
             type: 'created_by_type',
             id: 'created_by_id',
         );
+    }
+
+    /**
+     * @return array{
+     *   array{
+     *     id: string,
+     *     name: string,
+     *     url: string,
+     *   }
+     * }
+     */
+    public function getUploadedMedia(): array
+    {
+        return $this
+            ->getMedia('uploads')
+            ->map(function (Media $media) {
+                return [
+                    'id' => $media->id,
+                    'name' => $media->file_name,
+                    'url' => $media->getTemporaryUrl(now()->addMinute()),
+                ];
+            })
+            ->toArray();
     }
 
     protected function serializeDate(DateTimeInterface $date): string
