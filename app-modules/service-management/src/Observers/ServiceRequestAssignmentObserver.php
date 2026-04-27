@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Exceptions\AttemptedToAssignNonManagerToServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Notifications\Concerns\FetchServiceRequestTemplate;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestAssignedNotification;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestAssigned;
@@ -124,42 +123,6 @@ class ServiceRequestAssignmentObserver
             false,
             $serviceRequestAssignment->serviceRequest->priority?->type->is_auditors_service_request_assigned_notification_enabled ?? false,
         );
-    }
-
-    public function updated(ServiceRequestAssignment $serviceRequestAssignment): void
-    {
-        if (! $serviceRequestAssignment->wasChanged('status')) {
-            return;
-        }
-
-        if ($serviceRequestAssignment->status !== ServiceRequestAssignmentStatus::Inactive) {
-            return;
-        }
-
-        $hasActiveSuccessor = $serviceRequestAssignment->serviceRequest
-            ->assignments()
-            ->where('id', '!=', $serviceRequestAssignment->id)
-            ->where('status', ServiceRequestAssignmentStatus::Active)
-            ->exists();
-
-        if ($hasActiveSuccessor) {
-            return;
-        }
-
-        $actor = auth()->user();
-
-        $serviceRequestAssignment->serviceRequest->histories()->create([
-            'event_type' => ServiceRequestHistory::EVENT_UNASSIGNED,
-            'original_values' => [
-                'previous_user_id' => $serviceRequestAssignment->user_id,
-                'previous_user_name' => $serviceRequestAssignment->user->name,
-            ],
-            // Cast to object so json_encode writes `{}` rather than `[]` — keeps the stored shape
-            // consistent with field-change rows that use JSON objects.
-            'new_values' => (object) [],
-            'actor_type' => $actor?->getMorphClass(),
-            'actor_id' => $actor?->getKey(),
-        ]);
     }
 
     public function deleted(ServiceRequestAssignment $serviceRequestAssignment): void

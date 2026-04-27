@@ -65,10 +65,6 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
     /** @use HasFactory<ServiceRequestHistoryFactory> */
     use HasFactory;
 
-    public const EVENT_CREATED = 'created';
-
-    public const EVENT_UNASSIGNED = 'unassigned';
-
     protected $casts = [
         'original_values' => 'array',
         'new_values' => 'array',
@@ -77,7 +73,6 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
     protected $fillable = [
         'original_values',
         'new_values',
-        'event_type',
         'actor_type',
         'actor_id',
     ];
@@ -115,7 +110,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
      */
     public function getUpdates(): array
     {
-        if ($this->event_type !== null) {
+        if ($this->isCreatedEvent()) {
             return [];
         }
 
@@ -130,6 +125,15 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
         }
 
         return $updates;
+    }
+
+    /**
+     * A row is treated as the creation event when its `original_values` is empty
+     * (no prior state) and `new_values` carries the snapshot fields.
+     */
+    public function isCreatedEvent(): bool
+    {
+        return empty($this->original_values) && ! empty($this->new_values);
     }
 
     public function transformReadableKey(string $key): string
@@ -152,12 +156,8 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
 
     public function eventTitle(): string
     {
-        if ($this->event_type === self::EVENT_CREATED) {
+        if ($this->isCreatedEvent()) {
             return 'Service Request Created';
-        }
-
-        if ($this->event_type === self::EVENT_UNASSIGNED) {
-            return 'Service Request Unassigned';
         }
 
         $field = $this->changedField();

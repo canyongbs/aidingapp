@@ -55,33 +55,29 @@ trait ServiceRequestHistoryInfolist
                 ->color('primary'),
             TextEntry::make('created_by')
                 ->label('Created By')
-                ->visible(fn (ServiceRequestHistory $record): bool => $record->event_type === ServiceRequestHistory::EVENT_CREATED)
+                ->visible(fn (ServiceRequestHistory $record): bool => $record->isCreatedEvent())
                 ->state(fn (ServiceRequestHistory $record): string => $record->actorName()),
             TextEntry::make('snapshot_status')
                 ->label('Status')
-                ->visible(fn (ServiceRequestHistory $record): bool => $record->event_type === ServiceRequestHistory::EVENT_CREATED)
+                ->visible(fn (ServiceRequestHistory $record): bool => $record->isCreatedEvent())
                 ->state(fn (ServiceRequestHistory $record): ?string => $record->snapshotStatus()?->name),
             TextEntry::make('snapshot_priority')
                 ->label('Priority')
-                ->visible(fn (ServiceRequestHistory $record): bool => $record->event_type === ServiceRequestHistory::EVENT_CREATED)
+                ->visible(fn (ServiceRequestHistory $record): bool => $record->isCreatedEvent())
                 ->state(fn (ServiceRequestHistory $record): ?string => $record->snapshotPriority()?->name),
             TextEntry::make('snapshot_type')
                 ->label('Type')
-                ->visible(fn (ServiceRequestHistory $record): bool => $record->event_type === ServiceRequestHistory::EVENT_CREATED)
+                ->visible(fn (ServiceRequestHistory $record): bool => $record->isCreatedEvent())
                 ->state(fn (ServiceRequestHistory $record): ?string => $record->snapshotType()?->name),
             TextEntry::make('snapshot_title')
                 ->label('Title')
                 ->columnSpanFull()
-                ->visible(fn (ServiceRequestHistory $record): bool => $record->event_type === ServiceRequestHistory::EVENT_CREATED)
+                ->visible(fn (ServiceRequestHistory $record): bool => $record->isCreatedEvent())
                 ->state(fn (ServiceRequestHistory $record): ?string => $record->new_values['title'] ?? null),
-            TextEntry::make('unassigned_from')
-                ->label('Unassigned From')
-                ->visible(fn (ServiceRequestHistory $record): bool => $record->event_type === ServiceRequestHistory::EVENT_UNASSIGNED)
-                ->state(fn (ServiceRequestHistory $record): ?string => $record->original_values['previous_user_name'] ?? null),
             TextEntry::make('getUpdates')
                 ->label('Updates')
                 ->columnSpanFull()
-                ->visible(fn (ServiceRequestHistory $record): bool => $record->event_type === null)
+                ->visible(fn (ServiceRequestHistory $record): bool => ! $record->isCreatedEvent())
                 ->state(function (ServiceRequestHistory $record) {
                     return $record->getUpdates();
                 })

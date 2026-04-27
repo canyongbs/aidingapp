@@ -33,11 +33,11 @@
 --}}
 
 @php
-    use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
-    use App\Filament\Resources\Users\UserResource;
+    use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+    use App\Models\User;
 
     $serviceRequest = $this->recordModel ?? $record->serviceRequest;
-    $serviceRequest->loadMissing(['assignments.user', 'histories']);
+    $serviceRequest->loadMissing('assignments');
 
     $allAssignments = $serviceRequest->assignments;
     $initialAssignment = $allAssignments->sortBy('assigned_at')->first();
@@ -49,17 +49,17 @@
         ->sortByDesc('assigned_at')
         ->first();
 
-    // If an Unassigned event happened between the previous assignment and this one,
-    // the SR was in an unassigned state right before — this is a fresh Assign, not a Reassign.
-    $cameFromUnassigned = $previousAssignment
-        ? $serviceRequest->histories->contains(fn ($history) =>
-            $history->event_type === ServiceRequestHistory::EVENT_UNASSIGNED
-            && $history->created_at >= $previousAssignment->assigned_at
-            && $history->created_at <= $record->assigned_at
-        )
-        : false;
+    // Resolve users via withTrashed so soft-deleted assignees still show up by name (the partial renders
+    // them without a profile link). One query batched across all referenced assignment user_ids.
+    $userIds = collect([$record->user_id, $previousAssignment?->user_id])->filter()->unique();
+    $usersById = $userIds->isEmpty()
+        ? collect()
+        : User::withTrashed()->whereKey($userIds)->get()->keyBy('id');
 
-    $isAssign = $isInitial || ! $previousAssignment?->user || $cameFromUnassigned;
+    $assignedUser = $usersById->get($record->user_id);
+    $previousUser = $previousAssignment ? $usersById->get($previousAssignment->user_id) : null;
+
+    $isAssign = $isInitial || ! $previousUser;
 
     $createdAt = $record->assigned_at ?? $record->created_at;
 @endphp
@@ -67,13 +67,16 @@
 <div>
     <div class="flex flex-row justify-between">
         <h3 class="mb-1 flex items-center text-lg font-semibold text-gray-500 dark:text-gray-100">
-            <span class="ml-2 flex space-x-2">
+            <a
+                class="ml-2 flex space-x-2 font-medium underline"
+                href="{{ ServiceRequestResource::getUrl('view', ['record' => $serviceRequest]) }}"
+            >
                 @if ($isAssign)
                     Service Request Assigned
                 @else
                     Service Request Reassigned
                 @endif
-            </span>
+            </a>
         </h3>
 
         <div>
@@ -88,18 +91,12 @@
     >
         @if ($isAssign)
             Assigned to
-            <a class="primary font-semibold underline" href="{{ UserResource::getUrl('view', ['record' => $record->user]) }}">
-                {{ $record->user->name }}
-            </a>
+            @include('service-management::components.assignment-user', ['user' => $assignedUser])
         @else
             Assigned changed from
-            <a class="primary font-semibold underline" href="{{ UserResource::getUrl('view', ['record' => $previousAssignment->user]) }}">
-                {{ $previousAssignment->user->name }}
-            </a>
+            @include('service-management::components.assignment-user', ['user' => $previousUser])
             to
-            <a class="primary font-semibold underline" href="{{ UserResource::getUrl('view', ['record' => $record->user]) }}">
-                {{ $record->user->name }}
-            </a>
+            @include('service-management::components.assignment-user', ['user' => $assignedUser])
         @endif
     </div>
 </div>

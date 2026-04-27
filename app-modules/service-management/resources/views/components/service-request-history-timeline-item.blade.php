@@ -33,7 +33,7 @@
 --}}
 
 @php
-    use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
+    use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 
     $actorName = $record->actorName();
     $createdAt = $record->created_at;
@@ -42,7 +42,12 @@
 <div>
     <div class="flex flex-row justify-between">
         <h3 class="mb-1 flex items-center text-lg font-semibold text-gray-500 dark:text-gray-100">
-            <span class="ml-2 flex space-x-2">{{ $record->eventTitle() }}</span>
+            <a
+                class="ml-2 flex space-x-2 font-medium underline"
+                href="{{ ServiceRequestResource::getUrl('view', ['record' => $record->serviceRequest]) }}"
+            >
+                {{ $record->eventTitle() }}
+            </a>
         </h3>
 
         <div>
@@ -55,46 +60,35 @@
     <div
         class="my-4 rounded-lg border-2 border-gray-200 p-2 text-base font-normal text-gray-500 dark:border-gray-800 dark:text-gray-400"
     >
-        @switch($record->event_type)
-            @case(ServiceRequestHistory::EVENT_CREATED)
-                <div>Created by <span class="font-semibold">{{ $actorName }}</span></div>
-                @if ($status = $record->snapshotStatus())
-                    <div>Status: <span class="font-semibold">{{ $status->name }}</span></div>
-                @endif
-                @if ($priority = $record->snapshotPriority())
-                    <div>Priority: <span class="font-semibold">{{ $priority->name }}</span></div>
-                @endif
-                @if ($type = $record->snapshotType())
-                    <div>Type: <span class="font-semibold">{{ $type->name }}</span></div>
-                @endif
-                @break
+        @if ($record->isCreatedEvent())
+            <div>Created by <span class="font-semibold">{{ $actorName }}</span></div>
+            @if ($status = $record->snapshotStatus())
+                <div>Status: <span class="font-semibold">{{ $status->name }}</span></div>
+            @endif
+            @if ($priority = $record->snapshotPriority())
+                <div>Priority: <span class="font-semibold">{{ $priority->name }}</span></div>
+            @endif
+            @if ($type = $record->snapshotType())
+                <div>Type: <span class="font-semibold">{{ $type->name }}</span></div>
+            @endif
+        @else
+            @php
+                $field = $record->changedField();
+                $readableKey = $field ? $record->transformReadableKey($field) : null;
+                $old = $readableKey ? ($record->original_values_formatted[$readableKey] ?? 'NULL') : null;
+                $new = $readableKey ? ($record->new_values_formatted[$readableKey] ?? 'NULL') : null;
+            @endphp
 
-            @case(ServiceRequestHistory::EVENT_UNASSIGNED)
-                @php
-                    $previous = $record->original_values['previous_user_name'] ?? 'previous assignee';
-                @endphp
-
-                Unassigned from <span class="font-semibold">{{ $previous }}</span>
-                @break
-
-            @default
-                @php
-                    $field = $record->changedField();
-                    $readableKey = $field ? $record->transformReadableKey($field) : null;
-                    $old = $readableKey ? ($record->original_values_formatted[$readableKey] ?? 'NULL') : null;
-                    $new = $readableKey ? ($record->new_values_formatted[$readableKey] ?? 'NULL') : null;
-                @endphp
-
-                @if ($field)
-                    Changed from
-                    <span class="font-semibold">{{ $old }}</span>
-                    to
-                    <span class="font-semibold">{{ $new }}</span>
-                    by
-                    <span class="font-semibold">{{ $actorName }}</span>
-                @else
-                    Updated by <span class="font-semibold">{{ $actorName }}</span>
-                @endif
-        @endswitch
+            @if ($field)
+                Changed from
+                <span class="font-semibold">{{ $old }}</span>
+                to
+                <span class="font-semibold">{{ $new }}</span>
+                by
+                <span class="font-semibold">{{ $actorName }}</span>
+            @else
+                Updated by <span class="font-semibold">{{ $actorName }}</span>
+            @endif
+        @endif
     </div>
 </div>

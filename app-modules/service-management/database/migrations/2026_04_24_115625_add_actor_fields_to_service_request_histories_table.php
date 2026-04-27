@@ -42,7 +42,6 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('service_request_histories', function (Blueprint $table) {
-            $table->string('event_type')->nullable();
             $table->nullableUuidMorphs('actor');
         });
     }
@@ -51,7 +50,6 @@ return new class () extends Migration {
     {
         Schema::table('service_request_histories', function (Blueprint $table) {
             $table->dropMorphs('actor');
-            $table->dropColumn('event_type');
         });
     }
 };

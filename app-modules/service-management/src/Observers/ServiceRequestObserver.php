@@ -45,7 +45,6 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberUpdateAttemptException;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Notifications\Concerns\FetchServiceRequestTemplate;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
@@ -326,9 +325,9 @@ class ServiceRequestObserver
         $actor = $this->resolveActor();
 
         $serviceRequest->histories()->create([
-            'event_type' => ServiceRequestHistory::EVENT_CREATED,
-            // Cast to object so json_encode writes `{}` rather than `[]` — keeps the stored shape
-            // consistent with field-change rows that use JSON objects.
+            // Empty `original_values` is the discriminator for the Creation event — see
+            // ServiceRequestHistory::isCreatedEvent(). Cast to object so json_encode writes `{}`
+            // (consistent shape with field-change rows that use JSON objects).
             'original_values' => (object) [],
             'new_values' => [
                 'status_id' => $serviceRequest->status_id,
