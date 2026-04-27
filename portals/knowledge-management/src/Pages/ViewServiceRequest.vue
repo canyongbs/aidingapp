@@ -120,7 +120,7 @@
             }
             setPagination(response.data.serviceRequestUpdates);
         });
-    } 
+    }
     async function submitUpdate() {
         try {
             disableSubmitBtn.value = true;
@@ -195,7 +195,10 @@
         <template #rawContent>
             <!-- Error notices -->
             <template v-if="authorizationError || validationErrors.serviceRequestId">
-                <div v-if="authorizationError" class="rounded-[var(--rounding-md)] bg-red-50 px-4 py-3 text-sm text-red-700">
+                <div
+                    v-if="authorizationError"
+                    class="rounded-[var(--rounding-md)] bg-red-50 px-4 py-3 text-sm text-red-700"
+                >
                     {{ authorizationError }}
                 </div>
                 <div

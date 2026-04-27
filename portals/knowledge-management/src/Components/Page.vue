@@ -66,7 +66,10 @@
                 <slot name="breadcrumbs" />
             </div>
 
-            <div v-if="$slots.default" class="ring-1 ring-black/5 shadow-xs xl:-mx-6 px-6 py-4 flex flex-col gap-y-6 xl:rounded bg-white">
+            <div
+                v-if="$slots.default"
+                class="ring-1 ring-black/5 shadow-xs xl:-mx-6 px-6 py-4 flex flex-col gap-y-6 xl:rounded bg-white"
+            >
                 <slot />
             </div>
 
