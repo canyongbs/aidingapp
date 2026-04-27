@@ -53,8 +53,6 @@ class AssetsTable extends BaseWidget
 
     protected static ?string $heading = 'Assets';
 
-    protected static bool $isLazy = false;
-
     protected static ?string $pollingInterval = null;
 
     protected int | string | array $columnSpan = [

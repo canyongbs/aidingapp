@@ -88,6 +88,7 @@ class ManageFiles extends ManageRelatedRecords
                 SpatieMediaLibraryFileUpload::make('file')
                     ->visibility('private')
                     ->label('File')
+                    ->placeholder('Drag & Drop your file or Browse')
                     ->disk('s3')
                     ->collection('file')
                     ->required()

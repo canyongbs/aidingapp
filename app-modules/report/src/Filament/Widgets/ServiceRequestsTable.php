@@ -60,8 +60,6 @@ class ServiceRequestsTable extends BaseWidget
 
     protected static ?string $heading = 'Service Requests';
 
-    protected static bool $isLazy = false;
-
     protected static ?string $pollingInterval = null;
 
     protected int | string | array $columnSpan = [
