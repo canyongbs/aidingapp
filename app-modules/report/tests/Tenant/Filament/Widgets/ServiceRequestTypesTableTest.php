@@ -136,7 +136,7 @@ it('returns all service request types when no date filters are applied', functio
         ]));
 });
 
-it('shows correct incident and request counts per type', function () {
+it('shows correct advisory and request counts per type', function () {
     $type = ServiceRequestType::factory()->create(['name' => 'Access Issues']);
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
 
@@ -147,7 +147,7 @@ it('shows correct incident and request counts per type', function () {
     ServiceRequest::factory()->count(3)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'category' => ServiceRequestCategory::Incident,
+        'category' => ServiceRequestCategory::Advisory,
     ])->create();
 
     ServiceRequest::factory()->count(5)->state([
@@ -157,15 +157,15 @@ it('shows correct incident and request counts per type', function () {
     ])->create();
 
     livewire(ServiceRequestTypesTable::class, [
-        'cacheTag' => 'test-service-request-types-incident-request-counts',
+        'cacheTag' => 'test-service-request-types-advisory-request-counts',
         'pageFilters' => [],
     ])
         ->assertTableColumnFormattedStateSet('service_requests_count', '8', record: $type)
-        ->assertTableColumnFormattedStateSet('incident_count', '3', record: $type)
+        ->assertTableColumnFormattedStateSet('advisory_count', '3', record: $type)
         ->assertTableColumnFormattedStateSet('request_count', '5', record: $type);
 });
 
-it('applies date filters consistently to total, incident, and request counts', function () {
+it('applies date filters consistently to total, advisory, and request counts', function () {
     $startDate = now()->subDays(10);
     $endDate = now()->subDays(5);
 
@@ -179,7 +179,7 @@ it('applies date filters consistently to total, incident, and request counts', f
     ServiceRequest::factory()->count(2)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'category' => ServiceRequestCategory::Incident,
+        'category' => ServiceRequestCategory::Advisory,
         'created_at' => now()->subDays(7),
     ])->create();
 
@@ -193,7 +193,7 @@ it('applies date filters consistently to total, incident, and request counts', f
     ServiceRequest::factory()->count(4)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'category' => ServiceRequestCategory::Incident,
+        'category' => ServiceRequestCategory::Advisory,
         'created_at' => now()->subDays(20),
     ])->create();
 
@@ -212,6 +212,6 @@ it('applies date filters consistently to total, incident, and request counts', f
         ],
     ])
         ->assertTableColumnFormattedStateSet('service_requests_count', '5', record: $type)
-        ->assertTableColumnFormattedStateSet('incident_count', '2', record: $type)
+        ->assertTableColumnFormattedStateSet('advisory_count', '2', record: $type)
         ->assertTableColumnFormattedStateSet('request_count', '3', record: $type);
 });

@@ -146,7 +146,7 @@ test('type afterStateUpdated sets category from default_category', function () {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create([
-        'default_category' => ServiceRequestCategory::Incident,
+        'default_category' => ServiceRequestCategory::Advisory,
     ]);
 
     livewire(CreateServiceRequest::class)
@@ -154,7 +154,7 @@ test('type afterStateUpdated sets category from default_category', function () {
             'type_id' => $serviceRequestType->getKey(),
         ])
         ->assertFormSet([
-            'category' => ServiceRequestCategory::Incident,
+            'category' => ServiceRequestCategory::Advisory,
         ]);
 });
 

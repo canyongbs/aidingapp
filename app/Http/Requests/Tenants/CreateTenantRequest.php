@@ -36,6 +36,7 @@
 
 namespace App\Http\Requests\Tenants;
 
+use App\Features\IncidentRenameFeature;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateTenantRequest extends FormRequest
@@ -45,7 +46,7 @@ class CreateTenantRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'domain' => ['required', 'string', 'max:255', 'unique:landlord.tenants,domain', 'regex:/^((?:[a-zA-Z0-9-]*?\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,})$/i'],
             'database' => ['required', 'string', 'max:255'],
             'limits' => ['required', 'array'],
@@ -63,7 +64,22 @@ class CreateTenantRequest extends FormRequest
             'addons.contractManagement' => ['required', 'boolean'],
             'addons.licenseManagement' => ['required', 'boolean'],
             'addons.projectManagement' => ['required', 'boolean'],
-            'addons.incidentManagement' => ['required', 'boolean'],
         ];
+
+        //TODO: IncidentRenameFeature cleanup - remove this entire conditional and move the 'advisoryManagement' rule to the main $rules array.
+
+        if (IncidentRenameFeature::active()) {
+            $rules = [
+                ...$rules,
+                'addons.advisoryManagement' => ['required', 'boolean'],
+            ];
+        } else {
+            $rules = [
+                ...$rules,
+                'addons.incidentManagement' => ['required', 'boolean'],
+            ];
+        }
+
+        return $rules;
     }
 }
