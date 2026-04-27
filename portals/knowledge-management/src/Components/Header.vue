@@ -33,10 +33,10 @@
 -->
 <script setup>
     import { ArrowRightEndOnRectangleIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/vue/24/outline';
+    import { storeToRefs } from 'pinia';
     import Menubar from 'primevue/menubar';
     import { computed, defineProps, ref } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
-    import { storeToRefs } from 'pinia';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';

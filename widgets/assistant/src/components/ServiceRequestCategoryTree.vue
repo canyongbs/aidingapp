@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -55,9 +55,7 @@
             @click="$emit('select-type', type)"
             :class="[
                 'w-full flex items-center gap-2.5 text-left px-2.5 py-2.5 rounded-lg transition-all group',
-                selectedTypeId === type.id
-                    ? 'bg-brand-50 ring-1 ring-brand-200 relative z-10'
-                    : 'hover:bg-gray-50',
+                selectedTypeId === type.id ? 'bg-brand-50 ring-1 ring-brand-200 relative z-10' : 'hover:bg-gray-50',
             ]"
         >
             <!-- Checkbox indicator -->
@@ -69,12 +67,7 @@
                         : 'border-gray-300 bg-white group-hover:border-gray-400',
                 ]"
             >
-                <svg
-                    v-if="selectedTypeId === type.id"
-                    viewBox="0 0 12 12"
-                    class="w-2.5 h-2.5 text-white"
-                    fill="none"
-                >
+                <svg v-if="selectedTypeId === type.id" viewBox="0 0 12 12" class="w-2.5 h-2.5 text-white" fill="none">
                     <path
                         d="M2 6l3 3 5-5"
                         stroke="currentColor"

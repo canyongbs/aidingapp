@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -106,7 +106,8 @@
                 Enter your email to receive a sign-in code.
             </p>
             <p v-else class="mt-1 text-sm text-gray-500">
-                Enter the 6-digit code sent to <span class="font-medium text-gray-700">{{ email }}</span>.
+                Enter the 6-digit code sent to <span class="font-medium text-gray-700">{{ email }}</span
+                >.
             </p>
         </div>
 
@@ -164,7 +165,10 @@
 
             <button
                 type="button"
-                @click="step = 'email'; errorMessage = null"
+                @click="
+                    step = 'email';
+                    errorMessage = null;
+                "
                 class="text-sm text-gray-500 hover:text-gray-700 transition-colors"
             >
                 Use a different email

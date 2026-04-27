@@ -1,4 +1,4 @@
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,18 +30,40 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-import { genesisIcons } from '@formkit/icons';
-import { generateClasses } from '@formkit/themes';
-import inputs from './FormKit/Inputs/index.js';
-import theme from './FormKit/theme.js';
+-->
+<script setup>
+    import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
 
-export default {
-    icons: {
-        ...genesisIcons,
-    },
-    inputs,
-    config: {
-        classes: generateClasses(theme),
-    },
-};
+    defineProps({
+        title: { type: String, required: true },
+    });
+
+    defineEmits(['back']);
+</script>
+
+<template>
+    <div class="flex-1 flex flex-col items-center justify-center px-8 py-10 text-center gap-5">
+        <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
+            <svg class="w-8 h-8 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <h3 class="text-lg font-semibold text-gray-900">Request Submitted</h3>
+            <p class="text-sm text-gray-500 leading-relaxed">
+                Your service request
+                <span class="font-medium text-gray-700">"{{ title }}"</span>
+                has been received. Our team will get back to you soon.
+            </p>
+        </div>
+
+        <button
+            @click="$emit('back')"
+            class="mt-2 flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium transition-all shadow-sm"
+        >
+            <ArrowLeftIcon class="w-4 h-4" />
+            Back to Assistant Chat
+        </button>
+    </div>
+</template>

@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -53,13 +53,13 @@
             <button
                 v-if="currentView !== 'chat'"
                 @click="$emit('back')"
-                class="shrink-0 text-white/80 hover:text-white hover:bg-white/10 transition-all rounded-lg p-1.5 -ml-1"
+                class="shrink-0 text-white/80 hover:text-white hover:bg-white/10 transition-all rounded-lg p-2.5"
                 aria-label="Go back"
             >
                 <ArrowLeftIcon class="w-5 h-5" />
             </button>
 
-            <div v-else class="shrink-0 bg-white/20 p-2 rounded-lg">
+            <div v-else class="shrink-0 bg-white/20 p-2.5 rounded-lg">
                 <ChatBubbleLeftRightIcon class="w-5 h-5" />
             </div>
 
