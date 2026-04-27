@@ -72,7 +72,10 @@ class AdvisoryUpdateResource extends Resource
     //TODO: IncidentRenameFeature clean up - remove entire canAccess when you remove the feature flag.
     public static function canAccess(): bool
     {
-        return IncidentRenameFeature::active() && Gate::check(Feature::AdvisoryManagement->getGateName()) && auth()->user()->can('advisory_update.view-any');
+        return IncidentRenameFeature::active()
+            && Gate::check(Feature::ServiceManagement->getGateName())
+            && Gate::check(Feature::AdvisoryManagement->getGateName())
+            && auth()->user()->can('advisory_update.view-any');
     }
 
     public static function form(Schema $schema): Schema
