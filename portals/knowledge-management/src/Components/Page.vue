@@ -73,7 +73,7 @@
                 <slot />
             </div>
 
-            <div v-if="$slots.rawContent" class="flex flex-col gap-y-4">
+            <div v-if="$slots.rawContent" class="px-6 xl:px-0 flex flex-col gap-y-4">
                 <slot name="rawContent" />
             </div>
         </div>

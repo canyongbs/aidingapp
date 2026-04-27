@@ -293,7 +293,7 @@
                         <div>{{ serviceRequestUpdate.created_at.split(' ')[0] }}</div>
                         <div>{{ serviceRequestUpdate.created_at.split(' ').slice(1).join(' ') }}</div>
                     </div>
-                    <div class="flex-1 px-5 py-4 text-sm text-gray-700">
+                    <div class="flex-1 whitespace-pre-line px-5 py-4 text-sm text-gray-700">
                         {{ serviceRequestUpdate.update }}
                     </div>
                 </div>
