@@ -63,7 +63,7 @@ enum Feature: string
 
     case ProjectManagement = 'project-management';
 
-    case IncidentManagement = 'incident-management';
+    case AdvisoryManagement = 'advisory-management';
 
     public function generateGate(): void
     {

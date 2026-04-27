@@ -181,7 +181,7 @@ abstract class TestCase extends BaseTestCase
                     contractManagement: true,
                     licenseManagement: true,
                     projectManagement: true,
-                    incidentManagement: true,
+                    advisoryManagement: true,
                 )
             ),
             seedTenantDatabase: false,
@@ -240,7 +240,7 @@ abstract class TestCase extends BaseTestCase
                         contractManagement: true,
                         licenseManagement: true,
                         projectManagement: true,
-                        incidentManagement: true,
+                        advisoryManagement: true,
                     )
                 )
             ));
