@@ -42,7 +42,10 @@
     import BaseBadge from '../Components/ui/BaseBadge.vue';
     import BaseButton from '../Components/ui/BaseButton.vue';
     import BaseDetailSection from '../Components/ui/BaseDetailSection.vue';
+    import BaseInputError from '../Components/ui/BaseInputError.vue';
+    import BaseList from '../Components/ui/BaseList.vue';
     import BaseTable from '../Components/ui/BaseTable.vue';
+    import BaseTextarea from '../Components/ui/BaseTextarea.vue';
     import BaseTableBody from '../Components/ui/BaseTableBody.vue';
     import BaseTableCell from '../Components/ui/BaseTableCell.vue';
     import BaseTableHeader from '../Components/ui/BaseTableHeader.vue';
@@ -254,16 +257,13 @@
             <!-- New update form -->
             <BaseDetailSection label="New Service Request Update">
                 <form @submit.prevent="submitUpdate">
-                    <textarea
+                    <BaseTextarea
                         v-model="updateMessage"
-                        rows="5"
-                        class="w-full resize-y rounded-[var(--rounding-md)] border border-gray-300 p-3 text-sm focus:border-[rgb(var(--primary-500))] focus:outline-hidden focus:ring-2 focus:ring-[rgb(var(--primary-500))]"
+                        :rows="5"
                         placeholder="Enter your update here..."
                         required
-                    ></textarea>
-                    <div v-if="validationErrors.description" class="mt-1 text-sm text-red-500">
-                        <p v-for="error in validationErrors.description" :key="error">{{ error }}</p>
-                    </div>
+                    />
+                    <BaseInputError :errors="validationErrors.description ?? []" />
                     <div class="mt-3">
                         <BaseButton type="submit" variant="primary" size="md" :loading="disableSubmitBtn">
                             Submit Update
@@ -273,45 +273,41 @@
             </BaseDetailSection>
 
             <!-- Updates list -->
-            <div class="overflow-hidden rounded-[var(--rounding-lg)] border border-gray-200 bg-white shadow-xs">
-                <div class="border-b border-gray-100 px-5 py-3">
-                    <p class="text-xs font-semibold text-gray-500">Service Request Updates</p>
-                </div>
-
-                <div v-if="serviceRequestUpdates.length === 0" class="px-5 py-8 text-center text-sm text-gray-400">
-                    No updates yet.
-                </div>
-
-                <div v-else class="divide-y divide-gray-100">
-                    <div
-                        v-for="serviceRequestUpdate in serviceRequestUpdates"
-                        :key="serviceRequestUpdate.id"
-                        :class="[
-                            'flex',
-                            serviceRequestUpdate.created_by_type === 'contact' ? 'bg-white' : 'bg-gray-50',
-                        ]"
-                    >
-                        <div class="w-28 shrink-0 border-r border-gray-100 px-5 py-4 text-xs leading-relaxed text-gray-400">
-                            <div>{{ serviceRequestUpdate.created_at.split(' ')[0] }}</div>
-                            <div>{{ serviceRequestUpdate.created_at.split(' ').slice(1).join(' ') }}</div>
-                        </div>
-                        <div class="flex-1 px-5 py-4 text-sm text-gray-700">
-                            {{ serviceRequestUpdate.update }}
-                        </div>
+            <BaseList
+                label="Service Request Updates"
+                empty="No updates yet."
+                :isEmpty="serviceRequestUpdates.length === 0"
+            >
+                <div
+                    v-for="serviceRequestUpdate in serviceRequestUpdates"
+                    :key="serviceRequestUpdate.id"
+                    :class="[
+                        'flex',
+                        serviceRequestUpdate.created_by_type === 'contact' ? 'bg-white' : 'bg-gray-50',
+                    ]"
+                >
+                    <div class="w-28 shrink-0 border-r border-gray-100 px-5 py-4 text-xs leading-relaxed text-gray-400">
+                        <div>{{ serviceRequestUpdate.created_at.split(' ')[0] }}</div>
+                        <div>{{ serviceRequestUpdate.created_at.split(' ').slice(1).join(' ') }}</div>
+                    </div>
+                    <div class="flex-1 px-5 py-4 text-sm text-gray-700">
+                        {{ serviceRequestUpdate.update }}
                     </div>
                 </div>
 
-                <Pagination
-                    :currentPage="currentPage"
-                    :lastPage="lastPage"
-                    :fromArticle="fromRecord"
-                    :toArticle="toRecord"
-                    :totalArticles="totalRecords"
-                    @fetchNextPage="fetchNextPage"
-                    @fetchPreviousPage="fetchPreviousPage"
-                    @fetchPage="fetchPage"
-                />
-            </div>
+                <template #footer>
+                    <Pagination
+                        :currentPage="currentPage"
+                        :lastPage="lastPage"
+                        :fromArticle="fromRecord"
+                        :toArticle="toRecord"
+                        :totalArticles="totalRecords"
+                        @fetchNextPage="fetchNextPage"
+                        @fetchPreviousPage="fetchPreviousPage"
+                        @fetchPage="fetchPage"
+                    />
+                </template>
+            </BaseList>
         </template>
     </Page>
 </template>
