@@ -41,9 +41,11 @@ use AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\Pages\EditAd
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\Pages\ListAdvisoryStatuses;
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\Pages\ViewAdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
+use App\Enums\Feature;
 use App\Features\IncidentRenameFeature;
 use App\Filament\Clusters\Advisory;
 use Filament\Resources\Resource;
+use Illuminate\Support\Facades\Gate;
 
 class AdvisoryStatusResource extends Resource
 {
@@ -72,6 +74,6 @@ class AdvisoryStatusResource extends Resource
     //TODO: IncidentRenameFeature clean up - remove entire canAccess when you remove the feature flag.
     public static function canAccess(): bool
     {
-        return IncidentRenameFeature::active() && auth()->user()->can('settings.view-any');
+        return IncidentRenameFeature::active() && Gate::check(Feature::AdvisoryManagement->getGateName()) && auth()->user()->can('settings.view-any');
     }
 }

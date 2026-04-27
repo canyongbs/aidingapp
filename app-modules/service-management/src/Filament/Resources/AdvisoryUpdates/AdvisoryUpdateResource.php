@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\Pages\ListAdv
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\Pages\ViewAdvisoryUpdate;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
+use App\Enums\Feature;
 use App\Features\IncidentRenameFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use BackedEnum;
@@ -58,6 +59,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Gate;
 
 class AdvisoryUpdateResource extends Resource
 {
@@ -70,7 +72,7 @@ class AdvisoryUpdateResource extends Resource
     //TODO: IncidentRenameFeature clean up - remove entire canAccess when you remove the feature flag.
     public static function canAccess(): bool
     {
-        return IncidentRenameFeature::active() && auth()->user()->can('settings.view-any');
+        return IncidentRenameFeature::active() && Gate::check(Feature::AdvisoryManagement->getGateName()) && auth()->user()->can('settings.view-any');
     }
 
     public static function form(Schema $schema): Schema
