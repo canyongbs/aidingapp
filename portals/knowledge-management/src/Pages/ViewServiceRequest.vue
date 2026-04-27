@@ -45,12 +45,12 @@
     import BaseInputError from '../Components/ui/BaseInputError.vue';
     import BaseList from '../Components/ui/BaseList.vue';
     import BaseTable from '../Components/ui/BaseTable.vue';
-    import BaseTextarea from '../Components/ui/BaseTextarea.vue';
     import BaseTableBody from '../Components/ui/BaseTableBody.vue';
     import BaseTableCell from '../Components/ui/BaseTableCell.vue';
     import BaseTableHeader from '../Components/ui/BaseTableHeader.vue';
     import BaseTableHeaderCell from '../Components/ui/BaseTableHeaderCell.vue';
     import BaseTableRow from '../Components/ui/BaseTableRow.vue';
+    import BaseTextarea from '../Components/ui/BaseTextarea.vue';
     import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();
@@ -260,12 +260,7 @@
             <!-- New update form -->
             <BaseDetailSection label="New Service Request Update">
                 <form @submit.prevent="submitUpdate">
-                    <BaseTextarea
-                        v-model="updateMessage"
-                        :rows="5"
-                        placeholder="Enter your update here..."
-                        required
-                    />
+                    <BaseTextarea v-model="updateMessage" :rows="5" placeholder="Enter your update here..." required />
                     <BaseInputError :errors="validationErrors.description ?? []" />
                     <div class="mt-3">
                         <BaseButton type="submit" variant="primary" size="md" :loading="disableSubmitBtn">
@@ -284,10 +279,7 @@
                 <div
                     v-for="serviceRequestUpdate in serviceRequestUpdates"
                     :key="serviceRequestUpdate.id"
-                    :class="[
-                        'flex',
-                        serviceRequestUpdate.created_by_type === 'contact' ? 'bg-white' : 'bg-gray-50',
-                    ]"
+                    :class="['flex', serviceRequestUpdate.created_by_type === 'contact' ? 'bg-white' : 'bg-gray-50']"
                 >
                     <div class="w-28 shrink-0 border-r border-gray-100 px-5 py-4 text-xs leading-relaxed text-gray-400">
                         <div>{{ serviceRequestUpdate.created_at.split(' ')[0] }}</div>
