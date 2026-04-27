@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,7 +34,55 @@
 </COPYRIGHT>
 */
 
-return [
-    'emails' => env('DEMO_INTERNAL_USER_EMAILS') ? explode(',', env('DEMO_INTERNAL_USER_EMAILS')) : null,
-    'filter_admins_from_selection' => env('USER_SELECT_FILTER_ADMINS', true),
-];
+namespace App\Filament\Forms\Components;
+
+use App\Models\Scopes\WithoutAnyAdmin;
+use Closure;
+use Filament\Forms\Components\Select;
+use Illuminate\Database\Eloquent\Builder;
+
+class UserSelect extends Select
+{
+    protected bool $filterAdmins = true;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->searchable(['name', 'email']);
+    }
+
+    public function withoutAdminFilter(): static
+    {
+        $this->filterAdmins = false;
+
+        return $this;
+    }
+
+    public function relationship(string|Closure|null $name = null, string|Closure|null $titleAttribute = null, ?Closure $modifyQueryUsing = null, bool $ignoreRecord = false): static
+    {
+        return parent::relationship(
+            $name,
+            $titleAttribute ?? 'name',
+            function (Builder $query) use ($modifyQueryUsing) {
+                if ($this->shouldFilterAdmins()) {
+                    $query->tap(new WithoutAnyAdmin());
+                }
+
+                if ($modifyQueryUsing) {
+                    $modifyQueryUsing($query);
+                }
+            },
+            $ignoreRecord,
+        );
+    }
+
+    protected function shouldFilterAdmins(): bool
+    {
+        if (! $this->filterAdmins) {
+            return false;
+        }
+
+        return config('internal-users.filter_admins_from_selection', true);
+    }
+}
