@@ -324,12 +324,19 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             }
 
             // Create SR Update — do NOT change status (even if closed)
-            $serviceRequest->serviceRequestUpdates()->create([
+            $serviceRequestUpdate = $serviceRequest->serviceRequestUpdates()->create([
                 'update' => $parser->getMessageBody('text') ?: $parser->getMessageBody('html'),
                 'internal' => false,
                 'created_by_id' => $serviceRequest->respondent->getKey(),
                 'created_by_type' => $serviceRequest->respondent->getMorphClass(),
             ]);
+
+            foreach ($parser->getAttachments() as $attachment) {
+                    $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
+                        ->setName($attachment->getFilename())
+                        ->setFileName($attachment->getFilename())
+                        ->toMediaCollection('uploads');
+                }
         });
     }
 

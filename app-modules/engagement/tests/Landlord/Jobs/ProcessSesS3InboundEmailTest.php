@@ -1136,6 +1136,92 @@ describe('Service request reply threading', function () {
         $filesystem->assertMissing('s3_email');
     });
 
+    it('handles attachments properly', function () {
+        $fakeStorage = Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+        $tenant = Tenant::query()->first();
+
+        assert($filesystem instanceof FilesystemAdapter);
+        assert($tenant instanceof Tenant);
+
+        Event::listen(
+            MadeTenantCurrentEvent::class,
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+                Storage::set('s3', $fakeStorage);
+            }
+        );
+
+        [$contact, $serviceRequest] = $tenant->execute(function () {
+            $contact = Contact::factory()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+            ]);
+
+            $serviceRequest = ServiceRequest::factory()->create([
+                'respondent_id' => $contact->getKey(),
+            ]);
+
+            $serviceRequest->outboundEmailMessageIds()->create([
+                'message_id' => "{$serviceRequest->service_request_number}.1.1740000000000",
+            ]);
+
+            return [$contact, $serviceRequest];
+        });
+
+        assert($contact instanceof Contact);
+
+        $messageId = "{$serviceRequest->service_request_number}.1.1740000000000@mail.aiding.app";
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_sr_reply'));
+
+        $content = str_replace(
+            'SR-TEST123456.1.1740000000000@mail.aiding.app',
+            $messageId,
+            $content,
+        );
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        /** @var ProcessSesS3InboundEmail $mock */
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        invade($mock)->emailFilePath = 's3_email';
+
+        $filesystem->assertExists('s3_email');
+
+        $mock->handle();
+
+        $tenant->makeCurrent();
+
+        $tenant->execute(function () use ($contact, $serviceRequest) {
+            assertDatabaseCount(ServiceRequestUpdate::class, 1);
+
+            $serviceRequestUpdate = ServiceRequestUpdate::first();
+
+            assert($serviceRequestUpdate instanceof ServiceRequestUpdate);
+
+            assertDatabaseHas(ServiceRequestUpdate::class, [
+                'service_request_id' => $serviceRequest->getKey(),
+                'internal' => false,
+                'created_by_id' => $contact->getKey(),
+                'created_by_type' => $contact->getMorphClass(),
+            ]);
+
+            expect($serviceRequestUpdate->getMedia('uploads'))->toHaveCount(1);
+        });
+
+        $filesystem->assertMissing('s3_email');
+    });
+
     it('SR reply matches sender case-insensitively against respondent', function () {
         $tenant = Tenant::query()->firstOrFail();
 
