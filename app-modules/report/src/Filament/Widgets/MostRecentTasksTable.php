@@ -50,8 +50,6 @@ class MostRecentTasksTable extends BaseWidget
 
     protected static ?string $heading = 'Most Recent Tasks Added';
 
-    protected static bool $isLazy = false;
-
     protected static ?string $pollingInterval = null;
 
     protected int | string | array $columnSpan = [
