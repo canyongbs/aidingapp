@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Page
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use App\Concerns\EditPageRedirection;
+use App\Filament\Forms\Components\UserSelect;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -73,9 +74,9 @@ class EditChangeRequestType extends EditRecord
                                 '2' => '2',
                             ])
                             ->required(),
-                        Select::make('userApprovers')
+                        UserSelect::make('userApprovers')
                             ->label('User approvers')
-                            ->relationship('userApprovers', 'name')
+                            ->relationship('userApprovers')
                             ->preload()
                             ->multiple()
                             ->exists((new User())->getTable(), 'id'),
