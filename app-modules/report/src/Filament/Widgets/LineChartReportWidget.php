@@ -49,8 +49,6 @@ abstract class LineChartReportWidget extends ChartWidget
 
     protected ?string $maxHeight = '200px';
 
-    protected static bool $isLazy = false;
-
     public function mount(?string $cacheTag = null): void
     {
         parent::mount();
