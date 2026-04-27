@@ -43,13 +43,21 @@
         rounding: { type: String, default: 'md' },
         isAuthenticated: { type: Boolean, default: false },
         portalServiceManagement: { type: Boolean, default: false },
+        authenticateRequestUrl: { type: String, default: null },
+        serviceRequestTypesUrl: { type: String, default: null },
     });
 
     const isOpen = ref(false);
+    const isAuthenticated = ref(props.isAuthenticated);
 
     const toggleChat = () => {
         isOpen.value = !isOpen.value;
     };
+
+    function onAuthenticated(token) {
+        isAuthenticated.value = true;
+        window.dispatchEvent(new CustomEvent('assistant-widget:authenticated', { detail: { token } }));
+    }
 
     window.addEventListener('assistant:close', () => {
         isOpen.value = false;
@@ -128,7 +136,10 @@
             :websockets-config="websocketsConfig"
             :is-authenticated="isAuthenticated"
             :portal-service-management="portalServiceManagement"
+            :authenticate-request-url="authenticateRequestUrl"
+            :service-request-types-url="serviceRequestTypesUrl"
             @close="toggleChat"
+            @authenticated="onAuthenticated"
         />
 
         <ChatToggleButton :is-open="isOpen" @toggle="toggleChat" />

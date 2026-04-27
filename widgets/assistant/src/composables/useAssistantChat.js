@@ -164,11 +164,17 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
         connection.disconnect();
     });
 
+    const setAuthenticated = () => {
+        guestToken.value = null;
+        localStorage.removeItem('assistantGuestToken');
+    };
+
     return {
         messages,
         threadId,
         isSending,
         isAssistantResponding,
         sendMessage,
+        setAuthenticated,
     };
 }

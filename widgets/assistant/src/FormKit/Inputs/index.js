@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -31,27 +31,11 @@
 
 </COPYRIGHT>
 */
-@import 'filepond/dist/filepond.min.css' layer(base);
+import { createInput } from '@formkit/vue';
+import Upload from './Upload.vue';
 
-@import 'tailwindcss';
-
-@config '../tailwind.config.js';
-
-@layer base {
-    *,
-    ::after,
-    ::before,
-    ::backdrop,
-    ::file-selector-button {
-        --tw-border-style: solid;
-        border-color: var(--color-gray-200, currentColor);
-    }
-}
-
-:host {
-    all: initial;
-}
-
-* {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
+export default {
+    upload: createInput(Upload, {
+        props: ['accept', 'limit', 'multiple', 'size', 'uploadUrl'],
+    }),
+};

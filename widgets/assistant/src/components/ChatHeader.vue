@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -32,44 +32,61 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ChatBubbleLeftRightIcon, PlusIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+    import { ArrowLeftIcon, ChatBubbleLeftRightIcon, TicketIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 
-    defineProps({
-        portalServiceManagement: { type: Boolean, default: false },
+    const props = defineProps({
+        serviceRequestEnabled: { type: Boolean, default: false },
+        currentView: { type: String, default: 'chat' },
     });
 
-    defineEmits(['close']);
+    defineEmits(['close', 'open-service-request', 'back']);
 
-    function openServiceRequest() {
-        window.dispatchEvent(new CustomEvent('assistant:open-service-request'));
-    }
+    const viewTitles = {
+        'sign-in': 'Sign In',
+        'service-request': 'Open Service Request',
+    };
 </script>
 
 <template>
-    <div class="bg-brand-500 text-white px-6 py-4 flex items-center justify-between shadow-md shrink-0">
-        <div class="flex items-center gap-3">
-            <div class="bg-white/20 p-2 rounded-lg">
+    <div class="bg-brand-500 text-white px-4 py-3.5 flex items-center justify-between shadow-md shrink-0 gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <button
+                v-if="currentView !== 'chat'"
+                @click="$emit('back')"
+                class="shrink-0 text-white/80 hover:text-white hover:bg-white/10 transition-all rounded-lg p-1.5 -ml-1"
+                aria-label="Go back"
+            >
+                <ArrowLeftIcon class="w-5 h-5" />
+            </button>
+
+            <div v-else class="shrink-0 bg-white/20 p-2 rounded-lg">
                 <ChatBubbleLeftRightIcon class="w-5 h-5" />
             </div>
-            <div class="flex flex-col">
-                <h2 class="text-lg font-semibold tracking-tight">Support Assistant</h2>
-                <div v-if="portalServiceManagement" class="mt-1">
-                    <button
-                        @click="openServiceRequest"
-                        class="flex items-center gap-1.5 px-3 py-1.5 font-medium text-xs rounded-lg bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-sm transition-all shadow-xs"
-                    >
-                        <PlusIcon class="w-3.5 h-3.5" />
-                        Open Service Request
-                    </button>
-                </div>
+
+            <div class="flex flex-col min-w-0 gap-1">
+                <h2 class="text-sm font-semibold tracking-tight truncate leading-tight">
+                    {{ currentView === 'chat' ? 'Support Assistant' : viewTitles[currentView] }}
+                </h2>
+
+                <button
+                    v-if="currentView === 'chat' && serviceRequestEnabled"
+                    @click="$emit('open-service-request')"
+                    class="self-start flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/15 hover:bg-white/25 text-white/90 hover:text-white text-xs font-medium transition-all leading-none border border-white/20"
+                >
+                    <TicketIcon class="w-3 h-3 shrink-0" />
+                    Open Service Request
+                </button>
             </div>
         </div>
-        <button
-            @click="$emit('close')"
-            class="text-white/90 hover:text-white hover:bg-white/10 transition-all rounded-lg p-1.5"
-            aria-label="Close chat"
-        >
-            <XMarkIcon class="w-5 h-5" />
-        </button>
+
+        <div class="flex items-center gap-2 shrink-0">
+            <button
+                @click="$emit('close')"
+                class="text-white/90 hover:text-white hover:bg-white/10 transition-all rounded-lg p-1.5"
+                aria-label="Close chat"
+            >
+                <XMarkIcon class="w-5 h-5" />
+            </button>
+        </div>
     </div>
 </template>

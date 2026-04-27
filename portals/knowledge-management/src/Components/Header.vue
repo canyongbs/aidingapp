@@ -36,6 +36,7 @@
     import Menubar from 'primevue/menubar';
     import { computed, defineProps, ref } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
+    import { storeToRefs } from 'pinia';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
@@ -46,8 +47,8 @@
 
     const route = useRoute();
     const router = useRouter();
-    const { user, requiresAuthentication } = useAuthStore();
-    const { hasServiceManagement, hasAssets, hasLicense, hasTasks } = useFeatureStore();
+    const { user, requiresAuthentication } = storeToRefs(useAuthStore());
+    const { hasServiceManagement, hasAssets, hasLicense, hasTasks } = storeToRefs(useFeatureStore());
 
     const { removeToken } = useTokenStore();
 

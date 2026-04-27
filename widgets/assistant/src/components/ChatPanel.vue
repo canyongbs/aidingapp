@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -32,10 +32,13 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { ref } from 'vue';
     import { useAssistantChat } from '../composables/useAssistantChat.js';
     import ChatHeader from './ChatHeader.vue';
     import ChatInput from './ChatInput.vue';
     import ChatMessages from './ChatMessages.vue';
+    import ChatSignIn from './ChatSignIn.vue';
+    import ServiceRequestView from './ServiceRequestView.vue';
 
     const props = defineProps({
         isOpen: { type: Boolean, default: false },
@@ -43,15 +46,42 @@
         websocketsConfig: { type: Object, required: true },
         isAuthenticated: { type: Boolean, default: false },
         portalServiceManagement: { type: Boolean, default: false },
+        authenticateRequestUrl: { type: String, default: null },
+        serviceRequestTypesUrl: { type: String, default: null },
     });
 
-    const emit = defineEmits(['close']);
+    const emit = defineEmits(['close', 'authenticated']);
 
-    const { messages, isSending, isAssistantResponding, sendMessage } = useAssistantChat(
+    // 'chat' | 'sign-in' | 'service-request'
+    const currentView = ref('chat');
+    const pendingView = ref(null);
+
+    const { messages, isSending, isAssistantResponding, sendMessage, setAuthenticated } = useAssistantChat(
         props.sendMessageUrl,
         props.websocketsConfig,
         props.isAuthenticated,
     );
+
+    function onOpenServiceRequest() {
+        if (props.isAuthenticated) {
+            currentView.value = 'service-request';
+        } else {
+            pendingView.value = 'service-request';
+            currentView.value = 'sign-in';
+        }
+    }
+
+    function onBack() {
+        currentView.value = 'chat';
+        pendingView.value = null;
+    }
+
+    function onAuthenticated(token) {
+        setAuthenticated();
+        emit('authenticated', token);
+        currentView.value = pendingView.value ?? 'chat';
+        pendingView.value = null;
+    }
 
     const welcomeMessage =
         'Hi there, I am your support assistant. I can help you find information and troubleshoot issues. How can I assist you today?';
@@ -70,11 +100,32 @@
             v-if="props.isOpen"
             class="mb-4 w-[400px] max-w-full h-[650px] max-h-full bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden ring-1 ring-brand-950/5 backdrop-blur-sm origin-bottom-right"
         >
-            <ChatHeader :portal-service-management="portalServiceManagement" @close="emit('close')" />
+            <ChatHeader
+                :service-request-enabled="!!serviceRequestTypesUrl"
+                :current-view="currentView"
+                @close="emit('close')"
+                @open-service-request="onOpenServiceRequest"
+                @back="onBack"
+            />
 
-            <ChatMessages :messages="messages" :welcome-message="welcomeMessage" :is-open="props.isOpen" />
+            <ChatSignIn
+                v-if="currentView === 'sign-in'"
+                :authenticate-request-url="authenticateRequestUrl"
+                @authenticated="onAuthenticated"
+                @cancel="onBack"
+            />
 
-            <ChatInput :disabled="isSending || isAssistantResponding" @send="sendMessage" />
+            <ServiceRequestView
+                v-else-if="currentView === 'service-request'"
+                :service-request-types-url="serviceRequestTypesUrl"
+                @back="onBack"
+            />
+
+            <template v-else>
+                <ChatMessages :messages="messages" :welcome-message="welcomeMessage" :is-open="props.isOpen" />
+
+                <ChatInput :disabled="isSending || isAssistantResponding" @send="sendMessage" />
+            </template>
         </div>
     </Transition>
 </template>
