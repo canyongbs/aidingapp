@@ -52,7 +52,6 @@ beforeEach(function () {
     $settings->save();
 });
 
-
 test('The correct details are displayed on the ViewServiceMonitoring page', function () {
     $user = User::factory()->create();
 
