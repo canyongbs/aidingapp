@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ref } from 'vue';
+    import { ref, watch } from 'vue';
     import { useAssistantChat } from '../composables/useAssistantChat.js';
     import ChatHeader from './ChatHeader.vue';
     import ChatInput from './ChatInput.vue';
@@ -85,6 +85,16 @@
 
     const welcomeMessage =
         'Hi there, I am your support assistant. I can help you find information and troubleshoot issues. How can I assist you today?';
+
+    watch(
+        () => props.isAuthenticated,
+        (isAuth) => {
+            if (!isAuth) {
+                currentView.value = 'sign-in';
+                pendingView.value = null;
+            }
+        },
+    );
 </script>
 
 <template>

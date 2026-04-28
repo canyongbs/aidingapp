@@ -33,6 +33,7 @@
 */
 import axios from 'axios';
 import { computed, ref } from 'vue';
+import { clearToken, getAuthHeaders } from '../utils/token.js';
 
 /**
  * @param {string} storeUrlBase  - URL template with `__TYPE__` placeholder
@@ -54,7 +55,6 @@ export function useServiceRequestSubmit(storeUrlBase, typeId, priorityId) {
         isSubmitting.value = true;
         submitError.value = null;
 
-        const token = localStorage.getItem('token');
         const storeUrl = storeUrlBase.replace('__TYPE__', typeId);
 
         try {
@@ -69,12 +69,16 @@ export function useServiceRequestSubmit(storeUrlBase, typeId, priorityId) {
                         original_file_name: a.originalFileName,
                     })),
                 },
-                { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+                { headers: getAuthHeaders() },
             );
 
             onSuccess?.();
         } catch (error) {
-            submitError.value = error.response?.data?.errors?.[0] ?? 'Something went wrong. Please try again.';
+            if (!error.response || error.response.status === 401) {
+                clearToken();
+            } else {
+                submitError.value = error.response?.data?.errors?.[0] ?? 'Something went wrong. Please try again.';
+            }
         } finally {
             isSubmitting.value = false;
         }

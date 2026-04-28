@@ -35,6 +35,7 @@
     import { createMessage } from '@formkit/core';
     import axios from 'axios';
     import { computed, nextTick, ref } from 'vue';
+    import { clearToken, getAuthHeaders } from '../../utils/token.js';
 
     import vueFilePond from 'vue-filepond';
 
@@ -66,11 +67,10 @@
             }
             const index = fileIndexCounter.value++;
             try {
-                const token = localStorage.getItem('token');
                 const data = await axios
                     .get(props.context.uploadUrl, {
                         params: { filename: file.name },
-                        headers: token ? { Authorization: `Bearer ${token}` } : {},
+                        headers: getAuthHeaders(),
                     })
                     .then(async (response) => {
                         const { url, path } = response.data;
@@ -91,7 +91,10 @@
                                 return null;
                             });
                     })
-                    .catch(() => {
+                    .catch((err) => {
+                        if (!err.response || err.response.status === 401) {
+                            clearToken();
+                        }
                         return null;
                     })
                     .finally(() => {

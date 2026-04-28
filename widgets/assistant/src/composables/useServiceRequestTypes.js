@@ -33,6 +33,7 @@
 */
 import axios from 'axios';
 import { computed, onMounted, ref, watch } from 'vue';
+import { clearToken, getAuthHeaders } from '../utils/token.js';
 
 export function useServiceRequestTypes(serviceRequestTypesUrl) {
     const isLoading = ref(true);
@@ -45,13 +46,12 @@ export function useServiceRequestTypes(serviceRequestTypesUrl) {
 
     onMounted(async () => {
         try {
-            const token = localStorage.getItem('token');
             const { data } = await axios.get(serviceRequestTypesUrl, {
-                headers: token ? { Authorization: `Bearer ${token}` } : {},
+                headers: getAuthHeaders(),
             });
             rawData.value = data;
         } catch {
-            loadError.value = true;
+            clearToken();
         } finally {
             isLoading.value = false;
         }
