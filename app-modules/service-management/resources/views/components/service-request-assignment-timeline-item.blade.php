@@ -51,10 +51,15 @@
 
     // Resolve users via withTrashed so soft-deleted assignees still show up by name (the partial renders
     // them without a profile link). One query batched across all referenced assignment user_ids.
-    $userIds = collect([$record->user_id, $previousAssignment?->user_id])->filter()->unique();
+    $userIds = collect([$record->user_id, $previousAssignment?->user_id])
+        ->filter()
+        ->unique();
     $usersById = $userIds->isEmpty()
         ? collect()
-        : User::withTrashed()->whereKey($userIds)->get()->keyBy('id');
+        : User::withTrashed()
+            ->whereKey($userIds)
+            ->get()
+            ->keyBy('id');
 
     $assignedUser = $usersById->get($record->user_id);
     $previousUser = $previousAssignment ? $usersById->get($previousAssignment->user_id) : null;

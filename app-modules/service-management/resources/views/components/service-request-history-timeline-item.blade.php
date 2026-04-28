@@ -61,22 +61,36 @@
         class="my-4 rounded-lg border-2 border-gray-200 p-2 text-base font-normal text-gray-500 dark:border-gray-800 dark:text-gray-400"
     >
         @if ($record->isCreatedEvent())
-            <div>Created by <span class="font-semibold">{{ $actorName }}</span></div>
+            <div>
+                Created by
+                <span class="font-semibold">{{ $actorName }}</span>
+            </div>
             @if ($status = $record->snapshotStatus())
-                <div>Status: <span class="font-semibold">{{ $status->name }}</span></div>
+                <div>
+                    Status:
+                    <span class="font-semibold">{{ $status->name }}</span>
+                </div>
             @endif
+
             @if ($priority = $record->snapshotPriority())
-                <div>Priority: <span class="font-semibold">{{ $priority->name }}</span></div>
+                <div>
+                    Priority:
+                    <span class="font-semibold">{{ $priority->name }}</span>
+                </div>
             @endif
+
             @if ($type = $record->snapshotType())
-                <div>Type: <span class="font-semibold">{{ $type->name }}</span></div>
+                <div>
+                    Type:
+                    <span class="font-semibold">{{ $type->name }}</span>
+                </div>
             @endif
         @else
             @php
                 $field = $record->changedField();
                 $readableKey = $field ? $record->transformReadableKey($field) : null;
-                $old = $readableKey ? ($record->original_values_formatted[$readableKey] ?? 'NULL') : null;
-                $new = $readableKey ? ($record->new_values_formatted[$readableKey] ?? 'NULL') : null;
+                $old = $readableKey ? $record->original_values_formatted[$readableKey] ?? 'NULL' : null;
+                $new = $readableKey ? $record->new_values_formatted[$readableKey] ?? 'NULL' : null;
             @endphp
 
             @if ($field)
@@ -87,7 +101,8 @@
                 by
                 <span class="font-semibold">{{ $actorName }}</span>
             @else
-                Updated by <span class="font-semibold">{{ $actorName }}</span>
+                Updated by
+                <span class="font-semibold">{{ $actorName }}</span>
             @endif
         @endif
     </div>
