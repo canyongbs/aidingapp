@@ -52,7 +52,6 @@ beforeEach(function () {
     $settings->save();
 });
 
-
 test('EditServiceMonitoring is gated with proper access control', function () {
     $user = User::factory()->create();
 
