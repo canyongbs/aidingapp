@@ -34,32 +34,14 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestHistoryActorFeature;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+namespace App\Features;
 
-return new class () extends Migration {
-    public function up(): void
+use App\Support\AbstractFeatureFlag;
+
+class ServiceRequestHistoryActorFeature extends AbstractFeatureFlag
+{
+    public function resolve(mixed $scope): mixed
     {
-        DB::transaction(function () {
-            Schema::table('service_request_histories', function (Blueprint $table) {
-                $table->nullableUuidMorphs('actor');
-            });
-
-            ServiceRequestHistoryActorFeature::activate();
-        });
+        return false;
     }
-
-    public function down(): void
-    {
-        DB::transaction(function () {
-            ServiceRequestHistoryActorFeature::deactivate();
-
-            Schema::table('service_request_histories', function (Blueprint $table) {
-                $table->dropMorphs('actor');
-            });
-        });
-    }
-};
+}

@@ -55,6 +55,7 @@ use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
+use App\Features\ServiceRequestHistoryActorFeature;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
@@ -322,9 +323,7 @@ class ServiceRequestObserver
 
     private function writeCreatedHistory(ServiceRequest $serviceRequest): void
     {
-        $actor = $this->resolveActor();
-
-        $serviceRequest->histories()->create([
+        $row = [
             // Empty `original_values` is the discriminator for the Creation event — see
             // ServiceRequestHistory::isCreatedEvent(). Cast to object so json_encode writes `{}`
             // (consistent shape with field-change rows that use JSON objects).
@@ -335,8 +334,15 @@ class ServiceRequestObserver
                 'type_id' => $serviceRequest->priority?->type_id,
                 'title' => $serviceRequest->title,
             ],
-            'actor_type' => $actor?->getMorphClass(),
-            'actor_id' => $actor?->getKey(),
-        ]);
+        ];
+
+        // TODO: ServiceRequestHistoryActorFeature Cleanup - Always resolve the actor and set actor_type/actor_id on $row; remove this if-check after the feature flag is removed.
+        if (ServiceRequestHistoryActorFeature::active()) {
+            $actor = $this->resolveActor();
+            $row['actor_type'] = $actor?->getMorphClass();
+            $row['actor_id'] = $actor?->getKey();
+        }
+
+        $serviceRequest->histories()->create($row);
     }
 }

@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ServiceRequestHistoryActorFeature;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -74,17 +75,26 @@ class CreateServiceRequestHistory implements ShouldQueue
 
     public function handle(): void
     {
+        // TODO: ServiceRequestHistoryActorFeature Cleanup - Remove this line after the feature flag is removed.
+        $writeActor = ServiceRequestHistoryActorFeature::active();
+
         foreach ($this->changes as $key => $value) {
             if (in_array($key, self::IGNORED_KEYS, true)) {
                 continue;
             }
 
-            $this->serviceRequest->histories()->create([
+            $row = [
                 'original_values' => [$key => $this->original[$key] ?? null],
                 'new_values' => [$key => $value],
-                'actor_type' => $this->actorType,
-                'actor_id' => $this->actorId,
-            ]);
+            ];
+
+            // TODO: ServiceRequestHistoryActorFeature Cleanup - Always set actor_type and actor_id on $row; remove this if-check after the feature flag is removed.
+            if ($writeActor) {
+                $row['actor_type'] = $this->actorType;
+                $row['actor_id'] = $this->actorId;
+            }
+
+            $this->serviceRequest->histories()->create($row);
         }
     }
 }
