@@ -59,39 +59,39 @@ export function useServiceRequestTypes(serviceRequestTypesUrl) {
 
     const filteredTree = computed(() => {
         if (!rawData.value) return null;
-        const q = searchQuery.value.toLowerCase().trim();
-        if (!q) return rawData.value;
+        const normalizedQuery = searchQuery.value.toLowerCase().trim();
+        if (!normalizedQuery) return rawData.value;
 
-        const words = q.split(/\s+/).filter(Boolean);
+        const words = normalizedQuery.split(/\s+/).filter(Boolean);
 
         function textMatches(text) {
-            const t = (text ?? '').toLowerCase();
-            return words.every((w) => t.includes(w));
+            const lowercaseText = (text ?? '').toLowerCase();
+            return words.every((word) => lowercaseText.includes(word));
         }
 
         function anyTextMatches(...texts) {
             const combined = texts.join(' ').toLowerCase();
-            return words.every((w) => combined.includes(w));
+            return words.every((word) => combined.includes(word));
         }
 
-        function filterCats(cats, ancestorNames = []) {
-            return cats.flatMap((cat) => {
-                const lineage = [...ancestorNames, cat.name];
-                const catMatches = textMatches(cat.name);
-                const children = filterCats(cat.children || [], lineage);
-                const types = cat.types.filter(
-                    (t) => catMatches || anyTextMatches(t.name, t.description ?? '', ...lineage),
+        function filterCategories(categoryNodes, ancestorNames = []) {
+            return categoryNodes.flatMap((category) => {
+                const lineage = [...ancestorNames, category.name];
+                const categoryMatches = textMatches(category.name);
+                const children = filterCategories(category.children || [], lineage);
+                const types = category.types.filter(
+                    (type) => categoryMatches || anyTextMatches(type.name, type.description ?? '', ...lineage),
                 );
-                if (catMatches || types.length || children.length) {
-                    return [{ ...cat, types: catMatches ? cat.types : types, children }];
+                if (categoryMatches || types.length || children.length) {
+                    return [{ ...category, types: categoryMatches ? category.types : types, children }];
                 }
                 return [];
             });
         }
 
         return {
-            types: rawData.value.types.filter((t) => anyTextMatches(t.name, t.description ?? '')),
-            categories: filterCats(rawData.value.categories),
+            types: rawData.value.types.filter((type) => anyTextMatches(type.name, type.description ?? '')),
+            categories: filterCategories(rawData.value.categories),
         };
     });
 
@@ -100,29 +100,29 @@ export function useServiceRequestTypes(serviceRequestTypesUrl) {
         return filteredTree.value.types.length > 0 || filteredTree.value.categories.length > 0;
     });
 
-    watch(searchQuery, (q) => {
-        if (!q.trim() || !filteredTree.value) return;
-        const s = new Set(expandedCategories.value);
+    watch(searchQuery, (newQuery) => {
+        if (!newQuery.trim() || !filteredTree.value) return;
+        const expandedSet = new Set(expandedCategories.value);
 
-        function expandAll(cats) {
-            for (const cat of cats) {
-                s.add(cat.id);
-                if (cat.children?.length) expandAll(cat.children);
+        function expandAll(categoryNodes) {
+            for (const category of categoryNodes) {
+                expandedSet.add(category.id);
+                if (category.children?.length) expandAll(category.children);
             }
         }
 
         expandAll(filteredTree.value.categories);
-        expandedCategories.value = s;
+        expandedCategories.value = expandedSet;
     });
 
     const selectedPriorityObject = computed(
-        () => selectedType.value?.priorities?.find((p) => p.id === selectedPriority.value) ?? null,
+        () => selectedType.value?.priorities?.find((priority) => priority.id === selectedPriority.value) ?? null,
     );
 
     function toggleCategory(id) {
-        const s = new Set(expandedCategories.value);
-        s.has(id) ? s.delete(id) : s.add(id);
-        expandedCategories.value = s;
+        const updatedSet = new Set(expandedCategories.value);
+        updatedSet.has(id) ? updatedSet.delete(id) : updatedSet.add(id);
+        expandedCategories.value = updatedSet;
     }
 
     function selectType(type) {

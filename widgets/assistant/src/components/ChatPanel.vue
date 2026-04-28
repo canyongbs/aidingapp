@@ -101,7 +101,7 @@
             class="mb-4 w-[400px] max-w-full h-[650px] max-h-full bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden ring-1 ring-brand-950/5 backdrop-blur-sm origin-bottom-right"
         >
             <ChatHeader
-                :service-request-enabled="!!serviceRequestTypesUrl"
+                :service-request-enabled="!!serviceRequestTypesUrl && portalServiceManagement"
                 :current-view="currentView"
                 @close="emit('close')"
                 @open-service-request="onOpenServiceRequest"

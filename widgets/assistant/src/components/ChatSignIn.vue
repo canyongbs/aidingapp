@@ -32,8 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import axios from 'axios';
-    import { ref } from 'vue';
+    import { useWidgetSignIn } from '../composables/useWidgetSignIn.js';
 
     const props = defineProps({
         authenticateRequestUrl: { type: String, required: true },
@@ -41,61 +40,10 @@
 
     const emit = defineEmits(['authenticated', 'cancel']);
 
-    const step = ref('email');
-    const email = ref('');
-    const code = ref('');
-    const authenticationUrl = ref(null);
-    const isSubmitting = ref(false);
-    const errorMessage = ref(null);
-
-    async function submitEmail() {
-        if (!email.value.trim() || isSubmitting.value) return;
-
-        isSubmitting.value = true;
-        errorMessage.value = null;
-
-        try {
-            const response = await axios.post(props.authenticateRequestUrl, { email: email.value });
-            authenticationUrl.value = response.data.authentication_url;
-            step.value = 'code';
-        } catch (error) {
-            if (error.response?.data?.errors?.email) {
-                errorMessage.value = error.response.data.errors.email[0];
-            } else {
-                errorMessage.value = 'Something went wrong. Please try again.';
-            }
-        } finally {
-            isSubmitting.value = false;
-        }
-    }
-
-    async function submitCode() {
-        if (!code.value.trim() || isSubmitting.value) return;
-
-        isSubmitting.value = true;
-        errorMessage.value = null;
-
-        try {
-            const response = await axios.post(authenticationUrl.value, { code: code.value });
-
-            if (response.data.is_expired) {
-                errorMessage.value = 'This code has expired. Please start over.';
-                step.value = 'email';
-                code.value = '';
-                return;
-            }
-
-            emit('authenticated', response.data.token);
-        } catch (error) {
-            if (error.response?.data?.errors?.code) {
-                errorMessage.value = error.response.data.errors.code[0];
-            } else {
-                errorMessage.value = 'Something went wrong. Please try again.';
-            }
-        } finally {
-            isSubmitting.value = false;
-        }
-    }
+    const { step, email, code, isSubmitting, errorMessage, submitEmail, submitCode, resetToEmail } = useWidgetSignIn(
+        props.authenticateRequestUrl,
+        { onAuthenticated: (token) => emit('authenticated', token) },
+    );
 </script>
 
 <template>
@@ -165,10 +113,7 @@
 
             <button
                 type="button"
-                @click="
-                    step = 'email';
-                    errorMessage = null;
-                "
+                @click="resetToEmail"
                 class="text-sm text-gray-500 hover:text-gray-700 transition-colors"
             >
                 Use a different email

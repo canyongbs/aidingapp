@@ -32,7 +32,8 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ArrowLeftIcon, ChatBubbleLeftRightIcon, TicketIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+    import { TicketIcon } from '@heroicons/vue/16/solid';
+    import { ArrowLeftIcon, ChatBubbleLeftRightIcon, XMarkIcon } from '@heroicons/vue/24/outline';
 
     const props = defineProps({
         serviceRequestEnabled: { type: Boolean, default: false },

@@ -35,6 +35,8 @@
     import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/vue/16/solid';
     import { ref } from 'vue';
     import { useServiceRequestTypes } from '../../composables/useServiceRequestTypes.js';
+    import BaseTab from '../BaseTab.vue';
+    import BaseTabs from '../BaseTabs.vue';
     import ServiceRequestCategoryTree from '../ServiceRequestCategoryTree.vue';
     import TypeSelectFooter from './TypeSelectFooter.vue';
 
@@ -73,24 +75,10 @@
 <template>
     <!-- Tabs -->
     <div class="px-4 pt-4 pb-0 shrink-0">
-        <div class="flex gap-1 bg-gray-100 rounded-xl p-1">
-            <button
-                @click="activeTab = 'new'"
-                :class="[
-                    'flex-1 text-sm font-medium py-2 rounded-lg transition-all',
-                    activeTab === 'new' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700',
-                ]"
-            >
-                New Issue
-            </button>
-            <button
-                disabled
-                class="flex-1 text-sm font-medium py-2 rounded-lg text-gray-300 cursor-not-allowed"
-                title="Coming soon"
-            >
-                Existing Issue
-            </button>
-        </div>
+        <BaseTabs v-model="activeTab">
+            <BaseTab value="new">New Issue</BaseTab>
+            <BaseTab value="existing" disabled>Existing Issue</BaseTab>
+        </BaseTabs>
     </div>
 
     <template v-if="activeTab === 'new'">
