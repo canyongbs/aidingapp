@@ -52,14 +52,14 @@ class AssistantWidgetServiceRequestController extends Controller
             ->orderBy('sort')
             ->get();
 
-        $catsById = [];
+        $categoriesById = [];
 
-        foreach ($categories as $cat) {
-            $catsById[$cat->id] = [
-                'id' => $cat->id,
-                'name' => $cat->name,
-                'sort' => $cat->sort,
-                'parent_id' => $cat->parent_id,
+        foreach ($categories as $category) {
+            $categoriesById[$category->id] = [
+                'id' => $category->id,
+                'name' => $category->name,
+                'sort' => $category->sort,
+                'parent_id' => $category->parent_id,
                 'children' => [],
                 'types' => [],
             ];
@@ -82,8 +82,8 @@ class AssistantWidgetServiceRequestController extends Controller
                 ])->values()->all(),
             ];
 
-            if ($type->category_id && isset($catsById[$type->category_id])) {
-                $catsById[$type->category_id]['types'][] = $payload;
+            if ($type->category_id && isset($categoriesById[$type->category_id])) {
+                $categoriesById[$type->category_id]['types'][] = $payload;
             } else {
                 $topLevelTypes[] = $payload;
             }
@@ -91,11 +91,11 @@ class AssistantWidgetServiceRequestController extends Controller
 
         $topLevelCategories = [];
 
-        foreach ($catsById as $id => $cat) {
-            if ($cat['parent_id'] && isset($catsById[$cat['parent_id']])) {
-                $catsById[$cat['parent_id']]['children'][] = &$catsById[$id];
+        foreach ($categoriesById as $id => $category) {
+            if ($category['parent_id'] && isset($categoriesById[$category['parent_id']])) {
+                $categoriesById[$category['parent_id']]['children'][] = &$categoriesById[$id];
             } else {
-                $topLevelCategories[] = &$catsById[$id];
+                $topLevelCategories[] = &$categoriesById[$id];
             }
         }
 
