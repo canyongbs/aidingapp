@@ -56,6 +56,9 @@
 
     function onAuthenticated(token) {
         isAuthenticated.value = true;
+        if (token) {
+            localStorage.setItem('token', token);
+        }
         window.dispatchEvent(new CustomEvent('assistant-widget:authenticated', { detail: { token } }));
     }
 

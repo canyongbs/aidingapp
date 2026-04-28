@@ -36,6 +36,7 @@
 
 namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
 use AidingApp\ServiceManagement\Actions\AssignServiceRequestToTeam;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
@@ -74,9 +75,9 @@ class AssistantWidgetServiceRequestSubmitController extends Controller
 
     public function store(Request $request, ServiceRequestType $type): JsonResponse
     {
-        $contact = auth('contact')->user();
+        $contact = auth('contact')->user() ?? $request->user();
 
-        abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
+        abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
 
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],

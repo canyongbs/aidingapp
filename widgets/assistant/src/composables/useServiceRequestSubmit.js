@@ -54,18 +54,23 @@ export function useServiceRequestSubmit(storeUrlBase, typeId, priorityId) {
         isSubmitting.value = true;
         submitError.value = null;
 
+        const token = localStorage.getItem('token');
         const storeUrl = storeUrlBase.replace('__TYPE__', typeId);
 
         try {
-            await axios.post(storeUrl, {
-                title: title.value,
-                description: description.value,
-                priority_id: priorityId,
-                attachments: (attachments.value ?? []).map((a) => ({
-                    path: a.path,
-                    original_file_name: a.originalFileName,
-                })),
-            });
+            await axios.post(
+                storeUrl,
+                {
+                    title: title.value,
+                    description: description.value,
+                    priority_id: priorityId,
+                    attachments: (attachments.value ?? []).map((a) => ({
+                        path: a.path,
+                        original_file_name: a.originalFileName,
+                    })),
+                },
+                { headers: token ? { Authorization: `Bearer ${token}` } : {} },
+            );
 
             onSuccess?.();
         } catch (error) {

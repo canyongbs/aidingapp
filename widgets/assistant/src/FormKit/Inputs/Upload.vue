@@ -66,9 +66,11 @@
             }
             const index = fileIndexCounter.value++;
             try {
+                const token = localStorage.getItem('token');
                 const data = await axios
                     .get(props.context.uploadUrl, {
                         params: { filename: file.name },
+                        headers: token ? { Authorization: `Bearer ${token}` } : {},
                     })
                     .then(async (response) => {
                         const { url, path } = response.data;

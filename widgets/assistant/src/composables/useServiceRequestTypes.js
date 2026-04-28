@@ -45,7 +45,10 @@ export function useServiceRequestTypes(serviceRequestTypesUrl) {
 
     onMounted(async () => {
         try {
-            const { data } = await axios.get(serviceRequestTypesUrl);
+            const token = localStorage.getItem('token');
+            const { data } = await axios.get(serviceRequestTypesUrl, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {},
+            });
             rawData.value = data;
         } catch {
             loadError.value = true;
