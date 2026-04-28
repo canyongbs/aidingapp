@@ -56,5 +56,6 @@ class LicenseAddonsData extends Data
         public bool $licenseManagement = false,
         public bool $projectManagement = false,
         public bool $incidentManagement = false, //TODO: will need to be renamed to advisory management
+        public bool $serviceMonitoring = false,
     ) {}
 }
