@@ -112,6 +112,8 @@ class GetServiceRequestsController extends Controller
                 'statusName' => $serviceRequest->status?->name,
                 'statusColor' => $serviceRequest->status?->color->value,
                 'typeName' => $serviceRequest->priority?->type?->name,
+                'dateOpened' => $serviceRequest->created_at->format('m-d-Y g:i A'),
+                'lastUpdated' => $serviceRequest->updated_at->format('m-d-Y g:i A'),
             ],
             'serviceRequestUpdates' => $serviceRequest
                 ->serviceRequestUpdates()
