@@ -42,16 +42,16 @@ return new class () extends SettingsMigration {
     public function up(): void
     {
         $this->updateSettingData(
-            fromKey: 'incident_management',
-            toKey: 'advisory_management',
+            fromKey: 'incidentManagement',
+            toKey: 'advisoryManagement',
         );
     }
 
     public function down(): void
     {
         $this->updateSettingData(
-            fromKey: 'advisory_management',
-            toKey: 'incident_management',
+            fromKey: 'advisoryManagement',
+            toKey: 'incidentManagement',
         );
     }
 
