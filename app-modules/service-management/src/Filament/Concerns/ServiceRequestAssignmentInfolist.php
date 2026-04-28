@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Concerns;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Filament\Resources\Users\UserResource;
+use App\Models\User;
 use Filament\Infolists\Components\TextEntry;
 
 // TODO Re-use this trait across other places where infolist is rendered
@@ -54,10 +55,38 @@ trait ServiceRequestAssignmentInfolist
                 ->label('Service Request')
                 ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => ServiceRequestResource::getUrl('view', ['record' => $serviceRequestAssignment->serviceRequest]))
                 ->color('primary'),
-            TextEntry::make('user.name')
+            TextEntry::make('assigned_user_name')
                 ->label('Assigned To')
-                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => UserResource::getUrl('view', ['record' => $serviceRequestAssignment->user]))
-                ->color('primary'),
+                ->state(function (ServiceRequestAssignment $serviceRequestAssignment): string {
+                    if (! $serviceRequestAssignment->user_id) {
+                        return 'Deleted user';
+                    }
+
+                    /** @var User|null $user */
+                    $user = User::withTrashed()->find($serviceRequestAssignment->user_id);
+
+                    if ($user === null) {
+                        return 'Deleted user';
+                    }
+
+                    return $user->name;
+                })
+                ->url(function (ServiceRequestAssignment $serviceRequestAssignment): ?string {
+                    /** @var User|null $user */
+                    $user = $serviceRequestAssignment->user;
+
+                    if ($user === null) {
+                        return null;
+                    }
+
+                    return UserResource::getUrl('view', ['record' => $user]);
+                })
+                ->color(function (ServiceRequestAssignment $serviceRequestAssignment): ?string {
+                    /** @var User|null $user */
+                    $user = $serviceRequestAssignment->user;
+
+                    return $user === null ? null : 'primary';
+                }),
         ];
     }
 }

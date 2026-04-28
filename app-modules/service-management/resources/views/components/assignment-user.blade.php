@@ -31,37 +31,19 @@
     
     </COPYRIGHT>
 --}}
-@php
-    use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 
-    $createdAt = $record->created_at;
+@php
+    use App\Filament\Resources\Users\UserResource;
+
+    $user = $user ?? null;
 @endphp
 
-<div>
-    <div class="flex flex-row justify-between">
-        <h3 class="mb-1 flex items-center text-lg font-semibold text-gray-500 dark:text-gray-100">
-            <a
-                class="font-medium underline"
-                href="{{ ServiceRequestUpdateResource::getUrl('view', ['record' => $record]) }}"
-            >
-                @if ($record->internal === true)
-                    Internal Update Added
-                @else
-                    Customer Update Sent
-                @endif
-            </a>
-        </h3>
-
-        <div>
-            {{ $viewRecordIcon }}
-        </div>
-    </div>
-
-    @include('service-management::components.timeline-time', ['datetime' => $createdAt])
-
-    <div
-        class="my-4 rounded-lg border-2 border-gray-200 p-2 text-base font-normal text-gray-500 dark:border-gray-800 dark:text-gray-400"
-    >
-        {{ $record->update }}
-    </div>
-</div>
+@if ($user && ! $user->trashed())
+    <a class="primary font-semibold underline" href="{{ UserResource::getUrl('view', ['record' => $user]) }}">
+        {{ $user->name }}
+    </a>
+@elseif ($user)
+    <span class="font-semibold italic">{{ $user->name }}</span>
+@else
+    <span class="font-semibold italic">Deleted user</span>
+@endif
