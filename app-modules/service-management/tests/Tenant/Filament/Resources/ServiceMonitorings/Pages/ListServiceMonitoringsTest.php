@@ -38,29 +38,45 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\List
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\User;
+use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteBulkAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertSoftDeleted;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
-test('ListServiceMonitorings is gated with proper access control', function () {
-    $user = User::factory()->create();
+it('is gated with proper access control', function () {
+    $settings = app(LicenseSettings::class);
 
-    actingAs($user)
-        ->get(
-            ServiceMonitoringResource::getUrl('index')
-        )->assertForbidden();
+    $settings->data->addons->serviceMonitoring = false;
+    $settings->save();
+
+    $user = User::factory()->create();
 
     $user->givePermissionTo('service_monitoring.view-any');
 
-    actingAs($user)
-        ->get(
-            ServiceMonitoringResource::getUrl('index')
-        )->assertSuccessful();
+    actingAs($user);
+
+    get(ListServiceMonitorings::getUrl())->assertForbidden();
+
+    $settings->data->addons->serviceMonitoring = true;
+    $settings->save();
+
+    $user->revokePermissionTo('service_monitoring.view-any');
+
+    get(ListServiceMonitorings::getUrl())->assertForbidden();
+
+    $user->givePermissionTo('service_monitoring.view-any');
+
+    get(ListServiceMonitorings::getUrl())->assertSuccessful();
 });
 
 test('can list records', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceMonitoring = true;
+    $settings->save();
     $user = User::factory()->create();
 
     actingAs($user)
@@ -79,6 +95,10 @@ test('can list records', function () {
 });
 
 test('bulk delete ServiceMonitorings', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceMonitoring = true;
+    $settings->save();
     $user = User::factory()->create();
 
     actingAs($user);

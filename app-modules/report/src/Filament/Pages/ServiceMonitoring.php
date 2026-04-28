@@ -60,7 +60,7 @@ class ServiceMonitoring extends Dashboard
 
     public static function canAccess(): bool
     {
-        if (! Gate::check(Feature::ServiceManagement->getGateName())) {
+        if (! Gate::check(Feature::ServiceMonitoring->getGateName())) {
             return false;
         }
 

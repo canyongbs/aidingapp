@@ -39,10 +39,19 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMon
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
 use App\Models\User;
+use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
+
+beforeEach(function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceMonitoring = true;
+    $settings->save();
+});
+
 
 test('EditServiceMonitoring is gated with proper access control', function () {
     $user = User::factory()->create();
