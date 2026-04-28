@@ -1140,7 +1140,7 @@ describe('Service request reply threading', function () {
         $fakeStorage = Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
         $tenant = Tenant::query()->firstOrFail();
-        
+
         assert($tenant instanceof Tenant);
 
         Event::listen(
