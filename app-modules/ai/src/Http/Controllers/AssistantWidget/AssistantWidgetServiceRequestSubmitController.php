@@ -120,14 +120,15 @@ class AssistantWidgetServiceRequestSubmitController extends Controller
             $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
 
             Bus::batch(
-                collect($data['attachments'] ?? [])->map(
+                array_map(
                     fn (array $file) => new PersistServiceRequestUpload(
                         $serviceRequest,
                         $file['path'],
                         $file['original_file_name'],
                         $uploadsMediaCollection->getName(),
-                    )
-                )->all()
+                    ),
+                    $data['attachments'] ?? [],
+                ),
             )
                 ->name("persist-service-request-uploads-{$serviceRequest->getKey()}")
                 ->dispatchAfterResponse();

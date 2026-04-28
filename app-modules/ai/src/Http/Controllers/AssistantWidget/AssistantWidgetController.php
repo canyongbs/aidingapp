@@ -85,6 +85,7 @@ class AssistantWidgetController extends Controller
             'service_request_types_url' => $settings->knowledge_management_portal_service_management
                 ? route('widgets.assistant.api.service-request-types')
                 : null,
+            'portal_service_management' => (bool) $settings->knowledge_management_portal_service_management,
         ]);
     }
 

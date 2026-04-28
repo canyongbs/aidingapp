@@ -48,7 +48,7 @@ class AssistantWidgetServiceRequestController extends Controller
         $categories = ServiceRequestTypeCategory::query()->orderBy('sort')->get();
         $types = ServiceRequestType::query()
             ->withoutArchived()
-            ->with(['priorities' => fn ($q) => $q->orderByDesc('order')])
+            ->with(['priorities' => fn ($query) => $query->orderByDesc('order')])
             ->orderBy('sort')
             ->get();
 
@@ -75,10 +75,10 @@ class AssistantWidgetServiceRequestController extends Controller
                 'icon' => $type->icon ? svg($type->icon, 'h-5 w-5')->toHtml() : null,
                 'sort' => $type->sort,
                 'category_id' => $type->category_id,
-                'priorities' => $type->priorities->map(fn ($p) => [
-                    'id' => $p->getKey(),
-                    'name' => $p->name,
-                    'order' => $p->order,
+                'priorities' => $type->priorities->map(fn ($priority) => [
+                    'id' => $priority->getKey(),
+                    'name' => $priority->name,
+                    'order' => $priority->order,
                 ])->values()->all(),
             ];
 
@@ -100,11 +100,11 @@ class AssistantWidgetServiceRequestController extends Controller
         }
 
         $sortRecursive = function (array &$nodes) use (&$sortRecursive) {
-            usort($nodes, fn (array $a, array $b) => ($a['sort'] ?? 0) <=> ($b['sort'] ?? 0));
+            usort($nodes, fn (array $first, array $second) => ($first['sort'] ?? 0) <=> ($second['sort'] ?? 0));
 
             foreach ($nodes as &$node) {
                 if (! empty($node['types'])) {
-                    usort($node['types'], fn (array $a, array $b) => ($a['sort'] ?? 0) <=> ($b['sort'] ?? 0));
+                    usort($node['types'], fn (array $first, array $second) => ($first['sort'] ?? 0) <=> ($second['sort'] ?? 0));
                 }
 
                 if (! empty($node['children'])) {
@@ -115,7 +115,7 @@ class AssistantWidgetServiceRequestController extends Controller
 
         $sortRecursive($topLevelCategories);
 
-        usort($topLevelTypes, fn (array $a, array $b) => ($a['sort'] ?? 0) <=> ($b['sort'] ?? 0));
+        usort($topLevelTypes, fn (array $first, array $second) => ($first['sort'] ?? 0) <=> ($second['sort'] ?? 0));
 
         return response()->json([
             'categories' => $topLevelCategories,
