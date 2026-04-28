@@ -1139,9 +1139,8 @@ describe('Service request reply threading', function () {
     it('handles attachments properly', function () {
         $fakeStorage = Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
-        $tenant = Tenant::query()->first();
-
-        assert($filesystem instanceof FilesystemAdapter);
+        $tenant = Tenant::query()->firstOrFail();
+        
         assert($tenant instanceof Tenant);
 
         Event::listen(
@@ -1150,6 +1149,7 @@ describe('Service request reply threading', function () {
                 Storage::set('s3', $fakeStorage);
             }
         );
+        assert($filesystem instanceof FilesystemAdapter);
 
         [$contact, $serviceRequest] = $tenant->execute(function () {
             $contact = Contact::factory()->create([
@@ -1173,7 +1173,7 @@ describe('Service request reply threading', function () {
 
         $modulePath = resolve(ModulePath::class);
 
-        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_sr_reply'));
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_sr_reply_with_attachments'));
 
         $content = str_replace(
             'SR-TEST123456.1.1740000000000@mail.aiding.app',
@@ -1216,7 +1216,7 @@ describe('Service request reply threading', function () {
                 'created_by_type' => $contact->getMorphClass(),
             ]);
 
-            expect($serviceRequestUpdate->getMedia('uploads'))->toHaveCount(1);
+            expect($serviceRequestUpdate->getMedia('uploads'))->toHaveCount(2);
         });
 
         $filesystem->assertMissing('s3_email');
