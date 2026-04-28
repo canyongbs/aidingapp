@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ref } from 'vue';
+    import { onMounted, ref } from 'vue';
     import ChatPanel from './components/ChatPanel.vue';
     import ChatToggleButton from './components/ChatToggleButton.vue';
 
@@ -127,6 +127,12 @@
 
     setPrimaryColor();
     setRounding();
+
+    onMounted(() => {
+        if (!isAuthenticated.value && localStorage.getItem('token')) {
+            isAuthenticated.value = true;
+        }
+    });
 </script>
 
 <template>
