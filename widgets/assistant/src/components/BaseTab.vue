@@ -1,4 +1,4 @@
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,43 +30,31 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-@import 'filepond/dist/filepond.min.css' layer(base);
+-->
+<script setup>
+    import { inject } from 'vue';
 
-@import 'tailwindcss';
+    const props = defineProps({
+        value: { type: String, required: true },
+        disabled: { type: Boolean, default: false },
+    });
 
-@config '../tailwind.config.js';
+    const { activeValue, select } = inject('BaseTabs');
+</script>
 
-@layer base {
-    *,
-    ::after,
-    ::before,
-    ::backdrop,
-    ::file-selector-button {
-        --tw-border-style: solid;
-        --tw-shadow: 0 0 #0000;
-        --tw-inset-shadow: 0 0 #0000;
-        --tw-inset-ring-shadow: 0 0 #0000;
-        --tw-ring-shadow: 0 0 #0000;
-        --tw-ring-offset-shadow: 0 0 #0000;
-        --tw-ring-offset-width: 0px;
-        --tw-ring-offset-color: #fff;
-        border-color: var(--color-gray-200, currentColor);
-    }
-}
-
-:host {
-    all: initial;
-    --tw-border-style: solid;
-    --tw-shadow: 0 0 #0000;
-    --tw-inset-shadow: 0 0 #0000;
-    --tw-inset-ring-shadow: 0 0 #0000;
-    --tw-ring-shadow: 0 0 #0000;
-    --tw-ring-offset-shadow: 0 0 #0000;
-    --tw-ring-offset-width: 0px;
-    --tw-ring-offset-color: #fff;
-}
-
-* {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
+<template>
+    <button
+        :disabled="disabled"
+        :title="disabled ? 'Coming soon' : undefined"
+        :class="[
+            'flex-1 text-sm font-medium py-2 transition-all',
+            !disabled && activeValue === props.value ? 'bg-white text-gray-900 shadow-sm' : '',
+            !disabled && activeValue !== props.value ? 'text-gray-500 hover:text-gray-700' : '',
+            disabled ? 'text-gray-300 cursor-not-allowed' : '',
+        ]"
+        :style="{ borderRadius: 'calc(var(--rounding-lg) - 4px)' }"
+        @click="!disabled && select(props.value)"
+    >
+        <slot />
+    </button>
+</template>

@@ -31,8 +31,10 @@
 
 </COPYRIGHT>
 */
+import { defaultConfig, plugin } from '@formkit/vue';
 import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
 import App from './App.ce.vue';
+import formkitConfig from './formkit.config.js';
 import styles from './widget.css?inline';
 
 const config = window.__ASSISTANT_WIDGET_CONFIG__;
@@ -47,6 +49,7 @@ if (!config || !config.send_message_url || !config.websockets_config) {
             setup(props) {
                 const app = createApp();
                 app.config.devtools = true;
+                app.use(plugin, defaultConfig(formkitConfig));
 
                 const inst = getCurrentInstance();
                 Object.assign(inst.appContext, app._context);
@@ -60,6 +63,9 @@ if (!config || !config.send_message_url || !config.websockets_config) {
                         primaryColor: config.primary_color,
                         rounding: config.rounding,
                         isAuthenticated: config.is_authenticated || false,
+                        authenticateRequestUrl: config.authenticate_request_url || null,
+                        serviceRequestTypesUrl: config.service_request_types_url || null,
+                        portalServiceManagement: config.portal_service_management || false,
                     });
             },
             props: {

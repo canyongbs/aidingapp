@@ -193,8 +193,23 @@
 
     window.addEventListener('assistant:open-service-request', handleOpenServiceRequest);
 
+    async function handleWidgetAuthenticated(event) {
+        const { token } = event.detail ?? {};
+        if (!token) return;
+        await useTokenStore().setToken(token);
+        const isAuth = await determineIfUserIsAuthenticated(props.userAuthenticationUrl);
+        if (isAuth) {
+            userIsAuthenticated.value = true;
+            await getKnowledgeManagementPortal();
+            await getData();
+        }
+    }
+
+    window.addEventListener('assistant-widget:authenticated', handleWidgetAuthenticated);
+
     onUnmounted(() => {
         window.removeEventListener('assistant:open-service-request', handleOpenServiceRequest);
+        window.removeEventListener('assistant-widget:authenticated', handleWidgetAuthenticated);
     });
 
     watch([showSignIn, assistantWidgetLoaderUrl], ([isSignIn]) => {

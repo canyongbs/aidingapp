@@ -1,4 +1,4 @@
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,43 +30,52 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-@import 'filepond/dist/filepond.min.css' layer(base);
+-->
+<script setup>
+    import { ref } from 'vue';
+    import DetailsStep from './ServiceRequest/DetailsStep.vue';
+    import SuccessStep from './ServiceRequest/SuccessStep.vue';
+    import TypeSelectStep from './ServiceRequest/TypeSelectStep.vue';
 
-@import 'tailwindcss';
+    defineProps({
+        serviceRequestTypesUrl: { type: String, required: true },
+    });
 
-@config '../tailwind.config.js';
+    defineEmits(['back']);
 
-@layer base {
-    *,
-    ::after,
-    ::before,
-    ::backdrop,
-    ::file-selector-button {
-        --tw-border-style: solid;
-        --tw-shadow: 0 0 #0000;
-        --tw-inset-shadow: 0 0 #0000;
-        --tw-inset-ring-shadow: 0 0 #0000;
-        --tw-ring-shadow: 0 0 #0000;
-        --tw-ring-offset-shadow: 0 0 #0000;
-        --tw-ring-offset-width: 0px;
-        --tw-ring-offset-color: #fff;
-        border-color: var(--color-gray-200, currentColor);
+    // 'type-select' | 'details' | 'success'
+    const step = ref('type-select');
+    const detailsData = ref(null); // { type, priority, rawData }
+    const submittedTitle = ref('');
+
+    function onTypeSelectContinue(data) {
+        detailsData.value = data;
+        step.value = 'details';
     }
-}
 
-:host {
-    all: initial;
-    --tw-border-style: solid;
-    --tw-shadow: 0 0 #0000;
-    --tw-inset-shadow: 0 0 #0000;
-    --tw-inset-ring-shadow: 0 0 #0000;
-    --tw-ring-shadow: 0 0 #0000;
-    --tw-ring-offset-shadow: 0 0 #0000;
-    --tw-ring-offset-width: 0px;
-    --tw-ring-offset-color: #fff;
-}
+    function onDetailsSuccess(title) {
+        submittedTitle.value = title;
+        step.value = 'success';
+    }
+</script>
 
-* {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
+<template>
+    <div class="flex-1 flex flex-col overflow-hidden">
+        <TypeSelectStep
+            v-if="step === 'type-select'"
+            :service-request-types-url="serviceRequestTypesUrl"
+            @continue="onTypeSelectContinue"
+        />
+
+        <DetailsStep
+            v-else-if="step === 'details'"
+            :selected-type="detailsData.type"
+            :selected-priority="detailsData.priority"
+            :raw-data="detailsData.rawData"
+            @back="step = 'type-select'"
+            @success="onDetailsSuccess"
+        />
+
+        <SuccessStep v-else-if="step === 'success'" :title="submittedTitle" @back="$emit('back')" />
+    </div>
+</template>

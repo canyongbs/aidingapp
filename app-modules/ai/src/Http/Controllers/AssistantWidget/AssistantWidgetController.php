@@ -46,6 +46,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -75,6 +76,16 @@ class AssistantWidgetController extends Controller
                 ->all(),
             'rounding' => $settings->knowledge_management_portal_rounding->value ?? 'md',
             'is_authenticated' => (bool) auth('contact')->user(),
+            'authenticate_request_url' => auth('contact')->user() ? null : URL::to(
+                URL::signedRoute(
+                    name: 'widgets.assistant.api.authenticate.request',
+                    absolute: false,
+                )
+            ),
+            'service_request_types_url' => $settings->knowledge_management_portal_service_management
+                ? route('widgets.assistant.api.service-request-types')
+                : null,
+            'portal_service_management' => (bool) $settings->knowledge_management_portal_service_management,
         ]);
     }
 

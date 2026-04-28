@@ -35,7 +35,10 @@
 */
 
 use AidingApp\Ai\Http\Controllers\AssistantWidget\AssistantBroadcastController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\AssistantWidgetAuthController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\AssistantWidgetController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\AssistantWidgetServiceRequestController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\AssistantWidgetServiceRequestSubmitController;
 use AidingApp\Ai\Http\Middleware\AssistantWidgetCors;
 use AidingApp\Ai\Http\Middleware\EnsureAssistantWidgetIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
@@ -65,8 +68,28 @@ Route::middleware([
                         Route::get('config', [AssistantWidgetController::class, 'config'])
                             ->name('config');
 
+                        Route::post('authenticate/request', [AssistantWidgetAuthController::class, 'request'])
+                            ->middleware(['signed:relative'])
+                            ->name('authenticate.request');
+
+                        Route::post('authenticate/{authentication}', [AssistantWidgetAuthController::class, 'authenticate'])
+                            ->middleware(['signed:relative'])
+                            ->name('authenticate');
+
                         Route::post('messages', [AssistantWidgetController::class, 'sendMessage'])
                             ->name('messages');
+
+                        Route::get('service-request-types', [AssistantWidgetServiceRequestController::class, 'index'])
+                            ->middleware(['auth:sanctum'])
+                            ->name('service-request-types');
+
+                        Route::get('service-request/upload-url', [AssistantWidgetServiceRequestSubmitController::class, 'uploadUrl'])
+                            ->middleware(['auth:sanctum'])
+                            ->name('service-request.upload-url');
+
+                        Route::post('service-request/{type}', [AssistantWidgetServiceRequestSubmitController::class, 'store'])
+                            ->middleware(['auth:sanctum'])
+                            ->name('service-request.store');
 
                         Route::match(
                             ['GET', 'POST', 'HEAD'],
