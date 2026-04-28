@@ -64,6 +64,11 @@ class EditServiceRequestForm extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('preview')
+                ->label('Preview')
+                ->icon('heroicon-o-eye')
+                ->url(fn (ServiceRequestForm $serviceRequestForm) => route('service-request-forms.preview', ['serviceRequestForm' => $serviceRequestForm]))
+                ->openUrlInNewTab(),
             ArchiveAction::make(),
             Action::make('view')
                 ->url(fn (ServiceRequestForm $serviceRequestForm) => route('service-request-forms.show', ['serviceRequestForm' => $serviceRequestForm]))
