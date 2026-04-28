@@ -40,12 +40,20 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
 use AidingApp\Team\Models\Team;
 use App\Models\User;
+use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
+
+beforeEach(function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceMonitoring = true;
+    $settings->save();
+});
 
 test('CreateServiceMonitoring is gated with proper access control', function () {
     $user = User::factory()->create();

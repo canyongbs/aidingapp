@@ -120,30 +120,32 @@ class ManageLicenseSettings extends SettingsPage
                     ->columns()
                     ->schema(
                         [
-                            Toggle::make('data.addons.onlineForms')
-                                ->label('Custom Forms'),
-                            Toggle::make('data.addons.serviceManagement')
-                                ->label('Service Management'),
-                            Toggle::make('data.addons.knowledgeManagement')
-                                ->label('Knowledge Management'),
-                            Toggle::make('data.addons.realtimeChat')
-                                ->label('Chat'),
-                            Toggle::make('data.addons.mobileApps')
-                                ->label('Mobile Apps'),
-                            Toggle::make('data.addons.changeManagement')
-                                ->label('Change Management'),
-                            Toggle::make('data.addons.assetManagement')
-                                ->label('Asset Management'),
-                            Toggle::make('data.addons.feedbackManagement')
-                                ->label('Feedback Management'),
-                            Toggle::make('data.addons.contractManagement')
-                                ->label('Contract Management'),
-                            Toggle::make('data.addons.licenseManagement')
-                                ->label('License Management'),
-                            Toggle::make('data.addons.projectManagement')
-                                ->label('Project Management'),
                             Toggle::make('data.addons.incidentManagement') //TODO: will need to be renamed to advisory management
                                 ->label('Advisories'),
+                            Toggle::make('data.addons.assetManagement')
+                                ->label('Asset Management'),
+                            Toggle::make('data.addons.changeManagement')
+                                ->label('Change Management'),
+                            Toggle::make('data.addons.realtimeChat')
+                                ->label('Chat'),                            
+                            Toggle::make('data.addons.contractManagement')
+                                ->label('Contract Management'),
+                            Toggle::make('data.addons.onlineForms')
+                                ->label('Custom Forms'),
+                            Toggle::make('data.addons.feedbackManagement')
+                                ->label('Feedback Management'),
+                            Toggle::make('data.addons.knowledgeManagement')
+                                ->label('Knowledge Management'),
+                            Toggle::make('data.addons.licenseManagement')
+                                ->label('License Management'),
+                            Toggle::make('data.addons.mobileApps')
+                                ->label('Mobile Apps'),
+                            Toggle::make('data.addons.projectManagement')
+                                ->label('Project Management'),
+                            Toggle::make('data.addons.serviceManagement')
+                                ->label('Service Management'),
+                            Toggle::make('data.addons.serviceMonitoring')
+                                ->label('Service Monitoring'),
                         ]
                     ),
             ])
