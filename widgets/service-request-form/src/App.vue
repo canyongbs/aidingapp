@@ -52,6 +52,10 @@
             type: String,
             required: true,
         },
+        preview: {
+            type: String,
+            default: null,
+        },
     });
 
     const data = reactive({
@@ -78,6 +82,11 @@
         stringify: (value) => JSON.stringify(value, null, 2),
         submitForm: async (data, node) => {
             node.clearErrors();
+
+            if (props.preview === 'true' || props.preview === true) {
+                submittedSuccess.value = true;
+                return;
+            }
 
             let recaptchaToken = null;
 
@@ -153,6 +162,10 @@
                 formRecaptchaEnabled.value = json.recaptcha_enabled ?? false;
                 formRecaptchaKey.value = json.recaptcha_site_key ?? null;
 
+                if ((props.preview === 'true' || props.preview === true) && !json.authentication_url) {
+                    formSubmissionUrl.value = 'preview-mode';
+                }
+
                 formRounding.value = {
                     none: {
                         sm: '0px',
@@ -200,6 +213,11 @@
 
     async function authenticate(formData, node) {
         node.clearErrors();
+
+        if (props.preview === 'true' || props.preview === true) {
+            formSubmissionUrl.value = 'preview-mode';
+            return;
+        }
 
         if (authentication.value.isRequested) {
             fetch(authentication.value.url, {
@@ -300,6 +318,22 @@
         class="font-sans"
     >
         <div class="prose max-w-none" v-if="display && !submittedSuccess">
+            <div
+                v-if="props.preview === 'true' || props.preview === true"
+                style="
+                    background: #f9fafb;
+                    border: 1px solid #e5e7eb;
+                    border-radius: 0.375rem;
+                    padding: 1rem;
+                    margin-bottom: 1.5rem;
+                "
+                class="preview-banner"
+            >
+                <p style="font-size: 0.875rem; font-weight: 600; color: #374151; margin: 0">
+                    Preview Mode - This is only a preview of your form. Nothing will be saved.
+                </p>
+            </div>
+
             <h1>
                 {{ formName }}
             </h1>
@@ -337,7 +371,7 @@
             </div>
 
             <div v-if="formSubmissionUrl" class="space-y-6">
-                <p v-if="formIsAuthenticated" class="text-sm">
+                <p v-if="formIsAuthenticated || !(props.preview === 'true' || props.preview === true)" class="text-sm">
                     Signed in as <strong>{{ authentication.email }}</strong>
                 </p>
 
@@ -345,8 +379,15 @@
             </div>
         </div>
 
-        <div v-if="submittedSuccess">
-            <h1 class="text-2xl font-bold mb-2 text-center">Thank you, your submission has been received.</h1>
+        <div v-if="submittedSuccess" class="flex justify-center items-center w-full">
+            <h2
+                v-if="props.preview === 'true' || props.preview === true"
+                class="text-xl font-bold mb-2 text-center"
+                style="text-align: center; margin: 0 auto; display: block; width: 100%"
+            >
+                This was only a preview. Your data has not been submitted.
+            </h2>
+            <h1 v-else class="text-2xl font-bold mb-2 text-center">Thank you, your submission has been received.</h1>
         </div>
     </div>
 </template>

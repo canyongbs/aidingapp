@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,31 +34,31 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormPreviewController;
-use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetController;
-use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
-use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestFeedbackForm;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
-use Illuminate\Support\Facades\Route;
+namespace AidingApp\ServiceManagement\Http\Controllers;
 
-Route::middleware('web')
-    ->prefix('service-request-forms')
-    ->name('service-request-forms.')
-    ->group(function () {
-        Route::get('/{serviceRequestForm}/respond', RenderServiceRequestForm::class)
-            ->name('show');
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\File;
+use Illuminate\View\View;
 
-        Route::middleware(['auth', EnsureServiceManagementFeatureIsActive::class])
-            ->group(function () {
-                Route::get('/{serviceRequestForm}/preview', ServiceRequestFormPreviewController::class)
-                    ->name('preview');
+class ServiceRequestFormPreviewController extends Controller
+{
+    public function __invoke(ServiceRequestForm $serviceRequestForm): View
+    {
+        $manifestPath = public_path('storage/widgets/service-requests/forms/.vite/manifest.json');
 
-                Route::get('/{serviceRequestForm}/preview-entry', [ServiceRequestFormWidgetController::class, 'preview'])
-                    ->name('preview-entry');
-            });
-    });
+        /** @var array<string, array{file: string, name: string, src: string, isEntry: bool}> $manifest */
+        $manifest = json_decode(File::get($manifestPath), true, 512, JSON_THROW_ON_ERROR);
 
-Route::get('/service-requests/{serviceRequest}/feedback/', RenderServiceRequestFeedbackForm::class)
-    ->middleware(['web', FeedbackManagementIsOn::class])
-    ->name('feedback.service.request');
+        $widgetEntry = $manifest['src/widget.js'];
+
+        $assetBaseUrl = url('widgets/service-requests/forms');
+
+        return view('service-management::service-request-form-preview', [
+            'serviceRequestForm' => $serviceRequestForm,
+            'widgetJsUrl' => $assetBaseUrl . '/' . $widgetEntry['file'],
+            'assetUrl' => route('widgets.service-requests.forms.asset'),
+            'previewEntryUrl' => route('service-request-forms.preview-entry', ['serviceRequestForm' => $serviceRequestForm]),
+        ]);
+    }
+}
