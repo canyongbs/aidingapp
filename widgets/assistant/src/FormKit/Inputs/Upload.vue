@@ -40,8 +40,9 @@
     import vueFilePond from 'vue-filepond';
 
     import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
+    import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
 
-    const FilePond = vueFilePond(FilePondPluginFileValidateSize);
+    const FilePond = vueFilePond(FilePondPluginFileValidateSize, FilePondPluginFileValidateType);
 
     const props = defineProps({
         context: Object,
@@ -176,6 +177,7 @@
         :allow-multiple="context.multiple"
         :maxFiles="context.limit"
         :maxFileSize="context.size + 'MB'"
+        :accepted-file-types="context.accept"
         :files="uploadedFiles"
         :server="serverOptions"
         @addfile="handleFileAdd"

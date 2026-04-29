@@ -34,11 +34,15 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Ai\Http\Controllers\AssistantWidget\AssistantBroadcastController;
-use AidingApp\Ai\Http\Controllers\AssistantWidget\AssistantWidgetAuthController;
-use AidingApp\Ai\Http\Controllers\AssistantWidget\AssistantWidgetController;
-use AidingApp\Ai\Http\Controllers\AssistantWidget\AssistantWidgetServiceRequestController;
-use AidingApp\Ai\Http\Controllers\AssistantWidget\AssistantWidgetServiceRequestSubmitController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\AuthenticateController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\AuthorizeBroadcastController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestTypesController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestUploadUrlController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\GetWidgetConfigController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\RequestAuthenticationController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\SendMessageController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\ServeWidgetAssetController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\StoreServiceRequestController;
 use AidingApp\Ai\Http\Middleware\AssistantWidgetCors;
 use AidingApp\Ai\Http\Middleware\EnsureAssistantWidgetIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
@@ -65,36 +69,36 @@ Route::middleware([
                         EnsureAssistantWidgetIsEmbeddableAndAuthorized::class,
                     ])
                     ->group(function () {
-                        Route::get('config', [AssistantWidgetController::class, 'config'])
+                        Route::get('config', GetWidgetConfigController::class)
                             ->name('config');
 
-                        Route::post('authenticate/request', [AssistantWidgetAuthController::class, 'request'])
+                        Route::post('authenticate/request', RequestAuthenticationController::class)
                             ->middleware(['signed:relative'])
                             ->name('authenticate.request');
 
-                        Route::post('authenticate/{authentication}', [AssistantWidgetAuthController::class, 'authenticate'])
+                        Route::post('authenticate/{authentication}', AuthenticateController::class)
                             ->middleware(['signed:relative'])
                             ->name('authenticate');
 
-                        Route::post('messages', [AssistantWidgetController::class, 'sendMessage'])
+                        Route::post('messages', SendMessageController::class)
                             ->name('messages');
 
-                        Route::get('service-request-types', [AssistantWidgetServiceRequestController::class, 'index'])
+                        Route::get('service-request-types', GetServiceRequestTypesController::class)
                             ->middleware(['auth:sanctum'])
                             ->name('service-request-types');
 
-                        Route::get('service-request/upload-url', [AssistantWidgetServiceRequestSubmitController::class, 'uploadUrl'])
+                        Route::get('service-request/upload-url', GetServiceRequestUploadUrlController::class)
                             ->middleware(['auth:sanctum'])
                             ->name('service-request.upload-url');
 
-                        Route::post('service-request/{type}', [AssistantWidgetServiceRequestSubmitController::class, 'store'])
+                        Route::post('service-request/{type}', StoreServiceRequestController::class)
                             ->middleware(['auth:sanctum'])
                             ->name('service-request.store');
 
                         Route::match(
                             ['GET', 'POST', 'HEAD'],
                             '/broadcasting/auth',
-                            [AssistantBroadcastController::class, 'auth']
+                            AuthorizeBroadcastController::class
                         )
                             ->name('broadcasting.auth');
 
@@ -105,7 +109,7 @@ Route::middleware([
                             ->name('preflight');
                     });
 
-                Route::get('{file?}', [AssistantWidgetController::class, 'asset'])
+                Route::get('{file?}', ServeWidgetAssetController::class)
                     ->where('file', '(.*)')
                     ->name('asset');
             });

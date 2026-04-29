@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -50,30 +50,12 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
-class AssistantWidgetServiceRequestSubmitController extends Controller
+class StoreServiceRequestController extends Controller
 {
-    public function uploadUrl(Request $request): JsonResponse
-    {
-        $data = $request->validate([
-            'filename' => ['required', 'string'],
-        ]);
-
-        $filename = sprintf('%s.%s', Str::uuid(), str($data['filename'])->afterLast('.'));
-        $path = "tmp/{$filename}";
-
-        return response()->json([
-            'filename' => $filename,
-            'path' => $path,
-            ...Storage::temporaryUploadUrl($path, now()->addMinute()),
-        ]);
-    }
-
-    public function store(Request $request, ServiceRequestType $type): JsonResponse
+    public function __invoke(Request $request, ServiceRequestType $type): JsonResponse
     {
         $contact = auth('contact')->user() ?? $request->user();
 
@@ -92,17 +74,17 @@ class AssistantWidgetServiceRequestSubmitController extends Controller
             'attachments.*.original_file_name' => ['required_with:attachments', 'string', 'max:255'],
         ]);
 
-        $priority = $type->priorities()->findOrFail($data['priority_id']);
-
-        $serviceRequestStatus = ServiceRequestStatus::query()
-            ->where('classification', SystemServiceRequestClassification::Open)
-            ->where('name', 'New')
-            ->where('is_system_protected', true)
-            ->firstOrFail();
-
         DB::beginTransaction();
 
         try {
+            $priority = $type->priorities()->findOrFail($data['priority_id']);
+
+            $serviceRequestStatus = ServiceRequestStatus::query()
+                ->where('classification', SystemServiceRequestClassification::Open)
+                ->where('name', 'New')
+                ->where('is_system_protected', true)
+                ->firstOrFail();
+
             $serviceRequest = new ServiceRequest([
                 'title' => $data['title'],
                 'close_details' => $data['description'],

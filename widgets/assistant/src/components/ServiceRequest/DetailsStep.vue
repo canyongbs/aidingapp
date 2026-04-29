@@ -110,7 +110,7 @@
             label="Attachments"
             :upload-url="rawData.upload_url"
             :multiple="true"
-            :accept="['*/*']"
+            :accept="rawData.accepted_mime_types"
             :limit="10"
             :size="25"
             v-model="attachments"

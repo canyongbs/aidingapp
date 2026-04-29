@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -36,14 +36,15 @@
 
 namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 
-class AssistantWidgetServiceRequestController extends Controller
+class GetServiceRequestTypesController extends Controller
 {
-    public function index(): JsonResponse
+    public function __invoke(): JsonResponse
     {
         $categories = ServiceRequestTypeCategory::query()->orderBy('sort')->get();
         $types = ServiceRequestType::query()
@@ -122,6 +123,7 @@ class AssistantWidgetServiceRequestController extends Controller
             'types' => $topLevelTypes,
             'upload_url' => route('widgets.assistant.api.service-request.upload-url'),
             'store_url_base' => route('widgets.assistant.api.service-request.store', ['type' => '__TYPE__']),
+            'accepted_mime_types' => app(ResolveUploadsMediaCollectionForServiceRequest::class)()->getMimes(),
         ]);
     }
 }

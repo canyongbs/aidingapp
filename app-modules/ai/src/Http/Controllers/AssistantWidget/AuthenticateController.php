@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -37,63 +37,16 @@
 namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Models\PortalAuthentication;
-use AidingApp\Portal\Notifications\AuthenticatePortalNotification;
 use AidingApp\Portal\Rules\PortalAuthenticateCodeValidation;
-use App\Actions\ResolveEducatableFromEmail;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Validation\ValidationException;
 
-class AssistantWidgetAuthController extends Controller
+class AuthenticateController extends Controller
 {
-    public function request(Request $request, ResolveEducatableFromEmail $resolveEducatableFromEmail): JsonResponse
-    {
-        $data = $request->validate([
-            'email' => ['required', 'email'],
-        ]);
-
-        $contact = $resolveEducatableFromEmail($data['email']);
-
-        if (! $contact) {
-            throw ValidationException::withMessages([
-                'email' => 'A contact with that email address could not be found.',
-            ]);
-        }
-
-        $code = random_int(100000, 999999);
-
-        $authentication = new PortalAuthentication();
-        $authentication->portal_type = PortalType::KnowledgeManagement;
-        $authentication->code = Hash::make((string) $code);
-        $authentication->educatable()->associate($contact);
-        $authentication->save();
-
-        Notification::route('mail', [
-            $data['email'] => $contact->getAttributeValue($contact::displayNameKey()),
-        ])->notify(new AuthenticatePortalNotification($authentication, $code));
-
-        $authenticationUrl = URL::to(
-            URL::signedRoute(
-                name: 'widgets.assistant.api.authenticate',
-                parameters: ['authentication' => $authentication],
-                absolute: false,
-            )
-        );
-
-        return response()->json([
-            'message' => "We've sent an authentication code to {$data['email']}.",
-            'authentication_url' => $authenticationUrl,
-        ]);
-    }
-
-    public function authenticate(Request $request, PortalAuthentication $authentication): JsonResponse
+    public function __invoke(Request $request, PortalAuthentication $authentication): JsonResponse
     {
         if ($authentication->isExpired()) {
             return response()->json(['is_expired' => true], 422);
