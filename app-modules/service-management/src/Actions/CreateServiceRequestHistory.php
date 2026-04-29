@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ServiceRequestHistoryActorFeature;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -50,29 +51,50 @@ class CreateServiceRequestHistory implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
+    /**
+     * @var array<int, string>
+     */
+    private const IGNORED_KEYS = [
+        'updated_at',
+        'status_updated_at',
+        'time_to_resolution',
+        'service_request_form_submission_id',
+    ];
+
+    /**
+     * @param array<string, mixed> $changes
+     * @param array<string, mixed> $original
+     */
     public function __construct(
         public ServiceRequest $serviceRequest,
         public array $changes,
         public array $original,
+        public ?string $actorType = null,
+        public ?string $actorId = null,
     ) {}
 
     public function handle(): void
     {
-        $originalValues = [];
-        $newValues = [];
+        // TODO: ServiceRequestHistoryActorFeature Cleanup - Remove this line after the feature flag is removed.
+        $writeActor = ServiceRequestHistoryActorFeature::active();
 
         foreach ($this->changes as $key => $value) {
-            if ($key != 'updated_at') {
-                $originalValues[$key] = $this->original[$key] ?? null;
-                $newValues[$key] = $value;
+            if (in_array($key, self::IGNORED_KEYS, true)) {
+                continue;
             }
-        }
 
-        if (! blank($newValues)) {
-            $this->serviceRequest->histories()->create([
-                'original_values' => $originalValues,
-                'new_values' => $newValues,
-            ]);
+            $row = [
+                'original_values' => [$key => $this->original[$key] ?? null],
+                'new_values' => [$key => $value],
+            ];
+
+            // TODO: ServiceRequestHistoryActorFeature Cleanup - Always set actor_type and actor_id on $row; remove this if-check after the feature flag is removed.
+            if ($writeActor) {
+                $row['actor_type'] = $this->actorType;
+                $row['actor_id'] = $this->actorId;
+            }
+
+            $this->serviceRequest->histories()->create($row);
         }
     }
 }

@@ -49,6 +49,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -72,6 +73,8 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
     protected $fillable = [
         'original_values',
         'new_values',
+        'actor_type',
+        'actor_id',
     ];
 
     /**
@@ -80,6 +83,14 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
     public function serviceRequest(): BelongsTo
     {
         return $this->belongsTo(ServiceRequest::class);
+    }
+
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function actor(): MorphTo
+    {
+        return $this->morphTo();
     }
 
     public function timeline(): ServiceRequestHistoryTimeline
@@ -99,12 +110,16 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
      */
     public function getUpdates(): array
     {
+        if ($this->isCreatedEvent()) {
+            return [];
+        }
+
         $updates = [];
 
         foreach ($this->new_values as $key => $value) {
             $updates[] = [
                 'key' => $key,
-                'old' => $this->original_values[$key],
+                'old' => $this->original_values[$key] ?? null,
                 'new' => $value,
             ];
         }
@@ -113,12 +128,94 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
     }
 
     /**
+     * A row is treated as the creation event when its `original_values` is empty
+     * (no prior state) and `new_values` carries the snapshot fields.
+     */
+    public function isCreatedEvent(): bool
+    {
+        return empty($this->original_values) && ! empty($this->new_values);
+    }
+
+    public function transformReadableKey(string $key): string
+    {
+        if (Str::endsWith($key, '_id')) {
+            $key = Str::replaceLast('_id', '', $key);
+        }
+
+        return Str::of($key)->replace('_', ' ')->title()->toString();
+    }
+
+    public function changedField(): ?string
+    {
+        if (empty($this->new_values)) {
+            return null;
+        }
+
+        return array_key_first($this->new_values);
+    }
+
+    public function eventTitle(): string
+    {
+        if ($this->isCreatedEvent()) {
+            return 'Service Request Created';
+        }
+
+        $field = $this->changedField();
+
+        if ($field === null) {
+            return 'Service Request Updated';
+        }
+
+        return match ($field) {
+            'status_id' => 'Status Updated',
+            'priority_id' => 'Priority Updated',
+            'type_id' => 'Type Updated',
+            'division_id' => 'Division Updated',
+            'category' => 'Category Updated',
+            'issue_category' => 'Category Updated',
+            'title' => 'Title Updated',
+            'respondent_id' => 'Respondent Updated',
+            default => $this->transformReadableKey($field) . ' Updated',
+        };
+    }
+
+    public function actorName(): string
+    {
+        $actor = $this->actor;
+
+        if ($actor === null) {
+            return 'System';
+        }
+
+        return $actor->getAttribute('name') ?? $actor->getAttribute('full_name') ?? 'System';
+    }
+
+    public function snapshotStatus(): ?ServiceRequestStatus
+    {
+        $id = $this->new_values['status_id'] ?? null;
+
+        return $id ? ServiceRequestStatus::find($id) : null;
+    }
+
+    public function snapshotPriority(): ?ServiceRequestPriority
+    {
+        $id = $this->new_values['priority_id'] ?? null;
+
+        return $id ? ServiceRequestPriority::with('type')->find($id) : null;
+    }
+
+    public function snapshotType(): ?ServiceRequestType
+    {
+        return $this->snapshotPriority()?->type;
+    }
+
+    /**
      * @return Attribute<mixed, mixed>
      */
     protected function newValuesFormatted(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => $this->formatValues(json_decode($attributes['new_values'], true)),
+            get: fn (mixed $value, array $attributes) => $this->formatValues(json_decode($attributes['new_values'], true) ?? []),
         );
     }
 
@@ -128,7 +225,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
     protected function originalValuesFormatted(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => $this->formatValues(json_decode($attributes['original_values'], true)),
+            get: fn (mixed $value, array $attributes) => $this->formatValues(json_decode($attributes['original_values'], true) ?? []),
         );
     }
 
@@ -178,14 +275,5 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
         }
 
         return $value;
-    }
-
-    protected function transformReadableKey(string $key): string
-    {
-        if (Str::endsWith($key, '_id')) {
-            $key = Str::replaceLast('_id', '', $key);
-        }
-
-        return Str::of($key)->replace('_', ' ')->title()->toString();
     }
 }

@@ -31,37 +31,22 @@
     
     </COPYRIGHT>
 --}}
-@php
-    use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 
-    $createdAt = $record->created_at;
+@php
+    $datetime = $datetime ?? null;
+    $tooltip = $datetime?->format('M j, Y g:i A');
+
+    if (! $datetime) {
+        $display = '';
+    } elseif (abs(now()->diffInSeconds($datetime)) < 60) {
+        $display = 'Just now';
+    } elseif ($datetime->diffInDays() >= 7) {
+        $display = $datetime->format('M j, Y');
+    } else {
+        $display = $datetime->diffForHumans();
+    }
 @endphp
 
-<div>
-    <div class="flex flex-row justify-between">
-        <h3 class="mb-1 flex items-center text-lg font-semibold text-gray-500 dark:text-gray-100">
-            <a
-                class="font-medium underline"
-                href="{{ ServiceRequestUpdateResource::getUrl('view', ['record' => $record]) }}"
-            >
-                @if ($record->internal === true)
-                    Internal Update Added
-                @else
-                    Customer Update Sent
-                @endif
-            </a>
-        </h3>
-
-        <div>
-            {{ $viewRecordIcon }}
-        </div>
-    </div>
-
-    @include('service-management::components.timeline-time', ['datetime' => $createdAt])
-
-    <div
-        class="my-4 rounded-lg border-2 border-gray-200 p-2 text-base font-normal text-gray-500 dark:border-gray-800 dark:text-gray-400"
-    >
-        {{ $record->update }}
-    </div>
-</div>
+<time class="mb-2 block text-sm font-normal leading-none text-gray-400 dark:text-gray-500" title="{{ $tooltip }}">
+    {{ $display }}
+</time>
