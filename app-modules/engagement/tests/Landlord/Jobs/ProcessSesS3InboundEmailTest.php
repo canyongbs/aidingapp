@@ -1226,7 +1226,7 @@ describe('Service request reply threading', function () {
         });
 
         $filesystem->assertMissing('s3_email');
-    })->only();
+    });
 
     it('SR reply matches sender case-insensitively against respondent', function () {
         $tenant = Tenant::query()->firstOrFail();
