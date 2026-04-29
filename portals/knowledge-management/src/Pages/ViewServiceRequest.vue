@@ -389,11 +389,6 @@
                             </div>
                         </div>
                         <BaseInputError :errors="validationErrors.description ?? []" />
-                        <div class="mt-3">
-                            <BaseButton type="submit" variant="primary" size="md" :loading="disableSubmitBtn">
-                                Submit Update
-                            </BaseButton>
-                        </div>
                         <div v-if="validationErrors.files" class="text-red-500 text-sm">
                             <p v-for="error in validationErrors.files" :key="error">
                                 {{ error }}
