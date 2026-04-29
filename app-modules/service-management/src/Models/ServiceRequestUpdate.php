@@ -89,30 +89,30 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
 
     public function registerMediaCollections(): void
     {
-        $this->mediaCollections[] = UploadsMediaCollection::create()
-            ->maxFileSizeInMB(10)
-            ->maxNumberOfFiles(6)
-            ->mimes([
-                'application/pdf' => ['pdf'],
-                'application/vnd.ms-excel' => ['xls'],
-                'application/vnd.ms-powerpoint' => ['ppt'],
-                'application/vnd.ms-word' => ['doc'],
-                'application/vnd.openxmlformats-officedocument.presentationml.presentation' => ['pptx'],
-                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => ['xlsx'],
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => ['docx'],
-                'image/jpeg' => ['jpg', 'jpeg'],
-                'image/pdf' => ['pdf'],
-                'image/png' => ['png'],
-                'text/csv' => ['csv'],
-                'text/markdown' => ['md', 'markdown', 'mkd'],
-                'text/plain' => ['txt', 'text'],
-                'application/octet-stream' => ['log'],
-                '.log' => ['log'],
-                'video/mp4' => ['mp4'],
-                'video/webm' => ['webm'],
-                'video/ogg' => ['ogg'],
-                'video/quicktime' => ['quicktime'],
-                'video/x-msvideo' => ['x-msvideo'],
+        $this
+            ->addMediaCollection('uploads')
+            ->useDisk('s3')
+            ->acceptsMimeTypes([
+                'application/pdf',
+                'application/vnd.ms-excel',
+                'application/vnd.ms-powerpoint',
+                'application/vnd.ms-word',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'image/jpeg',
+                'image/pdf',
+                'image/png',
+                'text/csv',
+                'text/markdown',
+                'text/plain',
+                'application/octet-stream',
+                '.log',
+                'video/mp4',
+                'video/webm',
+                'video/ogg',
+                'video/quicktime',
+                'video/x-msvideo',
             ]);
     }
 
