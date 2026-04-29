@@ -169,7 +169,7 @@ it('assigned_to UserSelect does not show admin users by default in create task f
     livewire(ManageTasks::class, ['record' => $project->getRouteKey()])
         ->assertSuccessful()
         ->mountTableAction('create')
-        ->assertFormFieldExists('assigned_to', 'mountedTableActionSchema0', function (UserSelect $field) use ($regularUser, $adminUser): bool {
+        ->assertFormFieldExists('assigned_to', 'mountedActionSchema0', function (UserSelect $field) use ($regularUser, $adminUser): bool {
             return ! empty($field->getSearchResults($regularUser->name))
                 && empty($field->getSearchResults($adminUser->name));
         });
@@ -186,7 +186,7 @@ it('confidential_task_users UserSelect does not show admin users by default in c
     livewire(ManageTasks::class, ['record' => $project->getRouteKey()])
         ->assertSuccessful()
         ->mountTableAction('create')
-        ->assertFormFieldExists('confidential_task_users', 'mountedTableActionSchema0', function (UserSelect $field) use ($regularUser, $adminUser): bool {
+        ->assertFormFieldExists('confidential_task_users', 'mountedActionSchema0', function (UserSelect $field) use ($regularUser, $adminUser): bool {
             return ! empty($field->getSearchResults($regularUser->name))
                 && empty($field->getSearchResults($adminUser->name));
         });
@@ -205,7 +205,7 @@ it('confidential_task_users UserSelect shows pre-selected admin when already on 
     livewire(ManageTasks::class, ['record' => $project->getRouteKey()])
         ->assertSuccessful()
         ->mountTableAction('edit', $task)
-        ->assertFormFieldExists('confidential_task_users', 'mountedTableActionSchema0', function (UserSelect $field) use ($adminUser): bool {
+        ->assertFormFieldExists('confidential_task_users', 'mountedActionSchema0', function (UserSelect $field) use ($adminUser): bool {
             return ! empty($field->getSearchResults($adminUser->name));
         });
 });
@@ -222,7 +222,7 @@ it('assigned_to UserSelect shows all users when filter_admins_from_selection con
     livewire(ManageTasks::class, ['record' => $project->getRouteKey()])
         ->assertSuccessful()
         ->mountTableAction('create')
-        ->assertFormFieldExists('assigned_to', 'mountedTableActionSchema0', function (UserSelect $field) use ($adminUser): bool {
+        ->assertFormFieldExists('assigned_to', 'mountedActionSchema0', function (UserSelect $field) use ($adminUser): bool {
             return ! empty($field->getSearchResults($adminUser->name));
         });
 });
