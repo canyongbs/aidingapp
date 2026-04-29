@@ -340,7 +340,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 } catch (Throwable $throw) {
                     report($throw);
                 }
-            } 
+            }
         });
     }
 
