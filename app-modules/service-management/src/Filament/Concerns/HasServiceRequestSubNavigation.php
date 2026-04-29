@@ -50,7 +50,7 @@ trait HasServiceRequestSubNavigation
 {
     public function getSubNavigation(): array
     {
-        $serviceRequest = $this->getRecord()->serviceRequest;
+        $serviceRequest = $this->getParentRecord();
 
         $navigationItems = [
             ViewServiceRequest::class,
@@ -73,6 +73,6 @@ trait HasServiceRequestSubNavigation
 
     public function getSubNavigationParameters(): array
     {
-        return ['record' => $this->getRecord()->serviceRequest];
+        return ['record' => $this->getParentRecord()];
     }
 }

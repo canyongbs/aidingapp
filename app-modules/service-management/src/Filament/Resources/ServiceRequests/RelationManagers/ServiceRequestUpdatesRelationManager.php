@@ -160,7 +160,10 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
             ])
             ->recordActions([
                 ViewAction::make()
-                    ->url(fn (ServiceRequestUpdate $serviceRequestUpdate) => ServiceRequestUpdateResource::getUrl('view', ['record' => $serviceRequestUpdate])),
+                    ->url(fn (ServiceRequestUpdate $serviceRequestUpdate) => ServiceRequestUpdateResource::getUrl('view', [
+                        'record' => $serviceRequestUpdate,
+                        'service_request' => $serviceRequestUpdate->service_request_id,
+                    ])),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

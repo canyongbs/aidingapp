@@ -50,6 +50,14 @@ class EditServiceRequestUpdate extends EditRecord
 
     protected static string $resource = ServiceRequestUpdateResource::class;
 
+    public function getRedirectUrl(): ?string
+    {
+        return static::getResource()::getUrl('view', [
+            'record' => $this->record,
+            'service_request' => $this->getParentRecord()->getRouteKey(),
+        ]);
+    }
+
     protected function getHeaderActions(): array
     {
         return [

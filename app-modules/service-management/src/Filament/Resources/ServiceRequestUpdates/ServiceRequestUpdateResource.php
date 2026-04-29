@@ -36,9 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\CreateServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\EditServiceRequestUpdate;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\ListServiceRequestUpdates;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\ViewServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
@@ -68,6 +67,10 @@ class ServiceRequestUpdateResource extends Resource
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-chat-bubble-left-right';
 
     protected static bool $shouldRegisterNavigation = false;
+
+    protected static ?string $parentResource = ServiceRequestResource::class;
+
+    protected static ?string $slug = 'updates';
 
     public static function form(Schema $schema): Schema
     {
@@ -150,8 +153,6 @@ class ServiceRequestUpdateResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListServiceRequestUpdates::route('/'),
-            'create' => CreateServiceRequestUpdate::route('/create'),
             'view' => ViewServiceRequestUpdate::route('/{record}'),
             'edit' => EditServiceRequestUpdate::route('/{record}/edit'),
         ];
