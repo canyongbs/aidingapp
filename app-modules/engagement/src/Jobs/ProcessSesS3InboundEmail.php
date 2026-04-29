@@ -331,16 +331,16 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 'created_by_type' => $serviceRequest->respondent->getMorphClass(),
             ]);
 
-            try {
-                foreach ($parser->getAttachments(false) as $attachment) {
+            foreach ($parser->getAttachments(false) as $attachment) {
+                try {
                     $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
                         ->setName($attachment->getFilename())
                         ->setFileName($attachment->getFilename())
                         ->toMediaCollection('uploads');
+                } catch (Throwable $throw) {
+                    report($throw);
                 }
-            } catch (Throwable $throw) {
-                report($throw);
-            }
+            } 
         });
     }
 
