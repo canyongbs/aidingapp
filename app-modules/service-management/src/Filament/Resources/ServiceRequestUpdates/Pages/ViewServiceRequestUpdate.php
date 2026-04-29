@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\P
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -132,11 +131,12 @@ class ViewServiceRequestUpdate extends ViewRecord
                                         ->label($displayName)
                                         ->visibility('private')
                                         ->getStateUsing($media->getTemporaryUrl(now()->addMinute()))
-                                        ->hintAction(fn () => Action::make('download')
-                                            ->label('Download')
-                                            ->icon('heroicon-m-arrow-down-tray')
-                                            ->color('primary')
-                                            ->url($media->getTemporaryUrl(now()->addMinute()), true)
+                                        ->hintAction(
+                                            fn () => Action::make('download')
+                                                ->label('Download')
+                                                ->icon('heroicon-m-arrow-down-tray')
+                                                ->color('primary')
+                                                ->url($media->getTemporaryUrl(now()->addMinute()), true)
                                         );
                                 }
 
@@ -158,12 +158,13 @@ class ViewServiceRequestUpdate extends ViewRecord
                                         default => 'heroicon-o-paper-clip',
                                     })
                                     ->size(IconSize::TwoExtraLarge)
-                                    ->hintAction(fn () => Action::make('download')
+                                    ->hintAction(
+                                        fn () => Action::make('download')
                                             ->label('Download')
                                             ->icon('heroicon-m-arrow-down-tray')
                                             ->color('primary')
                                             ->url($media->getTemporaryUrl(now()->addMinute()), true)
-                                        );
+                                    );
                             })
                             ->toArray()
                     ),
