@@ -54,9 +54,7 @@ class IncidentSeverityFactory extends Factory
     {
         return [
             'name' => $this->faker->words(10, true),
-            'color' => $this->faker->randomElement(
-                collect(Color::cases())->values()
-            ),
+            'color' => $this->faker->randomElement(Color::cases()),
         ];
     }
 }

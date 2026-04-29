@@ -62,9 +62,15 @@ class IncidentSeverity extends BaseModel implements Auditable
         'color',
     ];
 
-    protected $appends = [
-        'rgb_color',
-    ];
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'color' => Color::class,
+        ];
+    }
 
     /**
      * @return HasMany<Incident, $this>
@@ -75,12 +81,12 @@ class IncidentSeverity extends BaseModel implements Auditable
     }
 
     /**
-     * @return Attribute<string, never>
+     * @return Attribute<string|null, never>
      */
     protected function rgbColor(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->color ? Color::from($this->color)->getRgb() : null,
+            get: fn () => $this->color?->getRgb(),
         );
     }
 }
