@@ -86,7 +86,7 @@ class IncidentSeverity extends BaseModel implements Auditable
     protected function rgbColor(): Attribute
     {
         return new Attribute(
-            get: fn () => $this->color?->getRgb(),
+            get: fn () => $this->color->getRgb(),
         );
     }
 }
