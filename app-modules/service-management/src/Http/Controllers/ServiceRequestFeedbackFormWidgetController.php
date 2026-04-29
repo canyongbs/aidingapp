@@ -97,6 +97,12 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
 
     public function view(Request $request, ServiceRequest $serviceRequest): JsonResponse
     {
+        $contact = auth('contact')->user();
+
+        if ($contact) {
+            abort_if(! $serviceRequest->respondent->is($contact), Response::HTTP_FORBIDDEN);
+        }
+
         $logo = ThemeSettings::getSettingsPropertyModel('theme.is_logo_active')->getFirstMedia('logo');
         $portalSettings = app(PortalSettings::class);
 
@@ -142,6 +148,8 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
         $contact = auth('contact')->user();
 
         abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
+
+        abort_if(! $serviceRequest->respondent->is($contact), Response::HTTP_FORBIDDEN);
 
         $validator = Validator::make($request->all(), [
             'csat' => [Rule::requiredIf($serviceRequest->priority?->type?->has_enabled_csat), 'between:1,5'],
