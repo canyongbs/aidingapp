@@ -64,15 +64,15 @@ class UserSelect extends Select
         return parent::relationship(
             $name,
             $titleAttribute ?? 'name',
-            function (Builder $query) use ($modifyQueryUsing) {
-                if ($this->shouldFilterAdmins()) {
+            function (Builder $query, UserSelect $component) use ($modifyQueryUsing) {
+                if ($component->shouldFilterAdmins()) {
                     $alreadySelected = [];
 
-                    $record = $this->getRecord();
-                    $relationshipName = $this->getRelationshipName();
+                    $record = $component->getRecord();
+                    $relationshipName = $component->getRelationshipName();
 
                     if ($record && $record->exists && $relationshipName && ! str_contains($relationshipName, '.')) {
-                        $qualifiedKey = $this->getRelationship()->getRelated()->getQualifiedKeyName();
+                        $qualifiedKey = $component->getRelationship()->getRelated()->getQualifiedKeyName();
 
                         $alreadySelected = $record->{$relationshipName}()
                             ->getQuery()
@@ -81,7 +81,7 @@ class UserSelect extends Select
                             ->toArray();
                     }
 
-                    $state = $this->getState();
+                    $state = $component->getState();
                     $stateSelected = array_filter(is_array($state) ? $state : [$state]);
                     $alreadySelected = array_values(array_unique(array_merge($alreadySelected, $stateSelected)));
 
@@ -102,7 +102,7 @@ class UserSelect extends Select
         );
     }
 
-    protected function shouldFilterAdmins(): bool
+    public function shouldFilterAdmins(): bool
     {
         return $this->filterAdmins && config('internal-users.filter_admins_from_selection', true);
     }
