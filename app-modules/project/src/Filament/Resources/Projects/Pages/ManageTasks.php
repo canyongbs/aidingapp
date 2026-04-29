@@ -44,6 +44,7 @@ use AidingApp\Task\Filament\Concerns\TaskEditForm;
 use AidingApp\Task\Filament\Concerns\TaskViewActionInfoList;
 use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 use AidingApp\Task\Models\Task;
+use App\Filament\Forms\Components\UserSelect;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSearch;
@@ -170,8 +171,8 @@ class ManageTasks extends ManageRelatedRecords
                                     ->label('Confidential')
                                     ->live()
                                     ->columnSpanFull(),
-                                Select::make('confidential_task_users')
-                                    ->relationship('confidentialAccessUsers', 'name')
+                                UserSelect::make('confidential_task_users')
+                                    ->relationship('confidentialAccessUsers')
                                     ->preload()
                                     ->label('Users')
                                     ->multiple()
@@ -195,11 +196,10 @@ class ManageTasks extends ManageRelatedRecords
                         DateTimePicker::make('due')
                             ->label('Due Date')
                             ->native(false),
-                        Select::make('assigned_to')
+                        UserSelect::make('assigned_to')
                             ->label('Assigned To')
-                            ->relationship('assignedTo', 'name')
+                            ->relationship('assignedTo')
                             ->nullable()
-                            ->searchable(['name', 'email'])
                             ->default(auth()->id()),
                         Select::make('concern_id')
                             ->label('Related To')

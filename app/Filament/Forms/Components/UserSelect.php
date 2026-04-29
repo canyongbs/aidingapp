@@ -34,55 +34,55 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
+namespace App\Filament\Forms\Components;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
-use App\Concerns\EditPageRedirection;
-use App\Filament\Forms\Components\UserSelect;
+use App\Models\Scopes\WithoutAnyAdmin;
+use Closure;
 use Filament\Forms\Components\Select;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
-class ManageServiceRequestTypeManagers extends EditRecord
+class UserSelect extends Select
 {
-    use EditPageRedirection;
+    protected bool $filterAdmins = true;
 
-    protected static ?string $title = 'Managers';
-
-    protected static ?string $breadcrumb = 'Managers';
-
-    protected static string $resource = ServiceRequestTypeResource::class;
-
-    public static function getNavigationLabel(): string
+    protected function setUp(): void
     {
-        return 'Managers';
+        parent::setUp();
+
+        $this->searchable(['name', 'email']);
     }
 
-    public function getRelationManagers(): array
+    public function withoutAdminFilter(): static
     {
-        // Needed to prevent Filament from loading the relation managers on this page.
-        return [];
+        $this->filterAdmins = false;
+
+        return $this;
     }
 
-    public function form(Schema $schema): Schema
+    public function relationship(string|Closure|null $name = null, string|Closure|null $titleAttribute = null, ?Closure $modifyQueryUsing = null, bool $ignoreRecord = false): static
     {
-        return $schema
-            ->components([
-                Section::make()
-                    ->schema([
-                        UserSelect::make('managerUsers')
-                            ->label('Users')
-                            ->multiple()
-                            ->relationship('managerUsers')
-                            ->preload(),
-                        Select::make('managerTeams')
-                            ->label('Teams')
-                            ->multiple()
-                            ->relationship('managerTeams', 'name')
-                            ->preload(),
-                    ])
-                    ->columns(2),
-            ]);
+        return parent::relationship(
+            $name,
+            $titleAttribute ?? 'name',
+            function (Builder $query) use ($modifyQueryUsing) {
+                if ($this->shouldFilterAdmins()) {
+                    $query->tap(new WithoutAnyAdmin());
+                }
+
+                if ($modifyQueryUsing) {
+                    $modifyQueryUsing($query);
+                }
+            },
+            $ignoreRecord,
+        );
+    }
+
+    protected function shouldFilterAdmins(): bool
+    {
+        if (! $this->filterAdmins) {
+            return false;
+        }
+
+        return config('internal-users.filter_admins_from_selection', true);
     }
 }

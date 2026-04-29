@@ -44,6 +44,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Concerns\EditPageRedirection;
+use App\Filament\Forms\Components\UserSelect;
 use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
 use App\Models\Scopes\TagsForClass;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
@@ -206,11 +207,10 @@ class EditKnowledgeBaseItem extends EditRecord
                                     ->visible(fn (): bool => Division::count() > 1)
                                     ->saveRelationshipsWhenHidden()
                                     ->exists((new Division())->getTable(), (new Division())->getKeyName()),
-                                Select::make('manager_ids')
+                                UserSelect::make('manager_ids')
                                     ->label('Managers')
-                                    ->relationship('managers', 'name')
+                                    ->relationship('managers')
                                     ->multiple()
-                                    ->searchable()
                                     ->exists('users', 'id'),
                             ]),
                     ])
