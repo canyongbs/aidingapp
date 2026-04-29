@@ -62,5 +62,4 @@ it('validates the inputs', function (array $data, array $error) {
             ['files' => [10]],
             ['files.0'],
         ],
-    ])
-    ->only();
+    ]);
