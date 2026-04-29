@@ -46,13 +46,6 @@ class StoreServiceRequestUpdateController extends Controller
 {
     public function __invoke(StoreServiceRequestUpdateRequest $request): JsonResponse
     {
-        $request->validate([
-            'description' => ['required', 'string'],
-            'serviceRequestId' => ['required', 'uuid', 'exists:service_requests,id'],
-            'files' => ['nullable', 'array'],
-            'files.*' => ['file'],
-        ]);
-
         $serviceRequestUpdate = new ServiceRequestUpdate();
         $serviceRequestUpdate->service_request_id = $request->serviceRequestId;
         $serviceRequestUpdate->update = $request->description;
