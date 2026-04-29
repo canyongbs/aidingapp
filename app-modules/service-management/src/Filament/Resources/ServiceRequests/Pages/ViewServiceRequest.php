@@ -155,7 +155,7 @@ class ViewServiceRequest extends ViewRecord
                                     ->label('Download')
                                     ->icon('heroicon-m-arrow-down-tray')
                                     ->color('primary')
-                                    ->url($media->getTemporaryUrl(now()->addMinute()), true);
+                                    ->url(route('service-request.media.download', ['media' => $media->getKey()]));
 
                                 if ($isImage) {
                                     return ImageEntry::make($media->getKey())

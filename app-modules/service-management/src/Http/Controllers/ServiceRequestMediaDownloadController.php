@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,24 +34,22 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestMediaDownloadController;
-use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestFeedbackForm;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
-use Illuminate\Support\Facades\Route;
+namespace AidingApp\ServiceManagement\Http\Controllers;
 
-Route::middleware('web')
-    ->prefix('service-request-forms')
-    ->name('service-request-forms.')
-    ->group(function () {
-        Route::get('/{serviceRequestForm}/respond', RenderServiceRequestForm::class)
-            ->name('show');
-    });
+use AidingApp\ServiceManagement\Http\Requests\ServiceRequestMediaDownloadRequest;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-Route::get('/service-requests/{serviceRequest}/feedback/', RenderServiceRequestFeedbackForm::class)
-    ->middleware(['web', FeedbackManagementIsOn::class])
-    ->name('feedback.service.request');
-
-Route::middleware(['web', 'auth'])
-    ->get('/service-request/media/{media}/download', ServiceRequestMediaDownloadController::class)
-    ->name('service-request.media.download');
+class ServiceRequestMediaDownloadController extends Controller
+{
+    public function __invoke(ServiceRequestMediaDownloadRequest $request, Media $media): RedirectResponse
+    {
+        return redirect(
+            $media->getTemporaryUrl(
+                expiration: now()->addMinute(),
+                options: ['ResponseContentDisposition' => 'attachment; filename="' . $media->file_name . '"']
+            )
+        );
+    }
+}

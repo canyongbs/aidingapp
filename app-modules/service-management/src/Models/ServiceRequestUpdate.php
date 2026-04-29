@@ -164,7 +164,7 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
                 return [
                     'id' => $media->id,
                     'name' => $media->file_name,
-                    'url' => $media->getTemporaryUrl(now()->addMinute()),
+                    'url' => route('api.portal.service-request.media.download', ['media' => $media->getKey()]),
                 ];
             })
             ->toArray();
