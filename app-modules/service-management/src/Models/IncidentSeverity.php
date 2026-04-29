@@ -63,6 +63,14 @@ class IncidentSeverity extends BaseModel implements Auditable
     ];
 
     /**
+     * @return HasMany<Incident, $this>
+     */
+    public function incidents(): HasMany
+    {
+        return $this->hasMany(Incident::class, 'severity_id');
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
@@ -70,14 +78,6 @@ class IncidentSeverity extends BaseModel implements Auditable
         return [
             'color' => Color::class,
         ];
-    }
-
-    /**
-     * @return HasMany<Incident, $this>
-     */
-    public function incidents(): HasMany
-    {
-        return $this->hasMany(Incident::class, 'severity_id');
     }
 
     /**
