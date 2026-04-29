@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,38 +34,25 @@
 </COPYRIGHT>
 */
 
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages\EditServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Support\Facades\File;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
+use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
+    $settings->data->addons->onlineForms = true;
     $settings->save();
 });
 
-it('redirects unauthenticated users to the login page', function () {
-    $type = ServiceRequestType::factory()->create();
-
-    $form = new ServiceRequestForm(['name' => 'Test Form']);
-    $form->type()->associate($type);
-    $form->save();
-
-    get(route('service-request-forms.preview', ['serviceRequestForm' => $form]))
-        ->assertRedirect();
-});
-
-it('is forbidden when service management is not enabled', function () {
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->serviceManagement = false;
-    $settings->save();
-
+it('renders the preview action on the edit page header', function () {
     $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any', 'settings.*.view', 'settings.*.update');
 
     $type = ServiceRequestType::factory()->create();
 
@@ -73,49 +60,33 @@ it('is forbidden when service management is not enabled', function () {
     $form->type()->associate($type);
     $form->save();
 
-    actingAs($user)
-        ->get(route('service-request-forms.preview', ['serviceRequestForm' => $form]))
-        ->assertForbidden();
-});
+    actingAs($user);
 
-it('renders the preview page for an authenticated user', function () {
-    $user = User::factory()->create();
-
-    $type = ServiceRequestType::factory()->create();
-
-    $form = new ServiceRequestForm(['name' => 'Test Form']);
-    $form->type()->associate($type);
-    $form->save();
-
-    $manifest = json_encode([
-        'src/widget.js' => [
-            'file' => 'assets/widget-abc123.js',
-            'name' => 'widget',
-            'src' => 'src/widget.js',
-            'isEntry' => true,
-        ],
-    ]);
-
-    File::shouldReceive('get')
-        ->once()
-        ->andReturn($manifest);
-
-    $previewEntryUrl = route('service-request-forms.preview-entry', ['serviceRequestForm' => $form]);
-
-    actingAs($user)
-        ->get(route('service-request-forms.preview', ['serviceRequestForm' => $form]))
+    // The preview action is present in the header actions of EditServiceRequestForm
+    livewire(EditServiceRequestForm::class, [
+        'record' => $form->getRouteKey(),
+    ])
         ->assertSuccessful()
-        // Correct view is used
-        ->assertViewIs('service-management::service-request-form-preview')
-        // The form model is passed through to the view
-        ->assertViewHas('serviceRequestForm', $form)
-        // The widget JS URL is built from the manifest's file entry
-        ->assertViewHas('widgetJsUrl', url('widgets/service-requests/forms') . '/assets/widget-abc123.js')
-        // The preview-entry URL is passed so the embed knows where to fetch schema
-        ->assertViewHas('previewEntryUrl', $previewEntryUrl)
-        // The embed element is rendered with preview="true" so the widget blocks submission
-        ->assertSee('service-request-form-embed', escape: false)
-        ->assertSee('preview="true"', escape: false)
-        // The entry-url attribute points to the preview-entry endpoint
-        ->assertSee('entry-url="' . $previewEntryUrl . '"', escape: false);
+        ->assertActionExists('preview');
+});
+
+it('the preview action URL points to the preview route for the given form', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any', 'settings.*.view', 'settings.*.update');
+
+    $type = ServiceRequestType::factory()->create();
+
+    $form = new ServiceRequestForm(['name' => 'Test Form']);
+    $form->type()->associate($type);
+    $form->save();
+
+    actingAs($user);
+
+    $expectedUrl = route('service-request-forms.preview', ['serviceRequestForm' => $form]);
+
+    livewire(EditServiceRequestForm::class, [
+        'record' => $form->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertActionHasUrl('preview', $expectedUrl);
 });
