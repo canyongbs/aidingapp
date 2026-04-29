@@ -98,7 +98,7 @@ class ServiceRequestUpdateResource extends Resource
                             ->visibility('private')
                             ->collection('uploads')
                             ->multiple(true)
-                            ->acceptedFileTypes(app(ServiceRequestUpdate::class)->getMediaCollection('uploads')->acceptsMimeTypes)
+                            ->acceptedFileTypes((new ServiceRequestUpdate())->getMediaCollection('uploads')->acceptsMimeTypes)
                             ->downloadable(),
                     ]),
             ]);

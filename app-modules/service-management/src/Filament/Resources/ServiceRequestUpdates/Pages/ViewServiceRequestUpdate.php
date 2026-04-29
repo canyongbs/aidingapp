@@ -92,10 +92,10 @@ class ViewServiceRequestUpdate extends ViewRecord
                     ])
                     ->columns(),
                 Section::make('Uploads')
-                    ->visible(fn (ServiceRequestUpdate $record): bool => $record->hasMedia(app(ServiceRequestUpdate::class)->getMediaCollection('uploads')->name))
+                    ->visible(fn (ServiceRequestUpdate $record): bool => $record->hasMedia((new ServiceRequestUpdate())->getMediaCollection('uploads')->name))
                     ->schema(
                         fn (ServiceRequestUpdate $record) => $record
-                            ->getMedia(app(ServiceRequestUpdate::class)->getMediaCollection('uploads')->name)
+                            ->getMedia((new ServiceRequestUpdate())->getMediaCollection('uploads')->name)
                             ->map(function (Media $media) {
                                 $mimeType = $media->mime_type;
                                 $isImage = in_array($mimeType, ['image/jpeg', 'image/png']);
