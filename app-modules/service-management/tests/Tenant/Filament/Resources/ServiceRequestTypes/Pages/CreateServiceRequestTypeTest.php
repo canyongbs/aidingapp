@@ -165,13 +165,13 @@ test('CreateServiceRequestType is creating default_category when form saved', fu
     livewire(CreateServiceRequestType::class)
         ->fillForm([
             'name' => 'Test Type',
-            'default_category' => ServiceRequestCategory::Incident->value,
+            'default_category' => ServiceRequestCategory::Advisory->value,
         ])
         ->call('create')
         ->assertHasNoFormErrors();
 
     assertDatabaseHas(ServiceRequestType::class, [
         'name' => 'Test Type',
-        'default_category' => ServiceRequestCategory::Incident->value,
+        'default_category' => ServiceRequestCategory::Advisory->value,
     ]);
 });

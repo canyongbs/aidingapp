@@ -36,14 +36,14 @@
 
 namespace AidingApp\ServiceManagement\Providers;
 
+use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use AidingApp\ServiceManagement\Models\AdvisoryStatus;
+use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
-use AidingApp\ServiceManagement\Models\Incident;
-use AidingApp\ServiceManagement\Models\IncidentSeverity;
-use AidingApp\ServiceManagement\Models\IncidentStatus;
-use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
@@ -98,10 +98,10 @@ class ServiceManagementServiceProvider extends ServiceProvider
             'service_request' => ServiceRequest::class,
             'sla' => Sla::class,
             'service-request-type-email-template' => ServiceRequestTypeEmailTemplate::class,
-            'incident' => Incident::class,
-            'incident_severity' => IncidentSeverity::class,
-            'incident_status' => IncidentStatus::class,
-            'incident_update' => IncidentUpdate::class,
+            'advisory' => Advisory::class,
+            'advisory_severity' => AdvisorySeverity::class,
+            'advisory_status' => AdvisoryStatus::class,
+            'advisory_update' => AdvisoryUpdate::class,
             'service_monitoring_target' => ServiceMonitoringTarget::class,
         ]);
 

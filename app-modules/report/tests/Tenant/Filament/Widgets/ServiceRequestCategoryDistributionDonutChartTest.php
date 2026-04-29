@@ -52,7 +52,7 @@ it('returns correct category distribution within the given date range', function
     ServiceRequest::factory()->count(3)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'category' => ServiceRequestCategory::Incident,
+        'category' => ServiceRequestCategory::Advisory,
         'created_at' => now()->subDays(7),
     ])->create();
 
@@ -67,7 +67,7 @@ it('returns correct category distribution within the given date range', function
     ServiceRequest::factory()->count(2)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'category' => ServiceRequestCategory::Incident,
+        'category' => ServiceRequestCategory::Advisory,
         'created_at' => now()->subDays(20),
     ])->create();
 
@@ -87,12 +87,12 @@ it('returns correct category distribution within the given date range', function
     $labels = $data['labels']->toArray();
     $counts = $data['datasets'][0]['data']->toArray();
 
-    $incidentIndex = array_search(ServiceRequestCategory::Incident->getLabel(), $labels);
+    $advisoryIndex = array_search(ServiceRequestCategory::Advisory->getLabel(), $labels);
     $requestIndex = array_search(ServiceRequestCategory::Request->getLabel(), $labels);
 
-    expect($incidentIndex)->not->toBeFalse()
+    expect($advisoryIndex)->not->toBeFalse()
         ->and($requestIndex)->not->toBeFalse()
-        ->and($counts[$incidentIndex])->toBe(3)
+        ->and($counts[$advisoryIndex])->toBe(3)
         ->and($counts[$requestIndex])->toBe(5);
 });
 
@@ -104,7 +104,7 @@ it('returns correct category distribution when no date filters are applied', fun
     ServiceRequest::factory()->count(4)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'category' => ServiceRequestCategory::Incident,
+        'category' => ServiceRequestCategory::Advisory,
         'created_at' => now()->subDays(3),
     ])->create();
 
@@ -124,10 +124,10 @@ it('returns correct category distribution when no date filters are applied', fun
     $labels = $data['labels']->toArray();
     $counts = $data['datasets'][0]['data']->toArray();
 
-    $incidentIndex = array_search(ServiceRequestCategory::Incident->getLabel(), $labels);
+    $advisoryIndex = array_search(ServiceRequestCategory::Advisory->getLabel(), $labels);
     $requestIndex = array_search(ServiceRequestCategory::Request->getLabel(), $labels);
 
-    expect($counts[$incidentIndex])->toBe(4)
+    expect($counts[$advisoryIndex])->toBe(4)
         ->and($counts[$requestIndex])->toBe(7);
 });
 
@@ -136,11 +136,11 @@ it('excludes zero-count categories from the chart', function () {
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
     $status = ServiceRequestStatus::factory()->create();
 
-    // Only incidents — requests should not appear in chart
+    // Only advisories — requests should not appear in chart
     ServiceRequest::factory()->count(2)->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'category' => ServiceRequestCategory::Incident,
+        'category' => ServiceRequestCategory::Advisory,
         'created_at' => now()->subDays(1),
     ])->create();
 
@@ -152,6 +152,6 @@ it('excludes zero-count categories from the chart', function () {
 
     $labels = $data['labels']->toArray();
 
-    expect($labels)->toContain(ServiceRequestCategory::Incident->getLabel())
+    expect($labels)->toContain(ServiceRequestCategory::Advisory->getLabel())
         ->and($labels)->not->toContain(ServiceRequestCategory::Request->getLabel());
 });

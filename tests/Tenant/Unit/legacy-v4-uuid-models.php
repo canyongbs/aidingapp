@@ -105,10 +105,6 @@ use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
-use AidingApp\ServiceManagement\Models\Incident;
-use AidingApp\ServiceManagement\Models\IncidentSeverity;
-use AidingApp\ServiceManagement\Models\IncidentStatus;
-use AidingApp\ServiceManagement\Models\IncidentUpdate;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser;
@@ -229,10 +225,6 @@ return [
     ChangeRequestStatus::class,
     ChangeRequestType::class,
     HistoricalServiceMonitoring::class,
-    Incident::class,
-    IncidentSeverity::class,
-    IncidentStatus::class,
-    IncidentUpdate::class,
     ServiceMonitoringTarget::class,
     ServiceMonitoringTargetTeam::class,
     ServiceMonitoringTargetUser::class,

@@ -93,8 +93,8 @@ class ServiceRequestTypesTable extends BaseWidget
                         },
                     ])
                         ->withCount([
-                            'serviceRequests as incident_count' => function (Builder $query) use ($startDate, $endDate) {
-                                $query->where('service_requests.category', 'incident');
+                            'serviceRequests as advisory_count' => function (Builder $query) use ($startDate, $endDate) {
+                                $query->where('service_requests.category', 'advisory');
                                 $query->when(
                                     $startDate && $endDate,
                                     fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
@@ -129,8 +129,8 @@ class ServiceRequestTypesTable extends BaseWidget
                     ->label('Type'),
                 TextColumn::make('service_requests_count')
                     ->label('Count'),
-                TextColumn::make('incident_count')
-                    ->label('Incidents'),
+                TextColumn::make('advisory_count')
+                    ->label('Advisories'),
                 TextColumn::make('request_count')
                     ->label('Requests'),
                 TextColumn::make('service_requests_avg_time_to_resolution')

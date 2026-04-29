@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\AdvisoryController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\AssetManagementPortalController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\EvaluateServiceRequestAiResolutionController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GenerateServiceRequestQuestionsController;
@@ -41,7 +42,6 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetKnowledgeMana
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestFormController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestsController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestUploadUrl;
-use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\IncidentController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalArticleController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalCategoryController;
@@ -155,7 +155,7 @@ Route::prefix('api')
                     ->middleware(['auth:sanctum'])
                     ->name('product.licenses');
 
-                Route::get('/advisories', IncidentController::class)
+                Route::get('/advisories', AdvisoryController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('advisories');
                 Route::get('/status', ServiceMonitorStatusController::class)

@@ -36,16 +36,16 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Models\Incident;
-use AidingApp\ServiceManagement\Models\IncidentSeverity;
-use AidingApp\ServiceManagement\Models\IncidentStatus;
-use AidingApp\ServiceManagement\Models\IncidentUpdate;
+use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use AidingApp\ServiceManagement\Models\AdvisoryStatus;
+use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
 use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\Get;
 
-test('Can fetch all incidents with updates', function () {
+test('Can fetch all advisories with updates', function () {
     $settings = app(PortalSettings::class);
 
     $settings->knowledge_management_portal_enabled = true;
@@ -55,15 +55,15 @@ test('Can fetch all incidents with updates', function () {
 
     actingAs($contact);
 
-    $incidentStatus = IncidentStatus::factory()->create();
+    $advisoryStatus = AdvisoryStatus::factory()->create();
 
-    $incidentSeverity = IncidentSeverity::factory()->create();
+    $advisorySeverity = AdvisorySeverity::factory()->create();
 
-    Incident::factory()
+    Advisory::factory()
         ->count(5)
-        ->for($incidentStatus, 'status')
-        ->for($incidentSeverity, 'severity')
-        ->has(IncidentUpdate::factory()->count(2), 'incidentUpdates')
+        ->for($advisoryStatus, 'status')
+        ->for($advisorySeverity, 'severity')
+        ->has(AdvisoryUpdate::factory()->count(2), 'advisoryUpdates')
         ->create();
 
     $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
