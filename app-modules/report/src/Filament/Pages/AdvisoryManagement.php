@@ -62,7 +62,7 @@ class AdvisoryManagement extends Dashboard
 
     public static function canAccess(): bool
     {
-        if (! IncidentRenameFeature::active() || ! Gate::check(Feature::AdvisoryManagement->getGateName())) {
+        if ((IncidentRenameFeature::active() && ! Gate::check(Feature::AdvisoryManagement->getGateName())) || (! Gate::check(Feature::IncidentManagement->getGateName()))) {
             return false;
         }
 

@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Policies;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
+use App\Features\IncidentRenameFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -124,6 +125,6 @@ class AdvisoryStatusPolicy
      */
     protected function requiredFeatures(): array
     {
-        return [Feature::AdvisoryManagement];
+        return IncidentRenameFeature::active() ? [Feature::AdvisoryManagement] : [Feature::IncidentManagement];
     }
 }

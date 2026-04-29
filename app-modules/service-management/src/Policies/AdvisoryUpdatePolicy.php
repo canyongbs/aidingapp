@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
+use App\Features\IncidentRenameFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -121,6 +122,6 @@ class AdvisoryUpdatePolicy
      */
     protected function requiredFeatures(): array
     {
-        return [Feature::AdvisoryManagement, Feature::ServiceManagement];
+        return IncidentRenameFeature::active() ? [Feature::AdvisoryManagement, Feature::ServiceManagement] : [Feature::IncidentManagement, Feature::ServiceManagement];
     }
 }
