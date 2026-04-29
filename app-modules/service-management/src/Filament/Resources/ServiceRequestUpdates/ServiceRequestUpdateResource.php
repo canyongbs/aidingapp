@@ -49,9 +49,11 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -89,6 +91,16 @@ class ServiceRequestUpdateResource extends Resource
                 Toggle::make('internal')
                     ->label('Internal')
                     ->rule(['boolean']),
+                Section::make('Uploads')
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('uploads')
+                            ->hiddenLabel()
+                            ->visibility('private')
+                            ->collection('uploads')
+                            ->multiple(true)
+                            ->acceptedFileTypes(app(ServiceRequestUpdate::class)->getMediaCollection('uploads')->acceptsMimeTypes)
+                            ->downloadable(),
+                    ]),
             ]);
     }
 

@@ -53,16 +53,20 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * @mixin IdeHelperServiceRequestUpdate
  */
 #[ObservedBy([ServiceRequestUpdateObserver::class])]
-class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATimeline
+class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATimeline, HasMedia
 {
     use SoftDeletes;
     use HasUuids;
     use AuditableTrait;
+    use InteractsWithMedia;
 
     /** @use HasFactory<ServiceRequestUpdateFactory> */
     use HasFactory;
@@ -81,6 +85,35 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
         'internal' => 'boolean',
         'update_type' => ServiceRequestUpdateType::class,
     ];
+
+    public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('uploads')
+            ->useDisk('s3')
+            ->acceptsMimeTypes([
+                'application/pdf',
+                'application/vnd.ms-excel',
+                'application/vnd.ms-powerpoint',
+                'application/vnd.ms-word',
+                'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'image/jpeg',
+                'image/pdf',
+                'image/png',
+                'text/csv',
+                'text/markdown',
+                'text/plain',
+                'application/octet-stream',
+                '.log',
+                'video/mp4',
+                'video/webm',
+                'video/ogg',
+                'video/quicktime',
+                'video/x-msvideo',
+            ]);
+    }
 
     /**
      * @return BelongsTo<ServiceRequest, $this>
@@ -112,6 +145,29 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
             type: 'created_by_type',
             id: 'created_by_id',
         );
+    }
+
+    /**
+     * @return array{
+     *   array{
+     *     id: string,
+     *     name: string,
+     *     url: string,
+     *   }
+     * }
+     */
+    public function getUploadedMedia(): array
+    {
+        return $this
+            ->getMedia('uploads')
+            ->map(function (Media $media) {
+                return [
+                    'id' => $media->id,
+                    'name' => $media->file_name,
+                    'url' => $media->getTemporaryUrl(now()->addMinute()),
+                ];
+            })
+            ->toArray();
     }
 
     protected function serializeDate(DateTimeInterface $date): string

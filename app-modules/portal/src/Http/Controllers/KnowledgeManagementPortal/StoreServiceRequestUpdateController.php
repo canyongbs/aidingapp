@@ -46,6 +46,13 @@ class StoreServiceRequestUpdateController extends Controller
 {
     public function __invoke(StoreServiceRequestUpdateRequest $request): JsonResponse
     {
+        $request->validate([
+            'description' => ['required', 'string'],
+            'serviceRequestId' => ['required', 'uuid', 'exists:service_requests,id'],
+            'files' => ['nullable', 'array'],
+            'files.*' => ['file'],
+        ]);
+
         $serviceRequestUpdate = new ServiceRequestUpdate();
         $serviceRequestUpdate->service_request_id = $request->serviceRequestId;
         $serviceRequestUpdate->update = $request->description;
@@ -54,6 +61,14 @@ class StoreServiceRequestUpdateController extends Controller
         $serviceRequestUpdate->createdBy()->associate($request->user(guard: 'contact'));
 
         $serviceRequestUpdate->save();
+
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $serviceRequestUpdate
+                    ->addMedia($file)
+                    ->toMediaCollection('uploads');
+            }
+        }
 
         $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
 
@@ -68,6 +83,7 @@ class StoreServiceRequestUpdateController extends Controller
                     'update' => $update->update,
                     'created_by_type' => $update->created_by_type,
                     'created_at' => $update->created_at->format('m-d-Y g:i A'),
+                    'media' => $update->getUploadedMedia(),
                 ];
             });
 
