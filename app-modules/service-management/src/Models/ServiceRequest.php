@@ -461,7 +461,13 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
         $updateDate = ! is_null($timezone) ? $recentUpdate->created_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $recentUpdate->created_at->format('M j, Y \a\t h:i A (T)');
 
-        return "{$creatorInfo}\n\n{$updateDate} - {$recentUpdate->update}";
+        $updateText = "{$creatorInfo}\n\n{$updateDate} - {$recentUpdate->update}";
+
+        if ($recentUpdate->hasMedia($recentUpdate->getMediaCollection('uploads')->name)) {
+            $updateText .= "\n\nNote: Files were attached with this update. Please login the service portal to see the files.";
+        }
+
+        return $updateText;
     }
 
     protected function casts(): array

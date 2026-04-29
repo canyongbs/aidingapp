@@ -55,6 +55,14 @@ class StoreServiceRequestUpdateController extends Controller
 
         $serviceRequestUpdate->save();
 
+        if ($request->hasFile('files')) {
+            foreach ($request->file('files') as $file) {
+                $serviceRequestUpdate
+                    ->addMedia($file)
+                    ->toMediaCollection('uploads');
+            }
+        }
+
         $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
 
         $serviceRequestUpdates = $serviceRequest
@@ -68,6 +76,7 @@ class StoreServiceRequestUpdateController extends Controller
                     'update' => $update->update,
                     'created_by_type' => $update->created_by_type,
                     'created_at' => $update->created_at->format('m-d-Y g:i A'),
+                    'media' => $update->getUploadedMedia(),
                 ];
             });
 

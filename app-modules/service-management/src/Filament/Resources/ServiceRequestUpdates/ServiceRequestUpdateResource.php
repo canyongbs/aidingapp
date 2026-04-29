@@ -36,28 +36,38 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\CreateServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\Feedback;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageAssignments;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageServiceRequestFormSubmission;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageServiceRequestUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ServiceRequestTimeline;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\EditServiceRequestUpdate;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\ListServiceRequestUpdates;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\ViewServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Enums\Feature;
 use App\Filament\Tables\Columns\IdColumn;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
+use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
 
 class ServiceRequestUpdateResource extends Resource
 {
@@ -67,19 +77,16 @@ class ServiceRequestUpdateResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    protected static ?string $parentResource = ServiceRequestResource::class;
+
+    protected static ?string $slug = 'updates';
+
+    protected static ?string $breadcrumb = 'Updates';
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Select::make('service_request_id')
-                    ->relationship('serviceRequest', 'id')
-                    ->preload()
-                    ->label('Service Request')
-                    ->required()
-                    ->exists(
-                        table: (new ServiceRequest())->getTable(),
-                        column: (new ServiceRequest())->getKeyName()
-                    ),
                 Textarea::make('update')
                     ->label('Update')
                     ->rows(3)
@@ -89,6 +96,16 @@ class ServiceRequestUpdateResource extends Resource
                 Toggle::make('internal')
                     ->label('Internal')
                     ->rule(['boolean']),
+                Section::make('Uploads')
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('uploads')
+                            ->hiddenLabel()
+                            ->visibility('private')
+                            ->collection('uploads')
+                            ->multiple(true)
+                            ->acceptedFileTypes((new ServiceRequestUpdate())->getMediaCollection('uploads')->acceptsMimeTypes)
+                            ->downloadable(),
+                    ]),
             ]);
     }
 
@@ -130,6 +147,31 @@ class ServiceRequestUpdateResource extends Resource
             ]);
     }
 
+    public static function getRecordSubNavigation(Page $page): array
+    {
+        $serviceRequest = $page->getParentRecord();
+
+        assert($serviceRequest instanceof ServiceRequest);
+
+        $navigationItems = [
+            ViewServiceRequest::class,
+            EditServiceRequest::class,
+            ManageAssignments::class,
+            ManageServiceRequestUpdate::class,
+            ServiceRequestTimeline::class,
+        ];
+
+        if ($serviceRequest->serviceRequestFormSubmission) {
+            array_splice($navigationItems, 1, 0, ManageServiceRequestFormSubmission::class);
+        }
+
+        if (Gate::check(Feature::FeedbackManagement->getGateName())) {
+            array_splice($navigationItems, array_search(ServiceRequestTimeline::class, $navigationItems), 0, Feedback::class);
+        }
+
+        return $page->generateNavigationItems($navigationItems);
+    }
+
     public static function getRelations(): array
     {
         return [];
@@ -138,8 +180,6 @@ class ServiceRequestUpdateResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListServiceRequestUpdates::route('/'),
-            'create' => CreateServiceRequestUpdate::route('/create'),
             'view' => ViewServiceRequestUpdate::route('/{record}'),
             'edit' => EditServiceRequestUpdate::route('/{record}/edit'),
         ];

@@ -53,9 +53,11 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -101,6 +103,16 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
 
                         return $this->getOwnerRecord()->status->getKey();
                     }),
+                Section::make('Uploads')
+                    ->schema([
+                        SpatieMediaLibraryFileUpload::make('uploads')
+                            ->hiddenLabel()
+                            ->visibility('private')
+                            ->collection('uploads')
+                            ->multiple(true)
+                            ->acceptedFileTypes((new ServiceRequestUpdate())->getMediaCollection('uploads')->acceptsMimeTypes)
+                            ->downloadable(),
+                    ]),
             ]);
     }
 
@@ -148,7 +160,10 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
             ])
             ->recordActions([
                 ViewAction::make()
-                    ->url(fn (ServiceRequestUpdate $serviceRequestUpdate) => ServiceRequestUpdateResource::getUrl('view', ['record' => $serviceRequestUpdate])),
+                    ->url(fn (ServiceRequestUpdate $serviceRequestUpdate) => ServiceRequestUpdateResource::getUrl('view', [
+                        'record' => $serviceRequestUpdate,
+                        'service_request' => $serviceRequestUpdate->service_request_id,
+                    ])),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

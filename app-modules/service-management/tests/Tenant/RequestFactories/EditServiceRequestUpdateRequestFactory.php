@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Worksome\RequestFactories\RequestFactory;
 
 class EditServiceRequestUpdateRequestFactory extends RequestFactory
@@ -44,7 +43,6 @@ class EditServiceRequestUpdateRequestFactory extends RequestFactory
     public function definition(): array
     {
         return [
-            'service_request_id' => ServiceRequest::factory()->create()->id,
             'update' => $this->faker->sentence,
             'internal' => $this->faker->boolean,
         ];

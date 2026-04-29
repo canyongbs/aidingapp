@@ -155,18 +155,20 @@ class ViewServiceRequest extends ViewRecord
                                     ->label('Download')
                                     ->icon('heroicon-m-arrow-down-tray')
                                     ->color('primary')
-                                    ->url($media->getTemporaryUrl(now()->addMinute()), true);
+                                    ->url(route('service-request.media.download', ['media' => $media->getKey()]));
+
+                                $displayName = $media->name . '.' . pathinfo($media->file_name, PATHINFO_EXTENSION);
 
                                 if ($isImage) {
                                     return ImageEntry::make($media->getKey())
-                                        ->label($media->name)
+                                        ->label($displayName)
                                         ->visibility('private')
                                         ->getStateUsing($media->getTemporaryUrl(now()->addMinute()))
                                         ->hintAction($downloadAction);
                                 }
 
                                 return IconEntry::make($media->getKey())
-                                    ->label($media->name)
+                                    ->label($displayName)
                                     ->state($mimeType)
                                     ->icon(match ($mimeType) {
                                         'application/pdf',

@@ -42,7 +42,7 @@
         <h3 class="mb-1 flex items-center text-lg font-semibold text-gray-500 dark:text-gray-100">
             <a
                 class="font-medium underline"
-                href="{{ ServiceRequestUpdateResource::getUrl('view', ['record' => $record]) }}"
+                href="{{ ServiceRequestUpdateResource::getUrl('view', ['record' => $record, 'service_request' => $record->service_request_id]) }}"
             >
                 @if ($record->internal === true)
                     Internal Update Added

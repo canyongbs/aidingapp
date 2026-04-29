@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestLocked;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\ServiceRequestUpdatesRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Illuminate\Database\Eloquent\Model;
 
@@ -54,6 +55,14 @@ class ManageServiceRequestUpdate extends ManageRelatedRecords
     protected static ?string $navigationLabel = 'Updates';
 
     protected static ?string $breadcrumb = 'Updates';
+
+    public static function getNavigationItemActiveRoutePattern(): string | array
+    {
+        return [
+            static::getRouteName(),
+            ServiceRequestUpdateResource::getRouteBaseName() . '.*',
+        ];
+    }
 
     public static function canAccess(array $arguments = []): bool
     {

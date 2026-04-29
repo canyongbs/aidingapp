@@ -34,12 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages;
+namespace AidingApp\ServiceManagement\Http\Controllers;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
-use Filament\Resources\Pages\CreateRecord;
+use AidingApp\ServiceManagement\Http\Requests\ServiceRequestMediaDownloadRequest;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
-class CreateServiceRequestUpdate extends CreateRecord
+class ServiceRequestMediaDownloadController extends Controller
 {
-    protected static string $resource = ServiceRequestUpdateResource::class;
+    public function __invoke(ServiceRequestMediaDownloadRequest $request, Media $media): RedirectResponse
+    {
+        return redirect(
+            $media->getTemporaryUrl(
+                expiration: now()->addMinute(),
+                options: ['ResponseContentDisposition' => 'attachment; filename="' . $media->file_name . '"']
+            )
+        );
+    }
 }

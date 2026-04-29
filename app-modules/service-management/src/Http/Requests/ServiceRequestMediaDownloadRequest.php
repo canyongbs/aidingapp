@@ -34,20 +34,53 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages;
+namespace AidingApp\ServiceManagement\Http\Requests;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
-use Filament\Actions\CreateAction;
-use Filament\Resources\Pages\ListRecords;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use Illuminate\Foundation\Http\FormRequest;
 
-class ListServiceRequestUpdates extends ListRecords
+class ServiceRequestMediaDownloadRequest extends FormRequest
 {
-    protected static string $resource = ServiceRequestUpdateResource::class;
-
-    protected function getHeaderActions(): array
+    public function authorize(): bool
     {
-        return [
-            CreateAction::make(),
-        ];
+        $media = $this->route('media');
+
+        $model = match ($media->model_type) {
+            (new ServiceRequestUpdate())->getMorphClass() => ServiceRequestUpdate::find($media->model_id),
+            (new ServiceRequest())->getMorphClass() => ServiceRequest::find($media->model_id),
+            default => null,
+        };
+
+        if (! $model) {
+            return false;
+        }
+
+        $contact = $this->user('contact');
+
+        if ($contact instanceof Contact) {
+            $serviceRequest = $model instanceof ServiceRequest
+                ? $model
+                : $model->serviceRequest;
+
+            return $serviceRequest->respondent()->is($contact);
+        }
+
+        $user = $this->user();
+
+        if ($user) {
+            return $user->can('view', $model);
+        }
+
+        return false;
+    }
+
+    /**
+     * @return array<string, array<string>>
+     */
+    public function rules(): array
+    {
+        return [];
     }
 }
