@@ -57,12 +57,7 @@ class ServiceRequestMediaDownloadRequest extends FormRequest
             return false;
         }
 
-        $user = $this->user();
         $contact = $this->user('contact');
-
-        if ($user) {
-            return $user->can('view', $model);
-        }
 
         if ($contact instanceof Contact) {
             $serviceRequest = $model instanceof ServiceRequest
@@ -70,6 +65,12 @@ class ServiceRequestMediaDownloadRequest extends FormRequest
                 : $model->serviceRequest;
 
             return $serviceRequest->respondent()->is($contact);
+        }
+
+        $user = $this->user();
+
+        if ($user) {
+            return $user->can('view', $model);
         }
 
         return false;
