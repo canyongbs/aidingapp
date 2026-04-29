@@ -446,7 +446,7 @@
                                                 <path d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14" />
                                             </svg>
 
-                                            <span class="text-sm truncate">
+                                            <span class="text-sm truncate text-gray-900">
                                                 {{ mediaItem.name }}
                                             </span>
                                         </div>

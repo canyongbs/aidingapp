@@ -63,8 +63,6 @@ class ViewServiceRequestUpdate extends ViewRecord
 
     public function infolist(Schema $schema): Schema
     {
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
-
         return $schema
             ->schema([
                 Section::make()
@@ -95,26 +93,25 @@ class ViewServiceRequestUpdate extends ViewRecord
                     ])
                     ->columns(),
                 Section::make('Uploads')
-                    ->visible(fn (ServiceRequestUpdate $record): bool => $record->hasMedia($uploadsMediaCollection->getName()))
+                    ->visible(fn (ServiceRequestUpdate $record): bool => $record->hasMedia(app(ServiceRequestUpdate::class)->getMediaCollection('uploads')->name))
                     ->schema(
                         fn (ServiceRequestUpdate $record) => $record
-                            ->getMedia($uploadsMediaCollection->getName())
+                            ->getMedia(app(ServiceRequestUpdate::class)->getMediaCollection('uploads')->name)
                             ->map(function (Media $media) {
                                 $mimeType = $media->mime_type;
                                 $isImage = in_array($mimeType, ['image/jpeg', 'image/png']);
-
-                                $downloadAction = Action::make('download')
-                                    ->label('Download')
-                                    ->icon('heroicon-m-arrow-down-tray')
-                                    ->color('primary')
-                                    ->url($media->getTemporaryUrl(now()->addMinute()), true);
 
                                 if ($isImage) {
                                     return ImageEntry::make($media->getKey())
                                         ->label($media->name)
                                         ->visibility('private')
                                         ->getStateUsing($media->getTemporaryUrl(now()->addMinute()))
-                                        ->hintAction($downloadAction);
+                                        ->hintAction(fn () => Action::make('download')
+                                            ->label('Download')
+                                            ->icon('heroicon-m-arrow-down-tray')
+                                            ->color('primary')
+                                            ->url($media->getTemporaryUrl(now()->addMinute()), true)
+                                        );
                                 }
 
                                 return IconEntry::make($media->getKey())
@@ -135,7 +132,12 @@ class ViewServiceRequestUpdate extends ViewRecord
                                         default => 'heroicon-o-paper-clip',
                                     })
                                     ->size(IconSize::TwoExtraLarge)
-                                    ->hintAction($downloadAction);
+                                    ->hintAction(fn () => Action::make('download')
+                                            ->label('Download')
+                                            ->icon('heroicon-m-arrow-down-tray')
+                                            ->color('primary')
+                                            ->url($media->getTemporaryUrl(now()->addMinute()), true)
+                                        );
                             })
                             ->toArray()
                     ),

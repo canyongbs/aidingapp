@@ -46,6 +46,13 @@ class StoreServiceRequestUpdateController extends Controller
 {
     public function __invoke(StoreServiceRequestUpdateRequest $request): JsonResponse
     {
+        $request->validate([
+            'description' => ['required', 'string'],
+            'serviceRequestId' => ['required', 'uuid', 'exists:service_requests,id'],
+            'files' => ['nullable', 'array'],
+            'files.*' => ['file'],
+        ]);
+
         $serviceRequestUpdate = new ServiceRequestUpdate();
         $serviceRequestUpdate->service_request_id = $request->serviceRequestId;
         $serviceRequestUpdate->update = $request->description;
@@ -59,7 +66,7 @@ class StoreServiceRequestUpdateController extends Controller
             foreach ($request->file('files') as $file) {
                 $serviceRequestUpdate
                     ->addMedia($file)
-                    ->toMediaCollection('uploads', config('media-library.disk_name'));
+                    ->toMediaCollection('uploads');
             }
         }
 
@@ -81,23 +88,5 @@ class StoreServiceRequestUpdateController extends Controller
             });
 
         return response()->json(['serviceRequestUpdates' => $serviceRequestUpdates], 201);
-    }
-
-    /**
-     * @return array{
-     *   description: array<string>,
-     *   serviceRequestId: array<string>,
-     *   files: array<string>,
-     *   'files.*': array<string>,
-     * }
-     */
-    public function rules(): array
-    {
-        return [
-            'description' => ['required', 'string'],
-            'serviceRequestId' => ['required', 'exists:service_requests,id'],
-            'files' => ['nullable', 'array'],
-            'files.*' => ['file'],
-        ];
     }
 }
