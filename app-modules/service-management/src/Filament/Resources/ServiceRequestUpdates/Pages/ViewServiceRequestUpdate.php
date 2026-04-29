@@ -65,6 +65,19 @@ class ViewServiceRequestUpdate extends ViewRecord
         return ['record' => $this->getParentRecord()];
     }
 
+    public function getResourceBreadcrumbs(): array
+    {
+        $parentRecord = $this->getParentRecord();
+
+        assert($parentRecord instanceof ServiceRequest);
+
+        return [
+            ServiceRequestResource::getUrl() => ServiceRequestResource::getBreadcrumb(),
+            ServiceRequestResource::getUrl('view', ['record' => $parentRecord]) => $parentRecord->service_request_number,
+            ServiceRequestResource::getUrl('manage-service-request-updates', ['record' => $parentRecord]) => static::getResource()::getBreadcrumb(),
+        ];
+    }
+
     public function infolist(Schema $schema): Schema
     {
         return $schema

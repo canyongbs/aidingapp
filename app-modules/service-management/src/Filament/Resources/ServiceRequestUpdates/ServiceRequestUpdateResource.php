@@ -55,7 +55,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -82,19 +81,12 @@ class ServiceRequestUpdateResource extends Resource
 
     protected static ?string $slug = 'updates';
 
+    protected static ?string $breadcrumb = 'Updates';
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Select::make('service_request_id')
-                    ->relationship('serviceRequest', 'id')
-                    ->preload()
-                    ->label('Service Request')
-                    ->required()
-                    ->exists(
-                        table: (new ServiceRequest())->getTable(),
-                        column: (new ServiceRequest())->getKeyName()
-                    ),
                 Textarea::make('update')
                     ->label('Update')
                     ->rows(3)
