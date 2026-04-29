@@ -89,22 +89,4 @@ class StoreServiceRequestUpdateController extends Controller
 
         return response()->json(['serviceRequestUpdates' => $serviceRequestUpdates], 201);
     }
-
-    /**
-     * @return array{
-     *   description: array<string>,
-     *   serviceRequestId: array<string>,
-     *   files: array<string>,
-     *   'files.*': array<string>,
-     * }
-     */
-    public function rules(): array
-    {
-        return [
-            'description' => ['required', 'string'],
-            'serviceRequestId' => ['required', 'exists:service_requests,id'],
-            'files' => ['nullable', 'array'],
-            'files.*' => ['file'],
-        ];
-    }
 }
