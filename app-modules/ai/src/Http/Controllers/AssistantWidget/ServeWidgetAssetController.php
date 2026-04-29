@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,42 +33,37 @@
 
 </COPYRIGHT>
 */
-@import 'filepond/dist/filepond.min.css' layer(base);
 
-@import 'tailwindcss';
+namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
-@config '../tailwind.config.js';
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
-@layer base {
-    *,
-    ::after,
-    ::before,
-    ::backdrop,
-    ::file-selector-button {
-        --tw-border-style: solid;
-        --tw-shadow: 0 0 #0000;
-        --tw-inset-shadow: 0 0 #0000;
-        --tw-inset-ring-shadow: 0 0 #0000;
-        --tw-ring-shadow: 0 0 #0000;
-        --tw-ring-offset-shadow: 0 0 #0000;
-        --tw-ring-offset-width: 0px;
-        --tw-ring-offset-color: #fff;
-        border-color: var(--color-gray-200, currentColor);
+class ServeWidgetAssetController extends Controller
+{
+    public function __invoke(Request $request, string $file): StreamedResponse
+    {
+        $path = "widgets/assistant/{$file}";
+
+        $disk = Storage::disk('public');
+
+        abort_if(! $disk->exists($path), 404, 'File not found.');
+
+        $mimeType = $disk->mimeType($path);
+
+        $stream = $disk->readStream($path);
+
+        abort_if(is_null($stream), 404, 'File not found.');
+
+        return response()->streamDownload(
+            function () use ($stream) {
+                fpassthru($stream);
+                fclose($stream);
+            },
+            $file,
+            ['Content-Type' => $mimeType]
+        );
     }
-}
-
-:host {
-    all: initial;
-    --tw-border-style: solid;
-    --tw-shadow: 0 0 #0000;
-    --tw-inset-shadow: 0 0 #0000;
-    --tw-inset-ring-shadow: 0 0 #0000;
-    --tw-ring-shadow: 0 0 #0000;
-    --tw-ring-offset-shadow: 0 0 #0000;
-    --tw-ring-offset-width: 0px;
-    --tw-ring-offset-color: #fff;
-}
-
-* {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }

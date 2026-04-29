@@ -1,4 +1,4 @@
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,43 +30,24 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
-@import 'filepond/dist/filepond.min.css' layer(base);
+-->
+<script setup>
+    import { computed, provide } from 'vue';
 
-@import 'tailwindcss';
+    const props = defineProps({
+        modelValue: { type: String, required: true },
+    });
 
-@config '../tailwind.config.js';
+    const emit = defineEmits(['update:modelValue']);
 
-@layer base {
-    *,
-    ::after,
-    ::before,
-    ::backdrop,
-    ::file-selector-button {
-        --tw-border-style: solid;
-        --tw-shadow: 0 0 #0000;
-        --tw-inset-shadow: 0 0 #0000;
-        --tw-inset-ring-shadow: 0 0 #0000;
-        --tw-ring-shadow: 0 0 #0000;
-        --tw-ring-offset-shadow: 0 0 #0000;
-        --tw-ring-offset-width: 0px;
-        --tw-ring-offset-color: #fff;
-        border-color: var(--color-gray-200, currentColor);
-    }
-}
+    provide('BaseTabs', {
+        activeValue: computed(() => props.modelValue),
+        select: (value) => emit('update:modelValue', value),
+    });
+</script>
 
-:host {
-    all: initial;
-    --tw-border-style: solid;
-    --tw-shadow: 0 0 #0000;
-    --tw-inset-shadow: 0 0 #0000;
-    --tw-inset-ring-shadow: 0 0 #0000;
-    --tw-ring-shadow: 0 0 #0000;
-    --tw-ring-offset-shadow: 0 0 #0000;
-    --tw-ring-offset-width: 0px;
-    --tw-ring-offset-color: #fff;
-}
-
-* {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
+<template>
+    <div class="flex gap-1 bg-gray-100 p-1" :style="{ borderRadius: 'var(--rounding-lg)' }">
+        <slot />
+    </div>
+</template>

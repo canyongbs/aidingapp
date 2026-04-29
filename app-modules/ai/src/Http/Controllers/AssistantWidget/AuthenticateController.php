@@ -36,61 +36,40 @@
 
 namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
-use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
-use Illuminate\Contracts\Broadcasting\Broadcaster;
+use AidingApp\Portal\Models\PortalAuthentication;
+use AidingApp\Portal\Rules\PortalAuthenticateCodeValidation;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-class AssistantBroadcastController extends Controller
+class AuthenticateController extends Controller
 {
-    public function auth(Request $request, Broadcaster $broadcaster): mixed
+    public function __invoke(Request $request, PortalAuthentication $authentication): JsonResponse
     {
+        if ($authentication->isExpired()) {
+            return response()->json(['is_expired' => true], 422);
+        }
+
+        $request->validate([
+            'code' => ['required', 'integer', 'digits:6', new PortalAuthenticateCodeValidation()],
+        ]);
+
+        /** @var Contact $contact */
+        $contact = $authentication->educatable;
+
+        Auth::guard('contact')->login($contact);
+
+        $token = $contact->createToken('knowledge-management-portal-access-token');
+
         if ($request->hasSession()) {
-            $request->session()->reflash();
+            $request->session()->regenerate();
         }
 
-        $channelName = $request->channel_name;
-
-        if (empty($channelName)) {
-            throw new AccessDeniedHttpException();
-        }
-
-        // @phpstan-ignore function.alreadyNarrowedType
-        $normalizedName = method_exists($broadcaster, 'normalizeChannelName') ? $broadcaster->normalizeChannelName($channelName) : $channelName;
-
-        if (! Str::startsWith($normalizedName, 'portal-assistant-thread-')) {
-            throw new AccessDeniedHttpException();
-        }
-
-        $threadId = Str::after($normalizedName, 'portal-assistant-thread-');
-        $thread = PortalAssistantThread::find($threadId);
-
-        if (! $thread) {
-            throw new AccessDeniedHttpException();
-        }
-
-        $user = Auth::guard('contact')->user();
-
-        if ($user instanceof Contact && $thread->author()->is($user)) {
-            return $broadcaster->validAuthenticationResponse($request, true);
-        }
-
-        if (
-            ! $user
-            && ! $thread->author_type
-            && ! $thread->author_id
-        ) {
-            $guestToken = $request->input('guest_token');
-
-            if ($guestToken && $thread->guest_token === $guestToken) {
-                return $broadcaster->validAuthenticationResponse($request, true);
-            }
-        }
-
-        throw new AccessDeniedHttpException();
+        return response()->json([
+            'success' => true,
+            'token' => $token->plainTextToken,
+        ]);
     }
 }

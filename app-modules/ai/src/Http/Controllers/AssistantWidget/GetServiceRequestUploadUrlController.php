@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,42 +33,30 @@
 
 </COPYRIGHT>
 */
-@import 'filepond/dist/filepond.min.css' layer(base);
 
-@import 'tailwindcss';
+namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
-@config '../tailwind.config.js';
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
-@layer base {
-    *,
-    ::after,
-    ::before,
-    ::backdrop,
-    ::file-selector-button {
-        --tw-border-style: solid;
-        --tw-shadow: 0 0 #0000;
-        --tw-inset-shadow: 0 0 #0000;
-        --tw-inset-ring-shadow: 0 0 #0000;
-        --tw-ring-shadow: 0 0 #0000;
-        --tw-ring-offset-shadow: 0 0 #0000;
-        --tw-ring-offset-width: 0px;
-        --tw-ring-offset-color: #fff;
-        border-color: var(--color-gray-200, currentColor);
+class GetServiceRequestUploadUrlController extends Controller
+{
+    public function __invoke(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'filename' => ['required', 'string'],
+        ]);
+
+        $filename = sprintf('%s.%s', Str::uuid(), str($data['filename'])->afterLast('.'));
+        $path = "tmp/{$filename}";
+
+        return response()->json([
+            'filename' => $filename,
+            'path' => $path,
+            ...Storage::temporaryUploadUrl($path, now()->addMinute()),
+        ]);
     }
-}
-
-:host {
-    all: initial;
-    --tw-border-style: solid;
-    --tw-shadow: 0 0 #0000;
-    --tw-inset-shadow: 0 0 #0000;
-    --tw-inset-ring-shadow: 0 0 #0000;
-    --tw-ring-shadow: 0 0 #0000;
-    --tw-ring-offset-shadow: 0 0 #0000;
-    --tw-ring-offset-width: 0px;
-    --tw-ring-offset-color: #fff;
-}
-
-* {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }

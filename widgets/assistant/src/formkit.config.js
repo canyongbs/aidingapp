@@ -31,42 +31,17 @@
 
 </COPYRIGHT>
 */
-@import 'filepond/dist/filepond.min.css' layer(base);
+import { genesisIcons } from '@formkit/icons';
+import { generateClasses } from '@formkit/themes';
+import inputs from './FormKit/Inputs/index.js';
+import theme from './FormKit/theme.js';
 
-@import 'tailwindcss';
-
-@config '../tailwind.config.js';
-
-@layer base {
-    *,
-    ::after,
-    ::before,
-    ::backdrop,
-    ::file-selector-button {
-        --tw-border-style: solid;
-        --tw-shadow: 0 0 #0000;
-        --tw-inset-shadow: 0 0 #0000;
-        --tw-inset-ring-shadow: 0 0 #0000;
-        --tw-ring-shadow: 0 0 #0000;
-        --tw-ring-offset-shadow: 0 0 #0000;
-        --tw-ring-offset-width: 0px;
-        --tw-ring-offset-color: #fff;
-        border-color: var(--color-gray-200, currentColor);
-    }
-}
-
-:host {
-    all: initial;
-    --tw-border-style: solid;
-    --tw-shadow: 0 0 #0000;
-    --tw-inset-shadow: 0 0 #0000;
-    --tw-inset-ring-shadow: 0 0 #0000;
-    --tw-ring-shadow: 0 0 #0000;
-    --tw-ring-offset-shadow: 0 0 #0000;
-    --tw-ring-offset-width: 0px;
-    --tw-ring-offset-color: #fff;
-}
-
-* {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
+export default {
+    icons: {
+        ...genesisIcons,
+    },
+    inputs,
+    config: {
+        classes: generateClasses(theme),
+    },
+};
