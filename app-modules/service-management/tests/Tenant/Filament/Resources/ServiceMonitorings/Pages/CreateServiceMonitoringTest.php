@@ -205,7 +205,7 @@ test('user UserSelect does not show admin users in options by default on CreateS
 });
 
 test('user UserSelect shows all users when filter_admins_from_selection config is false on CreateServiceMonitoring', function () {
-    Config::set('internal-users.filter_admins_from_selection', false);
+    Config::set('app.filter_admins_from_selection', false);
 
     $actor = User::factory()->create();
     $actor->givePermissionTo('service_monitoring.view-any');

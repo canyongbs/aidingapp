@@ -104,6 +104,6 @@ class UserSelect extends Select
 
     public function shouldFilterAdmins(): bool
     {
-        return $this->filterAdmins && config('internal-users.filter_admins_from_selection', true);
+        return $this->filterAdmins && config('app.filter_admins_from_selection', true);
     }
 }

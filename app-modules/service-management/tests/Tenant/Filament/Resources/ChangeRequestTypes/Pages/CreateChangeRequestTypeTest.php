@@ -62,7 +62,7 @@ test('userApprovers UserSelect does not show admin users in options by default o
 });
 
 test('userApprovers UserSelect shows all users when filter_admins_from_selection config is false on CreateChangeRequestType', function () {
-    Config::set('internal-users.filter_admins_from_selection', false);
+    Config::set('app.filter_admins_from_selection', false);
     asSuperAdmin();
 
     $adminUser = User::factory()->create();

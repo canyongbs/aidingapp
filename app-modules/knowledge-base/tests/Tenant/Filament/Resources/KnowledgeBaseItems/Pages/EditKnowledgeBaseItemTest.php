@@ -176,7 +176,7 @@ test('managers UserSelect shows a pre-selected admin user so they can be deselec
 });
 
 test('managers UserSelect shows all users including admins when filter_admins_from_selection config is false', function () {
-    Config::set('internal-users.filter_admins_from_selection', false);
+    Config::set('app.filter_admins_from_selection', false);
 
     $actor = User::factory()->create();
     $actor->givePermissionTo('knowledge_base_item.view-any');

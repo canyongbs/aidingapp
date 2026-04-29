@@ -161,7 +161,7 @@ test('manager_ids UserSelect does not show admin users in options by default on 
 });
 
 test('manager_ids UserSelect shows all users when filter_admins_from_selection config is false on CreateKnowledgeBaseItem', function () {
-    Config::set('internal-users.filter_admins_from_selection', false);
+    Config::set('app.filter_admins_from_selection', false);
 
     $actor = User::factory()->create();
     $actor->givePermissionTo('knowledge_base_item.view-any');

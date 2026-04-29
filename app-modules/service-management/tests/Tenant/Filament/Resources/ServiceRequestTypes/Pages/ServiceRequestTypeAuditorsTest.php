@@ -256,7 +256,7 @@ it('auditorUsers UserSelect shows a pre-selected admin user so they can be desel
 });
 
 it('auditorUsers UserSelect shows all users when filter_admins_from_selection config is false', function () {
-    Config::set('internal-users.filter_admins_from_selection', false);
+    Config::set('app.filter_admins_from_selection', false);
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
