@@ -35,15 +35,22 @@
 */
 
 use AidingApp\Report\Filament\Pages\AdvisoryManagement;
+use AidingApp\Report\Filament\Pages\IncidentManagement;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Laravel\Pennant\Feature;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
     $settings = app(LicenseSettings::class);
-    $settings->data->addons->advisoryManagement = false;
+
+    if (Feature::active(IncidentManagement::class)) {
+        $settings->data->addons->advisoryManagement = false;
+    } else {
+        $settings->data->addons->incidentManagement = false;
+    }
     $settings->save();
 
     $user = User::factory()->create();
@@ -57,7 +64,11 @@ it('is gated with proper access control', function () {
 
     livewire(AdvisoryManagement::class)->assertForbidden();
 
-    $settings->data->addons->advisoryManagement = true;
+    if (Feature::active(IncidentManagement::class)) {
+        $settings->data->addons->advisoryManagement = true;
+    } else {
+        $settings->data->addons->incidentManagement = true;
+    }
     $settings->save();
 
     livewire(AdvisoryManagement::class)->assertOk();
