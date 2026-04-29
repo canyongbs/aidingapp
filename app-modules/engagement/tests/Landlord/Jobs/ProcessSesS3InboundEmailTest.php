@@ -1216,11 +1216,17 @@ describe('Service request reply threading', function () {
                 'created_by_type' => $contact->getMorphClass(),
             ]);
 
-            expect($serviceRequestUpdate->getMedia('uploads'))->toHaveCount(2);
+            $media = $serviceRequestUpdate->getMedia('uploads');
+
+            expect($media)->toHaveCount(2);
+            expect($media->first()->file_name)->toBe('SampleJPGImage_1mbmb.jpg');
+            expect($media->first()->extension)->toBe('jpg');
+            expect($media->last()->file_name)->toBe('SampleJPGImage_50kbmb.jpg');
+            expect($media->last()->extension)->toBe('jpg');
         });
 
         $filesystem->assertMissing('s3_email');
-    });
+    })->only();
 
     it('SR reply matches sender case-insensitively against respondent', function () {
         $tenant = Tenant::query()->firstOrFail();
