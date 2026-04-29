@@ -88,6 +88,7 @@ class IncidentSeverity extends BaseModel implements Auditable
         return new Attribute(
             get: function () {
                 $color = $this->getAttributeValue('color');
+
                 return $color instanceof Color ? $color->getRgb() : null;
             },
         );
