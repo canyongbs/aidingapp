@@ -66,7 +66,32 @@ class UserSelect extends Select
             $titleAttribute ?? 'name',
             function (Builder $query) use ($modifyQueryUsing) {
                 if ($this->shouldFilterAdmins()) {
-                    $query->tap(new WithoutAnyAdmin());
+                    $alreadySelected = [];
+
+                    $record = $this->getRecord();
+                    $relationshipName = $this->getRelationshipName();
+
+                    if ($record && $record->exists && $relationshipName && ! str_contains($relationshipName, '.')) {
+                        $qualifiedKey = $this->getRelationship()->getRelated()->getQualifiedKeyName();
+
+                        $alreadySelected = $record->{$relationshipName}()
+                            ->getQuery()
+                            ->pluck($qualifiedKey)
+                            ->map(fn ($variable) => (string) $variable)
+                            ->toArray();
+                    }
+
+                    $state = $this->getState();
+                    $stateSelected = array_filter(is_array($state) ? $state : [$state]);
+                    $alreadySelected = array_values(array_unique(array_merge($alreadySelected, $stateSelected)));
+
+                    $query->where(function (Builder $query) use ($alreadySelected) {
+                        $query->tap(new WithoutAnyAdmin());
+
+                        if (! empty($alreadySelected)) {
+                            $query->orWhereIn('users.id', $alreadySelected);
+                        }
+                    });
                 }
 
                 if ($modifyQueryUsing) {
@@ -79,10 +104,6 @@ class UserSelect extends Select
 
     protected function shouldFilterAdmins(): bool
     {
-        if (! $this->filterAdmins) {
-            return false;
-        }
-
-        return config('internal-users.filter_admins_from_selection', true);
+        return $this->filterAdmins && config('internal-users.filter_admins_from_selection', true);
     }
 }

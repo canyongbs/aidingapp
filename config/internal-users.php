@@ -36,5 +36,4 @@
 
 return [
     'emails' => env('DEMO_INTERNAL_USER_EMAILS') ? explode(',', env('DEMO_INTERNAL_USER_EMAILS')) : null,
-    'filter_admins_from_selection' => env('USER_SELECT_FILTER_ADMINS', true),
 ];

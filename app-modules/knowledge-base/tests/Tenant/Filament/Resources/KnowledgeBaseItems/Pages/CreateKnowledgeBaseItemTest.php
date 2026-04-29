@@ -35,11 +35,15 @@
 */
 
 use AidingApp\Division\Models\Division;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\CreateKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ListKnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseItems\RequestFactories\CreateKnowledgeBaseItemRequestFactory;
+use App\Filament\Forms\Components\UserSelect;
+use App\Models\Authenticatable;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Illuminate\Support\Facades\Config;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -129,4 +133,51 @@ test('CreateKnowledgeBaseItem is gated with proper feature access control', func
     $knowledgeBaseItem = KnowledgeBaseItem::first();
 
     expect($knowledgeBaseItem->division->pluck('id')->toArray())->toEqual($request['division']);
+});
+
+// UserSelect (manager_ids field) admin-filtering tests
+// No pre-selected scenario on Create — no persisted record exists yet.
+
+test('manager_ids UserSelect does not show admin users in options by default on CreateKnowledgeBaseItem', function () {
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('knowledge_base_item.view-any');
+    $actor->givePermissionTo('knowledge_base_item.create');
+    actingAs($actor);
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->knowledgeManagement = true;
+    $settings->save();
+
+    $regularUser = User::factory()->create();
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    livewire(CreateKnowledgeBaseItem::class)
+        ->assertSuccessful()
+        ->assertFormFieldExists('manager_ids', function (UserSelect $field) use ($regularUser, $adminUser): bool {
+            return ! empty($field->getSearchResults($regularUser->name))
+                && empty($field->getSearchResults($adminUser->name));
+        });
+});
+
+test('manager_ids UserSelect shows all users when filter_admins_from_selection config is false on CreateKnowledgeBaseItem', function () {
+    Config::set('internal-users.filter_admins_from_selection', false);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('knowledge_base_item.view-any');
+    $actor->givePermissionTo('knowledge_base_item.create');
+    actingAs($actor);
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->knowledgeManagement = true;
+    $settings->save();
+
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    livewire(CreateKnowledgeBaseItem::class)
+        ->assertSuccessful()
+        ->assertFormFieldExists('manager_ids', function (UserSelect $field) use ($adminUser): bool {
+            return ! empty($field->getSearchResults($adminUser->name));
+        });
 });
