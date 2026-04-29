@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\P
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Filament\Concerns\HasServiceRequestSubNavigation;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -59,9 +58,12 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ViewServiceRequestUpdate extends ViewRecord
 {
-    use HasServiceRequestSubNavigation;
-
     protected static string $resource = ServiceRequestUpdateResource::class;
+
+    public function getSubNavigationParameters(): array
+    {
+        return ['record' => $this->getParentRecord()];
+    }
 
     public function infolist(Schema $schema): Schema
     {
