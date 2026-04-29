@@ -131,13 +131,7 @@ class ViewServiceRequestUpdate extends ViewRecord
                                         ->label($displayName)
                                         ->visibility('private')
                                         ->getStateUsing($media->getTemporaryUrl(now()->addMinute()))
-                                        ->hintAction(
-                                            fn () => Action::make('download')
-                                                ->label('Download')
-                                                ->icon('heroicon-m-arrow-down-tray')
-                                                ->color('primary')
-                                                ->url($media->getTemporaryUrl(now()->addMinute()), true)
-                                        );
+                                        ->hintAction($downloadAction);
                                 }
 
                                 return IconEntry::make($media->getKey())
@@ -158,13 +152,7 @@ class ViewServiceRequestUpdate extends ViewRecord
                                         default => 'heroicon-o-paper-clip',
                                     })
                                     ->size(IconSize::TwoExtraLarge)
-                                    ->hintAction(
-                                        fn () => Action::make('download')
-                                            ->label('Download')
-                                            ->icon('heroicon-m-arrow-down-tray')
-                                            ->color('primary')
-                                            ->url($media->getTemporaryUrl(now()->addMinute()), true)
-                                    );
+                                    ->hintAction($downloadAction);
                             })
                             ->toArray()
                     ),

@@ -281,10 +281,14 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     ]);
 
                 collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse) {
-                    $engagementResponse->addMediaFromStream($attachment->getStream())
-                        ->setName($attachment->getFilename())
-                        ->setFileName($attachment->getFilename())
-                        ->toMediaCollection('attachments');
+                    try {
+                        $engagementResponse->addMediaFromStream($attachment->getStream())
+                            ->setName($attachment->getFilename())
+                            ->setFileName($attachment->getFilename())
+                            ->toMediaCollection('attachments');
+                    } catch (Throwable $throw) {
+                        report($throw);
+                    }
                 });
             });
         });
@@ -511,10 +515,14 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 $serviceRequest->saveOrFail();
 
                 foreach ($parser->getAttachments(false) as $attachment) {
-                    $serviceRequest->addMediaFromStream($attachment->getStream())
-                        ->setName($attachment->getFilename())
-                        ->setFileName($attachment->getFilename())
-                        ->toMediaCollection('uploads');
+                    try {
+                        $serviceRequest->addMediaFromStream($attachment->getStream())
+                            ->setName($attachment->getFilename())
+                            ->setFileName($attachment->getFilename())
+                            ->toMediaCollection('uploads');
+                    } catch (Throwable $throw) {
+                        report($throw);
+                    }
                 }
             });
         });
