@@ -81,8 +81,6 @@ class ViewServiceRequestUpdate extends ViewRecord
 
     public function infolist(Schema $schema): Schema
     {
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
-
         return $schema
             ->schema([
                 Section::make()
@@ -134,7 +132,12 @@ class ViewServiceRequestUpdate extends ViewRecord
                                         ->label($displayName)
                                         ->visibility('private')
                                         ->getStateUsing($media->getTemporaryUrl(now()->addMinute()))
-                                        ->hintAction($downloadAction);
+                                        ->hintAction(fn () => Action::make('download')
+                                            ->label('Download')
+                                            ->icon('heroicon-m-arrow-down-tray')
+                                            ->color('primary')
+                                            ->url($media->getTemporaryUrl(now()->addMinute()), true)
+                                        );
                                 }
 
                                 return IconEntry::make($media->getKey())
@@ -155,7 +158,12 @@ class ViewServiceRequestUpdate extends ViewRecord
                                         default => 'heroicon-o-paper-clip',
                                     })
                                     ->size(IconSize::TwoExtraLarge)
-                                    ->hintAction($downloadAction);
+                                    ->hintAction(fn () => Action::make('download')
+                                            ->label('Download')
+                                            ->icon('heroicon-m-arrow-down-tray')
+                                            ->color('primary')
+                                            ->url($media->getTemporaryUrl(now()->addMinute()), true)
+                                        );
                             })
                             ->toArray()
                     ),

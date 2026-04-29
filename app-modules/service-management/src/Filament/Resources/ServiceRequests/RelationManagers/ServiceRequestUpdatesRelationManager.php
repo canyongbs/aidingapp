@@ -74,8 +74,6 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
-
         return $schema
             ->components([
                 Textarea::make('update')

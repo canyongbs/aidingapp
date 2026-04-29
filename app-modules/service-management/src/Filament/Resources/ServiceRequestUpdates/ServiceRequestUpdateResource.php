@@ -87,8 +87,6 @@ class ServiceRequestUpdateResource extends Resource
 
     public static function form(Schema $schema): Schema
     {
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
-
         return $schema
             ->components([
                 Textarea::make('update')
