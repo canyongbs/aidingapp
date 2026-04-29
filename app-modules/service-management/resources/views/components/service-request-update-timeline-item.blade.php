@@ -33,7 +33,8 @@
 --}}
 @php
     use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
-    use App\Models\User;
+
+    $createdAt = $record->created_at;
 @endphp
 
 <div>
@@ -43,23 +44,12 @@
                 class="font-medium underline"
                 href="{{ ServiceRequestUpdateResource::getUrl('view', ['record' => $record]) }}"
             >
-                Service Request Update Created
-            </a>
-            <span class="ml-2 flex space-x-2">
-                <x-filament::badge>
-                    @if ($record->internal === true)
-                        Internal
-                    @else
-                        External
-                    @endif
-                </x-filament::badge>
-
-                @if (! $record->createdBy instanceof User)
-                    <x-filament::icon class="w-5 text-gray-400 dark:text-gray-100" icon="heroicon-o-arrow-down-tray" />
+                @if ($record->internal === true)
+                    Internal Update Added
                 @else
-                    <x-filament::icon class="w-5 text-gray-400 dark:text-gray-100" icon="heroicon-o-arrow-up-tray" />
+                    Customer Update Sent
                 @endif
-            </span>
+            </a>
         </h3>
 
         <div>
@@ -67,9 +57,7 @@
         </div>
     </div>
 
-    <time class="mb-2 block text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
-        {{ $record->created_at->diffForHumans() }}
-    </time>
+    @include('service-management::components.timeline-time', ['datetime' => $createdAt])
 
     <div
         class="my-4 rounded-lg border-2 border-gray-200 p-2 text-base font-normal text-gray-500 dark:border-gray-800 dark:text-gray-400"

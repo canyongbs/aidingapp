@@ -37,6 +37,7 @@
 namespace App\Filament\Pages;
 
 use App\Filament\Clusters\DisplaySettings as DisplaySettingsCluster;
+use App\Models\Tenant;
 use App\Models\User;
 use App\Settings\EmailSettings;
 use Filament\Actions\Action;
@@ -44,6 +45,7 @@ use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\ColorPicker;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\TextInput;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Schema;
 
@@ -57,6 +59,8 @@ class ManageEmailSettings extends SettingsPage
 
     protected static ?string $cluster = DisplaySettingsCluster::class;
 
+    protected ?bool $hasDatabaseTransactions = true;
+
     public static function canAccess(): bool
     {
         /** @var User $user */
@@ -69,6 +73,11 @@ class ManageEmailSettings extends SettingsPage
     {
         return $schema
             ->components([
+                TextInput::make('tenant_mail_from_name')
+                    ->label('From Name')
+                    ->string()
+                    ->required()
+                    ->maxLength(255),
                 SpatieMediaLibraryFileUpload::make('header_logo')
                     ->collection('header_logo')
                     ->disk('s3-public')
@@ -122,5 +131,33 @@ class ManageEmailSettings extends SettingsPage
         }
 
         return parent::getFormActions();
+    }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $tenant = Tenant::current();
+
+        if ($tenant) {
+            $data['tenant_mail_from_name'] = $tenant->config->mail->fromName;
+        }
+
+        return $data;
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (filled($data['tenant_mail_from_name'] ?? null)) {
+            $tenant = Tenant::current();
+
+            throw_unless($tenant);
+
+            $tenant->config->mail->fromName = $data['tenant_mail_from_name'];
+
+            $tenant->saveOrFail();
+
+            unset($data['tenant_mail_from_name']);
+        }
+
+        return $data;
     }
 }

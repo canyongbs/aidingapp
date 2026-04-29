@@ -33,6 +33,7 @@
 -->
 <script setup>
     import { ArrowRightEndOnRectangleIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/vue/24/outline';
+    import { storeToRefs } from 'pinia';
     import Menubar from 'primevue/menubar';
     import { computed, defineProps, ref } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
@@ -46,8 +47,8 @@
 
     const route = useRoute();
     const router = useRouter();
-    const { user, requiresAuthentication } = useAuthStore();
-    const { hasServiceManagement, hasAssets, hasLicense, hasTasks } = useFeatureStore();
+    const { user, requiresAuthentication } = storeToRefs(useAuthStore());
+    const { hasServiceManagement, hasAssets, hasLicense, hasTasks } = storeToRefs(useFeatureStore());
 
     const { removeToken } = useTokenStore();
 

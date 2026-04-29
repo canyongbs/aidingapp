@@ -32,12 +32,13 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { storeToRefs } from 'pinia';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
     import BaseButton from './ui/BaseButton.vue';
 
-    const { user } = useAuthStore();
-    const { hasServiceManagement } = useFeatureStore();
+    const { user } = storeToRefs(useAuthStore());
+    const { hasServiceManagement } = storeToRefs(useFeatureStore());
 </script>
 
 <template>
@@ -66,8 +67,15 @@
                 <slot name="breadcrumbs" />
             </div>
 
-            <div class="ring-1 ring-black/5 shadow-xs xl:-mx-6 px-6 py-4 flex flex-col gap-y-6 xl:rounded bg-white">
+            <div
+                v-if="$slots.default"
+                class="ring-1 ring-black/5 shadow-xs xl:-mx-6 px-6 py-4 flex flex-col gap-y-6 xl:rounded bg-white"
+            >
                 <slot />
+            </div>
+
+            <div v-if="$slots.rawContent" class="px-6 xl:px-0 flex flex-col gap-y-4">
+                <slot name="rawContent" />
             </div>
         </div>
     </div>

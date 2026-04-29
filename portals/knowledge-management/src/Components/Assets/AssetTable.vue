@@ -151,7 +151,7 @@
 
                         <BaseTableCell>
                             <BaseBadge v-if="item.status === 'returned'" tone="success">Returned</BaseBadge>
-                            <BaseBadge v-else tone="warning" :pulse="true">Checked Out</BaseBadge>
+                            <BaseBadge v-else tone="warning">Checked Out</BaseBadge>
                         </BaseTableCell>
 
                         <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">

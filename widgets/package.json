@@ -7,6 +7,10 @@
         "build:service-request-feedback-form": "(cd service-request-feedback-form && vite build)",
         "build:service-request-form": "(cd service-request-form && vite build)",
         "build:assistant": "(cd assistant && vite build)",
+        "dev": "npm run dev:service-request-feedback-form & npm run dev:service-request-form & npm run dev:assistant & wait",
+        "dev:service-request-feedback-form": "(cd service-request-feedback-form && vite build --watch)",
+        "dev:service-request-form": "(cd service-request-form && vite build --watch)",
+        "dev:assistant": "(cd assistant && vite build --watch)",
         "postinstall": "node ../npm-postinstall.cjs"
     },
     "devDependencies": {

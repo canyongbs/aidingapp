@@ -32,9 +32,10 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ref } from 'vue';
+    import { onMounted, onUnmounted, ref } from 'vue';
     import ChatPanel from './components/ChatPanel.vue';
     import ChatToggleButton from './components/ChatToggleButton.vue';
+    import { setToken } from './utils/token.js';
 
     const props = defineProps({
         sendMessageUrl: { type: String, required: true },
@@ -43,13 +44,24 @@
         rounding: { type: String, default: 'md' },
         isAuthenticated: { type: Boolean, default: false },
         portalServiceManagement: { type: Boolean, default: false },
+        authenticateRequestUrl: { type: String, default: null },
+        serviceRequestTypesUrl: { type: String, default: null },
     });
 
     const isOpen = ref(false);
+    const isAuthenticated = ref(props.isAuthenticated);
 
     const toggleChat = () => {
         isOpen.value = !isOpen.value;
     };
+
+    function onAuthenticated(token) {
+        isAuthenticated.value = true;
+        if (token) {
+            setToken(token);
+        }
+        window.dispatchEvent(new CustomEvent('assistant-widget:authenticated', { detail: { token } }));
+    }
 
     window.addEventListener('assistant:close', () => {
         isOpen.value = false;
@@ -116,6 +128,22 @@
 
     setPrimaryColor();
     setRounding();
+
+    function onUnauthorized() {
+        isAuthenticated.value = false;
+    }
+
+    onMounted(() => {
+        if (!isAuthenticated.value && localStorage.getItem('token')) {
+            isAuthenticated.value = true;
+        }
+
+        window.addEventListener('assistant-widget:unauthorized', onUnauthorized);
+    });
+
+    onUnmounted(() => {
+        window.removeEventListener('assistant-widget:unauthorized', onUnauthorized);
+    });
 </script>
 
 <template>
@@ -128,7 +156,10 @@
             :websockets-config="websocketsConfig"
             :is-authenticated="isAuthenticated"
             :portal-service-management="portalServiceManagement"
+            :authenticate-request-url="authenticateRequestUrl"
+            :service-request-types-url="serviceRequestTypesUrl"
             @close="toggleChat"
+            @authenticated="onAuthenticated"
         />
 
         <ChatToggleButton :is-open="isOpen" @toggle="toggleChat" />
