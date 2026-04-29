@@ -192,14 +192,14 @@ test('EditServiceRequestType is updating default_category when form saved', func
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create([
-        'default_category' => ServiceRequestCategory::Advisory,
+        'default_category' => ServiceRequestCategory::Incident,
     ]);
 
     livewire(EditServiceRequestType::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertFormSet([
-            'default_category' => ServiceRequestCategory::Advisory,
+            'default_category' => ServiceRequestCategory::Incident,
         ])
         ->fillForm([
             'default_category' => ServiceRequestCategory::Request->value,

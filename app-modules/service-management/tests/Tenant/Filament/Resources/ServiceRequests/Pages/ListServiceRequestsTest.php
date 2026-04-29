@@ -210,23 +210,23 @@ test('category is rendered inline with the service request number on the ListSer
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create([
-        'category' => ServiceRequestCategory::Advisory,
+        'category' => ServiceRequestCategory::Incident,
     ]);
 
     livewire(ListServiceRequests::class)
         ->assertSuccessful()
         ->assertTableColumnExists('service_request_number')
         ->assertSee($serviceRequest->service_request_number)
-        ->assertSee(ServiceRequestCategory::Advisory->getLabel());
+        ->assertSee(ServiceRequestCategory::Incident->getLabel());
 });
 
 test('can filter service request by category', function () {
     asSuperAdmin();
 
-    $advisoryServiceRequests = ServiceRequest::factory()
+    $incidentServiceRequests = ServiceRequest::factory()
         ->count(2)
         ->create([
-            'category' => ServiceRequestCategory::Advisory,
+            'category' => ServiceRequestCategory::Incident,
         ]);
 
     $requestServiceRequests = ServiceRequest::factory()
@@ -236,9 +236,9 @@ test('can filter service request by category', function () {
         ]);
 
     livewire(ListServiceRequests::class)
-        ->assertCanSeeTableRecords($advisoryServiceRequests->merge($requestServiceRequests))
-        ->filterTable('category', ServiceRequestCategory::Advisory->value)
-        ->assertCanSeeTableRecords($advisoryServiceRequests)
+        ->assertCanSeeTableRecords($incidentServiceRequests->merge($requestServiceRequests))
+        ->filterTable('category', ServiceRequestCategory::Incident->value)
+        ->assertCanSeeTableRecords($incidentServiceRequests)
         ->assertCanNotSeeTableRecords($requestServiceRequests);
 });
 
