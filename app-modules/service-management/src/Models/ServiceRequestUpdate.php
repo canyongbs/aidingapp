@@ -163,7 +163,7 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
             ->map(function (Media $media) {
                 return [
                     'id' => $media->id,
-                    'name' => $media->file_name,
+                    'name' => $media->name . '.' . pathinfo($media->file_name, PATHINFO_EXTENSION),
                     'url' => route('api.portal.service-request.media.download', ['media' => $media->getKey()]),
                 ];
             })

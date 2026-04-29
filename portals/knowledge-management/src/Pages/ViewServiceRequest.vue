@@ -87,6 +87,7 @@
     const toRecord = ref(0);
     const disableSubmitBtn = ref(false);
     const isDragging = ref(false);
+    const acceptedMimeTypes = ref('');
 
     const setPagination = (pagination) => {
         currentPage.value = pagination.current_page;
@@ -168,6 +169,7 @@
         get(props.apiUrl + '/service-request/' + route.params.serviceRequestId, { page: page }).then((response) => {
             serviceRequest.value = response.data.serviceRequestDetails;
             serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
+            acceptedMimeTypes.value = (response.data.acceptedMimeTypes || []).join(',');
             if (!fromPagination) {
                 loadingResults.value = false;
             }
@@ -341,7 +343,7 @@
                                 @dragleave.prevent="isDragging = false"
                                 @drop.prevent="handleDrop"
                             >
-                                <input ref="fileInput" type="file" multiple class="hidden" @change="handleFiles" />
+                                <input ref="fileInput" type="file" multiple class="hidden" :accept="acceptedMimeTypes" @change="handleFiles" />
 
                                 <div class="text-taupe-600">
                                     <span>Drop files here or </span>

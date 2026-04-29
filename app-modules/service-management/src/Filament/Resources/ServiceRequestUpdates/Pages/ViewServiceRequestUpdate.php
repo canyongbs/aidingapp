@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\P
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Filament\Concerns\HasServiceRequestSubNavigation;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -58,6 +59,8 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ViewServiceRequestUpdate extends ViewRecord
 {
+    use HasServiceRequestSubNavigation;
+
     protected static string $resource = ServiceRequestUpdateResource::class;
 
     public function infolist(Schema $schema): Schema
@@ -106,16 +109,18 @@ class ViewServiceRequestUpdate extends ViewRecord
                                     ->color('primary')
                                     ->url(route('service-request.media.download', ['media' => $media->getKey()]));
 
+                                $displayName = $media->name . '.' . pathinfo($media->file_name, PATHINFO_EXTENSION);
+
                                 if ($isImage) {
                                     return ImageEntry::make($media->getKey())
-                                        ->label($media->name)
+                                        ->label($displayName)
                                         ->visibility('private')
                                         ->getStateUsing($media->getTemporaryUrl(now()->addMinute()))
                                         ->hintAction($downloadAction);
                                 }
 
                                 return IconEntry::make($media->getKey())
-                                    ->label($media->name)
+                                    ->label($displayName)
                                     ->state($mimeType)
                                     ->icon(match ($mimeType) {
                                         'application/pdf',

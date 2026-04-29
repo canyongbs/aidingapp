@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages;
 
+use AidingApp\ServiceManagement\Filament\Concerns\HasServiceRequestSubNavigation;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
@@ -45,6 +46,7 @@ use Filament\Resources\Pages\EditRecord;
 class EditServiceRequestUpdate extends EditRecord
 {
     use EditPageRedirection;
+    use HasServiceRequestSubNavigation;
 
     protected static string $resource = ServiceRequestUpdateResource::class;
 
