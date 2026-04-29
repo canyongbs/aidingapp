@@ -32,12 +32,13 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { storeToRefs } from 'pinia';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
     import BaseButton from './ui/BaseButton.vue';
 
-    const { user } = useAuthStore();
-    const { hasServiceManagement } = useFeatureStore();
+    const { user } = storeToRefs(useAuthStore());
+    const { hasServiceManagement } = storeToRefs(useFeatureStore());
 </script>
 
 <template>
