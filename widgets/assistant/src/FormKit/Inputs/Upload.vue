@@ -34,7 +34,7 @@
 <script setup>
     import { createMessage } from '@formkit/core';
     import axios from 'axios';
-    import { computed, nextTick, ref } from 'vue';
+    import { computed, inject, nextTick, ref, watch } from 'vue';
     import { clearToken, getAuthHeaders } from '../../utils/token.js';
 
     import vueFilePond from 'vue-filepond';
@@ -51,6 +51,27 @@
     const field = ref(null);
     const uploadedFiles = ref([]);
     const fileIndexCounter = ref(0);
+    const processingCount = ref(0);
+    const uploadProcessing = inject('uploadProcessing', null);
+
+    watch(processingCount, (count) => {
+        if (uploadProcessing) {
+            uploadProcessing.value = count > 0;
+        }
+
+        if (count > 0) {
+            props.context.node.store.set(
+                createMessage({
+                    blocking: true,
+                    visible: false,
+                    key: 'uploading',
+                    value: 'Files are still uploading.',
+                }),
+            );
+        } else {
+            props.context.node.store.remove('uploading');
+        }
+    });
 
     const serverOptions = computed(() => ({
         process: async (fieldName, file, metadata, load, error, progress, abort) => {
@@ -63,6 +84,7 @@
                         value: `File already exists with name: ${file.name}.`,
                     }),
                 );
+                processingCount.value--;
                 load();
                 return;
             }
@@ -115,6 +137,8 @@
             } catch (err) {
                 console.error('Upload error:', err);
                 error('Upload failed');
+            } finally {
+                processingCount.value--;
             }
 
             return {
@@ -145,9 +169,11 @@
 
     const handleFileAdd = (error, file) => {
         if (error) {
-            console.error('Error adding file:', error);
+            props.context.node.setErrors([error.body ?? 'File validation failed.']);
             return;
         }
+
+        props.context.node.setErrors([]);
 
         const isDuplicate = uploadedFiles.value.some(
             (existingFile) => existingFile.originalFileName === file.file.name,
@@ -167,6 +193,16 @@
             });
             return;
         }
+
+        processingCount.value++;
+    };
+
+    const handleWarning = (error) => {
+        props.context.node.setErrors([`Maximum ${props.context.limit} files allowed.`]);
+    };
+
+    const handleFileRemove = () => {
+        props.context.node.setErrors([]);
     };
 </script>
 
@@ -175,12 +211,16 @@
         ref="field"
         label-idle="Drop files here or <span class='filepond--label-action'>Browse</span>"
         :allow-multiple="context.multiple"
-        :maxFiles="context.limit"
-        :maxFileSize="context.size + 'MB'"
+        :max-files="context.limit"
+        :allow-file-size-validation="true"
+        :max-file-size="context.size + 'MB'"
+        :allow-file-type-validation="true"
         :accepted-file-types="context.accept"
         :files="uploadedFiles"
         :server="serverOptions"
         @addfile="handleFileAdd"
+        @warning="handleWarning"
+        @removefile="handleFileRemove"
         :credits="false"
     />
 </template>

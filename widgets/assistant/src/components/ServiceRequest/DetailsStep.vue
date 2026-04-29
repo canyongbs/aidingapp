@@ -34,7 +34,7 @@
 <script setup>
     import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
     import { ArrowRightIcon } from '@heroicons/vue/20/solid';
-    import { computed } from 'vue';
+    import { computed, provide, ref } from 'vue';
     import { useServiceRequestSubmit } from '../../composables/useServiceRequestSubmit.js';
 
     const props = defineProps({
@@ -51,6 +51,9 @@
 
     const { title, description, attachments, isSubmitting, submitError, canSubmit, submitForm } =
         useServiceRequestSubmit(props.rawData.store_url_base, props.selectedType.id, props.selectedPriority);
+
+    const isUploadProcessing = ref(false);
+    provide('uploadProcessing', isUploadProcessing);
 
     function onSubmit() {
         submitForm(() => emit('success', title.value));
@@ -111,8 +114,8 @@
             :upload-url="rawData.upload_url"
             :multiple="true"
             :accept="rawData.accepted_mime_types"
-            :limit="10"
-            :size="25"
+            :limit="rawData.max_files"
+            :size="rawData.max_file_size_mb"
             v-model="attachments"
             outer-class="!max-w-none"
         />
@@ -127,20 +130,20 @@
     <div class="shrink-0 px-4 pb-4 pt-3 border-t border-gray-100">
         <button
             @click="onSubmit"
-            :disabled="!canSubmit"
+            :disabled="!canSubmit || isUploadProcessing"
             :class="[
                 'w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all',
-                canSubmit
+                canSubmit && !isUploadProcessing
                     ? 'bg-brand-500 hover:bg-brand-600 text-white shadow-sm'
                     : 'bg-gray-100 text-gray-300 cursor-not-allowed',
             ]"
         >
-            <svg v-if="isSubmitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+            <svg v-if="isSubmitting || isUploadProcessing" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
-            {{ isSubmitting ? 'Submitting…' : 'Submit Service Request' }}
-            <ArrowRightIcon v-if="!isSubmitting" class="w-4 h-4" />
+            {{ isUploadProcessing ? 'Uploading…' : isSubmitting ? 'Submitting…' : 'Submit Service Request' }}
+            <ArrowRightIcon v-if="!isSubmitting && !isUploadProcessing" class="w-4 h-4" />
         </button>
     </div>
 </template>
