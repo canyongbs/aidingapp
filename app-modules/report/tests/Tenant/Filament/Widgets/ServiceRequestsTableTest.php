@@ -186,10 +186,10 @@ it('filters records by category using the table-level category filter', function
         'classification' => SystemServiceRequestClassification::Open,
     ])->create();
 
-    $advisoryRequest = ServiceRequest::factory()->state([
+    $incidentRequest = ServiceRequest::factory()->state([
         'priority_id' => $priority->id,
         'status_id' => $status->id,
-        'category' => ServiceRequestCategory::Advisory,
+        'category' => ServiceRequestCategory::Incident,
         'respondent_id' => Contact::factory(),
     ])->create();
 
@@ -204,7 +204,7 @@ it('filters records by category using the table-level category filter', function
         'cacheTag' => 'test-service-requests-table-category-filter',
         'pageFilters' => [],
     ])
-        ->filterTable('category', ServiceRequestCategory::Advisory->value)
-        ->assertCanSeeTableRecords(collect([$advisoryRequest]))
+        ->filterTable('category', ServiceRequestCategory::Incident->value)
+        ->assertCanSeeTableRecords(collect([$incidentRequest]))
         ->assertCanNotSeeTableRecords(collect([$requestRequest]));
 });

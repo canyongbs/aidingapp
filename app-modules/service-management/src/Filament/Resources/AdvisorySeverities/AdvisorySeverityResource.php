@@ -41,11 +41,8 @@ use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages\Edit
 use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages\ListAdvisorySeverities;
 use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages\ViewAdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use App\Enums\Feature;
-use App\Features\IncidentRenameFeature;
 use App\Filament\Clusters\Advisory;
 use Filament\Resources\Resource;
-use Illuminate\Support\Facades\Gate;
 
 class AdvisorySeverityResource extends Resource
 {
@@ -69,11 +66,5 @@ class AdvisorySeverityResource extends Resource
             'view' => ViewAdvisorySeverity::route('/{record}'),
             'edit' => EditAdvisorySeverity::route('/{record}/edit'),
         ];
-    }
-
-    //TODO: IncidentRenameFeature clean up - remove entire canAccess when you remove the feature flag.
-    public static function canAccess(): bool
-    {
-        return IncidentRenameFeature::active() && Gate::check(Feature::AdvisoryManagement->getGateName()) && auth()->user()->can('settings.view-any');
     }
 }

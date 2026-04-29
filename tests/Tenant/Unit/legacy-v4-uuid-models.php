@@ -100,6 +100,10 @@ use AidingApp\Project\Models\ProjectManagerTeam;
 use AidingApp\Project\Models\ProjectManagerUser;
 use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
+use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use AidingApp\ServiceManagement\Models\AdvisoryStatus;
+use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
@@ -225,6 +229,10 @@ return [
     ChangeRequestStatus::class,
     ChangeRequestType::class,
     HistoricalServiceMonitoring::class,
+    Advisory::class,
+    AdvisorySeverity::class,
+    AdvisoryStatus::class,
+    AdvisoryUpdate::class,
     ServiceMonitoringTarget::class,
     ServiceMonitoringTargetTeam::class,
     ServiceMonitoringTargetUser::class,

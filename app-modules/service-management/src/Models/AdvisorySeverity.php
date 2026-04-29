@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\AdvisorySeverityFactory;
+use App\Features\IncidentRenameFeature;
 use App\Models\BaseModel;
 use CanyonGBS\Common\Enums\Color;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -61,6 +62,11 @@ class AdvisorySeverity extends BaseModel implements Auditable
         'name',
         'color',
     ];
+
+    public function getTable(): string
+    {
+        return IncidentRenameFeature::active() ? 'advisory_severities' : 'incident_severities';
+    }
 
     /**
      * @return HasMany<Advisory, $this>

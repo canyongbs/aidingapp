@@ -42,12 +42,9 @@ use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ListAdvisori
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ManageAdvisoryUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ViewAdvisory;
 use AidingApp\ServiceManagement\Models\Advisory;
-use App\Enums\Feature;
-use App\Features\IncidentRenameFeature;
 use BackedEnum;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
-use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 class AdvisoryResource extends Resource
@@ -88,13 +85,5 @@ class AdvisoryResource extends Resource
             'edit' => EditAdvisory::route('/{record}/edit'),
             'manage-advisory-update' => ManageAdvisoryUpdate::route('/{record}/updates'),
         ];
-    }
-
-    //TODO: IncidentRenameFeature clean up - remove entire canAccess when you remove the feature flag.
-    public static function canAccess(): bool
-    {
-        return IncidentRenameFeature::active()
-          && Gate::check(Feature::AdvisoryManagement->getGateName())
-          && auth()->user()->can('advisory.view-any');
     }
 }

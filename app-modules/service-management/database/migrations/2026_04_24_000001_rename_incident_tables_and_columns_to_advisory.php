@@ -34,58 +34,74 @@
 </COPYRIGHT>
 */
 
+use App\Features\IncidentRenameFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        if (Schema::hasTable('incident_severities') && ! Schema::hasTable('advisory_severities')) {
+        DB::transaction(function () {
             Schema::rename('incident_severities', 'advisory_severities');
-        }
-
-        if (Schema::hasTable('incident_statuses') && ! Schema::hasTable('advisory_statuses')) {
             Schema::rename('incident_statuses', 'advisory_statuses');
-        }
-
-        if (Schema::hasTable('incident_updates') && ! Schema::hasTable('advisory_updates')) {
             Schema::rename('incident_updates', 'advisory_updates');
-        }
-
-        if (Schema::hasTable('incidents') && ! Schema::hasTable('advisories')) {
             Schema::rename('incidents', 'advisories');
-        }
 
-        if (Schema::hasTable('advisory_updates') && Schema::hasColumn('advisory_updates', 'incident_id')) {
             Schema::table('advisory_updates', function (Blueprint $table) {
                 $table->renameColumn('incident_id', 'advisory_id');
             });
-        }
+
+            DB::table('audits')
+                ->where('auditable_type', 'incident')
+                ->update(['auditable_type' => 'advisory']);
+
+            DB::table('audits')
+                ->where('auditable_type', 'incident_severity')
+                ->update(['auditable_type' => 'advisory_severity']);
+
+            DB::table('audits')
+                ->where('auditable_type', 'incident_status')
+                ->update(['auditable_type' => 'advisory_status']);
+
+            DB::table('audits')
+                ->where('auditable_type', 'incident_update')
+                ->update(['auditable_type' => 'advisory_update']);
+
+            IncidentRenameFeature::activate();
+        });
     }
 
     public function down(): void
     {
-        if (Schema::hasTable('advisory_updates') && Schema::hasColumn('advisory_updates', 'advisory_id')) {
+        DB::transaction(function () {
+            IncidentRenameFeature::deactivate();
+
+            DB::table('audits')
+                ->where('auditable_type', 'advisory')
+                ->update(['auditable_type' => 'incident']);
+
+            DB::table('audits')
+                ->where('auditable_type', 'advisory_severity')
+                ->update(['auditable_type' => 'incident_severity']);
+
+            DB::table('audits')
+                ->where('auditable_type', 'advisory_status')
+                ->update(['auditable_type' => 'incident_status']);
+
+            DB::table('audits')
+                ->where('auditable_type', 'advisory_update')
+                ->update(['auditable_type' => 'incident_update']);
+
             Schema::table('advisory_updates', function (Blueprint $table) {
                 $table->renameColumn('advisory_id', 'incident_id');
             });
-        }
 
-        if (Schema::hasTable('advisories') && ! Schema::hasTable('incidents')) {
             Schema::rename('advisories', 'incidents');
-        }
-
-        if (Schema::hasTable('advisory_updates') && ! Schema::hasTable('incident_updates')) {
             Schema::rename('advisory_updates', 'incident_updates');
-        }
-
-        if (Schema::hasTable('advisory_statuses') && ! Schema::hasTable('incident_statuses')) {
             Schema::rename('advisory_statuses', 'incident_statuses');
-        }
-
-        if (Schema::hasTable('advisory_severities') && ! Schema::hasTable('incident_severities')) {
             Schema::rename('advisory_severities', 'incident_severities');
-        }
+        });
     }
 };

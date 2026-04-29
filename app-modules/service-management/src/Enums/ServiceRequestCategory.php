@@ -43,14 +43,14 @@ use Filament\Support\Facades\FilamentColor;
 
 enum ServiceRequestCategory: string implements HasColor, HasLabel
 {
-    case Advisory = 'advisory';
+    case Incident = 'incident';
 
     case Request = 'request';
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::Advisory => 'Advisory',
+            self::Incident => 'Incident',
             self::Request => 'Request',
         };
     }
@@ -58,7 +58,7 @@ enum ServiceRequestCategory: string implements HasColor, HasLabel
     public function getColor(): string
     {
         return match ($this) {
-            self::Advisory => 'danger',
+            self::Incident => 'danger',
             self::Request => 'primary',
         };
     }
