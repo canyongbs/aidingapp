@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestMediaDownloadController;
 use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use AidingApp\ServiceManagement\Livewire\RenderServiceRequestFeedbackForm;
 use AidingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
@@ -50,3 +51,7 @@ Route::middleware('web')
 Route::get('/service-requests/{serviceRequest}/feedback/', RenderServiceRequestFeedbackForm::class)
     ->middleware(['web', FeedbackManagementIsOn::class])
     ->name('feedback.service.request');
+
+Route::middleware(['web', 'auth'])
+    ->get('/service-request/media/{media}/download', ServiceRequestMediaDownloadController::class)
+    ->name('service-request.media.download');

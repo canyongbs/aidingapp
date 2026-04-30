@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestUpdateRequestFactory;
+use AidingApp\Team\Models\Team;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -65,6 +66,7 @@ test('A successful action on the EditServiceRequestUpdate page', function () {
         ->get(
             ServiceRequestUpdateResource::getUrl('edit', [
                 'record' => $serviceRequestUpdate->getRouteKey(),
+                'service_request' => $serviceRequestUpdate->service_request_id,
             ])
         )
         ->assertSuccessful();
@@ -73,15 +75,13 @@ test('A successful action on the EditServiceRequestUpdate page', function () {
 
     livewire(EditServiceRequestUpdate::class, [
         'record' => $serviceRequestUpdate->getRouteKey(),
+        'parentRecord' => $serviceRequestUpdate->serviceRequest,
     ])
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertDatabaseHas(ServiceRequestUpdate::class, $request->except('service_request_id')->toArray());
-
-    expect(ServiceRequestUpdate::first()->serviceRequest->id)
-        ->toEqual($request->get('service_request_id'));
+    assertDatabaseHas(ServiceRequestUpdate::class, $request->toArray());
 });
 
 test('EditServiceRequestUpdate requires valid data', function ($data, $errors) {
@@ -99,6 +99,7 @@ test('EditServiceRequestUpdate requires valid data', function ($data, $errors) {
 
     livewire(EditServiceRequestUpdate::class, [
         'record' => $serviceRequestUpdate->getRouteKey(),
+        'parentRecord' => $serviceRequestUpdate->serviceRequest,
     ])
         ->fillForm(EditServiceRequestUpdateRequestFactory::new($data)->create())
         ->call('save')
@@ -107,13 +108,8 @@ test('EditServiceRequestUpdate requires valid data', function ($data, $errors) {
     unset($serviceRequestUpdate->serviceRequest);
 
     assertDatabaseHas(ServiceRequestUpdate::class, $serviceRequestUpdate->toArray());
-
-    expect(ServiceRequestUpdate::first()->serviceRequest->id)
-        ->toEqual($serviceRequestUpdate->serviceRequest->id);
 })->with(
     [
-        'service_request missing' => [EditServiceRequestUpdateRequestFactory::new()->state(['service_request_id' => null]), ['service_request_id' => 'required']],
-        'service_request not existing service_request id' => [EditServiceRequestUpdateRequestFactory::new()->state(['service_request_id' => fake()->uuid()]), ['service_request_id' => 'in']],
         'update missing' => [EditServiceRequestUpdateRequestFactory::new()->state(['update' => null]), ['update' => 'required']],
         'update is not a string' => [EditServiceRequestUpdateRequestFactory::new()->state(['update' => 99]), ['update' => 'string']],
         'internal not a boolean' => [EditServiceRequestUpdateRequestFactory::new()->state(['internal' => 'invalid']), ['internal' => 'boolean']],
@@ -125,6 +121,9 @@ test('EditServiceRequestUpdate requires valid data', function ($data, $errors) {
 test('EditServiceRequestUpdate is gated with proper access control', function () {
     $user = User::factory()->create();
 
+    $team = Team::factory()->create();
+    $user->team()->associate($team)->save();
+
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -135,18 +134,24 @@ test('EditServiceRequestUpdate is gated with proper access control', function ()
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
+    $serviceRequestUpdate->serviceRequest->priority->type->managerTeams()->attach($team);
+
     actingAs($user)
         ->get(
             ServiceRequestUpdateResource::getUrl('edit', [
                 'record' => $serviceRequestUpdate,
+                'service_request' => $serviceRequestUpdate->service_request_id,
             ])
         )->assertForbidden();
 
     livewire(EditServiceRequestUpdate::class, [
         'record' => $serviceRequestUpdate->getRouteKey(),
+        'parentRecord' => $serviceRequestUpdate->serviceRequest,
     ])
         ->assertForbidden();
 
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
     $user->givePermissionTo('service_request_update.view-any');
     $user->givePermissionTo('service_request_update.*.update');
 
@@ -154,6 +159,7 @@ test('EditServiceRequestUpdate is gated with proper access control', function ()
         ->get(
             ServiceRequestUpdateResource::getUrl('edit', [
                 'record' => $serviceRequestUpdate,
+                'service_request' => $serviceRequestUpdate->service_request_id,
             ])
         )->assertSuccessful();
 
@@ -161,15 +167,13 @@ test('EditServiceRequestUpdate is gated with proper access control', function ()
 
     livewire(EditServiceRequestUpdate::class, [
         'record' => $serviceRequestUpdate->getRouteKey(),
+        'parentRecord' => $serviceRequestUpdate->serviceRequest,
     ])
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertDatabaseHas(ServiceRequestUpdate::class, $request->except('service_request_id')->toArray());
-
-    expect(ServiceRequestUpdate::first()->serviceRequest->id)
-        ->toEqual($request->get('service_request_id'));
+    assertDatabaseHas(ServiceRequestUpdate::class, $request->toArray());
 });
 
 test('EditServiceRequestUpdate is gated with proper feature access control', function () {
@@ -181,6 +185,11 @@ test('EditServiceRequestUpdate is gated with proper feature access control', fun
 
     $user = User::factory()->create();
 
+    $team = Team::factory()->create();
+    $user->team()->associate($team)->save();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
     $user->givePermissionTo('service_request_update.view-any');
     $user->givePermissionTo('service_request_update.*.update');
 
@@ -194,15 +203,19 @@ test('EditServiceRequestUpdate is gated with proper feature access control', fun
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
+    $serviceRequestUpdate->serviceRequest->priority->type->managerTeams()->attach($team);
+
     actingAs($user)
         ->get(
             ServiceRequestUpdateResource::getUrl('edit', [
                 'record' => $serviceRequestUpdate,
+                'service_request' => $serviceRequestUpdate->service_request_id,
             ])
         )->assertForbidden();
 
     livewire(EditServiceRequestUpdate::class, [
         'record' => $serviceRequestUpdate->getRouteKey(),
+        'parentRecord' => $serviceRequestUpdate->serviceRequest,
     ])
         ->assertForbidden();
 
@@ -214,6 +227,7 @@ test('EditServiceRequestUpdate is gated with proper feature access control', fun
         ->get(
             ServiceRequestUpdateResource::getUrl('edit', [
                 'record' => $serviceRequestUpdate,
+                'service_request' => $serviceRequestUpdate->service_request_id,
             ])
         )->assertSuccessful();
 
@@ -221,6 +235,7 @@ test('EditServiceRequestUpdate is gated with proper feature access control', fun
 
     livewire(EditServiceRequestUpdate::class, [
         'record' => $serviceRequestUpdate->getRouteKey(),
+        'parentRecord' => $serviceRequestUpdate->serviceRequest,
     ])
         ->fillForm($request->toArray())
         ->call('save')

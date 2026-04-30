@@ -39,7 +39,7 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\IncidentSeverityFactory;
 use App\Models\BaseModel;
-use Filament\Support\Colors\Color;
+use CanyonGBS\Common\Enums\Color;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -62,10 +62,6 @@ class IncidentSeverity extends BaseModel implements Auditable
         'color',
     ];
 
-    protected $appends = [
-        'rgb_color',
-    ];
-
     /**
      * @return HasMany<Incident, $this>
      */
@@ -75,12 +71,22 @@ class IncidentSeverity extends BaseModel implements Auditable
     }
 
     /**
-     * @return Attribute<string, never>
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'color' => Color::class,
+        ];
+    }
+
+    /**
+     * @return Attribute<string|null, never>
      */
     protected function rgbColor(): Attribute
     {
         return new Attribute(
-            get: fn () => 'rgb(' . Color::all()[$this->color][600] . ')',
+            get: fn () => $this->color->getRgb(),
         );
     }
 }

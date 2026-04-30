@@ -61,6 +61,7 @@ use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddable
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\Portal\Http\Routing\ArticleShowMissingHandler;
 use AidingApp\Portal\Http\Routing\CategoryShowMissingHandler;
+use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestMediaDownloadController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Symfony\Component\HttpFoundation\Response;
@@ -148,6 +149,8 @@ Route::prefix('api')
                     ->name('service-request.show');
                 Route::post('/service-request-update/store', StoreServiceRequestUpdateController::class)
                     ->name('service-request-update.storeServiceRequestUpdate');
+                Route::get('/service-request/media/{media}/download', ServiceRequestMediaDownloadController::class)
+                    ->name('service-request.media.download');
                 Route::post('/knowledge_base_article_vote/store', StoreKnowledgeBaseArticleVoteController::class)
                     ->name('knowledge_base_article_vote.storeKnowledgeBaseArticleVote');
 

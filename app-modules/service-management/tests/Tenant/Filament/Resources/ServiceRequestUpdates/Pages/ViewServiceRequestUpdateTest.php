@@ -36,6 +36,7 @@
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use AidingApp\Team\Models\Team;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -49,6 +50,7 @@ test('The correct details are displayed on the ViewServiceRequestUpdate page', f
         ->get(
             ServiceRequestUpdateResource::getUrl('view', [
                 'record' => $serviceRequestUpdate,
+                'service_request' => $serviceRequestUpdate->service_request_id,
             ])
         )
         ->assertSuccessful()
@@ -69,15 +71,22 @@ test('The correct details are displayed on the ViewServiceRequestUpdate page', f
 test('ViewServiceRequestUpdate is gated with proper access control', function () {
     $user = User::factory()->create();
 
+    $team = Team::factory()->create();
+    $user->team()->associate($team)->save();
+
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+    $serviceRequestUpdate->serviceRequest->priority->type->managerTeams()->attach($team);
 
     actingAs($user)
         ->get(
             ServiceRequestUpdateResource::getUrl('view', [
                 'record' => $serviceRequestUpdate,
+                'service_request' => $serviceRequestUpdate->service_request_id,
             ])
         )->assertForbidden();
 
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
     $user->givePermissionTo('service_request_update.view-any');
     $user->givePermissionTo('service_request_update.*.view');
 
@@ -85,6 +94,7 @@ test('ViewServiceRequestUpdate is gated with proper access control', function ()
         ->get(
             ServiceRequestUpdateResource::getUrl('view', [
                 'record' => $serviceRequestUpdate,
+                'service_request' => $serviceRequestUpdate->service_request_id,
             ])
         )->assertSuccessful();
 });
@@ -98,15 +108,22 @@ test('ViewServiceRequestUpdate is gated with proper feature access control', fun
 
     $user = User::factory()->create();
 
+    $team = Team::factory()->create();
+    $user->team()->associate($team)->save();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
     $user->givePermissionTo('service_request_update.view-any');
     $user->givePermissionTo('service_request_update.*.view');
 
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+    $serviceRequestUpdate->serviceRequest->priority->type->managerTeams()->attach($team);
 
     actingAs($user)
         ->get(
             ServiceRequestUpdateResource::getUrl('view', [
                 'record' => $serviceRequestUpdate,
+                'service_request' => $serviceRequestUpdate->service_request_id,
             ])
         )->assertForbidden();
 
@@ -118,6 +135,7 @@ test('ViewServiceRequestUpdate is gated with proper feature access control', fun
         ->get(
             ServiceRequestUpdateResource::getUrl('view', [
                 'record' => $serviceRequestUpdate,
+                'service_request' => $serviceRequestUpdate->service_request_id,
             ])
         )->assertSuccessful();
 });

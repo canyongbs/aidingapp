@@ -34,7 +34,6 @@
 @props(['url' => null,'settings' => null])
 @php
     use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
-    use Filament\Support\Colors\Color;
     use App\Settings\EmailSettings;
     use Filament\Forms\Components\RichEditor\RichContentRenderer;use App\Models\SettingsProperty;
     use AidingApp\Theme\Settings\ThemeSettings;
@@ -48,7 +47,6 @@
     $h1TextColor = $emailSettings->h1_text_color ?? null;
     $h2TextColor = $emailSettings->h2_text_color ?? null;
     $backgroundColor = $emailSettings->background_color ?? null;
-    $color = Color::all()[$settings?->primary_color ?? 'blue'];
     $footer = $emailSettings->footer ? RichContentRenderer::make($emailSettings->footer)->toHtml() : null;
     $headerLogoModel = $emailSettings->getSettingsPropertyModel('email.header_logo');
     $headerLogo = $headerLogoModel->getFirstMedia('header_logo')
@@ -104,12 +102,16 @@
             }
         }
 
+        @php
+            $buttonColor = \Filament\Support\Colors\Color::convertToRgb(\Filament\Support\Colors\Color::all()[$settings?->primary_color ?? 'blue'][600]);
+        @endphp
+
         .button-primary {
-            background-color: rgb({{ $color[600] }});
-            border-bottom: 8px solid rgb({{ $color[600] }});
-            border-left: 18px solid rgb({{ $color[600] }});
-            border-right: 18px solid rgb({{ $color[600] }});
-            border-top: 8px solid rgb({{ $color[600] }});
+            background-color: {{ $buttonColor }};
+            border-bottom: 8px solid {{ $buttonColor }};
+            border-left: 18px solid {{ $buttonColor }};
+            border-right: 18px solid {{ $buttonColor }};
+            border-top: 8px solid {{ $buttonColor }};
         }
     </style>
 </head>

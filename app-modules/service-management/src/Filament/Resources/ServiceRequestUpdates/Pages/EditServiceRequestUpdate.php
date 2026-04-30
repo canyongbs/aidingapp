@@ -36,9 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages;
 
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Concerns\EditPageRedirection;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 
@@ -48,11 +49,36 @@ class EditServiceRequestUpdate extends EditRecord
 
     protected static string $resource = ServiceRequestUpdateResource::class;
 
+    public function getSubNavigationParameters(): array
+    {
+        return ['record' => $this->getParentRecord()];
+    }
+
+    public function getRedirectUrl(): ?string
+    {
+        return static::getResource()::getUrl('view', [
+            'record' => $this->record,
+            'service_request' => $this->getParentRecord()->getRouteKey(),
+        ]);
+    }
+
+    public function getResourceBreadcrumbs(): array
+    {
+        $parentRecord = $this->getParentRecord();
+
+        assert($parentRecord instanceof ServiceRequest);
+
+        return [
+            ServiceRequestResource::getUrl() => ServiceRequestResource::getBreadcrumb(),
+            ServiceRequestResource::getUrl('view', ['record' => $parentRecord]) => $parentRecord->service_request_number,
+            ServiceRequestResource::getUrl('manage-service-request-updates', ['record' => $parentRecord]) => static::getResource()::getBreadcrumb(),
+        ];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             ViewAction::make(),
-            DeleteAction::make(),
         ];
     }
 }
