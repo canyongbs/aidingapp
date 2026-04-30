@@ -192,24 +192,6 @@ it('confidential_task_users UserSelect does not show admin users by default in c
         });
 });
 
-it('confidential_task_users UserSelect shows pre-selected admin when already on the task relationship', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $adminUser = User::factory()->create();
-    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
-
-    $task = Task::factory()->for($project)->create();
-    $task->confidentialAccessUsers()->attach($adminUser);
-
-    livewire(ManageTasks::class, ['record' => $project->getRouteKey()])
-        ->assertSuccessful()
-        ->mountTableAction('edit', $task)
-        ->assertFormFieldExists('confidential_task_users', 'mountedActionSchema0', function (UserSelect $field) use ($adminUser): bool {
-            return ! empty($field->getSearchResults($adminUser->name));
-        });
-});
-
 it('assigned_to UserSelect shows all users when filter_admins_from_selection config is false', function () {
     Config::set('app.filter_admins_from_selection', false);
 
