@@ -36,7 +36,6 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\KnowledgeBase\Filament\Actions\CreateConcernAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
@@ -51,7 +50,6 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
-use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 
 class ViewKnowledgeBaseItem extends ViewRecord
 {
