@@ -86,6 +86,20 @@ class ListKnowledgeBaseItems extends ListRecords
                         );
                     })
                     ->sortable(),
+                TextColumn::make('rating')
+                    ->label('Rating')
+                    ->toggleable()
+                    ->getStateUsing(function (KnowledgeBaseItem $record): string {
+                        $totalVotes = $record->votes()->count();
+
+                        if ($totalVotes === 0) {
+                            return 'Unrated';
+                        }
+
+                        $helpfulVotes = $record->votes()->where('is_helpful', true)->count();
+
+                        return (int) round(($helpfulVotes / $totalVotes) * 100) . '%';
+                    }),
                 TextColumn::make('category.name')
                     ->label('Category')
                     ->toggleable()
