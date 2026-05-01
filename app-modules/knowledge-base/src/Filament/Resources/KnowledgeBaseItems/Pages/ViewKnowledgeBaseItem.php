@@ -36,6 +36,7 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\KnowledgeBase\Filament\Actions\CreateConcernAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
@@ -50,6 +51,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
+use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 
 class ViewKnowledgeBaseItem extends ViewRecord
 {
@@ -80,9 +82,6 @@ class ViewKnowledgeBaseItem extends ViewRecord
                             ->id('content'),
                         Tab::make('Properties')
                             ->schema([
-                                TextEntry::make('title')
-                                    ->label('Article Title')
-                                    ->columnSpanFull(),
                                 TextEntry::make('notes')
                                     ->label('Notes')
                                     ->columnSpanFull(),
@@ -95,6 +94,19 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                 TextEntry::make('tags')
                                     ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->tags->pluck('name'))
                                     ->badge(),
+                                TextEntry::make('rating')
+                                    ->label('Rating')
+                                    ->getStateUsing(function (KnowledgeBaseItem $record): string {
+                                        $totalVotes = $record->votes()->count();
+
+                                        if ($totalVotes === 0) {
+                                            return 'Unrated';
+                                        }
+
+                                        $helpfulVotes = $record->votes()->where('is_helpful', true)->count();
+
+                                        return (int) round(($helpfulVotes / $totalVotes) * 100) . '%';
+                                    }),
                             ])
                             ->id('properties')
                             ->columns(2),
