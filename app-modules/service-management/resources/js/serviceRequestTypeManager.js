@@ -45,6 +45,7 @@ document.addEventListener('alpine:init', () => {
         isCheckingType: false,
         nextTempId: 1,
         pendingRestore: null,
+        collapsedCategories: {},
         dragData: {
             isDragging: false,
             draggedElement: null,
@@ -75,6 +76,32 @@ document.addEventListener('alpine:init', () => {
 
         markAsChanged() {
             this.hasUnsavedChanges = true;
+        },
+
+        toggleCategory(categoryId) {
+            if (this.collapsedCategories[categoryId]) {
+                delete this.collapsedCategories[categoryId];
+            } else {
+                this.collapsedCategories[categoryId] = true;
+            }
+            this.render();
+        },
+
+        expandAll() {
+            this.collapsedCategories = {};
+            this.render();
+        },
+
+        collapseAll() {
+            const collectIds = (categories) => {
+                for (const category of categories || []) {
+                    this.collapsedCategories[category.id] = true;
+                    collectIds(category.children);
+                }
+            };
+            this.collapsedCategories = {};
+            collectIds(this.treeData.categories);
+            this.render();
         },
 
         render() {
@@ -210,6 +237,9 @@ document.addEventListener('alpine:init', () => {
             const showTypeInput = this.typeInputs[category.id] || false;
             const canAddChildCategory = level < 1;
             const isRenaming = this.renamingCategories[category.id] || false;
+            const isCollapsed = this.collapsedCategories[category.id] || false;
+            const hasChildren =
+                (category.types && category.types.length > 0) || (category.children && category.children.length > 0);
 
             return `<div class="category-wrapper" data-category-id="${category.id}">
                         <div class="category-item ${this.canEdit ? 'draggable cursor-grab active:cursor-grabbing' : ''} flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-600 dark:bg-gray-700 transition-all duration-150 ease-out hover:bg-gray-50 hover:-translate-y-px hover:shadow-lg dark:hover:bg-gray-600" style="margin-left: ${indent}px" ${this.canEdit ? 'draggable="true"' : ''} data-category-id="${category.id}">
@@ -222,9 +252,23 @@ document.addEventListener('alpine:init', () => {
                                         </div>`
                                     : ''
                             }
-                            <svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v3.26a3.235 3.235 0 0 1 1.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0 0 16.25 5h-4.836a.25.25 0 0 1-.177-.073L9.823 3.513A1.75 1.75 0 0 0 8.586 3H3.75ZM3.75 9A1.75 1.75 0 0 0 2 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0 0 18 15.25v-4.5A1.75 1.75 0 0 0 16.25 9H3.75Z" />
-                            </svg>
+                            ${
+                                hasChildren
+                                    ? `<button type="button" class="p-0.5 -m-0.5 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors" @click.stop="toggleCategory('${category.id}')">
+                                        ${
+                                            isCollapsed
+                                                ? `<svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v3.26a3.235 3.235 0 0 1 1.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0 0 16.25 5h-4.836a.25.25 0 0 1-.177-.073L9.823 3.513A1.75 1.75 0 0 0 8.586 3H3.75ZM3.75 9A1.75 1.75 0 0 0 2 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0 0 18 15.25v-4.5A1.75 1.75 0 0 0 16.25 9H3.75Z" />
+                                                </svg>`
+                                                : `<svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                    <path d="M4.75 3A1.75 1.75 0 0 0 3 4.75v2.752l.104-.002h13.792c.035 0 .07 0 .104.002V6.75A1.75 1.75 0 0 0 15.25 5h-3.836a.25.25 0 0 1-.177-.073L9.823 3.513A1.75 1.75 0 0 0 8.586 3H4.75ZM3.104 9a1.75 1.75 0 0 0-1.673 2.265l1.385 4.5A1.75 1.75 0 0 0 4.488 17h11.023a1.75 1.75 0 0 0 1.673-1.235l1.384-4.5A1.75 1.75 0 0 0 16.896 9H3.104Z" />
+                                                </svg>`
+                                        }
+                                    </button>`
+                                    : `<svg class="h-5 w-5 text-gray-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M3.75 3A1.75 1.75 0 0 0 2 4.75v3.26a3.235 3.235 0 0 1 1.75-.51h12.5c.644 0 1.245.188 1.75.51V6.75A1.75 1.75 0 0 0 16.25 5h-4.836a.25.25 0 0 1-.177-.073L9.823 3.513A1.75 1.75 0 0 0 8.586 3H3.75ZM3.75 9A1.75 1.75 0 0 0 2 10.75v4.5c0 .966.784 1.75 1.75 1.75h12.5A1.75 1.75 0 0 0 18 15.25v-4.5A1.75 1.75 0 0 0 16.25 9H3.75Z" />
+                                    </svg>`
+                            }
                             ${
                                 this.canEdit && isRenaming
                                     ? `
@@ -290,7 +334,7 @@ document.addEventListener('alpine:init', () => {
                         </div>
 
                         ${
-                            this.canEdit && canAddChildCategory && showCategoryInput
+                            !isCollapsed && this.canEdit && canAddChildCategory && showCategoryInput
                                 ? `
                                     <div id="category-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
                                         <input id="child-category-${category.id}" type="text" placeholder="Name of new child area" class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
@@ -302,7 +346,7 @@ document.addEventListener('alpine:init', () => {
                         }
 
                         ${
-                            this.canEdit && showTypeInput
+                            !isCollapsed && this.canEdit && showTypeInput
                                 ? `
                                     <div id="type-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
                                         <input id="child-type-${category.id}" type="text" placeholder="Name of new type in this area" class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
@@ -320,7 +364,7 @@ document.addEventListener('alpine:init', () => {
                         }
 
                         ${
-                            category.types && category.types.length > 0
+                            !isCollapsed && category.types && category.types.length > 0
                                 ? `
                                     <div data-sortable="types" data-category-id="${category.id}" class="mt-2 space-y-1 min-h-4 p-0.5 rounded transition-colors duration-150 ease-in-out" style="margin-left: ${indent + 24}px">
                                         ${category.types.map((type) => this.renderType(type)).join('')}
@@ -330,7 +374,7 @@ document.addEventListener('alpine:init', () => {
                         }
 
                         ${
-                            category.children && category.children.length > 0
+                            !isCollapsed && category.children && category.children.length > 0
                                 ? `
                                     <div data-sortable="categories" data-parent-id="${category.id}" class="mt-2 space-y-2 min-h-5 p-0.5 rounded-md transition-colors duration-150 ease-in-out">
                                         ${category.children.map((child) => this.renderCategoryRecursive(child, level + 1)).join('')}
@@ -1095,6 +1139,10 @@ document.addEventListener('alpine:init', () => {
                 newCategoryId = position.target.dataset.categoryId;
             } else if (position.type === 'insert') {
                 newCategoryId = position.container.dataset.categoryId || null;
+            }
+
+            if (newCategoryId && this.collapsedCategories[newCategoryId]) {
+                delete this.collapsedCategories[newCategoryId];
             }
 
             this.updateTypeInTreeData(typeId, newCategoryId, position);
