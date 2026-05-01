@@ -248,9 +248,9 @@
             <x-slot name="heading">Service Request Type Already Exists</x-slot>
 
             <p class="text-sm text-gray-600 dark:text-gray-400">
-                A service request type named "
-                <span class="font-semibold" x-text="pendingRestore?.archivedType?.name"></span>
-                " already exists and is currently archived.
+                A service request type named
+                <span class="font-semibold" x-text="'“' + pendingRestore?.archivedType?.name + '”'"></span>
+                already exists and is currently archived.
             </p>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 To use this name, you can restore the archived type. Or, select Cancel to create a new type with a
@@ -258,7 +258,7 @@
             </p>
 
             <x-slot name="footer">
-                <div class="flex gap-3">
+                <x-filament::actions full-width>
                     <x-filament::button
                         color="gray"
                         @click="$dispatch('close-modal', { id: 'archived-type-restore-modal' })"
@@ -271,7 +271,7 @@
                     >
                         Restore
                     </x-filament::button>
-                </div>
+                </x-filament::actions>
             </x-slot>
         </x-filament::modal>
     </div>
