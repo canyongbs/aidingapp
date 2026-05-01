@@ -44,6 +44,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 
 class Feedback extends ViewRecord
@@ -55,6 +56,22 @@ class Feedback extends ViewRecord
     protected ?string $heading = 'Feedback';
 
     protected static ?string $breadcrumb = 'Feedback';
+
+    public static function canAccess(array $arguments = []): bool
+    {
+        if (! Gate::check(Feature::FeedbackManagement->getGateName())) {
+            return false;
+        }
+
+        /** @var Model|null $record */
+        $record = $arguments['record'] ?? null;
+
+        if ($record) {
+            return static::getResource()::canView($record);
+        }
+
+        return parent::canAccess($arguments);
+    }
 
     public function mount(int | string $record): void
     {

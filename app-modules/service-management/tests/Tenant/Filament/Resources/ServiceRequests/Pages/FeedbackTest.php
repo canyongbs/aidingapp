@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\Team\Models\Team;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -91,6 +92,68 @@ test('Feedback is gated with proper feature access control', function () {
     $settings->data->addons->feedbackManagement = true;
 
     $settings->save();
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('manage-feedback', [
+                'record' => $serviceRequest,
+            ])
+        )->assertSuccessful();
+});
+
+test('Feedback page is gated based on access to the service request', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->feedbackManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $team = Team::factory()->create();
+    $user->team()->associate($team)->save();
+
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    // User has view-any permission but is NOT a manager/auditor of this service request's type
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('manage-feedback', [
+                'record' => $serviceRequest,
+            ])
+        )->assertForbidden();
+});
+
+test('Feedback page is accessible when user is a manager of the service request type', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->feedbackManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $team = Team::factory()->create();
+    $user->team()->associate($team)->save();
+
+    $type = ServiceRequestType::factory()->create([
+        'has_enabled_feedback_collection' => true,
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->create([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $type->getKey(),
+        ])->getKey(),
+    ]);
+
+    // Attach the team as manager of this service request type
+    $type->managerTeams()->attach($team);
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
 
     actingAs($user)
         ->get(
