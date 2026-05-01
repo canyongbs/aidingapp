@@ -64,6 +64,11 @@ class ViewKnowledgeBaseItem extends ViewRecord
 
     public function infolist(Schema $schema): Schema
     {
+        $this->record->loadCount([
+            'votes',
+            'votes as helpful_votes_count' => fn ($query) => $query->where('is_helpful', true),
+        ]);
+
         return $schema
             ->components([
                 View::make('knowledge-base::filament.pages.badges'),
@@ -95,13 +100,15 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                 TextEntry::make('rating')
                                     ->label('Rating')
                                     ->getStateUsing(function (KnowledgeBaseItem $record): string {
-                                        $totalVotes = $record->votes()->count();
+                                        /** @var int $totalVotes */
+                                        $totalVotes = $record->votes_count;
 
                                         if ($totalVotes === 0) {
                                             return 'Unrated';
                                         }
 
-                                        $helpfulVotes = $record->votes()->where('is_helpful', true)->count();
+                                        /** @var int $helpfulVotes */
+                                        $helpfulVotes = $record->getAttribute('helpful_votes_count');
 
                                         return (int) round(($helpfulVotes / $totalVotes) * 100) . '%';
                                     }),
