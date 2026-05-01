@@ -89,19 +89,19 @@
         {
             label: 'Service',
             routeName: 'service',
-            visible: hasServiceManagement && user !== null,
+            visible: computed(() => hasServiceManagement.value && user.value !== null),
             command: () => router.push({ name: 'service' }),
         },
         {
             label: 'Status',
             routeName: 'status',
-            visible: user !== null,
+            visible: computed(() => user.value !== null),
             command: () => router.push({ name: 'status' }),
         },
         {
             label: 'Advisories',
             routeName: 'advisories',
-            visible: user !== null,
+            visible: computed(() => user.value !== null),
             command: () => router.push({ name: 'advisories' }),
         },
         {
