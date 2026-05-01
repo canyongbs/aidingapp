@@ -160,10 +160,19 @@
                                 id="new-type-name"
                                 type="text"
                                 placeholder="Name of new type"
+                                x-bind:disabled="isCheckingType"
                             />
                         </div>
                         <div class="flex gap-2">
-                            <x-filament::button id="create-type-btn" type="button" size="sm">Add</x-filament::button>
+                            <x-filament::button
+                                id="create-type-btn"
+                                type="button"
+                                size="sm"
+                                x-bind:disabled="isCheckingType"
+                            >
+                                <span x-show="!isCheckingType">Add</span>
+                                <x-filament::loading-indicator x-show="isCheckingType" class="h-4 w-4" />
+                            </x-filament::button>
                             <x-filament::button id="cancel-type-btn" type="button" color="gray" size="sm">
                                 Cancel
                             </x-filament::button>
@@ -248,6 +257,38 @@
                 </x-filament::button>
             </div>
         </div>
+
+        {{-- Archived Type Restore Modal --}}
+        <x-filament::modal id="archived-type-restore-modal" width="md">
+            <x-slot name="heading">Service Request Type Already Exists</x-slot>
+
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                A service request type named "
+                <span class="font-semibold" x-text="pendingRestore?.archivedType?.name"></span>
+                " already exists and is currently archived.
+            </p>
+            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+                To use this name, you can restore the archived type. Or, select Cancel to create a new type with a
+                different name.
+            </p>
+
+            <x-slot name="footer">
+                <div class="flex gap-3">
+                    <x-filament::button
+                        color="gray"
+                        @click="$dispatch('close-modal', { id: 'archived-type-restore-modal' })"
+                    >
+                        Cancel
+                    </x-filament::button>
+
+                    <x-filament::button
+                        @click="confirmRestore(); $dispatch('close-modal', { id: 'archived-type-restore-modal' })"
+                    >
+                        Restore
+                    </x-filament::button>
+                </div>
+            </x-slot>
+        </x-filament::modal>
     </div>
 
     @assets

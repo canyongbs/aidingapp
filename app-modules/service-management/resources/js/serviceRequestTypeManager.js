@@ -42,7 +42,9 @@ document.addEventListener('alpine:init', () => {
         renamingTypes: {},
         hasUnsavedChanges: false,
         isSaving: false,
+        isCheckingType: false,
         nextTempId: 1,
+        pendingRestore: null,
         dragData: {
             isDragging: false,
             draggedElement: null,
@@ -66,6 +68,7 @@ document.addEventListener('alpine:init', () => {
             this.deletedCategories = [];
             this.deletedTypes = [];
             this.archivedTypes = [];
+            this.pendingRestore = null;
             this.renamingCategories = {};
             this.renamingTypes = {};
         },
@@ -303,7 +306,13 @@ document.addEventListener('alpine:init', () => {
                                 ? `
                                     <div id="type-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
                                         <input id="child-type-${category.id}" type="text" placeholder="Name of new type in this area" class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
-                                        <button @click="createType('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
+                                        <button @click="createType('${category.id}')" x-bind:disabled="isCheckingType" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700 disabled:opacity-50">
+                                            <span x-show="!isCheckingType">Add</span>
+                                            <svg x-show="isCheckingType" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="fi-icon fi-loading-indicator h-4 w-4">
+                                                <path clip-rule="evenodd" d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill-rule="evenodd" fill="currentColor" opacity="0.2"></path>
+                                                <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill="currentColor"></path>
+                                            </svg>
+                                        </button>
                                         <button @click="hideTypeInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
                                     </div>
                                 `
@@ -1339,6 +1348,9 @@ document.addEventListener('alpine:init', () => {
                 const freshData = await this.$wire.call('getHierarchicalData');
                 this.originalTreeData = freshData;
                 this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
+                this.deletedCategories = [];
+                this.deletedTypes = [];
+                this.archivedTypes = [];
                 this.hasUnsavedChanges = false;
                 this.render();
             } catch (error) {
@@ -1374,7 +1386,26 @@ document.addEventListener('alpine:init', () => {
                 deleted_categories: this.deletedCategories,
                 deleted_types: this.deletedTypes,
                 archived_types: this.archivedTypes,
+                restore_types: this.collectRestoreTypeIds(),
             };
+        },
+
+        collectRestoreTypeIds() {
+            const ids = [];
+            const walkTypes = (types) => {
+                (types || []).forEach((type) => {
+                    if (type._restore) ids.push(type.id);
+                });
+            };
+            const walkCategories = (categories) => {
+                (categories || []).forEach((category) => {
+                    walkTypes(category.types);
+                    walkCategories(category.children);
+                });
+            };
+            walkTypes(this.treeData.uncategorized_types);
+            walkCategories(this.treeData.categories);
+            return ids;
         },
 
         updateSortOrders() {
@@ -1670,7 +1701,7 @@ document.addEventListener('alpine:init', () => {
             this.render();
         },
 
-        createType(categoryId) {
+        async createType(categoryId) {
             let name;
 
             if (categoryId) {
@@ -1683,41 +1714,130 @@ document.addEventListener('alpine:init', () => {
 
             if (!name?.trim()) return;
 
-            // Create new type with temporary ID
-            const newType = {
-                id: `temp_${this.nextTempId++}`,
-                name: name.trim(),
-                type: 'type',
-                sort: 0,
-                category_id: categoryId,
-                service_requests_count: 0,
+            const locallyRemovedType = this.findLocallyRemovedTypeByName(name.trim());
+
+            if (locallyRemovedType) {
+                this.undoLocalRemoval(locallyRemovedType, categoryId);
+                return;
+            }
+
+            this.isCheckingType = true;
+
+            try {
+                const archivedType = await this.$wire.checkArchivedTypeName(name.trim());
+
+                if (archivedType) {
+                    this.pendingRestore = { archivedType, categoryId };
+                    window.dispatchEvent(
+                        new CustomEvent('open-modal', { detail: { id: 'archived-type-restore-modal' } }),
+                    );
+                    return;
+                }
+
+                this.addTypeToTree(
+                    {
+                        id: `temp_${this.nextTempId++}`,
+                        name: name.trim(),
+                        type: 'type',
+                        sort: 0,
+                        category_id: categoryId,
+                        service_requests_count: 0,
+                    },
+                    categoryId,
+                );
+            } finally {
+                this.isCheckingType = false;
+            }
+        },
+
+        confirmRestore() {
+            if (!this.pendingRestore) return;
+
+            const { archivedType, categoryId } = this.pendingRestore;
+            this.pendingRestore = null;
+
+            this.addTypeToTree(
+                {
+                    id: archivedType.id,
+                    name: archivedType.name,
+                    type: 'type',
+                    sort: 0,
+                    category_id: categoryId,
+                    service_requests_count: archivedType.service_requests_count,
+                    view_url: archivedType.view_url,
+                    _restore: true,
+                },
+                categoryId,
+            );
+        },
+
+        findLocallyRemovedTypeByName(name) {
+            const removedIds = [...(this.deletedTypes || []), ...(this.archivedTypes || [])];
+            if (removedIds.length === 0) return null;
+
+            const findInTypes = (types) => {
+                return (types || []).find((type) => removedIds.includes(type.id) && type.name === name);
+            };
+            const findInCategories = (categories) => {
+                for (const category of categories || []) {
+                    const found = findInTypes(category.types);
+                    if (found) return found;
+                    const childResult = findInCategories(category.children);
+                    if (childResult) return childResult;
+                }
+                return null;
             };
 
-            // Add to the appropriate location in tree data
+            return (
+                findInTypes(this.originalTreeData.uncategorized_types) ||
+                findInCategories(this.originalTreeData.categories)
+            );
+        },
+
+        undoLocalRemoval(type, categoryId) {
+            this.deletedTypes = (this.deletedTypes || []).filter((id) => id !== type.id);
+            this.archivedTypes = (this.archivedTypes || []).filter((id) => id !== type.id);
+
+            this.addTypeToTree(
+                {
+                    id: type.id,
+                    name: type.name,
+                    type: 'type',
+                    sort: 0,
+                    category_id: categoryId,
+                    service_requests_count: type.service_requests_count ?? 0,
+                    view_url: type.view_url ?? '',
+                },
+                categoryId,
+            );
+        },
+
+        addTypeToTree(type, categoryId) {
             if (categoryId) {
                 const category = this.findCategoryById(categoryId);
                 if (category) {
                     if (!category.types) {
                         category.types = [];
                     }
-                    category.types.push(newType);
+                    category.types.push(type);
                 }
             } else {
                 if (!this.treeData.uncategorized_types) {
                     this.treeData.uncategorized_types = [];
                 }
-                this.treeData.uncategorized_types.push(newType);
+                this.treeData.uncategorized_types.push(type);
             }
 
-            // Mark as changed and re-render
             this.markAsChanged();
 
-            // Hide input and clear form
             if (categoryId) {
                 this.hideTypeInput(categoryId);
             } else {
-                document.getElementById('show-type-btn')?.click();
+                document.getElementById('show-type-btn').style.display = 'block';
+                document.getElementById('type-input-form').style.display = 'none';
                 document.getElementById('new-type-name').value = '';
+                const showCategoryBtn = document.getElementById('show-category-btn');
+                if (showCategoryBtn) showCategoryBtn.style.display = 'block';
             }
 
             this.render();
