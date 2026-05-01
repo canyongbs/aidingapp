@@ -55,7 +55,6 @@ use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
-use App\Features\ServiceRequestHistoryActorFeature;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
@@ -336,12 +335,9 @@ class ServiceRequestObserver
             ],
         ];
 
-        // TODO: ServiceRequestHistoryActorFeature Cleanup - Always resolve the actor and set actor_type/actor_id on $row; remove this if-check after the feature flag is removed.
-        if (ServiceRequestHistoryActorFeature::active()) {
-            $actor = $this->resolveActor();
-            $row['actor_type'] = $actor?->getMorphClass();
-            $row['actor_id'] = $actor?->getKey();
-        }
+        $actor = $this->resolveActor();
+        $row['actor_type'] = $actor?->getMorphClass();
+        $row['actor_id'] = $actor?->getKey();
 
         $serviceRequest->histories()->create($row);
     }
