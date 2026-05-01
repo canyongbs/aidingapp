@@ -75,6 +75,10 @@ class ListKnowledgeBaseItems extends ListRecords
     {
         return $table
             ->splitSearchTerms(false)
+            ->modifyQueryUsing(fn (Builder $query) => $query->withCount([
+                'votes',
+                'votes as helpful_votes_count' => fn (Builder $query) => $query->where('is_helpful', true),
+            ]))
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('title')
@@ -90,13 +94,15 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->label('Rating')
                     ->toggleable()
                     ->getStateUsing(function (KnowledgeBaseItem $record): string {
-                        $totalVotes = $record->votes()->count();
+                        /** @var int $totalVotes */
+                        $totalVotes = $record->votes_count;
 
                         if ($totalVotes === 0) {
                             return 'Unrated';
                         }
 
-                        $helpfulVotes = $record->votes()->where('is_helpful', true)->count();
+                        /** @var int $helpfulVotes */
+                        $helpfulVotes = $record->getAttribute('helpful_votes_count');
 
                         return (int) round(($helpfulVotes / $totalVotes) * 100) . '%';
                     }),
