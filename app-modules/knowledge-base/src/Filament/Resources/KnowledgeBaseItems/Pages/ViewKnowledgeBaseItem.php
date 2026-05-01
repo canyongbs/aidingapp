@@ -36,6 +36,7 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
+use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Filament\Actions\CreateConcernAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
@@ -107,6 +108,7 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                 TextEntry::make('category.name')
                                     ->label('Category'),
                                 TextEntry::make('division.name')
+                                    ->visible(fn (): bool => Division::count() > 1)
                                     ->label('Division'),
                                 TextEntry::make('managers')
                                     ->label('Managers')
