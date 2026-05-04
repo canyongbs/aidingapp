@@ -37,6 +37,7 @@
 namespace App\Filament\Pages;
 
 use App\DataTransferObjects\LicenseManagement\LicenseData;
+use App\Features\IncidentRenameFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use BackedEnum;
@@ -142,7 +143,10 @@ class ManageLicenseSettings extends SettingsPage
                                 ->label('License Management'),
                             Toggle::make('data.addons.projectManagement')
                                 ->label('Project Management'),
-                            Toggle::make('data.addons.incidentManagement') //TODO: will need to be renamed to advisory management
+                            Toggle::make('data.addons.incidentManagement')
+                                ->visible(fn () => ! IncidentRenameFeature::active()),
+                            Toggle::make('data.addons.advisoryManagement')
+                                ->visible(fn () => IncidentRenameFeature::active())
                                 ->label('Advisories'),
                         ]
                     ),
