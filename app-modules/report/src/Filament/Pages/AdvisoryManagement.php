@@ -34,41 +34,41 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Models\Advisory;
-use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use Illuminate\Support\Facades\URL;
+namespace AidingApp\Report\Filament\Pages;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\Get;
+use App\Enums\Feature;
+use App\Features\IncidentRenameFeature;
+use App\Filament\Clusters\ReportLibrary;
+use App\Models\User;
+use Filament\Pages\Dashboard;
+use Illuminate\Support\Facades\Gate;
+use UnitEnum;
 
-test('Can fetch all advisories with updates', function () {
-    $settings = app(PortalSettings::class);
+class AdvisoryManagement extends Dashboard
+{
+    protected static ?string $cluster = ReportLibrary::class;
 
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
+    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
 
-    $contact = Contact::factory()->create();
+    protected static ?string $navigationLabel = 'Advisories';
 
-    actingAs($contact);
+    protected static ?string $title = 'Advisories';
 
-    $advisoryStatus = AdvisoryStatus::factory()->create();
+    protected static string $routePath = 'advisories';
 
-    $advisorySeverity = AdvisorySeverity::factory()->create();
+    protected string $view = 'filament.pages.coming-soon';
 
-    Advisory::factory()
-        ->count(5)
-        ->for($advisoryStatus, 'status')
-        ->for($advisorySeverity, 'severity')
-        ->has(AdvisoryUpdate::factory()->count(2), 'advisoryUpdates')
-        ->create();
+    protected static ?int $navigationSort = 50;
 
-    $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
-    $response = get($url);
+    public static function canAccess(): bool
+    {
+        if ((IncidentRenameFeature::active() && ! Gate::check(Feature::AdvisoryManagement->getGateName())) || (! Gate::check(Feature::IncidentManagement->getGateName()))) {
+            return false;
+        }
 
-    $response->assertStatus(200);
-    $response->assertJsonCount(5, 'data.data');
-});
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user->can('report-library.view-any');
+    }
+}

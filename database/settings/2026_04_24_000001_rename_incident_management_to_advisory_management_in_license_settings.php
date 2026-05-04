@@ -34,41 +34,49 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Models\Advisory;
-use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\DB;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
+use Spatie\LaravelSettings\Support\Crypto;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\Get;
+return new class () extends SettingsMigration {
+    public function up(): void
+    {
+        $this->updateSettingData(
+            fromKey: 'incidentManagement',
+            toKey: 'advisoryManagement',
+        );
+    }
 
-test('Can fetch all advisories with updates', function () {
-    $settings = app(PortalSettings::class);
+    public function down(): void
+    {
+        $this->updateSettingData(
+            fromKey: 'advisoryManagement',
+            toKey: 'incidentManagement',
+        );
+    }
 
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
+    private function updateSettingData(string $fromKey, string $toKey): void
+    {
+        $record = DB::table('settings')
+            ->where('group', 'license')
+            ->where('name', 'data')
+            ->first();
 
-    $contact = Contact::factory()->create();
+        if (! $record) {
+            return;
+        }
 
-    actingAs($contact);
+        $encryptedValue = json_decode($record->payload, true);
+        $payload = Crypto::decrypt($encryptedValue);
 
-    $advisoryStatus = AdvisoryStatus::factory()->create();
+        if (is_array($payload) && isset($payload['addons']) && array_key_exists($fromKey, $payload['addons'])) {
+            $payload['addons'][$toKey] = $payload['addons'][$fromKey];
+            unset($payload['addons'][$fromKey]);
+        }
 
-    $advisorySeverity = AdvisorySeverity::factory()->create();
-
-    Advisory::factory()
-        ->count(5)
-        ->for($advisoryStatus, 'status')
-        ->for($advisorySeverity, 'severity')
-        ->has(AdvisoryUpdate::factory()->count(2), 'advisoryUpdates')
-        ->create();
-
-    $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
-    $response = get($url);
-
-    $response->assertStatus(200);
-    $response->assertJsonCount(5, 'data.data');
-});
+        DB::table('settings')
+            ->where('group', 'license')
+            ->where('name', 'data')
+            ->update(['payload' => json_encode(Crypto::encrypt($payload))]);
+    }
+};

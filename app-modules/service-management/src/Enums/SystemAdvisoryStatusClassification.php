@@ -34,41 +34,21 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Models\Advisory;
-use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use Illuminate\Support\Facades\URL;
+namespace AidingApp\ServiceManagement\Enums;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\Get;
+use Filament\Support\Contracts\HasLabel;
 
-test('Can fetch all advisories with updates', function () {
-    $settings = app(PortalSettings::class);
+enum SystemAdvisoryStatusClassification: string implements HasLabel
+{
+    case Open = 'open';
 
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
+    case Resolved = 'resolved';
 
-    $contact = Contact::factory()->create();
-
-    actingAs($contact);
-
-    $advisoryStatus = AdvisoryStatus::factory()->create();
-
-    $advisorySeverity = AdvisorySeverity::factory()->create();
-
-    Advisory::factory()
-        ->count(5)
-        ->for($advisoryStatus, 'status')
-        ->for($advisorySeverity, 'severity')
-        ->has(AdvisoryUpdate::factory()->count(2), 'advisoryUpdates')
-        ->create();
-
-    $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
-    $response = get($url);
-
-    $response->assertStatus(200);
-    $response->assertJsonCount(5, 'data.data');
-});
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::Open => 'Open',
+            self::Resolved => 'Resolved',
+        };
+    }
+}

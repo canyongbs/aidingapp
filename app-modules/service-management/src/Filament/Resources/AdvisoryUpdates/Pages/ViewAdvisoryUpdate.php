@@ -34,41 +34,45 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Models\Advisory;
-use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use AidingApp\ServiceManagement\Models\AdvisoryStatus;
+namespace AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\Pages;
+
+use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
+use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\AdvisoryUpdateResource;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use Illuminate\Support\Facades\URL;
+use Filament\Actions\EditAction;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\Get;
+class ViewAdvisoryUpdate extends ViewRecord
+{
+    protected static string $resource = AdvisoryUpdateResource::class;
 
-test('Can fetch all advisories with updates', function () {
-    $settings = app(PortalSettings::class);
+    public function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Section::make()
+                    ->schema([
+                        TextEntry::make('advisory.title')
+                            ->label('Advisory')
+                            ->url(fn (AdvisoryUpdate $advisoryUpdate): string => AdvisoryResource::getUrl('view', ['record' => $advisoryUpdate->advisory]))
+                            ->color('primary'),
+                        IconEntry::make('internal')
+                            ->boolean(),
+                        TextEntry::make('update')
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(),
+            ]);
+    }
 
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
-
-    $contact = Contact::factory()->create();
-
-    actingAs($contact);
-
-    $advisoryStatus = AdvisoryStatus::factory()->create();
-
-    $advisorySeverity = AdvisorySeverity::factory()->create();
-
-    Advisory::factory()
-        ->count(5)
-        ->for($advisoryStatus, 'status')
-        ->for($advisorySeverity, 'severity')
-        ->has(AdvisoryUpdate::factory()->count(2), 'advisoryUpdates')
-        ->create();
-
-    $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
-    $response = get($url);
-
-    $response->assertStatus(200);
-    $response->assertJsonCount(5, 'data.data');
-});
+    protected function getHeaderActions(): array
+    {
+        return [
+            EditAction::make(),
+        ];
+    }
+}

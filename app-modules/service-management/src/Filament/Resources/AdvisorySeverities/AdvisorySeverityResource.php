@@ -34,41 +34,37 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Models\Advisory;
+namespace AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities;
+
+use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages\CreateAdvisorySeverity;
+use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages\EditAdvisorySeverity;
+use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages\ListAdvisorySeverities;
+use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages\ViewAdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use Illuminate\Support\Facades\URL;
+use App\Filament\Clusters\Advisory;
+use Filament\Resources\Resource;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\Get;
+class AdvisorySeverityResource extends Resource
+{
+    protected static ?string $model = AdvisorySeverity::class;
 
-test('Can fetch all advisories with updates', function () {
-    $settings = app(PortalSettings::class);
+    protected static ?string $cluster = Advisory::class;
 
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
+    protected static ?string $navigationLabel = 'Severities';
 
-    $contact = Contact::factory()->create();
+    protected static ?string $label = 'Advisory Severity';
 
-    actingAs($contact);
+    protected static ?string $slug = 'advisory-severities';
 
-    $advisoryStatus = AdvisoryStatus::factory()->create();
+    protected static ?int $navigationSort = 10;
 
-    $advisorySeverity = AdvisorySeverity::factory()->create();
-
-    Advisory::factory()
-        ->count(5)
-        ->for($advisoryStatus, 'status')
-        ->for($advisorySeverity, 'severity')
-        ->has(AdvisoryUpdate::factory()->count(2), 'advisoryUpdates')
-        ->create();
-
-    $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
-    $response = get($url);
-
-    $response->assertStatus(200);
-    $response->assertJsonCount(5, 'data.data');
-});
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListAdvisorySeverities::route('/'),
+            'create' => CreateAdvisorySeverity::route('/create'),
+            'view' => ViewAdvisorySeverity::route('/{record}'),
+            'edit' => EditAdvisorySeverity::route('/{record}/edit'),
+        ];
+    }
+}

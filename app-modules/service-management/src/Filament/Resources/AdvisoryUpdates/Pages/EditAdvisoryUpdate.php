@@ -34,41 +34,25 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Models\Advisory;
-use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use Illuminate\Support\Facades\URL;
+namespace AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\Pages;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\Get;
+use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\AdvisoryUpdateResource;
+use App\Concerns\EditPageRedirection;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Resources\Pages\EditRecord;
 
-test('Can fetch all advisories with updates', function () {
-    $settings = app(PortalSettings::class);
+class EditAdvisoryUpdate extends EditRecord
+{
+    use EditPageRedirection;
 
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
+    protected static string $resource = AdvisoryUpdateResource::class;
 
-    $contact = Contact::factory()->create();
-
-    actingAs($contact);
-
-    $advisoryStatus = AdvisoryStatus::factory()->create();
-
-    $advisorySeverity = AdvisorySeverity::factory()->create();
-
-    Advisory::factory()
-        ->count(5)
-        ->for($advisoryStatus, 'status')
-        ->for($advisorySeverity, 'severity')
-        ->has(AdvisoryUpdate::factory()->count(2), 'advisoryUpdates')
-        ->create();
-
-    $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
-    $response = get($url);
-
-    $response->assertStatus(200);
-    $response->assertJsonCount(5, 'data.data');
-});
+    protected function getHeaderActions(): array
+    {
+        return [
+            ViewAction::make(),
+            DeleteAction::make(),
+        ];
+    }
+}

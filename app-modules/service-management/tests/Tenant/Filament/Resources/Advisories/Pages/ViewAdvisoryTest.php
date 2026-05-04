@@ -34,41 +34,57 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Settings\PortalSettings;
+use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Models\Advisory;
-use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use Illuminate\Support\Facades\URL;
+use App\Models\User;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\Get;
+use function Tests\asSuperAdmin;
 
-test('Can fetch all advisories with updates', function () {
-    $settings = app(PortalSettings::class);
+test('The correct details are displayed on the ViewAdvisory page', function () {
+    $user = User::factory()->create();
 
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
+    actingAs($user);
 
-    $contact = Contact::factory()->create();
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.*.view');
 
-    actingAs($contact);
+    $advisory = Advisory::factory()->create();
 
-    $advisoryStatus = AdvisoryStatus::factory()->create();
+    asSuperAdmin()
+        ->get(
+            AdvisoryResource::getUrl('view', [
+                'record' => $advisory,
+            ])
+        )
+        ->assertSuccessful()
+        ->assertSeeInOrder(
+            [
+                'Title',
+                $advisory->title,
+                'Description',
+                $advisory->description,
+                'Severity',
+                $advisory->severity->name,
+                'Status',
+                $advisory->status->name,
+                'Assigned Team',
+                $advisory->assignedTeam->name,
+            ]
+        );
+});
 
-    $advisorySeverity = AdvisorySeverity::factory()->create();
+test('ViewAdvisory is gated with proper access control', function () {
+    $user = User::factory()->create();
 
-    Advisory::factory()
-        ->count(5)
-        ->for($advisoryStatus, 'status')
-        ->for($advisorySeverity, 'severity')
-        ->has(AdvisoryUpdate::factory()->count(2), 'advisoryUpdates')
-        ->create();
+    $advisory = Advisory::factory()->create();
 
-    $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
-    $response = get($url);
+    asSuperAdmin($user);
 
-    $response->assertStatus(200);
-    $response->assertJsonCount(5, 'data.data');
+    actingAs($user)
+        ->get(
+            AdvisoryResource::getUrl('view', [
+                'record' => $advisory,
+            ])
+        )->assertSuccessful();
 });

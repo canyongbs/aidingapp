@@ -34,41 +34,23 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Settings\PortalSettings;
+namespace AidingApp\ServiceManagement\Database\Factories;
+
 use AidingApp\ServiceManagement\Models\Advisory;
-use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\Get;
-
-test('Can fetch all advisories with updates', function () {
-    $settings = app(PortalSettings::class);
-
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
-
-    $contact = Contact::factory()->create();
-
-    actingAs($contact);
-
-    $advisoryStatus = AdvisoryStatus::factory()->create();
-
-    $advisorySeverity = AdvisorySeverity::factory()->create();
-
-    Advisory::factory()
-        ->count(5)
-        ->for($advisoryStatus, 'status')
-        ->for($advisorySeverity, 'severity')
-        ->has(AdvisoryUpdate::factory()->count(2), 'advisoryUpdates')
-        ->create();
-
-    $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
-    $response = get($url);
-
-    $response->assertStatus(200);
-    $response->assertJsonCount(5, 'data.data');
-});
+/**
+ * @extends Factory<AdvisoryUpdate>
+ */
+class AdvisoryUpdateFactory extends Factory
+{
+    public function definition(): array
+    {
+        return [
+            'advisory_id' => Advisory::factory(),
+            'update' => $this->faker->sentence(),
+            'internal' => $this->faker->boolean(),
+        ];
+    }
+}

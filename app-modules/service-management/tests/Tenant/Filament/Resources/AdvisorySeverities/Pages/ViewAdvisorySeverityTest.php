@@ -34,41 +34,51 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\AdvisorySeverityResource;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use Illuminate\Support\Facades\URL;
+use App\Models\User;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\Get;
+use function Tests\asSuperAdmin;
 
-test('Can fetch all advisories with updates', function () {
-    $settings = app(PortalSettings::class);
+test('The correct details are displayed on the ViewAdvisorySeverity page', function () {
+    $user = User::factory()->create();
 
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
+    actingAs($user);
 
-    $contact = Contact::factory()->create();
-
-    actingAs($contact);
-
-    $advisoryStatus = AdvisoryStatus::factory()->create();
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.view');
 
     $advisorySeverity = AdvisorySeverity::factory()->create();
 
-    Advisory::factory()
-        ->count(5)
-        ->for($advisoryStatus, 'status')
-        ->for($advisorySeverity, 'severity')
-        ->has(AdvisoryUpdate::factory()->count(2), 'advisoryUpdates')
-        ->create();
+    asSuperAdmin()
+        ->get(
+            AdvisorySeverityResource::getUrl('view', [
+                'record' => $advisorySeverity,
+            ])
+        )
+        ->assertSuccessful()
+        ->assertSeeInOrder(
+            [
+                'Name',
+                $advisorySeverity->name,
+                'Color',
+                $advisorySeverity->getRgb,
+            ]
+        );
+});
 
-    $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
-    $response = get($url);
+test('ViewAdvisorySeverity is gated with proper access control', function () {
+    $user = User::factory()->create();
 
-    $response->assertStatus(200);
-    $response->assertJsonCount(5, 'data.data');
+    $advisorySeverity = AdvisorySeverity::factory()->create();
+
+    asSuperAdmin($user);
+
+    actingAs($user)
+        ->get(
+            AdvisorySeverityResource::getUrl('view', [
+                'record' => $advisorySeverity,
+            ])
+        )->assertSuccessful();
 });

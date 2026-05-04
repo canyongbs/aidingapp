@@ -34,41 +34,35 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Models\Advisory;
-use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use Illuminate\Support\Facades\URL;
+namespace AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\Pages;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\Get;
+use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
+use AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\AdvisoryStatusResource;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
-test('Can fetch all advisories with updates', function () {
-    $settings = app(PortalSettings::class);
+class CreateAdvisoryStatus extends CreateRecord
+{
+    protected static string $resource = AdvisoryStatusResource::class;
 
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
-
-    $contact = Contact::factory()->create();
-
-    actingAs($contact);
-
-    $advisoryStatus = AdvisoryStatus::factory()->create();
-
-    $advisorySeverity = AdvisorySeverity::factory()->create();
-
-    Advisory::factory()
-        ->count(5)
-        ->for($advisoryStatus, 'status')
-        ->for($advisorySeverity, 'severity')
-        ->has(AdvisoryUpdate::factory()->count(2), 'advisoryUpdates')
-        ->create();
-
-    $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
-    $response = get($url);
-
-    $response->assertStatus(200);
-    $response->assertJsonCount(5, 'data.data');
-});
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->maxLength(255)
+                    ->required()
+                    ->string(),
+                Select::make('classification')
+                    ->label('Classification')
+                    ->required()
+                    ->preload()
+                    ->searchable()
+                    ->options(SystemAdvisoryStatusClassification::class)
+                    ->enum(SystemAdvisoryStatusClassification::class),
+            ]);
+    }
+}
