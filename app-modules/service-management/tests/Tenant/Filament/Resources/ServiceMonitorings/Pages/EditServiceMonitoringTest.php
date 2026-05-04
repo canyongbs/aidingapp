@@ -44,15 +44,14 @@ use Filament\Actions\DeleteAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-
-beforeEach(function () {
-    $settings = app(LicenseSettings::class);
-
-    $settings->data->addons->serviceMonitoring = true;
-    $settings->save();
-});
+use function Tests\asSuperAdmin;
 
 test('EditServiceMonitoring is gated with proper access control', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceMonitoring = false;
+    $settings->save();
+
     $user = User::factory()->create();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -77,7 +76,10 @@ test('EditServiceMonitoring is gated with proper access control', function () {
             ServiceMonitoringResource::getUrl('edit', [
                 'record' => $serviceMonitoringTarget,
             ])
-        )->assertSuccessful();
+        )->assertForbidden();
+
+    $settings->data->addons->serviceMonitoring = true;
+    $settings->save();
 
     $request = collect(ServiceMonitoringTargetRequestFactory::new()->create());
 
@@ -97,12 +99,7 @@ test('EditServiceMonitoring is gated with proper access control', function () {
 });
 
 test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    $user->givePermissionTo('service_monitoring.view-any');
-    $user->givePermissionTo('service_monitoring.*.update');
+    asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
@@ -149,6 +146,11 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
 );
 
 test('delete action visible with proper access control', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceMonitoring = true;
+    $settings->save();
+
     $user = User::factory()->create();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -172,12 +174,7 @@ test('delete action visible with proper access control', function () {
 });
 
 test('it will validate multiple valid forms of URL and IP Address', function () {
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    $user->givePermissionTo('service_monitoring.view-any');
-    $user->givePermissionTo('service_monitoring.*.update');
+    asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 

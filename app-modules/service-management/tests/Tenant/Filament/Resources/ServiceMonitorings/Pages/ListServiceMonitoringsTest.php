@@ -45,6 +45,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
 it('is gated with proper access control', function () {
     $settings = app(LicenseSettings::class);
@@ -73,18 +74,7 @@ it('is gated with proper access control', function () {
 });
 
 test('can list records', function () {
-    $settings = app(LicenseSettings::class);
-
-    $settings->data->addons->serviceMonitoring = true;
-    $settings->save();
-    $user = User::factory()->create();
-
-    actingAs($user)
-        ->get(
-            ServiceMonitoringResource::getUrl('index')
-        )->assertForbidden();
-
-    $user->givePermissionTo('service_monitoring.view-any');
+    asSuperAdmin();
 
     $records = ServiceMonitoringTarget::factory()->count(5)->create();
 
@@ -95,16 +85,7 @@ test('can list records', function () {
 });
 
 test('bulk delete ServiceMonitorings', function () {
-    $settings = app(LicenseSettings::class);
-
-    $settings->data->addons->serviceMonitoring = true;
-    $settings->save();
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    $user->givePermissionTo('service_monitoring.view-any');
-    $user->givePermissionTo('service_monitoring.*.delete');
+    asSuperAdmin();
 
     $serviceMonitoringTargets = ServiceMonitoringTarget::factory()->count(10)->create();
 

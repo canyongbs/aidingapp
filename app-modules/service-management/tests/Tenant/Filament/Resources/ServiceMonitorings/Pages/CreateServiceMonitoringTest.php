@@ -48,14 +48,11 @@ use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
-    $settings = app(LicenseSettings::class);
-
-    $settings->data->addons->serviceMonitoring = true;
-    $settings->save();
-});
-
 test('CreateServiceMonitoring is gated with proper access control', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceMonitoring = false;
+    $settings->save();
+
     $user = User::factory()->create();
 
     actingAs($user)
@@ -69,10 +66,11 @@ test('CreateServiceMonitoring is gated with proper access control', function () 
     $user->givePermissionTo('service_monitoring.view-any');
     $user->givePermissionTo('service_monitoring.create');
 
-    actingAs($user)
-        ->get(
-            ServiceMonitoringResource::getUrl('create')
-        )->assertSuccessful();
+    livewire(CreateServiceMonitoring::class)
+        ->assertForbidden();
+    
+    $settings->data->addons->serviceMonitoring = true;
+    $settings->save();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
 
