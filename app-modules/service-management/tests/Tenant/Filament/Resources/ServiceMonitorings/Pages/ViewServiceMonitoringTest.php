@@ -55,16 +55,16 @@ test('ViewServiceMonitoring is gated with proper access control', function () {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     actingAs($user)
-            ->get(
-                ServiceMonitoringResource::getUrl('view', [
-                    'record' => $serviceMonitoringTarget,
-                ])
-            )->assertForbidden();
-    
+        ->get(
+            ServiceMonitoringResource::getUrl('view', [
+                'record' => $serviceMonitoringTarget,
+            ])
+        )->assertForbidden();
+
     $user->givePermissionTo('service_monitoring.view-any');
     $user->givePermissionTo('service_monitoring.*.view');
 
-     actingAs($user)
+    actingAs($user)
         ->get(
             ServiceMonitoringResource::getUrl('view', [
                 'record' => $serviceMonitoringTarget,

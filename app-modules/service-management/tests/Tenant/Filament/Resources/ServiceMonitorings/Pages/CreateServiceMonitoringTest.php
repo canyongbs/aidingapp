@@ -68,7 +68,7 @@ test('CreateServiceMonitoring is gated with proper access control', function () 
 
     livewire(CreateServiceMonitoring::class)
         ->assertForbidden();
-    
+
     $settings->data->addons->serviceMonitoring = true;
     $settings->save();
 

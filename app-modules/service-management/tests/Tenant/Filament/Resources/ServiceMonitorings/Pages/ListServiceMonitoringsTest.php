@@ -35,7 +35,6 @@
 */
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\ListServiceMonitorings;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\User;
 use App\Settings\LicenseSettings;
