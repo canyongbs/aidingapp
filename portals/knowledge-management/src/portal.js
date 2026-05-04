@@ -39,8 +39,8 @@ import { createRouter, createWebHistory } from 'vue-router';
 import VueSignaturePad from 'vue-signature-pad';
 import App from './App.vue';
 import config from './formkit.config.js';
-import './portal.css';
 import appLoadingStyles from './loading.css?inline';
+import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
 
 customElements.define(
