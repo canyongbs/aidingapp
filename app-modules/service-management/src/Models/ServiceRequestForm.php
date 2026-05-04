@@ -82,7 +82,7 @@ class ServiceRequestForm extends Submissible
      */
     public function steps(): HasMany
     {
-        return $this->hasMany(ServiceRequestFormStep::class, 'service_request_form_id');
+        return $this->hasMany(ServiceRequestFormStep::class, 'service_request_form_id')->orderBy('sort');
     }
 
     /**
