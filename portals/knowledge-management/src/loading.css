@@ -40,7 +40,6 @@
 
 .app-loading-icon {
     @apply h-5 w-5 shrink-0;
-    /* animate-spin compiles to var(--animate-spin) which requires portal.css — use explicit values instead */
     animation: spin 1s linear infinite;
 }
 
