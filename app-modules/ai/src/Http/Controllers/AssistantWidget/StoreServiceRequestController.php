@@ -170,6 +170,9 @@ class StoreServiceRequestController extends Controller
         ]);
     }
 
+    /**
+     * @return array{rules: array<string, array<int, string>>, attributes: array<string, string>}
+     */
     protected function buildCustomFieldValidation(ServiceRequestForm $form): array
     {
         $blocks = app(ResolveBlockRegistry::class)($form, true);
@@ -202,6 +205,9 @@ class StoreServiceRequestController extends Controller
         return ['rules' => $rules, 'attributes' => $attributes];
     }
 
+    /**
+     * @param  Collection<string, mixed>  $customFieldData
+     */
     protected function createFormSubmission(
         ServiceRequestForm $form,
         Collection $customFieldData,
@@ -250,6 +256,10 @@ class StoreServiceRequestController extends Controller
         $serviceRequest->save();
     }
 
+    /**
+     * @param  array<int, array<string, string>>  $files
+     * @return array<int, string>
+     */
     protected function persistUploadFieldFiles(ServiceRequest $serviceRequest, array $files, string $collection): array
     {
         $mediaIds = [];

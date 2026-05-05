@@ -37,12 +37,17 @@
 namespace AidingApp\Ai\Actions;
 
 use AidingApp\Form\Actions\ResolveBlockRegistry;
+use AidingApp\Form\Filament\Blocks\FormFieldBlock;
+use AidingApp\Form\Models\SubmissibleField;
 use AidingApp\Form\Models\SubmissibleStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use Illuminate\Database\Eloquent\Collection;
 
 class GenerateAssistantServiceRequestFormKitSchema
 {
+    /**
+     * @return array<int, array{label: string, schema: array<int, mixed>}>
+     */
     public function __invoke(ServiceRequestForm $form): array
     {
         $form->loadMissing([
@@ -75,14 +80,25 @@ class GenerateAssistantServiceRequestFormKitSchema
         return $steps;
     }
 
+    /**
+     * @param  array<string, class-string<FormFieldBlock>>  $blocks
+     * @return array<int, mixed>
+     */
     protected function generateStepSchema(array $blocks, SubmissibleStep $step): array
     {
-        $content = $step->content['content'] ?? [];
+        /** @var array<int, mixed> $content */
+        $content = $step->content['content'] ?? []; // @phpstan-ignore nullCoalesce.offset
         $fields = $step->fields->keyBy('id');
 
         return $this->flatContent($blocks, $content, $fields);
     }
 
+    /**
+     * @param  array<string, class-string<FormFieldBlock>>  $blocks
+     * @param  array<int, mixed>  $content
+     * @param  Collection<int, SubmissibleField>|null  $fields
+     * @return array<int, mixed>
+     */
     protected function flatContent(array $blocks, array $content, ?Collection $fields = null): array
     {
         $result = [];
@@ -104,8 +120,13 @@ class GenerateAssistantServiceRequestFormKitSchema
         return $result;
     }
 
+    /**
+     * @param  array<string, mixed>  $component
+     * @return array<int, mixed>
+     */
     protected function flattenGrid(array $component): array
     {
+        /** @var array<int, array<string, mixed>> $columns */
         $columns = $component['content'] ?? [];
         $flattened = [];
 
@@ -116,11 +137,18 @@ class GenerateAssistantServiceRequestFormKitSchema
         return $flattened;
     }
 
+    /**
+     * @param  array<string, class-string<FormFieldBlock>>  $blocks
+     * @param  array<string, mixed>  $component
+     * @param  Collection<int, SubmissibleField>|null  $fields
+     * @return array<int, mixed>
+     */
     protected function resolveField(array $blocks, array $component, ?Collection $fields): array
     {
         $fieldId = $component['attrs']['config']['fieldId'] ?? '';
         $blockType = $component['attrs']['id'] ?? '';
 
+        /** @var SubmissibleField|null $field */
         $field = $fields[$fieldId] ?? null;
         $block = $blocks[$blockType] ?? null;
 
@@ -147,6 +175,10 @@ class GenerateAssistantServiceRequestFormKitSchema
         return [$schema];
     }
 
+    /**
+     * @param  array<int, mixed>  $content
+     * @return array<int, mixed>|string
+     */
     protected function textContent(array $content): array|string
     {
         if (empty($content)) {
@@ -166,6 +198,10 @@ class GenerateAssistantServiceRequestFormKitSchema
         );
     }
 
+    /**
+     * @param  array<string, mixed>  $component
+     * @return array<string, mixed>|string
+     */
     protected function text(array $component): array|string
     {
         if (filled($component['marks'] ?? [])) {
