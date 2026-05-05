@@ -106,7 +106,7 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                             return 'Unrated';
                                         }
 
-                                        return (int) round(($record->helpful_votes_count / $totalVotes) * 100) . '%';
+                                        return (int) round(($record->getAttribute('helpful_votes_count') / $totalVotes) * 100) . '%';
                                     }),
                             ])
                             ->id('properties')
