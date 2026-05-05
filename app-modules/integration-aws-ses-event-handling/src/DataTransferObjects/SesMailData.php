@@ -41,6 +41,12 @@ use Spatie\LaravelData\Optional;
 
 class SesMailData extends Data
 {
+    /**
+     * @param array<int, string> $destination
+     * @param array<int, array<string, mixed>>|Optional $headers
+     * @param array<string, mixed>|Optional $commonHeaders
+     * @param array<string, array<int, string>> $tags
+     */
     public function __construct(
         public string $timestamp,
         public string $messageId,

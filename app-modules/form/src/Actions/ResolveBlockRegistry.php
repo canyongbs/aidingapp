@@ -42,10 +42,14 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 
 class ResolveBlockRegistry
 {
+    /**
+     * @return array<string, class-string>
+     */
     public function __invoke(Submissible $submissible, bool $internal = false): array
     {
         return match ($submissible::class) {
             ServiceRequestForm::class => FormFieldBlockRegistry::keyByType($internal),
+            default => [],
         };
     }
 }
