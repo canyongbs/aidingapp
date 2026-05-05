@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Page
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
+use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -83,12 +84,11 @@ class CreateServiceMonitoring extends CreateRecord
                             ->multiple()
                             ->preload()
                             ->searchable(),
-                        Select::make('user')
-                            ->relationship('users', 'name')
+                        UserSelect::make('user')
+                            ->relationship('users')
                             ->label('User')
                             ->multiple()
-                            ->preload()
-                            ->searchable(),
+                            ->preload(),
                         Toggle::make('is_notified_via_database')
                             ->label('In Product notifications')
                             ->default(false),
