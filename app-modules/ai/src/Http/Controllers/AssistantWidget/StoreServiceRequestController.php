@@ -258,6 +258,7 @@ class StoreServiceRequestController extends Controller
 
     /**
      * @param  array<int, array<string, string>>  $files
+     *
      * @return array<int, string>
      */
     protected function persistUploadFieldFiles(ServiceRequest $serviceRequest, array $files, string $collection): array

@@ -82,6 +82,7 @@ class GenerateAssistantServiceRequestFormKitSchema
 
     /**
      * @param  array<string, class-string<FormFieldBlock>>  $blocks
+     *
      * @return array<int, mixed>
      */
     protected function generateStepSchema(array $blocks, SubmissibleStep $step): array
@@ -97,6 +98,7 @@ class GenerateAssistantServiceRequestFormKitSchema
      * @param  array<string, class-string<FormFieldBlock>>  $blocks
      * @param  array<int, mixed>  $content
      * @param  Collection<int, SubmissibleField>|null  $fields
+     *
      * @return array<int, mixed>
      */
     protected function flatContent(array $blocks, array $content, ?Collection $fields = null): array
@@ -122,6 +124,7 @@ class GenerateAssistantServiceRequestFormKitSchema
 
     /**
      * @param  array<string, mixed>  $component
+     *
      * @return array<int, mixed>
      */
     protected function flattenGrid(array $component): array
@@ -141,6 +144,7 @@ class GenerateAssistantServiceRequestFormKitSchema
      * @param  array<string, class-string<FormFieldBlock>>  $blocks
      * @param  array<string, mixed>  $component
      * @param  Collection<int, SubmissibleField>|null  $fields
+     *
      * @return array<int, mixed>
      */
     protected function resolveField(array $blocks, array $component, ?Collection $fields): array
@@ -177,6 +181,7 @@ class GenerateAssistantServiceRequestFormKitSchema
 
     /**
      * @param  array<int, mixed>  $content
+     *
      * @return array<int, mixed>|string
      */
     protected function textContent(array $content): array|string
@@ -200,6 +205,7 @@ class GenerateAssistantServiceRequestFormKitSchema
 
     /**
      * @param  array<string, mixed>  $component
+     *
      * @return array<string, mixed>|string
      */
     protected function text(array $component): array|string
