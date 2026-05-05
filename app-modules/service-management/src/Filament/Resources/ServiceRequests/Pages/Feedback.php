@@ -38,13 +38,13 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use App\Enums\Feature;
 use App\Settings\DisplaySettings;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 
 class Feedback extends ViewRecord
@@ -59,18 +59,7 @@ class Feedback extends ViewRecord
 
     public static function canAccess(array $arguments = []): bool
     {
-        if (! Gate::check(Feature::FeedbackManagement->getGateName())) {
-            return false;
-        }
-
-        /** @var Model|null $record */
-        $record = $arguments['record'] ?? null;
-
-        if ($record) {
-            return static::getResource()::canView($record);
-        }
-
-        return parent::canAccess($arguments);
+        return auth()->user()->can('viewAny', [ServiceRequestFeedback::class, $arguments['record']]);
     }
 
     public function mount(int | string $record): void
