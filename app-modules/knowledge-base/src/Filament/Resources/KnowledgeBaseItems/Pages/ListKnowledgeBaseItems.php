@@ -100,7 +100,7 @@ class ListKnowledgeBaseItems extends ListRecords
                             return 'Unrated';
                         }
 
-                        return (int) round(($record->helpful_votes_count / $totalVotes) * 100) . '%';
+                        return (int) round(($record->getAttribute('helpful_votes_count') / $totalVotes) * 100) . '%';
                     }),
                 TextColumn::make('category.name')
                     ->label('Category')
