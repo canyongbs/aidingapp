@@ -107,19 +107,19 @@
         {
             label: 'Assets',
             routeName: 'assets',
-            visible: hasAssets,
+            visible: computed(() => hasAssets.value && user.value !== null),
             command: () => router.push({ name: 'assets' }),
         },
         {
             label: 'Licenses',
             routeName: 'licenses',
-            visible: hasLicense,
+            visible: computed(() => hasLicense.value && user.value !== null),
             command: () => router.push({ name: 'licenses' }),
         },
         {
             label: 'Tasks',
             routeName: 'tasks',
-            visible: hasTasks,
+            visible: computed(() => hasTasks.value && user.value !== null),
             command: () => router.push({ name: 'tasks' }),
         },
     ]);
