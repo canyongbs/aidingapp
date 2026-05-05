@@ -56,12 +56,14 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Section;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -78,7 +80,7 @@ class ListKnowledgeBaseItems extends ListRecords
             ->modifyQueryUsing(fn (Builder $query) => $query->withCount([
                 'votes',
                 'votes as helpful_votes_count' => fn (Builder $query) => $query->where('is_helpful', true),
-            ]))
+            ])->with(['managers', 'concerns']))
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('title')
@@ -106,6 +108,30 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->label('Category')
                     ->toggleable()
                     ->sortable(),
+                IconColumn::make('health')
+                    ->label('Health')
+                    ->toggleable()
+                    ->boolean()
+                    ->state(function (KnowledgeBaseItem $record): bool {
+                        $hasTitle = ! empty($record->title);
+
+                        $hasArticle = ! blank($record->article_details)
+                            && ! (
+                                is_array($record->article_details)
+                                && ($record->article_details['type'] ?? null) === 'doc'
+                                && collect($record->article_details['content'] ?? [])
+                                    ->every(fn (array $node) => empty($node['content'] ?? []) || $node['content'] === [['type' => 'text', 'text' => '']])
+                            );
+
+                        $hasManager = $record->managers->isNotEmpty();
+
+                        $hasNoUnresolvedConcerns = $record->concerns
+                            ->where('status', '!=', ConcernStatus::Resolved)
+                            ->where('status', '!=', ConcernStatus::Archived)
+                            ->isEmpty();
+
+                        return $hasTitle && $hasArticle && $hasManager && $hasNoUnresolvedConcerns;
+                    }),
                 TextColumn::make('quality.name')
                     ->label('Quality')
                     ->toggleable()
@@ -296,5 +322,10 @@ class ListKnowledgeBaseItems extends ListRecords
                 ->slideOver()
                 ->successRedirectUrl(fn (Model $record): string => KnowledgeBaseItemResource::getUrl('edit', ['record' => $record])),
         ];
+    }
+
+    protected function checkHealth(): bool
+    {
+        return true;
     }
 }

@@ -37,12 +37,14 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
 use AidingApp\Division\Models\Division;
+use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Filament\Actions\CreateConcernAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Livewire;
@@ -133,6 +135,45 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                 Livewire::make(KnowledgeBaseItemConcernsTable::class, ['record' => $this->getRecord()]),
                             ])
                             ->id('concerns'),
+                        Tab::make('Health')
+                            ->schema([
+                                IconEntry::make('title_filled')
+                                    ->label('Title Filled')
+                                    ->boolean()
+                                    ->getStateUsing(fn (KnowledgeBaseItem $record) => ! empty($record->title)),
+                                IconEntry::make('article_filled')
+                                    ->label('Article Filled')
+                                    ->boolean()
+                                    ->getStateUsing(function (KnowledgeBaseItem $record): bool {
+                                        if (blank($record->article_details)) {
+                                            return false;
+                                        }
+
+                                        if (
+                                            is_array($record->article_details)
+                                            && ($record->article_details['type'] ?? null) === 'doc'
+                                            && collect($record->article_details['content'] ?? [])
+                                                ->every(fn (array $node) => empty($node['content'] ?? []) || $node['content'] === [['type' => 'text', 'text' => '']])
+                                        ) {
+                                            return false;
+                                        }
+
+                                        return true;
+                                    }),
+                                IconEntry::make('manager_assigned')
+                                    ->label('Manager Assigned')
+                                    ->boolean()
+                                    ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->managers->isNotEmpty()),
+                                IconEntry::make('no_unresolved_concerns')
+                                    ->label('No Unresolved Concerns')
+                                    ->boolean()
+                                    ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->concerns
+                                        ->where('status', '!=', ConcernStatus::Resolved)
+                                        ->where('status', '!=', ConcernStatus::Archived)
+                                        ->isEmpty()),
+                            ])
+                            ->columns(2)
+                            ->id('health'),
                     ])
                     ->columnSpanFull()
                     ->persistTabInQueryString(),
