@@ -100,17 +100,13 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                 TextEntry::make('rating')
                                     ->label('Rating')
                                     ->getStateUsing(function (KnowledgeBaseItem $record): string {
-                                        /** @var int $totalVotes */
                                         $totalVotes = $record->votes_count;
 
                                         if ($totalVotes === 0) {
                                             return 'Unrated';
                                         }
 
-                                        /** @var int $helpfulVotes */
-                                        $helpfulVotes = $record->getAttribute('helpful_votes_count');
-
-                                        return (int) round(($helpfulVotes / $totalVotes) * 100) . '%';
+                                        return (int) round(($record->helpful_votes_count / $totalVotes) * 100) . '%';
                                     }),
                             ])
                             ->id('properties')
