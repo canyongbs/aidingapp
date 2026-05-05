@@ -94,17 +94,13 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->label('Rating')
                     ->toggleable()
                     ->getStateUsing(function (KnowledgeBaseItem $record): string {
-                        /** @var int $totalVotes */
                         $totalVotes = $record->votes_count;
 
                         if ($totalVotes === 0) {
                             return 'Unrated';
                         }
 
-                        /** @var int $helpfulVotes */
-                        $helpfulVotes = $record->getAttribute('helpful_votes_count');
-
-                        return (int) round(($helpfulVotes / $totalVotes) * 100) . '%';
+                        return (int) round(($record->helpful_votes_count / $totalVotes) * 100) . '%';
                     }),
                 TextColumn::make('category.name')
                     ->label('Category')
