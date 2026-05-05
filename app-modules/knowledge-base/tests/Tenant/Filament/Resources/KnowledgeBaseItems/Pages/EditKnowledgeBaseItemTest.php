@@ -37,8 +37,11 @@
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\EditKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use App\Filament\Forms\Components\UserSelect;
+use App\Models\Authenticatable;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Illuminate\Support\Facades\Config;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -119,4 +122,96 @@ test('EditKnowledgeBaseItem is gated with proper feature access control', functi
     )->assertSuccessful();
 
     // TODO Restore testing the edit form
+});
+
+test('managers UserSelect does not show admin users in options by default', function () {
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('knowledge_base_item.view-any');
+    $actor->givePermissionTo('knowledge_base_item.*.update');
+    actingAs($actor);
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->knowledgeManagement = true;
+    $settings->save();
+
+    $regularUser = User::factory()->create();
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
+
+    livewire(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('manager_ids', function (UserSelect $field) use ($regularUser, $adminUser): bool {
+            $options = $field->getSearchResults($regularUser->name);
+            $adminOptions = $field->getSearchResults($adminUser->name);
+
+            return ! empty($options) && empty($adminOptions);
+        });
+});
+
+test('managers UserSelect shows a pre-selected admin user so they can be deselected', function () {
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('knowledge_base_item.view-any');
+    $actor->givePermissionTo('knowledge_base_item.*.update');
+    actingAs($actor);
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->knowledgeManagement = true;
+    $settings->save();
+
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
+    $knowledgeBaseItem->managers()->attach($adminUser);
+
+    livewire(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('manager_ids', function (UserSelect $field) use ($adminUser): bool {
+            $options = $field->getSearchResults($adminUser->name);
+
+            return ! empty($options);
+        });
+});
+
+test('managers UserSelect shows all users including admins when filter_admins_from_selection config is false', function () {
+    Config::set('app.filter_admins_from_selection', false);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('knowledge_base_item.view-any');
+    $actor->givePermissionTo('knowledge_base_item.*.update');
+    actingAs($actor);
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->knowledgeManagement = true;
+    $settings->save();
+
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
+
+    livewire(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('manager_ids', function (UserSelect $field) use ($adminUser): bool {
+            $options = $field->getSearchResults($adminUser->name);
+
+            return ! empty($options);
+        });
+});
+
+test('managers UserSelect shows all users including admins when withoutAdminFilter is used', function () {
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    User::factory()->create();
+
+    KnowledgeBaseItem::factory()->create();
+
+    $field = UserSelect::make('manager_ids')
+        ->withoutAdminFilter()
+        ->relationship('managers', 'name');
+
+    expect(invade($field)->filterAdmins)->toBeFalse();
 });
