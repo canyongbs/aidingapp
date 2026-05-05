@@ -64,6 +64,7 @@ class CreateTenantRequest extends FormRequest
             'addons.contractManagement' => ['required', 'boolean'],
             'addons.licenseManagement' => ['required', 'boolean'],
             'addons.projectManagement' => ['required', 'boolean'],
+            'addons.serviceMonitoring' => ['required', 'boolean'],
         ];
 
         //TODO: IncidentRenameFeature cleanup - remove this entire conditional and move the 'advisoryManagement' rule to the main $rules array.
