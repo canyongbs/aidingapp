@@ -35,6 +35,8 @@
 
 @import 'tailwindcss';
 
+@plugin "@tailwindcss/typography";
+
 @config '../tailwind.config.js';
 
 @layer base {
@@ -69,4 +71,11 @@
 
 * {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+.prose h5,
+.prose h6 {
+    font-weight: 600;
+    margin-top: 0.5rem;
+    margin-bottom: 0.25rem;
 }
