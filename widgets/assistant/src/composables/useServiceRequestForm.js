@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,48 +31,41 @@
 
 </COPYRIGHT>
 */
+import axios from 'axios';
+import { ref } from 'vue';
+import { clearToken, getAuthHeaders } from '../utils/token.js';
 
-namespace AidingApp\Form\Filament\Blocks;
+export function useServiceRequestForm(formUrl) {
+    const steps = ref([]);
+    const isLoading = ref(true);
+    const loadError = ref(false);
 
-use AidingApp\Form\Models\SubmissibleField;
+    async function fetchForm() {
+        isLoading.value = true;
+        loadError.value = false;
 
-class UploadFormFieldBlock extends FormFieldBlock
-{
-    public static bool $internal = true;
+        try {
+            const { data } = await axios.get(formUrl, {
+                headers: getAuthHeaders(),
+            });
 
-    public static function type(): string
-    {
-        return 'upload';
+            steps.value = data.steps ?? [];
+        } catch (error) {
+            if (!error.response || error.response.status === 401) {
+                clearToken();
+            } else {
+                loadError.value = true;
+            }
+        } finally {
+            isLoading.value = false;
+        }
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public static function getFormKitSchema(SubmissibleField $field): array
-    {
-        return [
-            '$formkit' => 'upload',
-            'label' => $field->label,
-            'name' => $field->getKey(),
-            ...($field->is_required ? ['validation' => 'required'] : []),
-            'multiple' => $field->config['multiple'] ?? false,
-            'accept' => $field->config['accept'] ?? '',
-            'limit' => $field->config['limit'] ?? null,
-            'size' => $field->config['size'] ?? null,
-            'uploadUrl' => route('api.portal.service-request.request-upload-url'),
-        ];
-    }
+    fetchForm();
 
-    /**
-     * @return array<string>
-     */
-    public static function getValidationRules(SubmissibleField $field): array
-    {
-        return [];
-    }
-
-    protected static function renderedView(): string
-    {
-        return 'form::blocks.submissions.upload';
-    }
+    return {
+        steps,
+        isLoading,
+        loadError,
+    };
 }

@@ -33,6 +33,7 @@
 */
 import { defaultConfig, plugin } from '@formkit/vue';
 import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
+import VueSignaturePad from 'vue-signature-pad';
 import App from './App.ce.vue';
 import formkitConfig from './formkit.config.js';
 import styles from './widget.css?inline';
@@ -50,6 +51,7 @@ if (!config || !config.send_message_url || !config.websockets_config) {
                 const app = createApp();
                 app.config.devtools = true;
                 app.use(plugin, defaultConfig(formkitConfig));
+                app.use(VueSignaturePad);
 
                 const inst = getCurrentInstance();
                 Object.assign(inst.appContext, app._context);

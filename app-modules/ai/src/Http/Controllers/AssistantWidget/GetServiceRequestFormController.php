@@ -34,47 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Form\Filament\Blocks;
+namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
-use AidingApp\Form\Models\SubmissibleField;
+use AidingApp\Ai\Actions\GenerateAssistantServiceRequestFormKitSchema;
+use AidingApp\Portal\Actions\GenerateServiceRequestForm;
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 
-class UploadFormFieldBlock extends FormFieldBlock
+class GetServiceRequestFormController extends Controller
 {
-    public static bool $internal = true;
-
-    public static function type(): string
+    public function __invoke(ServiceRequestType $type): JsonResponse
     {
-        return 'upload';
-    }
+        $form = $type->form;
 
-    /**
-     * @return array<string, mixed>
-     */
-    public static function getFormKitSchema(SubmissibleField $field): array
-    {
-        return [
-            '$formkit' => 'upload',
-            'label' => $field->label,
-            'name' => $field->getKey(),
-            ...($field->is_required ? ['validation' => 'required'] : []),
-            'multiple' => $field->config['multiple'] ?? false,
-            'accept' => $field->config['accept'] ?? '',
-            'limit' => $field->config['limit'] ?? null,
-            'size' => $field->config['size'] ?? null,
-            'uploadUrl' => route('api.portal.service-request.request-upload-url'),
-        ];
-    }
+        if (! $form) {
+            return response()->json([
+                'steps' => [],
+            ]);
+        }
 
-    /**
-     * @return array<string>
-     */
-    public static function getValidationRules(SubmissibleField $field): array
-    {
-        return [];
-    }
+        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
 
-    protected static function renderedView(): string
-    {
-        return 'form::blocks.submissions.upload';
+        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
+
+        $steps = app(GenerateAssistantServiceRequestFormKitSchema::class)($form);
+
+        return response()->json([
+            'steps' => $steps,
+        ]);
     }
 }

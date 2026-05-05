@@ -33,8 +33,10 @@
 -->
 <script setup>
     import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/vue/16/solid';
+    import axios from 'axios';
     import { ref } from 'vue';
     import { useServiceRequestTypes } from '../../composables/useServiceRequestTypes.js';
+    import { getAuthHeaders } from '../../utils/token.js';
     import BaseTab from '../BaseTab.vue';
     import BaseTabs from '../BaseTabs.vue';
     import ServiceRequestCategoryTree from '../ServiceRequestCategoryTree.vue';
@@ -47,6 +49,7 @@
     const emit = defineEmits(['continue']);
 
     const activeTab = ref('new');
+    const isFetchingForm = ref(false);
 
     const {
         isLoading,
@@ -63,11 +66,28 @@
         clearSearch,
     } = useServiceRequestTypes(props.serviceRequestTypesUrl);
 
-    function onContinue() {
+    async function onContinue() {
+        let formSteps = [];
+
+        if (rawData.value?.form_url_base) {
+            isFetchingForm.value = true;
+
+            try {
+                const formUrl = rawData.value.form_url_base.replace('__TYPE__', selectedType.value.id);
+                const { data } = await axios.get(formUrl, { headers: getAuthHeaders() });
+                formSteps = data.steps ?? [];
+            } catch {
+                // If form fetch fails, proceed without custom steps
+            } finally {
+                isFetchingForm.value = false;
+            }
+        }
+
         emit('continue', {
             type: selectedType.value,
             priority: selectedPriority.value,
             rawData: rawData.value,
+            formSteps,
         });
     }
 </script>
@@ -92,7 +112,7 @@
                     v-model="searchQuery"
                     type="text"
                     placeholder="Search request types…"
-                    class="w-full bg-gray-50 border border-gray-200 rounded-lg pl-9 pr-8 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-all"
+                    class="w-full bg-gray-50 ring-1 ring-gray-400 rounded pl-9 pr-8 py-2 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-all"
                 />
                 <button
                     v-if="searchQuery"
@@ -150,6 +170,7 @@
             <TypeSelectFooter
                 v-if="selectedType"
                 :selected-type="selectedType"
+                :is-loading="isFetchingForm"
                 v-model="selectedPriority"
                 @continue="onContinue"
             />

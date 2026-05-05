@@ -34,37 +34,42 @@
 <script setup>
     import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
     import { ArrowRightIcon } from '@heroicons/vue/20/solid';
-    import { computed, provide, ref } from 'vue';
-    import { useServiceRequestSubmit } from '../../composables/useServiceRequestSubmit.js';
+    import { computed, provide, ref, toRaw } from 'vue';
 
     const props = defineProps({
         selectedType: { type: Object, required: true },
         selectedPriority: { type: String, default: '' },
         rawData: { type: Object, required: true },
+        hasCustomSteps: { type: Boolean, default: false },
+        submitState: { type: Object, required: true },
     });
 
-    const emit = defineEmits(['back', 'success']);
+    const emit = defineEmits(['back', 'next', 'success']);
 
     const selectedPriorityObject = computed(
         () => props.selectedType.priorities?.find((p) => p.id === props.selectedPriority) ?? null,
     );
 
-    const { title, description, attachments, isSubmitting, submitError, canSubmit, submitForm } =
-        useServiceRequestSubmit(props.rawData.store_url_base, props.selectedType.id, props.selectedPriority);
+    const { title, description, attachments, isSubmitting, submitError, canSubmit, submitForm } = toRaw(
+        props.submitState,
+    );
 
     const isUploadProcessing = ref(false);
     provide('uploadProcessing', isUploadProcessing);
 
-    function onSubmit() {
-        submitForm(() => emit('success', title.value));
+    function onAction() {
+        if (props.hasCustomSteps) {
+            if (!canSubmit.value) return;
+            emit('next');
+        } else {
+            submitForm({}, () => emit('success', title.value));
+        }
     }
 </script>
 
 <template>
     <!-- Context bar -->
-    <div
-        class="shrink-0 mx-4 mt-4 mb-1 flex items-center gap-2 px-3 py-2 bg-brand-50 border border-brand-100 rounded-xl"
-    >
+    <div class="shrink-0 mx-4 mt-4 mb-1 flex items-center gap-2 px-3 py-2 bg-brand-50 border border-brand-100 rounded">
         <button
             @click="$emit('back')"
             class="shrink-0 text-brand-400 hover:text-brand-600 transition-colors"
@@ -89,8 +94,6 @@
             validation="required"
             :validation-messages="{ required: 'Title is required.' }"
             v-model="title"
-            outer-class="!max-w-none"
-            inner-class="!max-w-none !rounded-xl"
         />
 
         <FormKit
@@ -101,9 +104,6 @@
             validation="required"
             :validation-messages="{ required: 'Description is required.' }"
             v-model="description"
-            outer-class="!max-w-none"
-            inner-class="!max-w-none !rounded-xl"
-            input-class="!h-28"
         />
 
         <FormKit
@@ -117,22 +117,21 @@
             :limit="rawData.max_files"
             :size="rawData.max_file_size_mb"
             v-model="attachments"
-            outer-class="!max-w-none"
         />
 
         <!-- Submit error -->
-        <div v-if="submitError" class="px-3 py-2.5 rounded-xl bg-red-50 border border-red-100 mt-2">
+        <div v-if="submitError" class="px-3 py-2.5 rounded bg-red-50 border border-red-100 mt-2">
             <p class="text-sm text-red-600">{{ submitError }}</p>
         </div>
     </div>
 
-    <!-- Submit footer -->
+    <!-- Action footer -->
     <div class="shrink-0 px-4 pb-4 pt-3 border-t border-gray-100">
         <button
-            @click="onSubmit"
+            @click="onAction"
             :disabled="!canSubmit || isUploadProcessing"
             :class="[
-                'w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-medium transition-all',
+                'w-full flex items-center justify-center gap-2 py-2.5 rounded text-sm font-medium transition-all',
                 canSubmit && !isUploadProcessing
                     ? 'bg-brand-500 hover:bg-brand-600 text-white shadow-sm'
                     : 'bg-gray-100 text-gray-300 cursor-not-allowed',
@@ -142,7 +141,15 @@
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
             </svg>
-            {{ isUploadProcessing ? 'Uploading…' : isSubmitting ? 'Submitting…' : 'Submit Service Request' }}
+            {{
+                isUploadProcessing
+                    ? 'Uploading…'
+                    : isSubmitting
+                      ? 'Submitting…'
+                      : hasCustomSteps
+                        ? 'Next'
+                        : 'Submit Service Request'
+            }}
             <ArrowRightIcon v-if="!isSubmitting && !isUploadProcessing" class="w-4 h-4" />
         </button>
     </div>

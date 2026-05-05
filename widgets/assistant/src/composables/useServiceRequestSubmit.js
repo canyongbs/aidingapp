@@ -46,38 +46,59 @@ export function useServiceRequestSubmit(storeUrlBase, typeId, priorityId) {
     const attachments = ref([]);
     const isSubmitting = ref(false);
     const submitError = ref(null);
+    const fieldErrors = ref({});
 
     const canSubmit = computed(() => title.value.trim() && description.value.trim() && !isSubmitting.value);
 
-    async function submitForm(onSuccess) {
-        if (!canSubmit.value) return;
+    async function submitForm(customFields, onSuccess) {
+        if (!canSubmit.value) return { success: false };
 
         isSubmitting.value = true;
         submitError.value = null;
+        fieldErrors.value = {};
 
         const storeUrl = storeUrlBase.replace('__TYPE__', typeId);
 
+        const payload = {
+            title: title.value,
+            description: description.value,
+            priority_id: priorityId,
+            attachments: (attachments.value ?? []).map((a) => ({
+                path: a.path,
+                original_file_name: a.originalFileName,
+            })),
+        };
+
+        if (customFields && Object.keys(customFields).length > 0) {
+            payload.custom_fields = customFields;
+        }
+
         try {
-            await axios.post(
-                storeUrl,
-                {
-                    title: title.value,
-                    description: description.value,
-                    priority_id: priorityId,
-                    attachments: (attachments.value ?? []).map((a) => ({
-                        path: a.path,
-                        original_file_name: a.originalFileName,
-                    })),
-                },
-                { headers: getAuthHeaders() },
-            );
+            await axios.post(storeUrl, payload, { headers: getAuthHeaders() });
 
             onSuccess?.();
+            return { success: true };
         } catch (error) {
             if (!error.response || error.response.status === 401) {
                 clearToken();
+                submitError.value = 'Session expired. Please refresh.';
+                return { success: false, error: 'Session expired. Please refresh.' };
+            } else if (error.response.status === 422) {
+                const errors = error.response.data?.errors;
+
+                if (errors && typeof errors === 'object' && !Array.isArray(errors)) {
+                    fieldErrors.value = errors;
+                    return { success: false, fieldErrors: errors };
+                } else if (Array.isArray(errors)) {
+                    submitError.value = errors[0] ?? 'Validation failed.';
+                    return { success: false, error: errors[0] ?? 'Validation failed.' };
+                } else {
+                    submitError.value = 'Validation failed.';
+                    return { success: false, error: 'Validation failed.' };
+                }
             } else {
-                submitError.value = error.response?.data?.errors?.[0] ?? 'Something went wrong. Please try again.';
+                submitError.value = 'Something went wrong. Please try again.';
+                return { success: false, error: 'Something went wrong. Please try again.' };
             }
         } finally {
             isSubmitting.value = false;
@@ -90,6 +111,7 @@ export function useServiceRequestSubmit(storeUrlBase, typeId, priorityId) {
         attachments,
         isSubmitting,
         submitError,
+        fieldErrors,
         canSubmit,
         submitForm,
     };
