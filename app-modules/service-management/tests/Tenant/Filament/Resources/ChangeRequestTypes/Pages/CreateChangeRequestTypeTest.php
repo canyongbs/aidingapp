@@ -34,45 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages;
-
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\CreateChangeRequestType;
 use App\Filament\Forms\Components\UserSelect;
+use App\Models\Authenticatable;
 use App\Models\User;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Config;
 
-class CreateChangeRequestType extends CreateRecord
-{
-    protected static string $resource = ChangeRequestTypeResource::class;
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                Section::make()
-                    ->columns()
-                    ->schema([
-                        TextInput::make('name')
-                            ->required()
-                            ->string(),
-                        Select::make('number_of_required_approvals')
-                            ->options([
-                                '0' => '0',
-                                '1' => '1',
-                                '2' => '2',
-                            ])
-                            ->required(),
-                        UserSelect::make('userApprovers')
-                            ->label('User approvers')
-                            ->relationship('userApprovers')
-                            ->preload()
-                            ->multiple()
-                            ->exists((new User())->getTable(), 'id'),
-                    ]),
-            ]);
-    }
-}
+// UserSelect (userApprovers field) admin-filtering tests
+// No pre-selected scenario on Create — no persisted record exists yet.
+
+test('userApprovers UserSelect does not show admin users in options by default on CreateChangeRequestType', function () {
+    asSuperAdmin();
+
+    $regularUser = User::factory()->create();
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    livewire(CreateChangeRequestType::class)
+        ->assertSuccessful()
+        ->assertFormFieldExists('userApprovers', function (UserSelect $field) use ($regularUser, $adminUser): bool {
+            return ! empty($field->getSearchResults($regularUser->name))
+                && empty($field->getSearchResults($adminUser->name));
+        });
+});
+
+test('userApprovers UserSelect shows all users when filter_admins_from_selection config is false on CreateChangeRequestType', function () {
+    Config::set('app.filter_admins_from_selection', false);
+    asSuperAdmin();
+
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    livewire(CreateChangeRequestType::class)
+        ->assertSuccessful()
+        ->assertFormFieldExists('userApprovers', function (UserSelect $field) use ($adminUser): bool {
+            return ! empty($field->getSearchResults($adminUser->name));
+        });
+});

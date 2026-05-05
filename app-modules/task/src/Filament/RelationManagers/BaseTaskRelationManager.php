@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 use AidingApp\Task\Models\Task;
+use App\Filament\Forms\Components\UserSelect;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
@@ -80,8 +81,8 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                             ->multiple()
                             ->exists('projects', 'id')
                             ->visible(fn (Get $get) => $get('is_confidential')),
-                        Select::make('confidential_task_users')
-                            ->relationship('confidentialAccessUsers', 'name')
+                        UserSelect::make('confidential_task_users')
+                            ->relationship('confidentialAccessUsers')
                             ->preload()
                             ->label('Users')
                             ->multiple()
@@ -106,14 +107,10 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                 DateTimePicker::make('due')
                     ->label('Due Date')
                     ->native(false),
-                Select::make('assigned_to')
+                UserSelect::make('assigned_to')
                     ->label('Assigned To')
-                    ->relationship(
-                        'assignedTo',
-                        'name',
-                    )
+                    ->relationship('assignedTo')
                     ->nullable()
-                    ->searchable(['name', 'email'])
                     ->default(auth()->id()),
             ]);
     }

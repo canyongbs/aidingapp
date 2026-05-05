@@ -34,45 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages;
+namespace AidingApp\ServiceManagement\Http\Controllers;
 
-use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
-use App\Filament\Forms\Components\UserSelect;
-use App\Models\User;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\File;
+use Illuminate\View\View;
 
-class CreateChangeRequestType extends CreateRecord
+class ServiceRequestFormPreviewController extends Controller
 {
-    protected static string $resource = ChangeRequestTypeResource::class;
-
-    public function form(Schema $schema): Schema
+    public function __invoke(ServiceRequestForm $serviceRequestForm): View
     {
-        return $schema
-            ->components([
-                Section::make()
-                    ->columns()
-                    ->schema([
-                        TextInput::make('name')
-                            ->required()
-                            ->string(),
-                        Select::make('number_of_required_approvals')
-                            ->options([
-                                '0' => '0',
-                                '1' => '1',
-                                '2' => '2',
-                            ])
-                            ->required(),
-                        UserSelect::make('userApprovers')
-                            ->label('User approvers')
-                            ->relationship('userApprovers')
-                            ->preload()
-                            ->multiple()
-                            ->exists((new User())->getTable(), 'id'),
-                    ]),
-            ]);
+        $manifestPath = public_path('storage/widgets/service-requests/forms/.vite/manifest.json');
+
+        /** @var array<string, array{file: string, name: string, src: string, isEntry: bool}> $manifest */
+        $manifest = json_decode(File::get($manifestPath), true, 512, JSON_THROW_ON_ERROR);
+
+        $widgetEntry = $manifest['src/widget.js'];
+
+        $assetBaseUrl = url('widgets/service-requests/forms');
+
+        return view('service-management::service-request-form-preview', [
+            'serviceRequestForm' => $serviceRequestForm,
+            'widgetJsUrl' => $assetBaseUrl . '/' . $widgetEntry['file'],
+            'assetUrl' => route('widgets.service-requests.forms.asset'),
+            'previewEntryUrl' => route('service-request-forms.preview-entry', ['serviceRequestForm' => $serviceRequestForm]),
+        ]);
     }
 }

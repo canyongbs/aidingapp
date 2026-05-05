@@ -36,6 +36,7 @@
 
 namespace AidingApp\Task\Filament\Concerns;
 
+use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -59,8 +60,8 @@ trait TaskEditForm
                         ->label('Confidential')
                         ->live()
                         ->columnSpanFull(),
-                    Select::make('confidential_task_users')
-                        ->relationship('confidentialAccessUsers', 'name')
+                    UserSelect::make('confidential_task_users')
+                        ->relationship('confidentialAccessUsers')
                         ->preload()
                         ->label('Users')
                         ->multiple()
@@ -84,11 +85,10 @@ trait TaskEditForm
             DateTimePicker::make('due')
                 ->label('Due Date')
                 ->native(false),
-            Select::make('assigned_to')
+            UserSelect::make('assigned_to')
                 ->label('Assigned To')
-                ->relationship('assignedTo', 'name')
+                ->relationship('assignedTo')
                 ->nullable()
-                ->searchable(['name', 'email'])
                 ->default(auth()->id()),
             Select::make('concern_id')
                 ->label('Related To')
