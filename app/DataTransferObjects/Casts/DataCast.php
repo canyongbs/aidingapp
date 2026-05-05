@@ -49,14 +49,25 @@ class DataCast implements SettingsCast
         $this->type = $this->ensureDataTypeExists($type);
     }
 
-    public function get($payload): ?Data
+    public function get(mixed $payload): ?Data
     {
         return is_null($payload) ? $payload : $this->type::from($payload);
     }
 
-    public function set($payload): ?array
+    /**
+     * @return array<string, mixed>|null
+     */
+    public function set(mixed $payload): ?array
     {
-        return is_null($payload) ? $payload : $payload->toArray();
+        if (is_null($payload)) {
+            return null;
+        }
+
+        if ($payload instanceof Data) {
+            return $payload->toArray();
+        }
+
+        return is_array($payload) ? $payload : null;
     }
 
     protected function ensureDataTypeExists(?string $type): string

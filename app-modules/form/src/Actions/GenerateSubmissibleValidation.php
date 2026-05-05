@@ -40,10 +40,14 @@ use AidingApp\Form\Models\Submissible;
 use AidingApp\Form\Models\SubmissibleField;
 use AidingApp\IntegrationGoogleRecaptcha\Rules\RecaptchaTokenValid;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Support\Arr;
 
 class GenerateSubmissibleValidation
 {
+    /**
+     * @return array<string, array<int, string|ValidationRule>>
+     */
     public function __invoke(Submissible $submissible): array
     {
         $rules = [];
@@ -61,6 +65,12 @@ class GenerateSubmissibleValidation
         return array_merge($rules, $this->fields($blocks, $submissible->fields));
     }
 
+    /**
+     * @param array<string, class-string> $blocks
+     * @param Collection<int, SubmissibleField> $fields
+     *
+     * @return array<string, array<int, string|ValidationRule>>
+     */
     public function fields(array $blocks, Collection $fields): array
     {
         return $fields
@@ -71,7 +81,7 @@ class GenerateSubmissibleValidation
                     $rules->push('required');
                 }
 
-                if (is_null($field->type)) {
+                if (blank($field->type)) {
                     return [];
                 }
 
@@ -84,6 +94,9 @@ class GenerateSubmissibleValidation
             ->all();
     }
 
+    /**
+     * @return array<string, array<int, string|ValidationRule>>
+     */
     public function wizardRules(Submissible $submissible): array
     {
         $rules = collect();

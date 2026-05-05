@@ -125,12 +125,18 @@ class Asset extends BaseModel implements Auditable
         return $this->hasMany(AssetCheckIn::class, 'asset_id');
     }
 
+    /**
+     * @return HasOne<AssetCheckOut, $this>
+     */
     public function latestCheckOut(): HasOne
     {
         return $this->hasOne(AssetCheckOut::class, 'asset_id')
             ->latest('checked_out_at');
     }
 
+    /**
+     * @return HasOne<AssetCheckIn, $this>
+     */
     public function latestCheckIn(): HasOne
     {
         return $this->hasOne(AssetCheckIn::class, 'asset_id')
@@ -140,7 +146,7 @@ class Asset extends BaseModel implements Auditable
     public function isAvailable(): bool
     {
         return $this->status->classification === SystemAssetStatusClassification::Available
-            && (is_null($this->latestCheckOut) || ! is_null($this->latestCheckOut?->asset_check_in_id));
+            && ($this->latestCheckOut === null || $this->latestCheckOut->asset_check_in_id !== null);
     }
 
     public function isNotAvailable(): bool
@@ -167,7 +173,10 @@ class Asset extends BaseModel implements Auditable
             ->associate(AssetStatus::tap(new ClassifiedAs(SystemAssetStatusClassification::Available))->first())
             ->save();
     }
-
+    /**
+     * @return Attribute
+     * @phpstan-return Attribute<non-falsy-string, never>
+     */
     protected function purchaseAge(): Attribute
     {
         return Attribute::get(function () {
@@ -184,8 +193,13 @@ class Asset extends BaseModel implements Auditable
                 ->setTimezone($user?->timezone)
                 ->diff();
 
-            return $diff->y . ' ' . ($diff->y === 1 ? 'Year' : 'Years') . ' ' .
-                $diff->m . ' ' . ($diff->m === 1 ? 'Month' : 'Months');
+            return sprintf(
+                '%s %s %s %s',
+                $diff->y,
+                $diff->y === 1 ? 'Year' : 'Years',
+                $diff->m,
+                $diff->m === 1 ? 'Month' : 'Months',
+            );
         });
     }
 }

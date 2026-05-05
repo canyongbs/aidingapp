@@ -41,6 +41,9 @@ use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithMapping;
 
+/**
+ * @implements WithMapping<object>
+ */
 class FormSubmissionExport implements FromCollection, WithHeadings, WithMapping
 {
     /**
@@ -57,7 +60,7 @@ class FormSubmissionExport implements FromCollection, WithHeadings, WithMapping
     }
 
     /**
-     * @return array<string>
+     * @return array<int, string>
      */
     public function headings(): array
     {
@@ -71,9 +74,9 @@ class FormSubmissionExport implements FromCollection, WithHeadings, WithMapping
     }
 
     /**
-     * @param mixed $row
+     * @param object $row
      *
-     * @return array<string>
+     * @return array<int, mixed>
      */
     public function map($row): array
     {
