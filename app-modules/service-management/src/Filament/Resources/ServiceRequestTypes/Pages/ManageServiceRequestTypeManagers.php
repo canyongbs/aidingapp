@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use App\Concerns\EditPageRedirection;
+use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
@@ -70,10 +71,10 @@ class ManageServiceRequestTypeManagers extends EditRecord
             ->components([
                 Section::make()
                     ->schema([
-                        Select::make('managerUsers')
+                        UserSelect::make('managerUsers')
                             ->label('Users')
                             ->multiple()
-                            ->relationship('managerUsers', 'name')
+                            ->relationship('managerUsers')
                             ->preload(),
                         Select::make('managerTeams')
                             ->label('Teams')
