@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,33 +33,32 @@
 
 </COPYRIGHT>
 */
-import { defaultConfig, plugin } from '@formkit/vue';
-import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
-import VueSignaturePad from 'vue-signature-pad';
-import App from './App.vue';
-import config from './formkit.config.js';
-import styles from './widget.css?inline';
 
-customElements.define(
-    'service-request-form-embed',
-    defineCustomElement({
-        styles: [styles],
-        setup(props) {
-            const app = createApp();
+namespace AidingApp\ServiceManagement\Http\Controllers;
 
-            // install plugins
-            app.use(plugin, defaultConfig(config));
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\File;
+use Illuminate\View\View;
 
-            app.use(VueSignaturePad);
+class ServiceRequestFormPreviewController extends Controller
+{
+    public function __invoke(ServiceRequestForm $serviceRequestForm): View
+    {
+        $manifestPath = public_path('storage/widgets/service-requests/forms/.vite/manifest.json');
 
-            app.config.devtools = true;
+        /** @var array<string, array{file: string, name: string, src: string, isEntry: bool}> $manifest */
+        $manifest = json_decode(File::get($manifestPath), true, 512, JSON_THROW_ON_ERROR);
 
-            const inst = getCurrentInstance();
-            Object.assign(inst.appContext, app._context);
-            Object.assign(inst.provides, app._context.provides);
+        $widgetEntry = $manifest['src/widget.js'];
 
-            return () => h(App, props);
-        },
-        props: ['url', 'preview'],
-    }),
-);
+        $assetBaseUrl = url('widgets/service-requests/forms');
+
+        return view('service-management::service-request-form-preview', [
+            'serviceRequestForm' => $serviceRequestForm,
+            'widgetJsUrl' => $assetBaseUrl . '/' . $widgetEntry['file'],
+            'assetUrl' => route('widgets.service-requests.forms.asset'),
+            'previewEntryUrl' => route('service-request-forms.preview-entry', ['serviceRequestForm' => $serviceRequestForm]),
+        ]);
+    }
+}

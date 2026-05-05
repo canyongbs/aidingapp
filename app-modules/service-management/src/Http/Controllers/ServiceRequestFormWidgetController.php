@@ -135,6 +135,24 @@ class ServiceRequestFormWidgetController extends Controller
         );
     }
 
+    public function preview(GenerateServiceRequestFormKitSchema $generateSchema, ServiceRequestForm $serviceRequestForm): JsonResponse
+    {
+        return response()->json(
+            [
+                'name' => $serviceRequestForm->name,
+                'description' => $serviceRequestForm->description,
+                'is_authenticated' => false,
+                'recaptcha_enabled' => false,
+                'schema' => $generateSchema($serviceRequestForm),
+                'primary_color' => collect(Color::all()[$serviceRequestForm->primary_color ?? 'blue'])
+                    ->map(Color::convertToRgb(...))
+                    ->map(fn (string $value): string => (string) str($value)->after('rgb(')->before(')'))
+                    ->all(),
+                'rounding' => $serviceRequestForm->rounding,
+            ],
+        );
+    }
+
     public function requestAuthentication(Request $request, ResolveSubmissionAuthorFromEmail $resolveSubmissionAuthorFromEmail, ServiceRequestForm $serviceRequestForm): JsonResponse
     {
         $data = $request->validate([
