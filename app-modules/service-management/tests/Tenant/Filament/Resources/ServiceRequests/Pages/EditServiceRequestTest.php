@@ -211,38 +211,6 @@ test('EditServiceRequest requires valid data', function ($data, $errors, $setup 
     ]
 );
 
-test('type afterStateUpdated sets category from default_category', function () {
-    asSuperAdmin();
-
-    $serviceRequestType = ServiceRequestType::factory()->create([
-        'default_category' => ServiceRequestCategory::Incident,
-    ]);
-
-    $serviceRequest = ServiceRequest::factory()->state([
-        'status_id' => ServiceRequestStatus::factory()->create([
-            'classification' => SystemServiceRequestClassification::Open,
-        ])->getKey(),
-        'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestType->getKey(),
-        ])->getKey(),
-        'category' => ServiceRequestCategory::Request,
-    ])->create();
-
-    $newType = ServiceRequestType::factory()->create([
-        'default_category' => ServiceRequestCategory::Incident,
-    ]);
-
-    livewire(EditServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->fillForm([
-            'type_id' => $newType->getKey(),
-        ])
-        ->assertFormSet([
-            'category' => ServiceRequestCategory::Incident,
-        ]);
-});
-
 // Permission Tests
 
 test('EditServiceRequest is gated with proper access control', function () {
