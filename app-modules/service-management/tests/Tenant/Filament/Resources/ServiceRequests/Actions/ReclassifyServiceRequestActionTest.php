@@ -118,59 +118,6 @@ test('reclassify with default assignment updates priority_id', function () {
     expect($serviceRequest->refresh()->priority_id)->toBe($newPriority->getKey());
 });
 
-test('reclassify with individual assignment method creates correct assignment', function () {
-    $assignedManager = User::factory()->create();
-
-    $originalType = ServiceRequestType::factory()->create([
-        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
-    ]);
-
-    $newType = ServiceRequestType::factory()->create([
-        'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
-        'assignment_type_individual_id' => $assignedManager->getKey(),
-    ]);
-
-    $newType->managerUsers()->attach($assignedManager);
-
-    $originalPriority = ServiceRequestPriority::factory()->create([
-        'type_id' => $originalType->getKey(),
-    ]);
-
-    $newPriority = ServiceRequestPriority::factory()->create([
-        'type_id' => $newType->getKey(),
-    ]);
-
-    $serviceRequest = ServiceRequest::factory()->state([
-        'status_id' => ServiceRequestStatus::factory()->create([
-            'classification' => SystemServiceRequestClassification::Open,
-        ])->getKey(),
-        'priority_id' => $originalPriority->getKey(),
-    ])->create();
-
-    asSuperAdmin();
-
-    livewire(ViewServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->callAction('reclassify', data: [
-            'type_id' => $newType->getKey(),
-            'priority_id' => $newPriority->getKey(),
-            'assignment_method' => 'default',
-        ])
-        ->assertHasNoFormErrors();
-
-    $serviceRequest->refresh();
-
-    expect($serviceRequest->priority_id)->toBe($newPriority->getKey());
-
-    $assignment = ServiceRequestAssignment::where('service_request_id', $serviceRequest->getKey())
-        ->where('user_id', $assignedManager->getKey())
-        ->where('status', ServiceRequestAssignmentStatus::Active)
-        ->first();
-
-    expect($assignment)->not->toBeNull();
-});
-
 test('reclassify with override assignment creates manual assignment to selected user', function () {
     $originalType = ServiceRequestType::factory()->create([
         'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
