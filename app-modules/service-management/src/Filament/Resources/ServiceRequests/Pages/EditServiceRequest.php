@@ -40,25 +40,24 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Filament\Actions\ReclassifyServiceRequestAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Concerns\EditPageRedirection;
 use CanyonGBS\Common\Filament\Support\HideDeletedExceptSelectedFromSelectOptions;
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -91,7 +90,35 @@ class EditServiceRequest extends EditRecord
                             ->required()
                             ->visible(fn (): bool => Division::count() > 1)
                             ->exists((new Division())->getTable(), 'id'),
-                        Grid::make(3)
+                        ToggleButtons::make('category')
+                            ->options(ServiceRequestCategory::class)
+                            ->enum(ServiceRequestCategory::class)
+                            ->inline()
+                            ->inlineLabel(false),
+                        Select::make('respondent_id')
+                            ->relationship(
+                                name: 'respondent',
+                                titleAttribute: 'full_name',
+                                modifyQueryUsing: fn (Builder $query) => $query->with('type')->orderBy('first_name')
+                            )
+                            ->label('Customer Contact')
+                            ->required()
+                            ->searchable()
+                            ->preload()
+                            ->getOptionLabelFromRecordUsing(fn (Contact $record) => $record->full_name . ' (' . ($record->type->name ?? 'N/A') . ")\n" . ($record->organization->name ?? 'Unaffiliated'))
+                            ->exists((new Contact())->getTable(), 'id'),
+                        TextInput::make('title')
+                            ->required()
+                            ->string()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                        Textarea::make('close_details')
+                            ->label('Description')
+                            ->nullable()
+                            ->string()
+                            ->columnSpan(1),
+
+                        Grid::make(2)
                             ->schema([
                                 Select::make('status_id')
                                     ->relationship('status', 'name')
@@ -109,45 +136,6 @@ class EditServiceRequest extends EditRecord
                                     ->required()
                                     ->exists((new ServiceRequestStatus())->getTable(), 'id')
                                     ->disableOptionWhen(fn (string $value) => $disabledStatuses->contains($value)),
-                                Select::make('type_id')
-                                    ->options(
-                                        fn (ServiceRequest $record) => ServiceRequestType::query()
-                                            ->where(
-                                                fn (Builder $query) => $query
-                                                    ->withoutArchived()
-                                                    ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                                                        $query->where(function (Builder $query) {
-                                                            $query->whereHas('managerUsers', fn (Builder $query) => $query->where('users.id', auth()->user()->getKey()));
-                                                            $query->orWhereHas('managerTeams', fn (Builder $query) => $query->where('teams.id', auth()->user()->team?->getKey()));
-                                                        });
-                                                    }),
-                                            )
-                                            ->orWhere(
-                                                $record->priority->type->getQualifiedKeyName(),
-                                                $record->priority->type->getKey(),
-                                            )
-                                            ->orderBy('name')
-                                            ->pluck('name', 'id')
-                                    )
-                                    ->afterStateUpdated(function (?string $state, Set $set) {
-                                        $set('priority_id', null);
-
-                                        if ($state) {
-                                            $type = ServiceRequestType::find($state);
-                                            $defaultCategoryColumn = 'default_category';
-                                            $categoryField = 'category';
-
-                                            if ($type?->$defaultCategoryColumn) {
-                                                $set($categoryField, $type->$defaultCategoryColumn->value);
-                                            }
-                                        }
-                                    })
-                                    ->label('Type')
-                                    ->required()
-                                    ->rule(new ManagedServiceRequestType())
-                                    ->live()
-                                    ->exists(ServiceRequestType::class, 'id')
-                                    ->disableOptionWhen(fn (string $value) => $disabledTypes->contains($value)),
                                 Select::make('priority_id')
                                     ->relationship(
                                         name: 'priority',
@@ -159,34 +147,6 @@ class EditServiceRequest extends EditRecord
                                     ->exists(ServiceRequestPriority::class, 'id')
                                     ->visible(fn (Get $get): bool => filled($get('type_id'))),
                             ]),
-                        Radio::make('category')
-                            ->label('Category')
-                            ->options(ServiceRequestCategory::class)
-                            ->enum(ServiceRequestCategory::class)
-                            ->inline()
-                            ->inlineLabel(false),
-                        TextInput::make('title')
-                            ->required()
-                            ->string()
-                            ->maxLength(255)
-                            ->columnSpanFull(),
-                        Textarea::make('close_details')
-                            ->label('Description')
-                            ->nullable()
-                            ->string()
-                            ->columnSpan(1),
-                        Select::make('respondent_id')
-                            ->relationship(
-                                name: 'respondent',
-                                titleAttribute: 'full_name',
-                                modifyQueryUsing: fn (Builder $query) => $query->with('type')->orderBy('first_name')
-                            )
-                            ->label('Customer Contact')
-                            ->required()
-                            ->searchable()
-                            ->preload()
-                            ->getOptionLabelFromRecordUsing(fn (Contact $record) => $record->full_name . ' (' . ($record->type->name ?? 'N/A') . ")\n" . ($record->organization->name ?? 'Unaffiliated'))
-                            ->exists((new Contact())->getTable(), 'id'),
                     ]),
                 Section::make('Uploads')
                     ->schema([
@@ -207,6 +167,9 @@ class EditServiceRequest extends EditRecord
     {
         return [
             DeleteAction::make(),
+            ReclassifyServiceRequestAction::make('reclassify')
+                ->record($this->getRecord())
+                ->slideOver(),
         ];
     }
 
