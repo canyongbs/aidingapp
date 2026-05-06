@@ -43,6 +43,9 @@ use AidingApp\Engagement\Jobs\DeliverEngagements;
 use AidingApp\Engagement\Jobs\GatherAndDispatchSesS3InboundEmails;
 use AidingApp\Engagement\Jobs\UnmatchedInboundCommunicationsJob;
 use AidingApp\Engagement\Models\EngagementFile;
+use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleImagesJob;
+use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleLinksJob;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Project\Models\ProjectFile;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Jobs\AutoSubmitStaleDraftServiceRequests;
@@ -163,6 +166,19 @@ class Kernel extends ConsoleKernel
                         ->name("Prepare Knowledge Base Vector Store | Tenant {$tenant->domain}")
                         ->onOneServer()
                         ->withoutOverlapping(5);
+
+                    $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
+                            KnowledgeBaseItem::each(function (KnowledgeBaseItem $article) {
+                                CheckKnowledgeBaseArticleLinksJob::dispatch($article);
+                                CheckKnowledgeBaseArticleImagesJob::dispatch($article);
+                            });
+                        });
+                    })
+                        ->daily()
+                        ->name("Check Knowledge Base Article Links and Images | Tenant {$tenant->domain}")
+                        ->onOneServer()
+                        ->withoutOverlapping(720);
 
                     $schedule->command("tenants:artisan \"cache:prune-stale-tags\" --tenant={$tenant->id}")
                         ->hourly()

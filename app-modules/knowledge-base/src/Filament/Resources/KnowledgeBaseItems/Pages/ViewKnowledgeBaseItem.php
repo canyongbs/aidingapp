@@ -171,6 +171,14 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                         ->where('status', '!=', ConcernStatus::Resolved)
                                         ->where('status', '!=', ConcernStatus::Archived)
                                         ->isEmpty()),
+                                IconEntry::make('no_broken_links')
+                                    ->label('No Broken Links Detected')
+                                    ->boolean()
+                                    ->getStateUsing(fn (KnowledgeBaseItem $record) => ! $record->are_broken_links_detected),
+                                IconEntry::make('no_broken_images')
+                                    ->label('No Broken Images Detected')
+                                    ->boolean()
+                                    ->getStateUsing(fn (KnowledgeBaseItem $record) => ! $record->are_broken_images_detected)
                             ])
                             ->columns(2)
                             ->id('health'),

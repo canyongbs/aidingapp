@@ -130,7 +130,10 @@ class ListKnowledgeBaseItems extends ListRecords
                             ->where('status', '!=', ConcernStatus::Archived)
                             ->isEmpty();
 
-                        return $hasTitle && $hasArticle && $hasManager && $hasNoUnresolvedConcerns;
+                        $hasNoBrokenLinks = ! $record->are_broken_links_detected;
+                        $hasNoBrokenImages = ! $record->are_broken_images_detected;
+
+                        return $hasTitle && $hasArticle && $hasManager && $hasNoUnresolvedConcerns && $hasNoBrokenLinks && $hasNoBrokenImages;
                     }),
                 TextColumn::make('quality.name')
                     ->label('Quality')

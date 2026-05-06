@@ -10,7 +10,7 @@ return new class extends Migration
     public function up(): void
     {
         DB::transaction(function () {
-            Schema::table('knowledge_base_items', function (Blueprint $table) {
+            Schema::table('knowledge_base_articles', function (Blueprint $table) {
                 $table->boolean('are_broken_links_detected')->default(false);
                 $table->jsonb('broken_links')->nullable();
                 $table->boolean('are_broken_images_detected')->default(false);
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         DB::transaction(function () {
-            Schema::table('knowledge_base_items', function (Blueprint $table) {
+            Schema::table('knowledge_base_articles', function (Blueprint $table) {
                 $table->dropColumn('are_broken_links_detected');
                 $table->dropColumn('broken_links');
                 $table->dropColumn('are_broken_images_detected');

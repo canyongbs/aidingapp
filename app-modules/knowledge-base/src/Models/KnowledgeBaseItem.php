@@ -86,6 +86,10 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
         'public' => 'boolean',
         'article_details' => 'array',
         'has_table_of_contents' => 'boolean',
+        'are_broken_links_detected' => 'boolean',
+        'broken_links' => 'array',
+        'are_broken_images_detected' => 'boolean',
+        'broken_images' => 'array',
     ];
 
     protected $fillable = [
@@ -98,6 +102,10 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
         'title',
         'is_featured',
         'has_table_of_contents',
+        'are_broken_links_detected',
+        'broken_links',
+        'are_broken_images_detected',
+        'broken_images'
     ];
 
     /**

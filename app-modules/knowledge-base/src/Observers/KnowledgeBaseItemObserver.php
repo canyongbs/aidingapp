@@ -38,6 +38,8 @@ namespace AidingApp\KnowledgeBase\Observers;
 
 use AidingApp\Ai\Jobs\PrepareKnowledgeBaseVectorStore;
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
+use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleImagesJob;
+use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleLinksJob;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Settings\PortalSettings;
 
@@ -50,10 +52,13 @@ class KnowledgeBaseItemObserver
         }
     }
 
-    public function saved(): void
+    public function saved(KnowledgeBaseItem $knowledgeBaseItem): void
     {
         if (app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant) {
             PrepareKnowledgeBaseVectorStore::dispatch();
         }
+
+        CheckKnowledgeBaseArticleLinksJob::dispatch($knowledgeBaseItem);
+        CheckKnowledgeBaseArticleImagesJob::dispatch($knowledgeBaseItem);
     }
 }
