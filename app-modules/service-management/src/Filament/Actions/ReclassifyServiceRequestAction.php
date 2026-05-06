@@ -63,8 +63,8 @@ class ReclassifyServiceRequestAction extends Action
 
         $this->label('Reclassify')
             ->modalSubmitActionLabel('Reclassify')
-            ->modalHeading(fn (): HtmlString => new HtmlString(
-                'Reclassify Service Request<br><span class="text-sm font-normal text-gray-500">' . ($this->getRecord() instanceof ServiceRequest ? $this->getRecord()->service_request_number : null) . '</span>'
+            ->modalHeading(fn (ServiceRequest $record): HtmlString => new HtmlString(
+                'Reclassify Service Request<br><span class="text-sm font-normal text-gray-500">' . $record->service_request_number . '</span>'
             ))
             ->modalDescription('Reclassify this request to a different service request type. The selected type determines the responsible team, assignment rules, and communication templates.')
             ->schema([
@@ -86,15 +86,13 @@ class ReclassifyServiceRequestAction extends Action
                                 ->whereKeyNot($record->priority->type->getKey())
                                 ->orderBy('name')
                                 ->pluck('name', 'id'))
-                            ->afterStateUpdated(function (?string $state, Set $set): void {
+                            ->afterStateUpdated(function (?string $state, Set $set, ServiceRequest $record): void {
                                 if (! $state) {
                                     $set('priority_id', null);
 
                                     return;
                                 }
 
-                                $record = $this->getRecord();
-                                assert($record instanceof ServiceRequest);
                                 $currentPriorityName = $record->priority?->name;
 
                                 $matchingPriority = ServiceRequestPriority::query()
