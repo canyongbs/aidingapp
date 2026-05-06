@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceReques
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -73,16 +72,7 @@ class ReclassifyServiceRequestAction extends Action
                         Select::make('type_id')
                             ->label('Type')
                             ->options(fn (ServiceRequest $record) => ServiceRequestType::query()
-                                ->where(function (Builder $query) {
-                                    $query->withoutArchived();
-
-                                    if (! auth()->user()->isSuperAdmin()) {
-                                        $query->where(function (Builder $query) {
-                                            $query->whereHas('managerUsers', fn (Builder $query) => $query->where('users.id', auth()->user()->getKey()));
-                                            $query->orWhereHas('managerTeams', fn (Builder $query) => $query->where('teams.id', auth()->user()->team?->getKey()));
-                                        });
-                                    }
-                                })
+                                ->withoutArchived()
                                 ->whereKeyNot($record->priority->type->getKey())
                                 ->orderBy('name')
                                 ->pluck('name', 'id'))
@@ -103,7 +93,6 @@ class ReclassifyServiceRequestAction extends Action
                                 $set('priority_id', $matchingPriority?->getKey());
                             })
                             ->required()
-                            ->rule(new ManagedServiceRequestType())
                             ->live()
                             ->exists(ServiceRequestType::class, 'id'),
 
