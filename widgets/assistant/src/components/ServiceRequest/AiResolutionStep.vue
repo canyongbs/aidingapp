@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -127,12 +127,17 @@
         <!-- Content -->
         <div class="flex-1 overflow-y-auto px-4 py-3 flex flex-col">
             <!-- Loading state -->
-            <div v-if="isLoading || (!proposedAnswer && isSubmitting)" class="flex-1 flex flex-col items-center justify-center gap-3 text-gray-400">
+            <div
+                v-if="isLoading || (!proposedAnswer && isSubmitting)"
+                class="flex-1 flex flex-col items-center justify-center gap-3 text-gray-400"
+            >
                 <svg class="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                 </svg>
-                <span class="text-sm">{{ isSubmitting ? 'Submitting your request…' : 'Evaluating your request…' }}</span>
+                <span class="text-sm">{{
+                    isSubmitting ? 'Submitting your request…' : 'Evaluating your request…'
+                }}</span>
             </div>
 
             <!-- Resolution available -->
