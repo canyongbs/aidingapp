@@ -127,13 +127,24 @@ class ReclassifyServiceRequestAction extends Action
                             ->visible(fn (Get $get): bool => $get('assignment_method') === 'override')
                             ->required(fn (Get $get): bool => $get('assignment_method') === 'override')
                             ->searchable()
+                            ->options(
+                                fn (Get $get): array => User::query()
+                                    ->where(fn (Builder $query) => $query
+                                        ->whereHas('manageableServiceRequestTypes', fn (Builder $query) => $query->where('service_request_type_id', $get('type_id')))
+                                        ->orWhereHas('team.manageableServiceRequestTypes', fn (Builder $query) => $query->where('service_request_type_id', $get('type_id'))))
+                                    ->orderBy('name')
+                                    ->limit(50)
+                                    ->pluck('name', 'id')
+                                    ->all()
+                            )
                             ->getSearchResultsUsing(fn (string $search, Get $get): array => User::query()
-                                ->where(function (Builder $query) use ($get): void {
-                                    $typeId = $get('type_id');
-                                    $query->whereHas('manageableServiceRequestTypes', fn (Builder $query1) => $query1->where('service_request_type_id', $typeId));
-                                    $query->orWhereHas('team.manageableServiceRequestTypes', fn (Builder $query1) => $query1->where('service_request_type_id', $typeId));
-                                })
-                                ->where(new Expression('lower(name)'), 'like', '%' . Str::lower($search) . '%')
+                                ->where(fn (Builder $query) => $query
+                                    ->whereHas('manageableServiceRequestTypes', fn (Builder $query) => $query->where('service_request_type_id', $get('type_id')))
+                                    ->orWhereHas('team.manageableServiceRequestTypes', fn (Builder $query) => $query->where('service_request_type_id', $get('type_id'))))
+                                ->when(filled($search), fn (Builder $query) => $query
+                                    ->where(new Expression('lower(name)'), 'like', '%' . Str::lower($search) . '%'))
+                                ->orderBy('name')
+                                ->limit(50)
                                 ->pluck('name', 'id')
                                 ->all())
                             ->getOptionLabelUsing(fn ($value): ?string => User::find($value)?->name),
