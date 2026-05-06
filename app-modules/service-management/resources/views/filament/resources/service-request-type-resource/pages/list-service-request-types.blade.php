@@ -87,17 +87,7 @@
         </div>
 
         {{-- Top Action Buttons --}}
-        <div class="flex flex-wrap items-center justify-between gap-4" x-show="canEdit">
-            {{-- Expand/Collapse Links --}}
-            <div class="flex gap-3" x-show="treeData.categories && treeData.categories.length > 0">
-                <x-filament::link tag="button" type="button" @click="expandAll()" size="sm">
-                    Expand All
-                </x-filament::link>
-                <x-filament::link tag="button" type="button" @click="collapseAll()" size="sm">
-                    Collapse All
-                </x-filament::link>
-            </div>
-
+        <div class="flex flex-col items-end gap-2" x-show="canEdit">
             {{-- Add Service Request Area/Type Buttons (Right) --}}
             <div class="flex w-full justify-end gap-3 sm:w-auto">
                 {{-- Add Service Request Area Button --}}
@@ -164,6 +154,16 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {{-- Expand/Collapse Links --}}
+            <div class="flex justify-end gap-3" x-show="treeData.categories && treeData.categories.length > 0">
+                <x-filament::link tag="button" type="button" @click="expandAll()" size="sm">
+                    Expand All
+                </x-filament::link>
+                <x-filament::link tag="button" type="button" @click="collapseAll()" size="sm">
+                    Collapse All
+                </x-filament::link>
             </div>
         </div>
 
