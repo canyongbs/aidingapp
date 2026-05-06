@@ -113,7 +113,7 @@ test('reclassify with default assignment updates priority_id', function () {
             'priority_id' => $newPriority->getKey(),
             'assignment_method' => 'default',
         ])
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     expect($serviceRequest->refresh()->priority_id)->toBe($newPriority->getKey());
 });
@@ -157,7 +157,7 @@ test('reclassify with individual assignment method creates correct assignment', 
             'priority_id' => $newPriority->getKey(),
             'assignment_method' => 'default',
         ])
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $serviceRequest->refresh();
 
@@ -212,7 +212,7 @@ test('reclassify with override assignment creates manual assignment to selected 
             'assignment_method' => 'override',
             'assign_to' => $eligibleAgent->getKey(),
         ])
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $serviceRequest->refresh();
 
@@ -256,7 +256,7 @@ test('reclassify with override but missing assign_to produces validation error',
             'assignment_method' => 'override',
             'assign_to' => null,
         ])
-        ->assertHasActionErrors(['assign_to' => 'required']);
+        ->assertHasFormErrors(['assign_to' => 'required']);
 });
 
 test('reclassify requires type_id', function () {
@@ -272,7 +272,7 @@ test('reclassify requires type_id', function () {
             'priority_id' => null,
             'assignment_method' => 'default',
         ])
-        ->assertHasActionErrors(['type_id' => 'required']);
+        ->assertHasFormErrors(['type_id' => 'required']);
 });
 
 test('reclassify requires priority_id', function () {
@@ -297,7 +297,7 @@ test('reclassify requires priority_id', function () {
             'priority_id' => null,
             'assignment_method' => 'default',
         ])
-        ->assertHasActionErrors(['priority_id' => 'required']);
+        ->assertHasFormErrors(['priority_id' => 'required']);
 });
 
 test('reclassify requires assignment_method', function () {
@@ -326,7 +326,7 @@ test('reclassify requires assignment_method', function () {
             'priority_id' => $newPriority->getKey(),
             'assignment_method' => null,
         ])
-        ->assertHasActionErrors(['assignment_method' => 'required']);
+        ->assertHasFormErrors(['assignment_method' => 'required']);
 });
 
 test('selecting a new type auto-selects priority with matching name', function () {
@@ -355,8 +355,8 @@ test('selecting a new type auto-selects priority with matching name', function (
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->mountAction('reclassify')
-        ->setActionData(['type_id' => $newType->getKey()])
-        ->assertActionDataSet(['priority_id' => $matchingPriority->getKey()]);
+        ->fillForm(['type_id' => $newType->getKey()])
+        ->assertSchemaStateSet(['priority_id' => $matchingPriority->getKey()]);
 });
 
 test('selecting a new type clears priority when no matching name exists', function () {
@@ -383,8 +383,8 @@ test('selecting a new type clears priority when no matching name exists', functi
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->mountAction('reclassify')
-        ->setActionData(['type_id' => $newType->getKey()])
-        ->assertActionDataSet(['priority_id' => null]);
+        ->fillForm(['type_id' => $newType->getKey()])
+        ->assertSchemaStateSet(['priority_id' => null]);
 });
 
 test('reclassify action is visible for manager team member with update permission', function () {
@@ -463,7 +463,7 @@ test('reclassify with default assignment invokes the correct assigner class', fu
             'priority_id' => $newPriority->getKey(),
             'assignment_method' => 'default',
         ])
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     if ($assignerClass) {
         $spy->shouldHaveReceived('execute')->once();
@@ -523,7 +523,7 @@ test('reclassify deletes existing active assignment', function () {
             'priority_id' => $newPriority->getKey(),
             'assignment_method' => 'default',
         ])
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     expect($serviceRequest->refresh()->assignments()->where('status', ServiceRequestAssignmentStatus::Active)->count())->toBe(0);
     expect(ServiceRequestAssignment::withTrashed()->where('service_request_id', $serviceRequest->getKey())->where('user_id', $previousAssignee->getKey())->first()?->trashed())->toBeTrue();
@@ -657,7 +657,7 @@ test('reclassify with individual assignment end-to-end assigns correct user', fu
             'priority_id' => $newPriority->getKey(),
             'assignment_method' => 'default',
         ])
-        ->assertHasNoActionErrors();
+        ->assertHasNoFormErrors();
 
     $serviceRequest->refresh();
 
