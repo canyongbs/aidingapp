@@ -32,9 +32,13 @@
 </COPYRIGHT>
 */
 import { createInput } from '@formkit/vue';
+import Signature from './Signature.vue';
 import Upload from './Upload.vue';
 
 export default {
+    signature: createInput(Signature, {
+        props: [],
+    }),
     upload: createInput(Upload, {
         props: ['accept', 'limit', 'multiple', 'size', 'uploadUrl'],
     }),

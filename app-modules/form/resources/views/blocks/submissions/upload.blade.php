@@ -31,25 +31,29 @@
     
     </COPYRIGHT>
 --}}
+@use('Spatie\MediaLibrary\MediaCollections\Models\Media')
 
-@php
-    $submission = $getRecord()->serviceRequestFormSubmission;
-@endphp
+<x-form::blocks.field-wrapper class="py-3" :$label :$isRequired>
+    @php
+        $mediaIds = json_decode($response ?? '[]', true) ?: [];
+        $mediaItems = empty($mediaIds) ? collect() : Media::whereIn('id', $mediaIds)->get();
+    @endphp
 
-<div class="tiptap-rendered-content flex flex-col gap-6">
-    @if ($submission->submissible->is_wizard)
-        @foreach ($submission->submissible->steps as $step)
-            @if (! empty($step->content['content'] ?? []))
-                <x-filament::section>
-                    <x-slot name="heading">
-                        {{ $step->label }}
-                    </x-slot>
-
-                    <x-form::submissions.content :content="$step->content" :submission="$submission" />
-                </x-filament::section>
-            @endif
-        @endforeach
+    @if ($mediaItems->isEmpty())
+        <span class="text-gray-500">No files uploaded</span>
     @else
-        <x-form::submissions.content :content="$submission->submissible->content" :submission="$submission" />
+        <ul class="space-y-1">
+            @foreach ($mediaItems as $media)
+                <li class="flex items-center gap-2">
+                    <x-heroicon-o-paper-clip class="w-4 h-4 text-gray-400 shrink-0" />
+                    <a
+                        href="{{ route('service-request.media.download', ['media' => $media->getKey()]) }}"
+                        class="text-sm text-primary-600 hover:underline"
+                    >
+                        {{ $media->name }}.{{ pathinfo($media->file_name, PATHINFO_EXTENSION) }}
+                    </a>
+                </li>
+            @endforeach
+        </ul>
     @endif
-</div>
+</x-form::blocks.field-wrapper>

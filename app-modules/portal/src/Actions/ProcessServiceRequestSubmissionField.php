@@ -58,7 +58,7 @@ class ProcessServiceRequestSubmissionField
     ): void {
         $submission->fields()->attach($fieldId, [
             'id' => Str::orderedUuid(),
-            'response' => $response,
+            'response' => is_array($response) ? json_encode($response) : $response,
         ]);
 
         if ($submission->author) {

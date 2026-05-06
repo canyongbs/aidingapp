@@ -54,6 +54,7 @@
         --tw-ring-offset-width: 0px;
         --tw-ring-offset-color: #fff;
         border-color: var(--color-gray-200, currentColor);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     }
 }
 
@@ -69,8 +70,19 @@
     --tw-ring-offset-color: #fff;
 }
 
-* {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+.formkit-required > .formkit-wrapper > .formkit-label::after,
+.formkit-required > .formkit-fieldset > .formkit-legend::after,
+.formkit-required[data-family='box'] > .formkit-wrapper > span:not(.formkit-inner)::after {
+    content: ' *';
+    color: #ef4444;
+}
+
+@font-face {
+    font-family: 'Satisfy';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url(https://fonts.gstatic.com/s/satisfy/v21/rP2Hp2yn6lkG50LoCZOIHTWEBlw.woff2) format('woff2');
 }
 
 .prose h5,
