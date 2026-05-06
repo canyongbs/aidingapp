@@ -45,6 +45,7 @@ use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -53,6 +54,7 @@ use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
+use Throwable;
 
 class ReclassifyServiceRequestAction extends Action
 {
@@ -151,7 +153,13 @@ class ReclassifyServiceRequestAction extends Action
                     ]),
             ])
             ->action(function (array $data, ServiceRequest $record): void {
-                DB::transaction(function () use ($data, $record): void {
+                try {
+                    DB::beginTransaction();
+
+                    $record->assignments()
+                        ->where('status', ServiceRequestAssignmentStatus::Active)
+                        ->delete();
+
                     $record->priority_id = $data['priority_id'];
                     $record->save();
                     $record->refresh();
@@ -164,12 +172,28 @@ class ReclassifyServiceRequestAction extends Action
                             'status' => ServiceRequestAssignmentStatus::Active,
                         ]);
                     } else {
-                        ServiceRequestType::find($data['type_id'])
-                            ?->assignment_type
-                            ?->getAssignerClass()
+                        $record->priority->type
+                            ->assignment_type
+                            ->getAssignerClass()
                             ?->execute($record);
                     }
-                });
+
+                    DB::commit();
+
+                    Notification::make()
+                        ->title('Service request reclassified successfully.')
+                        ->success()
+                        ->send();
+                } catch (Throwable $exception) {
+                    DB::rollBack();
+
+                    report($exception);
+
+                    Notification::make()
+                        ->title('Something went wrong reclassifying the service request.')
+                        ->danger()
+                        ->send();
+                }
             })
             ->successRedirectUrl(fn (ServiceRequest $record): string => ServiceRequestResource::getUrl('view', ['record' => $record]));
     }

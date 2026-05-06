@@ -44,8 +44,12 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
+use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
+use AidingApp\ServiceManagement\Services\ServiceRequestType\WorkloadAssigner;
 use AidingApp\Team\Models\Team;
 use App\Models\User;
+use Filament\Notifications\Notification;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -413,4 +417,250 @@ test('reclassify action is visible for manager team member with update permissio
     ])
         ->assertSuccessful()
         ->assertActionVisible('reclassify');
+});
+
+test('reclassify with default assignment invokes the correct assigner class', function (ServiceRequestTypeAssignmentTypes $assignmentType, ?string $assignerClass) {
+    $manager = User::factory()->create();
+
+    $originalType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
+    ]);
+
+    $newType = ServiceRequestType::factory()->create([
+        'assignment_type' => $assignmentType,
+        'assignment_type_individual_id' => $assignmentType === ServiceRequestTypeAssignmentTypes::Individual ? $manager->getKey() : null,
+    ]);
+
+    $newType->managerUsers()->attach($manager);
+
+    $originalPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $originalType->getKey(),
+    ]);
+
+    $newPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $newType->getKey(),
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => $originalPriority->getKey(),
+    ])->create();
+
+    if ($assignerClass) {
+        $spy = Mockery::spy($assignerClass);
+        app()->instance($assignerClass, $spy);
+    }
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->callAction('reclassify', data: [
+            'type_id' => $newType->getKey(),
+            'priority_id' => $newPriority->getKey(),
+            'assignment_method' => 'default',
+        ])
+        ->assertHasNoActionErrors();
+
+    if ($assignerClass) {
+        $spy->shouldHaveReceived('execute')->once();
+    } else {
+        expect($serviceRequest->refresh()->assignments()->where('status', ServiceRequestAssignmentStatus::Active)->count())->toBe(0);
+    }
+})->with([
+    'none' => [ServiceRequestTypeAssignmentTypes::None, null],
+    'individual' => [ServiceRequestTypeAssignmentTypes::Individual, IndividualAssigner::class],
+    'round robin' => [ServiceRequestTypeAssignmentTypes::RoundRobin, RoundRobinAssigner::class],
+    'workload' => [ServiceRequestTypeAssignmentTypes::Workload, WorkloadAssigner::class],
+]);
+
+test('reclassify deletes existing active assignment', function () {
+    $originalType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
+    ]);
+
+    $newType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
+    ]);
+
+    $originalPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $originalType->getKey(),
+    ]);
+
+    $newPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $newType->getKey(),
+    ]);
+
+    $previousAssignee = User::factory()->create();
+    $originalType->managerUsers()->attach($previousAssignee);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => $originalPriority->getKey(),
+    ])->create();
+
+    $serviceRequest->assignments()->create([
+        'user_id' => $previousAssignee->getKey(),
+        'assigned_by_id' => null,
+        'assigned_at' => now(),
+        'status' => ServiceRequestAssignmentStatus::Active,
+    ]);
+
+    expect($serviceRequest->assignments()->where('status', ServiceRequestAssignmentStatus::Active)->count())->toBe(1);
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->callAction('reclassify', data: [
+            'type_id' => $newType->getKey(),
+            'priority_id' => $newPriority->getKey(),
+            'assignment_method' => 'default',
+        ])
+        ->assertHasNoActionErrors();
+
+    expect($serviceRequest->refresh()->assignments()->where('status', ServiceRequestAssignmentStatus::Active)->count())->toBe(0);
+    expect(ServiceRequestAssignment::withTrashed()->where('service_request_id', $serviceRequest->getKey())->where('user_id', $previousAssignee->getKey())->first()?->trashed())->toBeTrue();
+});
+
+test('reclassify rolls back changes on failure and shows error notification', function () {
+    $originalType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
+    ]);
+
+    $newType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
+        'assignment_type_individual_id' => null,
+    ]);
+
+    $originalPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $originalType->getKey(),
+    ]);
+
+    $newPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $newType->getKey(),
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => $originalPriority->getKey(),
+    ])->create();
+
+    $mock = Mockery::mock(IndividualAssigner::class);
+    $mock->shouldReceive('execute')->andThrow(new RuntimeException('Assigner failed'));
+    app()->instance(IndividualAssigner::class, $mock);
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->callAction('reclassify', data: [
+            'type_id' => $newType->getKey(),
+            'priority_id' => $newPriority->getKey(),
+            'assignment_method' => 'default',
+        ])
+        ->assertNotified(
+            Notification::make()
+                ->title('Something went wrong reclassifying the service request.')
+                ->danger()
+        );
+
+    expect($serviceRequest->refresh()->priority_id)->toBe($originalPriority->getKey());
+});
+
+test('reclassify shows success notification on completion', function () {
+    $originalType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
+    ]);
+
+    $newType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
+    ]);
+
+    $originalPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $originalType->getKey(),
+    ]);
+
+    $newPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $newType->getKey(),
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => $originalPriority->getKey(),
+    ])->create();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->callAction('reclassify', data: [
+            'type_id' => $newType->getKey(),
+            'priority_id' => $newPriority->getKey(),
+            'assignment_method' => 'default',
+        ])
+        ->assertNotified(
+            Notification::make()
+                ->title('Service request reclassified successfully.')
+                ->success()
+        );
+});
+
+test('reclassify with individual assignment end-to-end assigns correct user', function () {
+    $manager = User::factory()->create();
+
+    $originalType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
+    ]);
+
+    $newType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
+        'assignment_type_individual_id' => $manager->getKey(),
+    ]);
+
+    $newType->managerUsers()->attach($manager);
+
+    $originalPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $originalType->getKey(),
+    ]);
+
+    $newPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $newType->getKey(),
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => $originalPriority->getKey(),
+    ])->create();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->callAction('reclassify', data: [
+            'type_id' => $newType->getKey(),
+            'priority_id' => $newPriority->getKey(),
+            'assignment_method' => 'default',
+        ])
+        ->assertHasNoActionErrors();
+
+    $serviceRequest->refresh();
+
+    expect($serviceRequest->priority_id)->toBe($newPriority->getKey());
+    expect($serviceRequest->assignedTo?->user_id)->toBe($manager->getKey());
 });
