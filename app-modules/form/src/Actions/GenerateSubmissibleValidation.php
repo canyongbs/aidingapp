@@ -39,8 +39,8 @@ namespace AidingApp\Form\Actions;
 use AidingApp\Form\Models\Submissible;
 use AidingApp\Form\Models\SubmissibleField;
 use AidingApp\IntegrationGoogleRecaptcha\Rules\RecaptchaTokenValid;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Arr;
 
 class GenerateSubmissibleValidation

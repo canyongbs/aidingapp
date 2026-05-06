@@ -37,6 +37,7 @@
 namespace AidingApp\Form\Actions;
 
 use AidingApp\Form\Models\Submissible;
+use AidingApp\Form\Models\SubmissibleField;
 use AidingApp\Form\Models\SubmissibleStep;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -48,7 +49,6 @@ use Illuminate\Database\Eloquent\Collection;
  */
 class GenerateFormKitSchema
 {
-
     /**
      * @return array<string, mixed>
      */
@@ -70,7 +70,7 @@ class GenerateFormKitSchema
     /**
      * @param FormKitBlocks $blocks
      * @param FormKitChildren $content
-     * @param Collection<string, \AidingApp\Form\Models\SubmissibleField>|null $fields
+     * @param Collection<string, SubmissibleField>|null $fields
      *
      * @return FormKitChildren
      */
@@ -98,7 +98,7 @@ class GenerateFormKitSchema
     /**
      * @param FormKitBlocks $blocks
      * @param FormKitNode $component
-     * @param Collection<string, \AidingApp\Form\Models\SubmissibleField>|null $fields
+     * @param Collection<string, SubmissibleField>|null $fields
      *
      * @return FormKitNode
      */
