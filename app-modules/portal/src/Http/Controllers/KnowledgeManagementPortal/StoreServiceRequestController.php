@@ -151,7 +151,7 @@ class StoreServiceRequestController extends Controller
             'is_ai_resolution_attempted' => ['nullable', 'boolean'],
             'is_ai_resolution_successful' => ['nullable', 'boolean'],
             'ai_resolution_confidence_score' => ['nullable', 'integer', 'min:1', 'max:100'],
-            'encrypted_ai_proposed_answer' => ['nullable', 'string'],
+            'encrypted_ai_proposed_answer' => ['required_if:is_ai_resolution_attempted,true', 'nullable', 'string'],
             // Security: Validate file upload paths match expected pattern (tmp/{uuid}.{extension})
             'Main.upload-file' => ['nullable', 'array'],
             'Main.upload-file.*.path' => [
