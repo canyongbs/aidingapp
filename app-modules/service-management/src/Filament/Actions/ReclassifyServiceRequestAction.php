@@ -92,7 +92,7 @@ class ReclassifyServiceRequestAction extends Action
 
                                     return;
                                 }
-                                
+
                                 /** @var ServiceRequestPriority|null $currentPriority */
                                 $currentPriorityName = $this->getRecord()?->priority?->name;
 
