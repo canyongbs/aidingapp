@@ -50,7 +50,7 @@ export function useServiceRequestSubmit(storeUrlBase, typeId, priorityId) {
 
     const canSubmit = computed(() => title.value.trim() && description.value.trim() && !isSubmitting.value);
 
-    async function submitForm(customFields, onSuccess) {
+    async function submitForm(customFields, questions, aiResolution, onSuccess) {
         if (!canSubmit.value) return { success: false };
 
         isSubmitting.value = true;
@@ -71,6 +71,17 @@ export function useServiceRequestSubmit(storeUrlBase, typeId, priorityId) {
 
         if (customFields && Object.keys(customFields).length > 0) {
             payload.custom_fields = customFields;
+        }
+
+        if (questions && Object.keys(questions).length > 0) {
+            payload.questions = questions;
+        }
+
+        if (aiResolution) {
+            payload.is_ai_resolution_attempted = aiResolution.attempted;
+            payload.is_ai_resolution_successful = aiResolution.successful;
+            payload.ai_resolution_confidence_score = aiResolution.confidenceScore;
+            payload.encrypted_ai_proposed_answer = aiResolution.encryptedProposedAnswer;
         }
 
         try {

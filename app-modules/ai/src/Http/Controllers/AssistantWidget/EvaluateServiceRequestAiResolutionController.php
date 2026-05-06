@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,10 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use AidingApp\Ai\Settings\AiResolutionSettings;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use AidingApp\Portal\Actions\GenerateAiResolutionPrompt;
@@ -53,9 +54,9 @@ class EvaluateServiceRequestAiResolutionController extends Controller
 {
     public function __invoke(Request $request, ServiceRequestType $type): JsonResponse
     {
-        $contact = auth('contact')->user();
+        $contact = auth('contact')->user() ?? $request->user();
 
-        abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
+        abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
 
         $settings = app(AiResolutionSettings::class);
 
@@ -66,11 +67,26 @@ class EvaluateServiceRequestAiResolutionController extends Controller
             ]);
         }
 
-        $formData = $request->input('formData', []);
+        $data = $request->validate([
+            'title' => ['required', 'string'],
+            'description' => ['required', 'string'],
+            'priority_id' => ['nullable', 'string'],
+            'custom_fields' => ['nullable', 'array'],
+            'questions' => ['nullable', 'array'],
+        ]);
+
+        $formData = [
+            'Main' => [
+                'title' => $data['title'],
+                'description' => $data['description'],
+                'priority' => $data['priority_id'] ?? '',
+            ],
+            'Details' => $data['custom_fields'] ?? [],
+        ];
 
         $questionsAndAnswers = [];
 
-        foreach ($formData['Questions'] ?? [] as $encryptedQuestion => $answer) {
+        foreach ($data['questions'] ?? [] as $encryptedQuestion => $answer) {
             $payload = json_decode(decrypt($encryptedQuestion), true);
 
             abort_if(

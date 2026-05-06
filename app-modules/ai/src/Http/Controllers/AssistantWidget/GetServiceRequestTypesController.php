@@ -36,22 +36,34 @@
 
 namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
+use AidingApp\Ai\Settings\AiClarificationSettings;
+use AidingApp\Ai\Settings\AiResolutionSettings;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class GetServiceRequestTypesController extends Controller
 {
-    public function __invoke(): JsonResponse
+    public function __invoke(Request $request): JsonResponse
     {
+        $contact = auth('contact')->user() ?? $request->user();
+
+        abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
+
         $categories = ServiceRequestTypeCategory::query()->orderBy('sort')->get();
         $types = ServiceRequestType::query()
             ->withoutArchived()
             ->with(['priorities' => fn ($query) => $query->orderByDesc('order')])
             ->orderBy('sort')
             ->get();
+
+        $aiClarificationGlobalEnabled = app(AiClarificationSettings::class)->is_enabled;
+        $aiResolutionGlobalEnabled = app(AiResolutionSettings::class)->is_enabled;
 
         $categoriesById = [];
 
@@ -76,6 +88,8 @@ class GetServiceRequestTypesController extends Controller
                 'icon' => $type->icon ? svg($type->icon, 'h-5 w-5')->toHtml() : null,
                 'sort' => $type->sort,
                 'category_id' => $type->category_id,
+                'is_ai_clarification_enabled' => $aiClarificationGlobalEnabled && $type->is_ai_clarification_enabled,
+                'is_ai_resolution_enabled' => $aiResolutionGlobalEnabled && $type->is_ai_resolution_enabled,
                 'priorities' => $type->priorities->map(fn ($priority) => [
                     'id' => $priority->getKey(),
                     'name' => $priority->name,
@@ -124,6 +138,8 @@ class GetServiceRequestTypesController extends Controller
             'upload_url' => route('widgets.assistant.api.service-request.upload-url'),
             'store_url_base' => route('widgets.assistant.api.service-request.store', ['type' => '__TYPE__']),
             'form_url_base' => route('widgets.assistant.api.service-request-form', ['type' => '__TYPE__']),
+            'generate_question_url_base' => route('widgets.assistant.api.service-request.generate-question', ['type' => '__TYPE__']),
+            'evaluate_ai_resolution_url_base' => route('widgets.assistant.api.service-request.evaluate-ai-resolution', ['type' => '__TYPE__']),
             'accepted_mime_types' => ($uploadsCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)())->getMimes(),
             'max_file_size_mb' => $uploadsCollection->getMaxFileSizeInMB(),
             'max_files' => $uploadsCollection->getMaxNumberOfFiles(),

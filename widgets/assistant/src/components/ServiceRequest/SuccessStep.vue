@@ -36,6 +36,7 @@
 
     defineProps({
         title: { type: String, required: true },
+        aiResolved: { type: Boolean, default: false },
     });
 
     defineEmits(['back']);
@@ -50,11 +51,20 @@
         </div>
 
         <div class="flex flex-col gap-2">
-            <h3 class="text-lg font-semibold text-gray-900">Request Submitted</h3>
+            <h3 class="text-lg font-semibold text-gray-900">
+                {{ aiResolved ? 'Issue Resolved' : 'Request Submitted' }}
+            </h3>
             <p class="text-sm text-gray-500 leading-relaxed">
-                Your service request
-                <span class="font-medium text-gray-700">"{{ title }}"</span>
-                has been received. Our team will get back to you soon.
+                <template v-if="aiResolved">
+                    Your issue
+                    <span class="font-medium text-gray-700">"{{ title }}"</span>
+                    has been resolved. If you need further assistance, you can submit a new request.
+                </template>
+                <template v-else>
+                    Your service request
+                    <span class="font-medium text-gray-700">"{{ title }}"</span>
+                    has been received. Our team will get back to you soon.
+                </template>
             </p>
         </div>
 

@@ -40,7 +40,7 @@
         selectedType: { type: Object, required: true },
         selectedPriority: { type: String, default: '' },
         rawData: { type: Object, required: true },
-        hasCustomSteps: { type: Boolean, default: false },
+        hasNextStep: { type: Boolean, default: false },
         submitState: { type: Object, required: true },
     });
 
@@ -58,11 +58,11 @@
     provide('uploadProcessing', isUploadProcessing);
 
     function onAction() {
-        if (props.hasCustomSteps) {
+        if (props.hasNextStep) {
             if (!canSubmit.value) return;
             emit('next');
         } else {
-            submitForm({}, () => emit('success', title.value));
+            submitForm({}, null, null, () => emit('success', title.value));
         }
     }
 </script>
@@ -146,7 +146,7 @@
                     ? 'Uploading…'
                     : isSubmitting
                       ? 'Submitting…'
-                      : hasCustomSteps
+                      : hasNextStep
                         ? 'Next'
                         : 'Submit Service Request'
             }}

@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -32,10 +32,11 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed, ref } from 'vue';
-    import { useServiceRequestSubmit } from '../composables/useServiceRequestSubmit.js';
+    import { useServiceRequestWizard } from '../composables/useServiceRequestWizard.js';
+    import AiResolutionStep from './ServiceRequest/AiResolutionStep.vue';
     import CustomFieldsStep from './ServiceRequest/CustomFieldsStep.vue';
     import DetailsStep from './ServiceRequest/DetailsStep.vue';
+    import QuestionStep from './ServiceRequest/QuestionStep.vue';
     import SuccessStep from './ServiceRequest/SuccessStep.vue';
     import TypeSelectStep from './ServiceRequest/TypeSelectStep.vue';
 
@@ -45,91 +46,39 @@
 
     defineEmits(['back']);
 
-    const step = ref('type-select');
-    const detailsData = ref(null);
-    const submittedTitle = ref('');
-    const customFormSteps = ref([]);
-    const currentCustomStepIndex = ref(0);
-
-    const submitState = ref(null);
-
-    const isSubmitting = computed(() => submitState.value?.isSubmitting ?? false);
-    const submitError = ref(null);
-    const fieldErrors = ref({});
-
-    function onTypeSelectContinue(data) {
-        detailsData.value = data;
-        customFormSteps.value = data.formSteps ?? [];
-
-        submitState.value = useServiceRequestSubmit(data.rawData.store_url_base, data.type.id, data.priority);
-
-        step.value = 'details';
-    }
-
-    function onDetailsNext() {
-        currentCustomStepIndex.value = 0;
-        step.value = 'custom-step';
-    }
-
-    function onCustomStepBack() {
-        if (currentCustomStepIndex.value === 0) {
-            step.value = 'details';
-        } else {
-            currentCustomStepIndex.value--;
-        }
-    }
-
-    function onCustomStepNext() {
-        currentCustomStepIndex.value++;
-    }
-
-    function onCustomStepSubmit() {
-        doSubmit();
-    }
-
-    async function doSubmit() {
-        if (!submitState.value) return;
-
-        submitError.value = null;
-        fieldErrors.value = {};
-
-        const allCustomFields = {};
-        customStepRefs.value.forEach((stepRef) => {
-            if (stepRef?.getFieldValues) {
-                Object.assign(allCustomFields, stepRef.getFieldValues());
-            }
-        });
-
-        const titleSnapshot = submitState.value.title;
-
-        const result = await submitState.value.submitForm(allCustomFields, () => {
-            submittedTitle.value = titleSnapshot;
-            step.value = 'success';
-        });
-
-        if (result?.fieldErrors) {
-            fieldErrors.value = result.fieldErrors;
-
-            const errorFieldId = Object.keys(result.fieldErrors)[0];
-            if (errorFieldId) {
-                const errorStepIndex = customFormSteps.value.findIndex((s) =>
-                    s.schema?.some((field) => field.name === errorFieldId),
-                );
-                if (errorStepIndex >= 0) {
-                    currentCustomStepIndex.value = errorStepIndex;
-                    step.value = 'custom-step';
-                }
-            }
-        } else if (result?.error) {
-            submitError.value = result.error;
-        }
-    }
-
-    const customStepRefs = ref([]);
-
-    function setCustomStepRef(index, el) {
-        customStepRefs.value[index] = el;
-    }
+    const {
+        step,
+        detailsData,
+        submittedTitle,
+        customFormSteps,
+        currentCustomStepIndex,
+        submitState,
+        isSubmitting,
+        submitError,
+        fieldErrors,
+        aiClarificationEnabled,
+        aiResolutionEnabled,
+        questionsAndAnswers,
+        generatedQuestions,
+        wasAiResolved,
+        hasNextStep,
+        formDataForAi,
+        questionsPayload,
+        onTypeSelectContinue,
+        onDetailsNext,
+        onCustomStepBack,
+        onCustomStepNext,
+        onCustomStepSubmit,
+        onQuestionNext,
+        onQuestionBack,
+        onAiResolutionBack,
+        onAiResolutionResolved,
+        onAiResolutionDeclined,
+        onAiResolutionSkip,
+        setCustomStepRef,
+        setQuestionStepRef,
+        cacheGeneratedQuestion,
+    } = useServiceRequestWizard();
 </script>
 
 <template>
@@ -145,7 +94,7 @@
             :selected-type="detailsData.type"
             :selected-priority="detailsData.priority"
             :raw-data="detailsData.rawData"
-            :has-custom-steps="customFormSteps.length > 0"
+            :has-next-step="hasNextStep"
             :submit-state="submitState"
             @back="step = 'type-select'"
             @next="onDetailsNext"
@@ -168,6 +117,7 @@
             :selected-type="detailsData.type"
             :upload-url="detailsData.rawData?.upload_url"
             :is-submitting="isSubmitting"
+            :is-final-step="index === customFormSteps.length - 1 && !aiClarificationEnabled && !aiResolutionEnabled"
             :submit-error="currentCustomStepIndex === index ? submitError : null"
             :field-errors="fieldErrors"
             @back="onCustomStepBack"
@@ -175,6 +125,71 @@
             @submit="onCustomStepSubmit"
         />
 
-        <SuccessStep v-if="step === 'success'" :title="submittedTitle" @back="$emit('back')" />
+        <QuestionStep
+            v-if="step === 'question-1' && aiClarificationEnabled"
+            :ref="(el) => setQuestionStepRef(0, el)"
+            :generate-question-url="detailsData.rawData.generate_question_url_base"
+            :form-data="formDataForAi"
+            :previous-questions-and-answers="[]"
+            :question-number="1"
+            :selected-type="detailsData.type"
+            :cached-question="generatedQuestions[0]"
+            :initial-answer="questionsAndAnswers[0]?.answer ?? ''"
+            @back="onQuestionBack(1)"
+            @next="onQuestionNext(1)"
+            @question-generated="cacheGeneratedQuestion(1, $event)"
+        />
+
+        <QuestionStep
+            v-if="step === 'question-2' && aiClarificationEnabled"
+            :ref="(el) => setQuestionStepRef(1, el)"
+            :generate-question-url="detailsData.rawData.generate_question_url_base"
+            :form-data="formDataForAi"
+            :previous-questions-and-answers="questionsAndAnswers.slice(0, 1)"
+            :question-number="2"
+            :selected-type="detailsData.type"
+            :cached-question="generatedQuestions[1]"
+            :initial-answer="questionsAndAnswers[1]?.answer ?? ''"
+            @back="onQuestionBack(2)"
+            @next="onQuestionNext(2)"
+            @question-generated="cacheGeneratedQuestion(2, $event)"
+        />
+
+        <QuestionStep
+            v-if="step === 'question-3' && aiClarificationEnabled"
+            :ref="(el) => setQuestionStepRef(2, el)"
+            :generate-question-url="detailsData.rawData.generate_question_url_base"
+            :form-data="formDataForAi"
+            :previous-questions-and-answers="questionsAndAnswers.slice(0, 2)"
+            :question-number="3"
+            :selected-type="detailsData.type"
+            :cached-question="generatedQuestions[2]"
+            :initial-answer="questionsAndAnswers[2]?.answer ?? ''"
+            :is-final-step="!aiResolutionEnabled"
+            :is-submitting="isSubmitting"
+            @back="onQuestionBack(3)"
+            @next="onQuestionNext(3)"
+            @question-generated="cacheGeneratedQuestion(3, $event)"
+        />
+
+        <AiResolutionStep
+            v-if="step === 'ai-resolution' && aiResolutionEnabled"
+            :evaluate-ai-resolution-url="detailsData.rawData.evaluate_ai_resolution_url_base"
+            :form-data="formDataForAi"
+            :questions="questionsPayload"
+            :selected-type="detailsData.type"
+            :is-submitting="isSubmitting"
+            @back="onAiResolutionBack"
+            @resolved="onAiResolutionResolved"
+            @declined="onAiResolutionDeclined"
+            @skip="onAiResolutionSkip"
+        />
+
+        <SuccessStep
+            v-if="step === 'success'"
+            :title="submittedTitle"
+            :ai-resolved="wasAiResolved"
+            @back="$emit('back')"
+        />
     </div>
 </template>

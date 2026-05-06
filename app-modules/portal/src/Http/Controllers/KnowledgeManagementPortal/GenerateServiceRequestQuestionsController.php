@@ -82,7 +82,11 @@ class GenerateServiceRequestQuestionsController extends Controller
                 $questions,
                 fn (string $question): array => [
                     '$formkit' => 'textarea',
-                    'name' => encrypt($question),
+                    'name' => encrypt(json_encode([
+                        'text' => $question,
+                        'contact_id' => $contact->getKey(),
+                        'type_id' => $type->getKey(),
+                    ])),
                     'label' => $question,
                     'validation' => 'required',
                 ],
