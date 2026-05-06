@@ -39,12 +39,14 @@ import { createRouter, createWebHistory } from 'vue-router';
 import VueSignaturePad from 'vue-signature-pad';
 import App from './App.vue';
 import config from './formkit.config.js';
+import appLoadingStyles from './loading.css?inline';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
 
 customElements.define(
     'knowledge-management-portal-embed',
     defineCustomElement({
+        styles: [appLoadingStyles],
         setup(props) {
             const app = createApp();
             const pinia = createPinia();

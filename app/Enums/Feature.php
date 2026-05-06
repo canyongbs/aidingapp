@@ -67,6 +67,8 @@ enum Feature: string
 
     case AdvisoryManagement = 'advisory-management';
 
+    case ServiceMonitoring = 'service-monitoring';
+
     public function generateGate(): void
     {
         // If features are added that are not based on a License Addon we will need to update this

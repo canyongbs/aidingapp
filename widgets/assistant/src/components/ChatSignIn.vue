@@ -69,7 +69,7 @@
                     autocomplete="email"
                     required
                     placeholder="you@example.com"
-                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    class="w-full rounded ring-1 ring-gray-400 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
             </div>
 
@@ -78,7 +78,7 @@
             <button
                 type="submit"
                 :disabled="isSubmitting"
-                class="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white font-medium text-sm rounded-lg px-4 py-2.5 transition-colors"
+                class="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white font-medium text-sm rounded px-4 py-2.5 transition-colors"
             >
                 {{ isSubmitting ? 'Sending...' : 'Send Code' }}
             </button>
@@ -97,7 +97,7 @@
                     autocomplete="one-time-code"
                     required
                     placeholder="123456"
-                    class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    class="w-full rounded ring-1 ring-gray-400 px-4 py-2.5 text-sm text-gray-900 placeholder-gray-400 text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-primary-500"
                 />
             </div>
 
@@ -106,7 +106,7 @@
             <button
                 type="submit"
                 :disabled="isSubmitting"
-                class="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white font-medium text-sm rounded-lg px-4 py-2.5 transition-colors"
+                class="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white font-medium text-sm rounded px-4 py-2.5 transition-colors"
             >
                 {{ isSubmitting ? 'Verifying...' : 'Verify Code' }}
             </button>

@@ -43,7 +43,7 @@ use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
     $settings = app(LicenseSettings::class);
-    $settings->data->addons->serviceManagement = false;
+    $settings->data->addons->serviceMonitoring = false;
     $settings->save();
 
     $user = User::factory()->create();
@@ -57,7 +57,7 @@ it('is gated with proper access control', function () {
 
     livewire(ServiceMonitoring::class)->assertForbidden();
 
-    $settings->data->addons->serviceManagement = true;
+    $settings->data->addons->serviceMonitoring = true;
     $settings->save();
 
     livewire(ServiceMonitoring::class)->assertOk();

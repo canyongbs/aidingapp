@@ -39,19 +39,50 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMon
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\Team\Models\Team;
 use App\Models\User;
+use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ViewServiceMonitoring page', function () {
+test('ViewServiceMonitoring is gated with proper access control', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceMonitoring = false;
+    $settings->save();
     $user = User::factory()->create();
 
-    actingAs($user);
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    actingAs($user)
+        ->get(
+            ServiceMonitoringResource::getUrl('view', [
+                'record' => $serviceMonitoringTarget,
+            ])
+        )->assertForbidden();
 
     $user->givePermissionTo('service_monitoring.view-any');
     $user->givePermissionTo('service_monitoring.*.view');
 
+    actingAs($user)
+        ->get(
+            ServiceMonitoringResource::getUrl('view', [
+                'record' => $serviceMonitoringTarget,
+            ])
+        )->assertForbidden();
+
+    $settings->data->addons->serviceMonitoring = true;
+    $settings->save();
+
+    actingAs($user)
+        ->get(
+            ServiceMonitoringResource::getUrl('view', [
+                'record' => $serviceMonitoringTarget,
+            ])
+        )->assertSuccessful();
+});
+
+test('The correct details are displayed on the ViewServiceMonitoring page', function () {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
         ->hasAttached(Team::factory())
         ->hasAttached(User::factory())
@@ -80,21 +111,6 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
                 ...$serviceMonitoringTarget->users()->pluck('name')->all(),
             ]
         );
-});
-
-test('ViewServiceMonitoring is gated with proper access control', function () {
-    $user = User::factory()->create();
-
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
-
-    asSuperAdmin($user);
-
-    actingAs($user)
-        ->get(
-            ServiceMonitoringResource::getUrl('view', [
-                'record' => $serviceMonitoringTarget,
-            ])
-        )->assertSuccessful();
 });
 
 test('Reset Monitoring button resets monitoring', function () {

@@ -32,7 +32,9 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ref } from 'vue';
+    import { computed, ref } from 'vue';
+    import { useServiceRequestSubmit } from '../composables/useServiceRequestSubmit.js';
+    import CustomFieldsStep from './ServiceRequest/CustomFieldsStep.vue';
     import DetailsStep from './ServiceRequest/DetailsStep.vue';
     import SuccessStep from './ServiceRequest/SuccessStep.vue';
     import TypeSelectStep from './ServiceRequest/TypeSelectStep.vue';
@@ -43,19 +45,90 @@
 
     defineEmits(['back']);
 
-    // 'type-select' | 'details' | 'success'
     const step = ref('type-select');
-    const detailsData = ref(null); // { type, priority, rawData }
+    const detailsData = ref(null);
     const submittedTitle = ref('');
+    const customFormSteps = ref([]);
+    const currentCustomStepIndex = ref(0);
+
+    const submitState = ref(null);
+
+    const isSubmitting = computed(() => submitState.value?.isSubmitting ?? false);
+    const submitError = ref(null);
+    const fieldErrors = ref({});
 
     function onTypeSelectContinue(data) {
         detailsData.value = data;
+        customFormSteps.value = data.formSteps ?? [];
+
+        submitState.value = useServiceRequestSubmit(data.rawData.store_url_base, data.type.id, data.priority);
+
         step.value = 'details';
     }
 
-    function onDetailsSuccess(title) {
-        submittedTitle.value = title;
-        step.value = 'success';
+    function onDetailsNext() {
+        currentCustomStepIndex.value = 0;
+        step.value = 'custom-step';
+    }
+
+    function onCustomStepBack() {
+        if (currentCustomStepIndex.value === 0) {
+            step.value = 'details';
+        } else {
+            currentCustomStepIndex.value--;
+        }
+    }
+
+    function onCustomStepNext() {
+        currentCustomStepIndex.value++;
+    }
+
+    function onCustomStepSubmit() {
+        doSubmit();
+    }
+
+    async function doSubmit() {
+        if (!submitState.value) return;
+
+        submitError.value = null;
+        fieldErrors.value = {};
+
+        const allCustomFields = {};
+        customStepRefs.value.forEach((stepRef) => {
+            if (stepRef?.getFieldValues) {
+                Object.assign(allCustomFields, stepRef.getFieldValues());
+            }
+        });
+
+        const titleSnapshot = submitState.value.title;
+
+        const result = await submitState.value.submitForm(allCustomFields, () => {
+            submittedTitle.value = titleSnapshot;
+            step.value = 'success';
+        });
+
+        if (result?.fieldErrors) {
+            fieldErrors.value = result.fieldErrors;
+
+            const errorFieldId = Object.keys(result.fieldErrors)[0];
+            if (errorFieldId) {
+                const errorStepIndex = customFormSteps.value.findIndex((s) =>
+                    s.schema?.some((field) => field.name === errorFieldId),
+                );
+                if (errorStepIndex >= 0) {
+                    currentCustomStepIndex.value = errorStepIndex;
+                    step.value = 'custom-step';
+                }
+            }
+        } else if (result?.error) {
+            submitError.value = result.error;
+        }
+    }
+
+    const customStepRefs = ref([]);
+
+    function setCustomStepRef(index, el) {
+        customStepRefs.value[index] = el;
     }
 </script>
 
@@ -68,14 +141,40 @@
         />
 
         <DetailsStep
-            v-else-if="step === 'details'"
+            v-if="step === 'details'"
             :selected-type="detailsData.type"
             :selected-priority="detailsData.priority"
             :raw-data="detailsData.rawData"
+            :has-custom-steps="customFormSteps.length > 0"
+            :submit-state="submitState"
             @back="step = 'type-select'"
-            @success="onDetailsSuccess"
+            @next="onDetailsNext"
+            @success="
+                (title) => {
+                    submittedTitle = title;
+                    step = 'success';
+                }
+            "
         />
 
-        <SuccessStep v-else-if="step === 'success'" :title="submittedTitle" @back="$emit('back')" />
+        <CustomFieldsStep
+            v-for="(formStep, index) in customFormSteps"
+            v-show="step === 'custom-step' && currentCustomStepIndex === index"
+            :key="formStep.label"
+            :ref="(el) => setCustomStepRef(index, el)"
+            :step="formStep"
+            :step-index="index"
+            :total-steps="customFormSteps.length"
+            :selected-type="detailsData.type"
+            :upload-url="detailsData.rawData?.upload_url"
+            :is-submitting="isSubmitting"
+            :submit-error="currentCustomStepIndex === index ? submitError : null"
+            :field-errors="fieldErrors"
+            @back="onCustomStepBack"
+            @next="onCustomStepNext"
+            @submit="onCustomStepSubmit"
+        />
+
+        <SuccessStep v-if="step === 'success'" :title="submittedTitle" @back="$emit('back')" />
     </div>
 </template>

@@ -37,6 +37,7 @@
     defineProps({
         selectedType: { type: Object, required: true },
         modelValue: { type: String, required: true },
+        isLoading: { type: Boolean, default: false },
     });
 
     defineEmits(['update:modelValue', 'continue']);
@@ -54,7 +55,7 @@
                     :value="modelValue"
                     @change="$emit('update:modelValue', $event.target.value)"
                     :disabled="!selectedType.priorities?.length"
-                    class="w-full h-9 appearance-none bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 pr-8 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
+                    class="w-full h-9 appearance-none bg-white ring-1 ring-gray-400 rounded px-3 py-2 text-sm text-gray-700 pr-8 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all cursor-pointer"
                 >
                     <option value="" disabled>
                         {{ selectedType.priorities?.length ? 'Select priority…' : 'No priorities available' }}
@@ -76,16 +77,22 @@
 
             <button
                 @click="$emit('continue')"
-                :disabled="!modelValue"
+                :disabled="!modelValue || isLoading"
                 :class="[
-                    'shrink-0 h-9 flex items-center gap-1.5 px-4 rounded-lg text-sm font-medium transition-all',
-                    modelValue
+                    'shrink-0 h-9 flex items-center gap-1.5 px-4 rounded text-sm font-medium transition-all',
+                    modelValue && !isLoading
                         ? 'bg-brand-500 hover:bg-brand-600 text-white shadow-sm'
                         : 'bg-gray-100 text-gray-300 cursor-not-allowed',
                 ]"
             >
-                Continue
-                <ArrowRightIcon class="w-4 h-4" />
+                <svg v-if="isLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                </svg>
+                <template v-else>
+                    Continue
+                    <ArrowRightIcon class="w-4 h-4" />
+                </template>
             </button>
         </div>
     </div>

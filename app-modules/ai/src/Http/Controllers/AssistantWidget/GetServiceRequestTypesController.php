@@ -123,6 +123,7 @@ class GetServiceRequestTypesController extends Controller
             'types' => $topLevelTypes,
             'upload_url' => route('widgets.assistant.api.service-request.upload-url'),
             'store_url_base' => route('widgets.assistant.api.service-request.store', ['type' => '__TYPE__']),
+            'form_url_base' => route('widgets.assistant.api.service-request-form', ['type' => '__TYPE__']),
             'accepted_mime_types' => ($uploadsCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)())->getMimes(),
             'max_file_size_mb' => $uploadsCollection->getMaxFileSizeInMB(),
             'max_files' => $uploadsCollection->getMaxNumberOfFiles(),
