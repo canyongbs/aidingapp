@@ -37,11 +37,11 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
 use AidingApp\Division\Models\Division;
+use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Filament\Actions\AssignManagerBulkAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\TagsForClass;
@@ -63,7 +63,6 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
-use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
@@ -116,9 +115,7 @@ class ListKnowledgeBaseItems extends ListRecords
                         $hasTitle = ! empty($record->title);
 
                         $hasArticle = ! blank($record->article_details)
-                            && ! (
-                                is_array($record->article_details)
-                                && ($record->article_details['type'] ?? null) === 'doc'
+                            && ! (($record->article_details['type'] ?? null) === 'doc'
                                 && collect($record->article_details['content'] ?? [])
                                     ->every(fn (array $node) => empty($node['content'] ?? []) || $node['content'] === [['type' => 'text', 'text' => '']])
                             );
@@ -135,10 +132,6 @@ class ListKnowledgeBaseItems extends ListRecords
 
                         return $hasTitle && $hasArticle && $hasManager && $hasNoUnresolvedConcerns && $hasNoBrokenLinks && $hasNoBrokenImages;
                     }),
-                TextColumn::make('quality.name')
-                    ->label('Quality')
-                    ->toggleable()
-                    ->sortable(),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->toggleable()
@@ -163,10 +156,6 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('quality')
-                    ->relationship('quality', 'name')
-                    ->multiple()
-                    ->preload(),
                 SelectFilter::make('status')
                     ->relationship('status', 'name')
                     ->multiple()
@@ -236,12 +225,6 @@ class ListKnowledgeBaseItems extends ListRecords
                             ]),
                         Section::make()
                             ->schema([
-                                Select::make('quality_id')
-                                    ->label('Quality')
-                                    ->relationship('quality', 'name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->exists((new KnowledgeBaseQuality())->getTable(), (new KnowledgeBaseQuality())->getKeyName()),
                                 Select::make('status_id')
                                     ->label('Status')
                                     ->relationship('status', 'name')

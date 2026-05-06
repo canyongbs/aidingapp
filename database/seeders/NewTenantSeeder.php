@@ -44,7 +44,6 @@ use AidingApp\Contact\Database\Seeders\OrganizationTypeSeeder;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
-use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseQualitySeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
 use AidingApp\Project\Database\Seeders\ProjectMilestoneStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
@@ -69,7 +68,6 @@ class NewTenantSeeder extends Seeder
             ServiceRequestTypeSeeder::class,
             ContactTypeSeeder::class,
             KnowledgeBaseCategorySeeder::class,
-            KnowledgeBaseQualitySeeder::class,
             KnowledgeBaseStatusSeeder::class,
             PronounsSeeder::class,
 

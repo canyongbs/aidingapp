@@ -41,7 +41,6 @@ use AidingApp\KnowledgeBase\Filament\Resources\Actions\DraftKnowledgeBaseItemWit
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Concerns\EditPageRedirection;
 use App\Filament\Forms\Components\UserSelect;
@@ -168,12 +167,6 @@ class EditKnowledgeBaseItem extends EditRecord
                             ->columns(2),
                         Tab::make('Metadata')
                             ->schema([
-                                Select::make('quality_id')
-                                    ->label('Quality')
-                                    ->relationship('quality', 'name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->exists((new KnowledgeBaseQuality())->getTable(), (new KnowledgeBaseQuality())->getKeyName()),
                                 Select::make('status_id')
                                     ->label('Status')
                                     ->relationship('status', 'name')

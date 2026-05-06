@@ -116,8 +116,6 @@ class ViewKnowledgeBaseItem extends ViewRecord
                             ->columns(2),
                         Tab::make('Metadata')
                             ->schema([
-                                TextEntry::make('quality.name')
-                                    ->label('Quality'),
                                 TextEntry::make('status.name')
                                     ->label('Status'),
                                 TextEntry::make('category.name')
@@ -149,9 +147,7 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                             return false;
                                         }
 
-                                        if (
-                                            is_array($record->article_details)
-                                            && ($record->article_details['type'] ?? null) === 'doc'
+                                        if (($record->article_details['type'] ?? null) === 'doc'
                                             && collect($record->article_details['content'] ?? [])
                                                 ->every(fn (array $node) => empty($node['content'] ?? []) || $node['content'] === [['type' => 'text', 'text' => '']])
                                         ) {
@@ -178,7 +174,7 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                 IconEntry::make('no_broken_images')
                                     ->label('No Broken Images Detected')
                                     ->boolean()
-                                    ->getStateUsing(fn (KnowledgeBaseItem $record) => ! $record->are_broken_images_detected)
+                                    ->getStateUsing(fn (KnowledgeBaseItem $record) => ! $record->are_broken_images_detected),
                             ])
                             ->columns(2)
                             ->id('health'),

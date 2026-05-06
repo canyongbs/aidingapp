@@ -105,16 +105,8 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
         'are_broken_links_detected',
         'broken_links',
         'are_broken_images_detected',
-        'broken_images'
+        'broken_images',
     ];
-
-    /**
-     * @return BelongsTo<KnowledgeBaseQuality, $this>
-     */
-    public function quality(): BelongsTo
-    {
-        return $this->belongsTo(KnowledgeBaseQuality::class);
-    }
 
     /**
      * @return BelongsTo<KnowledgeBaseStatus, $this>

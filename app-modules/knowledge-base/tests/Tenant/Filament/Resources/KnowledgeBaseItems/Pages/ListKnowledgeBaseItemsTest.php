@@ -38,7 +38,6 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseI
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ListKnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -85,51 +84,6 @@ test('ListKnowledgeBaseItems is gated with proper feature access control', funct
     get(
         KnowledgeBaseItemResource::getUrl('index')
     )->assertSuccessful();
-});
-
-test('Filter ListKnowledgeBaseItems with `quality` filter', function () {
-    $settings = app(LicenseSettings::class);
-
-    // When the feature is enabled
-    $settings->data->addons->knowledgeManagement = true;
-
-    $settings->save();
-
-    $user = User::factory()->create();
-
-    // And the authenticatable has the correct permissions
-    // But they do not have the appropriate license
-    $user->givePermissionTo('knowledge_base_item.view-any');
-    $user->givePermissionTo('knowledge_base_item.create');
-
-    $goodQuality = KnowledgeBaseQuality::factory()->state([
-        'name' => 'Good',
-    ])->create();
-
-    $reviewQuality = KnowledgeBaseQuality::factory()->state([
-        'name' => 'Review Needed',
-    ])->create();
-
-    $badQuality = KnowledgeBaseQuality::factory()->state([
-        'name' => 'Bad Quality',
-    ])->create();
-
-    // They should not be able to access the resource
-    actingAs($user);
-
-    $goodQualityKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($goodQuality, 'quality')->create();
-
-    $reviewNeededKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($reviewQuality, 'quality')->create();
-
-    $badQualityKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(3)->for($badQuality, 'quality')->create();
-
-    $user->refresh();
-
-    livewire(ListKnowledgeBaseItems::class)
-        ->assertCanSeeTableRecords($goodQualityKnowledgeBaseItems->merge($reviewNeededKnowledgeBaseItems)->merge($badQualityKnowledgeBaseItems))
-        ->filterTable('quality', [$goodQuality, $reviewQuality])
-        ->assertCanSeeTableRecords($goodQualityKnowledgeBaseItems->merge($reviewNeededKnowledgeBaseItems))
-        ->assertCanNotSeeTableRecords($badQualityKnowledgeBaseItems);
 });
 
 test('Filter ListKnowledgeBaseItems with `status` filter', function () {
