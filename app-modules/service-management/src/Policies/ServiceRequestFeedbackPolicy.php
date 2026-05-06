@@ -67,7 +67,7 @@ class ServiceRequestFeedbackPolicy
     public function view(Authenticatable $authenticatable, ServiceRequestFeedback $serviceRequestFeedback): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request.*.view', "service_request.{$serviceRequestFeedback->service_request_id}.view"],
+            abilities: 'service_request.*.view',
             denyResponse: 'You do not have permission to view this service request feedback.'
         );
     }
@@ -83,7 +83,7 @@ class ServiceRequestFeedbackPolicy
     public function update(Authenticatable $authenticatable, ServiceRequestFeedback $serviceRequestFeedback): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request.*.update', "service_request.{$serviceRequestFeedback->service_request_id}.update"],
+            abilities: 'service_request.*.update',
             denyResponse: 'You do not have permission to update this service request feedback.'
         );
     }
@@ -91,7 +91,7 @@ class ServiceRequestFeedbackPolicy
     public function delete(Authenticatable $authenticatable, ServiceRequestFeedback $serviceRequestFeedback): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request.*.delete', "service_request.{$serviceRequestFeedback->service_request_id}.delete"],
+            abilities: 'service_request.*.delete',
             denyResponse: 'You do not have permission to delete this service request feedback.'
         );
     }
@@ -99,7 +99,7 @@ class ServiceRequestFeedbackPolicy
     public function restore(Authenticatable $authenticatable, ServiceRequestFeedback $serviceRequestFeedback): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request.*.restore', "service_request.{$serviceRequestFeedback->service_request_id}.restore"],
+            abilities: 'service_request.*.restore',
             denyResponse: 'You do not have permission to restore this service request feedback.'
         );
     }
@@ -107,7 +107,7 @@ class ServiceRequestFeedbackPolicy
     public function forceDelete(Authenticatable $authenticatable, ServiceRequestFeedback $serviceRequestFeedback): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['service_request.*.force-delete', "service_request.{$serviceRequestFeedback->service_request_id}.force-delete"],
+            abilities: 'service_request.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete this service request feedback.'
         );
     }
