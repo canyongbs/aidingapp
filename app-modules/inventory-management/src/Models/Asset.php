@@ -173,8 +173,10 @@ class Asset extends BaseModel implements Auditable
             ->associate(AssetStatus::tap(new ClassifiedAs(SystemAssetStatusClassification::Available))->first())
             ->save();
     }
+
     /**
      * @return Attribute
+     *
      * @phpstan-return Attribute<non-falsy-string, never>
      */
     protected function purchaseAge(): Attribute

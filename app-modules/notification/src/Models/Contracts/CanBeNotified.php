@@ -40,6 +40,7 @@ interface CanBeNotified
 {
     /**
      * @param mixed $instance
+     *
      * @return mixed
      */
     public function notify($instance);
@@ -47,6 +48,7 @@ interface CanBeNotified
     /**
      * @param mixed $instance
      * @param array<int, string>|null $channels
+     *
      * @return mixed
      */
     public function notifyNow($instance, ?array $channels = null);
@@ -54,6 +56,7 @@ interface CanBeNotified
     /**
      * @param string $driver
      * @param mixed $notification
+     *
      * @return mixed
      */
     public function routeNotificationFor($driver, $notification = null);
