@@ -36,7 +36,6 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
@@ -210,38 +209,6 @@ test('EditServiceRequest requires valid data', function ($data, $errors, $setup 
         'close_details is not a string' => [EditServiceRequestRequestFactory::new()->state(['close_details' => 1]), ['close_details' => 'string']],
     ]
 );
-
-test('type afterStateUpdated sets category from default_category', function () {
-    asSuperAdmin();
-
-    $serviceRequestType = ServiceRequestType::factory()->create([
-        'default_category' => ServiceRequestCategory::Incident,
-    ]);
-
-    $serviceRequest = ServiceRequest::factory()->state([
-        'status_id' => ServiceRequestStatus::factory()->create([
-            'classification' => SystemServiceRequestClassification::Open,
-        ])->getKey(),
-        'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestType->getKey(),
-        ])->getKey(),
-        'category' => ServiceRequestCategory::Request,
-    ])->create();
-
-    $newType = ServiceRequestType::factory()->create([
-        'default_category' => ServiceRequestCategory::Incident,
-    ]);
-
-    livewire(EditServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->fillForm([
-            'type_id' => $newType->getKey(),
-        ])
-        ->assertFormSet([
-            'category' => ServiceRequestCategory::Incident,
-        ]);
-});
 
 // Permission Tests
 

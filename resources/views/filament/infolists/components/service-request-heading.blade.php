@@ -35,6 +35,7 @@
 @props([
     'serviceRequestNumber',
     'category' => null,
+    'type' => null,
 ])
 
 <div class="inline-flex flex-col gap-1">
@@ -51,6 +52,10 @@
             <x-heroicon-o-clipboard-document class="inline h-4 w-4" />
         </button>
     </span>
+
+    @if ($type)
+        <span class="text-sm text-gray-500">Type: {{ $type }}</span>
+    @endif
 
     @if ($category)
         <x-filament::badge :color="$category->getColor()" class="w-fit">
