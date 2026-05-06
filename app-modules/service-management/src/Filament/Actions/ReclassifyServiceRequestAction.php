@@ -63,6 +63,7 @@ class ReclassifyServiceRequestAction extends Action
         parent::setUp();
 
         $this->label('Reclassify')
+            ->authorize('update')
             ->modalSubmitActionLabel('Reclassify')
             ->modalHeading(fn (ServiceRequest $record): HtmlString => new HtmlString(
                 'Reclassify Service Request<br><span class="text-sm font-normal text-gray-500">' . $record->service_request_number . '</span>'

@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -37,7 +37,6 @@
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
@@ -55,10 +54,32 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-test('reclassify action is visible on view page for super admin', function () {
-    $serviceRequest = ServiceRequest::factory()->create();
+// Authorization
 
-    asSuperAdmin();
+test('reclassify action is visible for manager team member with update permission', function () {
+    $user = User::factory()->create();
+
+    $team = Team::factory()->create();
+    $user->team()->associate($team)->save();
+    $user->refresh();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $serviceRequestType->managerTeams()->attach($team);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
+    $user->givePermissionTo('service_request.*.update');
+
+    actingAs($user->refresh());
 
     livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
@@ -67,17 +88,323 @@ test('reclassify action is visible on view page for super admin', function () {
         ->assertActionVisible('reclassify');
 });
 
-test('reclassify action is visible on edit page for super admin', function () {
+test('reclassify action is hidden for user without update permission', function () {
+    $user = User::factory()->create();
+
+    $team = Team::factory()->create();
+    $user->team()->associate($team)->save();
+    $user->refresh();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->auditorTeams()->attach($team);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
+
+    actingAs($user->refresh());
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertActionHidden('reclassify');
+});
+
+test('reclassify action is hidden on closed service requests', function () {
+    $user = User::factory()->create();
+
+    $team = Team::factory()->create();
+    $user->team()->associate($team)->save();
+    $user->refresh();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $serviceRequestType->managerTeams()->attach($team);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Closed,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
+    $user->givePermissionTo('service_request.*.update');
+
+    actingAs($user->refresh());
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertActionHidden('reclassify');
+});
+
+// Validation
+
+test('reclassify requires type_id', function () {
     $serviceRequest = ServiceRequest::factory()->create();
 
     asSuperAdmin();
 
-    livewire(EditServiceRequest::class, [
+    livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
-        ->assertSuccessful()
-        ->assertActionVisible('reclassify');
+        ->callAction('reclassify', data: [
+            'type_id' => null,
+            'priority_id' => null,
+            'assignment_method' => 'default',
+        ])
+        ->assertHasFormErrors(['type_id' => 'required']);
 });
+
+test('reclassify requires priority_id', function () {
+    $originalType = ServiceRequestType::factory()->create();
+    $newType = ServiceRequestType::factory()->create();
+
+    $originalPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $originalType->getKey(),
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'priority_id' => $originalPriority->getKey(),
+    ])->create();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->callAction('reclassify', data: [
+            'type_id' => $newType->getKey(),
+            'priority_id' => null,
+            'assignment_method' => 'default',
+        ])
+        ->assertHasFormErrors(['priority_id' => 'required']);
+});
+
+test('reclassify requires assignment_method', function () {
+    $originalType = ServiceRequestType::factory()->create();
+    $newType = ServiceRequestType::factory()->create();
+
+    $originalPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $originalType->getKey(),
+    ]);
+
+    $newPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $newType->getKey(),
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'priority_id' => $originalPriority->getKey(),
+    ])->create();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->callAction('reclassify', data: [
+            'type_id' => $newType->getKey(),
+            'priority_id' => $newPriority->getKey(),
+            'assignment_method' => null,
+        ])
+        ->assertHasFormErrors(['assignment_method' => 'required']);
+});
+
+test('reclassify with override but missing assign_to produces validation error', function () {
+    $originalType = ServiceRequestType::factory()->create();
+    $newType = ServiceRequestType::factory()->create();
+
+    $originalPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $originalType->getKey(),
+    ]);
+
+    $newPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $newType->getKey(),
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'priority_id' => $originalPriority->getKey(),
+    ])->create();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->callAction('reclassify', data: [
+            'type_id' => $newType->getKey(),
+            'priority_id' => $newPriority->getKey(),
+            'assignment_method' => 'override',
+            'assign_to' => null,
+        ])
+        ->assertHasFormErrors(['assign_to' => 'required']);
+});
+
+// Form Behavior / Options
+
+test('type options exclude the current service request type', function () {
+    $currentType = ServiceRequestType::factory()->create();
+    $otherType = ServiceRequestType::factory()->create();
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $currentType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->mountAction('reclassify')
+        ->assertFormFieldExists('type_id', function ($field) use ($currentType, $otherType): bool {
+            $options = $field->getOptions();
+
+            return ! isset($options[$currentType->getKey()])
+                && isset($options[$otherType->getKey()]);
+        });
+});
+
+test('type options exclude archived service request types', function () {
+    $currentType = ServiceRequestType::factory()->create();
+    $archivedType = ServiceRequestType::factory()->create([
+        'archived_at' => now(),
+    ]);
+    $activeType = ServiceRequestType::factory()->create();
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $currentType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->mountAction('reclassify')
+        ->assertFormFieldExists('type_id', function ($field) use ($archivedType, $activeType): bool {
+            $options = $field->getOptions();
+
+            return ! isset($options[$archivedType->getKey()])
+                && isset($options[$activeType->getKey()]);
+        });
+});
+
+test('override assign_to only lists eligible managers for selected type', function () {
+    $originalType = ServiceRequestType::factory()->create();
+    $newType = ServiceRequestType::factory()->create();
+
+    $eligibleDirectManager = User::factory()->create(['name' => 'Eligible Direct']);
+    $newType->managerUsers()->attach($eligibleDirectManager);
+
+    $eligibleTeamManager = User::factory()->create(['name' => 'Eligible Team']);
+    $team = Team::factory()->create();
+    $eligibleTeamManager->team()->associate($team)->save();
+    $newType->managerTeams()->attach($team);
+
+    $ineligibleUser = User::factory()->create(['name' => 'Ineligible User']);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $originalType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->mountAction('reclassify')
+        ->fillForm([
+            'type_id' => $newType->getKey(),
+            'assignment_method' => 'override',
+        ])
+        ->assertFormFieldExists('assign_to', function ($field) use ($eligibleDirectManager, $eligibleTeamManager, $ineligibleUser): bool {
+            $options = $field->getOptions();
+
+            return isset($options[$eligibleDirectManager->getKey()])
+                && isset($options[$eligibleTeamManager->getKey()])
+                && ! isset($options[$ineligibleUser->getKey()]);
+        });
+});
+
+test('selecting a new type auto-selects priority with matching name', function () {
+    $originalType = ServiceRequestType::factory()->create();
+    $newType = ServiceRequestType::factory()->create();
+
+    $sharedName = 'High';
+
+    $originalPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $originalType->getKey(),
+        'name' => $sharedName,
+    ]);
+
+    $matchingPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $newType->getKey(),
+        'name' => $sharedName,
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'priority_id' => $originalPriority->getKey(),
+    ])->create();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->mountAction('reclassify')
+        ->fillForm(['type_id' => $newType->getKey()])
+        ->assertSchemaStateSet(['priority_id' => $matchingPriority->getKey()]);
+});
+
+test('selecting a new type clears priority when no matching name exists', function () {
+    $originalType = ServiceRequestType::factory()->create();
+    $newType = ServiceRequestType::factory()->create();
+
+    $originalPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $originalType->getKey(),
+        'name' => 'Urgent',
+    ]);
+
+    ServiceRequestPriority::factory()->create([
+        'type_id' => $newType->getKey(),
+        'name' => 'Low',
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'priority_id' => $originalPriority->getKey(),
+    ])->create();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->mountAction('reclassify')
+        ->fillForm(['type_id' => $newType->getKey()])
+        ->assertSchemaStateSet(['priority_id' => null]);
+});
+
+// Happy Path
 
 test('reclassify with default assignment updates priority_id', function () {
     $originalType = ServiceRequestType::factory()->create([
@@ -176,9 +503,14 @@ test('reclassify with override assignment creates manual assignment to selected 
     expect($assignment->assigned_by_id)->toBe($actor->getKey());
 });
 
-test('reclassify with override but missing assign_to produces validation error', function () {
-    $originalType = ServiceRequestType::factory()->create();
-    $newType = ServiceRequestType::factory()->create();
+test('reclassify deletes existing active assignment', function () {
+    $originalType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
+    ]);
+
+    $newType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
+    ]);
 
     $originalPriority = ServiceRequestPriority::factory()->create([
         'type_id' => $originalType->getKey(),
@@ -188,182 +520,39 @@ test('reclassify with override but missing assign_to produces validation error',
         'type_id' => $newType->getKey(),
     ]);
 
-    $serviceRequest = ServiceRequest::factory()->state([
-        'priority_id' => $originalPriority->getKey(),
-    ])->create();
-
-    asSuperAdmin();
-
-    livewire(ViewServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->callAction('reclassify', data: [
-            'type_id' => $newType->getKey(),
-            'priority_id' => $newPriority->getKey(),
-            'assignment_method' => 'override',
-            'assign_to' => null,
-        ])
-        ->assertHasFormErrors(['assign_to' => 'required']);
-});
-
-test('reclassify requires type_id', function () {
-    $serviceRequest = ServiceRequest::factory()->create();
-
-    asSuperAdmin();
-
-    livewire(ViewServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->callAction('reclassify', data: [
-            'type_id' => null,
-            'priority_id' => null,
-            'assignment_method' => 'default',
-        ])
-        ->assertHasFormErrors(['type_id' => 'required']);
-});
-
-test('reclassify requires priority_id', function () {
-    $originalType = ServiceRequestType::factory()->create();
-    $newType = ServiceRequestType::factory()->create();
-
-    $originalPriority = ServiceRequestPriority::factory()->create([
-        'type_id' => $originalType->getKey(),
-    ]);
-
-    $serviceRequest = ServiceRequest::factory()->state([
-        'priority_id' => $originalPriority->getKey(),
-    ])->create();
-
-    asSuperAdmin();
-
-    livewire(ViewServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->callAction('reclassify', data: [
-            'type_id' => $newType->getKey(),
-            'priority_id' => null,
-            'assignment_method' => 'default',
-        ])
-        ->assertHasFormErrors(['priority_id' => 'required']);
-});
-
-test('reclassify requires assignment_method', function () {
-    $originalType = ServiceRequestType::factory()->create();
-    $newType = ServiceRequestType::factory()->create();
-
-    $originalPriority = ServiceRequestPriority::factory()->create([
-        'type_id' => $originalType->getKey(),
-    ]);
-
-    $newPriority = ServiceRequestPriority::factory()->create([
-        'type_id' => $newType->getKey(),
-    ]);
-
-    $serviceRequest = ServiceRequest::factory()->state([
-        'priority_id' => $originalPriority->getKey(),
-    ])->create();
-
-    asSuperAdmin();
-
-    livewire(ViewServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->callAction('reclassify', data: [
-            'type_id' => $newType->getKey(),
-            'priority_id' => $newPriority->getKey(),
-            'assignment_method' => null,
-        ])
-        ->assertHasFormErrors(['assignment_method' => 'required']);
-});
-
-test('selecting a new type auto-selects priority with matching name', function () {
-    $originalType = ServiceRequestType::factory()->create();
-    $newType = ServiceRequestType::factory()->create();
-
-    $sharedName = 'High';
-
-    $originalPriority = ServiceRequestPriority::factory()->create([
-        'type_id' => $originalType->getKey(),
-        'name' => $sharedName,
-    ]);
-
-    $matchingPriority = ServiceRequestPriority::factory()->create([
-        'type_id' => $newType->getKey(),
-        'name' => $sharedName,
-    ]);
-
-    $serviceRequest = ServiceRequest::factory()->state([
-        'priority_id' => $originalPriority->getKey(),
-    ])->create();
-
-    asSuperAdmin();
-
-    livewire(ViewServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->mountAction('reclassify')
-        ->fillForm(['type_id' => $newType->getKey()])
-        ->assertSchemaStateSet(['priority_id' => $matchingPriority->getKey()]);
-});
-
-test('selecting a new type clears priority when no matching name exists', function () {
-    $originalType = ServiceRequestType::factory()->create();
-    $newType = ServiceRequestType::factory()->create();
-
-    $originalPriority = ServiceRequestPriority::factory()->create([
-        'type_id' => $originalType->getKey(),
-        'name' => 'Urgent',
-    ]);
-
-    ServiceRequestPriority::factory()->create([
-        'type_id' => $newType->getKey(),
-        'name' => 'Low',
-    ]);
-
-    $serviceRequest = ServiceRequest::factory()->state([
-        'priority_id' => $originalPriority->getKey(),
-    ])->create();
-
-    asSuperAdmin();
-
-    livewire(ViewServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->mountAction('reclassify')
-        ->fillForm(['type_id' => $newType->getKey()])
-        ->assertSchemaStateSet(['priority_id' => null]);
-});
-
-test('reclassify action is visible for manager team member with update permission', function () {
-    $user = User::factory()->create();
-
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
-    $user->refresh();
-
-    $serviceRequestType = ServiceRequestType::factory()->create();
-    $serviceRequestType->managerTeams()->attach($team);
+    $previousAssignee = User::factory()->create();
+    $originalType->managerUsers()->attach($previousAssignee);
 
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
         ])->getKey(),
-        'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestType->getKey(),
-        ])->getKey(),
+        'priority_id' => $originalPriority->getKey(),
     ])->create();
 
-    $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request.*.view');
-    $user->givePermissionTo('service_request.*.update');
+    $serviceRequest->assignments()->create([
+        'user_id' => $previousAssignee->getKey(),
+        'assigned_by_id' => null,
+        'assigned_at' => now(),
+        'status' => ServiceRequestAssignmentStatus::Active,
+    ]);
 
-    actingAs($user->refresh());
+    expect($serviceRequest->assignments()->where('status', ServiceRequestAssignmentStatus::Active)->count())->toBe(1);
+
+    asSuperAdmin();
 
     livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
-        ->assertSuccessful()
-        ->assertActionVisible('reclassify');
+        ->callAction('reclassify', data: [
+            'type_id' => $newType->getKey(),
+            'priority_id' => $newPriority->getKey(),
+            'assignment_method' => 'default',
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($serviceRequest->refresh()->assignments()->where('status', ServiceRequestAssignmentStatus::Active)->count())->toBe(0);
+    expect(ServiceRequestAssignment::withTrashed()->where('service_request_id', $serviceRequest->getKey())->where('user_id', $previousAssignee->getKey())->first()?->trashed())->toBeTrue();
 });
 
 test('reclassify with default assignment invokes the correct assigner class', function (ServiceRequestTypeAssignmentTypes $assignmentType, ?string $assignerClass) {
@@ -424,14 +613,19 @@ test('reclassify with default assignment invokes the correct assigner class', fu
     'workload' => [ServiceRequestTypeAssignmentTypes::Workload, WorkloadAssigner::class],
 ]);
 
-test('reclassify deletes existing active assignment', function () {
+test('reclassify with individual assignment end-to-end assigns correct user', function () {
+    $manager = User::factory()->create();
+
     $originalType = ServiceRequestType::factory()->create([
         'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
     ]);
 
     $newType = ServiceRequestType::factory()->create([
-        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
+        'assignment_type_individual_id' => $manager->getKey(),
     ]);
+
+    $newType->managerUsers()->attach($manager);
 
     $originalPriority = ServiceRequestPriority::factory()->create([
         'type_id' => $originalType->getKey(),
@@ -441,24 +635,12 @@ test('reclassify deletes existing active assignment', function () {
         'type_id' => $newType->getKey(),
     ]);
 
-    $previousAssignee = User::factory()->create();
-    $originalType->managerUsers()->attach($previousAssignee);
-
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
         ])->getKey(),
         'priority_id' => $originalPriority->getKey(),
     ])->create();
-
-    $serviceRequest->assignments()->create([
-        'user_id' => $previousAssignee->getKey(),
-        'assigned_by_id' => null,
-        'assigned_at' => now(),
-        'status' => ServiceRequestAssignmentStatus::Active,
-    ]);
-
-    expect($serviceRequest->assignments()->where('status', ServiceRequestAssignmentStatus::Active)->count())->toBe(1);
 
     asSuperAdmin();
 
@@ -472,9 +654,13 @@ test('reclassify deletes existing active assignment', function () {
         ])
         ->assertHasNoFormErrors();
 
-    expect($serviceRequest->refresh()->assignments()->where('status', ServiceRequestAssignmentStatus::Active)->count())->toBe(0);
-    expect(ServiceRequestAssignment::withTrashed()->where('service_request_id', $serviceRequest->getKey())->where('user_id', $previousAssignee->getKey())->first()?->trashed())->toBeTrue();
+    $serviceRequest->refresh();
+
+    expect($serviceRequest->priority_id)->toBe($newPriority->getKey());
+    expect($serviceRequest->assignedTo?->user_id)->toBe($manager->getKey());
 });
+
+// Error Handling
 
 test('reclassify rolls back changes on failure and shows error notification', function () {
     $originalType = ServiceRequestType::factory()->create([
@@ -563,51 +749,4 @@ test('reclassify shows success notification on completion', function () {
                 ->title('Service request reclassified successfully.')
                 ->success()
         );
-});
-
-test('reclassify with individual assignment end-to-end assigns correct user', function () {
-    $manager = User::factory()->create();
-
-    $originalType = ServiceRequestType::factory()->create([
-        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
-    ]);
-
-    $newType = ServiceRequestType::factory()->create([
-        'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
-        'assignment_type_individual_id' => $manager->getKey(),
-    ]);
-
-    $newType->managerUsers()->attach($manager);
-
-    $originalPriority = ServiceRequestPriority::factory()->create([
-        'type_id' => $originalType->getKey(),
-    ]);
-
-    $newPriority = ServiceRequestPriority::factory()->create([
-        'type_id' => $newType->getKey(),
-    ]);
-
-    $serviceRequest = ServiceRequest::factory()->state([
-        'status_id' => ServiceRequestStatus::factory()->create([
-            'classification' => SystemServiceRequestClassification::Open,
-        ])->getKey(),
-        'priority_id' => $originalPriority->getKey(),
-    ])->create();
-
-    asSuperAdmin();
-
-    livewire(ViewServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->callAction('reclassify', data: [
-            'type_id' => $newType->getKey(),
-            'priority_id' => $newPriority->getKey(),
-            'assignment_method' => 'default',
-        ])
-        ->assertHasNoFormErrors();
-
-    $serviceRequest->refresh();
-
-    expect($serviceRequest->priority_id)->toBe($newPriority->getKey());
-    expect($serviceRequest->assignedTo?->user_id)->toBe($manager->getKey());
 });
