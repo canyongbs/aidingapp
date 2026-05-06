@@ -71,11 +71,13 @@ class ReclassifyServiceRequestAction extends Action
                     ->schema([
                         Select::make('type_id')
                             ->label('Type')
-                            ->options(fn (ServiceRequest $record) => ServiceRequestType::query()
-                                ->withoutArchived()
-                                ->whereKeyNot($record->priority->type->getKey())
-                                ->orderBy('name')
-                                ->pluck('name', 'id'))
+                            ->options(
+                                fn (ServiceRequest $record) => ServiceRequestType::query()
+                                    ->withoutArchived()
+                                    ->whereKeyNot($record->priority->type->getKey())
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id')
+                            )
                             ->afterStateUpdated(function (?string $state, Set $set, ServiceRequest $record): void {
                                 if (! $state) {
                                     $set('priority_id', null);
