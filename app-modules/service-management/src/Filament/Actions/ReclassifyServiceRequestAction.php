@@ -93,8 +93,9 @@ class ReclassifyServiceRequestAction extends Action
                                     return;
                                 }
 
-                                /** @var ServiceRequestPriority|null $currentPriority */
-                                $currentPriorityName = $this->getRecord()?->priority?->name;
+                                $record = $this->getRecord();
+                                assert($record instanceof ServiceRequest);
+                                $currentPriorityName = $record->priority?->name;
 
                                 $matchingPriority = ServiceRequestPriority::query()
                                     ->where('type_id', $state)
