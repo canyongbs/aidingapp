@@ -36,80 +36,87 @@
 
 namespace AidingApp\ServiceManagement\Policies;
 
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
+use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
 use App\Models\Authenticatable;
-use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
-use Illuminate\Support\Facades\Gate;
 
 class ServiceRequestFeedbackPolicy
 {
+    use PerformsFeatureChecks;
+
     public function before(Authenticatable $authenticatable): ?Response
     {
-        if (! Gate::check(
-            collect($this->requiredFeatures())->map(fn (Feature $feature) => $feature->getGateName())
-        )) {
-            return FeatureAccessResponse::deny();
+        if (! is_null($response = $this->hasFeatures())) {
+            return $response;
         }
 
         return null;
     }
 
-    public function viewAny(Authenticatable $authenticatable): Response
+    public function viewAny(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        return $authenticatable->canOrElse(
-            abilities: 'service_request.view-any',
-            denyResponse: 'You do not have permission to view service request feedback.'
-        );
+        if ($authenticatable->cannot('view', $serviceRequest)) {
+            return Response::deny('You do not have permission to view service request feedback.');
+        }
+
+        return Response::allow();
     }
 
     public function view(Authenticatable $authenticatable, ServiceRequestFeedback $serviceRequestFeedback): Response
     {
-        return $authenticatable->canOrElse(
-            abilities: 'service_request.*.view',
-            denyResponse: 'You do not have permission to view this service request feedback.'
-        );
+        if ($authenticatable->cannot('view', $serviceRequestFeedback->serviceRequest)) {
+            return Response::deny('You do not have permission to view this service request feedback.');
+        }
+
+        return Response::allow();
     }
 
-    public function create(Authenticatable $authenticatable): Response
+    public function create(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        return $authenticatable->canOrElse(
-            abilities: 'service_request.create',
-            denyResponse: 'You do not have permission to create service request feedback.'
-        );
+        if ($authenticatable->cannot('update', $serviceRequest)) {
+            return Response::deny('You do not have permission to create service request feedback.');
+        }
+
+        return Response::allow();
     }
 
     public function update(Authenticatable $authenticatable, ServiceRequestFeedback $serviceRequestFeedback): Response
     {
-        return $authenticatable->canOrElse(
-            abilities: 'service_request.*.update',
-            denyResponse: 'You do not have permission to update this service request feedback.'
-        );
+        if ($authenticatable->cannot('update', $serviceRequestFeedback->serviceRequest)) {
+            return Response::deny('You do not have permission to update this service request feedback.');
+        }
+
+        return Response::allow();
     }
 
     public function delete(Authenticatable $authenticatable, ServiceRequestFeedback $serviceRequestFeedback): Response
     {
-        return $authenticatable->canOrElse(
-            abilities: 'service_request.*.delete',
-            denyResponse: 'You do not have permission to delete this service request feedback.'
-        );
+        if ($authenticatable->cannot('update', $serviceRequestFeedback->serviceRequest)) {
+            return Response::deny('You do not have permission to delete this service request feedback.');
+        }
+
+        return Response::allow();
     }
 
     public function restore(Authenticatable $authenticatable, ServiceRequestFeedback $serviceRequestFeedback): Response
     {
-        return $authenticatable->canOrElse(
-            abilities: 'service_request.*.restore',
-            denyResponse: 'You do not have permission to restore this service request feedback.'
-        );
+        if ($authenticatable->cannot('update', $serviceRequestFeedback->serviceRequest)) {
+            return Response::deny('You do not have permission to restore this service request feedback.');
+        }
+
+        return Response::allow();
     }
 
     public function forceDelete(Authenticatable $authenticatable, ServiceRequestFeedback $serviceRequestFeedback): Response
     {
-        return $authenticatable->canOrElse(
-            abilities: 'service_request.*.force-delete',
-            denyResponse: 'You do not have permission to permanently delete this service request feedback.'
-        );
+        if ($authenticatable->cannot('update', $serviceRequestFeedback->serviceRequest)) {
+            return Response::deny('You do not have permission to permanently delete this service request feedback.');
+        }
+
+        return Response::allow();
     }
 
     /**
