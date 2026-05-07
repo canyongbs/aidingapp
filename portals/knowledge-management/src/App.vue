@@ -37,8 +37,8 @@
     import AppLoading from './Components/AppLoading.vue';
     import Footer from './Components/Footer.vue';
     import Header from './Components/Header.vue';
-    import Login from './Pages/Login.vue';
     import axios from './Globals/Axios.js';
+    import Login from './Pages/Login.vue';
     import { consumer } from './Services/Consumer.js';
     import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
     import { useAuthStore } from './Stores/auth.js';
@@ -610,4 +610,3 @@
         </div>
     </div>
 </template>
-

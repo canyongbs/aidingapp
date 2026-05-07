@@ -32,15 +32,24 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { ArrowRightEndOnRectangleIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/vue/20/solid';
+    import {
+        ClipboardDocumentListIcon,
+        CubeIcon,
+        DocumentTextIcon,
+        HomeIcon,
+        ShieldExclamationIcon,
+        SignalIcon,
+        WrenchScrewdriverIcon,
+    } from '@heroicons/vue/24/outline';
     import { storeToRefs } from 'pinia';
     import { computed, ref } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
-    import { globalSearchQuery } from '../Stores/globalState.js';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
+    import { globalSearchQuery } from '../Stores/globalState.js';
     import { useTokenStore } from '../Stores/token.js';
-    import { ArrowRightEndOnRectangleIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/vue/20/solid';
 
     const route = useRoute();
     const router = useRouter();
@@ -66,7 +75,7 @@
 
     const emit = defineEmits(['showLogin']);
 
-    const mobileMenuOpen = ref(false);
+    const sidebarOpen = ref(false);
 
     const logout = () => {
         const { post } = consumer();
@@ -85,35 +94,42 @@
         {
             label: 'Home',
             routeName: 'home',
+            icon: HomeIcon,
         },
         {
             label: 'Service',
             routeName: 'service',
+            icon: WrenchScrewdriverIcon,
             visible: hasServiceManagement && user !== null,
         },
         {
             label: 'Status',
             routeName: 'status',
+            icon: SignalIcon,
             visible: user !== null,
         },
         {
             label: 'Advisories',
             routeName: 'advisories',
+            icon: ShieldExclamationIcon,
             visible: user !== null,
         },
         {
             label: 'Assets',
             routeName: 'assets',
+            icon: CubeIcon,
             visible: hasAssets,
         },
         {
             label: 'Licenses',
             routeName: 'licenses',
+            icon: DocumentTextIcon,
             visible: hasLicense,
         },
         {
             label: 'Tasks',
             routeName: 'tasks',
+            icon: ClipboardDocumentListIcon,
             visible: hasTasks,
         },
     ]);
@@ -126,19 +142,87 @@
 </script>
 
 <template>
-    <div class="sticky top-0 z-30 overflow-x-clip">
+    <!-- Sidebar close overlay -->
+    <Transition
+        enter-active-class="transition duration-300"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-300"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+    >
+        <div v-if="sidebarOpen" class="fixed inset-0 z-30 bg-gray-950/50 lg:hidden" @click="sidebarOpen = false"></div>
+    </Transition>
+
+    <!-- Mobile sidebar -->
+    <aside
+        class="fixed inset-y-0 start-0 z-30 flex h-dvh w-80 flex-col bg-white shadow-xl ring-1 ring-gray-950/5 transition-all lg:hidden"
+        :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+    >
+        <header class="flex h-16 shrink-0 items-center bg-white px-6 ring-1 ring-gray-950/5 shadow-xs">
+            <div class="flex-1">
+                <router-link :to="{ name: 'home' }" @click="sidebarOpen = false">
+                    <img :src="headerLogo" :alt="appName" class="h-9 block" />
+                </router-link>
+            </div>
+        </header>
+
+        <nav class="flex grow flex-col gap-y-7 overflow-x-hidden overflow-y-auto px-6 py-8">
+            <ul class="-mx-2 flex flex-col gap-y-1">
+                <li v-for="item in visibleMenuItems" :key="item.label">
+                    <router-link :to="{ name: item.routeName }" custom v-slot="{ navigate, isActive, isExactActive }">
+                        <a
+                            @click="
+                                navigate();
+                                sidebarOpen = false;
+                            "
+                            class="relative flex items-center gap-x-3 rounded-lg p-2 outline-none transition duration-75 cursor-pointer"
+                            :class="
+                                isActive || isExactActive
+                                    ? 'bg-gray-100'
+                                    : 'hover:bg-gray-100 focus-visible:bg-gray-100'
+                            "
+                        >
+                            <component
+                                :is="item.icon"
+                                class="size-6"
+                                :class="isActive || isExactActive ? 'text-brand-700' : 'text-gray-400'"
+                            />
+                            <span
+                                class="flex-1 truncate text-sm font-medium"
+                                :class="isActive || isExactActive ? 'text-brand-700' : 'text-gray-700'"
+                            >
+                                {{ item.label }}
+                            </span>
+                        </a>
+                    </router-link>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Topbar -->
+    <div class="sticky top-0 z-20 overflow-x-clip">
         <nav class="flex min-h-16 items-center bg-white px-4 shadow-xs ring-1 ring-gray-950/5">
-            <!-- Mobile menu toggle -->
+            <!-- Mobile sidebar toggle -->
             <button
                 type="button"
                 class="relative flex size-9 items-center justify-center rounded-lg text-gray-500 outline-none transition duration-75 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-brand-600 lg:hidden"
-                @click="mobileMenuOpen = !mobileMenuOpen"
+                @click="sidebarOpen = true"
             >
-                <svg v-if="!mobileMenuOpen" class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                </svg>
-                <svg v-else class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                <svg
+                    class="size-6"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                >
+                    <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                    />
                 </svg>
             </button>
 
@@ -152,11 +236,7 @@
             <!-- Nav items (desktop) -->
             <ul class="ms-4 me-4 hidden items-center gap-x-4 lg:my-2 lg:flex lg:flex-wrap lg:gap-y-1">
                 <li v-for="item in visibleMenuItems" :key="item.label">
-                    <router-link
-                        :to="{ name: item.routeName }"
-                        custom
-                        v-slot="{ navigate, isActive, isExactActive }"
-                    >
+                    <router-link :to="{ name: item.routeName }" custom v-slot="{ navigate, isActive, isExactActive }">
                         <a
                             @click="navigate"
                             class="flex items-center justify-center gap-x-2 rounded-lg px-3 py-2 outline-none transition duration-75 hover:bg-gray-50 focus-visible:bg-gray-50 cursor-pointer"
@@ -176,11 +256,26 @@
             <!-- End section -->
             <div class="ms-auto flex items-center gap-x-4">
                 <!-- Global search -->
-                <form v-if="!['home', 'view-category'].includes(route.name)" @submit.prevent="onSearch" class="flex items-center">
-                    <div class="flex rounded-lg bg-white shadow-sm ring-1 ring-gray-950/10 transition duration-75 focus-within:ring-2 focus-within:ring-brand-600">
+                <form
+                    v-if="!['home', 'view-category'].includes(route.name)"
+                    @submit.prevent="onSearch"
+                    class="flex items-center"
+                >
+                    <div
+                        class="flex rounded-lg bg-white shadow-sm ring-1 ring-gray-950/10 transition duration-75 focus-within:ring-2 focus-within:ring-brand-600"
+                    >
                         <div class="flex items-center gap-x-3 ps-3 pe-2">
-                            <svg class="size-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd" />
+                            <svg
+                                class="size-5 text-gray-400"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 20 20"
+                                fill="currentColor"
+                            >
+                                <path
+                                    fill-rule="evenodd"
+                                    d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z"
+                                    clip-rule="evenodd"
+                                />
                             </svg>
                         </div>
                         <div class="min-w-0 flex-1">
@@ -218,33 +313,5 @@
                 </div>
             </div>
         </nav>
-
-        <!-- Mobile nav menu -->
-        <div
-            v-if="mobileMenuOpen"
-            class="border-t border-gray-200 bg-white px-4 py-3 shadow-xs ring-1 ring-gray-950/5 lg:hidden"
-        >
-            <ul class="flex flex-col gap-y-1">
-                <li v-for="item in visibleMenuItems" :key="item.label">
-                    <router-link
-                        :to="{ name: item.routeName }"
-                        custom
-                        v-slot="{ navigate, isActive, isExactActive }"
-                    >
-                        <a
-                            @click="navigate(); mobileMenuOpen = false"
-                            class="flex items-center gap-x-2 rounded-lg px-3 py-2 outline-none transition duration-75 hover:bg-gray-50 focus-visible:bg-gray-50 cursor-pointer"
-                        >
-                            <span
-                                class="text-sm font-medium"
-                                :class="isActive || isExactActive ? 'text-brand-600' : 'text-gray-700'"
-                            >
-                                {{ item.label }}
-                            </span>
-                        </a>
-                    </router-link>
-                </li>
-            </ul>
-        </div>
     </div>
 </template>

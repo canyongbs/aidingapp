@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -69,7 +69,9 @@
 
 <template>
     <div class="flex min-h-screen w-full flex-col bg-gray-50 text-gray-950 antialiased">
-        <div class="sticky top-0 z-10 flex justify-center items-center w-full border-b border-gray-200 flex-shrink-0 p-4 bg-gray-50">
+        <div
+            class="sticky top-0 z-10 flex justify-center items-center w-full border-b border-gray-200 flex-shrink-0 p-4 bg-gray-50"
+        >
             <img :src="headerLogo" class="h-9 block" />
         </div>
 
@@ -232,8 +234,9 @@
 
                 <div class="flex w-full justify-center pb-4 pt-2">
                     <span class="w-11/12 text-center text-xs lg:w-3/4 xl:w-7/12">
-                        &copy; 2015-{{ new Date().getFullYear() }} Canyon GBS Inc. All Rights Reserved. Canyon GBS&reg; and Aiding App&reg; are
-                        trademarks of Canyon GBS Inc. For more information or inquiries, please visit our website at
+                        &copy; 2015-{{ new Date().getFullYear() }} Canyon GBS Inc. All Rights Reserved. Canyon GBS&reg;
+                        and Aiding App&reg; are trademarks of Canyon GBS Inc. For more information or inquiries, please
+                        visit our website at
                         <a class="text-blue-600 underline" href="https://canyongbs.com/">https://canyongbs.com</a>.
                     </span>
                 </div>
