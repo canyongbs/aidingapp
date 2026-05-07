@@ -32,12 +32,12 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { FormKit } from '@formkit/vue';
     import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
     import { RouterView, useRoute, useRouter } from 'vue-router';
     import AppLoading from './Components/AppLoading.vue';
     import Footer from './Components/Footer.vue';
     import Header from './Components/Header.vue';
+    import Login from './Pages/Login.vue';
     import axios from './Globals/Axios.js';
     import { consumer } from './Services/Consumer.js';
     import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
@@ -425,7 +425,7 @@
         });
     }
 
-    async function authenticate(formData, node) {
+    async function authenticate(formData, node, done) {
         node.clearErrors();
 
         const { setToken } = useTokenStore();
@@ -505,7 +505,8 @@
                 })
                 .catch((error) => {
                     node.setErrors([], error.response.data.errors);
-                });
+                })
+                .finally(() => done());
 
             return;
         }
@@ -539,7 +540,8 @@
                 }
 
                 node.setErrors([], data.errors);
-            });
+            })
+            .finally(() => done());
     }
 </script>
 
@@ -574,114 +576,15 @@
         </div>
 
         <div class="bg-white" v-else>
-            <div
+            <Login
                 v-if="!userIsAuthenticated && (requiresAuthentication || showLogin || route.meta.requiresAuth)"
-                class="bg-gradient flex flex-col items-center justify-start min-h-screen"
-            >
-                <div
-                    class="max-w-md w-full bg-white rounded ring-1 ring-black/5 shadow-xs px-8 pt-6 pb-4 flex flex-col gap-6 mx-4 mt-4"
-                >
-                    <h1 class="text-brand-950 text-center text-2xl font-semibold">Login to Help Center</h1>
-
-                    <FormKit type="form" @submit="authenticate" v-model="authentication" :actions="false">
-                        <FormKit
-                            type="email"
-                            label="Email address"
-                            name="email"
-                            validation="required|email"
-                            validation-visibility="submit"
-                            :disabled="authentication.isRequested || authentication.registrationAllowed"
-                        />
-
-                        <div v-if="authentication.registrationAllowed">
-                            <p class="text-gray-700 font-medium text-xs my-3">
-                                You are not registered yet. Please fill in the form below to register.
-                            </p>
-
-                            <FormKit
-                                type="text"
-                                label="First Name*"
-                                name="first_name"
-                                validation="required|alpha|length:0,255"
-                                validation-visibility="submit"
-                            />
-
-                            <FormKit
-                                type="text"
-                                label="Last Name*"
-                                name="last_name"
-                                validation="required|alpha|length:0,255"
-                                validation-visibility="submit"
-                            />
-
-                            <FormKit
-                                type="text"
-                                label="Preferred Name"
-                                name="preferred"
-                                validation="alpha|length:0,255"
-                                validation-visibility="submit"
-                            />
-
-                            <FormKit
-                                type="tel"
-                                label="Mobile*"
-                                name="mobile"
-                                placeholder="xxx-xxx-xxxx"
-                                validation="required|length:0,255"
-                                validation-visibility="submit"
-                            />
-
-                            <FormKit
-                                type="tel"
-                                label="Other Phone"
-                                name="phone"
-                                placeholder="xxx-xxx-xxxx"
-                                validation="length:0,255"
-                                validation-visibility="submit"
-                            />
-
-                            <FormKit
-                                type="select"
-                                label="SMS Opt Out"
-                                name="sms_opt_out"
-                                :value="0"
-                                :options="[
-                                    { value: false, label: 'No' },
-                                    { value: true, label: 'Yes' },
-                                ]"
-                                validation-visibility="submit"
-                            />
-                        </div>
-
-                        <p v-if="authentication.requestedMessage" class="text-gray-700 font-medium text-xs my-3">
-                            {{ authentication.requestedMessage }}
-                        </p>
-
-                        <FormKit
-                            type="otp"
-                            digits="6"
-                            label="Enter the code here"
-                            name="code"
-                            validation="required"
-                            validation-visibility="submit"
-                            v-if="authentication.isRequested"
-                        />
-
-                        <div class="flex justify-between">
-                            <FormKit
-                                type="submit"
-                                :label="authentication.isRequested ? 'Sign in' : 'Send login code'"
-                            />
-                            <FormKit
-                                v-if="!requiresAuthentication"
-                                type="button"
-                                label="Cancel"
-                                @click="showLogin = false"
-                            />
-                        </div>
-                    </FormKit>
-                </div>
-            </div>
+                v-model:authentication="authentication"
+                :requires-authentication="requiresAuthentication"
+                :header-logo="headerLogo"
+                :footer-logo="footerLogo"
+                @authenticate="authenticate"
+                @cancel="showLogin = false"
+            />
             <div v-else class="min-h-screen flex flex-col">
                 <Header
                     :api-url="apiUrl"
@@ -710,9 +613,3 @@
     </div>
 </template>
 
-<style scoped>
-    .bg-gradient {
-        @apply relative bg-no-repeat;
-        background-image: radial-gradient(circle at top, rgba(var(--primary-200), 1), white 50%);
-    }
-</style>
