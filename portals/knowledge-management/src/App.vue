@@ -496,8 +496,6 @@
                             assistantWidgetConfigUrl.value = response.data.assistant_widget_config_url;
                         }
 
-                        const { hasServiceManagement, hasAssets, hasLicense, hasTasks } = useFeatureStore();
-
                         userIsAuthenticated.value = true;
 
                         getData();
