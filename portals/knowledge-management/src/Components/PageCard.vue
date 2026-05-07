@@ -31,40 +31,8 @@
 
 </COPYRIGHT>
 -->
-<script setup>
-    import { storeToRefs } from 'pinia';
-    import { useAuthStore } from '../Stores/auth.js';
-    import { useFeatureStore } from '../Stores/feature.js';
-    import BaseButton from './ui/BaseButton.vue';
-
-    const { user } = storeToRefs(useAuthStore());
-    const { hasServiceManagement } = storeToRefs(useFeatureStore());
-</script>
-
 <template>
-    <div class="flex-1 bg-gray-50">
-        <div class="bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))]">
-            <div class="max-w-(--breakpoint-xl) flex flex-col gap-y-6 mx-auto px-6 py-8">
-                <div class="text-right" v-if="hasServiceManagement && user">
-                    <BaseButton as="router-link" :to="{ name: 'create-service-request' }" variant="secondary" size="md">
-                        New Request
-                    </BaseButton>
-                </div>
-
-                <div class="flex flex-col gap-y-1 text-left">
-                    <h3 class="text-3xl font-semibold text-white"><slot name="heading" /></h3>
-                    <div class="text-brand-100"><slot name="description" /></div>
-                </div>
-
-                <div v-if="$slots.belowHeaderContent">
-                    <slot name="belowHeaderContent" />
-                </div>
-            </div>
-        </div>
-
-        <div class="max-w-(--breakpoint-xl) mx-auto px-6 py-8 flex flex-col gap-y-6">
-            <slot name="breadcrumbs" />
-            <slot />
-        </div>
+    <div class="bg-white ring-1 ring-gray-950/5 shadow-xs rounded-xl px-6 py-4 flex flex-col gap-y-6">
+        <slot />
     </div>
 </template>

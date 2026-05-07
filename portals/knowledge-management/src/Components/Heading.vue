@@ -32,50 +32,14 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ArrowRightIcon } from '@heroicons/vue/20/solid';
-    import Subheading from './Subheading.vue';
-
     defineProps({
-        categories: {
-            type: Object,
-            required: true,
-        },
-        serviceRequests: {
-            type: Object,
+        title: {
+            type: String,
             required: true,
         },
     });
 </script>
 
 <template>
-    <div class="grid gap-4">
-        <Subheading title="Article Categories" />
-
-        <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            <router-link
-                v-for="category in categories"
-                :key="category.slug"
-                :to="{ name: 'view-category', params: { categorySlug: category.slug } }"
-                class="group flex w-full gap-3 rounded-xl bg-white p-4 ring-1 ring-gray-950/5 transition duration-75 hover:bg-gray-50"
-            >
-                <div
-                    v-if="category.icon"
-                    v-html="category.icon"
-                    class="shrink-0 text-gray-400 [&>svg]:size-6 transition duration-75 group-hover:text-brand-500"
-                    aria-hidden="true"
-                ></div>
-
-                <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
-                    <span class="text-sm font-medium text-gray-950">{{ category.name }}</span>
-                    <p class="overflow-hidden text-sm text-pretty break-words text-gray-500">
-                        {{ category.description }}
-                    </p>
-                </div>
-
-                <ArrowRightIcon
-                    class="shrink-0 size-5 self-center text-gray-400 transition duration-75 group-hover:text-brand-500"
-                />
-            </router-link>
-        </div>
-    </div>
+    <h2 class="text-2xl font-bold tracking-tight text-gray-950">{{ title }}</h2>
 </template>

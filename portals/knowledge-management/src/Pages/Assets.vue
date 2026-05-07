@@ -38,6 +38,7 @@
     import AssetTable from '../Components/Assets/AssetTable.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';
+    import PageCard from '../Components/PageCard.vue';
     import { consumer } from '../Services/Consumer';
 
     const props = defineProps({
@@ -107,20 +108,22 @@
             <Breadcrumbs :currentCrumb="'Assets'" />
         </template>
 
-        <AssetStatCards :counts="counts" />
+        <PageCard>
+            <AssetStatCards :counts="counts" />
 
-        <AssetFilterTabs v-model="activeFilter" :tabs="tabs" />
+            <AssetFilterTabs v-model="activeFilter" :tabs="tabs" />
 
-        <AssetTable
-            :assets="assets"
-            :loading="loading"
-            :active-filter="activeFilter"
-            :current-page="currentPage"
-            :last-page="lastPage"
-            :from-item="fromItem"
-            :to-item="toItem"
-            :total-items="totalItems"
-            @fetchPage="fetchAssets"
-        />
+            <AssetTable
+                :assets="assets"
+                :loading="loading"
+                :active-filter="activeFilter"
+                :current-page="currentPage"
+                :last-page="lastPage"
+                :from-item="fromItem"
+                :to-item="toItem"
+                :total-items="totalItems"
+                @fetchPage="fetchAssets"
+            />
+        </PageCard>
     </Page>
 </template>

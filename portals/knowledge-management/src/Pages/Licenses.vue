@@ -38,6 +38,7 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
+    import PageCard from '../Components/PageCard.vue';
     import BaseButton from '../Components/ui/BaseButton.vue';
     import { consumer } from '../Services/Consumer';
 
@@ -88,143 +89,147 @@
             <Breadcrumbs :currentCrumb="'Licenses'" />
         </template>
 
-        <div v-if="loading" class="flex flex-col gap-y-8">
-            <div>
-                <div class="h-6 bg-gray-300 rounded w-24 mb-3"></div>
-                <div class="grid gap-4 lg:grid-cols-2">
-                    <div
-                        v-for="n in 4"
-                        :key="'active-skel-' + n"
-                        class="p-7 bg-white text-sm shadow-md rounded-lg border border-gray-200 animate-pulse"
-                    >
-                        <div class="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
-                        <div class="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
-                        <div class="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
-                        <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+        <PageCard>
+            <div v-if="loading" class="flex flex-col gap-y-8">
+                <div>
+                    <div class="h-6 bg-gray-300 rounded w-24 mb-3"></div>
+                    <div class="grid gap-4 lg:grid-cols-2">
+                        <div
+                            v-for="n in 4"
+                            :key="'active-skel-' + n"
+                            class="p-7 bg-white text-sm shadow-md rounded-lg border border-gray-200 animate-pulse"
+                        >
+                            <div class="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="h-6 bg-gray-300 rounded w-24 mb-3"></div>
+                    <div class="grid gap-4 lg:grid-cols-2">
+                        <div
+                            v-for="n in 4"
+                            :key="'expired-skel-' + n"
+                            class="p-7 bg-white text-sm shadow-md rounded-lg border border-gray-200 animate-pulse"
+                        >
+                            <div class="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div>
-                <div class="h-6 bg-gray-300 rounded w-24 mb-3"></div>
-                <div class="grid gap-4 lg:grid-cols-2">
-                    <div
-                        v-for="n in 4"
-                        :key="'expired-skel-' + n"
-                        class="p-7 bg-white text-sm shadow-md rounded-lg border border-gray-200 animate-pulse"
-                    >
-                        <div class="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
-                        <div class="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
-                        <div class="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
-                        <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+            <div v-else class="flex flex-col gap-y-8">
+                <div v-if="productLicenses.activeLicense?.length > 0">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Active</h3>
+                    <div class="grid gap-4 lg:grid-cols-2">
+                        <Card
+                            v-for="activeLicense in productLicenses.activeLicense"
+                            :key="activeLicense.id"
+                            class="mt-1 bg-white text-sm shadow-md rounded-lg border border-gray-200"
+                        >
+                            <template #content>
+                                <p class="mb-2 font-semibold text-gray-800">
+                                    Product Name:
+                                    <span class="font-normal text-gray-700">{{ activeLicense.product.name }}</span>
+                                </p>
+                                <p class="mb-2 font-semibold text-gray-800">
+                                    Product Version:
+                                    <span class="font-normal text-gray-700">{{ activeLicense.product.version }}</span>
+                                </p>
+                                <p class="mb-2 font-semibold text-gray-800">
+                                    Expiration:
+                                    <span class="font-normal text-gray-700">
+                                        {{ activeLicense.formatted_expiration_date ?? 'No Expiration' }}
+                                    </span>
+                                </p>
+                                <p class="flex gap-2 font-semibold text-gray-800">
+                                    License Key:
+                                    <span
+                                        class="font-normal text-gray-700 bg-gray-100 px-2 py-1 rounded"
+                                        :class="{ 'blur-xs': !showLicenseKeys[activeLicense.id] }"
+                                    >
+                                        {{ activeLicense.license }}
+                                    </span>
+                                    <BaseButton
+                                        variant="ghost"
+                                        size="sm"
+                                        icon-only
+                                        :icon-left="showLicenseKeys[activeLicense.id] ? EyeIcon : EyeSlashIcon"
+                                        :aria-label="
+                                            showLicenseKeys[activeLicense.id] ? 'Hide license key' : 'Show license key'
+                                        "
+                                        @click="toggleLicenseKey(activeLicense.id)"
+                                    />
+                                </p>
+                            </template>
+                        </Card>
+                    </div>
+                </div>
+
+                <div v-if="productLicenses.expiredLicense?.length > 0">
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">Expired</h3>
+                    <div class="grid gap-4 lg:grid-cols-2">
+                        <Card
+                            v-for="expiredLicense in productLicenses.expiredLicense"
+                            :key="expiredLicense.id"
+                            class="mt-1 bg-white text-sm shadow-md rounded-lg border border-gray-200"
+                        >
+                            <template #content>
+                                <p class="mb-2 font-semibold text-gray-800">
+                                    Product Name:
+                                    <span class="font-normal text-gray-700">{{ expiredLicense.product.name }}</span>
+                                </p>
+                                <p class="mb-2 font-semibold text-gray-800">
+                                    Product Version:
+                                    <span class="font-normal text-gray-700">{{ expiredLicense.product.version }}</span>
+                                </p>
+                                <p class="mb-2 font-semibold text-gray-800">
+                                    Expiration:
+                                    <span class="font-normal text-gray-700">
+                                        {{ expiredLicense.formatted_expiration_date }}
+                                    </span>
+                                </p>
+                                <p class="flex gap-2 font-semibold text-gray-800">
+                                    License Key:
+                                    <span
+                                        class="font-normal text-gray-700 bg-gray-100 px-2 py-1 rounded"
+                                        :class="{ 'blur-xs': !showLicenseKeys[expiredLicense.id] }"
+                                    >
+                                        {{ expiredLicense.license }}
+                                    </span>
+                                    <BaseButton
+                                        variant="ghost"
+                                        size="sm"
+                                        icon-only
+                                        :icon-left="showLicenseKeys[expiredLicense.id] ? EyeIcon : EyeSlashIcon"
+                                        :aria-label="
+                                            showLicenseKeys[expiredLicense.id] ? 'Hide license key' : 'Show license key'
+                                        "
+                                        @click="toggleLicenseKey(expiredLicense.id)"
+                                    />
+                                </p>
+                            </template>
+                        </Card>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div v-else class="flex flex-col gap-y-8">
-            <div v-if="productLicenses.activeLicense?.length > 0">
-                <h3 class="text-xl font-semibold text-gray-800 mb-3">Active</h3>
-                <div class="grid gap-4 lg:grid-cols-2">
-                    <Card
-                        v-for="activeLicense in productLicenses.activeLicense"
-                        :key="activeLicense.id"
-                        class="mt-1 bg-white text-sm shadow-md rounded-lg border border-gray-200"
-                    >
-                        <template #content>
-                            <p class="mb-2 font-semibold text-gray-800">
-                                Product Name:
-                                <span class="font-normal text-gray-700">{{ activeLicense.product.name }}</span>
-                            </p>
-                            <p class="mb-2 font-semibold text-gray-800">
-                                Product Version:
-                                <span class="font-normal text-gray-700">{{ activeLicense.product.version }}</span>
-                            </p>
-                            <p class="mb-2 font-semibold text-gray-800">
-                                Expiration:
-                                <span class="font-normal text-gray-700">
-                                    {{ activeLicense.formatted_expiration_date ?? 'No Expiration' }}
-                                </span>
-                            </p>
-                            <p class="flex gap-2 font-semibold text-gray-800">
-                                License Key:
-                                <span
-                                    class="font-normal text-gray-700 bg-gray-100 px-2 py-1 rounded"
-                                    :class="{ 'blur-xs': !showLicenseKeys[activeLicense.id] }"
-                                >
-                                    {{ activeLicense.license }}
-                                </span>
-                                <BaseButton
-                                    variant="ghost"
-                                    size="sm"
-                                    icon-only
-                                    :icon-left="showLicenseKeys[activeLicense.id] ? EyeIcon : EyeSlashIcon"
-                                    :aria-label="
-                                        showLicenseKeys[activeLicense.id] ? 'Hide license key' : 'Show license key'
-                                    "
-                                    @click="toggleLicenseKey(activeLicense.id)"
-                                />
-                            </p>
-                        </template>
-                    </Card>
-                </div>
-            </div>
-
-            <div v-if="productLicenses.expiredLicense?.length > 0">
-                <h3 class="text-xl font-semibold text-gray-800 mb-3">Expired</h3>
-                <div class="grid gap-4 lg:grid-cols-2">
-                    <Card
-                        v-for="expiredLicense in productLicenses.expiredLicense"
-                        :key="expiredLicense.id"
-                        class="mt-1 bg-white text-sm shadow-md rounded-lg border border-gray-200"
-                    >
-                        <template #content>
-                            <p class="mb-2 font-semibold text-gray-800">
-                                Product Name:
-                                <span class="font-normal text-gray-700">{{ expiredLicense.product.name }}</span>
-                            </p>
-                            <p class="mb-2 font-semibold text-gray-800">
-                                Product Version:
-                                <span class="font-normal text-gray-700">{{ expiredLicense.product.version }}</span>
-                            </p>
-                            <p class="mb-2 font-semibold text-gray-800">
-                                Expiration:
-                                <span class="font-normal text-gray-700">
-                                    {{ expiredLicense.formatted_expiration_date }}
-                                </span>
-                            </p>
-                            <p class="flex gap-2 font-semibold text-gray-800">
-                                License Key:
-                                <span
-                                    class="font-normal text-gray-700 bg-gray-100 px-2 py-1 rounded"
-                                    :class="{ 'blur-xs': !showLicenseKeys[expiredLicense.id] }"
-                                >
-                                    {{ expiredLicense.license }}
-                                </span>
-                                <BaseButton
-                                    variant="ghost"
-                                    size="sm"
-                                    icon-only
-                                    :icon-left="showLicenseKeys[expiredLicense.id] ? EyeIcon : EyeSlashIcon"
-                                    :aria-label="
-                                        showLicenseKeys[expiredLicense.id] ? 'Hide license key' : 'Show license key'
-                                    "
-                                    @click="toggleLicenseKey(expiredLicense.id)"
-                                />
-                            </p>
-                        </template>
-                    </Card>
-                </div>
-            </div>
-        </div>
-
-        <EmptyState v-if="!loading && !productLicenses.activeLicense.length && !productLicenses.expiredLicense.length">
-            <template #heading>There are no licenses to display.</template>
-            <template #actions>
-                <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
-                    Return Home
-                </BaseButton>
-            </template>
-        </EmptyState>
+            <EmptyState
+                v-if="!loading && !productLicenses.activeLicense.length && !productLicenses.expiredLicense.length"
+            >
+                <template #heading>There are no licenses to display.</template>
+                <template #actions>
+                    <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
+                        Return Home
+                    </BaseButton>
+                </template>
+            </EmptyState>
+        </PageCard>
     </Page>
 </template>

@@ -34,6 +34,7 @@
 <script setup>
     import { FormKit } from '@formkit/vue';
     import { ref } from 'vue';
+    import Heading from '../Components/Heading.vue';
 
     const authentication = defineModel('authentication', {
         type: Object,
@@ -77,7 +78,7 @@
 
         <main class="mx-auto flex flex-1 justify-center items-center w-full px-4 md:px-6 lg:px-8 max-w-screen-lg py-8">
             <div class="w-full max-w-md">
-                <h1 class="text-center text-2xl font-bold tracking-tight text-gray-950">Login to Help Center</h1>
+                <Heading title="Login to Help Center" class="text-center" />
 
                 <FormKit type="form" @submit="handleSubmit" v-model="authentication" :actions="false">
                     <div class="mt-8 flex flex-col gap-6">

@@ -37,6 +37,7 @@
     import EmptyState from '../Components/EmptyState.vue';
     import Loader from '../Components/Loader.vue';
     import Page from '../Components/Page.vue';
+    import PageCard from '../Components/PageCard.vue';
     import BaseButton from '../Components/ui/BaseButton.vue';
     import { consumer } from '../Services/Consumer';
 
@@ -142,45 +143,49 @@
             <Breadcrumbs :currentCrumb="'Advisories'" />
         </template>
 
-        <div class="mb-6 bg-white shadow-xs rounded-lg p-4" v-for="(advisory, index) in advisories" :key="index">
-            <time class="mb-1 text-lg font-semibold leading-none text-black">{{
-                formatDate(advisory.created_at)
-            }}</time>
-            <h3 class="text-lg font-semibold" :class="severityTextColor(advisory.severity)">
-                {{ advisory.title }}
-            </h3>
-            <p class="text-sm text-gray-500">
-                {{ advisory.description }}
-            </p>
-            <span
-                class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm mb-5"
-                v-if="advisory.status"
-                >{{ advisory.status.name }}</span
-            >
-            <hr class="my-4" v-if="advisory.advisory_updates?.length" />
-            <ol class="relative border-s border-gray-200" v-if="advisory.advisory_updates?.length">
-                <li class="mb-8 ms-4" v-for="updateData in advisory.advisory_updates" :key="updateData.id">
-                    <div class="absolute w-3 h-3 bg-gray-200 rounded-lg mt-1.5 -inset-s-1.5 border border-white"></div>
+        <PageCard>
+            <div class="mb-6 bg-white shadow-xs rounded-lg p-4" v-for="(advisory, index) in advisories" :key="index">
+                <time class="mb-1 text-lg font-semibold leading-none text-black">{{
+                    formatDate(advisory.created_at)
+                }}</time>
+                <h3 class="text-lg font-semibold" :class="severityTextColor(advisory.severity)">
+                    {{ advisory.title }}
+                </h3>
+                <p class="text-sm text-gray-500">
+                    {{ advisory.description }}
+                </p>
+                <span
+                    class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm mb-5"
+                    v-if="advisory.status"
+                    >{{ advisory.status.name }}</span
+                >
+                <hr class="my-4" v-if="advisory.advisory_updates?.length" />
+                <ol class="relative border-s border-gray-200" v-if="advisory.advisory_updates?.length">
+                    <li class="mb-8 ms-4" v-for="updateData in advisory.advisory_updates" :key="updateData.id">
+                        <div
+                            class="absolute w-3 h-3 bg-gray-200 rounded-lg mt-1.5 -inset-s-1.5 border border-white"
+                        ></div>
 
-                    <time class="mb-1 text-sm font-normal leading-none text-gray-400">{{
-                        formatDate(updateData.created_at)
-                    }}</time>
-                    <p class="text-sm text-gray-700 mt-1">{{ updateData.update }}</p>
-                </li>
-            </ol>
-        </div>
-        <Loader :loading="loading" />
-        <div class="flex justify-center mt-6" v-if="hasMore && !loading">
-            <BaseButton variant="primary" size="md" @click="loadMore"> Load More </BaseButton>
-        </div>
+                        <time class="mb-1 text-sm font-normal leading-none text-gray-400">{{
+                            formatDate(updateData.created_at)
+                        }}</time>
+                        <p class="text-sm text-gray-700 mt-1">{{ updateData.update }}</p>
+                    </li>
+                </ol>
+            </div>
+            <Loader :loading="loading" />
+            <div class="flex justify-center mt-6" v-if="hasMore && !loading">
+                <BaseButton variant="primary" size="md" @click="loadMore"> Load More </BaseButton>
+            </div>
 
-        <EmptyState v-if="!loading && advisories.length === 0">
-            <template #heading>There are no advisories to display.</template>
-            <template #actions>
-                <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
-                    Return Home
-                </BaseButton>
-            </template>
-        </EmptyState>
+            <EmptyState v-if="!loading && advisories.length === 0">
+                <template #heading>There are no advisories to display.</template>
+                <template #actions>
+                    <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
+                        Return Home
+                    </BaseButton>
+                </template>
+            </EmptyState>
+        </PageCard>
     </Page>
 </template>
