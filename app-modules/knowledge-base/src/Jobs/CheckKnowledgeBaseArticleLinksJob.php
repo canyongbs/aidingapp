@@ -100,7 +100,7 @@ class CheckKnowledgeBaseArticleLinksJob implements ShouldBeUnique, ShouldQueue
 
         preg_match_all('/<a\s[^>]*href=["\']([^"\']+)["\'][^>]*>/i', $html, $matches);
 
-        $urls = array_unique($matches[1] ?? []);
+        $urls = array_unique($matches[1]);
 
         return array_values(array_filter($urls, function (string $url): bool {
             $parsed = parse_url($url);

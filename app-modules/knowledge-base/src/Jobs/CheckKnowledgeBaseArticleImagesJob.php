@@ -94,24 +94,18 @@ class CheckKnowledgeBaseArticleImagesJob implements ShouldBeUnique, ShouldQueue
     {
         $content = $this->knowledgeBaseItem->article_details;
 
-        if (blank($content)) {
-            return [];
-        }
-
-        $data = is_string($content) ? json_decode($content, true) : $content;
-
-        if (! is_array($data)) {
+        if (empty($content)) {
             return [];
         }
 
         $ids = [];
-        $this->findImageNodes($data, $ids);
+        $this->findImageNodes($content, $ids);
 
         return array_unique($ids);
     }
 
     /**
-     * @param array<string, mixed> $nodes
+     * @param array<mixed> $nodes
      * @param array<string> $ids
      */
     protected function findImageNodes(array $nodes, array &$ids): void
@@ -121,7 +115,7 @@ class CheckKnowledgeBaseArticleImagesJob implements ShouldBeUnique, ShouldQueue
                 continue;
             }
 
-            if (($node['type'] ?? null) === 'image' && ! blank($node['attrs']['id'] ?? null)) {
+            if (($node['type'] ?? null) === 'image' && isset($node['attrs']['id']) && is_string($node['attrs']['id']) && $node['attrs']['id'] !== '') {
                 $ids[] = $node['attrs']['id'];
             }
 
@@ -186,7 +180,7 @@ class CheckKnowledgeBaseArticleImagesJob implements ShouldBeUnique, ShouldQueue
 
         $urls = [];
 
-        foreach ($matches[1] ?? [] as $attributes) {
+        foreach ($matches[1] as $attributes) {
             if (preg_match('/data-id=["\'][^"\']+["\']/', $attributes)) {
                 continue;
             }

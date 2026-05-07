@@ -117,7 +117,7 @@ class ListKnowledgeBaseItems extends ListRecords
                         $hasArticle = ! blank($record->article_details)
                             && ! (
                                 ($record->article_details['type'] ?? null) === 'doc'
-                                && collect($record->article_details['content'] ?? [])
+                                && collect((array) ($record->article_details['content'] ?? []))
                                     ->every(fn (array $node) => empty($node['content'] ?? []) || $node['content'] === [['type' => 'text', 'text' => '']])
                             );
 

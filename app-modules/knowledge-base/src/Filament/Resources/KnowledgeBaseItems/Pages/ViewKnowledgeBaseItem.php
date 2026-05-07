@@ -148,7 +148,7 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                         }
 
                                         if (($record->article_details['type'] ?? null) === 'doc'
-                                            && collect($record->article_details['content'] ?? [])
+                                            && collect((array) ($record->article_details['content'] ?? []))
                                                 ->every(fn (array $node) => empty($node['content'] ?? []) || $node['content'] === [['type' => 'text', 'text' => '']])
                                         ) {
                                             return false;
