@@ -32,11 +32,10 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
     import { defineProps, nextTick, onMounted, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
-    import Badge from '../Components/Badge.vue';
     import HelpCenter from '../Components/HelpCenter.vue';
+    import HeroSearch from '../Components/HeroSearch.vue';
     import Page from '../Components/Page.vue';
     import SearchResults from '../Components/SearchResults.vue';
     import { consumer } from '../Services/Consumer.js';
@@ -270,40 +269,13 @@
         <template #description> Search our knowledge base for advice and answers </template>
 
         <template #belowHeaderContent>
-            <label for="search" class="sr-only">Search</label>
-            <div class="relative rounded">
-                <div>
-                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4 py-3">
-                        <MagnifyingGlassIcon class="h-5 w-5 text-gray-400" aria-hidden="true" />
-                    </div>
-                    <input
-                        ref="globalSearchInput"
-                        type="search"
-                        v-model="searchQuery"
-                        id="search"
-                        placeholder="Search for articles and categories"
-                        class="block w-full rounded border-0 pl-12 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-2-- sm:text-sm sm:leading-6"
-                        :class="{ 'rounded-b-none': tags.length > 0 }"
-                    />
-                </div>
-            </div>
-            <details
-                v-if="tags.length > 0"
-                class="rounded rounded-t-none bg-white py-3 p-4 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-2-- sm:text-sm sm:leading-6"
-            >
-                <summary v-if="selectedTags.length > 0">Tags ({{ selectedTags.length }} selected)</summary>
-                <summary v-else>Tags</summary>
-                <div class="flex flex-wrap gap-2">
-                    <Badge
-                        v-for="tag in tags"
-                        :key="tag.id"
-                        :value="tag.name"
-                        class="cursor-pointer"
-                        :class="{ '!bg-brand-600 text-white': selectedTags.includes(tag.id) }"
-                        @click="toggleTag(tag.id)"
-                    />
-                </div>
-            </details>
+            <HeroSearch
+                ref="globalSearchInput"
+                v-model="searchQuery"
+                :tags="tags"
+                :selectedTags="selectedTags"
+                @toggle-tag="toggleTag"
+            />
         </template>
 
         <SearchResults
