@@ -60,6 +60,17 @@ export default {
                 full: 'var(--rounding-sm)',
             },
             fontFamily: {
+                sans: [
+                    'Inter Variable',
+                    'Inter',
+                    'ui-sans-serif',
+                    'system-ui',
+                    'sans-serif',
+                    'Apple Color Emoji',
+                    'Segoe UI Emoji',
+                    'Segoe UI Symbol',
+                    'Noto Color Emoji',
+                ],
                 signature: ['Satisfy', 'cursive'],
             },
         },

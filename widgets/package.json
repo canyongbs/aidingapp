@@ -15,6 +15,7 @@
     },
     "devDependencies": {
         "@headlessui/vue": "^1.7.16",
+        "@tailwindcss/vite": "^4.2.2",
         "@tiptap/core": "^2.2.1",
         "@tiptap/extension-color": "^2.2.1",
         "@tiptap/extension-link": "^2.2.1",
@@ -35,7 +36,6 @@
         "flatpickr": "^4.6.9",
         "jquery": "^3.2",
         "laravel-echo": "^1.14.0",
-        "@tailwindcss/vite": "^4.2.2",
         "prettier": "^3.6.2",
         "prettier-plugin-blade": "^2.1.21",
         "prettier-plugin-organize-imports": "^4.1.0",
@@ -47,6 +47,7 @@
         "vue-tsc": "^3.2.5"
     },
     "dependencies": {
+        "@fontsource-variable/inter": "^5.2.8",
         "@formkit/icons": "^1.2.2",
         "@formkit/themes": "^1.2.2",
         "@formkit/vue": "^1.2.2",

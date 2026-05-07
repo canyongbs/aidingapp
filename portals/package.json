@@ -42,6 +42,7 @@
         "vue-tsc": "^3.2.5"
     },
     "dependencies": {
+        "@fontsource-variable/inter": "^5.2.8",
         "@formkit/icons": "^1.2.2",
         "@formkit/themes": "^1.2.2",
         "@formkit/vue": "^1.2.2",
