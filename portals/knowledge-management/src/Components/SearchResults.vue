@@ -116,7 +116,7 @@
             >
         </Subheading>
 
-        <div class="flex flex-col rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
+        <div class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
             <Tabs
                 :tabs="filterTabs"
                 :modelValue="selectedFilter || 'all-articles'"
@@ -124,7 +124,7 @@
                 :contained="true"
             />
 
-            <div v-if="searchResults.data.articles.data.length > 0" class="divide-y">
+            <div v-if="searchResults.data.articles.data.length > 0">
                 <ul role="list" class="divide-y">
                     <li v-for="article in searchResults.data.articles.data" :key="article.id">
                         <Article :article="article" />

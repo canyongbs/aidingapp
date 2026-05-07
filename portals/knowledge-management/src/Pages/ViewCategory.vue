@@ -354,7 +354,7 @@
                             v-if="category.subCategories.length > 0"
                             :subCategories="category.subCategories"
                         ></SubCategories>
-                        <div class="flex flex-col rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
+                        <div class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
                             <Tabs
                                 :tabs="filterTabs"
                                 :modelValue="filter || 'all-articles'"
@@ -362,7 +362,7 @@
                                 :contained="true"
                             />
 
-                            <div v-if="articles.length > 0" class="divide-y">
+                            <div v-if="articles.length > 0">
                                 <ul role="list" class="divide-y">
                                     <li v-for="article in articles" :key="article.id">
                                         <Article :article="article" />

@@ -59,7 +59,7 @@ class GetWidgetConfigController extends Controller
         $websocketsConfig = config('filament.broadcasting.echo');
 
         return response()->json([
-            'asset_url' => route('widgets.assistant.asset'),
+            'asset_url' => route('widgets.assistant.asset') . '/',
             'js' => route('widgets.assistant.asset', ['file' => $widgetEntry['file']]),
             'send_message_url' => route('widgets.assistant.api.messages'),
             'websockets_config' => $websocketsConfig,

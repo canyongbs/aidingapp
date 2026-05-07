@@ -78,7 +78,7 @@
                     id="search"
                     autocomplete="off"
                     placeholder="Search for articles and categories"
-                    class="block w-full appearance-none border-none bg-transparent ps-0 px-3 py-2 text-start text-sm leading-6 text-white placeholder:text-white/50 focus:placeholder:text-white/75 focus:ring-0 focus:outline-none"
+                    class="block w-full appearance-none border-none bg-transparent ps-0 px-3 py-2 text-start text-sm leading-6 text-white placeholder:text-white/50 focus:placeholder:text-white/75 focus:ring-0 focus:outline-none [&::-webkit-search-cancel-button]:invert [&::-webkit-search-cancel-button]:brightness-0 [&::-webkit-search-cancel-button]:opacity-70 [&::-webkit-search-cancel-button]:hover:opacity-100"
                 />
             </div>
         </div>

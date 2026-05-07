@@ -89,7 +89,12 @@
 </script>
 
 <template>
-    <nav aria-label="Pagination" role="navigation" class="grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 px-6 py-3">
+    <nav
+        aria-label="Pagination"
+        role="navigation"
+        class="grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 border-t border-gray-200 px-6 py-3"
+        :class="lastPage <= 1 && 'hidden md:grid'"
+    >
         <button
             v-if="currentPage > 1"
             type="button"
@@ -114,9 +119,9 @@
 
         <ol
             v-if="lastPage > 1"
-            class="hidden md:flex col-start-3 justify-self-end rounded-lg bg-white shadow-sm ring-1 ring-gray-950/10"
+            class="hidden md:flex col-start-3 justify-self-end divide-x divide-gray-200 rounded-lg bg-white shadow-sm ring-1 ring-gray-950/10"
         >
-            <li class="border-x-[0.5px] border-gray-200 first:border-s-0 last:border-e-0">
+            <li>
                 <button
                     type="button"
                     :disabled="currentPage === 1"
@@ -128,11 +133,7 @@
                 </button>
             </li>
 
-            <li
-                v-for="(element, index) in paginationElements"
-                :key="index"
-                class="border-x-[0.5px] border-gray-200 first:border-s-0 last:border-e-0"
-            >
+            <li v-for="(element, index) in paginationElements" :key="index">
                 <button
                     v-if="element === '...'"
                     type="button"
@@ -158,7 +159,7 @@
                 </button>
             </li>
 
-            <li class="border-x-[0.5px] border-gray-200 first:border-s-0 last:border-e-0">
+            <li>
                 <button
                     type="button"
                     :disabled="currentPage === lastPage"
