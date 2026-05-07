@@ -103,6 +103,7 @@
 <template>
     <Page>
         <template #heading>Assets</template>
+        <template #description> View your assigned hardware and equipment </template>
 
         <template #breadcrumbs>
             <Breadcrumbs :currentCrumb="'Assets'" />

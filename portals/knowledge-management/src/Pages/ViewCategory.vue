@@ -32,18 +32,18 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { XMarkIcon } from '@heroicons/vue/20/solid/index.js';
     import { computed, defineProps, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
     import AppLoading from '../Components/AppLoading.vue';
     import Article from '../Components/Article.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import FilterComponent from '../Components/FilterComponent.vue';
+    import EmptyState from '../Components/EmptyState.vue';
     import HeroSearch from '../Components/HeroSearch.vue';
     import Page from '../Components/Page.vue';
     import Pagination from '../Components/Pagination.vue';
     import SearchResults from '../Components/SearchResults.vue';
     import SubCategories from '../Components/SubCategories.vue';
+    import Tabs from '../Components/Tabs.vue';
     import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();
@@ -84,6 +84,12 @@
     const toArticle = ref(0);
     const filter = ref('');
     const fromSearch = ref(false);
+
+    const filterTabs = [
+        { label: 'All Articles', value: 'all-articles' },
+        { label: 'Featured', value: 'featured' },
+        { label: 'Most Viewed', value: 'most-viewed' },
+    ];
 
     const debounceSearch = debounce((value, page = 1) => {
         const { post } = consumer();
@@ -349,38 +355,35 @@
                             v-if="category.subCategories.length > 0"
                             :subCategories="category.subCategories"
                         ></SubCategories>
-                        <filter-component @change-filter="changeFilter" :selected-filter="filter"></filter-component>
-                        <div>
-                            <div
-                                class="flex flex-col divide-y ring-1 ring-black/5 shadow-xs px-3 pt-3 pb-1 rounded bg-white"
-                            >
-                                <h3 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">
+                        <Tabs :tabs="filterTabs" :modelValue="filter || 'all-articles'" @update:modelValue="changeFilter" />
+                        <div class="flex flex-col divide-y rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
+                            <div class="px-6 py-4">
+                                <h3 class="text-base font-semibold text-gray-950">
                                     Articles ({{ totalArticles }})
                                 </h3>
-
-                                <div v-if="articles.length > 0">
-                                    <ul role="list" class="divide-y">
-                                        <li v-for="article in articles" :key="article.id">
-                                            <Article :article="article" />
-                                        </li>
-                                    </ul>
-                                    <Pagination
-                                        :currentPage="currentPage"
-                                        :lastPage="lastPage"
-                                        :fromArticle="fromArticle"
-                                        :toArticle="toArticle"
-                                        :totalArticles="totalArticles"
-                                        @fetchNextPage="fetchNextPage"
-                                        @fetchPreviousPage="fetchPreviousPage"
-                                        @fetchPage="fetchPage"
-                                    />
-                                </div>
-                                <div v-else class="p-3 flex items-start gap-2">
-                                    <XMarkIcon class="h-5 w-5 text-gray-400" />
-
-                                    <p class="text-gray-600 text-sm font-medium">No articles found in this category.</p>
-                                </div>
                             </div>
+
+                            <div v-if="articles.length > 0">
+                                <ul role="list" class="divide-y">
+                                    <li v-for="article in articles" :key="article.id">
+                                        <Article :article="article" />
+                                    </li>
+                                </ul>
+                                <Pagination
+                                    :currentPage="currentPage"
+                                    :lastPage="lastPage"
+                                    :fromArticle="fromArticle"
+                                    :toArticle="toArticle"
+                                    :totalArticles="totalArticles"
+                                    @fetchNextPage="fetchNextPage"
+                                    @fetchPreviousPage="fetchPreviousPage"
+                                    @fetchPage="fetchPage"
+                                />
+                            </div>
+                            <EmptyState v-else :contained="false">
+                                <template #heading>No articles found</template>
+                                <template #description>No articles found in this category.</template>
+                            </EmptyState>
                         </div>
                     </div>
                 </div>

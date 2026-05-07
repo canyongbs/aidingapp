@@ -136,6 +136,7 @@
 <template>
     <Page>
         <template #heading> Status </template>
+        <template #description> Real-time status of services and systems </template>
 
         <template #breadcrumbs>
             <Breadcrumbs :currentCrumb="'Status'" />

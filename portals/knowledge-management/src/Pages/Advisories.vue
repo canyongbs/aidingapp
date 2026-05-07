@@ -138,6 +138,7 @@
 <template>
     <Page>
         <template #heading> Advisory History </template>
+        <template #description> Important notices and security advisories </template>
 
         <template #breadcrumbs>
             <Breadcrumbs :currentCrumb="'Advisories'" />

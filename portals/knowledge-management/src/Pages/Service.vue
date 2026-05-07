@@ -54,6 +54,7 @@
 <template>
     <Page>
         <template #heading> Service Requests </template>
+        <template #description> Track and manage your support requests </template>
 
         <template #breadcrumbs>
             <Breadcrumbs :currentCrumb="'Service'" />

@@ -84,6 +84,7 @@
 <template>
     <Page>
         <template #heading> Licenses </template>
+        <template #description> View and manage your software licenses </template>
 
         <template #breadcrumbs>
             <Breadcrumbs :currentCrumb="'Licenses'" />

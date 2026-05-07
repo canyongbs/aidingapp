@@ -32,7 +32,11 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ArrowRightEndOnRectangleIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/vue/20/solid';
+    import {
+        ArrowRightEndOnRectangleIcon,
+        ArrowRightStartOnRectangleIcon,
+        PlusIcon,
+    } from '@heroicons/vue/20/solid';
     import {
         ClipboardDocumentListIcon,
         CubeIcon,
@@ -151,12 +155,12 @@
         leave-from-class="opacity-100"
         leave-to-class="opacity-0"
     >
-        <div v-if="sidebarOpen" class="fixed inset-0 z-30 bg-gray-950/50 lg:hidden" @click="sidebarOpen = false"></div>
+        <div v-if="sidebarOpen" class="fixed inset-0 z-30 bg-gray-950/50 xl:hidden" @click="sidebarOpen = false"></div>
     </Transition>
 
     <!-- Mobile sidebar -->
     <aside
-        class="fixed inset-y-0 start-0 z-30 flex h-dvh w-80 flex-col bg-white shadow-xl ring-1 ring-gray-950/5 transition-all lg:hidden"
+        class="fixed inset-y-0 start-0 z-30 flex h-dvh w-80 flex-col bg-white shadow-xl ring-1 ring-gray-950/5 transition-all xl:hidden"
         :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
     >
         <header class="flex h-16 shrink-0 items-center bg-white px-6 ring-1 ring-gray-950/5 shadow-xs">
@@ -207,7 +211,7 @@
             <!-- Mobile sidebar toggle -->
             <button
                 type="button"
-                class="relative flex size-9 items-center justify-center rounded-lg text-gray-500 outline-none transition duration-75 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-brand-600 lg:hidden"
+                class="relative flex size-9 items-center justify-center rounded-lg text-gray-500 outline-none transition duration-75 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-brand-600 xl:hidden"
                 @click="sidebarOpen = true"
             >
                 <svg
@@ -227,14 +231,14 @@
             </button>
 
             <!-- Logo (desktop) -->
-            <div class="me-6 hidden items-center lg:flex">
+            <div class="me-6 hidden items-center xl:flex">
                 <router-link :to="{ name: 'home' }" class="ms-3">
                     <img :src="headerLogo" :alt="appName" class="h-9 block" />
                 </router-link>
             </div>
 
             <!-- Nav items (desktop) -->
-            <ul class="ms-4 me-4 hidden items-center gap-x-4 lg:my-2 lg:flex lg:flex-wrap lg:gap-y-1">
+            <ul class="ms-4 me-4 hidden items-center gap-x-2 xl:my-2 xl:flex xl:flex-wrap xl:gap-y-1">
                 <li v-for="item in visibleMenuItems" :key="item.label">
                     <router-link :to="{ name: item.routeName }" custom v-slot="{ navigate, isActive, isExactActive }">
                         <a
@@ -259,7 +263,7 @@
                 <form
                     v-if="!['home', 'view-category'].includes(route.name)"
                     @submit.prevent="onSearch"
-                    class="flex items-center"
+                    class="flex items-center max-w-[12rem]"
                 >
                     <div
                         class="flex rounded-lg bg-white shadow-sm ring-1 ring-gray-950/10 transition duration-75 focus-within:ring-2 focus-within:ring-brand-600"
@@ -289,6 +293,16 @@
                         </div>
                     </div>
                 </form>
+
+                <!-- New Request -->
+                <router-link
+                    v-if="hasServiceManagement && user"
+                    :to="{ name: 'create-service-request' }"
+                    class="relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 bg-white text-gray-950 ring-1 ring-gray-950/10 hover:bg-gray-50 focus-visible:ring-2"
+                >
+                    <PlusIcon class="size-5" />
+                    New Request
+                </router-link>
 
                 <!-- Sign in / Sign out -->
                 <div v-if="requiresAuthentication || hasServiceManagement">

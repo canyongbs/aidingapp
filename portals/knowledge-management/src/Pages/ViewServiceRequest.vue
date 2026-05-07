@@ -32,7 +32,6 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ArrowLeftIcon } from '@heroicons/vue/20/solid';
     import { defineProps, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
     import AppLoading from '../Components/AppLoading.vue';
@@ -247,18 +246,10 @@
 
     <Page v-else>
         <template #heading>Service Request Details</template>
+        <template #description> View the details and status of your request </template>
 
         <template #breadcrumbs>
-            <div class="flex flex-col gap-y-6">
-                <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="serviceRequest.serviceRequestNumber" />
-                <router-link
-                    :to="{ name: 'service' }"
-                    class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
-                >
-                    <ArrowLeftIcon class="h-4 w-4" />
-                    Back to My Service Requests
-                </router-link>
-            </div>
+            <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="serviceRequest.serviceRequestNumber" />
         </template>
 
         <!-- Error notices -->
