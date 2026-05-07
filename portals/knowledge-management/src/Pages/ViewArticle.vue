@@ -42,7 +42,7 @@
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
     import Tags from '../Components/Tags.vue';
-    import BaseButton from '../Components/ui/BaseButton.vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();
@@ -238,19 +238,17 @@
             <p class="text-lg font-semibold mr-4">Was this content helpful?</p>
             <div class="flex space-x-2">
                 <BaseButton
-                    :variant="feedback === true ? 'primary' : 'neutral'"
-                    :selected="feedback === true"
+                    :color="feedback === true ? 'primary' : 'gray'"
                     size="md"
-                    :icon-left="HandThumbUpIcon"
+                    :icon="HandThumbUpIcon"
                     @click="toggleFeedback(true)"
                 >
                     Yes
                 </BaseButton>
                 <BaseButton
-                    :variant="feedback === false ? 'primary' : 'neutral'"
-                    :selected="feedback === false"
+                    :color="feedback === false ? 'primary' : 'gray'"
                     size="md"
-                    :icon-left="HandThumbDownIcon"
+                    :icon="HandThumbDownIcon"
                     @click="toggleFeedback(false)"
                 >
                     No
@@ -269,7 +267,7 @@
             <template #heading>Article Not Found</template>
             <template #description>The article you are looking for does not exist or has been removed.</template>
             <template #actions>
-                <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
+                <BaseButton tag="router-link" :to="{ name: 'home' }" color="primary" size="md">
                     Return Home
                 </BaseButton>
             </template>

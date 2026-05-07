@@ -35,7 +35,7 @@
 <script setup>
     import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/20/solid';
     import { computed, defineProps } from 'vue';
-    import BaseButton from './ui/BaseButton.vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
 
     const props = defineProps({
         currentPage: {
@@ -71,11 +71,11 @@
 <template>
     <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
         <div class="flex flex-1 justify-between sm:hidden">
-            <BaseButton variant="neutral" size="md" :disabled="currentPage === 1" @click="$emit('fetchPreviousPage')">
+            <BaseButton color="gray" size="md" :disabled="currentPage === 1" @click="$emit('fetchPreviousPage')">
                 Previous
             </BaseButton>
             <BaseButton
-                variant="neutral"
+                color="gray"
                 size="md"
                 :disabled="currentPage === lastPage"
                 @click="$emit('fetchNextPage')"
@@ -99,10 +99,10 @@
             <div>
                 <nav class="isolate inline-flex -space-x-px rounded-md shadow-xs" aria-label="Pagination">
                     <BaseButton
-                        variant="ghost"
+                        color="gray"
                         size="md"
                         icon-only
-                        :icon-left="ChevronLeftIcon"
+                        :icon="ChevronLeftIcon"
                         :disabled="currentPage === 1"
                         class="!rounded-r-none"
                         aria-label="Previous page"
@@ -112,7 +112,7 @@
                     <!-- First Page Button -->
                     <BaseButton
                         v-if="currentPage > 4"
-                        variant="ghost"
+                        color="gray"
                         size="md"
                         class="!rounded-none"
                         @click="$emit('fetchPage', 1)"
@@ -127,8 +127,8 @@
                     <BaseButton
                         v-for="page in visiblePages"
                         :key="page"
-                        :variant="page === currentPage ? 'primary' : 'ghost'"
-                        :selected="page === currentPage"
+                        :color="page === currentPage ? 'primary' : 'gray'"
+                        :disabled="page === currentPage"
                         size="md"
                         class="!rounded-none"
                         @click="$emit('fetchPage', page)"
@@ -141,7 +141,7 @@
                     </span>
                     <BaseButton
                         v-if="currentPage < lastPage - 3"
-                        variant="ghost"
+                        color="gray"
                         size="md"
                         class="!rounded-none"
                         @click="$emit('fetchPage', lastPage)"
@@ -149,10 +149,10 @@
                         {{ lastPage }}
                     </BaseButton>
                     <BaseButton
-                        variant="ghost"
+                        color="gray"
                         size="md"
                         icon-only
-                        :icon-left="ChevronRightIcon"
+                        :icon="ChevronRightIcon"
                         :disabled="currentPage === lastPage"
                         class="!rounded-l-none"
                         aria-label="Next page"

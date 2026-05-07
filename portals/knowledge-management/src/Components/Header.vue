@@ -43,7 +43,7 @@
     import { useTokenStore } from '../Stores/token.js';
     import GlobalSearchBar from './GlobalSearchBar.vue';
     import MobileMenu from './MobileMenu.vue';
-    import BaseButton from './ui/BaseButton.vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
 
     const route = useRoute();
     const router = useRouter();
@@ -165,18 +165,18 @@
                         <div v-if="requiresAuthentication || hasServiceManagement">
                             <BaseButton
                                 v-if="user"
-                                variant="primary"
+                                color="primary"
                                 size="md"
-                                :icon-left="ArrowRightStartOnRectangleIcon"
+                                :icon="ArrowRightStartOnRectangleIcon"
                                 @click="logout"
                             >
                                 Sign out
                             </BaseButton>
                             <BaseButton
                                 v-else
-                                variant="primary"
+                                color="primary"
                                 size="md"
-                                :icon-left="ArrowRightEndOnRectangleIcon"
+                                :icon="ArrowRightEndOnRectangleIcon"
                                 @click="$emit('showLogin')"
                             >
                                 Sign in

@@ -37,7 +37,7 @@
     import EmptyState from '../Components/EmptyState.vue';
     import Loader from '../Components/Loader.vue';
     import Page from '../Components/Page.vue';
-    import BaseButton from '../Components/ui/BaseButton.vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import { consumer } from '../Services/Consumer';
 
     const advisories = ref([]);
@@ -171,13 +171,13 @@
         </div>
         <Loader :loading="loading" />
         <div class="flex justify-center mt-6" v-if="hasMore && !loading">
-            <BaseButton variant="primary" size="md" @click="loadMore"> Load More </BaseButton>
+            <BaseButton color="primary" size="md" @click="loadMore"> Load More </BaseButton>
         </div>
 
         <EmptyState v-if="!loading && advisories.length === 0">
             <template #heading>There are no advisories to display.</template>
             <template #actions>
-                <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
+                <BaseButton tag="router-link" :to="{ name: 'home' }" color="primary" size="md">
                     Return Home
                 </BaseButton>
             </template>

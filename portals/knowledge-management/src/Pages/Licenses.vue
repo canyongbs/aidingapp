@@ -38,7 +38,7 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
-    import BaseButton from '../Components/ui/BaseButton.vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import { consumer } from '../Services/Consumer';
 
     const productLicenses = ref({});
@@ -155,10 +155,10 @@
                                     {{ activeLicense.license }}
                                 </span>
                                 <BaseButton
-                                    variant="ghost"
+                                    color="gray"
                                     size="sm"
                                     icon-only
-                                    :icon-left="showLicenseKeys[activeLicense.id] ? EyeIcon : EyeSlashIcon"
+                                    :icon="showLicenseKeys[activeLicense.id] ? EyeIcon : EyeSlashIcon"
                                     :aria-label="
                                         showLicenseKeys[activeLicense.id] ? 'Hide license key' : 'Show license key'
                                     "
@@ -202,10 +202,10 @@
                                     {{ expiredLicense.license }}
                                 </span>
                                 <BaseButton
-                                    variant="ghost"
+                                    color="gray"
                                     size="sm"
                                     icon-only
-                                    :icon-left="showLicenseKeys[expiredLicense.id] ? EyeIcon : EyeSlashIcon"
+                                    :icon="showLicenseKeys[expiredLicense.id] ? EyeIcon : EyeSlashIcon"
                                     :aria-label="
                                         showLicenseKeys[expiredLicense.id] ? 'Hide license key' : 'Show license key'
                                     "
@@ -221,7 +221,7 @@
         <EmptyState v-if="!loading && !productLicenses.activeLicense.length && !productLicenses.expiredLicense.length">
             <template #heading>There are no licenses to display.</template>
             <template #actions>
-                <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
+                <BaseButton tag="router-link" :to="{ name: 'home' }" color="primary" size="md">
                     Return Home
                 </BaseButton>
             </template>

@@ -40,7 +40,7 @@
     import Page from '../Components/Page.vue';
     import Pagination from '../Components/Pagination.vue';
     import BaseBadge from '../Components/ui/BaseBadge.vue';
-    import BaseButton from '../Components/ui/BaseButton.vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import BaseDetailSection from '../Components/ui/BaseDetailSection.vue';
     import BaseInputError from '../Components/ui/BaseInputError.vue';
     import BaseList from '../Components/ui/BaseList.vue';
@@ -404,7 +404,7 @@
                             </p>
                         </div>
                     </div>
-                    <BaseButton type="submit" variant="primary" size="md" :loading="disableSubmitBtn">
+                    <BaseButton type="submit" color="primary" size="md" :loading="disableSubmitBtn">
                         Submit Update
                     </BaseButton>
                 </form>

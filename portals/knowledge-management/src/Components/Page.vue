@@ -35,7 +35,7 @@
     import { storeToRefs } from 'pinia';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
-    import BaseButton from './ui/BaseButton.vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
 
     const { user } = storeToRefs(useAuthStore());
     const { hasServiceManagement } = storeToRefs(useFeatureStore());
@@ -46,7 +46,7 @@
         <div class="bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] px-6">
             <div class="max-w-(--breakpoint-xl) flex flex-col gap-y-6 mx-auto py-8">
                 <div class="text-right" v-if="hasServiceManagement && user">
-                    <BaseButton as="router-link" :to="{ name: 'create-service-request' }" variant="secondary" size="md">
+                    <BaseButton tag="router-link" :to="{ name: 'create-service-request' }" color="gray" size="md">
                         New Request
                     </BaseButton>
                 </div>
