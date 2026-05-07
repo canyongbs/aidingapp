@@ -64,7 +64,7 @@ class CheckKnowledgeBaseArticleImagesJob implements ShouldBeUnique, ShouldQueue
 
     public function uniqueFor(): int
     {
-        return 300;
+        return 180;
     }
 
     public function handle(): void

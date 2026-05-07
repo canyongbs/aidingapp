@@ -97,7 +97,6 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
         'category_id',
         'notes',
         'public',
-        'quality_id',
         'status_id',
         'title',
         'is_featured',

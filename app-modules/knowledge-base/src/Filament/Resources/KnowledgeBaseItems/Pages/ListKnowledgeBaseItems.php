@@ -310,9 +310,4 @@ class ListKnowledgeBaseItems extends ListRecords
                 ->successRedirectUrl(fn (Model $record): string => KnowledgeBaseItemResource::getUrl('edit', ['record' => $record])),
         ];
     }
-
-    protected function checkHealth(): bool
-    {
-        return true;
-    }
 }
