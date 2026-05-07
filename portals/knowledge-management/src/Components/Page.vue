@@ -41,7 +41,7 @@
                 <div class="flex flex-col gap-y-3 text-left">
                     <slot name="breadcrumbs" />
 
-                    <div class="flex flex-col gap-y-1">
+                    <div class="flex flex-col gap-y-2">
                         <h1 class="text-2xl font-bold text-white"><slot name="heading" /></h1>
                         <div v-if="$slots.description" class="text-sm text-white/75"><slot name="description" /></div>
                     </div>

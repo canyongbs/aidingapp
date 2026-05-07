@@ -34,6 +34,7 @@
 <script setup>
     import { defineProps, nextTick, onMounted, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
+    import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import HelpCenter from '../Components/HelpCenter.vue';
     import HeroSearch from '../Components/HeroSearch.vue';
     import Page from '../Components/Page.vue';
@@ -267,6 +268,10 @@
         <template #heading> Need help? </template>
 
         <template #description> Search our knowledge base for advice and answers </template>
+
+        <template #breadcrumbs>
+            <Breadcrumbs currentCrumb="Home" />
+        </template>
 
         <template #belowHeaderContent>
             <HeroSearch

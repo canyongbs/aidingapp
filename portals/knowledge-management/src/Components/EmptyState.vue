@@ -52,7 +52,7 @@
         :class="contained && 'rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5'"
     >
         <div class="mx-auto grid max-w-lg justify-items-center text-center">
-            <div class="mb-4 rounded-full bg-gray-100 p-3">
+            <div class="mb-4 flex size-12 items-center justify-center rounded-full bg-gray-100">
                 <component :is="icon || XMarkIcon" class="size-6 text-gray-400" />
             </div>
 

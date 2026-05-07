@@ -41,13 +41,20 @@
             type: String,
             required: true,
         },
+        contained: {
+            type: Boolean,
+            default: false,
+        },
     });
 
     const emit = defineEmits(['update:modelValue']);
 </script>
 
 <template>
-    <nav class="flex max-w-full gap-x-1 overflow-x-auto rounded-xl bg-white p-2 shadow-sm ring-1 ring-gray-950/5">
+    <nav
+        class="flex max-w-full gap-x-1 overflow-x-auto"
+        :class="contained ? 'border-b border-gray-200 px-3 py-2.5' : 'rounded-xl bg-white p-2 shadow-sm ring-1 ring-gray-950/5'"
+    >
         <button
             v-for="tab in tabs"
             :key="tab.value"
@@ -61,7 +68,7 @@
             "
         >
             <component v-if="tab.icon" :is="tab.icon" class="size-5 shrink-0 transition duration-75" :class="modelValue === tab.value ? 'text-brand-600' : 'text-gray-400'" />
-            <span class="transition duration-75" :class="modelValue === tab.value ? 'text-brand-700' : 'text-gray-500 hover:text-gray-700'">{{ tab.label }}</span>
+            <span class="transition duration-75" :class="modelValue === tab.value ? 'text-brand-700' : 'text-gray-500'">{{ tab.label }}</span>
         </button>
     </nav>
 </template>

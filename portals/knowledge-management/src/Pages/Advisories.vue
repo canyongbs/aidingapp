@@ -144,7 +144,7 @@
             <Breadcrumbs :currentCrumb="'Advisories'" />
         </template>
 
-        <PageCard>
+        <PageCard v-if="advisories.length > 0 || loading">
             <div class="mb-6 bg-white shadow-xs rounded-lg p-4" v-for="(advisory, index) in advisories" :key="index">
                 <time class="mb-1 text-lg font-semibold leading-none text-black">{{
                     formatDate(advisory.created_at)
@@ -178,15 +178,15 @@
             <div class="flex justify-center mt-6" v-if="hasMore && !loading">
                 <BaseButton variant="primary" size="md" @click="loadMore"> Load More </BaseButton>
             </div>
-
-            <EmptyState v-if="!loading && advisories.length === 0">
-                <template #heading>There are no advisories to display.</template>
-                <template #actions>
-                    <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
-                        Return Home
-                    </BaseButton>
-                </template>
-            </EmptyState>
         </PageCard>
+
+        <EmptyState v-if="!loading && advisories.length === 0">
+            <template #heading>There are no advisories to display.</template>
+            <template #actions>
+                <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
+                    Return Home
+                </BaseButton>
+            </template>
+        </EmptyState>
     </Page>
 </template>

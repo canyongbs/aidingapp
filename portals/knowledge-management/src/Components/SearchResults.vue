@@ -110,17 +110,14 @@
     </div>
 
     <div v-if="!loadingResults && searchResults?.data" class="flex flex-col gap-6">
-        <Subheading :title="`Search results: ${searchQuery}`" />
+        <Subheading>
+            Search results for <span class="text-gray-500">&ldquo;{{ searchQuery }}&rdquo;</span>
+        </Subheading>
 
-        <Tabs :tabs="filterTabs" :modelValue="selectedFilter || 'all-articles'" @update:modelValue="updateFilter" />
+        <div class="flex flex-col rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
+            <Tabs :tabs="filterTabs" :modelValue="selectedFilter || 'all-articles'" @update:modelValue="updateFilter" :contained="true" />
 
-        <div class="flex flex-col divide-y rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
-            <div class="flex items-center gap-x-2 px-6 py-4">
-                <DocumentTextIcon class="size-5 text-gray-400" />
-                <h4 class="text-base font-semibold text-gray-950">Articles ({{ totalArticles }})</h4>
-            </div>
-
-            <div v-if="searchResults.data.articles.data.length > 0">
+            <div v-if="searchResults.data.articles.data.length > 0" class="divide-y">
                 <ul role="list" class="divide-y">
                     <li v-for="article in searchResults.data.articles.data" :key="article.id">
                         <Article :article="article" />
@@ -143,13 +140,8 @@
             </EmptyState>
         </div>
 
-        <div class="flex flex-col divide-y rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
-            <div class="flex items-center gap-x-2 px-6 py-4">
-                <FolderIcon class="size-5 text-gray-400" />
-                <h4 class="text-base font-semibold text-gray-950">Categories</h4>
-            </div>
-
-            <div v-if="searchResults.data.categories.length > 0">
+        <div class="flex flex-col rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
+            <div v-if="searchResults.data.categories.length > 0" class="divide-y">
                 <ul role="list" class="divide-y">
                     <li v-for="category in searchResults.data.categories" :key="category.slug">
                         <router-link

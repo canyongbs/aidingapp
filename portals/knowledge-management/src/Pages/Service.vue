@@ -60,9 +60,8 @@
             <Breadcrumbs :currentCrumb="'Service'" />
         </template>
 
-        <PageCard>
+        <PageCard v-if="serviceRequests?.length > 0">
             <div
-                v-if="serviceRequests?.length > 0"
                 class="overflow-hidden rounded bg-gray-200 shadow-xs ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
             >
                 <div
@@ -120,15 +119,15 @@
                     </div>
                 </div>
             </div>
-
-            <EmptyState v-else>
-                <template #heading>There are no service requests to display.</template>
-                <template #actions>
-                    <BaseButton as="router-link" :to="{ name: 'create-service-request' }" variant="primary" size="md">
-                        New Request
-                    </BaseButton>
-                </template>
-            </EmptyState>
         </PageCard>
+
+        <EmptyState v-else>
+            <template #heading>There are no service requests to display.</template>
+            <template #actions>
+                <BaseButton as="router-link" :to="{ name: 'create-service-request' }" variant="primary" size="md">
+                    New Request
+                </BaseButton>
+            </template>
+        </EmptyState>
     </Page>
 </template>

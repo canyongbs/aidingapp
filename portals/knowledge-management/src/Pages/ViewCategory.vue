@@ -43,6 +43,7 @@
     import Pagination from '../Components/Pagination.vue';
     import SearchResults from '../Components/SearchResults.vue';
     import SubCategories from '../Components/SubCategories.vue';
+    import Subheading from '../Components/Subheading.vue';
     import Tabs from '../Components/Tabs.vue';
     import { consumer } from '../Services/Consumer.js';
 
@@ -347,23 +348,16 @@
                     </SearchResults>
                 </div>
                 <div v-else class="flex flex-col gap-6">
-                    <div class="flex flex-col gap-6">
-                        <h2 class="text-2xl font-bold text-brand-950">
-                            {{ category.name }}
-                        </h2>
+                    <div class="flex flex-col gap-4">
+                        <Subheading :title="category.name" />
                         <SubCategories
                             v-if="category.subCategories.length > 0"
                             :subCategories="category.subCategories"
                         ></SubCategories>
-                        <Tabs :tabs="filterTabs" :modelValue="filter || 'all-articles'" @update:modelValue="changeFilter" />
-                        <div class="flex flex-col divide-y rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
-                            <div class="px-6 py-4">
-                                <h3 class="text-base font-semibold text-gray-950">
-                                    Articles ({{ totalArticles }})
-                                </h3>
-                            </div>
+                        <div class="flex flex-col rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
+                            <Tabs :tabs="filterTabs" :modelValue="filter || 'all-articles'" @update:modelValue="changeFilter" :contained="true" />
 
-                            <div v-if="articles.length > 0">
+                            <div v-if="articles.length > 0" class="divide-y">
                                 <ul role="list" class="divide-y">
                                     <li v-for="article in articles" :key="article.id">
                                         <Article :article="article" />

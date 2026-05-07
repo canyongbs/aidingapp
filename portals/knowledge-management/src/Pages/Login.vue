@@ -34,6 +34,7 @@
 <script setup>
     import { FormKit } from '@formkit/vue';
     import { ref } from 'vue';
+    import Footer from '../Components/Footer.vue';
     import Heading from '../Components/Heading.vue';
 
     const authentication = defineModel('authentication', {
@@ -227,21 +228,6 @@
             </div>
         </main>
 
-        <div class="mb-4 w-full">
-            <div class="flex w-full flex-col">
-                <div class="mt-4 flex w-full justify-center">
-                    <img class="block h-7" :src="footerLogo" alt="Aiding App" />
-                </div>
-
-                <div class="flex w-full justify-center pb-4 pt-2">
-                    <span class="w-11/12 text-center text-xs lg:w-3/4 xl:w-7/12">
-                        &copy; 2015-{{ new Date().getFullYear() }} Canyon GBS Inc. All Rights Reserved. Canyon GBS&reg;
-                        and Aiding App&reg; are trademarks of Canyon GBS Inc. For more information or inquiries, please
-                        visit our website at
-                        <a class="text-blue-600 underline" href="https://canyongbs.com/">https://canyongbs.com</a>.
-                    </span>
-                </div>
-            </div>
-        </div>
+        <Footer :logo="footerLogo" />
     </div>
 </template>

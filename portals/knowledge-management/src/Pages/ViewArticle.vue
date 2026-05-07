@@ -32,7 +32,8 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ClockIcon, EyeIcon, HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/vue/24/outline/index.js';
+    import { ClockIcon, EyeIcon } from '@heroicons/vue/20/solid';
+    import { HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/vue/24/solid';
     import DOMPurify from 'dompurify';
     import truncate from 'lodash/truncate';
     import { computed, defineProps, ref, watch } from 'vue';
@@ -185,20 +186,20 @@
         </template>
 
         <template #description>
-            <div class="flex mb-4">
-                <div class="flex items-center space-x-1 mr-2">
-                    <EyeIcon class="h-4 w-4 shrink-0" aria-hidden="true" />
-                    <span class="text-xs">{{ portalViewCount }} Views</span>
+            <div class="flex items-center gap-x-4">
+                <div class="flex items-center gap-x-1.5">
+                    <EyeIcon class="size-4 shrink-0" aria-hidden="true" />
+                    <span>{{ portalViewCount }} Views</span>
                 </div>
-                <div class="flex items-center space-x-1">
-                    <ClockIcon class="h-4 w-4 shrink-0" aria-hidden="true" />
-                    <span class="text-xs">Last updated: {{ article.lastUpdated }}</span>
+                <div class="flex items-center gap-x-1.5">
+                    <ClockIcon class="size-4 shrink-0" aria-hidden="true" />
+                    <span>Last updated: {{ article.lastUpdated }}</span>
                 </div>
             </div>
         </template>
 
         <template #belowHeaderContent>
-            <Tags :tags="article.tags" :featured="article.featured" />
+            <Tags :tags="article.tags" :featured="article.featured" variant="hero" />
         </template>
 
         <template #breadcrumbs>
@@ -207,62 +208,69 @@
 
         <PageCard>
             <div
-                class="prose max-w-none! p-16 prose-p:leading-snug! prose-p:my-2.5! prose-headings:my-4! prose-hr:my-5! prose-ul:my-3! prose-ol:my-3! prose-li:my-0! [&_li>p]:my-1! [&_td_p]:my-3! [&_th_p]:my-3! prose-table:w-full! prose-table:my-6 prose-table:border-separate prose-table:border-spacing-0 prose-table:rounded-lg prose-table:border prose-table:border-gray-200 prose-table:overflow-hidden prose-table:shadow-xs prose-td:border-b prose-td:border-gray-100 prose-td:align-middle prose-td:px-6 prose-td:py-2 prose-td:text-left prose-td:text-gray-700 prose-th:border-none prose-th:bg-brand-600 prose-th:px-6 prose-th:py-2 prose-th:text-left prose-th:font-bold prose-th:text-white [&_tr:last-child_td]:border-b-[3px]! [&_tr:last-child_td]:border-brand-600! even:prose-tr:bg-gray-50"
-            >
-                <div
-                    v-html="
-                        DOMPurify.sanitize(article.content, {
-                            ADD_TAGS: ['iframe', 'video', 'source'],
-                            ADD_ATTR: [
-                                'allow',
-                                'allowfullscreen',
-                                'frameborder',
-                                'controls',
-                                'target',
-                                'rel',
-                                'data-video-embed',
-                                'data-video-type',
-                                'data-video-src',
-                                'data-video-width',
-                                'data-video-height',
-                                'data-cols',
-                                'data-col-span',
-                                'data-from-breakpoint',
-                                'data-color',
-                                'data-id',
-                            ],
-                        })
+                class="prose max-w-none! prose-p:leading-snug! prose-p:my-2.5! prose-headings:my-4! prose-hr:my-5! prose-ul:my-3! prose-ol:my-3! prose-li:my-0! [&_li>p]:my-1! [&_td_p]:my-3! [&_th_p]:my-3! prose-table:w-full! prose-table:my-6 prose-table:border-separate prose-table:border-spacing-0 prose-table:rounded-lg prose-table:border prose-table:border-gray-200 prose-table:overflow-hidden prose-table:shadow-xs prose-td:border-b prose-td:border-gray-100 prose-td:align-middle prose-td:px-6 prose-td:py-2 prose-td:text-left prose-td:text-gray-700 prose-th:border-none prose-th:bg-brand-600 prose-th:px-6 prose-th:py-2 prose-th:text-left prose-th:font-bold prose-th:text-white [&_tr:last-child_td]:border-b-[3px]! [&_tr:last-child_td]:border-brand-600! even:prose-tr:bg-gray-50"
+                v-html="
+                    DOMPurify.sanitize(article.content, {
+                        ADD_TAGS: ['iframe', 'video', 'source'],
+                        ADD_ATTR: [
+                            'allow',
+                            'allowfullscreen',
+                            'frameborder',
+                            'controls',
+                            'target',
+                            'rel',
+                            'data-video-embed',
+                            'data-video-type',
+                            'data-video-src',
+                            'data-video-width',
+                            'data-video-height',
+                            'data-cols',
+                            'data-col-span',
+                            'data-from-breakpoint',
+                            'data-color',
+                            'data-id',
+                        ],
+                    })
+                "></div>
+        </PageCard>
+
+        <div class="flex flex-wrap items-center gap-4">
+            <span class="text-sm font-medium text-gray-700">Was this article helpful?</span>
+
+            <div class="flex items-center gap-2">
+                <button
+                    type="button"
+                    @click="toggleFeedback(true)"
+                    class="relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 focus-visible:ring-2"
+                    :class="
+                        feedback === true
+                            ? 'bg-brand-600 text-white hover:bg-brand-500 focus-visible:ring-brand-500/50'
+                            : 'bg-white text-gray-950 ring-1 ring-gray-950/10 hover:bg-gray-50'
                     "
-                ></div>
+                >
+                    <HandThumbUpIcon class="size-5" />
+                    Yes
+                </button>
+
+                <button
+                    type="button"
+                    @click="toggleFeedback(false)"
+                    class="relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 focus-visible:ring-2"
+                    :class="
+                        feedback === false
+                            ? 'bg-brand-600 text-white hover:bg-brand-500 focus-visible:ring-brand-500/50'
+                            : 'bg-white text-gray-950 ring-1 ring-gray-950/10 hover:bg-gray-50'
+                    "
+                >
+                    <HandThumbDownIcon class="size-5" />
+                    No
+                </button>
             </div>
 
-            <div class="flex items-center mt-6 p-4 border rounded-lg bg-white">
-                <p class="text-lg font-semibold mr-4">Was this content helpful?</p>
-                <div class="flex space-x-2">
-                    <BaseButton
-                        :variant="feedback === true ? 'primary' : 'neutral'"
-                        :selected="feedback === true"
-                        size="md"
-                        :icon-left="HandThumbUpIcon"
-                        @click="toggleFeedback(true)"
-                    >
-                        Yes
-                    </BaseButton>
-                    <BaseButton
-                        :variant="feedback === false ? 'primary' : 'neutral'"
-                        :selected="feedback === false"
-                        size="md"
-                        :icon-left="HandThumbDownIcon"
-                        @click="toggleFeedback(false)"
-                    >
-                        No
-                    </BaseButton>
-                </div>
-                <p class="text-lg font-semibold ml-4" v-if="helpfulVotePercentage">
-                    {{ helpfulVotePercentage }}% of visitors found this helpful.
-                </p>
-            </div>
-        </PageCard>
+            <span v-if="helpfulVotePercentage" class="text-sm text-gray-500">
+                {{ helpfulVotePercentage }}% found this helpful
+            </span>
+        </div>
     </Page>
 
     <Page v-if="!loading && (!category || !article)">

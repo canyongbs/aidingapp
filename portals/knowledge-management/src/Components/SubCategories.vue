@@ -32,8 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ArrowRightIcon } from '@heroicons/vue/20/solid';
-    import Subheading from './Subheading.vue';
+    import { ChevronRightIcon } from '@heroicons/vue/20/solid';
 
     defineProps({
         subCategories: {
@@ -44,10 +43,7 @@
 </script>
 
 <template>
-    <div class="grid gap-4">
-        <Subheading title="Subcategories" />
-
-        <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             <router-link
                 v-for="subCategory in subCategories"
                 :key="subCategory.slug"
@@ -74,10 +70,9 @@
                     </p>
                 </div>
 
-                <ArrowRightIcon
-                    class="shrink-0 size-5 self-center text-gray-400 transition duration-75 group-hover:text-brand-500"
+                <ChevronRightIcon
+                    class="shrink-0 size-5 self-center text-gray-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
                 />
             </router-link>
         </div>
-    </div>
 </template>

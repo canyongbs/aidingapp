@@ -35,11 +35,14 @@
     defineProps({
         title: {
             type: String,
-            required: true,
+            default: '',
         },
     });
 </script>
 
 <template>
-    <h2 class="text-xl font-medium text-gray-950">{{ title }}</h2>
+    <h2 class="text-xl font-medium text-gray-950">
+        <template v-if="$slots.default"><slot /></template>
+        <template v-else>{{ title }}</template>
+    </h2>
 </template>

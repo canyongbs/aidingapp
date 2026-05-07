@@ -52,7 +52,7 @@
 <template>
     <nav aria-label="Breadcrumb">
         <ol class="flex flex-wrap items-center gap-x-2">
-            <li class="flex items-center gap-x-2 text-sm font-medium">
+            <li v-if="currentCrumb !== 'Home'" class="flex items-center gap-x-2 text-sm font-medium">
                 <router-link :to="{ name: 'home' }" class="text-white/70 transition duration-75 hover:text-white">
                     Home
                 </router-link>
@@ -82,7 +82,7 @@
                 </template>
             </li>
             <li class="flex items-center gap-x-2 text-sm font-medium">
-                <ChevronRightIcon class="size-5 text-white/40" aria-hidden="true" />
+                <ChevronRightIcon v-if="currentCrumb !== 'Home'" class="size-5 text-white/40" aria-hidden="true" />
                 <span class="text-white">{{ currentCrumb }}</span>
             </li>
         </ol>

@@ -142,9 +142,9 @@
             <Breadcrumbs :currentCrumb="'Status'" />
         </template>
 
-        <PageCard>
-            <template v-if="!loading">
-                <div v-if="result.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <template v-if="!loading">
+            <PageCard v-if="result.length > 0">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div v-for="(serviceMonitor, index) in result" :key="index">
                         <ServiceMonitorCard
                             :name="serviceMonitor.name"
@@ -157,18 +157,8 @@
                     </div>
                 </div>
 
-                <EmptyState v-else>
-                    <template #heading>There are no service monitors to display.</template>
-                    <template #actions>
-                        <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
-                            Return Home
-                        </BaseButton>
-                    </template>
-                </EmptyState>
-
                 <Pagination
-                    class="mt-3"
-                    v-if="result.length > 0"
+                    v-if="lastPage > 1"
                     :currentPage="currentPage"
                     :lastPage="lastPage"
                     :fromArticle="fromArticle"
@@ -178,28 +168,37 @@
                     @fetchPreviousPage="fetchPreviousPage"
                     @fetchPage="fetchPage"
                 />
-            </template>
+            </PageCard>
 
-            <template v-else>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
-                    <div
-                        v-for="n in 15"
-                        :key="`service-monitor-skeleton-${n}`"
-                        class="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-lg shadow-xs animate-pulse"
-                    >
-                        <div class="flex items-center">
-                            <div class="h-7 w-7 bg-gray-300 rounded-full"></div>
+            <EmptyState v-else>
+                <template #heading>There are no service monitors to display.</template>
+                <template #actions>
+                    <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
+                        Return Home
+                    </BaseButton>
+                </template>
+            </EmptyState>
+        </template>
 
-                            <div class="ml-4">
-                                <div class="h-4 bg-gray-300 rounded w-24 mb-2"></div>
-                                <div class="h-3 bg-gray-200 rounded w-32"></div>
-                            </div>
+        <PageCard v-else>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
+                <div
+                    v-for="n in 15"
+                    :key="`service-monitor-skeleton-${n}`"
+                    class="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-lg shadow-xs animate-pulse"
+                >
+                    <div class="flex items-center">
+                        <div class="h-7 w-7 bg-gray-300 rounded-full"></div>
+
+                        <div class="ml-4">
+                            <div class="h-4 bg-gray-300 rounded w-24 mb-2"></div>
+                            <div class="h-3 bg-gray-200 rounded w-32"></div>
                         </div>
-
-                        <div class="h-5 w-5 bg-gray-300 rounded-full"></div>
                     </div>
+
+                    <div class="h-5 w-5 bg-gray-300 rounded-full"></div>
                 </div>
-            </template>
+            </div>
         </PageCard>
     </Page>
 </template>

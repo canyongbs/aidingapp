@@ -573,7 +573,7 @@
             <AppLoading />
         </div>
 
-        <div class="bg-white" v-else>
+        <div v-else>
             <Login
                 v-if="!userIsAuthenticated && (requiresAuthentication || showLogin || route.meta.requiresAuth)"
                 v-model:authentication="authentication"
