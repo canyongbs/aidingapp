@@ -32,18 +32,15 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ArrowRightEndOnRectangleIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/vue/24/outline';
     import { storeToRefs } from 'pinia';
-    import Menubar from 'primevue/menubar';
-    import { computed, defineProps, ref } from 'vue';
+    import { computed, ref } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
+    import { globalSearchQuery } from '../Stores/globalState.js';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
     import { useTokenStore } from '../Stores/token.js';
-    import GlobalSearchBar from './GlobalSearchBar.vue';
-    import MobileMenu from './MobileMenu.vue';
-    import BaseButton from './ui/BaseButton.vue';
+    import { ArrowRightEndOnRectangleIcon, ArrowRightStartOnRectangleIcon } from '@heroicons/vue/20/solid';
 
     const route = useRoute();
     const router = useRouter();
@@ -67,6 +64,10 @@
         },
     });
 
+    const emit = defineEmits(['showLogin']);
+
+    const mobileMenuOpen = ref(false);
+
     const logout = () => {
         const { post } = consumer();
 
@@ -84,123 +85,166 @@
         {
             label: 'Home',
             routeName: 'home',
-            command: () => router.push({ name: 'home' }),
         },
         {
             label: 'Service',
             routeName: 'service',
             visible: hasServiceManagement && user !== null,
-            command: () => router.push({ name: 'service' }),
         },
         {
             label: 'Status',
             routeName: 'status',
             visible: user !== null,
-            command: () => router.push({ name: 'status' }),
         },
         {
             label: 'Advisories',
             routeName: 'advisories',
             visible: user !== null,
-            command: () => router.push({ name: 'advisories' }),
         },
         {
             label: 'Assets',
             routeName: 'assets',
             visible: hasAssets,
-            command: () => router.push({ name: 'assets' }),
         },
         {
             label: 'Licenses',
             routeName: 'licenses',
             visible: hasLicense,
-            command: () => router.push({ name: 'licenses' }),
         },
         {
             label: 'Tasks',
             routeName: 'tasks',
             visible: hasTasks,
-            command: () => router.push({ name: 'tasks' }),
         },
     ]);
 
     const visibleMenuItems = computed(() => menuItems.value.filter((item) => item.visible !== false));
+
+    const onSearch = () => {
+        router.push({ name: 'home', query: { search: globalSearchQuery.value } });
+    };
 </script>
 
 <template>
-    <div class="max-w-(--breakpoint-xl) flex flex-col gap-y-6 mx-auto w-full">
-        <Menubar class="border border-none md:px-1.5 xl:px-0">
-            <template #start>
-                <router-link :to="{ name: 'home', query: {} }" class="flex items-center">
-                    <img :src="headerLogo" :alt="appName" class="h-12 m-0" />
+    <div class="sticky top-0 z-30 overflow-x-clip">
+        <nav class="flex min-h-16 items-center bg-white px-4 shadow-xs ring-1 ring-gray-950/5">
+            <!-- Mobile menu toggle -->
+            <button
+                type="button"
+                class="relative flex size-9 items-center justify-center rounded-lg text-gray-500 outline-none transition duration-75 hover:text-gray-600 focus-visible:ring-2 focus-visible:ring-brand-600 lg:hidden"
+                @click="mobileMenuOpen = !mobileMenuOpen"
+            >
+                <svg v-if="!mobileMenuOpen" class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+                <svg v-else class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </button>
+
+            <!-- Logo (desktop) -->
+            <div class="me-6 hidden items-center lg:flex">
+                <router-link :to="{ name: 'home' }" class="ms-3">
+                    <img :src="headerLogo" :alt="appName" class="h-9 block" />
                 </router-link>
-            </template>
+            </div>
 
-            <template #end>
-                <div class="flex items-center gap-6 ml-auto">
-                    <div class="flex items-center gap-10 hidden lg:flex">
-                        <template v-for="item in visibleMenuItems" :key="item.label">
-                            <router-link
-                                :to="{ name: item.routeName }"
-                                custom
-                                v-slot="{ navigate, isActive, isExactActive }"
+            <!-- Nav items (desktop) -->
+            <ul class="ms-4 me-4 hidden items-center gap-x-4 lg:my-2 lg:flex lg:flex-wrap lg:gap-y-1">
+                <li v-for="item in visibleMenuItems" :key="item.label">
+                    <router-link
+                        :to="{ name: item.routeName }"
+                        custom
+                        v-slot="{ navigate, isActive, isExactActive }"
+                    >
+                        <a
+                            @click="navigate"
+                            class="flex items-center justify-center gap-x-2 rounded-lg px-3 py-2 outline-none transition duration-75 hover:bg-gray-50 focus-visible:bg-gray-50 cursor-pointer"
+                            :class="(isActive || isExactActive) && 'bg-gray-50'"
+                        >
+                            <span
+                                class="text-sm font-medium"
+                                :class="isActive || isExactActive ? 'text-brand-600' : 'text-gray-700'"
                             >
-                                <a
-                                    @click="navigate"
-                                    class="cursor-pointer flex items-center font-medium text-sm"
-                                    :class="[
-                                        isActive || isExactActive ? 'text-brand-500' : 'text-gray-700',
-                                        'hover:text-brand-500',
-                                    ]"
-                                >
-                                    {{ item.label }}
-                                </a>
-                            </router-link>
-                        </template>
-                    </div>
+                                {{ item.label }}
+                            </span>
+                        </a>
+                    </router-link>
+                </li>
+            </ul>
 
-                    <div class="flex items-center gap-4">
-                        <GlobalSearchBar v-if="!['home', 'view-category'].includes(route.name)" />
-
-                        <div v-if="requiresAuthentication || hasServiceManagement">
-                            <BaseButton
-                                v-if="user"
-                                variant="primary"
-                                size="md"
-                                :icon-left="ArrowRightStartOnRectangleIcon"
-                                @click="logout"
-                            >
-                                Sign out
-                            </BaseButton>
-                            <BaseButton
-                                v-else
-                                variant="primary"
-                                size="md"
-                                :icon-left="ArrowRightEndOnRectangleIcon"
-                                @click="$emit('showLogin')"
-                            >
-                                Sign in
-                            </BaseButton>
+            <!-- End section -->
+            <div class="ms-auto flex items-center gap-x-4">
+                <!-- Global search -->
+                <form v-if="!['home', 'view-category'].includes(route.name)" @submit.prevent="onSearch" class="flex items-center">
+                    <div class="flex rounded-lg bg-white shadow-sm ring-1 ring-gray-950/10 transition duration-75 focus-within:ring-2 focus-within:ring-brand-600">
+                        <div class="flex items-center gap-x-3 ps-3 pe-2">
+                            <svg class="size-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11ZM2 9a7 7 0 1 1 12.452 4.391l3.328 3.329a.75.75 0 1 1-1.06 1.06l-3.329-3.328A7 7 0 0 1 2 9Z" clip-rule="evenodd" />
+                            </svg>
                         </div>
-                        <MobileMenu class="relative lg:hidden" :visibleMenuItems="visibleMenuItems" />
+                        <div class="min-w-0 flex-1">
+                            <input
+                                v-model="globalSearchQuery"
+                                type="search"
+                                autocomplete="off"
+                                placeholder="Search"
+                                class="block w-full appearance-none border-none bg-transparent ps-0 px-3 py-1.5 text-start text-sm leading-6 text-gray-950 placeholder:text-gray-400 focus:ring-0 focus:outline-none"
+                            />
+                        </div>
                     </div>
+                </form>
+
+                <!-- Sign in / Sign out -->
+                <div v-if="requiresAuthentication || hasServiceManagement">
+                    <button
+                        v-if="user"
+                        type="button"
+                        @click="logout"
+                        class="relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 bg-brand-600 text-white hover:bg-brand-500 focus-visible:ring-2 focus-visible:ring-brand-500/50"
+                    >
+                        <ArrowRightStartOnRectangleIcon class="size-5" />
+                        Sign out
+                    </button>
+                    <button
+                        v-else
+                        type="button"
+                        @click="emit('showLogin')"
+                        class="relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 bg-brand-600 text-white hover:bg-brand-500 focus-visible:ring-2 focus-visible:ring-brand-500/50"
+                    >
+                        <ArrowRightEndOnRectangleIcon class="size-5" />
+                        Sign in
+                    </button>
                 </div>
-            </template>
-        </Menubar>
+            </div>
+        </nav>
+
+        <!-- Mobile nav menu -->
+        <div
+            v-if="mobileMenuOpen"
+            class="border-t border-gray-200 bg-white px-4 py-3 shadow-xs ring-1 ring-gray-950/5 lg:hidden"
+        >
+            <ul class="flex flex-col gap-y-1">
+                <li v-for="item in visibleMenuItems" :key="item.label">
+                    <router-link
+                        :to="{ name: item.routeName }"
+                        custom
+                        v-slot="{ navigate, isActive, isExactActive }"
+                    >
+                        <a
+                            @click="navigate(); mobileMenuOpen = false"
+                            class="flex items-center gap-x-2 rounded-lg px-3 py-2 outline-none transition duration-75 hover:bg-gray-50 focus-visible:bg-gray-50 cursor-pointer"
+                        >
+                            <span
+                                class="text-sm font-medium"
+                                :class="isActive || isExactActive ? 'text-brand-600' : 'text-gray-700'"
+                            >
+                                {{ item.label }}
+                            </span>
+                        </a>
+                    </router-link>
+                </li>
+            </ul>
+        </div>
     </div>
 </template>
-
-<style scoped>
-    .gap-6 > * {
-        white-space: nowrap;
-    }
-
-    .text-transparent.bg-clip-text {
-        -webkit-background-clip: text;
-        background-clip: text;
-    }
-
-    .pointer {
-        cursor: pointer;
-    }
-</style>
