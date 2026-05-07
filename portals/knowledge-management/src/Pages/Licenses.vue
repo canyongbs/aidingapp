@@ -35,10 +35,10 @@
     import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
     import { Card } from 'primevue';
     import { onMounted, ref } from 'vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import { consumer } from '../Services/Consumer';
 
     const productLicenses = ref({});

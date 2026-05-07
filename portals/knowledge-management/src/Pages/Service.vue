@@ -33,10 +33,10 @@
 -->
 <script setup>
     import { defineProps } from 'vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import Breadcrumbs from './../Components/Breadcrumbs.vue';
     import EmptyState from './../Components/EmptyState.vue';
     import Page from './../Components/Page.vue';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
 
     defineProps({
         categories: {

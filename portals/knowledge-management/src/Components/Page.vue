@@ -33,9 +33,9 @@
 -->
 <script setup>
     import { storeToRefs } from 'pinia';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
 
     const { user } = storeToRefs(useAuthStore());
     const { hasServiceManagement } = storeToRefs(useFeatureStore());

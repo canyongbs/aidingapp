@@ -74,12 +74,7 @@
             <BaseButton color="gray" size="md" :disabled="currentPage === 1" @click="$emit('fetchPreviousPage')">
                 Previous
             </BaseButton>
-            <BaseButton
-                color="gray"
-                size="md"
-                :disabled="currentPage === lastPage"
-                @click="$emit('fetchNextPage')"
-            >
+            <BaseButton color="gray" size="md" :disabled="currentPage === lastPage" @click="$emit('fetchNextPage')">
                 Next
             </BaseButton>
         </div>

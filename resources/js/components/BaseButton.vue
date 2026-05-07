@@ -210,7 +210,9 @@
             'bg-[var(--btn-bg)] text-[var(--btn-text)] ring-1 ring-[var(--btn-ring)]',
             'hover:bg-[var(--btn-hover-bg)] hover:text-[var(--btn-hover-text)]',
             sizeClasses.value,
-            isDisabled.value ? 'cursor-default opacity-70 pointer-events-none' : 'focus-visible:ring-2 focus-visible:ring-[var(--btn-focus-ring)]',
+            isDisabled.value
+                ? 'cursor-default opacity-70 pointer-events-none'
+                : 'focus-visible:ring-2 focus-visible:ring-[var(--btn-focus-ring)]',
         ];
     });
 
