@@ -31,8 +31,7 @@
 
 </COPYRIGHT>
 -->
-<script setup>
-</script>
+<script setup></script>
 
 <template>
     <div class="flex-1 bg-gray-50">
@@ -42,7 +41,7 @@
                     <slot name="breadcrumbs" />
 
                     <div class="flex flex-col gap-y-2">
-                        <h1 class="text-2xl font-bold text-white"><slot name="heading" /></h1>
+                        <h1 class="text-3xl font-bold text-white"><slot name="heading" /></h1>
                         <div v-if="$slots.description" class="text-sm text-white/75"><slot name="description" /></div>
                     </div>
                 </div>

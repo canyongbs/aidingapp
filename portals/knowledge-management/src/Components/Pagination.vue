@@ -89,11 +89,7 @@
 </script>
 
 <template>
-    <nav
-        aria-label="Pagination"
-        role="navigation"
-        class="grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 px-6 py-3"
-    >
+    <nav aria-label="Pagination" role="navigation" class="grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 px-6 py-3">
         <button
             v-if="currentPage > 1"
             type="button"
@@ -116,7 +112,10 @@
             Next
         </button>
 
-        <ol v-if="lastPage > 1" class="hidden md:flex col-start-3 justify-self-end rounded-lg bg-white shadow-sm ring-1 ring-gray-950/10">
+        <ol
+            v-if="lastPage > 1"
+            class="hidden md:flex col-start-3 justify-self-end rounded-lg bg-white shadow-sm ring-1 ring-gray-950/10"
+        >
             <li class="border-x-[0.5px] border-gray-200 first:border-s-0 last:border-e-0">
                 <button
                     type="button"

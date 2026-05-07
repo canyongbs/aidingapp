@@ -231,7 +231,8 @@
                             'data-id',
                         ],
                     })
-                "></div>
+                "
+            ></div>
         </PageCard>
 
         <div class="flex flex-wrap items-center gap-4">
@@ -281,7 +282,7 @@
                 <template #heading>Article Not Found</template>
                 <template #description>The article you are looking for does not exist or has been removed.</template>
                 <template #actions>
-                    <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
+                    <BaseButton as="router-link" :to="{ name: 'home' }" variant="neutral" size="md">
                         Return Home
                     </BaseButton>
                 </template>

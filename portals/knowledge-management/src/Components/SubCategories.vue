@@ -44,35 +44,35 @@
 
 <template>
     <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            <router-link
-                v-for="subCategory in subCategories"
-                :key="subCategory.slug"
-                :to="{
-                    name: 'view-subcategory',
-                    params: {
-                        parentCategorySlug: subCategory.parentCategory.slug,
-                        categorySlug: subCategory.slug,
-                    },
-                }"
-                class="group flex w-full gap-3 rounded-xl bg-white p-4 ring-1 ring-gray-950/5 transition duration-75 hover:bg-gray-50"
-            >
-                <div
-                    v-if="subCategory.icon"
-                    v-html="subCategory.icon"
-                    class="shrink-0 text-gray-400 [&>svg]:size-6 transition duration-75 group-hover:text-brand-500"
-                    aria-hidden="true"
-                ></div>
+        <router-link
+            v-for="subCategory in subCategories"
+            :key="subCategory.slug"
+            :to="{
+                name: 'view-subcategory',
+                params: {
+                    parentCategorySlug: subCategory.parentCategory.slug,
+                    categorySlug: subCategory.slug,
+                },
+            }"
+            class="group flex w-full gap-3 rounded-xl bg-white p-4 ring-1 ring-gray-950/5 transition duration-75 hover:bg-gray-50"
+        >
+            <div
+                v-if="subCategory.icon"
+                v-html="subCategory.icon"
+                class="shrink-0 text-gray-400 [&>svg]:size-6 transition duration-75 group-hover:text-brand-500"
+                aria-hidden="true"
+            ></div>
 
-                <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
-                    <span class="text-sm font-medium text-gray-950">{{ subCategory.name }}</span>
-                    <p class="overflow-hidden text-sm text-pretty break-words text-gray-500">
-                        {{ subCategory.description }}
-                    </p>
-                </div>
+            <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
+                <span class="text-sm font-medium text-gray-950">{{ subCategory.name }}</span>
+                <p class="overflow-hidden text-sm text-pretty break-words text-gray-500">
+                    {{ subCategory.description }}
+                </p>
+            </div>
 
-                <ChevronRightIcon
-                    class="shrink-0 size-5 self-center text-gray-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
-                />
-            </router-link>
-        </div>
+            <ChevronRightIcon
+                class="shrink-0 size-5 self-center text-gray-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
+            />
+        </router-link>
+    </div>
 </template>

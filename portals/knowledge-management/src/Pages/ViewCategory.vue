@@ -355,7 +355,12 @@
                             :subCategories="category.subCategories"
                         ></SubCategories>
                         <div class="flex flex-col rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
-                            <Tabs :tabs="filterTabs" :modelValue="filter || 'all-articles'" @update:modelValue="changeFilter" :contained="true" />
+                            <Tabs
+                                :tabs="filterTabs"
+                                :modelValue="filter || 'all-articles'"
+                                @update:modelValue="changeFilter"
+                                :contained="true"
+                            />
 
                             <div v-if="articles.length > 0" class="divide-y">
                                 <ul role="list" class="divide-y">

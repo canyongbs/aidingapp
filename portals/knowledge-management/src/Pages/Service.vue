@@ -124,7 +124,7 @@
         <EmptyState v-else>
             <template #heading>There are no service requests to display.</template>
             <template #actions>
-                <BaseButton as="router-link" :to="{ name: 'create-service-request' }" variant="primary" size="md">
+                <BaseButton as="router-link" :to="{ name: 'create-service-request' }" variant="neutral" size="md">
                     New Request
                 </BaseButton>
             </template>

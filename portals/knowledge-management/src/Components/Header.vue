@@ -32,11 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import {
-        ArrowRightEndOnRectangleIcon,
-        ArrowRightStartOnRectangleIcon,
-        PlusIcon,
-    } from '@heroicons/vue/20/solid';
+    import { ArrowRightEndOnRectangleIcon, ArrowRightStartOnRectangleIcon, PlusIcon } from '@heroicons/vue/20/solid';
     import {
         ClipboardDocumentListIcon,
         CubeIcon,

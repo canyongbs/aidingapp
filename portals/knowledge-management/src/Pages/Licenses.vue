@@ -222,12 +222,10 @@
             </div>
         </PageCard>
 
-        <EmptyState
-            v-if="!loading && !productLicenses.activeLicense.length && !productLicenses.expiredLicense.length"
-        >
+        <EmptyState v-if="!loading && !productLicenses.activeLicense.length && !productLicenses.expiredLicense.length">
             <template #heading>There are no licenses to display.</template>
             <template #actions>
-                <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
+                <BaseButton as="router-link" :to="{ name: 'home' }" variant="neutral" size="md">
                     Return Home
                 </BaseButton>
             </template>

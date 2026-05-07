@@ -176,14 +176,14 @@
             </div>
             <Loader :loading="loading" />
             <div class="flex justify-center mt-6" v-if="hasMore && !loading">
-                <BaseButton variant="primary" size="md" @click="loadMore"> Load More </BaseButton>
+                <BaseButton variant="neutral" size="md" @click="loadMore"> Load More </BaseButton>
             </div>
         </PageCard>
 
         <EmptyState v-if="!loading && advisories.length === 0">
             <template #heading>There are no advisories to display.</template>
             <template #actions>
-                <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
+                <BaseButton as="router-link" :to="{ name: 'home' }" variant="neutral" size="md">
                     Return Home
                 </BaseButton>
             </template>

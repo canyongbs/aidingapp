@@ -173,7 +173,7 @@
             <EmptyState v-else>
                 <template #heading>There are no service monitors to display.</template>
                 <template #actions>
-                    <BaseButton as="router-link" :to="{ name: 'home' }" variant="primary" size="md">
+                    <BaseButton as="router-link" :to="{ name: 'home' }" variant="neutral" size="md">
                         Return Home
                     </BaseButton>
                 </template>

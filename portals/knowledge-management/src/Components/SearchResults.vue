@@ -111,11 +111,18 @@
 
     <div v-if="!loadingResults && searchResults?.data" class="flex flex-col gap-6">
         <Subheading>
-            Search results for <span class="text-gray-500">&ldquo;{{ searchQuery }}&rdquo;</span>
+            Search results<template v-if="searchQuery">
+                for <span class="text-gray-500">&ldquo;{{ searchQuery }}&rdquo;</span></template
+            >
         </Subheading>
 
         <div class="flex flex-col rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
-            <Tabs :tabs="filterTabs" :modelValue="selectedFilter || 'all-articles'" @update:modelValue="updateFilter" :contained="true" />
+            <Tabs
+                :tabs="filterTabs"
+                :modelValue="selectedFilter || 'all-articles'"
+                @update:modelValue="updateFilter"
+                :contained="true"
+            />
 
             <div v-if="searchResults.data.articles.data.length > 0" class="divide-y">
                 <ul role="list" class="divide-y">
@@ -140,27 +147,33 @@
             </EmptyState>
         </div>
 
-        <div class="flex flex-col rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
-            <div v-if="searchResults.data.categories.length > 0" class="divide-y">
-                <ul role="list" class="divide-y">
-                    <li v-for="category in searchResults.data.categories" :key="category.slug">
-                        <router-link
-                            :to="{ name: 'view-category', params: { categorySlug: category.slug } }"
-                            class="group flex items-center px-6 py-3 text-sm font-medium text-gray-700 transition duration-75 hover:bg-gray-50"
-                        >
-                            <span class="flex-1">{{ category.name }}</span>
-
-                            <ChevronRightIcon
-                                class="size-5 text-gray-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
-                            />
-                        </router-link>
-                    </li>
-                </ul>
+        <div
+            v-if="searchResults.data.categories.length > 0"
+            class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5"
+        >
+            <div class="px-6 py-3 border-b border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-950">Categories</h3>
             </div>
-            <EmptyState v-else :contained="false" :icon="FolderIcon">
-                <template #heading>No categories found</template>
-                <template #description>No categories match your current search criteria.</template>
-            </EmptyState>
+
+            <ul role="list" class="divide-y">
+                <li v-for="category in searchResults.data.categories" :key="category.slug">
+                    <router-link
+                        :to="{ name: 'view-category', params: { categorySlug: category.slug } }"
+                        class="group flex items-center px-6 py-3 text-sm font-medium text-gray-700 transition duration-75 hover:bg-gray-50"
+                    >
+                        <span class="flex-1">{{ category.name }}</span>
+
+                        <ChevronRightIcon
+                            class="size-5 text-gray-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
+                        />
+                    </router-link>
+                </li>
+            </ul>
         </div>
+
+        <EmptyState v-else :icon="FolderIcon">
+            <template #heading>No categories found</template>
+            <template #description>No categories match your current search criteria.</template>
+        </EmptyState>
     </div>
 </template>
