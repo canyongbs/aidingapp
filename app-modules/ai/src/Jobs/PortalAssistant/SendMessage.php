@@ -40,6 +40,7 @@ use AidingApp\Ai\Events\PortalAssistant\PortalAssistantMessageChunk;
 use AidingApp\Ai\Models\PortalAssistantMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
+use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Ai\Support\StreamingChunks\Finish;
 use AidingApp\Ai\Support\StreamingChunks\Meta;
 use AidingApp\Ai\Support\StreamingChunks\Text;
@@ -47,6 +48,7 @@ use AidingApp\Ai\Support\StreamingChunks\ToolCall;
 use AidingApp\IntegrationOpenAi\Prism\ValueObjects\Messages\DeveloperMessage;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
+use App\Features\AiSupportAssistantDefaultInstructionsFeature;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -88,24 +90,14 @@ class SendMessage implements ShouldQueue
         $message->is_assistant = false;
         $message->save();
 
-        $context = <<<EOT
-            You are a helpful AI assistant for our support portal. Your PRIMARY role is to answer user questions by searching and referencing information from our knowledge base.
-
-            Important guidelines:
-            - You have access to a knowledge base containing support articles and documentation
-            - Never mention "uploaded files" or suggest that the user has provided any files - the knowledge base is managed by the system, not by users
-            - Only provide answers based on information found in the knowledge base
-            - If you cannot find relevant information in the knowledge base, politely say "I don't have that information in our knowledge base at the moment" or suggest contacting support for further assistance
-            - Do not make up or assume information that isn't in the knowledge base
-            - Provide clear, concise, and accurate responses
-            - Be friendly and professional in your tone
-            - When referencing information, speak naturally about "our knowledge base" or "our documentation" rather than mentioning files or uploads
-            - Communicate naturally with users as a human would - never explain your internal processes, tool calls, or data structures
-            - Never mention technical details like field_ids, JSON, internal state, or how you're organizing information
-            - Keep responses conversational and focused on helping the user
-
-            CRITICAL: You MUST format ALL responses using Markdown. This is non-negotiable. Always use proper Markdown formatting. NEVER mention that you are responding using Markdown.
-            EOT;
+        if (AiSupportAssistantDefaultInstructionsFeature::active()) {
+            $supportAssistantSettings = app(AiSupportAssistantSettings::class);
+            $context = filled($supportAssistantSettings->instructions)
+                ? $supportAssistantSettings->instructions
+                : AiSupportAssistantSettings::defaultInstructions();
+        } else {
+            $context = AiSupportAssistantSettings::defaultInstructions();
+        }
 
         try {
             $aiService = app(AiIntegratedAssistantSettings::class)->getDefaultModel()->getService();

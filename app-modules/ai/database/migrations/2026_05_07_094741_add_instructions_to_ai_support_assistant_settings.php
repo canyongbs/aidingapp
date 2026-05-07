@@ -34,24 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Settings;
+use App\Features\AiSupportAssistantDefaultInstructionsFeature;
+use Illuminate\Support\Facades\DB;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use Spatie\LaravelSettings\Settings;
-
-class AiSupportAssistantSettings extends Settings
-{
-    public bool $is_enabled = false;
-
-    public string $instructions = '';
-
-    public static function group(): string
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return 'ai-support-assistant';
-    }
-
-    public static function defaultInstructions(): string
-    {
-        return <<<EOT
+        $instructions = <<<EOT
             You are a support portal assistant. Your role is to answer the user's question using ONLY the knowledge base provided to you.
 
             # How to engage
@@ -70,5 +61,24 @@ class AiSupportAssistantSettings extends Settings
             - Never describe your internal processes, tool usage, or data structures (e.g. JSON, field IDs, internal state).
             - Format every response in Markdown. Never mention that you are using Markdown.
             EOT;
+
+        DB::transaction(function () use ($instructions) {
+            try {
+                $this->migrator->add('ai-support-assistant.instructions', $instructions);
+            } catch (SettingAlreadyExists $exception) {
+                // do nothing
+            }
+
+            AiSupportAssistantDefaultInstructionsFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            AiSupportAssistantDefaultInstructionsFeature::deactivate();
+
+            $this->migrator->deleteIfExists('ai-support-assistant.instructions');
+        });
+    }
+};

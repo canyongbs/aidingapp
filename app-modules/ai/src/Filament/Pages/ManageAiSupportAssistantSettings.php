@@ -38,16 +38,19 @@ namespace AidingApp\Ai\Filament\Pages;
 
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\AiSupportAssistantDefaultInstructionsFeature;
 use App\Filament\Clusters\GlobalArtificialIntelligence;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class ManageAiSupportAssistantSettings extends SettingsPage
@@ -82,6 +85,27 @@ class ManageAiSupportAssistantSettings extends SettingsPage
                         Callout::make('Disabling the AI Support Assistant globally will also disable it in the portal settings. Any portal that currently has the AI Support Assistant enabled will have it turned off.')
                             ->warning()
                             ->visible(fn (Get $get) => app(AiSupportAssistantSettings::class)->is_enabled && ! $get('is_enabled')),
+                    ]),
+                Section::make('Assistant Instructions')
+                    ->description('The system prompt sent to the AI on every conversation. Tune this to control how the assistant engages — for example, to make it more inquisitive, stricter about staying on topic, or more concise.')
+                    ->visible(fn () => AiSupportAssistantDefaultInstructionsFeature::active())
+                    ->schema([
+                        Textarea::make('instructions')
+                            ->label('Instructions')
+                            ->required()
+                            ->rows(20)
+                            ->autosize()
+                            ->helperText('These instructions are prepended to every conversation as the assistant\'s system prompt. Changes take effect on the next message sent.')
+                            ->hintAction(
+                                Action::make('resetInstructions')
+                                    ->label('Reset to default')
+                                    ->icon('heroicon-m-arrow-path')
+                                    ->requiresConfirmation()
+                                    ->modalHeading('Reset instructions to default?')
+                                    ->modalDescription('This will replace your current instructions with the system default. You can save or discard the change afterwards.')
+                                    ->action(fn (Set $set) => $set('instructions', AiSupportAssistantSettings::defaultInstructions()))
+                            )
+                            ->columnSpanFull(),
                     ]),
             ])
             ->disabled(! auth()->user()->canAccessAiSettings());
