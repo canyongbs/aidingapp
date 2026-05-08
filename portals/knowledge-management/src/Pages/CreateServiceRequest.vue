@@ -36,10 +36,10 @@
     import { FormKitSchema } from '@formkit/vue';
     import { computed, defineProps, nextTick, onMounted, reactive, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import wizard from '../FormKit/wizard.js';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
@@ -521,9 +521,7 @@
                             <BaseButton color="success" size="md" @click="handleAiResolutionAccepted">
                                 Yes (Resolved)
                             </BaseButton>
-                            <BaseButton color="gray" size="md" @click="handleAiResolutionDeclined">
-                                No
-                            </BaseButton>
+                            <BaseButton color="gray" size="md" @click="handleAiResolutionDeclined"> No </BaseButton>
                         </div>
                     </div>
 

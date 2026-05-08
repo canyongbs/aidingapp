@@ -37,12 +37,12 @@
     import truncate from 'lodash/truncate';
     import { computed, defineProps, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
     import Tags from '../Components/Tags.vue';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();

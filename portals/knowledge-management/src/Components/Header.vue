@@ -37,13 +37,13 @@
     import Menubar from 'primevue/menubar';
     import { computed, defineProps, ref } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
     import { useTokenStore } from '../Stores/token.js';
     import GlobalSearchBar from './GlobalSearchBar.vue';
     import MobileMenu from './MobileMenu.vue';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
 
     const route = useRoute();
     const router = useRouter();

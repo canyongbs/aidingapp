@@ -35,12 +35,12 @@
     import { ArrowLeftIcon } from '@heroicons/vue/20/solid';
     import { defineProps, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';
     import Pagination from '../Components/Pagination.vue';
     import BaseBadge from '../Components/ui/BaseBadge.vue';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import BaseDetailSection from '../Components/ui/BaseDetailSection.vue';
     import BaseInputError from '../Components/ui/BaseInputError.vue';
     import BaseList from '../Components/ui/BaseList.vue';

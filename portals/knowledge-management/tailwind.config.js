@@ -35,5 +35,5 @@ import preset from './tailwind.config.preset.js';
 
 export default {
     presets: [preset],
-  content: ['./src/**/*.vue', './src/**/*.js', '../../resources/js/components/**/*.vue'],
+    content: ['./src/**/*.vue', './src/**/*.js', '../../resources/js/components/**/*.vue'],
 };

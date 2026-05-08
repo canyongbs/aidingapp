@@ -33,12 +33,12 @@
 -->
 <script setup>
     import { computed, onMounted, ref } from 'vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
     import Pagination from '../Components/Pagination.vue';
     import ServiceMonitorCard from '../Components/ServiceMonitorCard.vue';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import { consumer } from '../Services/Consumer.js';
 
     const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage', 'change-filter']);
