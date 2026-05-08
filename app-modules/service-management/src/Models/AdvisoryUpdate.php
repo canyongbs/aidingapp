@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\AdvisoryUpdateFactory;
-use App\Features\IncidentRenameFeature;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -64,16 +63,13 @@ class AdvisoryUpdate extends BaseModel implements Auditable
         'internal' => 'boolean',
     ];
 
-    public function getTable(): string
-    {
-        return IncidentRenameFeature::active() ? 'advisory_updates' : 'incident_updates';
-    }
+    protected $table = 'advisory_updates';
 
     /**
      * @return BelongsTo<Advisory, $this>
      */
     public function advisory(): BelongsTo
     {
-        return $this->belongsTo(Advisory::class, IncidentRenameFeature::active() ? 'advisory_id' : 'incident_id');
+        return $this->belongsTo(Advisory::class, 'advisory_id');
     }
 }

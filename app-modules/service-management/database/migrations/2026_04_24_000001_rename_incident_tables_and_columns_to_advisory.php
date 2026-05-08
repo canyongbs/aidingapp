@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\IncidentRenameFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -68,16 +67,12 @@ return new class () extends Migration {
             DB::table('audits')
                 ->where('auditable_type', 'incident_update')
                 ->update(['auditable_type' => 'advisory_update']);
-
-            IncidentRenameFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            IncidentRenameFeature::deactivate();
-
             DB::table('audits')
                 ->where('auditable_type', 'advisory')
                 ->update(['auditable_type' => 'incident']);
