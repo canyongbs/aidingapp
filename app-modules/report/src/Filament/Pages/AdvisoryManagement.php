@@ -37,7 +37,6 @@
 namespace AidingApp\Report\Filament\Pages;
 
 use App\Enums\Feature;
-use App\Features\IncidentRenameFeature;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Pages\Dashboard;
@@ -62,7 +61,7 @@ class AdvisoryManagement extends Dashboard
 
     public static function canAccess(): bool
     {
-        if ((IncidentRenameFeature::active() && ! Gate::check(Feature::AdvisoryManagement->getGateName())) || (! Gate::check(Feature::IncidentManagement->getGateName()))) {
+        if (! Gate::check(Feature::AdvisoryManagement->getGateName())) {
             return false;
         }
 

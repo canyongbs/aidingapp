@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\AdvisoryFactory;
 use AidingApp\Team\Models\Team;
-use App\Features\IncidentRenameFeature;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -66,10 +65,7 @@ class Advisory extends BaseModel implements Auditable
         'assigned_team_id',
     ];
 
-    public function getTable(): string
-    {
-        return IncidentRenameFeature::active() ? 'advisories' : 'incidents';
-    }
+    protected $table = 'advisories';
 
     /**
      * @return BelongsTo<Team, $this>
@@ -100,6 +96,6 @@ class Advisory extends BaseModel implements Auditable
      */
     public function advisoryUpdates(): HasMany
     {
-        return $this->hasMany(AdvisoryUpdate::class, IncidentRenameFeature::active() ? 'advisory_id' : 'incident_id');
+        return $this->hasMany(AdvisoryUpdate::class, 'advisory_id');
     }
 }
