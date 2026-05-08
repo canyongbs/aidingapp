@@ -67,7 +67,15 @@ class GenerateAiResolutionPrompt
             }
         }
 
-        $prompt = "You are an expert support technician reviewing a service request from {$requesterName} for the service request type: {$serviceRequestType->name}.";
+        $prompt = "Adopt the persona of a Level 1 helpdesk technician.\n\n";
+
+        $prompt .= "Review all available context, including:\n";
+        $prompt .= "- The knowledge and background information provided\n";
+        $prompt .= "- The customer's original question or request\n";
+        $prompt .= "- Any clarification questions already answered by the customer\n\n";
+
+        $prompt .= "## Background\n\n";
+        $prompt .= "The customer ({$requesterName}) submitted a service request for the service request type: {$serviceRequestType->name}.";
 
         if (! empty($serviceRequestType->description)) {
             $prompt .= " The service request type description is: {$serviceRequestType->description}.";
@@ -83,39 +91,33 @@ class GenerateAiResolutionPrompt
         }
 
         $prompt .= "\n## Your Task\n\n";
-        $prompt .= "Based on the knowledge base articles available to you and the information provided above, determine if you can provide a complete, actionable solution to this request.\n\n";
+        $prompt .= "Determine whether the customer's request can be fully resolved without collecting additional information and without requiring a human to take any follow-up action.\n\n";
 
-        $prompt .= "## CRITICAL: Response Format Constraints\n\n";
-        $prompt .= "The user will ONLY see your `proposed_answer` with two buttons: \"Yes (Resolved)\" and \"No\". They CANNOT provide any additional information, ask follow-up questions, or clarify anything. This is a one-shot response with no further interaction possible.\n\n";
-        $prompt .= "Your `proposed_answer` MUST be:\n";
-        $prompt .= "- A complete, self-contained solution that the user can act on immediately\n";
-        $prompt .= "- Written as a direct answer, NOT as a question or request for clarification\n";
-        $prompt .= "- Free of any phrases like \"Could you provide...\", \"Can you clarify...\", \"What is your...\", \"Please specify...\", or similar requests for information\n\n";
-        $prompt .= "If you do not have enough information to provide a definitive solution:\n";
-        $prompt .= "- Set a LOW confidence_score (below the threshold) so the ticket goes to a human agent\n";
-        $prompt .= "- In `proposed_answer`, state what you would need to know and provide any partial guidance you can\n";
-        $prompt .= "- In `reasoning`, explain what information is missing\n\n";
+        $prompt .= "A \"yes\" disposition means:\n";
+        $prompt .= "- You have enough information to fully answer the customer's request\n";
+        $prompt .= "- The response can directly resolve the issue or provide complete service steps\n";
+        $prompt .= "- No additional customer input is needed\n";
+        $prompt .= "- No human action is required to complete a dependent task\n\n";
+
+        $prompt .= "A \"no\" disposition means:\n";
+        $prompt .= "- More information is needed from the customer\n";
+        $prompt .= "- The request requires a human to perform an action\n";
+        $prompt .= "- The request depends on an external system, approval, account change, investigation, escalation, or other task that cannot be completed through the response alone\n";
+        $prompt .= "- You are not confident that the response fully resolves the customer's request\n\n";
 
         $prompt .= "## Response Format\n\n";
-        $prompt .= "You MUST respond in the following JSON format:\n";
-        $prompt .= "```json\n";
-        $prompt .= "{\n";
-        $prompt .= "  \"confidence_score\": <integer 1-100>,\n";
-        $prompt .= "  \"proposed_answer\": \"<your detailed solution here>\",\n";
-        $prompt .= "  \"reasoning\": \"<brief explanation of your confidence level>\"\n";
-        $prompt .= "}\n";
-        $prompt .= "```\n\n";
+        $prompt .= "Return only a structured JSON response using the following format.\n\n";
+        $prompt .= "For a \"yes\" disposition:\n";
+        $prompt .= "- Set `disposition` to `\"yes\"`\n";
+        $prompt .= "- Set `confidence` to a number from 1 to 100\n";
+        $prompt .= "- Set `detailed_response` to the complete customer-facing answer, formatted in Markdown when helpful\n\n";
 
-        $prompt .= "## Confidence Score Guidelines\n\n";
-        $prompt .= "The confidence_score should reflect how certain you are that your proposed_answer will fully resolve the user's issue without any human intervention:\n";
-        $prompt .= "- 90-100: Highly confident - clear solution with direct knowledge base support, no human action required\n";
-        $prompt .= "- 70-89: Moderately confident - likely solution but may need verification\n";
-        $prompt .= "- 50-69: Somewhat confident - partial solution or general guidance\n";
-        $prompt .= "- Below 50: Not confident - insufficient information, requires human support, configuration changes, or work on behalf of the user\n\n";
-        $prompt .= "IMPORTANT: Only provide a high confidence score if:\n";
-        $prompt .= "1. You have enough information to provide a complete answer\n";
-        $prompt .= "2. The solution is something the user can implement themselves\n";
-        $prompt .= "3. No support representative needs to make system changes, update configurations, or perform actions on their behalf\n";
+        $prompt .= "For a \"no\" disposition:\n";
+        $prompt .= "- Set `disposition` to `\"no\"`\n";
+        $prompt .= "- Set `confidence` to an empty string\n";
+        $prompt .= "- Set `detailed_response` to an empty string\n\n";
+
+        $prompt .= "Do not include any explanation outside the JSON response.\n";
 
         return $prompt;
     }
