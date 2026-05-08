@@ -167,8 +167,18 @@
             </div>
         </header>
 
-        <nav class="flex grow flex-col gap-y-7 overflow-x-hidden overflow-y-auto px-6 py-8">
-            <ul class="-mx-2 flex flex-col gap-y-1">
+        <nav class="flex grow flex-col gap-y-7 overflow-x-hidden overflow-y-auto px-4 py-4">
+            <router-link
+                v-if="hasServiceManagement && user"
+                :to="{ name: 'create-service-request' }"
+                @click="sidebarOpen = false"
+                class="relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 bg-brand-600 text-white hover:bg-brand-500 focus-visible:ring-2 focus-visible:ring-brand-500/50"
+            >
+                <PlusIcon class="size-5" />
+                New Request
+            </router-link>
+
+            <ul class="flex flex-col gap-y-1">
                 <li v-for="item in visibleMenuItems" :key="item.label">
                     <router-link :to="{ name: item.routeName }" custom v-slot="{ navigate, isActive, isExactActive }">
                         <a
@@ -294,7 +304,7 @@
                 <router-link
                     v-if="hasServiceManagement && user"
                     :to="{ name: 'create-service-request' }"
-                    class="relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 bg-white text-gray-950 ring-1 ring-gray-950/10 hover:bg-gray-50 focus-visible:ring-2"
+                    class="relative hidden sm:inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 bg-white text-gray-950 ring-1 ring-gray-950/10 hover:bg-gray-50 focus-visible:ring-2"
                 >
                     <PlusIcon class="size-5" />
                     New Request

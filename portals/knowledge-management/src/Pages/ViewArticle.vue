@@ -186,7 +186,7 @@
         </template>
 
         <template #description>
-            <div class="flex items-center gap-x-4">
+            <div class="flex flex-col sm:flex-row sm:items-center gap-y-1 gap-x-4">
                 <div class="flex items-center gap-x-1.5">
                     <EyeIcon class="size-4 shrink-0" aria-hidden="true" />
                     <span>{{ portalViewCount }} Views</span>
