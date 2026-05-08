@@ -437,7 +437,7 @@
                                     :href="mediaItem.url"
                                     target="_blank"
                                     download
-                                    class="flex items-center space-x-2 overflow-hidden rounded-lg border border-gray-100 bg-white py-2 pl-0 pr-3 text-sm transition hover:bg-gray-200"
+                                    class="inline-flex w-fit items-center space-x-2 rounded-lg border border-gray-100 bg-white px-2 py-1.5 text-sm transition hover:bg-gray-200"
                                 >
                                     <svg
                                         class="h-4 w-4 shrink-0 opacity-70"
