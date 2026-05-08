@@ -95,6 +95,14 @@
             type: Boolean,
             default: false,
         },
+        outlined: {
+            type: Boolean,
+            default: false,
+        },
+        labelSrOnly: {
+            type: Boolean,
+            default: false,
+        },
     });
 
     const emit = defineEmits(['click']);
@@ -112,107 +120,95 @@
         return props.tag;
     });
 
-    const sizeClasses = computed(() => {
-        const sizes = {
-            xs: 'gap-1 px-2 py-1.5 text-xs',
-            sm: 'gap-1 px-2.5 py-1.5 text-sm',
-            md: 'gap-1.5 px-3 py-2 text-sm',
-            lg: 'gap-1.5 px-3.5 py-2.5 text-sm',
-            xl: 'gap-1.5 px-4 py-3 text-sm',
-        };
+    // fi-size-* modifier class; 'md' is the default — no modifier class needed.
+    const sizeClass = computed(() => {
+        const map = { xs: 'fi-size-xs', sm: 'fi-size-sm', lg: 'fi-size-lg', xl: 'fi-size-xl' };
 
-        return sizes[props.size];
+        return map[props.size] ?? null;
     });
 
-    const iconSizeClasses = computed(() => {
+    const iconSizeClass = computed(() => {
         return ['xs', 'sm'].includes(props.size) ? 'h-4 w-4' : 'h-5 w-5';
     });
 
-    const colorClasses = computed(() => {
-        const neutral = {
-            bg: '#ffffff',
-            text: '#09090b',
-            hoverBg: '#f9fafb',
-            hoverText: '#09090b',
-            ring: 'rgba(9, 9, 11, 0.1)',
-            focusRing: 'rgba(156, 163, 175, 0.4)',
-            iconText: '#9ca3af',
-        };
+    // Only colored buttons (non-gray) get fi-color + CSS custom properties.
+    const isColored = computed(() => props.color !== 'gray');
 
-        const colors = {
+    // Mirrors Filament ButtonComponent color mapping:
+    // --bg/--text for normal state, --hover-bg/--hover-text for hover,
+    // --dark-* variants for dark mode.
+    const colorVars = computed(() => {
+        if (!isColored.value) return {};
+
+        const map = {
             primary: {
-                bg: '#2563eb',
-                text: '#ffffff',
-                hoverBg: '#1d4ed8',
-                hoverText: '#ffffff',
-                ring: 'rgba(37, 99, 235, 0.5)',
-                focusRing: 'rgba(59, 130, 246, 0.5)',
-                iconText: '#ffffff',
+                '--bg': '#2563eb',
+                '--text': '#ffffff',
+                '--hover-bg': '#3b82f6',
+                '--hover-text': '#ffffff',
+                '--dark-bg': '#3b82f6',
+                '--dark-text': '#ffffff',
+                '--dark-hover-bg': '#60a5fa',
+                '--dark-hover-text': '#ffffff',
+                '--focus-ring': 'rgba(37, 99, 235, 0.5)',
             },
             danger: {
-                bg: '#dc2626',
-                text: '#ffffff',
-                hoverBg: '#b91c1c',
-                hoverText: '#ffffff',
-                ring: 'rgba(220, 38, 38, 0.5)',
-                focusRing: 'rgba(239, 68, 68, 0.5)',
-                iconText: '#ffffff',
+                '--bg': '#dc2626',
+                '--text': '#ffffff',
+                '--hover-bg': '#ef4444',
+                '--hover-text': '#ffffff',
+                '--dark-bg': '#ef4444',
+                '--dark-text': '#ffffff',
+                '--dark-hover-bg': '#f87171',
+                '--dark-hover-text': '#ffffff',
+                '--focus-ring': 'rgba(220, 38, 38, 0.5)',
             },
-            gray: neutral,
             info: {
-                bg: '#0284c7',
-                text: '#ffffff',
-                hoverBg: '#0369a1',
-                hoverText: '#ffffff',
-                ring: 'rgba(2, 132, 199, 0.5)',
-                focusRing: 'rgba(14, 165, 233, 0.5)',
-                iconText: '#ffffff',
+                '--bg': '#0284c7',
+                '--text': '#ffffff',
+                '--hover-bg': '#0ea5e9',
+                '--hover-text': '#ffffff',
+                '--dark-bg': '#0ea5e9',
+                '--dark-text': '#ffffff',
+                '--dark-hover-bg': '#38bdf8',
+                '--dark-hover-text': '#ffffff',
+                '--focus-ring': 'rgba(2, 132, 199, 0.5)',
             },
             success: {
-                bg: '#16a34a',
-                text: '#ffffff',
-                hoverBg: '#15803d',
-                hoverText: '#ffffff',
-                ring: 'rgba(22, 163, 74, 0.5)',
-                focusRing: 'rgba(34, 197, 94, 0.5)',
-                iconText: '#ffffff',
+                '--bg': '#16a34a',
+                '--text': '#ffffff',
+                '--hover-bg': '#22c55e',
+                '--hover-text': '#ffffff',
+                '--dark-bg': '#22c55e',
+                '--dark-text': '#ffffff',
+                '--dark-hover-bg': '#4ade80',
+                '--dark-hover-text': '#ffffff',
+                '--focus-ring': 'rgba(22, 163, 74, 0.5)',
             },
             warning: {
-                bg: '#f59e0b',
-                text: '#451a03',
-                hoverBg: '#d97706',
-                hoverText: '#451a03',
-                ring: 'rgba(245, 158, 11, 0.5)',
-                focusRing: 'rgba(251, 191, 36, 0.5)',
-                iconText: '#451a03',
+                '--bg': '#d97706',
+                '--text': '#ffffff',
+                '--hover-bg': '#f59e0b',
+                '--hover-text': '#ffffff',
+                '--dark-bg': '#f59e0b',
+                '--dark-text': '#fff7ed',
+                '--dark-hover-bg': '#fbbf24',
+                '--dark-hover-text': '#fff7ed',
+                '--focus-ring': 'rgba(217, 119, 6, 0.5)',
             },
         };
 
-        return colors[props.color] ?? colors.primary;
+        return map[props.color] ?? {};
     });
 
-    const colorVariableStyle = computed(() => {
-        return {
-            '--btn-bg': colorClasses.value.bg,
-            '--btn-text': colorClasses.value.text,
-            '--btn-hover-bg': colorClasses.value.hoverBg,
-            '--btn-hover-text': colorClasses.value.hoverText,
-            '--btn-ring': colorClasses.value.ring,
-            '--btn-focus-ring': colorClasses.value.focusRing,
-            '--btn-icon': colorClasses.value.iconText,
-        };
-    });
-
-    const baseClasses = computed(() => {
-        return [
-            // Mirrors Filament fi-btn base styles and non-outlined color mode.
-            'relative inline-grid grid-flow-col items-center justify-center rounded-lg font-medium transition duration-75 outline-none',
-            'bg-[var(--btn-bg)] text-[var(--btn-text)] ring-1 ring-[var(--btn-ring)]',
-            'hover:bg-[var(--btn-hover-bg)] hover:text-[var(--btn-hover-text)]',
-            sizeClasses.value,
-            isDisabled.value ? 'cursor-default opacity-70 pointer-events-none' : 'focus-visible:ring-2 focus-visible:ring-[var(--btn-focus-ring)]',
-        ];
-    });
+    // Assembles the fi-btn class list, mirroring Filament's ->class([...]) call.
+    const buttonClasses = computed(() => [
+        'fi-btn',
+        sizeClass.value,
+        isColored.value && 'fi-color',
+        props.outlined && 'fi-outlined',
+        isDisabled.value && 'fi-disabled',
+    ]);
 
     const resolvedIcon = computed(() => {
         if (!props.icon || typeof props.icon !== 'string') {
@@ -298,7 +294,7 @@
     }
 
     const iconClasses = computed(() => {
-        return ['fi-icon shrink-0 transition duration-75', iconSizeClasses.value, 'text-[var(--btn-icon)]'];
+        return ['fi-icon shrink-0 transition duration-75', iconSizeClass.value];
     });
 </script>
 
@@ -306,8 +302,8 @@
     <component
         :is="componentTag"
         v-bind="componentAttrs"
-        :class="baseClasses"
-        :style="colorVariableStyle"
+        :class="buttonClasses"
+        :style="colorVars"
         @click="handleClick"
     >
         <template v-if="beforeIconVisible">
@@ -334,7 +330,8 @@
             <component v-else :is="resolvedIcon" :class="iconClasses" aria-hidden="true" />
         </template>
 
-        <span v-if="hasLabel"><slot /></span>
+        <span v-if="hasLabel && labelSrOnly" class="sr-only"><slot /></span>
+        <span v-else-if="hasLabel"><slot /></span>
 
         <template v-if="afterIconVisible">
             <svg

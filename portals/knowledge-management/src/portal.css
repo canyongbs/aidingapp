@@ -34,6 +34,7 @@
 @import '../src/FormKit/index.css' layer(base);
 
 @import 'tailwindcss';
+@import '../../../resources/js/components/base-button.css' layer(components);
 @import './preflight-v3-compat.css' layer(base);
 @import 'tailwindcss-primeui';
 @import '../src/assets/primevue/tailwind.css' layer(components);
