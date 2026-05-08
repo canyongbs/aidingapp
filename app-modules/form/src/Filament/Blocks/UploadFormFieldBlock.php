@@ -72,4 +72,10 @@ class UploadFormFieldBlock extends FormFieldBlock
     {
         return [];
     }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.upload';
+    }
+
 }
