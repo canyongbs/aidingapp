@@ -63,12 +63,15 @@ class CheckKnowledgeBaseArticleLinksJob implements ShouldBeUnique, ShouldQueue
 
     public function uniqueFor(): int
     {
-        return 300;
+        return 180;
     }
 
     public function handle(): void
     {
-        $urls = $this->extractLinks();
+        $urls = array_values(array_unique(array_merge(
+            $this->extractLinks(),
+            $this->extractVideoEmbedUrls(),
+        )));
 
         if (empty($urls)) {
             $this->knowledgeBaseItem->updateQuietly([
@@ -118,6 +121,56 @@ class CheckKnowledgeBaseArticleLinksJob implements ShouldBeUnique, ShouldQueue
 
             return in_array($scheme, ['http', 'https']);
         }));
+    }
+
+    /**
+     * @return array<string>
+     */
+    protected function extractVideoEmbedUrls(): array
+    {
+        $content = $this->knowledgeBaseItem->article_details;
+
+        if (empty($content)) {
+            return [];
+        }
+
+        $urls = [];
+        $this->findVideoEmbedNodes($content, $urls);
+
+        return array_values(array_unique($urls));
+    }
+
+    /**
+     * @param array<mixed> $nodes
+     * @param array<string> $urls
+     */
+    protected function findVideoEmbedNodes(array $nodes, array &$urls): void
+    {
+        foreach ($nodes as $node) {
+            if (! is_array($node)) {
+                continue;
+            }
+
+            if (($node['type'] ?? null) === 'videoEmbed'
+                && isset($node['attrs']['src'])
+                && is_string($node['attrs']['src'])
+                && $node['attrs']['src'] !== '') {
+                $src = $node['attrs']['src'];
+                $parsed = parse_url($src);
+                $host = $parsed['host'] ?? null;
+                $scheme = $parsed['scheme'] ?? null;
+
+                if (! blank($host)
+                    && ! filter_var($host, FILTER_VALIDATE_IP)
+                    && in_array($scheme, ['http', 'https'])) {
+                    $urls[] = $src;
+                }
+            }
+
+            if (isset($node['content']) && is_array($node['content'])) {
+                $this->findVideoEmbedNodes($node['content'], $urls);
+            }
+        }
     }
 
     /**
