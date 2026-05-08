@@ -34,35 +34,14 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestAssignmentHistoryFeature;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+namespace App\Features;
 
-return new class () extends Migration {
-    public function up(): void
+use App\Support\AbstractFeatureFlag;
+
+class ServiceRequestAssignmentHistoryFeature extends AbstractFeatureFlag
+{
+    public function resolve(mixed $scope): mixed
     {
-        DB::transaction(function () {
-            Schema::table('service_request_assignments', function (Blueprint $table) {
-                $table->foreignUuid('service_request_status_id')
-                    ->nullable()
-                    ->constrained('service_request_statuses')
-                    ->nullOnDelete();
-            });
-
-            ServiceRequestAssignmentHistoryFeature::activate();
-        });
+        return false;
     }
-
-    public function down(): void
-    {
-        DB::transaction(function () {
-            ServiceRequestAssignmentHistoryFeature::deactivate();
-
-            Schema::table('service_request_assignments', function (Blueprint $table) {
-                $table->dropConstrainedForeignId('service_request_status_id');
-            });
-        });
-    }
-};
+}

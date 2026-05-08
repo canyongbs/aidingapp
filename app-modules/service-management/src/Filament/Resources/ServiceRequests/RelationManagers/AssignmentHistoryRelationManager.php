@@ -37,18 +37,30 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use App\Features\ServiceRequestAssignmentHistoryFeature;
 use App\Models\User;
 use App\Settings\DisplaySettings;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Livewire\Attributes\On;
 
 class AssignmentHistoryRelationManager extends RelationManager
 {
     protected static string $relationship = 'assignments';
 
     protected static ?string $title = 'History';
+
+    public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
+    {
+        return ServiceRequestAssignmentHistoryFeature::active()
+            && parent::canViewForRecord($ownerRecord, $pageClass);
+    }
+
+    #[On('assignment-history-refresh')]
+    public function onAssignmentHistoryRefresh(): void {}
 
     public function table(Table $table): Table
     {
@@ -83,6 +95,7 @@ class AssignmentHistoryRelationManager extends RelationManager
                 'assignedBy.team',
                 'serviceRequestStatus',
             ]))
+            ->emptyStateHeading('No assignment history')
             ->defaultSort('assigned_at', 'desc')
             ->columns([
                 TextColumn::make('user.name')
@@ -90,21 +103,22 @@ class AssignmentHistoryRelationManager extends RelationManager
                     ->description(fn (ServiceRequestAssignment $record): ?string => $userLine($record->user)),
                 TextColumn::make('assignedBy.name')
                     ->label('By')
-                    ->placeholder('—')
+                    ->state(fn (ServiceRequestAssignment $record): string => $record->assignedBy
+                        ? $record->assignedBy->name
+                        : 'Auto-Assignment')
                     ->description(fn (ServiceRequestAssignment $record): ?string => $userLine($record->assignedBy)),
                 TextColumn::make('serviceRequestStatus.name')
                     ->label('Status')
+                    ->badge()
+                    ->color(fn (ServiceRequestAssignment $record): ?string => $record->serviceRequestStatus?->color?->value)
                     ->placeholder('—'),
                 TextColumn::make('assigned_at')
                     ->label('Date')
                     ->dateTime('M j, Y')
-                    ->description(fn (ServiceRequestAssignment $record): ?string => $record->assigned_at
-                        ?->copy()
+                    ->description(fn (ServiceRequestAssignment $record): string => $record->assigned_at
+                        ->copy()
                         ->setTimezone($timezone)
                         ->format('g:i A (T)')),
-            ])
-            ->paginated([10, 25, 50])
-            ->headerActions([])
-            ->recordActions([]);
+            ]);
     }
 }

@@ -37,23 +37,41 @@
 namespace App\Filament\Concerns;
 
 use Filament\Resources\RelationManagers\RelationGroup;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\RelationManagers\RelationManagerConfiguration;
+use Illuminate\Database\Eloquent\Model;
 
 trait FiltersManagersFromGroups
 {
-    public static function filterRelationManagers($relationManager, $record)
+    /**
+     * @param  class-string<RelationManager>|RelationManagerConfiguration|RelationGroup  $relationManager
+     *
+     * @return class-string<RelationManager>|RelationManagerConfiguration|RelationGroup|null
+     */
+    public static function filterRelationManagers(string | RelationManagerConfiguration | RelationGroup $relationManager, ?Model $record): string | RelationManagerConfiguration | RelationGroup | null
     {
         if ($relationManager instanceof RelationGroup) {
             $filteredManagers = collect($relationManager->getManagers())
-                ->reject(fn ($manager) => $record && ! $manager::canViewForRecord($record, static::class))
+                ->reject(fn (string | RelationManagerConfiguration $manager): bool => $record && ! self::resolveRelationManagerClass($manager)::canViewForRecord($record, static::class))
                 ->all();
 
             return RelationGroup::make($relationManager->getLabel(), $filteredManagers);
         }
 
-        if ($record && ! $relationManager::canViewForRecord($record, static::class)) {
+        if ($record && ! self::resolveRelationManagerClass($relationManager)::canViewForRecord($record, static::class)) {
             return null;
         }
 
         return $relationManager;
+    }
+
+    /**
+     * @param  class-string<RelationManager>|RelationManagerConfiguration  $manager
+     *
+     * @return class-string<RelationManager>
+     */
+    private static function resolveRelationManagerClass(string | RelationManagerConfiguration $manager): string
+    {
+        return $manager instanceof RelationManagerConfiguration ? $manager->relationManager : $manager;
     }
 }
