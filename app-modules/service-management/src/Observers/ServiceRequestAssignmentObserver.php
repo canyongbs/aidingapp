@@ -62,6 +62,10 @@ class ServiceRequestAssignmentObserver
             $type->managerTeams()->whereRelation('users', 'users.id', $serviceRequestAssignment->user_id)->exists();
 
         throw_if(! $isManager, new AttemptedToAssignNonManagerToServiceRequest());
+
+        if (blank($serviceRequestAssignment->service_request_status_id)) {
+            $serviceRequestAssignment->service_request_status_id = $serviceRequestAssignment->serviceRequest->status_id;
+        }
     }
 
     public function created(ServiceRequestAssignment $serviceRequestAssignment): void

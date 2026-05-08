@@ -38,13 +38,17 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 
 use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestLocked;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\AssignedToRelationManager;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\AssignmentHistoryRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\CreatedByRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use App\Filament\Concerns\FiltersManagersFromGroups;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Resources\RelationManagers\RelationGroup;
 use Illuminate\Database\Eloquent\Model;
 
 class ManageAssignments extends ManageRelatedRecords
 {
+    use FiltersManagersFromGroups;
     use ServiceRequestLocked;
 
     protected static string $resource = ServiceRequestResource::class;
@@ -75,10 +79,14 @@ class ManageAssignments extends ManageRelatedRecords
     private static function managers(?Model $record = null): array
     {
         return collect([
-            AssignedToRelationManager::class,
+            RelationGroup::make('Assigned To', [
+                AssignedToRelationManager::class,
+                AssignmentHistoryRelationManager::class,
+            ]),
             CreatedByRelationManager::class,
         ])
-            ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
+            ->map(fn ($relationManager) => self::filterRelationManagers($relationManager, $record))
+            ->filter()
             ->toArray();
     }
 }
