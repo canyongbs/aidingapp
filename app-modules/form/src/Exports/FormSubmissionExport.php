@@ -60,7 +60,7 @@ class FormSubmissionExport implements FromCollection, WithHeadings, WithMapping
     }
 
     /**
-     * @return array<int, string>
+     * @return array<string>
      */
     public function headings(): array
     {
