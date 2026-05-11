@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use App\Enums\Feature;
 use App\Settings\DisplaySettings;
 use Filament\Infolists\Components\TextEntry;
@@ -55,6 +56,11 @@ class Feedback extends ViewRecord
     protected ?string $heading = 'Feedback';
 
     protected static ?string $breadcrumb = 'Feedback';
+
+    public static function canAccess(array $arguments = []): bool
+    {
+        return auth()->user()->can('viewAny', [ServiceRequestFeedback::class, $arguments['record']]);
+    }
 
     public function mount(int | string $record): void
     {

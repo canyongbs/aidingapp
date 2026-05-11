@@ -114,21 +114,27 @@ class EvaluateServiceRequestAiResolutionController extends Controller
             ]);
         }
 
-        $meetsThreshold = $evaluation->confidenceScore >= $settings->confidence_threshold;
+        if ($evaluation->disposition !== 'yes') {
+            return response()->json([
+                'is_ai_resolution_available' => false,
+            ]);
+        }
+
+        $meetsThreshold = $evaluation->confidence >= $settings->confidence_threshold;
 
         if (! $meetsThreshold) {
             return response()->json([
                 'is_ai_resolution_available' => false,
-                'confidence_score' => $evaluation->confidenceScore,
+                'confidence_score' => $evaluation->confidence,
             ]);
         }
 
         return response()->json([
             'is_ai_resolution_available' => true,
-            'confidence_score' => $evaluation->confidenceScore,
-            'proposed_answer' => $evaluation->proposedAnswer,
+            'confidence_score' => $evaluation->confidence,
+            'proposed_answer' => $evaluation->detailedResponse,
             'encrypted_proposed_answer' => encrypt(json_encode([
-                'text' => $evaluation->proposedAnswer,
+                'text' => $evaluation->detailedResponse,
                 'contact_id' => $contact->getKey(),
                 'type_id' => $type->getKey(),
             ])),

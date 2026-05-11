@@ -129,18 +129,21 @@ class ListServiceRequestTypes extends ListRecords
             'treeData.uncategorized_types' => 'array',
             'treeData.new_categories' => 'array',
             'treeData.new_types' => 'array',
-            'treeData.new_types.*.name' => ['required', 'string', Rule::unique('service_request_types', 'name')->withoutTrashed()],
+            'treeData.new_types.*.name' => ['required', 'string', Rule::unique('service_request_types', 'name')->withoutTrashed()->whereNull('archived_at')],
             'treeData.updated_categories' => 'array',
             'treeData.updated_types' => 'array',
             'treeData.deleted_categories' => 'array',
             'treeData.deleted_types' => 'array',
             'treeData.archived_types' => 'array',
+            'treeData.restore_types' => 'array',
         ]);
 
         $this->assertMaxCategoryDepth($treeData['categories'] ?? []);
 
         DB::transaction(function () use ($treeData) {
             $newCategoryIds = [];
+
+            $this->handleRestoredTypes($treeData['restore_types'] ?? []);
 
             if (! empty($treeData['new_categories'])) {
                 foreach ($treeData['new_categories'] as $newCategory) {
@@ -201,7 +204,7 @@ class ListServiceRequestTypes extends ListRecords
                 foreach ($treeData['updated_types'] as $updatedType) {
                     Validator::validate(
                         ['name' => trim($updatedType['name'])],
-                        ['name' => ['required', 'string', Rule::unique('service_request_types', 'name')->ignore($updatedType['id'])->withoutTrashed()]],
+                        ['name' => ['required', 'string', Rule::unique('service_request_types', 'name')->ignore($updatedType['id'])->withoutTrashed()->whereNull('archived_at')]],
                     );
 
                     ServiceRequestType::where('id', $updatedType['id'])->update([
@@ -238,6 +241,30 @@ class ListServiceRequestTypes extends ListRecords
             ->success()
             ->title('Changes saved successfully')
             ->send();
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    #[Renderless]
+    public function checkArchivedTypeName(string $name): ?array
+    {
+        $type = ServiceRequestType::query()
+            ->onlyArchived()
+            ->where('name', trim($name))
+            ->withCount('serviceRequests')
+            ->first();
+
+        if (! $type) {
+            return null;
+        }
+
+        return [
+            'id' => $type->id,
+            'name' => $type->name,
+            'service_requests_count' => $type->service_requests_count,
+            'view_url' => ServiceRequestTypeResource::getUrl('view', ['record' => $type]),
+        ];
     }
 
     /**
@@ -299,6 +326,25 @@ class ListServiceRequestTypes extends ListRecords
         }
 
         $category->delete();
+    }
+
+    /**
+     * @param array<int, string> $typeIds
+     */
+    protected function handleRestoredTypes(array $typeIds): void
+    {
+        if (empty($typeIds)) {
+            return;
+        }
+
+        $types = ServiceRequestType::query()
+            ->onlyArchived()
+            ->whereIn('id', $typeIds)
+            ->get();
+
+        foreach ($types as $type) {
+            $type->unarchive();
+        }
     }
 
     /**

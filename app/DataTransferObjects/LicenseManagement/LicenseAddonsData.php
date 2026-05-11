@@ -56,7 +56,6 @@ class LicenseAddonsData extends Data
         public bool $licenseManagement = false,
         public bool $projectManagement = false,
         public bool $advisoryManagement = false,
-        public bool $incidentManagement = false, //TODO: IncidentRenameFeature clean up - remove this when you remove the feature flag.
         public bool $serviceMonitoring = false,
     ) {}
 }
