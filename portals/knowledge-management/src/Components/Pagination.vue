@@ -69,7 +69,7 @@
 </script>
 
 <template>
-    <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+    <div class="flex items-center justify-between bg-white px-4 py-3 sm:px-6">
         <div class="flex flex-1 justify-between sm:hidden">
             <BaseButton color="gray" size="md" :disabled="currentPage === 1" @click="$emit('fetchPreviousPage')">
                 Previous
@@ -109,7 +109,7 @@
                         v-if="currentPage > 4"
                         color="gray"
                         size="md"
-                        class="!rounded-none"
+                        class="!rounded-none w-9"
                         @click="$emit('fetchPage', 1)"
                     >
                         1
@@ -125,7 +125,7 @@
                         :color="page === currentPage ? 'primary' : 'gray'"
                         :disabled="page === currentPage"
                         size="md"
-                        class="!rounded-none"
+                        class="!rounded-none w-9"
                         @click="$emit('fetchPage', page)"
                     >
                         {{ page }}
@@ -138,7 +138,7 @@
                         v-if="currentPage < lastPage - 3"
                         color="gray"
                         size="md"
-                        class="!rounded-none"
+                        class="!rounded-none w-9"
                         @click="$emit('fetchPage', lastPage)"
                     >
                         {{ lastPage }}

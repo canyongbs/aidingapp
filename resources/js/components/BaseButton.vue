@@ -95,14 +95,6 @@
             type: Boolean,
             default: false,
         },
-        outlined: {
-            type: Boolean,
-            default: false,
-        },
-        labelSrOnly: {
-            type: Boolean,
-            default: false,
-        },
     });
 
     const emit = defineEmits(['click']);
@@ -112,163 +104,129 @@
 
     const isDisabled = computed(() => props.disabled || props.loading);
 
-    const componentTag = computed(() => {
-        if (props.tag === 'router-link') {
-            return RouterLink;
-        }
+    const componentTag = computed(() => (props.tag === 'router-link' ? RouterLink : props.tag));
 
-        return props.tag;
-    });
-
-    // fi-size-* modifier class; 'md' is the default — no modifier class needed.
-    const sizeClass = computed(() => {
-        const map = { xs: 'fi-size-xs', sm: 'fi-size-sm', lg: 'fi-size-lg', xl: 'fi-size-xl' };
-
-        return map[props.size] ?? null;
-    });
-
-    const iconSizeClass = computed(() => {
-        return ['xs', 'sm'].includes(props.size) ? 'h-4 w-4' : 'h-5 w-5';
-    });
-
-    // Only colored buttons (non-gray) get fi-color + CSS custom properties.
-    const isColored = computed(() => props.color !== 'gray');
-
-    // Mirrors Filament ButtonComponent color mapping:
-    // --bg/--text for normal state, --hover-bg/--hover-text for hover,
-    // --dark-* variants for dark mode.
     const colorVars = computed(() => {
-        if (!isColored.value) return {};
-
         const map = {
+            gray: {
+                '--bg': '#ffffff',
+                '--text': '#030712',
+                '--hover-bg': '#f9fafb',
+                '--hover-text': '#030712',
+                '--ring': 'rgba(12, 10, 9, 0.1)',
+            },
             primary: {
-                '--bg': '#2563eb',
+                '--bg': 'rgba(var(--primary-600), 1)',
                 '--text': '#ffffff',
-                '--hover-bg': '#3b82f6',
+                '--hover-bg': 'rgba(var(--primary-500), 1)',
                 '--hover-text': '#ffffff',
-                '--dark-bg': '#3b82f6',
-                '--dark-text': '#ffffff',
-                '--dark-hover-bg': '#60a5fa',
-                '--dark-hover-text': '#ffffff',
-                '--focus-ring': 'rgba(37, 99, 235, 0.5)',
+                '--ring': 'transparent',
             },
             danger: {
                 '--bg': '#dc2626',
                 '--text': '#ffffff',
                 '--hover-bg': '#ef4444',
                 '--hover-text': '#ffffff',
-                '--dark-bg': '#ef4444',
-                '--dark-text': '#ffffff',
-                '--dark-hover-bg': '#f87171',
-                '--dark-hover-text': '#ffffff',
-                '--focus-ring': 'rgba(220, 38, 38, 0.5)',
+                '--ring': 'transparent',
             },
             info: {
                 '--bg': '#0284c7',
                 '--text': '#ffffff',
                 '--hover-bg': '#0ea5e9',
                 '--hover-text': '#ffffff',
-                '--dark-bg': '#0ea5e9',
-                '--dark-text': '#ffffff',
-                '--dark-hover-bg': '#38bdf8',
-                '--dark-hover-text': '#ffffff',
-                '--focus-ring': 'rgba(2, 132, 199, 0.5)',
+                '--ring': 'transparent',
             },
             success: {
                 '--bg': '#16a34a',
                 '--text': '#ffffff',
                 '--hover-bg': '#22c55e',
                 '--hover-text': '#ffffff',
-                '--dark-bg': '#22c55e',
-                '--dark-text': '#ffffff',
-                '--dark-hover-bg': '#4ade80',
-                '--dark-hover-text': '#ffffff',
-                '--focus-ring': 'rgba(22, 163, 74, 0.5)',
+                '--ring': 'transparent',
             },
             warning: {
                 '--bg': '#d97706',
                 '--text': '#ffffff',
                 '--hover-bg': '#f59e0b',
                 '--hover-text': '#ffffff',
-                '--dark-bg': '#f59e0b',
-                '--dark-text': '#fff7ed',
-                '--dark-hover-bg': '#fbbf24',
-                '--dark-hover-text': '#fff7ed',
-                '--focus-ring': 'rgba(217, 119, 6, 0.5)',
+                '--ring': 'transparent',
             },
         };
 
         return map[props.color] ?? {};
     });
 
-    // Assembles the fi-btn class list, mirroring Filament's ->class([...]) call.
+    const buttonStyle = computed(() => {
+        const iconOnlyPadMap = { xs: '0.375rem', sm: '0.375rem', md: '0.5rem', lg: '0.625rem', xl: '0.75rem' };
+
+        return {
+            ...colorVars.value,
+            'border-radius': 'var(--rounding-md, 0.5rem)',
+            ...(props.iconOnly ? { padding: iconOnlyPadMap[props.size] ?? '0.5rem' } : {}),
+        };
+    });
+
     const buttonClasses = computed(() => [
-        'fi-btn',
-        sizeClass.value,
-        isColored.value && 'fi-color',
-        props.outlined && 'fi-outlined',
-        isDisabled.value && 'fi-disabled',
+        'relative inline-grid grid-flow-col items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium transition duration-75 outline-none',
+        props.size === 'xs' && 'gap-1 px-2 py-1.5 text-xs',
+        props.size === 'sm' && 'gap-1 px-2.5 py-1.5',
+        props.size === 'lg' && 'gap-1.5 px-3.5 py-2.5',
+        props.size === 'xl' && 'gap-1.5 px-4 py-3',
+        'bg-(--bg) text-(--text) shadow-[0_0_0_1px_var(--ring,transparent)]',
+        !isDisabled.value && 'hover:bg-(--hover-bg) hover:text-(--hover-text) focus-visible:ring-2',
+        isDisabled.value && 'cursor-default opacity-70 pointer-events-none',
     ]);
+
+    const iconClasses = computed(() => [
+        'shrink-0 transition duration-75',
+        ['xs', 'sm'].includes(props.size) ? 'h-4 w-4' : 'h-5 w-5',
+    ]);
+
+    const iconPx = computed(() => (['xs', 'sm'].includes(props.size) ? 16 : 20));
 
     const resolvedIcon = computed(() => {
         if (!props.icon || typeof props.icon !== 'string') {
             return props.icon;
         }
 
-        const toPascalCase = (value) => {
-            return value
+        const toPascalCase = (value) =>
+            value
                 .split('-')
                 .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
                 .join('');
-        };
 
-        const byPrefix = {
-            m: HeroiconsMini,
-            o: HeroiconsOutline,
-            s: HeroiconsSolid,
-        };
+        const byPrefix = { m: HeroiconsMini, o: HeroiconsOutline, s: HeroiconsSolid };
 
         if (props.icon.startsWith('heroicon-')) {
-            const segments = props.icon.split('-');
+            const [, prefix, ...rest] = props.icon.split('-');
+            const name = `${toPascalCase(rest.join('-'))}Icon`;
 
-            if (segments.length >= 3) {
-                const prefix = segments[1];
-                const iconName = `${toPascalCase(segments.slice(2).join('-'))}Icon`;
-
-                if (byPrefix[prefix]?.[iconName]) {
-                    return byPrefix[prefix][iconName];
-                }
+            if (byPrefix[prefix]?.[name]) {
+                return byPrefix[prefix][name];
             }
         }
 
         return HeroiconsOutline[props.icon] ?? HeroiconsSolid[props.icon] ?? HeroiconsMini[props.icon] ?? null;
     });
 
-    const hasIcon = computed(() => !!resolvedIcon.value || !!slots.icon);
-
+    const hasIcon = computed(() => !!resolvedIcon.value);
     const beforeIconVisible = computed(() => hasIcon.value && props.iconPosition === 'before');
     const afterIconVisible = computed(() => hasIcon.value && props.iconPosition === 'after');
-
     const hasLabel = computed(() => !props.iconOnly && !!slots.default);
 
     const componentAttrs = computed(() => {
-        const baseAttrs = {
+        const base = {
             ...attrs,
             'aria-busy': props.loading || undefined,
             'aria-disabled': isDisabled.value ? 'true' : undefined,
         };
 
         if (props.tag === 'button') {
-            return {
-                ...baseAttrs,
-                type: props.type,
-                disabled: isDisabled.value,
-            };
+            return { ...base, type: props.type, disabled: isDisabled.value };
         }
 
         if (props.tag === 'a') {
             return {
-                ...baseAttrs,
+                ...base,
                 href: props.href,
                 target: props.target,
                 rel: props.target === '_blank' ? 'noopener noreferrer' : undefined,
@@ -276,11 +234,7 @@
             };
         }
 
-        return {
-            ...baseAttrs,
-            to: props.to,
-            tabindex: isDisabled.value ? -1 : attrs.tabindex,
-        };
+        return { ...base, to: props.to, tabindex: isDisabled.value ? -1 : attrs.tabindex };
     });
 
     function handleClick(event) {
@@ -292,10 +246,6 @@
 
         emit('click', event);
     }
-
-    const iconClasses = computed(() => {
-        return ['fi-icon shrink-0 transition duration-75', iconSizeClass.value];
-    });
 </script>
 
 <template>
@@ -303,13 +253,14 @@
         :is="componentTag"
         v-bind="componentAttrs"
         :class="buttonClasses"
-        :style="colorVars"
+        :style="buttonStyle"
         @click="handleClick"
     >
         <template v-if="beforeIconVisible">
             <svg
                 v-if="loading"
                 :class="[...iconClasses, 'animate-spin']"
+                :style="{ color: colorVars['--text'] }"
                 fill="none"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -326,17 +277,24 @@
                 />
             </svg>
 
-            <slot v-else-if="$slots.icon" name="icon" />
-            <component v-else :is="resolvedIcon" :class="iconClasses" aria-hidden="true" />
+            <component
+                v-else
+                :is="resolvedIcon"
+                :class="iconClasses"
+                :style="{ color: colorVars['--text'] }"
+                :width="iconPx"
+                :height="iconPx"
+                aria-hidden="true"
+            />
         </template>
 
-        <span v-if="hasLabel && labelSrOnly" class="sr-only"><slot /></span>
-        <span v-else-if="hasLabel"><slot /></span>
+        <span v-if="hasLabel"><slot /></span>
 
         <template v-if="afterIconVisible">
             <svg
                 v-if="loading"
                 :class="[...iconClasses, 'animate-spin']"
+                :style="{ color: colorVars['--text'] }"
                 fill="none"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -353,8 +311,15 @@
                 />
             </svg>
 
-            <slot v-else-if="$slots.icon" name="icon" />
-            <component v-else :is="resolvedIcon" :class="iconClasses" aria-hidden="true" />
+            <component
+                v-else
+                :is="resolvedIcon"
+                :class="iconClasses"
+                :style="{ color: colorVars['--text'] }"
+                :width="iconPx"
+                :height="iconPx"
+                aria-hidden="true"
+            />
         </template>
     </component>
 </template>
