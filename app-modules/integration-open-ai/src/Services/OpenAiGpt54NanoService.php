@@ -57,14 +57,4 @@ class OpenAiGpt54NanoService extends BaseOpenAiService
     {
         return $this->settings->open_ai_gpt_54_nano_image_generation_deployment;
     }
-
-    public function hasTemperature(): bool
-    {
-        return false;
-    }
-
-    public function hasReasoning(): bool
-    {
-        return true;
-    }
 }
