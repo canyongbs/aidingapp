@@ -34,7 +34,10 @@
 </COPYRIGHT>
 */
 
+use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormPreviewController;
+use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetController;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestMediaDownloadController;
+use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
 use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use AidingApp\ServiceManagement\Livewire\RenderServiceRequestFeedbackForm;
 use AidingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
@@ -46,6 +49,15 @@ Route::middleware('web')
     ->group(function () {
         Route::get('/{serviceRequestForm}/respond', RenderServiceRequestForm::class)
             ->name('show');
+
+        Route::middleware(['auth', EnsureServiceManagementFeatureIsActive::class])
+            ->group(function () {
+                Route::get('/{serviceRequestForm}/preview', ServiceRequestFormPreviewController::class)
+                    ->name('preview');
+
+                Route::get('/{serviceRequestForm}/preview-entry', [ServiceRequestFormWidgetController::class, 'preview'])
+                    ->name('preview-entry');
+            });
     });
 
 Route::get('/service-requests/{serviceRequest}/feedback/', RenderServiceRequestFeedbackForm::class)

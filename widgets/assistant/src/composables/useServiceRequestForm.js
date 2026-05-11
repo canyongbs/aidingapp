@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,15 +31,41 @@
 
 </COPYRIGHT>
 */
+import axios from 'axios';
+import { ref } from 'vue';
+import { clearToken, getAuthHeaders } from '../utils/token.js';
 
-namespace App\Features;
+export function useServiceRequestForm(formUrl) {
+    const steps = ref([]);
+    const isLoading = ref(true);
+    const loadError = ref(false);
 
-use App\Support\AbstractFeatureFlag;
+    async function fetchForm() {
+        isLoading.value = true;
+        loadError.value = false;
 
-class IncidentRenameFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
+        try {
+            const { data } = await axios.get(formUrl, {
+                headers: getAuthHeaders(),
+            });
+
+            steps.value = data.steps ?? [];
+        } catch (error) {
+            if (!error.response || error.response.status === 401) {
+                clearToken();
+            } else {
+                loadError.value = true;
+            }
+        } finally {
+            isLoading.value = false;
+        }
     }
+
+    fetchForm();
+
+    return {
+        steps,
+        isLoading,
+        loadError,
+    };
 }

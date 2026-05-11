@@ -36,6 +36,7 @@
 
 use AidingApp\Ai\Http\Controllers\AssistantWidget\AuthenticateController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\AuthorizeBroadcastController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestFormController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestTypesController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestUploadUrlController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GetWidgetConfigController;
@@ -86,6 +87,10 @@ Route::middleware([
                         Route::get('service-request-types', GetServiceRequestTypesController::class)
                             ->middleware(['auth:sanctum'])
                             ->name('service-request-types');
+
+                        Route::get('service-request-form/{type}', GetServiceRequestFormController::class)
+                            ->middleware(['auth:sanctum'])
+                            ->name('service-request-form');
 
                         Route::get('service-request/upload-url', GetServiceRequestUploadUrlController::class)
                             ->middleware(['auth:sanctum'])

@@ -77,5 +77,4 @@ class UploadFormFieldBlock extends FormFieldBlock
     {
         return 'form::blocks.submissions.upload';
     }
-
 }

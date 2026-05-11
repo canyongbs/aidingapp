@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Concerns\EditPageRedirection;
+use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -91,12 +92,11 @@ class EditServiceMonitoring extends EditRecord
                             ->multiple()
                             ->preload()
                             ->searchable(),
-                        Select::make('user')
-                            ->relationship('users', 'name')
+                        UserSelect::make('user')
+                            ->relationship('users')
                             ->label('User')
                             ->multiple()
-                            ->preload()
-                            ->searchable(),
+                            ->preload(),
                         Toggle::make('is_notified_via_database')
                             ->label('In Product notifications')
                             ->default(false),

@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
+use App\Filament\Forms\Components\UserSelect;
 use App\Models\User;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -65,9 +66,9 @@ class CreateChangeRequestType extends CreateRecord
                                 '2' => '2',
                             ])
                             ->required(),
-                        Select::make('userApprovers')
+                        UserSelect::make('userApprovers')
                             ->label('User approvers')
-                            ->relationship('userApprovers', 'name')
+                            ->relationship('userApprovers')
                             ->preload()
                             ->multiple()
                             ->exists((new User())->getTable(), 'id'),

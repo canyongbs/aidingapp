@@ -39,13 +39,15 @@
 <div class="tiptap-rendered-content flex flex-col gap-6">
     @if ($submission->submissible->is_wizard)
         @foreach ($submission->submissible->steps as $step)
-            <x-filament::section>
-                <x-slot name="heading">
-                    {{ $step->label }}
-                </x-slot>
+            @if (! empty($step->content['content'] ?? []))
+                <x-filament::section>
+                    <x-slot name="heading">
+                        {{ $step->label }}
+                    </x-slot>
 
-                <x-form::submissions.content :content="$step->content" :submission="$submission" />
-            </x-filament::section>
+                    <x-form::submissions.content :content="$step->content" :submission="$submission" />
+                </x-filament::section>
+            @endif
         @endforeach
     @else
         <x-form::submissions.content :content="$submission->submissible->content" :submission="$submission" />

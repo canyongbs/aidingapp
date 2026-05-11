@@ -34,6 +34,8 @@
 <script setup>
     import { createMessage, getNode } from '@formkit/core';
     import { FormKitSchema } from '@formkit/vue';
+    import DOMPurify from 'dompurify';
+    import { marked } from 'marked';
     import { computed, defineProps, nextTick, onMounted, reactive, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
     import AppLoading from '../Components/AppLoading.vue';
@@ -43,6 +45,21 @@
     import wizard from '../FormKit/wizard.js';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
+
+    marked.setOptions({
+        breaks: true,
+        gfm: true,
+    });
+
+    function renderMarkdown(content) {
+        if (!content) return '';
+        try {
+            const html = marked.parse(content, { async: false });
+            return DOMPurify.sanitize(html);
+        } catch (error) {
+            return DOMPurify.sanitize(content);
+        }
+    }
 
     let { steps, visitedSteps, activeStep, setStep, wizardPlugin } = wizard();
 
@@ -507,9 +524,10 @@
                         </p>
 
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                            <div class="prose prose-sm max-w-none text-gray-800 whitespace-pre-wrap">
-                                {{ aiResolutionData?.proposedAnswer }}
-                            </div>
+                            <div
+                                class="prose prose-sm max-w-none text-gray-800"
+                                v-html="renderMarkdown(aiResolutionData?.proposedAnswer)"
+                            ></div>
                         </div>
 
                         <p class="text-gray-600 mb-6">

@@ -38,13 +38,23 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\Edit
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
+use App\Filament\Forms\Components\UserSelect;
+use App\Models\Authenticatable;
 use App\Models\User;
+use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteAction;
+use Illuminate\Support\Facades\Config;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
 test('EditServiceMonitoring is gated with proper access control', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceMonitoring = false;
+    $settings->save();
+
     $user = User::factory()->create();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -69,7 +79,10 @@ test('EditServiceMonitoring is gated with proper access control', function () {
             ServiceMonitoringResource::getUrl('edit', [
                 'record' => $serviceMonitoringTarget,
             ])
-        )->assertSuccessful();
+        )->assertForbidden();
+
+    $settings->data->addons->serviceMonitoring = true;
+    $settings->save();
 
     $request = collect(ServiceMonitoringTargetRequestFactory::new()->create());
 
@@ -89,12 +102,7 @@ test('EditServiceMonitoring is gated with proper access control', function () {
 });
 
 test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    $user->givePermissionTo('service_monitoring.view-any');
-    $user->givePermissionTo('service_monitoring.*.update');
+    asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
@@ -141,6 +149,11 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
 );
 
 test('delete action visible with proper access control', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceMonitoring = true;
+    $settings->save();
+
     $user = User::factory()->create();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -164,12 +177,7 @@ test('delete action visible with proper access control', function () {
 });
 
 test('it will validate multiple valid forms of URL and IP Address', function () {
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    $user->givePermissionTo('service_monitoring.view-any');
-    $user->givePermissionTo('service_monitoring.*.update');
+    asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
@@ -217,4 +225,65 @@ test('it will validate multiple valid forms of URL and IP Address', function () 
             ->call('save')
             ->assertHasFormErrors(['domain']);
     }
+});
+
+// UserSelect (user field) admin-filtering tests
+
+test('user UserSelect does not show admin users in options by default on EditServiceMonitoring', function () {
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('service_monitoring.view-any');
+    $actor->givePermissionTo('service_monitoring.*.update');
+    actingAs($actor);
+
+    $regularUser = User::factory()->create();
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('user', function (UserSelect $field) use ($regularUser, $adminUser): bool {
+            return ! empty($field->getSearchResults($regularUser->name))
+                && empty($field->getSearchResults($adminUser->name));
+        });
+});
+
+test('user UserSelect shows a pre-selected admin user so they can be deselected on EditServiceMonitoring', function () {
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('service_monitoring.view-any');
+    $actor->givePermissionTo('service_monitoring.*.update');
+    actingAs($actor);
+
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+    $serviceMonitoringTarget->users()->attach($adminUser);
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('user', function (UserSelect $field) use ($adminUser): bool {
+            return ! empty($field->getSearchResults($adminUser->name));
+        });
+});
+
+test('user UserSelect shows all users when filter_admins_from_selection config is false on EditServiceMonitoring', function () {
+    Config::set('app.filter_admins_from_selection', false);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('service_monitoring.view-any');
+    $actor->givePermissionTo('service_monitoring.*.update');
+    actingAs($actor);
+
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('user', function (UserSelect $field) use ($adminUser): bool {
+            return ! empty($field->getSearchResults($adminUser->name));
+        });
 });

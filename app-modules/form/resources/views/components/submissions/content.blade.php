@@ -44,7 +44,7 @@
     use Symfony\Component\HtmlSanitizer\HtmlSanitizer;
     use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
-    $blocks = app(ResolveBlockRegistry::class)($submission->submissible);
+    $blocks = app(ResolveBlockRegistry::class)($submission->submissible, true);
 
     $content['content'] = app(InjectSubmissionStateIntoRichContent::class)($submission, $content['content'] ?? [], $blocks);
 

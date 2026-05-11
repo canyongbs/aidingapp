@@ -38,8 +38,11 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\Man
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Team\Models\Team;
+use App\Filament\Forms\Components\UserSelect;
+use App\Models\Authenticatable;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Illuminate\Support\Facades\Config;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -217,4 +220,52 @@ test('ManageServiceRequestTypeAuditors is gated with proper feature access contr
 
     expect($serviceRequestType->refresh()->auditorTeams->pluck('id'))
         ->toContain($auditorTeam->getKey());
+});
+
+// UserSelect (auditorUsers field) admin-filtering tests
+
+it('auditorUsers UserSelect does not show admin users in options by default', function () {
+    asSuperAdmin();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $regularUser = User::factory()->create();
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    livewire(ManageServiceRequestTypeAuditors::class, ['record' => $serviceRequestType->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('auditorUsers', function (UserSelect $field) use ($regularUser, $adminUser): bool {
+            return ! empty($field->getSearchResults($regularUser->name))
+                && empty($field->getSearchResults($adminUser->name));
+        });
+});
+
+it('auditorUsers UserSelect shows a pre-selected admin user so they can be deselected', function () {
+    asSuperAdmin();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+    $serviceRequestType->auditorUsers()->attach($adminUser);
+
+    livewire(ManageServiceRequestTypeAuditors::class, ['record' => $serviceRequestType->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('auditorUsers', function (UserSelect $field) use ($adminUser): bool {
+            return ! empty($field->getSearchResults($adminUser->name));
+        });
+});
+
+it('auditorUsers UserSelect shows all users when filter_admins_from_selection config is false', function () {
+    Config::set('app.filter_admins_from_selection', false);
+    asSuperAdmin();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    livewire(ManageServiceRequestTypeAuditors::class, ['record' => $serviceRequestType->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('auditorUsers', function (UserSelect $field) use ($adminUser): bool {
+            return ! empty($field->getSearchResults($adminUser->name));
+        });
 });

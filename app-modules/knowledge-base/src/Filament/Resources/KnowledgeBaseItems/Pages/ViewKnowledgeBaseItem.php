@@ -36,6 +36,7 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
+use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Filament\Actions\CreateConcernAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
@@ -64,6 +65,11 @@ class ViewKnowledgeBaseItem extends ViewRecord
 
     public function infolist(Schema $schema): Schema
     {
+        $this->record->loadCount([
+            'votes',
+            'votes as helpful_votes_count' => fn ($query) => $query->where('is_helpful', true),
+        ]);
+
         return $schema
             ->components([
                 View::make('knowledge-base::filament.pages.badges'),
@@ -80,9 +86,6 @@ class ViewKnowledgeBaseItem extends ViewRecord
                             ->id('content'),
                         Tab::make('Properties')
                             ->schema([
-                                TextEntry::make('title')
-                                    ->label('Article Title')
-                                    ->columnSpanFull(),
                                 TextEntry::make('notes')
                                     ->label('Notes')
                                     ->columnSpanFull(),
@@ -95,6 +98,17 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                 TextEntry::make('tags')
                                     ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->tags->pluck('name'))
                                     ->badge(),
+                                TextEntry::make('rating')
+                                    ->label('Rating')
+                                    ->getStateUsing(function (KnowledgeBaseItem $record): string {
+                                        $totalVotes = $record->votes_count;
+
+                                        if ($totalVotes === 0) {
+                                            return 'Unrated';
+                                        }
+
+                                        return (int) round(($record->getAttribute('helpful_votes_count') / $totalVotes) * 100) . '%';
+                                    }),
                             ])
                             ->id('properties')
                             ->columns(2),
@@ -107,6 +121,7 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                 TextEntry::make('category.name')
                                     ->label('Category'),
                                 TextEntry::make('division.name')
+                                    ->visible(fn (): bool => Division::count() > 1)
                                     ->label('Division'),
                                 TextEntry::make('managers')
                                     ->label('Managers')

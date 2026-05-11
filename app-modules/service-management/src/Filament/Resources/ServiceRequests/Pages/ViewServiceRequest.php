@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
+use AidingApp\ServiceManagement\Filament\Actions\ReclassifyServiceRequestAction;
 use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestLocked;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -82,26 +83,13 @@ class ViewServiceRequest extends ViewRecord
                         view('filament.infolists.components.service-request-heading', [
                             'serviceRequestNumber' => $record->service_request_number,
                             'category' => $record->category,
+                            'type' => $record->priority?->type()->first()?->name,
                         ])->render()
                     ))
                     ->schema([
                         TextEntry::make('division.name')
                             ->visible(fn (): bool => Division::count() > 1)
                             ->label('Division'),
-                        Grid::make(3)
-                            ->schema([
-                                TextEntry::make('status.name')
-                                    ->label('Status')
-                                    ->badge()
-                                    ->color(fn (ServiceRequest $record): string => $record->status->color->value),
-                                TextEntry::make('priority.type.name')
-                                    ->state(
-                                        fn (ServiceRequest $record) => $record->priority->type()->first()?->name
-                                    )
-                                    ->label('Type'),
-                                TextEntry::make('priority.name')
-                                    ->label('Priority'),
-                            ])->columns(3),
                         Grid::make(3)
                             ->schema([
                                 TextEntry::make('respondent')
@@ -129,6 +117,15 @@ class ViewServiceRequest extends ViewRecord
                                     ->label('Last Updated')
                                     ->dateTime('M j, Y g:i A (T)')
                                     ->hintIcon(null),
+                            ])->columns(3),
+                        Grid::make(3)
+                            ->schema([
+                                TextEntry::make('status.name')
+                                    ->label('Status')
+                                    ->badge()
+                                    ->color(fn (ServiceRequest $record): string => $record->status->color->value),
+                                TextEntry::make('priority.name')
+                                    ->label('Priority'),
                             ])->columns(3),
                     ])
                     ->columns(),
@@ -264,6 +261,9 @@ class ViewServiceRequest extends ViewRecord
     {
         return [
             EditAction::make(),
+            ReclassifyServiceRequestAction::make('reclassify')
+                ->record($this->getRecord())
+                ->slideOver(),
         ];
     }
 }

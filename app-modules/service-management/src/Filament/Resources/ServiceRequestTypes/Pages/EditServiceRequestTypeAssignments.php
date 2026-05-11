@@ -43,8 +43,8 @@ use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUse
 use App\Concerns\EditPageRedirection;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
+use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -97,12 +97,11 @@ class EditServiceRequestTypeAssignments extends EditRecord
                                     ->toArray()
                             )
                             ->required(),
-                        Select::make('assignment_type_individual_id')
+                        UserSelect::make('assignment_type_individual_id')
                             ->label('Assignment Individual')
                             ->columnSpanFull()
                             ->relationship(
                                 name: 'assignmentTypeIndividual',
-                                titleAttribute: 'name',
                                 modifyQueryUsing: function (Builder $query) {
                                     $query->whereRelation(
                                         'team.manageableServiceRequestTypes',
@@ -117,7 +116,6 @@ class EditServiceRequestTypeAssignments extends EditRecord
                                     );
                                 }
                             )
-                            ->searchable(['name', 'email'])
                             ->preload()
                             ->required()
                             ->rules(fn (ServiceRequestType $record) => [new ServiceRequestTypeAssignmentsIndividualUserMustBeAManager($record)])

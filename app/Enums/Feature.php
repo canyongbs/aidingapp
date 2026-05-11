@@ -63,9 +63,9 @@ enum Feature: string
 
     case ProjectManagement = 'project-management';
 
-    case IncidentManagement = 'incident-management'; //TODO: remove when IncidentRenameFeature is removed
-
     case AdvisoryManagement = 'advisory-management';
+
+    case ServiceMonitoring = 'service-monitoring';
 
     public function generateGate(): void
     {
