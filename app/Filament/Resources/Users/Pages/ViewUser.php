@@ -36,6 +36,7 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Features\UserPresence;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use App\Rules\EmailNotInUseOrSoftDeleted;
@@ -44,6 +45,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -73,6 +75,14 @@ class ViewUser extends ViewRecord
                             ->rules([
                                 new EmailNotInUseOrSoftDeleted(),
                             ]),
+                        TextEntry::make('presence_status')
+                            ->label('Presence')
+                            ->state(fn (User $record) => $record->presenceStatus())
+                            ->badge()
+                            ->color(fn (User $record) => $record->presenceStatus()->getColor())
+                            ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
+                            ->formatStateUsing(fn (User $record) => $record->presenceStatus()->getLabel())
+                            ->visible(fn () => UserPresence::active()),
                         TextInput::make('job_title')
                             ->string()
                             ->maxLength(255),
