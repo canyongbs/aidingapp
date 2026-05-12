@@ -42,6 +42,7 @@ use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleImagesJob;
 use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleLinksJob;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\BrokenLinksFeature;
 
 class KnowledgeBaseItemObserver
 {
@@ -58,7 +59,7 @@ class KnowledgeBaseItemObserver
             PrepareKnowledgeBaseVectorStore::dispatch();
         }
 
-        if ($knowledgeBaseItem->wasChanged('article_details')) {
+        if (BrokenLinksFeature::active() && $knowledgeBaseItem->wasChanged('article_details')) {
             CheckKnowledgeBaseArticleLinksJob::dispatch($knowledgeBaseItem);
             CheckKnowledgeBaseArticleImagesJob::dispatch($knowledgeBaseItem);
         }

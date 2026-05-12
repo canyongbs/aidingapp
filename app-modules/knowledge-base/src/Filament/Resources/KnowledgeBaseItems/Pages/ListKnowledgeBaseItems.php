@@ -43,6 +43,7 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseI
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use App\Features\BrokenLinksFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\TagsForClass;
 use Filament\Actions\BulkActionGroup;
@@ -132,7 +133,8 @@ class ListKnowledgeBaseItems extends ListRecords
                         $hasNoBrokenImages = ! $record->are_broken_images_detected;
 
                         return $hasTitle && $hasArticle && $hasManager && $hasNoUnresolvedConcerns && $hasNoBrokenLinks && $hasNoBrokenImages;
-                    }),
+                    })
+                    ->visible(BrokenLinksFeature::active()),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->toggleable()

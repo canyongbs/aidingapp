@@ -45,6 +45,7 @@ use AidingApp\Engagement\Jobs\UnmatchedInboundCommunicationsJob;
 use AidingApp\Engagement\Models\EngagementFile;
 use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleImagesJob;
 use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleLinksJob;
+use App\Features\BrokenLinksFeature;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Project\Models\ProjectFile;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
@@ -169,10 +170,12 @@ class Kernel extends ConsoleKernel
 
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
-                            KnowledgeBaseItem::each(function (KnowledgeBaseItem $article) {
-                                CheckKnowledgeBaseArticleLinksJob::dispatch($article);
-                                CheckKnowledgeBaseArticleImagesJob::dispatch($article);
-                            });
+                            if (BrokenLinksFeature::active()) {
+                                KnowledgeBaseItem::each(function (KnowledgeBaseItem $article) {
+                                    CheckKnowledgeBaseArticleLinksJob::dispatch($article);
+                                    CheckKnowledgeBaseArticleImagesJob::dispatch($article);
+                                });
+                            }
                         });
                     })
                         ->daily()
