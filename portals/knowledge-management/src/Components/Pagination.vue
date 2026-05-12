@@ -109,7 +109,7 @@
                         v-if="currentPage > 4"
                         color="gray"
                         size="md"
-                        class="!rounded-none w-9"
+                        class="!rounded-none min-w-9 justify-center"
                         @click="$emit('fetchPage', 1)"
                     >
                         1
@@ -125,7 +125,7 @@
                         :color="page === currentPage ? 'primary' : 'gray'"
                         :disabled="page === currentPage"
                         size="md"
-                        class="!rounded-none w-9"
+                        class="!rounded-none min-w-9 justify-center"
                         @click="$emit('fetchPage', page)"
                     >
                         {{ page }}
@@ -138,7 +138,7 @@
                         v-if="currentPage < lastPage - 3"
                         color="gray"
                         size="md"
-                        class="!rounded-none w-9"
+                        class="!rounded-none min-w-9 justify-center"
                         @click="$emit('fetchPage', lastPage)"
                     >
                         {{ lastPage }}

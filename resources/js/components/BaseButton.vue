@@ -35,8 +35,75 @@
     import * as HeroiconsMini from '@heroicons/vue/20/solid';
     import * as HeroiconsOutline from '@heroicons/vue/24/outline';
     import * as HeroiconsSolid from '@heroicons/vue/24/solid';
+    import { ArrowPathIcon } from '@heroicons/vue/24/solid';
     import { computed, useAttrs, useSlots } from 'vue';
     import { RouterLink } from 'vue-router';
+
+    const COLOR_VARS = {
+        primary: {
+            '--bg': 'rgba(var(--primary-600), 1)',
+            '--text': '#ffffff',
+            '--hover-bg': 'rgba(var(--primary-500), 1)',
+            '--hover-text': '#ffffff',
+            '--focus-ring': 'rgba(var(--primary-500), 0.5)',
+        },
+        danger: {
+            '--bg': '#dc2626',
+            '--text': '#ffffff',
+            '--hover-bg': '#ef4444',
+            '--hover-text': '#ffffff',
+            '--focus-ring': 'rgba(220, 38, 38, 0.5)',
+        },
+        info: {
+            '--bg': '#0284c7',
+            '--text': '#ffffff',
+            '--hover-bg': '#0ea5e9',
+            '--hover-text': '#ffffff',
+            '--focus-ring': 'rgba(2, 132, 199, 0.5)',
+        },
+        success: {
+            '--bg': '#16a34a',
+            '--text': '#ffffff',
+            '--hover-bg': '#22c55e',
+            '--hover-text': '#ffffff',
+            '--focus-ring': 'rgba(22, 163, 74, 0.5)',
+        },
+        warning: {
+            '--bg': '#d97706',
+            '--text': '#ffffff',
+            '--hover-bg': '#f59e0b',
+            '--hover-text': '#ffffff',
+            '--focus-ring': 'rgba(217, 119, 6, 0.5)',
+        },
+    };
+
+    const SIZE_CLASSES = {
+        xs: 'gap-1 px-2 py-1.5 text-xs',
+        sm: 'gap-1 px-2.5 py-1.5',
+        md: 'px-3 py-2',
+        lg: 'gap-1.5 px-3.5 py-2.5',
+        xl: 'gap-1.5 px-4 py-3',
+    };
+
+    const ICON_ONLY_SIZE_CLASSES = {
+        xs: 'p-1.5',
+        sm: 'p-1.5',
+        md: 'p-2',
+        lg: 'p-2.5',
+        xl: 'p-3',
+    };
+
+    const HEROICON_SETS = {
+        m: HeroiconsMini,
+        o: HeroiconsOutline,
+        s: HeroiconsSolid,
+    };
+
+    const toPascalCase = (value) =>
+        value
+            .split('-')
+            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+            .join('');
 
     defineOptions({
         inheritAttrs: false,
@@ -106,118 +173,53 @@
 
     const componentTag = computed(() => (props.tag === 'router-link' ? RouterLink : props.tag));
 
-    const colorVars = computed(() => {
-        const map = {
-            gray: {
-                '--bg': '#ffffff',
-                '--text': '#030712',
-                '--hover-bg': '#f9fafb',
-                '--hover-text': '#030712',
-                '--ring': 'rgba(12, 10, 9, 0.1)',
-                '--focus-ring': 'rgba(107, 114, 128, 0.5)',
-            },
-            primary: {
-                '--bg': 'rgba(var(--primary-600), 1)',
-                '--text': '#ffffff',
-                '--hover-bg': 'rgba(var(--primary-500), 1)',
-                '--hover-text': '#ffffff',
-                '--ring': 'transparent',
-                '--focus-ring': 'rgba(var(--primary-500), 0.5)',
-            },
-            danger: {
-                '--bg': '#dc2626',
-                '--text': '#ffffff',
-                '--hover-bg': '#ef4444',
-                '--hover-text': '#ffffff',
-                '--ring': 'transparent',
-                '--focus-ring': 'rgba(220, 38, 38, 0.5)',
-            },
-            info: {
-                '--bg': '#0284c7',
-                '--text': '#ffffff',
-                '--hover-bg': '#0ea5e9',
-                '--hover-text': '#ffffff',
-                '--ring': 'transparent',
-                '--focus-ring': 'rgba(2, 132, 199, 0.5)',
-            },
-            success: {
-                '--bg': '#16a34a',
-                '--text': '#ffffff',
-                '--hover-bg': '#22c55e',
-                '--hover-text': '#ffffff',
-                '--ring': 'transparent',
-                '--focus-ring': 'rgba(22, 163, 74, 0.5)',
-            },
-            warning: {
-                '--bg': '#d97706',
-                '--text': '#ffffff',
-                '--hover-bg': '#f59e0b',
-                '--hover-text': '#ffffff',
-                '--ring': 'transparent',
-                '--focus-ring': 'rgba(217, 119, 6, 0.5)',
-            },
-        };
+    const colorVars = computed(() => (props.color === 'gray' ? {} : COLOR_VARS[props.color] ?? {}));
 
-        return map[props.color] ?? {};
+    const sizeClass = computed(() => (props.iconOnly ? ICON_ONLY_SIZE_CLASSES[props.size] : SIZE_CLASSES[props.size]));
+
+    const colorClass = computed(() => (props.color === 'gray' ? 'bg-white text-gray-950 ring-1 ring-gray-950/10' : 'bg-(--bg) text-(--text)'));
+
+    const stateClass = computed(() => {
+        if (isDisabled.value) return 'cursor-default opacity-70 pointer-events-none';
+
+        return props.color === 'gray'
+            ? 'hover:bg-gray-50 focus-visible:ring-2'
+            : 'hover:bg-(--hover-bg) hover:text-(--hover-text) focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]';
     });
 
-    const buttonStyle = computed(() => {
-        const iconOnlyPadMap = { xs: '0.375rem', sm: '0.375rem', md: '0.5rem', lg: '0.625rem', xl: '0.75rem' };
-
-        return {
-            ...colorVars.value,
-            'border-radius': 'var(--rounding-md, 0.5rem)',
-            ...(props.iconOnly ? { padding: iconOnlyPadMap[props.size] ?? '0.5rem' } : {}),
-        };
-    });
+    const buttonStyle = computed(() => ({
+        ...colorVars.value,
+        'border-radius': 'var(--rounding-md, 0.5rem)',
+    }));
 
     const buttonClasses = computed(() => [
-        'relative inline-grid grid-flow-col items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium transition duration-75 outline-none',
-        props.size === 'xs' && 'gap-1 px-2 py-1.5 text-xs',
-        props.size === 'sm' && 'gap-1 px-2.5 py-1.5',
-        props.size === 'lg' && 'gap-1.5 px-3.5 py-2.5',
-        props.size === 'xl' && 'gap-1.5 px-4 py-3',
-        'bg-(--bg) text-(--text) shadow-[0_0_0_1px_var(--ring,transparent)]',
-        !isDisabled.value &&
-            'hover:bg-(--hover-bg) hover:text-(--hover-text) focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2',
-        isDisabled.value && 'cursor-default opacity-70 pointer-events-none',
+        'relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition duration-75 outline-none',
+        sizeClass.value,
+        colorClass.value,
+        stateClass.value,
     ]);
 
     const iconClasses = computed(() => [
         'shrink-0 transition duration-75',
+        props.color === 'gray' && 'text-gray-400',
         ['xs', 'sm'].includes(props.size) ? 'h-4 w-4' : 'h-5 w-5',
     ]);
 
-    const iconPx = computed(() => (['xs', 'sm'].includes(props.size) ? 16 : 20));
-
     const resolvedIcon = computed(() => {
-        if (!props.icon || typeof props.icon !== 'string') {
-            return props.icon;
-        }
-
-        const toPascalCase = (value) =>
-            value
-                .split('-')
-                .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-                .join('');
-
-        const byPrefix = { m: HeroiconsMini, o: HeroiconsOutline, s: HeroiconsSolid };
+        if (!props.icon || typeof props.icon !== 'string') return props.icon;
 
         if (props.icon.startsWith('heroicon-')) {
             const [, prefix, ...rest] = props.icon.split('-');
             const name = `${toPascalCase(rest.join('-'))}Icon`;
 
-            if (byPrefix[prefix]?.[name]) {
-                return byPrefix[prefix][name];
+            if (HEROICON_SETS[prefix]?.[name]) {
+                return HEROICON_SETS[prefix][name];
             }
         }
 
         return HeroiconsOutline[props.icon] ?? HeroiconsSolid[props.icon] ?? HeroiconsMini[props.icon] ?? null;
     });
 
-    const hasIcon = computed(() => !!resolvedIcon.value);
-    const beforeIconVisible = computed(() => hasIcon.value && props.iconPosition === 'before');
-    const afterIconVisible = computed(() => hasIcon.value && props.iconPosition === 'after');
     const hasLabel = computed(() => !props.iconOnly && !!slots.default);
 
     const componentAttrs = computed(() => {
@@ -263,64 +265,34 @@
         :style="buttonStyle"
         @click="handleClick"
     >
-        <template v-if="beforeIconVisible">
-            <svg
+        <template v-if="iconPosition === 'before' && (loading || resolvedIcon)">
+            <ArrowPathIcon
                 v-if="loading"
                 :class="[...iconClasses, 'animate-spin']"
-                fill="none"
-                viewBox="0 0 24 24"
                 aria-hidden="true"
-            >
-                <path
-                    class="opacity-20"
-                    d="M12 2C6.47715 2 2 6.47715 2 12H5C5 8.13401 8.13401 5 12 5V2Z"
-                    fill="currentColor"
-                />
-                <path
-                    class="opacity-100"
-                    d="M22 12C22 6.47715 17.5228 2 12 2V5C15.866 5 19 8.13401 19 12H22Z"
-                    fill="currentColor"
-                />
-            </svg>
+            />
 
             <component
                 v-else
                 :is="resolvedIcon"
                 :class="iconClasses"
-                :width="iconPx"
-                :height="iconPx"
                 aria-hidden="true"
             />
         </template>
 
         <span v-if="hasLabel"><slot /></span>
 
-        <template v-if="afterIconVisible">
-            <svg
+        <template v-if="iconPosition === 'after' && (loading || resolvedIcon)">
+            <ArrowPathIcon
                 v-if="loading"
                 :class="[...iconClasses, 'animate-spin']"
-                fill="none"
-                viewBox="0 0 24 24"
                 aria-hidden="true"
-            >
-                <path
-                    class="opacity-20"
-                    d="M12 2C6.47715 2 2 6.47715 2 12H5C5 8.13401 8.13401 5 12 5V2Z"
-                    fill="currentColor"
-                />
-                <path
-                    class="opacity-100"
-                    d="M22 12C22 6.47715 17.5228 2 12 2V5C15.866 5 19 8.13401 19 12H22Z"
-                    fill="currentColor"
-                />
-            </svg>
+            />
 
             <component
                 v-else
                 :is="resolvedIcon"
                 :class="iconClasses"
-                :width="iconPx"
-                :height="iconPx"
                 aria-hidden="true"
             />
         </template>
