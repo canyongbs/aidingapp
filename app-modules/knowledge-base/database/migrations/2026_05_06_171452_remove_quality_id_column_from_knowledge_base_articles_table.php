@@ -50,7 +50,7 @@ return new class () extends Migration {
     public function down(): void
     {
         Schema::table('knowledge_base_articles', function (Blueprint $table) {
-            $table->foreign('quality_id')->references('id')->on('knowledge_base_qualities');
+            $table->foreignUuid('quality_id')->nullable()->references('id')->on('knowledge_base_qualities');
         });
     }
 };

@@ -56,7 +56,7 @@ return new class () extends Migration {
             BrokenLinksFeature::deactivate();
 
             Schema::create('knowledge_base_qualities', function (Blueprint $table) {
-                $table->id();
+                $table->uuid('id')->primary();
                 $table->string('name');
                 $table->timestamps();
             });
