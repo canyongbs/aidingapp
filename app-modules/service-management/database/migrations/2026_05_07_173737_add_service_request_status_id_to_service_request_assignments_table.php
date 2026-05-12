@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,30 +33,36 @@
 
 </COPYRIGHT>
 */
-import DOMPurify from 'dompurify';
-import { marked } from 'marked';
 
-marked.setOptions({
-    breaks: true,
-    gfm: true,
-});
+use App\Features\ServiceRequestAssignmentHistoryFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-export function useMarkdown() {
-    const renderMarkdown = (content) => {
-        if (!content) return '';
-        try {
-            // Strip the last line if it contains only a single "-" (with optional surrounding whitespace).
-            // This prevents setext H2 flashing during streaming when a nested bullet "-" appears
-            // alone on the final line before its text has arrived. Also removes any "【...】"
-            // patterns which are used for internal citations and should not be rendered.
-            const cleanedContent = content.replace(/【[^】]*】/g, '').replace(/\n\s*-\s*$/, '');
-            const html = marked.parse(cleanedContent, { async: false });
-            return DOMPurify.sanitize(html);
-        } catch (error) {
-            console.error('Error rendering markdown:', error);
-            return DOMPurify.sanitize(content);
-        }
-    };
+return new class () extends Migration {
+    public function up(): void
+    {
+        DB::transaction(function () {
+            Schema::table('service_request_assignments', function (Blueprint $table) {
+                $table->foreignUuid('service_request_status_id')
+                    ->nullable()
+                    ->constrained('service_request_statuses')
+                    ->nullOnDelete();
+            });
 
-    return { renderMarkdown };
-}
+            ServiceRequestAssignmentHistoryFeature::activate();
+        });
+    }
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            ServiceRequestAssignmentHistoryFeature::deactivate();
+
+            Schema::table('service_request_assignments', function (Blueprint $table) {
+                $table->dropConstrainedForeignId('service_request_status_id');
+            });
+        });
+    }
+};

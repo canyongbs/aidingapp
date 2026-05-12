@@ -105,9 +105,9 @@ class StoreServiceRequestController extends Controller
 
             $updateUuids = $this->generateUpdateUuids($request);
 
-            $this->storeClarifyingQuestions($request, $serviceRequest, $contact, $updateUuids);
+            $this->storeClarifyingQuestions($request, $serviceRequest, $contact, $type, $updateUuids);
 
-            $this->handleAiResolution($request, $serviceRequest, $contact, $updateUuids);
+            $this->handleAiResolution($request, $serviceRequest, $contact, $type, $updateUuids);
 
             $this->assignServiceRequest($serviceRequest);
 
@@ -151,7 +151,7 @@ class StoreServiceRequestController extends Controller
             'is_ai_resolution_attempted' => ['nullable', 'boolean'],
             'is_ai_resolution_successful' => ['nullable', 'boolean'],
             'ai_resolution_confidence_score' => ['nullable', 'integer', 'min:1', 'max:100'],
-            'encrypted_ai_proposed_answer' => ['nullable', 'string'],
+            'encrypted_ai_proposed_answer' => ['required_if:is_ai_resolution_attempted,true', 'nullable', 'string'],
             // Security: Validate file upload paths match expected pattern (tmp/{uuid}.{extension})
             'Main.upload-file' => ['nullable', 'array'],
             'Main.upload-file.*.path' => [
@@ -243,6 +243,7 @@ class StoreServiceRequestController extends Controller
         Request $request,
         ServiceRequest $serviceRequest,
         Contact $contact,
+        ServiceRequestType $type,
         Collection $updateUuids
     ): void {
         $questions = $request->input('Questions', []);
@@ -252,9 +253,18 @@ class StoreServiceRequestController extends Controller
         }
 
         foreach ($questions as $encryptedQuestion => $answer) {
+            $payload = json_decode(decrypt($encryptedQuestion), true);
+
+            abort_if(
+                ! is_array($payload)
+                    || ($payload['contact_id'] ?? null) !== $contact->getKey()
+                    || ($payload['type_id'] ?? null) !== $type->getKey(),
+                Response::HTTP_FORBIDDEN
+            );
+
             $questionUpdate = $serviceRequest->serviceRequestUpdates()->createQuietly([
                 'id' => $updateUuids->shift(),
-                'update' => decrypt($encryptedQuestion),
+                'update' => $payload['text'],
                 'update_type' => ServiceRequestUpdateType::ClarifyingQuestion,
                 'internal' => false,
                 'created_by_id' => $serviceRequest->getKey(),
@@ -283,6 +293,7 @@ class StoreServiceRequestController extends Controller
         Request $request,
         ServiceRequest $serviceRequest,
         Contact $contact,
+        ServiceRequestType $type,
         Collection $updateUuids
     ): void {
         if (! $request->boolean('is_ai_resolution_attempted')) {
@@ -301,7 +312,16 @@ class StoreServiceRequestController extends Controller
             return;
         }
 
-        $aiProposedAnswer = decrypt($encryptedAnswer);
+        $payload = json_decode(decrypt($encryptedAnswer), true);
+
+        abort_if(
+            ! is_array($payload)
+                || ($payload['contact_id'] ?? null) !== $contact->getKey()
+                || ($payload['type_id'] ?? null) !== $type->getKey(),
+            Response::HTTP_FORBIDDEN
+        );
+
+        $aiProposedAnswer = $payload['text'];
         $confidenceScore = $request->integer('ai_resolution_confidence_score');
 
         $this->createAiProposedAnswerUpdate($serviceRequest, $aiProposedAnswer, $updateUuids);

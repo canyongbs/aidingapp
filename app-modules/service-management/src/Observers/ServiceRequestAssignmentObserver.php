@@ -49,6 +49,7 @@ use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestAssign
 use AidingApp\ServiceManagement\Notifications\ServiceRequestAssigned;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
+use App\Features\ServiceRequestAssignmentHistoryFeature;
 
 class ServiceRequestAssignmentObserver
 {
@@ -62,6 +63,10 @@ class ServiceRequestAssignmentObserver
             $type->managerTeams()->whereRelation('users', 'users.id', $serviceRequestAssignment->user_id)->exists();
 
         throw_if(! $isManager, new AttemptedToAssignNonManagerToServiceRequest());
+
+        if (ServiceRequestAssignmentHistoryFeature::active() && blank($serviceRequestAssignment->service_request_status_id)) {
+            $serviceRequestAssignment->service_request_status_id = $serviceRequestAssignment->serviceRequest->status_id;
+        }
     }
 
     public function created(ServiceRequestAssignment $serviceRequestAssignment): void

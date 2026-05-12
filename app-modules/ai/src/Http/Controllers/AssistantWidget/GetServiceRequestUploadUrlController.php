@@ -36,16 +36,22 @@
 
 namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
+use AidingApp\Contact\Models\Contact;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response;
 
 class GetServiceRequestUploadUrlController extends Controller
 {
     public function __invoke(Request $request): JsonResponse
     {
+        $contact = auth('contact')->user() ?? $request->user();
+
+        abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
+
         $data = $request->validate([
             'filename' => ['required', 'string'],
         ]);

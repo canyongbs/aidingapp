@@ -74,6 +74,7 @@ class ServiceRequestAssignment extends BaseModel implements Auditable, ProvidesA
         'assigned_by_id',
         'assigned_at',
         'status',
+        'service_request_status_id',
     ];
 
     /**
@@ -98,6 +99,14 @@ class ServiceRequestAssignment extends BaseModel implements Auditable, ProvidesA
     public function serviceRequest(): BelongsTo
     {
         return $this->belongsTo(ServiceRequest::class);
+    }
+
+    /**
+     * @return BelongsTo<ServiceRequestStatus, $this>
+     */
+    public function serviceRequestStatus(): BelongsTo
+    {
+        return $this->belongsTo(ServiceRequestStatus::class);
     }
 
     public function timeline(): ServiceRequestAssignmentTimeline
