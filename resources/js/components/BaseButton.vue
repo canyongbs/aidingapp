@@ -173,11 +173,13 @@
 
     const componentTag = computed(() => (props.tag === 'router-link' ? RouterLink : props.tag));
 
-    const colorVars = computed(() => (props.color === 'gray' ? {} : COLOR_VARS[props.color] ?? {}));
+    const colorVars = computed(() => (props.color === 'gray' ? {} : (COLOR_VARS[props.color] ?? {})));
 
     const sizeClass = computed(() => (props.iconOnly ? ICON_ONLY_SIZE_CLASSES[props.size] : SIZE_CLASSES[props.size]));
 
-    const colorClass = computed(() => (props.color === 'gray' ? 'bg-white text-gray-950 ring-1 ring-gray-950/10' : 'bg-(--bg) text-(--text)'));
+    const colorClass = computed(() =>
+        props.color === 'gray' ? 'bg-white text-gray-950 ring-1 ring-gray-950/10' : 'bg-(--bg) text-(--text)',
+    );
 
     const stateClass = computed(() => {
         if (isDisabled.value) return 'cursor-default opacity-70 pointer-events-none';
@@ -266,35 +268,17 @@
         @click="handleClick"
     >
         <template v-if="iconPosition === 'before' && (loading || resolvedIcon)">
-            <ArrowPathIcon
-                v-if="loading"
-                :class="[...iconClasses, 'animate-spin']"
-                aria-hidden="true"
-            />
+            <ArrowPathIcon v-if="loading" :class="[...iconClasses, 'animate-spin']" aria-hidden="true" />
 
-            <component
-                v-else
-                :is="resolvedIcon"
-                :class="iconClasses"
-                aria-hidden="true"
-            />
+            <component v-else :is="resolvedIcon" :class="iconClasses" aria-hidden="true" />
         </template>
 
         <span v-if="hasLabel"><slot /></span>
 
         <template v-if="iconPosition === 'after' && (loading || resolvedIcon)">
-            <ArrowPathIcon
-                v-if="loading"
-                :class="[...iconClasses, 'animate-spin']"
-                aria-hidden="true"
-            />
+            <ArrowPathIcon v-if="loading" :class="[...iconClasses, 'animate-spin']" aria-hidden="true" />
 
-            <component
-                v-else
-                :is="resolvedIcon"
-                :class="iconClasses"
-                aria-hidden="true"
-            />
+            <component v-else :is="resolvedIcon" :class="iconClasses" aria-hidden="true" />
         </template>
     </component>
 </template>
