@@ -32,7 +32,6 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ArrowLeftIcon } from '@heroicons/vue/20/solid';
     import { defineProps, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
     import AppLoading from '../Components/AppLoading.vue';
@@ -247,227 +246,209 @@
 
     <Page v-else>
         <template #heading>Service Request Details</template>
+        <template #description> View the details and status of your request </template>
 
         <template #breadcrumbs>
             <div class="flex flex-col gap-y-6">
                 <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="serviceRequest.serviceRequestNumber" />
-                <router-link
-                    :to="{ name: 'service' }"
-                    class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700"
-                >
-                    <ArrowLeftIcon class="h-4 w-4" />
-                    Back to My Service Requests
-                </router-link>
             </div>
         </template>
 
-        <template #rawContent>
-            <!-- Error notices -->
-            <template v-if="authorizationError || validationErrors.serviceRequestId">
-                <div
-                    v-if="authorizationError"
-                    class="rounded-[var(--rounding-md)] bg-red-50 px-4 py-3 text-sm text-red-700"
-                >
-                    {{ authorizationError }}
-                </div>
-                <div
-                    v-if="validationErrors.serviceRequestId"
-                    class="rounded-[var(--rounding-md)] bg-red-50 px-4 py-3 text-sm text-red-700"
-                >
-                    <p v-for="error in validationErrors.serviceRequestId" :key="error">{{ error }}</p>
-                </div>
-            </template>
-
-            <!-- Summary table -->
-            <BaseTable>
-                <BaseTableHeader>
-                    <tr>
-                        <BaseTableHeaderCell>Service Request #</BaseTableHeaderCell>
-                        <BaseTableHeaderCell>Type</BaseTableHeaderCell>
-                        <BaseTableHeaderCell>Status</BaseTableHeaderCell>
-                        <BaseTableHeaderCell>Date Opened</BaseTableHeaderCell>
-                        <BaseTableHeaderCell>Last Updated</BaseTableHeaderCell>
-                    </tr>
-                </BaseTableHeader>
-                <BaseTableBody>
-                    <BaseTableRow>
-                        <BaseTableCell class="whitespace-nowrap text-sm font-medium text-gray-900">
-                            {{ serviceRequest.serviceRequestNumber }}
-                        </BaseTableCell>
-                        <BaseTableCell class="text-sm text-gray-600">
-                            {{ serviceRequest.typeName ?? '—' }}
-                        </BaseTableCell>
-                        <BaseTableCell>
-                            <BaseBadge
-                                v-if="serviceRequest.statusName"
-                                :color="serviceRequest.statusColor?.toLowerCase()"
-                            >
-                                {{ serviceRequest.statusName }}
-                            </BaseBadge>
-                            <span v-else class="text-sm text-gray-400">—</span>
-                        </BaseTableCell>
-                        <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
-                            {{ serviceRequest.dateOpened ?? '—' }}
-                        </BaseTableCell>
-                        <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
-                            {{ serviceRequest.lastUpdated ?? '—' }}
-                        </BaseTableCell>
-                    </BaseTableRow>
-                </BaseTableBody>
-            </BaseTable>
-
-            <!-- Title -->
-            <BaseDetailSection label="Title">
-                <p class="text-sm text-gray-900">{{ serviceRequest.title }}</p>
-            </BaseDetailSection>
-
-            <!-- Description -->
-            <BaseDetailSection label="Description">
-                <p class="whitespace-pre-line text-sm text-gray-700">{{ serviceRequest.description }}</p>
-            </BaseDetailSection>
-
-            <!-- New update form -->
-            <BaseDetailSection label="New Service Request Update">
-                <form @submit.prevent="submitUpdate">
-                    <BaseTextarea v-model="updateMessage" :rows="5" placeholder="Enter your update here..." required />
-                    <div class="my-4">
-                        <div class="my-4">
-                            <label class="block font-bold mb-2"> Upload files </label>
-
-                            <div
-                                class="rounded-lg p-6 text-center transition"
-                                :class="isDragging ? 'bg-taupe-300' : 'bg-taupe-100'"
-                                @click="$refs.fileInput.click()"
-                                @dragover.prevent="isDragging = true"
-                                @dragenter.prevent="isDragging = true"
-                                @dragleave.prevent="isDragging = false"
-                                @drop.prevent="handleDrop"
-                            >
-                                <input
-                                    ref="fileInput"
-                                    type="file"
-                                    multiple
-                                    class="hidden"
-                                    :accept="acceptedMimeTypes"
-                                    @change="handleFiles"
-                                />
-
-                                <div class="text-taupe-600">
-                                    <span>Drop files here or </span>
-                                    <span class="underline hover:cursor-pointer"> Browse </span>
-                                </div>
-
-                                <ul v-if="files.length" class="mt-4 space-y-2">
-                                    <li
-                                        v-for="(file, index) in files"
-                                        :key="index"
-                                        class="flex items-center justify-between bg-neutral-700 rounded-lg px-3 py-2 shadow-sm"
-                                    >
-                                        <div class="flex flex-col leading-tight items-start">
-                                            <span class="block text-sm text-white truncate">
-                                                {{ file.name }}
-                                            </span>
-                                            <span class="block text-xs text-neutral-400">
-                                                {{ (file.size / 1024).toFixed(1) }} KB
-                                            </span>
-                                        </div>
-
-                                        <button
-                                            type="button"
-                                            class="ml-3 flex items-center justify-center w-7 h-7 text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-600 transition shrink-0"
-                                            style="border-radius: 9999px"
-                                            @click.stop="removeFile(index)"
-                                        >
-                                            <svg
-                                                class="h-4 w-4"
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                                stroke-width="2.5"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    d="M6 6l12 12M6 18L18 6"
-                                                />
-                                            </svg>
-                                        </button>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                        <BaseInputError :errors="validationErrors.description ?? []" />
-                        <div v-if="validationErrors.files" class="text-red-500 text-sm">
-                            <p v-for="error in validationErrors.files" :key="error">
-                                {{ error }}
-                            </p>
-                        </div>
-                    </div>
-                    <BaseButton type="submit" variant="primary" size="md" :loading="disableSubmitBtn">
-                        Submit Update
-                    </BaseButton>
-                </form>
-            </BaseDetailSection>
-
-            <!-- Updates list -->
-            <BaseList
-                label="Service Request Updates"
-                empty="No updates yet."
-                :isEmpty="serviceRequestUpdates.length === 0"
+        <!-- Error notices -->
+        <template v-if="authorizationError || validationErrors.serviceRequestId">
+            <div
+                v-if="authorizationError"
+                class="rounded-[var(--rounding-md)] bg-red-50 px-4 py-3 text-sm text-red-700"
             >
-                <div
-                    v-for="serviceRequestUpdate in serviceRequestUpdates"
-                    :key="serviceRequestUpdate.id"
-                    :class="['flex', serviceRequestUpdate.created_by_type === 'contact' ? 'bg-white' : 'bg-gray-50']"
-                >
-                    <div class="w-28 shrink-0 border-r border-gray-100 px-5 py-4 text-xs leading-relaxed text-gray-400">
-                        <div>{{ serviceRequestUpdate.created_at.split(' ')[0] }}</div>
-                        <div>{{ serviceRequestUpdate.created_at.split(' ').slice(1).join(' ') }}</div>
-                    </div>
-                    <div class="flex-1 px-5 py-4 text-sm text-gray-700">
-                        <div class="whitespace-pre-line">{{ serviceRequestUpdate.update }}</div>
+                {{ authorizationError }}
+            </div>
+            <div
+                v-if="validationErrors.serviceRequestId"
+                class="rounded-[var(--rounding-md)] bg-red-50 px-4 py-3 text-sm text-red-700"
+            >
+                <p v-for="error in validationErrors.serviceRequestId" :key="error">{{ error }}</p>
+            </div>
+        </template>
 
-                        <ul
-                            v-if="serviceRequestUpdate.media && serviceRequestUpdate.media.length"
-                            class="mt-3 space-y-1"
+        <!-- Summary table -->
+        <BaseTable>
+            <BaseTableHeader>
+                <tr>
+                    <BaseTableHeaderCell>Service Request #</BaseTableHeaderCell>
+                    <BaseTableHeaderCell>Type</BaseTableHeaderCell>
+                    <BaseTableHeaderCell>Status</BaseTableHeaderCell>
+                    <BaseTableHeaderCell>Date Opened</BaseTableHeaderCell>
+                    <BaseTableHeaderCell>Last Updated</BaseTableHeaderCell>
+                </tr>
+            </BaseTableHeader>
+            <BaseTableBody>
+                <BaseTableRow>
+                    <BaseTableCell class="whitespace-nowrap text-sm font-medium text-gray-900">
+                        {{ serviceRequest.serviceRequestNumber }}
+                    </BaseTableCell>
+                    <BaseTableCell class="text-sm text-gray-600">
+                        {{ serviceRequest.typeName ?? '—' }}
+                    </BaseTableCell>
+                    <BaseTableCell>
+                        <BaseBadge v-if="serviceRequest.statusName" :color="serviceRequest.statusColor?.toLowerCase()">
+                            {{ serviceRequest.statusName }}
+                        </BaseBadge>
+                        <span v-else class="text-sm text-gray-400">—</span>
+                    </BaseTableCell>
+                    <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
+                        {{ serviceRequest.dateOpened ?? '—' }}
+                    </BaseTableCell>
+                    <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
+                        {{ serviceRequest.lastUpdated ?? '—' }}
+                    </BaseTableCell>
+                </BaseTableRow>
+            </BaseTableBody>
+        </BaseTable>
+
+        <!-- Title -->
+        <BaseDetailSection label="Title">
+            <p class="text-sm text-gray-900">{{ serviceRequest.title }}</p>
+        </BaseDetailSection>
+
+        <!-- Description -->
+        <BaseDetailSection label="Description">
+            <p class="whitespace-pre-line text-sm text-gray-700">{{ serviceRequest.description }}</p>
+        </BaseDetailSection>
+
+        <!-- New update form -->
+        <BaseDetailSection label="New Service Request Update">
+            <form @submit.prevent="submitUpdate">
+                <BaseTextarea v-model="updateMessage" :rows="5" placeholder="Enter your update here..." required />
+                <div class="my-4">
+                    <div class="my-4">
+                        <label class="block font-bold mb-2"> Upload files </label>
+
+                        <div
+                            class="rounded-lg p-6 text-center transition"
+                            :class="isDragging ? 'bg-taupe-300' : 'bg-taupe-100'"
+                            @click="$refs.fileInput.click()"
+                            @dragover.prevent="isDragging = true"
+                            @dragenter.prevent="isDragging = true"
+                            @dragleave.prevent="isDragging = false"
+                            @drop.prevent="handleDrop"
                         >
-                            <li v-for="mediaItem in serviceRequestUpdate.media" :key="mediaItem.id">
-                                <a
-                                    :href="mediaItem.url"
-                                    target="_blank"
-                                    download
-                                    class="inline-flex w-fit items-center space-x-2 rounded-lg border border-gray-100 bg-white px-2 py-1.5 text-sm transition hover:bg-gray-200"
+                            <input
+                                ref="fileInput"
+                                type="file"
+                                multiple
+                                class="hidden"
+                                :accept="acceptedMimeTypes"
+                                @change="handleFiles"
+                            />
+
+                            <div class="text-taupe-600">
+                                <span>Drop files here or </span>
+                                <span class="underline hover:cursor-pointer"> Browse </span>
+                            </div>
+
+                            <ul v-if="files.length" class="mt-4 space-y-2">
+                                <li
+                                    v-for="(file, index) in files"
+                                    :key="index"
+                                    class="flex items-center justify-between bg-neutral-700 rounded-lg px-3 py-2 shadow-sm"
                                 >
-                                    <svg
-                                        class="h-4 w-4 shrink-0 opacity-70"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        stroke-width="2"
-                                        viewBox="0 0 24 24"
+                                    <div class="flex flex-col leading-tight items-start">
+                                        <span class="block text-sm text-white truncate">
+                                            {{ file.name }}
+                                        </span>
+                                        <span class="block text-xs text-neutral-400">
+                                            {{ (file.size / 1024).toFixed(1) }} KB
+                                        </span>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        class="ml-3 flex items-center justify-center w-7 h-7 text-neutral-400 hover:text-white bg-neutral-900 hover:bg-neutral-600 transition shrink-0"
+                                        style="border-radius: 9999px"
+                                        @click.stop="removeFile(index)"
                                     >
-                                        <path d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14" />
-                                    </svg>
-                                    <span class="truncate text-gray-900">{{ mediaItem.name }}</span>
-                                </a>
-                            </li>
-                        </ul>
+                                        <svg
+                                            class="h-4 w-4"
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                            stroke-width="2.5"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M6 6l12 12M6 18L18 6"
+                                            />
+                                        </svg>
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <BaseInputError :errors="validationErrors.description ?? []" />
+                    <div v-if="validationErrors.files" class="text-red-500 text-sm">
+                        <p v-for="error in validationErrors.files" :key="error">
+                            {{ error }}
+                        </p>
                     </div>
                 </div>
+                <BaseButton type="submit" variant="primary" size="md" :loading="disableSubmitBtn">
+                    Submit Update
+                </BaseButton>
+            </form>
+        </BaseDetailSection>
 
-                <template #footer>
-                    <Pagination
-                        :currentPage="currentPage"
-                        :lastPage="lastPage"
-                        :fromArticle="fromRecord"
-                        :toArticle="toRecord"
-                        :totalArticles="totalRecords"
-                        @fetchNextPage="fetchNextPage"
-                        @fetchPreviousPage="fetchPreviousPage"
-                        @fetchPage="fetchPage"
-                    />
-                </template>
-            </BaseList>
-        </template>
+        <!-- Updates list -->
+        <BaseList label="Service Request Updates" empty="No updates yet." :isEmpty="serviceRequestUpdates.length === 0">
+            <div
+                v-for="serviceRequestUpdate in serviceRequestUpdates"
+                :key="serviceRequestUpdate.id"
+                :class="['flex', serviceRequestUpdate.created_by_type === 'contact' ? 'bg-white' : 'bg-gray-50']"
+            >
+                <div class="w-28 shrink-0 border-r border-gray-100 px-5 py-4 text-xs leading-relaxed text-gray-400">
+                    <div>{{ serviceRequestUpdate.created_at.split(' ')[0] }}</div>
+                    <div>{{ serviceRequestUpdate.created_at.split(' ').slice(1).join(' ') }}</div>
+                </div>
+                <div class="flex-1 px-5 py-4 text-sm text-gray-700">
+                    <div class="whitespace-pre-line">{{ serviceRequestUpdate.update }}</div>
+
+                    <ul v-if="serviceRequestUpdate.media && serviceRequestUpdate.media.length" class="mt-3 space-y-1">
+                        <li v-for="mediaItem in serviceRequestUpdate.media" :key="mediaItem.id">
+                            <a
+                                :href="mediaItem.url"
+                                target="_blank"
+                                download
+                                class="inline-flex w-fit items-center space-x-2 rounded-lg border border-gray-100 bg-white px-2 py-1.5 text-sm transition hover:bg-gray-200"
+                            >
+                                <svg
+                                    class="h-4 w-4 shrink-0 opacity-70"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="2"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <path d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14" />
+                                </svg>
+                                <span class="truncate text-gray-900">{{ mediaItem.name }}</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <template #footer>
+                <Pagination
+                    :currentPage="currentPage"
+                    :lastPage="lastPage"
+                    :fromArticle="fromRecord"
+                    :toArticle="toRecord"
+                    :totalArticles="totalRecords"
+                    @fetchNextPage="fetchNextPage"
+                    @fetchPreviousPage="fetchPreviousPage"
+                    @fetchPage="fetchPage"
+                />
+            </template>
+        </BaseList>
     </Page>
 </template>
