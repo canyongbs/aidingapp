@@ -114,6 +114,7 @@
                 '--hover-bg': '#f9fafb',
                 '--hover-text': '#030712',
                 '--ring': 'rgba(12, 10, 9, 0.1)',
+                '--focus-ring': 'rgba(107, 114, 128, 0.5)',
             },
             primary: {
                 '--bg': 'rgba(var(--primary-600), 1)',
@@ -121,6 +122,7 @@
                 '--hover-bg': 'rgba(var(--primary-500), 1)',
                 '--hover-text': '#ffffff',
                 '--ring': 'transparent',
+                '--focus-ring': 'rgba(var(--primary-500), 0.5)',
             },
             danger: {
                 '--bg': '#dc2626',
@@ -128,6 +130,7 @@
                 '--hover-bg': '#ef4444',
                 '--hover-text': '#ffffff',
                 '--ring': 'transparent',
+                '--focus-ring': 'rgba(220, 38, 38, 0.5)',
             },
             info: {
                 '--bg': '#0284c7',
@@ -135,6 +138,7 @@
                 '--hover-bg': '#0ea5e9',
                 '--hover-text': '#ffffff',
                 '--ring': 'transparent',
+                '--focus-ring': 'rgba(2, 132, 199, 0.5)',
             },
             success: {
                 '--bg': '#16a34a',
@@ -142,6 +146,7 @@
                 '--hover-bg': '#22c55e',
                 '--hover-text': '#ffffff',
                 '--ring': 'transparent',
+                '--focus-ring': 'rgba(22, 163, 74, 0.5)',
             },
             warning: {
                 '--bg': '#d97706',
@@ -149,6 +154,7 @@
                 '--hover-bg': '#f59e0b',
                 '--hover-text': '#ffffff',
                 '--ring': 'transparent',
+                '--focus-ring': 'rgba(217, 119, 6, 0.5)',
             },
         };
 
@@ -172,7 +178,7 @@
         props.size === 'lg' && 'gap-1.5 px-3.5 py-2.5',
         props.size === 'xl' && 'gap-1.5 px-4 py-3',
         'bg-(--bg) text-(--text) shadow-[0_0_0_1px_var(--ring,transparent)]',
-        !isDisabled.value && 'hover:bg-(--hover-bg) hover:text-(--hover-text) focus-visible:ring-2',
+        !isDisabled.value && 'hover:bg-(--hover-bg) hover:text-(--hover-text) focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2',
         isDisabled.value && 'cursor-default opacity-70 pointer-events-none',
     ]);
 
@@ -260,7 +266,6 @@
             <svg
                 v-if="loading"
                 :class="[...iconClasses, 'animate-spin']"
-                :style="{ color: colorVars['--text'] }"
                 fill="none"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -281,7 +286,6 @@
                 v-else
                 :is="resolvedIcon"
                 :class="iconClasses"
-                :style="{ color: colorVars['--text'] }"
                 :width="iconPx"
                 :height="iconPx"
                 aria-hidden="true"
@@ -294,7 +298,6 @@
             <svg
                 v-if="loading"
                 :class="[...iconClasses, 'animate-spin']"
-                :style="{ color: colorVars['--text'] }"
                 fill="none"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -315,7 +318,6 @@
                 v-else
                 :is="resolvedIcon"
                 :class="iconClasses"
-                :style="{ color: colorVars['--text'] }"
                 :width="iconPx"
                 :height="iconPx"
                 aria-hidden="true"
