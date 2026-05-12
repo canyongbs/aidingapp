@@ -43,7 +43,11 @@ export function useMarkdown() {
     const renderMarkdown = (content) => {
         if (!content) return '';
         try {
-            const cleanedContent = content.replace(/【[^】]*】/g, '');
+            // Strip the last line if it contains only a single "-" (with optional surrounding whitespace).
+            // This prevents setext H2 flashing during streaming when a nested bullet "-" appears
+            // alone on the final line before its text has arrived. Also removes any "【...】"
+            // patterns which are used for internal citations and should not be rendered.
+            const cleanedContent = content.replace(/【[^】]*】/g, '').replace(/\n\s*-\s*$/, '');
             const html = marked.parse(cleanedContent, { async: false });
             return DOMPurify.sanitize(html);
         } catch (error) {
