@@ -175,7 +175,7 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                         ? implode("\n", $record->broken_links ?? [])
                                         : 'No broken links were detected in this article.')
                                     ->getStateUsing(fn (KnowledgeBaseItem $record) => ! $record->are_broken_links_detected)
-                                    ->visible(fn(): bool => BrokenLinksFeature::active()),
+                                    ->visible(fn (): bool => BrokenLinksFeature::active()),
                                 IconEntry::make('no_broken_images')
                                     ->label('No Broken Images Detected')
                                     ->boolean()
@@ -183,7 +183,7 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                         ? implode("\n", $record->broken_images ?? [])
                                         : 'No broken images were detected in this article.')
                                     ->getStateUsing(fn (KnowledgeBaseItem $record) => ! $record->are_broken_images_detected)
-                                    ->visible(fn(): bool => BrokenLinksFeature::active()),
+                                    ->visible(fn (): bool => BrokenLinksFeature::active()),
                             ])
                             ->columns(2)
                             ->id('health'),
