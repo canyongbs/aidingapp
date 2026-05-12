@@ -46,8 +46,8 @@ use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 class AiResolutionEvaluation extends Data
 {
     public function __construct(
-        public int $confidenceScore,
-        public string $proposedAnswer,
-        public string $reasoning,
+        public string $disposition,
+        public int|string $confidence,
+        public string $detailedResponse,
     ) {}
 }

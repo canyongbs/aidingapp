@@ -34,16 +34,32 @@
 <script setup>
     import { createMessage, getNode } from '@formkit/core';
     import { FormKitSchema } from '@formkit/vue';
+    import DOMPurify from 'dompurify';
+    import { marked } from 'marked';
     import { computed, defineProps, nextTick, onMounted, reactive, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';
-    import PageCard from '../Components/PageCard.vue';
     import BaseButton from '../Components/ui/BaseButton.vue';
     import wizard from '../FormKit/wizard.js';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
+
+    marked.setOptions({
+        breaks: true,
+        gfm: true,
+    });
+
+    function renderMarkdown(content) {
+        if (!content) return '';
+        try {
+            const html = marked.parse(content, { async: false });
+            return DOMPurify.sanitize(html);
+        } catch (error) {
+            return DOMPurify.sanitize(content);
+        }
+    }
 
     let { steps, visitedSteps, activeStep, setStep, wizardPlugin } = wizard();
 
@@ -446,102 +462,96 @@
                     />
                 </template>
 
-                <PageCard>
-                    <main class="grid gap-4" v-if="submittedSuccess">
-                        <template v-if="wasAiResolved">
-                            <p>Great! We're glad the AI was able to resolve your issue.</p>
-                            <p class="text-sm text-gray-600">
-                                A record of this interaction has been saved. If you need further assistance, feel free
-                                to submit a new request.
-                            </p>
-                        </template>
-                        <template v-else>
-                            <p>Thank you. Your request has been submitted.</p>
-                        </template>
+                <main class="grid gap-4" v-if="submittedSuccess">
+                    <template v-if="wasAiResolved">
+                        <p>Great! We're glad the AI was able to resolve your issue.</p>
+                        <p class="text-sm text-gray-600">
+                            A record of this interaction has been saved. If you need further assistance, feel free to
+                            submit a new request.
+                        </p>
+                    </template>
+                    <template v-else>
+                        <p>Thank you. Your request has been submitted.</p>
+                    </template>
 
-                        <BaseButton
-                            as="router-link"
-                            :to="{ name: 'create-service-request' }"
-                            variant="secondary"
-                            size="md"
-                        >
-                            Submit Another Request
-                        </BaseButton>
-                    </main>
+                    <BaseButton as="router-link" :to="{ name: 'create-service-request' }" variant="secondary" size="md">
+                        Submit Another Request
+                    </BaseButton>
+                </main>
 
-                    <main class="grid gap-4" v-else>
+                <main class="grid gap-4" v-else>
+                    <div
+                        v-if="isGeneratingQuestions || isEvaluatingAiResolution"
+                        class="flex items-center justify-center"
+                    >
                         <div
-                            v-if="isGeneratingQuestions || isEvaluatingAiResolution"
-                            class="flex items-center justify-center"
+                            role="status"
+                            aria-live="polite"
+                            class="pointer-events-auto flex items-center gap-3 px-4 py-2"
                         >
-                            <div
-                                role="status"
-                                aria-live="polite"
-                                class="pointer-events-auto flex items-center gap-3 px-4 py-2"
+                            <svg
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                                class="animate-spin h-4 w-4 text-brand-600"
                             >
-                                <svg
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="animate-spin h-4 w-4 text-brand-600"
-                                >
-                                    <path
-                                        clip-rule="evenodd"
-                                        d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                                        fill-rule="evenodd"
-                                        fill="currentColor"
-                                        opacity="0.2"
-                                    ></path>
-                                    <path
-                                        d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z"
-                                        fill="currentColor"
-                                    ></path>
-                                </svg>
+                                <path
+                                    clip-rule="evenodd"
+                                    d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                                    fill-rule="evenodd"
+                                    fill="currentColor"
+                                    opacity="0.2"
+                                ></path>
+                                <path
+                                    d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z"
+                                    fill="currentColor"
+                                ></path>
+                            </svg>
 
-                                <span v-if="isGeneratingQuestions" class="text-sm text-gray-700"
-                                    >Generating questions…</span
-                                >
-                                <span v-else class="text-sm text-gray-700">Evaluating your request…</span>
-                            </div>
+                            <span v-if="isGeneratingQuestions" class="text-sm text-gray-700"
+                                >Generating questions…</span
+                            >
+                            <span v-else class="text-sm text-gray-700">Evaluating your request…</span>
+                        </div>
+                    </div>
+
+                    <div v-if="showAiResolutionStep" class="bg-white rounded-lg p-6 shadow-xs">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">AI Resolution Available</h3>
+
+                        <p class="text-gray-600 mb-4">
+                            Our AI has considered your request and may be able to answer it immediately. Please review
+                            the potential answer below:
+                        </p>
+
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                            <div
+                                class="prose prose-sm max-w-none text-gray-800"
+                                v-html="renderMarkdown(aiResolutionData?.proposedAnswer)"
+                            ></div>
                         </div>
 
-                        <div v-if="showAiResolutionStep" class="bg-white rounded-lg p-6 shadow-xs">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">AI Resolution Available</h3>
+                        <p class="text-gray-600 mb-6">
+                            Please tell us if this resolved your issue. If not, we will escalate this ticket to a
+                            support team member.
+                        </p>
 
-                            <p class="text-gray-600 mb-4">
-                                Our AI has considered your request and may be able to answer it immediately. Please
-                                review the potential answer below:
-                            </p>
-
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                                <div class="prose prose-sm max-w-none text-gray-800 whitespace-pre-wrap">
-                                    {{ aiResolutionData?.proposedAnswer }}
-                                </div>
-                            </div>
-
-                            <p class="text-gray-600 mb-6">
-                                Please tell us if this resolved your issue. If not, we will escalate this ticket to a
-                                support team member.
-                            </p>
-
-                            <div class="flex gap-3">
-                                <BaseButton variant="success" size="md" @click="handleAiResolutionAccepted">
-                                    Yes (Resolved)
-                                </BaseButton>
-                                <BaseButton variant="neutral" size="md" @click="handleAiResolutionDeclined">
-                                    No
-                                </BaseButton>
-                            </div>
+                        <div class="flex gap-3">
+                            <BaseButton variant="success" size="md" @click="handleAiResolutionAccepted">
+                                Yes (Resolved)
+                            </BaseButton>
+                            <BaseButton variant="neutral" size="md" @click="handleAiResolutionDeclined">
+                                No
+                            </BaseButton>
                         </div>
+                    </div>
 
-                        <div
-                            class="prose max-w-none"
-                            v-show="!isGeneratingQuestions && !isEvaluatingAiResolution && !showAiResolutionStep"
-                        >
-                            <FormKitSchema :schema="schema" :data="data" />
-                        </div>
-                    </main>
-                </PageCard>
+                    <div
+                        class="prose max-w-none"
+                        v-show="!isGeneratingQuestions && !isEvaluatingAiResolution && !showAiResolutionStep"
+                    >
+                        <FormKitSchema :schema="schema" :data="data" />
+                    </div>
+                </main>
             </Page>
         </div>
     </div>

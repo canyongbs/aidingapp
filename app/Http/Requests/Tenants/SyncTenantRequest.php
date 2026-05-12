@@ -36,7 +36,6 @@
 
 namespace App\Http\Requests\Tenants;
 
-use App\Features\IncidentRenameFeature;
 use Illuminate\Foundation\Http\FormRequest;
 
 class SyncTenantRequest extends FormRequest
@@ -46,7 +45,7 @@ class SyncTenantRequest extends FormRequest
      */
     public function rules(): array
     {
-        $rules = [
+        return [
             'limits' => ['required', 'array'],
             'limits.emails' => ['required', 'integer', 'min:0'],
             'limits.resetDate' => ['required', 'string', 'date_format:m-d'],
@@ -63,22 +62,7 @@ class SyncTenantRequest extends FormRequest
             'addons.licenseManagement' => ['required', 'boolean'],
             'addons.projectManagement' => ['required', 'boolean'],
             'addons.serviceMonitoring' => ['required', 'boolean'],
+            'addons.advisoryManagement' => ['required', 'boolean'],
         ];
-
-        //TODO: IncidentRenameFeature cleanup - remove this entire conditional and move the 'advisoryManagement' rule to the main $rules array.
-
-        if (IncidentRenameFeature::active()) {
-            $rules = [
-                ...$rules,
-                'addons.advisoryManagement' => ['required', 'boolean'],
-            ];
-        } else {
-            $rules = [
-                ...$rules,
-                'addons.incidentManagement' => ['required', 'boolean'],
-            ];
-        }
-
-        return $rules;
     }
 }

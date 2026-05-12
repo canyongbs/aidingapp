@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\AdvisoryStatusFactory;
 use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
-use App\Features\IncidentRenameFeature;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -66,10 +65,7 @@ class AdvisoryStatus extends BaseModel implements Auditable
         'classification' => SystemAdvisoryStatusClassification::class,
     ];
 
-    public function getTable(): string
-    {
-        return IncidentRenameFeature::active() ? 'advisory_statuses' : 'incident_statuses';
-    }
+    protected $table = 'advisory_statuses';
 
     /**
      * @return HasMany<Advisory, $this>

@@ -37,7 +37,6 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\ServiceManagement\Models\Advisory;
-use App\Features\IncidentRenameFeature;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -45,10 +44,6 @@ class AdvisoryController
 {
     public function __invoke(Request $request): JsonResponse
     {
-        if (! IncidentRenameFeature::active()) {
-            return response()->json(['data' => []]);
-        }
-
         $perPage = $request->get('per_page', 15);
         $advisories = Advisory::with(['severity', 'advisoryUpdates', 'status'])->orderBy('created_at', 'desc')->paginate($perPage);
 
