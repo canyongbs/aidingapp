@@ -35,9 +35,6 @@
     import { FormKit } from '@formkit/vue';
     import { defineProps, onMounted, ref } from 'vue';
     import axios from '../../../portals/knowledge-management/src/Globals/Axios.js';
-    import determineIfUserIsAuthenticated from '../../../portals/knowledge-management/src/Services/DetermineIfUserIsAuthenticated.js';
-    import { useAuthStore } from '../../../portals/knowledge-management/src/Stores/auth.js';
-    import { useTokenStore } from '../../../portals/knowledge-management/src/Stores/token.js';
     import AppLoading from '../src/Components/AppLoading.vue';
     import Footer from './Components/Footer.vue';
 
@@ -77,9 +74,16 @@
 
     onMounted(async () => {
         await getForm().then(async () => {
-            await determineIfUserIsAuthenticated(authenticate.userAuthenticationUrl).then((response) => {
-                userIsAuthenticated.value = response;
-            });
+            const token = localStorage.getItem('token');
+
+            userIsAuthenticated.value = await axios
+                .get(authenticate.userAuthenticationUrl, {
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+                .then((response) => {
+                    return response.status === 200;
+                })
+                .catch(() => false);
 
             loading.value = false;
         });
@@ -136,11 +140,7 @@
 
                 authenticate.userAuthenticationUrl = response.data.user_auth_check_url;
 
-                const { setRequiresAuthentication } = useAuthStore();
-
-                setRequiresAuthentication(response.data.requires_authentication).then(() => {
-                    requiresAuthentication.value = response.data.requires_authentication;
-                });
+                requiresAuthentication.value = response.data.requires_authentication;
 
                 formRounding.value = {
                     none: {
@@ -189,9 +189,6 @@
     async function authenticate(formData, node) {
         node.clearErrors();
 
-        const { setToken } = useTokenStore();
-        const { setUser } = useAuthStore();
-
         if (authentication.value.isRequested) {
             axios
                 .post(authentication.value.url, {
@@ -214,8 +211,7 @@
                     }
 
                     if (response.data.success === true) {
-                        setToken(response.data.token);
-                        setUser(response.data.user);
+                        localStorage.setItem('token', response.data.token);
 
                         userIsAuthenticated.value = true;
                     }

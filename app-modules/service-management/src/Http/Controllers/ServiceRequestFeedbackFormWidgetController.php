@@ -119,7 +119,7 @@ class ServiceRequestFeedbackFormWidgetController extends Controller
                 'header_logo' => $logo?->getTemporaryUrl(
                     expiration: now()->addMinutes(5),
                     conversionName: 'logo-height-250px',
-                ),
+                ) ?? url(Vite::asset('resources/images/default-logo-light-1735308866.svg')),
                 'feedback_submitted' => $serviceRequest->feedback()->exists() ? true : false,
                 'app_name' => config('app.name'),
                 'has_enabled_csat' => $serviceRequest->priority?->type?->has_enabled_csat,
