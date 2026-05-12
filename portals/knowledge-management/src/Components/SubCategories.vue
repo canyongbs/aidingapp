@@ -43,7 +43,7 @@
 </script>
 
 <template>
-    <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-3 md:grid-cols-2">
         <router-link
             v-for="subCategory in subCategories"
             :key="subCategory.slug"
@@ -54,7 +54,7 @@
                     categorySlug: subCategory.slug,
                 },
             }"
-            class="group flex w-full gap-3 rounded-xl bg-white p-4 ring-1 ring-gray-950/5 transition duration-75 hover:bg-gray-50"
+            class="group flex w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5 transition duration-75 hover:bg-gray-50"
         >
             <div
                 v-if="subCategory.icon"

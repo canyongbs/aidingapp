@@ -36,7 +36,6 @@
     import { DocumentTextIcon, FolderIcon } from '@heroicons/vue/24/outline';
     import { defineProps } from 'vue';
     import Article from './Article.vue';
-    import EmptyState from './EmptyState.vue';
     import Pagination from './Pagination.vue';
     import SearchLoading from './SearchLoading.vue';
     import Subheading from './Subheading.vue';
@@ -141,10 +140,18 @@
                     @fetchPage="fetchPage"
                 />
             </div>
-            <EmptyState v-else :contained="false" :icon="DocumentTextIcon">
-                <template #heading>No articles found</template>
-                <template #description>No articles match your current search criteria.</template>
-            </EmptyState>
+
+            <section v-else class="px-6 py-4 flex items-start gap-x-4">
+                <div class="flex size-12 items-center justify-center rounded-full bg-gray-100">
+                    <DocumentTextIcon class="size-6 text-gray-400" />
+                </div>
+
+                <div class="flex-1">
+                    <h4 class="text-base font-semibold leading-6 text-gray-950">No articles found</h4>
+
+                    <p class="mt-1 text-sm text-gray-500">No articles match your current search criteria.</p>
+                </div>
+            </section>
         </div>
 
         <div
@@ -171,9 +178,16 @@
             </ul>
         </div>
 
-        <EmptyState v-else :icon="FolderIcon">
-            <template #heading>No categories found</template>
-            <template #description>No categories match your current search criteria.</template>
-        </EmptyState>
+        <section v-else class="rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 px-6 py-4 flex items-start gap-x-4">
+            <div class="flex size-12 items-center justify-center rounded-full bg-gray-100">
+                <FolderIcon class="size-6 text-gray-400" />
+            </div>
+
+            <div class="flex-1">
+                <h4 class="text-base font-semibold leading-6 text-gray-950">No categories found</h4>
+
+                <p class="mt-1 text-sm text-gray-500">No categories match your current search criteria.</p>
+            </div>
+        </section>
     </div>
 </template>

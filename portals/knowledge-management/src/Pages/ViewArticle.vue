@@ -208,7 +208,7 @@
 
         <PageCard>
             <div
-                class="prose max-w-none! prose-p:leading-snug! prose-p:my-2.5! prose-headings:my-4! prose-hr:my-5! prose-ul:my-3! prose-ol:my-3! prose-li:my-0! [&_li>p]:my-1! [&_td_p]:my-3! [&_th_p]:my-3! prose-table:w-full! prose-table:my-6 prose-table:border-separate prose-table:border-spacing-0 prose-table:rounded-lg prose-table:border prose-table:border-gray-200 prose-table:overflow-hidden prose-table:shadow-xs prose-td:border-b prose-td:border-gray-100 prose-td:align-middle prose-td:px-6 prose-td:py-2 prose-td:text-left prose-td:text-gray-700 prose-th:border-none prose-th:bg-brand-600 prose-th:px-6 prose-th:py-2 prose-th:text-left prose-th:font-bold prose-th:text-white [&_tr:last-child_td]:border-b-[3px]! [&_tr:last-child_td]:border-brand-600! even:prose-tr:bg-gray-50"
+                class="prose max-w-5xl w-full mx-auto prose-p:leading-snug! prose-p:my-2.5! prose-headings:my-4! prose-hr:my-5! prose-ul:my-3! prose-ol:my-3! prose-li:my-0! [&_li>p]:my-1! [&_td_p]:my-3! [&_th_p]:my-3! prose-table:w-full! prose-table:my-6 prose-table:border-separate prose-table:border-spacing-0 prose-table:rounded-lg prose-table:border prose-table:border-gray-200 prose-table:overflow-hidden prose-table:shadow-xs prose-td:border-b prose-td:border-gray-100 prose-td:align-middle prose-td:px-6 prose-td:py-2 prose-td:text-left prose-td:text-gray-700 prose-th:border-none prose-th:bg-brand-600 prose-th:px-6 prose-th:py-2 prose-th:text-left prose-th:font-bold prose-th:text-white [&_tr:last-child_td]:border-b-[3px]! [&_tr:last-child_td]:border-brand-600! even:prose-tr:bg-gray-50"
                 v-html="
                     DOMPurify.sanitize(article.content, {
                         ADD_TAGS: ['iframe', 'video', 'source'],
@@ -233,45 +233,45 @@
                     })
                 "
             ></div>
-        </PageCard>
 
-        <div class="flex flex-wrap items-center gap-4">
-            <span class="text-sm font-medium text-gray-700">Was this article helpful?</span>
+            <div class="max-w-5xl mx-auto w-full flex flex-wrap items-center gap-4">
+                <span class="text-sm font-medium text-gray-700">Was this article helpful?</span>
 
-            <div class="flex items-center gap-2">
-                <button
-                    type="button"
-                    @click="toggleFeedback(true)"
-                    class="relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 focus-visible:ring-2"
-                    :class="
-                        feedback === true
-                            ? 'bg-brand-600 text-white hover:bg-brand-500 focus-visible:ring-brand-500/50'
-                            : 'bg-white text-gray-950 ring-1 ring-gray-950/10 hover:bg-gray-50'
-                    "
-                >
-                    <HandThumbUpIcon class="size-5" />
-                    Yes
-                </button>
+                <div class="flex items-center gap-2">
+                    <button
+                        type="button"
+                        @click="toggleFeedback(true)"
+                        class="relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 focus-visible:ring-2"
+                        :class="
+                            feedback === true
+                                ? 'bg-brand-600 text-white hover:bg-brand-500 focus-visible:ring-brand-500/50'
+                                : 'bg-white text-gray-950 ring-1 ring-gray-950/10 hover:bg-gray-50'
+                        "
+                    >
+                        <HandThumbUpIcon class="size-5" />
+                        Yes
+                    </button>
 
-                <button
-                    type="button"
-                    @click="toggleFeedback(false)"
-                    class="relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 focus-visible:ring-2"
-                    :class="
-                        feedback === false
-                            ? 'bg-brand-600 text-white hover:bg-brand-500 focus-visible:ring-brand-500/50'
-                            : 'bg-white text-gray-950 ring-1 ring-gray-950/10 hover:bg-gray-50'
-                    "
-                >
-                    <HandThumbDownIcon class="size-5" />
-                    No
-                </button>
+                    <button
+                        type="button"
+                        @click="toggleFeedback(false)"
+                        class="relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 focus-visible:ring-2"
+                        :class="
+                            feedback === false
+                                ? 'bg-brand-600 text-white hover:bg-brand-500 focus-visible:ring-brand-500/50'
+                                : 'bg-white text-gray-950 ring-1 ring-gray-950/10 hover:bg-gray-50'
+                        "
+                    >
+                        <HandThumbDownIcon class="size-5" />
+                        No
+                    </button>
+                </div>
+
+                <span v-if="helpfulVotePercentage" class="text-sm text-gray-500">
+                    {{ helpfulVotePercentage }}% found this helpful
+                </span>
             </div>
-
-            <span v-if="helpfulVotePercentage" class="text-sm text-gray-500">
-                {{ helpfulVotePercentage }}% found this helpful
-            </span>
-        </div>
+        </PageCard>
     </Page>
 
     <Page v-if="!loading && (!category || !article)">
