@@ -129,12 +129,15 @@ class ListKnowledgeBaseItems extends ListRecords
                             ->where('status', '!=', ConcernStatus::Archived)
                             ->isEmpty();
 
-                        $hasNoBrokenLinks = ! $record->are_broken_links_detected;
-                        $hasNoBrokenImages = ! $record->are_broken_images_detected;
+                        if(!BrokenLinksFeature::active()) {
+                            return $hasTitle && $hasArticle && $hasManager && $hasNoUnresolvedConcerns;
+                        }else{
+                            $hasNoBrokenLinks = ! $record->are_broken_links_detected;
+                            $hasNoBrokenImages = ! $record->are_broken_images_detected;
 
-                        return $hasTitle && $hasArticle && $hasManager && $hasNoUnresolvedConcerns && $hasNoBrokenLinks && $hasNoBrokenImages;
-                    })
-                    ->visible(BrokenLinksFeature::active()),
+                            return $hasTitle && $hasArticle && $hasManager && $hasNoUnresolvedConcerns && $hasNoBrokenLinks && $hasNoBrokenImages;
+                        }                        
+                    }),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->toggleable()
