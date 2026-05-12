@@ -36,6 +36,8 @@
 
 use AidingApp\Ai\Http\Controllers\AssistantWidget\AuthenticateController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\AuthorizeBroadcastController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\EvaluateServiceRequestAiResolutionController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\GenerateServiceRequestQuestionController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestFormController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestTypesController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestUploadUrlController;
@@ -99,6 +101,14 @@ Route::middleware([
                         Route::post('service-request/{type}', StoreServiceRequestController::class)
                             ->middleware(['auth:sanctum'])
                             ->name('service-request.store');
+
+                        Route::post('service-request/{type}/generate-question', GenerateServiceRequestQuestionController::class)
+                            ->middleware(['auth:sanctum'])
+                            ->name('service-request.generate-question');
+
+                        Route::post('service-request/{type}/evaluate-ai-resolution', EvaluateServiceRequestAiResolutionController::class)
+                            ->middleware(['auth:sanctum'])
+                            ->name('service-request.evaluate-ai-resolution');
 
                         Route::match(
                             ['GET', 'POST', 'HEAD'],

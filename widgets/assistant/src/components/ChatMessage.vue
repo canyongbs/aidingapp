@@ -61,7 +61,7 @@
             >
                 <div
                     v-if="props.message.author === 'assistant'"
-                    class="prose prose-sm max-w-none text-sm text-gray-800 leading-relaxed prose-p:my-0 prose-p:first:mt-0 prose-p:last:mb-0 prose-ul:my-1 prose-ol:my-1 prose-li:my-0 prose-headings:mt-2 prose-headings:mb-1 prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-hr:my-2 prose-pre:my-2 prose-blockquote:my-2"
+                    class="prose prose-sm max-w-none text-sm text-gray-800 leading-relaxed prose-p:my-2 prose-p:first:mt-0 prose-p:last:mb-0 prose-ul:my-1 prose-ol:my-1 prose-li:my-0 prose-headings:mt-2 prose-headings:mb-1 prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg prose-h4:text-base prose-hr:my-2 prose-pre:my-2 prose-blockquote:my-2"
                     v-html="renderMarkdown(props.message.content)"
                 ></div>
                 <p v-else class="text-sm text-gray-800 leading-relaxed whitespace-pre-line">

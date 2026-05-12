@@ -37,16 +37,23 @@
 namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Ai\Actions\GenerateAssistantServiceRequestFormKitSchema;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class GetServiceRequestFormController extends Controller
 {
-    public function __invoke(ServiceRequestType $type): JsonResponse
+    public function __invoke(Request $request, ServiceRequestType $type): JsonResponse
     {
+        $contact = auth('contact')->user() ?? $request->user();
+
+        abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
+
         $form = $type->form;
 
         if (! $form) {

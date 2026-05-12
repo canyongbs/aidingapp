@@ -44,6 +44,7 @@
         selectedType: { type: Object, required: true },
         uploadUrl: { type: String, default: '' },
         isSubmitting: { type: Boolean, default: false },
+        isFinalStep: { type: Boolean, default: false },
         submitError: { type: String, default: null },
         fieldErrors: { type: Object, default: () => ({}) },
     });
@@ -53,7 +54,7 @@
     const isUploadProcessing = ref(false);
     provide('uploadProcessing', isUploadProcessing);
 
-    const isLastStep = computed(() => props.stepIndex === props.totalSteps - 1);
+    const isLastCustomStep = computed(() => props.stepIndex === props.totalSteps - 1);
     const formRef = ref(null);
     const isFormValid = ref(true);
     const formNodeReady = ref(false);
@@ -107,7 +108,7 @@
     defineExpose({ getFieldValues });
 
     function onFormSubmit() {
-        if (isLastStep.value) {
+        if (isLastCustomStep.value) {
             emit('submit');
         } else {
             emit('next');
@@ -180,7 +181,7 @@
                         ? 'Uploading…'
                         : isSubmitting
                           ? 'Submitting…'
-                          : isLastStep
+                          : isFinalStep
                             ? 'Submit Service Request'
                             : 'Next'
                 }}
