@@ -1234,11 +1234,11 @@
             }
         },
         {
-            "name": "canyon-gbs/aiding-app-team",
+            "name": "canyon-gbs/aiding-app-department",
             "version": "1.0",
             "dist": {
                 "type": "path",
-                "url": "app-modules/team",
+                "url": "app-modules/department",
                 "reference": "5e7aca8f02dfc2199ab0a8e2d449de88b36ec0e7"
             },
             "require": {
@@ -1248,16 +1248,16 @@
             "extra": {
                 "laravel": {
                     "providers": [
-                        "AidingApp\\Team\\Providers\\TeamServiceProvider"
+                        "AidingApp\\Department\\Providers\\DepartmentServiceProvider"
                     ]
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "AidingApp\\Team\\": "src/",
-                    "AidingApp\\Team\\Tests\\": "tests/",
-                    "AidingApp\\Team\\Database\\Factories\\": "database/factories/",
-                    "AidingApp\\Team\\Database\\Seeders\\": "database/seeders/"
+                    "AidingApp\\Department\\": "src/",
+                    "AidingApp\\Department\\Tests\\": "tests/",
+                    "AidingApp\\Department\\Database\\Factories\\": "database/factories/",
+                    "AidingApp\\Department\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [

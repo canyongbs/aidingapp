@@ -36,7 +36,7 @@
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -71,7 +71,7 @@ test('The correct details are displayed on the ViewServiceRequestUpdate page', f
 test('ViewServiceRequestUpdate is gated with proper access control', function () {
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
 
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
@@ -108,7 +108,7 @@ test('ViewServiceRequestUpdate is gated with proper feature access control', fun
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
 
     $user->givePermissionTo('service_request.view-any');

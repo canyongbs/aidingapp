@@ -40,7 +40,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\Edi
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestTypeAssignmentsRequestFactory;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -77,7 +77,7 @@ test('A successful action on the EditServiceRequestTypeAssignments page', functi
 });
 
 test('A successful action on the EditServiceRequestTypeAssignments page when the type selected is Individual', function () {
-    $managerTeam = Team::factory()->create();
+    $managerTeam = Department::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()
         ->hasAttached(

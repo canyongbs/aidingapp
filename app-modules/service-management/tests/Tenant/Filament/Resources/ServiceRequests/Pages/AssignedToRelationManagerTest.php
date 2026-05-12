@@ -43,7 +43,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\Select;
@@ -64,7 +64,7 @@ test('During assignment only Users that are on a Team that is Manager of the Typ
     $user = User::factory()->create();
     $userWithoutTeam = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -154,7 +154,7 @@ test('During reassignment current assigned user should not be in options', funct
     $user = User::factory()->create();
     $secondUser = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -258,7 +258,7 @@ test('Assign To Me action visible when the Service Request is unassigned and the
 
     $user->givePermissionTo('service_request.*.update');
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -334,7 +334,7 @@ test('Assign To Me action is not visible when the Service Request is already ass
 
     actingAs($user);
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -410,7 +410,7 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
@@ -475,7 +475,7 @@ test('Assign Service Request action visible when the Service Request is unassign
 
     actingAs($user);
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -545,7 +545,7 @@ test('Assign Service Request action is not visible when the Service Request is u
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
@@ -610,7 +610,7 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
 
     actingAs($user);
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -680,7 +680,7 @@ test('Assign Service Request action is not visible when the Service Request is C
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 

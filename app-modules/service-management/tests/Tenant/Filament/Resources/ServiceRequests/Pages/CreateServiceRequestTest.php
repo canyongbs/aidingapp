@@ -43,7 +43,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestRequestFactory;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\Select;
@@ -168,7 +168,7 @@ test('CreateServiceRequest is gated with proper access control', function () {
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -297,7 +297,7 @@ test('CreateServiceRequest is gated with proper feature access control', functio
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -423,7 +423,7 @@ test('cannot create service requests if user is manager of any service request t
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -451,7 +451,7 @@ test('displays only service request types managed by the current user', function
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -515,7 +515,7 @@ test('create service requests if user is manager of any service request type', f
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -607,7 +607,7 @@ test('validate service requests type if user is manager of any service request t
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 

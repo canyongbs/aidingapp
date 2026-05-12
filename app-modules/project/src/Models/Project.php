@@ -42,7 +42,7 @@ use AidingApp\Project\Models\Scopes\ProjectVisibilityScope;
 use AidingApp\Project\Observers\ProjectObserver;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -111,13 +111,13 @@ class Project extends BaseModel implements Auditable
     }
 
     /**
-     * @return BelongsToMany<Team, $this, ProjectManagerTeam>
+     * @return BelongsToMany<Department, $this, ProjectManagerDepartment>
      */
     public function managerTeams(): BelongsToMany
     {
         return $this
-            ->belongsToMany(Team::class, 'project_manager_teams', 'project_id', 'team_id')
-            ->using(ProjectManagerTeam::class)
+            ->belongsToMany(Department::class, 'project_manager_teams', 'project_id', 'team_id')
+            ->using(ProjectManagerDepartment::class)
             ->withTimestamps();
     }
 
@@ -133,13 +133,13 @@ class Project extends BaseModel implements Auditable
     }
 
     /**
-     * @return BelongsToMany<Team, $this, ProjectAuditorTeam>
+     * @return BelongsToMany<Department, $this, ProjectAuditorDepartment>
      */
     public function auditorTeams(): BelongsToMany
     {
         return $this
-            ->belongsToMany(Team::class, 'project_auditor_teams', 'project_id', 'team_id')
-            ->using(ProjectAuditorTeam::class)
+            ->belongsToMany(Department::class, 'project_auditor_teams', 'project_id', 'team_id')
+            ->using(ProjectAuditorDepartment::class)
             ->withTimestamps();
     }
 

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -149,8 +149,8 @@ it('allows a user to leave impersonate', function () {
 it('can filter users by teams', function () {
     asSuperAdmin();
 
-    $team1 = Team::factory()->create();
-    $team2 = Team::factory()->create();
+    $team1 = Department::factory()->create();
+    $team2 = Department::factory()->create();
 
     $userWithoutTeam = User::factory()->count(5)->create();
 

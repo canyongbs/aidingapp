@@ -38,7 +38,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListSer
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -67,7 +67,7 @@ test('it can bulk delete service requests as a team manager', function () {
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.delete');
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
 

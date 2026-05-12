@@ -37,7 +37,7 @@
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypeManagers;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -83,7 +83,7 @@ it('can attach manager users to a service request type', function () {
 it('can attach manager teams to a service request type', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     asSuperAdmin();
 
@@ -104,7 +104,7 @@ it('can attach both manager users and manager teams to a service request type', 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     asSuperAdmin();
 
@@ -204,7 +204,7 @@ test('ManageServiceRequestTypeManagers is gated with proper feature access contr
             ])
         )->assertSuccessful();
 
-    $managerTeam = Team::factory()->create();
+    $managerTeam = Department::factory()->create();
 
     livewire(ManageServiceRequestTypeManagers::class, [
         'record' => $serviceRequestType->getRouteKey(),

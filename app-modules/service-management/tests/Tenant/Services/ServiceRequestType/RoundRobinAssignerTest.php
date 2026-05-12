@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 
 use function Pest\Laravel\travelBack;
@@ -51,7 +51,7 @@ use function Tests\asSuperAdmin;
 test('round robin assigner distributes requests evenly across managers', function () {
     asSuperAdmin();
 
-    $team = Team::factory()
+    $team = Department::factory()
         ->has(User::factory()->count(3), 'users')
         ->create();
 
@@ -92,7 +92,7 @@ test('round robin assigner distributes requests evenly across managers', functio
 test('round robin assigner wraps around after all managers have been assigned', function () {
     asSuperAdmin();
 
-    $team = Team::factory()
+    $team = Department::factory()
         ->has(User::factory()->count(3), 'users')
         ->create();
 

@@ -36,7 +36,7 @@
         "canyon-gbs/aiding-app-portal": "*",
         "canyon-gbs/aiding-app-service-management": "*",
         "canyon-gbs/aiding-app-task": "*",
-        "canyon-gbs/aiding-app-team": "*",
+        "canyon-gbs/aiding-app-department": "*",
         "canyon-gbs/aiding-app-theme": "*",
         "canyon-gbs/aiding-app-timeline": "*",
         "canyon-gbs/aiding-app-webhook": "*",

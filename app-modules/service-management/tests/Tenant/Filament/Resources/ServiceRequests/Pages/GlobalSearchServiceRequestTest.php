@@ -40,7 +40,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -53,7 +53,7 @@ test('global search is gated with proper feature access control', function () {
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
 
@@ -112,7 +112,7 @@ test('global search returns service requests for managers of service request typ
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
 
@@ -169,7 +169,7 @@ test('global search returns service requests for auditors of service request typ
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
 
@@ -226,7 +226,7 @@ test('global search does not return service requests for non-managers/auditors',
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
 
@@ -307,7 +307,7 @@ test('global search details are correctly formatted', function () {
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
 
@@ -386,7 +386,7 @@ test('global search URL points to view page', function () {
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
 

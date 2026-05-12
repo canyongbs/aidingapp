@@ -39,7 +39,7 @@ namespace AidingApp\Division\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Division\Database\Factories\DivisionFactory;
 use AidingApp\Division\Observers\DivisionObserver;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\BaseModel;
 use App\Models\NotificationSettingPivot;
 use App\Models\User;
@@ -93,11 +93,11 @@ class Division extends BaseModel implements Auditable
     }
 
     /**
-     * @return HasMany<Team, $this>
+     * @return HasMany<Department, $this>
      */
     public function teams(): HasMany
     {
-        return $this->hasMany(Team::class);
+        return $this->hasMany(Department::class);
     }
 
     /**

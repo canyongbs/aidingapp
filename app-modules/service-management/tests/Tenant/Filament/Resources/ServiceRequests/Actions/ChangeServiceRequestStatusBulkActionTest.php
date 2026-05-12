@@ -40,7 +40,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -110,7 +110,7 @@ test('it can change status of multiple service requests for user directly assign
 test('it can change status of multiple service requests for user belonging to a manager team', function () {
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 

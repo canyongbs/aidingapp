@@ -45,7 +45,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -186,7 +186,7 @@ test('view service request page visible if the user is an auditor of the service
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -254,7 +254,7 @@ test('view service request page visible if the user is a manager of the service 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 

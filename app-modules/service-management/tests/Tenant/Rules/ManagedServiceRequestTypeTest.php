@@ -36,7 +36,7 @@
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 
@@ -59,7 +59,7 @@ test('super admin passes ManagedServiceRequestType rule for any type', function 
 test('team manager passes ManagedServiceRequestType rule', function () {
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
 

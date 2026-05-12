@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestUpdateRequestFactory;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -121,7 +121,7 @@ test('EditServiceRequestUpdate requires valid data', function ($data, $errors) {
 test('EditServiceRequestUpdate is gated with proper access control', function () {
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
 
     $serviceRequest = ServiceRequest::factory([
@@ -185,7 +185,7 @@ test('EditServiceRequestUpdate is gated with proper feature access control', fun
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
 
     $user->givePermissionTo('service_request.view-any');

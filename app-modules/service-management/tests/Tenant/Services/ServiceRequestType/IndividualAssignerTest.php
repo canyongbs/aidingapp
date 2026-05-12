@@ -42,7 +42,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 
 use function Tests\asSuperAdmin;
@@ -51,7 +51,7 @@ test('individual assigner assigns to configured user via team manager', function
     asSuperAdmin();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
 

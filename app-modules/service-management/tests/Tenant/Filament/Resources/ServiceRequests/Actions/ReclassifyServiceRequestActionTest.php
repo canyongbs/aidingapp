@@ -46,7 +46,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\WorkloadAssigner;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use Filament\Notifications\Notification;
 
@@ -59,7 +59,7 @@ use function Tests\asSuperAdmin;
 test('reclassify action is visible for manager team member with update permission', function () {
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
 
@@ -91,7 +91,7 @@ test('reclassify action is visible for manager team member with update permissio
 test('reclassify action is hidden for user without update permission', function () {
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
 
@@ -123,7 +123,7 @@ test('reclassify action is hidden for user without update permission', function 
 test('reclassify action is hidden on closed service requests', function () {
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
 
@@ -315,7 +315,7 @@ test('override assign_to only lists eligible managers for selected type', functi
     $newType->managerUsers()->attach($eligibleDirectManager);
 
     $eligibleTeamManager = User::factory()->create(['name' => 'Eligible Team']);
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $eligibleTeamManager->team()->associate($team)->save();
     $newType->managerTeams()->attach($team);
 

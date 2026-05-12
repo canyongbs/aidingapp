@@ -44,7 +44,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -110,7 +110,7 @@ test('Feedback page is gated based on access to the service request', function (
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -136,7 +136,7 @@ test('Feedback page is accessible when user is a manager of the service request 
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
 
     $type = ServiceRequestType::factory()->create([

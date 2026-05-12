@@ -37,7 +37,7 @@
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypeAuditors;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -83,7 +83,7 @@ it('can attach auditor users to a service request type', function () {
 it('can attach auditor teams to a service request type', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     asSuperAdmin();
 
@@ -104,7 +104,7 @@ it('can attach both auditor users and auditor teams to a service request type', 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     asSuperAdmin();
 
@@ -206,7 +206,7 @@ test('ManageServiceRequestTypeAuditors is gated with proper feature access contr
             ])
         )->assertSuccessful();
 
-    $auditorTeam = Team::factory()->create();
+    $auditorTeam = Department::factory()->create();
 
     livewire(ManageServiceRequestTypeAuditors::class, [
         'record' => $serviceRequestType->getRouteKey(),

@@ -48,7 +48,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -63,7 +63,7 @@ test('The correct details are displayed on the ListServiceRequests page', functi
 
     $user->givePermissionTo('service_request.*.update');
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -324,7 +324,7 @@ test('service requests only visible to service request type managers', function 
 
     $user->givePermissionTo('service_request.view-any');
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -402,7 +402,7 @@ test('service requests only visible to service request type auditors', function 
 
     $user->givePermissionTo('service_request.view-any');
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -471,7 +471,7 @@ test('service requests only visible to direct user service request type auditors
 
 test('can list audit member to service request type', function () {
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->refresh();
 
@@ -561,7 +561,7 @@ it('can filter service requests by assigned to with unassigned option', function
 
     $user->givePermissionTo('service_request.*.update');
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $user->team()->associate($team)->save();
 
@@ -704,8 +704,8 @@ it('can filter service requests by searched assigned user outside initial preloa
     $searchedUser = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    $searchedUserTeam = Team::factory()->create();
-    $otherUserTeam = Team::factory()->create();
+    $searchedUserTeam = Department::factory()->create();
+    $otherUserTeam = Department::factory()->create();
 
     $searchedUser->team()->associate($searchedUserTeam)->save();
     $otherUser->team()->associate($otherUserTeam)->save();

@@ -38,7 +38,7 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\AdvisoryFactory;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -68,11 +68,11 @@ class Advisory extends BaseModel implements Auditable
     protected $table = 'advisories';
 
     /**
-     * @return BelongsTo<Team, $this>
+     * @return BelongsTo<Department, $this>
      */
     public function assignedTeam(): BelongsTo
     {
-        return $this->belongsTo(Team::class, 'assigned_team_id', 'id');
+        return $this->belongsTo(Department::class, 'assigned_team_id', 'id');
     }
 
     /**

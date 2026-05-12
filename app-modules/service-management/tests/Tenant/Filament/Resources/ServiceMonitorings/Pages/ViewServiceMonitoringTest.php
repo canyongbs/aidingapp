@@ -37,7 +37,7 @@
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\ViewServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -84,7 +84,7 @@ test('ViewServiceMonitoring is gated with proper access control', function () {
 
 test('The correct details are displayed on the ViewServiceMonitoring page', function () {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
-        ->hasAttached(Team::factory())
+        ->hasAttached(Department::factory())
         ->hasAttached(User::factory())
         ->create();
 

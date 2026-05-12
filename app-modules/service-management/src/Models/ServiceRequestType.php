@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
@@ -161,15 +161,15 @@ class ServiceRequestType extends BaseModel implements Auditable
     }
 
     /**
-     * @return BelongsToMany<Team, $this, covariant ServiceRequestTypeTeamManager>
+     * @return BelongsToMany<Department, $this, covariant ServiceRequestTypeDepartmentManager>
      */
     public function managerTeams(): BelongsToMany
     {
         return $this->belongsToMany(
-            related: Team::class,
-            table: (new ServiceRequestTypeTeamManager())->getTable(),
+            related: Department::class,
+            table: (new ServiceRequestTypeDepartmentManager())->getTable(),
         )
-            ->using(ServiceRequestTypeTeamManager::class)
+            ->using(ServiceRequestTypeDepartmentManager::class)
             ->withPivot('id')
             ->withTimestamps();
     }
@@ -189,15 +189,15 @@ class ServiceRequestType extends BaseModel implements Auditable
     }
 
     /**
-     * @return BelongsToMany<Team, $this, covariant ServiceRequestTypeTeamAuditor>
+     * @return BelongsToMany<Department, $this, covariant ServiceRequestTypeDepartmentAuditor>
      */
     public function auditorTeams(): BelongsToMany
     {
         return $this->belongsToMany(
-            related: Team::class,
-            table: (new ServiceRequestTypeTeamAuditor())->getTable(),
+            related: Department::class,
+            table: (new ServiceRequestTypeDepartmentAuditor())->getTable(),
         )
-            ->using(ServiceRequestTypeTeamAuditor::class)
+            ->using(ServiceRequestTypeDepartmentAuditor::class)
             ->withPivot('id')
             ->withTimestamps();
     }

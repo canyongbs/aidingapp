@@ -42,7 +42,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\Select;
@@ -142,7 +142,7 @@ test('Only service request types managed by user team are available in type sele
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->givePermissionTo('service_request.create');
 
@@ -386,7 +386,7 @@ test('Non-super admin can only see service requests from managed or audited type
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');

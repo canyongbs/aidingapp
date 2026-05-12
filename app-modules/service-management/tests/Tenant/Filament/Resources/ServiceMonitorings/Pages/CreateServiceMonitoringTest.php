@@ -38,7 +38,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\Crea
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -138,7 +138,7 @@ test('CreateServiceMonitor with notification group User or Team', function () {
     expect($serviceMonitoringTarget->teams())->exists()->toBeFalse();
     expect($serviceMonitoringTarget->users())->exists()->toBeFalse();
 
-    $serviceMonitoringTarget->teams()->attach(Team::factory()->create());
+    $serviceMonitoringTarget->teams()->attach(Department::factory()->create());
     $serviceMonitoringTarget->users()->attach(User::factory()->create());
 
     expect($serviceMonitoringTarget->teams())->exists()->toBeTrue();

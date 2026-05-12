@@ -42,7 +42,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\WorkloadAssigner;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 
 use function Pest\Laravel\travelBack;
@@ -52,7 +52,7 @@ use function Tests\asSuperAdmin;
 test('workload assigner assigns to user with fewest active requests', function () {
     asSuperAdmin();
 
-    $team = Team::factory()
+    $team = Department::factory()
         ->has(User::factory()->count(3), 'users')
         ->create();
 
@@ -106,7 +106,7 @@ test('workload assigner assigns to user with fewest active requests', function (
 test('workload assigner distributes evenly when all managers have same workload', function () {
     asSuperAdmin();
 
-    $team = Team::factory()
+    $team = Department::factory()
         ->has(User::factory()->count(3), 'users')
         ->create();
 

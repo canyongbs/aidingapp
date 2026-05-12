@@ -36,7 +36,7 @@
 
 use AidingApp\Project\Filament\Resources\Projects\Pages\ListProjects;
 use AidingApp\Project\Models\Project;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -160,7 +160,7 @@ it('can see project in list if logged in user is a superadmin, the creator, a ma
         ->assertCanNotSeeTableRecords([$project])
         ->assertSuccessful();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $secondUser->team()->associate($team)->save();
 

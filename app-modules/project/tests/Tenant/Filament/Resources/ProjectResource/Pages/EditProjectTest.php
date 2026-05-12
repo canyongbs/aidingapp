@@ -37,7 +37,7 @@
 use AidingApp\Project\Filament\Resources\Projects\Pages\EditProject;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\ProjectResource\RequestFactory\EditProjectRequestFactory;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use Olympus\Crm\Models\Contact;
 
@@ -136,7 +136,7 @@ it('can render if logged in user is superadmin, creator, or a manager of the pro
     ]))
         ->assertNotFound();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $secondUser->team()->associate($team)->save();
 

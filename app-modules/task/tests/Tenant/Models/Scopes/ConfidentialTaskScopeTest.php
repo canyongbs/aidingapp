@@ -37,7 +37,7 @@
 use AidingApp\Project\Models\Project;
 use AidingApp\Task\Models\Scopes\ConfidentialTaskScope;
 use AidingApp\Task\Models\Task;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -84,7 +84,7 @@ test('users can access public tasks and confidential tasks that they have create
 test('users can access confidential tasks if they belong to a team with access', function () {
     $teamUser = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
 
     $teamUser->team()->associate($team)->save();
 
@@ -238,7 +238,7 @@ test('users can access confidential tasks if they are a project manager user', f
 
 test('users can access confidential tasks if their team is a project manager team', function () {
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
 
     actingAs($user);
@@ -308,7 +308,7 @@ test('users can access confidential tasks if they are a project auditor user', f
 
 test('users can access confidential tasks if their team is a project auditor team', function () {
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $team = Department::factory()->create();
     $user->team()->associate($team)->save();
 
     actingAs($user);

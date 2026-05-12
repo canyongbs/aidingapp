@@ -37,7 +37,7 @@
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
-use AidingApp\Team\Models\Team;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
 use Worksome\RequestFactories\RequestFactory;
 
@@ -64,7 +64,7 @@ class EditServiceRequestTypeAssignmentsRequestFactory extends RequestFactory
         ]);
     }
 
-    public function withIndividualId(?Team $team = null): static
+    public function withIndividualId(?Department $team = null): static
     {
         $userFactory = User::factory();
 
