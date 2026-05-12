@@ -39,6 +39,7 @@ use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetControl
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestMediaDownloadController;
 use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
 use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
+use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestTypeFeedbackIsOn;
 use AidingApp\ServiceManagement\Livewire\RenderServiceRequestFeedbackForm;
 use AidingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
 use Illuminate\Support\Facades\Route;
@@ -61,7 +62,7 @@ Route::middleware('web')
     });
 
 Route::get('/service-requests/{serviceRequest}/feedback/', RenderServiceRequestFeedbackForm::class)
-    ->middleware(['web', FeedbackManagementIsOn::class])
+    ->middleware(['web', FeedbackManagementIsOn::class, ServiceRequestTypeFeedbackIsOn::class])
     ->name('feedback.service.request');
 
 Route::middleware(['web', 'auth'])
