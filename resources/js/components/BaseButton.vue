@@ -178,7 +178,8 @@
         props.size === 'lg' && 'gap-1.5 px-3.5 py-2.5',
         props.size === 'xl' && 'gap-1.5 px-4 py-3',
         'bg-(--bg) text-(--text) shadow-[0_0_0_1px_var(--ring,transparent)]',
-        !isDisabled.value && 'hover:bg-(--hover-bg) hover:text-(--hover-text) focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2',
+        !isDisabled.value &&
+            'hover:bg-(--hover-bg) hover:text-(--hover-text) focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)] focus-visible:ring-offset-2',
         isDisabled.value && 'cursor-default opacity-70 pointer-events-none',
     ]);
 
