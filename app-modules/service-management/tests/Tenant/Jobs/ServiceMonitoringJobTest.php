@@ -38,6 +38,7 @@ use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringCheckJob;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Queue;
 
 it('successfully dispatches', function ($frequency) {
@@ -50,6 +51,29 @@ it('successfully dispatches', function ($frequency) {
     (new ServiceMonitoringJob($frequency))->handle();
 
     Queue::assertPushed(ServiceMonitoringCheckJob::class, $numJobs);
+})
+    ->with(
+        [
+            fn () => ServiceMonitoringFrequency::FiveMinutes,
+            fn () => ServiceMonitoringFrequency::FifteenMinutes,
+            fn () => ServiceMonitoringFrequency::ThirtyMinutes,
+            fn () => ServiceMonitoringFrequency::OneHour,
+            fn () => ServiceMonitoringFrequency::TwentyFourHours,
+        ]
+    );
+
+it('does not dispatch when serviceMonitoring addon is disabled', function ($frequency) {
+    Queue::fake();
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceMonitoring = false;
+    $settings->save();
+
+    ServiceMonitoringTarget::factory()->count(3)->create(['frequency' => $frequency]);
+
+    (new ServiceMonitoringJob($frequency))->handle();
+
+    Queue::assertNotPushed(ServiceMonitoringCheckJob::class);
 })
     ->with(
         [
