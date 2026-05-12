@@ -51,6 +51,7 @@ class CreateConcernAction extends Action
         $this
             ->label('Raise Concern')
             ->button()
+            ->authorize(fn () => auth()->user()->can('knowledge_base_item.view-any'))
             ->modalDescription('Please articulate the concern you have with this knowledge base item. You may enter up to 100 characters in the box below.')
             ->schema([
                 Textarea::make('description')

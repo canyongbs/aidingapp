@@ -75,8 +75,7 @@ class KnowledgeBaseItemConcernsTable extends TableWidget
                 TextColumn::make('status'),
             ])
             ->recordActions([
-                ChangeConcernStatusAction::make()
-                    ->authorize(fn () => auth()->user()->can('update', $this->record)),
+                ChangeConcernStatusAction::make(),
             ])
             ->filters([
                 SelectFilter::make('status')
