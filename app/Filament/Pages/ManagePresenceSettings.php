@@ -44,6 +44,7 @@ use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\SettingsPage;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 class ManagePresenceSettings extends SettingsPage
@@ -77,21 +78,26 @@ class ManagePresenceSettings extends SettingsPage
                     ->helperText('Minutes of inactivity before a user is considered idle.')
                     ->numeric()
                     ->minValue(1)
+                    ->maxValue(fn (Get $get) => ($get('idle_threshold') ?? 2) - 1)
                     ->required()
+                    ->live(onBlur: true)
                     ->suffix('minutes'),
                 TextInput::make('idle_threshold')
                     ->label('Idle threshold')
                     ->helperText('Minutes of inactivity before a user is considered inactive.')
                     ->numeric()
-                    ->minValue(1)
+                    ->minValue(fn (Get $get) => ($get('active_threshold') ?? 0) + 1)
+                    ->maxValue(fn (Get $get) => ($get('inactive_threshold') ?? 2) - 1)
                     ->required()
+                    ->live(onBlur: true)
                     ->suffix('minutes'),
                 TextInput::make('inactive_threshold')
                     ->label('Inactive threshold')
                     ->helperText('Minutes of inactivity before a user is considered offline.')
                     ->numeric()
-                    ->minValue(1)
+                    ->minValue(fn (Get $get) => ($get('idle_threshold') ?? 0) + 1)
                     ->required()
+                    ->live(onBlur: true)
                     ->suffix('minutes'),
             ])
             ->disabled(! auth()->user()->can('settings.*.update'));

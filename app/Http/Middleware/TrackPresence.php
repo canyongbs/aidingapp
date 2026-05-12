@@ -62,7 +62,7 @@ class TrackPresence
             return $response;
         }
 
-        $user->touchQuietly('last_activity_at');
+        User::withoutTimestamps(fn () => $user->touchQuietly('last_activity_at'));
 
         return $response;
     }
