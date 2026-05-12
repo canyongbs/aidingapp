@@ -58,7 +58,9 @@ class KnowledgeBaseItemObserver
             PrepareKnowledgeBaseVectorStore::dispatch();
         }
 
-        CheckKnowledgeBaseArticleLinksJob::dispatch($knowledgeBaseItem);
-        CheckKnowledgeBaseArticleImagesJob::dispatch($knowledgeBaseItem);
+        if ($knowledgeBaseItem->wasChanged('article_details')) {
+            CheckKnowledgeBaseArticleLinksJob::dispatch($knowledgeBaseItem);
+            CheckKnowledgeBaseArticleImagesJob::dispatch($knowledgeBaseItem);
+        }
     }
 }

@@ -78,7 +78,7 @@ class KnowledgeBaseItemResource extends Resource
     public static function getGlobalSearchEloquentQuery(): Builder
     {
         return parent::getGlobalSearchEloquentQuery()
-            ->with(['quality', 'status', 'category', 'division']);
+            ->with(['status', 'category', 'division']);
     }
 
     /**

@@ -170,10 +170,16 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                 IconEntry::make('no_broken_links')
                                     ->label('No Broken Links Detected')
                                     ->boolean()
+                                    ->tooltip(fn (KnowledgeBaseItem $record): string => $record->are_broken_links_detected
+                                        ? implode("\n", $record->broken_links ?? [])
+                                        : 'No broken links were detected in this article.')
                                     ->getStateUsing(fn (KnowledgeBaseItem $record) => ! $record->are_broken_links_detected),
                                 IconEntry::make('no_broken_images')
                                     ->label('No Broken Images Detected')
                                     ->boolean()
+                                    ->tooltip(fn (KnowledgeBaseItem $record): string => $record->are_broken_images_detected
+                                        ? implode("\n", $record->broken_images ?? [])
+                                        : 'No broken images were detected in this article.')
                                     ->getStateUsing(fn (KnowledgeBaseItem $record) => ! $record->are_broken_images_detected),
                             ])
                             ->columns(2)
