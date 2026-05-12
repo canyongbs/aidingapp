@@ -94,22 +94,30 @@ class AssignedToRelationManager extends RelationManager
                     ->label('Assign To Me')
                     ->color('gray')
                     ->requiresConfirmation()
-                    ->action(fn (array $data) => $this->getOwnerRecord()->assignments()->create([
-                        'user_id' => auth()->user()?->getKey(),
-                        'assigned_by_id' => auth()->user()->getKey() ?? null,
-                        'assigned_at' => now(),
-                        'status' => ServiceRequestAssignmentStatus::Active,
-                    ])),
+                    ->action(function () {
+                        $this->getOwnerRecord()->assignments()->create([
+                            'user_id' => auth()->user()?->getKey(),
+                            'assigned_by_id' => auth()->user()?->getKey() ?? null,
+                            'assigned_at' => now(),
+                            'status' => ServiceRequestAssignmentStatus::Active,
+                        ]);
+
+                        $this->dispatch('assignment-history-refresh');
+                    }),
                 Action::make('assign-service-request')
                     ->visible(fn () => auth()->user()->can('update', $this->getOwnerRecord()))
                     ->label(fn () => $this->getOwnerRecord()->assignedTo ? 'Reassign' : 'Assign')
                     ->color('gray')
-                    ->action(fn (array $data) => $this->getOwnerRecord()->assignments()->create([
-                        'user_id' => $data['userId'],
-                        'assigned_by_id' => auth()->user()->getKey() ?? null,
-                        'assigned_at' => now(),
-                        'status' => ServiceRequestAssignmentStatus::Active,
-                    ]))
+                    ->action(function (array $data) {
+                        $this->getOwnerRecord()->assignments()->create([
+                            'user_id' => $data['userId'],
+                            'assigned_by_id' => auth()->user()->getKey() ?? null,
+                            'assigned_at' => now(),
+                            'status' => ServiceRequestAssignmentStatus::Active,
+                        ]);
+
+                        $this->dispatch('assignment-history-refresh');
+                    })
                     ->schema([
                         Select::make('userId')
                             ->label(fn () => $this->getOwnerRecord()->assignedTo ? 'Reassign' : 'Assign')
