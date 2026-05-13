@@ -393,6 +393,8 @@ test('Health column shows true when knowledge base item has title, article conte
                     ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Some content']]],
                 ],
             ],
+            'are_broken_links_detected' => false,
+            'are_broken_images_detected' => false,
         ])
         ->create();
 
@@ -608,6 +610,56 @@ test('Health column shows false when multiple conditions fail simultaneously', f
         ->for($knowledgeBaseItem, 'knowledgeBaseItem')
         ->state(['status' => ConcernStatus::New])
         ->create();
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
+});
+
+test('Health column shows false when broken links are detected', function () {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'title' => 'Test Article',
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Some content']]],
+                ],
+            ],
+            'are_broken_links_detected' => true,
+            'are_broken_images_detected' => false,
+        ])
+        ->create();
+
+    $knowledgeBaseItem->managers()->attach($user);
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
+});
+
+test('Health column shows false when broken images are detected', function () {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'title' => 'Test Article',
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Some content']]],
+                ],
+            ],
+            'are_broken_links_detected' => false,
+            'are_broken_images_detected' => true,
+        ])
+        ->create();
+
+    $knowledgeBaseItem->managers()->attach($user);
 
     livewire(ListKnowledgeBaseItems::class)
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);

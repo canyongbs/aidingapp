@@ -225,6 +225,30 @@ test('Health tab article_filled shows correct state', function () {
         'article_details' => [
             'type' => 'doc',
             'content' => [
+                ['type' => 'paragraph', 'content' => []],
+            ],
+        ],
+    ]);
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSchemaComponentStateSet('article_filled', false, 'infolist');
+
+    $knowledgeBaseItem->update([
+        'article_details' => [
+            'type' => 'doc',
+            'content' => [
+                ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => '']]],
+            ],
+        ],
+    ]);
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSchemaComponentStateSet('article_filled', false, 'infolist');
+
+    $knowledgeBaseItem->update([
+        'article_details' => [
+            'type' => 'doc',
+            'content' => [
                 ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Some content']]],
             ],
         ],
