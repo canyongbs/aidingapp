@@ -34,53 +34,40 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\ServiceManagement\Jobs\ServiceMonitoringCheckJob;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Models\Tenant;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Queue;
 
-it('successfully dispatches', function ($frequency) {
-    Queue::fake();
+use function Pest\Laravel\artisan;
+use function Pest\Laravel\travelTo;
 
-    $numJobs = rand(1, 10);
+describe('ServiceMonitoringJob scheduling', function () {
+    it('dispatches ServiceMonitoringJob for each frequency when serviceMonitoring addon is enabled', function () {
+        Queue::fake();
 
-    ServiceMonitoringTarget::factory()->count($numJobs)->create(['frequency' => $frequency]);
+        travelTo(now()->startOfDay());
 
-    (new ServiceMonitoringJob($frequency))->handle();
+        artisan('schedule:run');
 
-    Queue::assertPushed(ServiceMonitoringCheckJob::class, $numJobs);
-})
-    ->with(
-        [
-            fn () => ServiceMonitoringFrequency::FiveMinutes,
-            fn () => ServiceMonitoringFrequency::FifteenMinutes,
-            fn () => ServiceMonitoringFrequency::ThirtyMinutes,
-            fn () => ServiceMonitoringFrequency::OneHour,
-            fn () => ServiceMonitoringFrequency::TwentyFourHours,
-        ]
-    );
+        Queue::assertPushed(ServiceMonitoringJob::class, 5);
+    });
 
-it('does not dispatch when serviceMonitoring addon is disabled', function ($frequency) {
-    Queue::fake();
+    it('does not dispatch ServiceMonitoringJob when serviceMonitoring addon is disabled', function () {
+        Queue::fake();
 
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->serviceMonitoring = false;
-    $settings->save();
+        $tenant = Tenant::query()->first();
 
-    ServiceMonitoringTarget::factory()->count(3)->create(['frequency' => $frequency]);
+        $tenant->execute(function () {
+            $settings = app(LicenseSettings::class);
+            $settings->data->addons->serviceMonitoring = false;
+            $settings->save();
+        });
 
-    (new ServiceMonitoringJob($frequency))->handle();
+        travelTo(now()->startOfDay());
 
-    Queue::assertNotPushed(ServiceMonitoringCheckJob::class);
-})
-    ->with(
-        [
-            fn () => ServiceMonitoringFrequency::FiveMinutes,
-            fn () => ServiceMonitoringFrequency::FifteenMinutes,
-            fn () => ServiceMonitoringFrequency::ThirtyMinutes,
-            fn () => ServiceMonitoringFrequency::OneHour,
-            fn () => ServiceMonitoringFrequency::TwentyFourHours,
-        ]
-    );
+        artisan('schedule:run');
+
+        Queue::assertNotPushed(ServiceMonitoringJob::class);
+    });
+});
