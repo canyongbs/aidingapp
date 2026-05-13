@@ -32,12 +32,12 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { DocumentTextIcon } from '@heroicons/vue/24/outline';
     import { computed, defineProps, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
     import AppLoading from '../Components/AppLoading.vue';
     import Article from '../Components/Article.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import EmptyState from '../Components/EmptyState.vue';
     import HeroSearch from '../Components/HeroSearch.vue';
     import Page from '../Components/Page.vue';
     import Pagination from '../Components/Pagination.vue';
@@ -379,10 +379,17 @@
                                     @fetchPage="fetchPage"
                                 />
                             </div>
-                            <EmptyState v-else :contained="false">
-                                <template #heading>No articles found</template>
-                                <template #description>No articles found in this category.</template>
-                            </EmptyState>
+                            <section v-else class="px-6 py-4 flex items-start gap-x-4">
+                                <div class="flex size-12 items-center justify-center rounded-full bg-gray-100">
+                                    <DocumentTextIcon class="size-6 text-gray-400" />
+                                </div>
+
+                                <div class="flex-1">
+                                    <h4 class="text-base font-semibold leading-6 text-gray-950">No articles found</h4>
+
+                                    <p class="mt-1 text-sm text-gray-500">No articles found in this category.</p>
+                                </div>
+                            </section>
                         </div>
                     </div>
                 </div>
