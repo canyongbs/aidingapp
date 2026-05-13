@@ -167,6 +167,8 @@ class Task extends BaseModel implements Auditable
         return $this->belongsToMany(
             Department::class,
             TeamRenameFeature::active() ? 'confidential_task_departments' : 'confidential_task_teams',
+            'task_id',
+            TeamRenameFeature::active() ? 'department_id' : 'team_id',
         )
             ->using(ConfidentialTaskDepartment::class)
             ->withTimestamps();

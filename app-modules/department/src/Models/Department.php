@@ -85,7 +85,12 @@ class Department extends BaseModel
      */
     public function serviceMonitoringTargets(): BelongsToMany
     {
-        return $this->belongsToMany(ServiceMonitoringTarget::class)
+        return $this->belongsToMany(
+            ServiceMonitoringTarget::class,
+            TeamRenameFeature::active() ? 'service_monitoring_target_department' : 'service_monitoring_target_team',
+            TeamRenameFeature::active() ? 'department_id' : 'team_id',
+            'service_monitoring_target_id',
+        )
             ->using(ServiceMonitoringTargetDepartment::class)
             ->withTimestamps();
     }
@@ -95,7 +100,12 @@ class Department extends BaseModel
      */
     public function manageableServiceRequestTypes(): BelongsToMany
     {
-        return $this->belongsToMany(ServiceRequestType::class, (new ServiceRequestTypeDepartmentManager())->getTable())
+        return $this->belongsToMany(
+            ServiceRequestType::class,
+            (new ServiceRequestTypeDepartmentManager())->getTable(),
+            TeamRenameFeature::active() ? 'department_id' : 'team_id',
+            'service_request_type_id',
+        )
             ->using(ServiceRequestTypeDepartmentManager::class)
             ->withPivot('id')
             ->withTimestamps();
@@ -106,7 +116,12 @@ class Department extends BaseModel
      */
     public function auditableServiceRequestTypes(): BelongsToMany
     {
-        return $this->belongsToMany(ServiceRequestType::class, (new ServiceRequestTypeDepartmentAuditor())->getTable())
+        return $this->belongsToMany(
+            ServiceRequestType::class,
+            (new ServiceRequestTypeDepartmentAuditor())->getTable(),
+            TeamRenameFeature::active() ? 'department_id' : 'team_id',
+            'service_request_type_id',
+        )
             ->using(ServiceRequestTypeDepartmentAuditor::class)
             ->withPivot('id')
             ->withTimestamps();

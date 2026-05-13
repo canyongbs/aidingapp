@@ -60,6 +60,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserManager;
 use AidingApp\Task\Models\Task;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use App\Enums\PresenceStatus;
+use App\Features\TeamRenameFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Settings\DisplaySettings;
 use App\Settings\PresenceSettings;
