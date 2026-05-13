@@ -36,6 +36,7 @@
 
 namespace Database\Seeders;
 
+use AidingApp\Ai\Database\Seeders\AiSupportAssistantSettingsSeeder;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Contact\Database\Seeders\ContactTypeSeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationIndustrySeeder;
@@ -84,6 +85,9 @@ class NewTenantSeeder extends Seeder
             OrganizationIndustrySeeder::class,
 
             ProjectMilestoneStatusSeeder::class,
+
+            // AI
+            AiSupportAssistantSettingsSeeder::class,
         ]);
     }
 }
