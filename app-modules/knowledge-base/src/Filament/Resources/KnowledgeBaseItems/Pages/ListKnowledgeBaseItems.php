@@ -37,13 +37,11 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
 use AidingApp\Division\Models\Division;
-use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Filament\Actions\AssignManagerBulkAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use App\Features\BrokenLinksFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\TagsForClass;
 use Filament\Actions\BulkActionGroup;
@@ -111,32 +109,7 @@ class ListKnowledgeBaseItems extends ListRecords
                 IconColumn::make('health')
                     ->label('Health')
                     ->toggleable()
-                    ->boolean()
-                    ->state(function (KnowledgeBaseItem $record): bool {
-                        $hasTitle = ! empty($record->title);
-
-                        $hasArticle = ! blank($record->article_details)
-                            && ! (
-                                ($record->article_details['type'] ?? null) === 'doc'
-                                && collect((array) ($record->article_details['content'] ?? []))
-                                    ->every(fn (array $node) => empty($node['content'] ?? []) || $node['content'] === [['type' => 'text', 'text' => '']])
-                            );
-
-                        $hasManager = $record->managers->isNotEmpty();
-
-                        $hasNoUnresolvedConcerns = $record->concerns
-                            ->where('status', '!=', ConcernStatus::Resolved)
-                            ->where('status', '!=', ConcernStatus::Archived)
-                            ->isEmpty();
-
-                        if (! BrokenLinksFeature::active()) {
-                            return $hasTitle && $hasArticle && $hasManager && $hasNoUnresolvedConcerns;
-                        }
-                        $hasNoBrokenLinks = ! $record->are_broken_links_detected;
-                        $hasNoBrokenImages = ! $record->are_broken_images_detected;
-
-                        return $hasTitle && $hasArticle && $hasManager && $hasNoUnresolvedConcerns && $hasNoBrokenLinks && $hasNoBrokenImages;
-                    }),
+                    ->boolean(),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->toggleable()

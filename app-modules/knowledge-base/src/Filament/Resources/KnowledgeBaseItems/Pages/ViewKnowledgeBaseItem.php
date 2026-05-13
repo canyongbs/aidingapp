@@ -37,7 +37,6 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
 use AidingApp\Division\Models\Division;
-use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Filament\Actions\CreateConcernAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
@@ -138,43 +137,22 @@ class ViewKnowledgeBaseItem extends ViewRecord
                             ->schema([
                                 IconEntry::make('title_filled')
                                     ->label('Title Filled')
-                                    ->boolean()
-                                    ->getStateUsing(fn (KnowledgeBaseItem $record) => ! empty($record->title)),
+                                    ->boolean(),
                                 IconEntry::make('article_filled')
                                     ->label('Article Filled')
-                                    ->boolean()
-                                    ->getStateUsing(function (KnowledgeBaseItem $record): bool {
-                                        if (blank($record->article_details)) {
-                                            return false;
-                                        }
-
-                                        if (($record->article_details['type'] ?? null) === 'doc'
-                                            && collect((array) ($record->article_details['content'] ?? []))
-                                                ->every(fn (array $node) => empty($node['content'] ?? []) || $node['content'] === [['type' => 'text', 'text' => '']])
-                                        ) {
-                                            return false;
-                                        }
-
-                                        return true;
-                                    }),
+                                    ->boolean(),
                                 IconEntry::make('manager_assigned')
                                     ->label('Manager Assigned')
-                                    ->boolean()
-                                    ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->managers->isNotEmpty()),
+                                    ->boolean(),
                                 IconEntry::make('no_unresolved_concerns')
                                     ->label('No Unresolved Concerns')
-                                    ->boolean()
-                                    ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->concerns
-                                        ->where('status', '!=', ConcernStatus::Resolved)
-                                        ->where('status', '!=', ConcernStatus::Archived)
-                                        ->isEmpty()),
+                                    ->boolean(),
                                 IconEntry::make('no_broken_links')
                                     ->label('No Broken Links Detected')
                                     ->boolean()
                                     ->tooltip(fn (KnowledgeBaseItem $record): string => $record->are_broken_links_detected
                                         ? implode("\n", $record->broken_links ?? [])
                                         : 'No broken links were detected in this article.')
-                                    ->getStateUsing(fn (KnowledgeBaseItem $record) => ! $record->are_broken_links_detected)
                                     ->visible(fn (): bool => BrokenLinksFeature::active()),
                                 IconEntry::make('no_broken_images')
                                     ->label('No Broken Images Detected')
@@ -182,7 +160,6 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                     ->tooltip(fn (KnowledgeBaseItem $record): string => $record->are_broken_images_detected
                                         ? implode("\n", $record->broken_images ?? [])
                                         : 'No broken images were detected in this article.')
-                                    ->getStateUsing(fn (KnowledgeBaseItem $record) => ! $record->are_broken_images_detected)
                                     ->visible(fn (): bool => BrokenLinksFeature::active()),
                             ])
                             ->columns(2)

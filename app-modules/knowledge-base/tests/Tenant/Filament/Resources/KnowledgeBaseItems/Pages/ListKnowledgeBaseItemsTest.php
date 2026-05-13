@@ -34,10 +34,12 @@
 </COPYRIGHT>
 */
 
+use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ListKnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -45,6 +47,7 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 use function Tests\Helpers\testResourceRequiresPermissionForAccess;
 
 // TODO: Write ListKnowledgeBaseItems tests
@@ -374,4 +377,238 @@ test('SearchKnowledgeBaseItems by article body text', function () {
         ->searchTable('xylophone')
         ->assertCanSeeTableRecords(collect([$matchingItem]))
         ->assertCanNotSeeTableRecords(collect([$nonMatchingItem]));
+});
+
+test('Health column shows true when knowledge base item has title, article content, manager, and no unresolved concerns', function () {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'title' => 'Test Article',
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Some content']]],
+                ],
+            ],
+        ])
+        ->create();
+
+    $knowledgeBaseItem->managers()->attach($user);
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnStateSet('health', true, $knowledgeBaseItem);
+});
+
+test('Health column shows false when knowledge base item has empty title', function () {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'title' => '',
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Some content']]],
+                ],
+            ],
+        ])
+        ->create();
+
+    $knowledgeBaseItem->managers()->attach($user);
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
+});
+
+test('Health column shows false when knowledge base item has no article content', function () {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'title' => 'Test Article',
+            'article_details' => null,
+        ])
+        ->create();
+
+    $knowledgeBaseItem->managers()->attach($user);
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
+});
+
+test('Health column shows false when knowledge base item has empty doc article content', function () {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'title' => 'Test Article',
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    ['type' => 'paragraph', 'content' => []],
+                ],
+            ],
+        ])
+        ->create();
+
+    $knowledgeBaseItem->managers()->attach($user);
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
+});
+
+test('Health column shows false when knowledge base item article content has only empty text nodes', function () {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'title' => 'Test Article',
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => '']]],
+                ],
+            ],
+        ])
+        ->create();
+
+    $knowledgeBaseItem->managers()->attach($user);
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
+});
+
+test('Health column shows false when knowledge base item has no manager assigned', function () {
+    asSuperAdmin();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'title' => 'Test Article',
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Some content']]],
+                ],
+            ],
+        ])
+        ->create();
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
+});
+
+test('Health column shows false when knowledge base item has unresolved concern with New status', function () {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'title' => 'Test Article',
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Some content']]],
+                ],
+            ],
+        ])
+        ->create();
+
+    $knowledgeBaseItem->managers()->attach($user);
+
+    KnowledgeBaseItemConcern::factory()
+        ->for($knowledgeBaseItem, 'knowledgeBaseItem')
+        ->state(['status' => ConcernStatus::New])
+        ->create();
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
+});
+
+test('Health column shows true when knowledge base item has only resolved concerns', function () {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'title' => 'Test Article',
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Some content']]],
+                ],
+            ],
+        ])
+        ->create();
+
+    $knowledgeBaseItem->managers()->attach($user);
+
+    KnowledgeBaseItemConcern::factory()
+        ->for($knowledgeBaseItem, 'knowledgeBaseItem')
+        ->state(['status' => ConcernStatus::Resolved])
+        ->create();
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnStateSet('health', true, $knowledgeBaseItem);
+});
+
+test('Health column shows true when knowledge base item has only archived concerns', function () {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'title' => 'Test Article',
+            'article_details' => [
+                'type' => 'doc',
+                'content' => [
+                    ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Some content']]],
+                ],
+            ],
+        ])
+        ->create();
+
+    $knowledgeBaseItem->managers()->attach($user);
+
+    KnowledgeBaseItemConcern::factory()
+        ->for($knowledgeBaseItem, 'knowledgeBaseItem')
+        ->state(['status' => ConcernStatus::Archived])
+        ->create();
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnStateSet('health', true, $knowledgeBaseItem);
+});
+
+test('Health column shows false when multiple conditions fail simultaneously', function () {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'title' => '',
+            'article_details' => null,
+        ])
+        ->create();
+
+    KnowledgeBaseItemConcern::factory()
+        ->for($knowledgeBaseItem, 'knowledgeBaseItem')
+        ->state(['status' => ConcernStatus::New])
+        ->create();
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });

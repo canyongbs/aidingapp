@@ -35,9 +35,11 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ViewKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -189,4 +191,123 @@ test('rating displays 0 percent when no votes are helpful', function () {
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
         ->assertSeeText('0%');
+});
+
+// Health Tab Tests
+
+test('Health tab title_filled shows correct state', function () {
+    asSuperAdmin();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state(['title' => ''])
+        ->create();
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSchemaComponentStateSet('title_filled', false, 'infolist');
+
+    $knowledgeBaseItem->update(['title' => 'Test Article']);
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSchemaComponentStateSet('title_filled', true, 'infolist');
+});
+
+test('Health tab article_filled shows correct state', function () {
+    asSuperAdmin();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state(['article_details' => null])
+        ->create();
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSchemaComponentStateSet('article_filled', false, 'infolist');
+
+    $knowledgeBaseItem->update([
+        'article_details' => [
+            'type' => 'doc',
+            'content' => [
+                ['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => 'Some content']]],
+            ],
+        ],
+    ]);
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSchemaComponentStateSet('article_filled', true, 'infolist');
+});
+
+test('Health tab manager_assigned shows correct state', function () {
+    $user = User::factory()->create();
+    asSuperAdmin($user);
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSchemaComponentStateSet('manager_assigned', false, 'infolist');
+
+    $knowledgeBaseItem->managers()->attach($user);
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSchemaComponentStateSet('manager_assigned', true, 'infolist');
+});
+
+test('Health tab no_unresolved_concerns shows correct state', function () {
+    asSuperAdmin();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
+
+    $concern = KnowledgeBaseItemConcern::factory()
+        ->for($knowledgeBaseItem, 'knowledgeBaseItem')
+        ->state(['status' => ConcernStatus::New])
+        ->create();
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSchemaComponentStateSet('no_unresolved_concerns', false, 'infolist');
+
+    $concern->update(['status' => ConcernStatus::Resolved]);
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSchemaComponentStateSet('no_unresolved_concerns', true, 'infolist');
+});
+
+test('Health tab no_broken_links shows correct state', function () {
+    asSuperAdmin();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'are_broken_links_detected' => true,
+            'broken_links' => ['https://example.com/broken'],
+        ])
+        ->create();
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSchemaComponentStateSet('no_broken_links', false, 'infolist');
+
+    $knowledgeBaseItem->update([
+        'are_broken_links_detected' => false,
+        'broken_links' => [],
+    ]);
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSchemaComponentStateSet('no_broken_links', true, 'infolist');
+});
+
+test('Health tab no_broken_images shows correct state', function () {
+    asSuperAdmin();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'are_broken_images_detected' => true,
+            'broken_images' => ['https://example.com/broken-image.png'],
+        ])
+        ->create();
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSchemaComponentStateSet('no_broken_images', false, 'infolist');
+
+    $knowledgeBaseItem->update([
+        'are_broken_images_detected' => false,
+        'broken_images' => [],
+    ]);
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertSchemaComponentStateSet('no_broken_images', true, 'infolist');
 });
