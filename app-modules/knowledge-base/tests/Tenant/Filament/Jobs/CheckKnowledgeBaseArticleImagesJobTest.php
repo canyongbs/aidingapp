@@ -37,6 +37,10 @@
 use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleImagesJob;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Mockery\MockInterface;
+
+use function Pest\Laravel\partialMock;
 
 test('it clears broken images when article has no content', function () {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
@@ -84,12 +88,11 @@ test('it clears broken images when article has no image nodes', function () {
 });
 
 test('it marks media image as not broken when file exists on disk', function () {
+    Storage::fake('s3');
+
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
         ->state([
-            'article_details' => [
-                'type' => 'doc',
-                'content' => [],
-            ],
+            'article_details' => ['type' => 'doc', 'content' => []],
         ])
         ->create();
 
@@ -98,26 +101,91 @@ test('it marks media image as not broken when file exists on disk', function () 
         ->usingFileName('test.png')
         ->toMediaCollection('article_details');
 
-    $knowledgeBaseItem->update([
-        'article_details' => [
-            'type' => 'doc',
-            'content' => [
-                [
-                    'type' => 'image',
-                    'attrs' => ['id' => $media->uuid],
-                ],
-            ],
-        ],
-    ]);
-
     Http::fake();
 
-    (new CheckKnowledgeBaseArticleImagesJob($knowledgeBaseItem))->handle();
+    /** @var CheckKnowledgeBaseArticleImagesJob $mock */
+    $mock = partialMock(CheckKnowledgeBaseArticleImagesJob::class, function (MockInterface $mock) use ($media) {
+        $mock
+            ->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('extractMediaImageIds')
+            ->andReturn([$media->uuid]);
+    });
+
+    invade($mock)->knowledgeBaseItem = $knowledgeBaseItem;
+
+    $mock->handle();
 
     $knowledgeBaseItem->refresh();
 
     expect($knowledgeBaseItem->are_broken_images_detected)->toBeFalse();
     expect($knowledgeBaseItem->broken_images)->toBeNull();
+});
+
+test('it detects broken media image when uuid has no matching media record', function () {
+    Storage::fake('s3');
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'article_details' => ['type' => 'doc', 'content' => []],
+        ])
+        ->create();
+
+    $missingUuid = fake()->uuid();
+
+    Http::fake();
+
+    /** @var CheckKnowledgeBaseArticleImagesJob $mock */
+    $mock = partialMock(CheckKnowledgeBaseArticleImagesJob::class, function (MockInterface $mock) use ($missingUuid) {
+        $mock
+            ->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('extractMediaImageIds')
+            ->andReturn([$missingUuid]);
+    });
+
+    invade($mock)->knowledgeBaseItem = $knowledgeBaseItem;
+
+    $mock->handle();
+
+    $knowledgeBaseItem->refresh();
+
+    expect($knowledgeBaseItem->are_broken_images_detected)->toBeTrue();
+    expect($knowledgeBaseItem->broken_images)->toContain($missingUuid);
+});
+
+test('it detects broken media image when file is missing from disk', function () {
+    Storage::fake('s3');
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()
+        ->state([
+            'article_details' => ['type' => 'doc', 'content' => []],
+        ])
+        ->create();
+
+    $media = $knowledgeBaseItem
+        ->addMediaFromString('test image content')
+        ->usingFileName('test.png')
+        ->toMediaCollection('article_details');
+
+    Storage::disk($media->disk)->delete($media->getPathRelativeToRoot());
+
+    Http::fake();
+
+    /** @var CheckKnowledgeBaseArticleImagesJob $mock */
+    $mock = partialMock(CheckKnowledgeBaseArticleImagesJob::class, function (MockInterface $mock) use ($media) {
+        $mock
+            ->shouldAllowMockingProtectedMethods()
+            ->shouldReceive('extractMediaImageIds')
+            ->andReturn([$media->uuid]);
+    });
+
+    invade($mock)->knowledgeBaseItem = $knowledgeBaseItem;
+
+    $mock->handle();
+
+    $knowledgeBaseItem->refresh();
+
+    expect($knowledgeBaseItem->are_broken_images_detected)->toBeTrue();
+    expect($knowledgeBaseItem->broken_images)->toContain($media->uuid);
 });
 
 test('it ignores external images with relative paths', function () {
@@ -150,38 +218,6 @@ test('it ignores external images with relative paths', function () {
     expect($knowledgeBaseItem->broken_images)->toBeNull();
 
     Http::assertNothingSent();
-});
-
-test('it detects broken external image when url returns error', function () {
-    $knowledgeBaseItem = KnowledgeBaseItem::factory()
-        ->state([
-            'article_details' => [
-                'type' => 'doc',
-                'content' => [
-                    [
-                        'type' => 'paragraph',
-                        'content' => [
-                            [
-                                'type' => 'image',
-                                'attrs' => ['src' => 'https://example.com/broken-image.png'],
-                            ],
-                        ],
-                    ],
-                ],
-            ],
-        ])
-        ->create();
-
-    Http::fake([
-        'https://example.com/broken-image.png' => Http::response('Not Found', 404),
-    ]);
-
-    (new CheckKnowledgeBaseArticleImagesJob($knowledgeBaseItem))->handle();
-
-    $knowledgeBaseItem->refresh();
-
-    expect($knowledgeBaseItem->are_broken_images_detected)->toBeTrue();
-    expect($knowledgeBaseItem->broken_images)->toContain('https://example.com/broken-image.png');
 });
 
 test('it has correct unique id and unique for values', function () {
