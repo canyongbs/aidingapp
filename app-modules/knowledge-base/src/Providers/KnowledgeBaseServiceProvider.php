@@ -40,7 +40,6 @@ use AidingApp\KnowledgeBase\KnowledgeBasePlugin;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -58,7 +57,6 @@ class KnowledgeBaseServiceProvider extends ServiceProvider
         Relation::morphMap([
             'knowledge_base_item' => KnowledgeBaseItem::class,
             'knowledge_base_category' => KnowledgeBaseCategory::class,
-            'knowledge_base_quality' => KnowledgeBaseQuality::class,
             'knowledge_base_status' => KnowledgeBaseStatus::class,
             'knowledge_base_item_concern' => KnowledgeBaseItemConcern::class,
         ]);

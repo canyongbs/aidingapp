@@ -46,7 +46,6 @@ use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\MaintenanceProviderSeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseItemSeeder;
-use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseQualitySeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
@@ -74,7 +73,6 @@ class DatabaseSeeder extends Seeder
             ServiceRequestTypeSeeder::class,
             ContactTypeSeeder::class,
             KnowledgeBaseCategorySeeder::class,
-            KnowledgeBaseQualitySeeder::class,
             KnowledgeBaseStatusSeeder::class,
             PronounsSeeder::class,
 

@@ -41,8 +41,10 @@ use AidingApp\KnowledgeBase\Filament\Actions\CreateConcernAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use App\Features\BrokenLinksFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Livewire;
@@ -114,8 +116,6 @@ class ViewKnowledgeBaseItem extends ViewRecord
                             ->columns(2),
                         Tab::make('Metadata')
                             ->schema([
-                                TextEntry::make('quality.name')
-                                    ->label('Quality'),
                                 TextEntry::make('status.name')
                                     ->label('Status'),
                                 TextEntry::make('category.name')
@@ -133,6 +133,37 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                 Livewire::make(KnowledgeBaseItemConcernsTable::class, ['record' => $this->getRecord()]),
                             ])
                             ->id('concerns'),
+                        Tab::make('Health')
+                            ->schema([
+                                IconEntry::make('title_filled')
+                                    ->label('Title Filled')
+                                    ->boolean(),
+                                IconEntry::make('article_filled')
+                                    ->label('Article Filled')
+                                    ->boolean(),
+                                IconEntry::make('manager_assigned')
+                                    ->label('Manager Assigned')
+                                    ->boolean(),
+                                IconEntry::make('no_unresolved_concerns')
+                                    ->label('No Unresolved Concerns')
+                                    ->boolean(),
+                                IconEntry::make('no_broken_links')
+                                    ->label('No Broken Links Detected')
+                                    ->boolean()
+                                    ->tooltip(fn (KnowledgeBaseItem $record): string => $record->are_broken_links_detected
+                                        ? implode("\n", $record->broken_links ?? [])
+                                        : 'No broken links were detected in this article.')
+                                    ->visible(fn (): bool => BrokenLinksFeature::active()),
+                                IconEntry::make('no_broken_images')
+                                    ->label('No Broken Images Detected')
+                                    ->boolean()
+                                    ->tooltip(fn (KnowledgeBaseItem $record): string => $record->are_broken_images_detected
+                                        ? implode("\n", $record->broken_images ?? [])
+                                        : 'No broken images were detected in this article.')
+                                    ->visible(fn (): bool => BrokenLinksFeature::active()),
+                            ])
+                            ->columns(2)
+                            ->id('health'),
                     ])
                     ->columnSpanFull()
                     ->persistTabInQueryString(),

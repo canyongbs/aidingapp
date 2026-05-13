@@ -34,16 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseQualities\RequestFactories;
+namespace App\Features;
 
-use Worksome\RequestFactories\RequestFactory;
+use App\Support\AbstractFeatureFlag;
 
-class EditKnowledgeBaseQualityRequestFactory extends RequestFactory
+class BrokenLinksFeature extends AbstractFeatureFlag
 {
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'name' => $this->faker->word(),
-        ];
+        return false;
     }
 }

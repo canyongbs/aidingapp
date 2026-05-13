@@ -34,16 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseQualities\RequestFactories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use Worksome\RequestFactories\RequestFactory;
-
-class CreateKnowledgeBaseQualityRequestFactory extends RequestFactory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => $this->faker->word(),
-        ];
+        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            $table->dropForeign(['quality_id']);
+            $table->dropColumn('quality_id');
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            $table->foreignUuid('quality_id')->nullable()->references('id')->on('knowledge_base_qualities');
+        });
+    }
+};

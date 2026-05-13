@@ -34,33 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities;
+use App\Features\BrokenLinksFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages\CreateKnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages\EditKnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages\ListKnowledgeBaseQualities;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages\ViewKnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use App\Filament\Clusters\KnowledgeManagement;
-use Filament\Resources\Resource;
-
-class KnowledgeBaseQualityResource extends Resource
-{
-    protected static ?string $model = KnowledgeBaseQuality::class;
-
-    protected static ?string $navigationLabel = 'Qualities';
-
-    protected static ?int $navigationSort = 2;
-
-    protected static ?string $cluster = KnowledgeManagement::class;
-
-    public static function getPages(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'index' => ListKnowledgeBaseQualities::route('/'),
-            'create' => CreateKnowledgeBaseQuality::route('/create'),
-            'view' => ViewKnowledgeBaseQuality::route('/{record}'),
-            'edit' => EditKnowledgeBaseQuality::route('/{record}/edit'),
-        ];
+        DB::transaction(function () {
+            Schema::dropIfExists('knowledge_base_qualities');
+
+            BrokenLinksFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            BrokenLinksFeature::deactivate();
+
+            Schema::create('knowledge_base_qualities', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->string('name');
+                $table->timestamps();
+            });
+        });
+    }
+};

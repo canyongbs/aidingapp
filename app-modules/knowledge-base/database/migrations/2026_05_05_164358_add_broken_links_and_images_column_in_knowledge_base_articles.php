@@ -34,57 +34,28 @@
 </COPYRIGHT>
 */
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\KnowledgeBaseQualityResource;
-use App\Models\User;
-use App\Settings\LicenseSettings;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use function Pest\Laravel\actingAs;
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            $table->boolean('are_broken_links_detected')->default(false);
+            $table->jsonb('broken_links')->nullable();
+            $table->boolean('are_broken_images_detected')->default(false);
+            $table->jsonb('broken_images')->nullable();
+        });
+    }
 
-// TODO: Write ListKnowledgeBaseQuality tests
-//test('The correct details are displayed on the ListKnowledgeBaseQuality page', function () {});
-
-// TODO: Sorting and Searching tests
-
-// Permission Tests
-
-test('ListKnowledgeBaseQuality is gated with proper access control', function () {
-    $user = User::factory()->create();
-
-    actingAs($user)
-        ->get(
-            KnowledgeBaseQualityResource::getUrl('index')
-        )->assertForbidden();
-
-    $user->givePermissionTo('settings.view-any');
-
-    actingAs($user)
-        ->get(
-            KnowledgeBaseQualityResource::getUrl('index')
-        )->assertSuccessful();
-});
-
-test('ListKnowledgeBaseQuality is gated with proper feature access control', function () {
-    $settings = app(LicenseSettings::class);
-
-    $settings->data->addons->knowledgeManagement = false;
-
-    $settings->save();
-
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('settings.view-any');
-
-    actingAs($user)
-        ->get(
-            KnowledgeBaseQualityResource::getUrl('index')
-        )->assertForbidden();
-
-    $settings->data->addons->knowledgeManagement = true;
-
-    $settings->save();
-
-    actingAs($user)
-        ->get(
-            KnowledgeBaseQualityResource::getUrl('index')
-        )->assertSuccessful();
-});
+    public function down(): void
+    {
+        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            $table->dropColumn('are_broken_links_detected');
+            $table->dropColumn('broken_links');
+            $table->dropColumn('are_broken_images_detected');
+            $table->dropColumn('broken_images');
+        });
+    }
+};
