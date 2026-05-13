@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Department\Filament\Resources\Teams\Pages;
+namespace AidingApp\Department\Filament\Resources\Departments\Pages;
 
 use AidingApp\Division\Models\Division;
-use AidingApp\Department\Filament\Resources\Teams\DepartmentResource;
+use AidingApp\Department\Filament\Resources\Departments\DepartmentResource;
 use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;

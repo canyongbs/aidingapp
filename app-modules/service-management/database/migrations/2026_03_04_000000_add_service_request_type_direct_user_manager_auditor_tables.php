@@ -41,8 +41,8 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::rename('service_request_type_managers', 'service_request_type_manager_teams');
-        Schema::rename('service_request_type_auditors', 'service_request_type_auditor_teams');
+        Schema::rename('service_request_type_managers', 'service_request_type_manager_departments');
+        Schema::rename('service_request_type_auditors', 'service_request_type_auditor_departments');
 
         Schema::create('service_request_type_manager_users', function (Blueprint $table) {
             $table->uuid('id')->primary();
@@ -64,7 +64,7 @@ return new class () extends Migration {
         Schema::dropIfExists('service_request_type_manager_users');
         Schema::dropIfExists('service_request_type_auditor_users');
 
-        Schema::rename('service_request_type_manager_teams', 'service_request_type_managers');
-        Schema::rename('service_request_type_auditor_teams', 'service_request_type_auditors');
+        Schema::rename('service_request_type_manager_departments', 'service_request_type_managers');
+        Schema::rename('service_request_type_auditor_departments', 'service_request_type_auditors');
     }
 };

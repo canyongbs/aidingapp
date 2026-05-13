@@ -55,8 +55,8 @@ class DepartmentFactory extends Factory
 
     public function configure(): DepartmentFactory|Factory
     {
-        return $this->afterMaking(function (Department $team) {
-            $team->division()->associate($this->faker->randomElement([Division::inRandomOrder()->first(), null]));
+        return $this->afterMaking(function (Department $department) {
+            $department->division()->associate($this->faker->randomElement([Division::inRandomOrder()->first(), null]));
         });
     }
 }

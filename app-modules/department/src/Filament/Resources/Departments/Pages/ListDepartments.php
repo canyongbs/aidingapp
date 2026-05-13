@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Department\Filament\Resources\Teams\Pages;
+namespace AidingApp\Department\Filament\Resources\Departments\Pages;
 
-use AidingApp\Department\Filament\Resources\Teams\DepartmentResource;
+use AidingApp\Department\Filament\Resources\Departments\DepartmentResource;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;

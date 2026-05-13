@@ -45,7 +45,7 @@ use Filament\Notifications\Notification;
 use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Collection;
 
-class AssignTeamBulkAction extends BulkAction
+class AssignDepartmentBulkAction extends BulkAction
 {
     protected function setUp(): void
     {
@@ -54,14 +54,14 @@ class AssignTeamBulkAction extends BulkAction
         $this->icon('heroicon-o-user-group')
             ->modalWidth(Width::Small)
             ->modalDescription(
-                fn (Collection $records): string => 'This bulk action will overwrite any prior team assignments for the selected ' . ((count($records) > 1) ? 'users' : 'user') . '.'
+                fn (Collection $records): string => 'This bulk action will overwrite any prior department assignments for the selected ' . ((count($records) > 1) ? 'users' : 'user') . '.'
             )
             ->fillForm(fn (Collection $records): array => [
                 'records' => $records,
             ])
             ->form([
-                Select::make('team')
-                    ->label('Team')
+                Select::make('department')
+                    ->label('Department')
                     ->options(Department::pluck('name', 'id'))
                     ->searchable()
                     ->required(),
@@ -72,7 +72,7 @@ class AssignTeamBulkAction extends BulkAction
                 /** @var Collection<int, User> $records */
                 $records->each(function (User $record) use ($data, &$success, &$fail) {
                     try {
-                        $record->assignTeam($data['team']);
+                        $record->assignDepartment($data['department']);
                         $success++;
                     } catch (Exception $exception) {
                         report($exception);
@@ -82,14 +82,14 @@ class AssignTeamBulkAction extends BulkAction
 
                 if ($fail > 0) {
                     Notification::make()
-                        ->title('Assigned Team')
-                        ->body($fail . ' ' . (($fail > 1) ? 'users were' : 'user was') . ' fail to added to the team.')
+                        ->title('Assigned Department')
+                        ->body($fail . ' ' . (($fail > 1) ? 'users were' : 'user was') . ' fail to added to the department.')
                         ->success()
                         ->send();
                 } else {
                     Notification::make()
-                        ->title('Assigned Team')
-                        ->body($success . ' ' . (($success > 1) ? 'users were' : 'user was') . ' successfully added to the team.')
+                        ->title('Assigned Department')
+                        ->body($success . ' ' . (($success > 1) ? 'users were' : 'user was') . ' successfully added to the department.')
                         ->success()
                         ->send();
                 }
@@ -98,6 +98,6 @@ class AssignTeamBulkAction extends BulkAction
 
     public static function getDefaultName(): ?string
     {
-        return 'Assign team';
+        return 'Assign department';
     }
 }

@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Department\Filament\Resources\Teams\Pages\EditDepartment;
-use AidingApp\Department\Filament\Resources\Teams\DepartmentResource;
+use AidingApp\Department\Filament\Resources\Departments\Pages\EditDepartment;
+use AidingApp\Department\Filament\Resources\Departments\DepartmentResource;
 use AidingApp\Department\Models\Department;
 use App\Models\User;
 
@@ -47,27 +47,27 @@ use function Pest\Livewire\livewire;
 test('EditDepartment is gated with proper access control', function () {
     $user = User::factory()->create();
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
     actingAs($user)
         ->get(
             DepartmentResource::getUrl('edit', [
-                'record' => $team,
+                'record' => $department,
             ])
         )->assertForbidden();
 
     livewire(EditDepartment::class, [
-        'record' => $team->getRouteKey(),
+        'record' => $department->getRouteKey(),
     ])
         ->assertForbidden();
 
-    $user->givePermissionTo('team.view-any');
-    $user->givePermissionTo('team.*.update');
+    $user->givePermissionTo('department.view-any');
+    $user->givePermissionTo('department.*.update');
 
     actingAs($user)
         ->get(
             DepartmentResource::getUrl('edit', [
-                'record' => $team,
+                'record' => $department,
             ])
         )->assertSuccessful();
 
@@ -76,14 +76,14 @@ test('EditDepartment is gated with proper access control', function () {
     $request = Department::factory()->make();
 
     livewire(EditDepartment::class, [
-        'record' => $team->getRouteKey(),
+        'record' => $department->getRouteKey(),
     ])
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasNoFormErrors();
 
-    $team->refresh();
+    $department->refresh();
 
-    expect($team->name)->toEqual($request->name)
-        ->and($team->description)->toEqual($request->description);
+    expect($department->name)->toEqual($request->name)
+        ->and($department->description)->toEqual($request->description);
 });

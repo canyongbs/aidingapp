@@ -88,20 +88,20 @@ class ServiceRequestResource extends Resource
         return parent::getGlobalSearchEloquentQuery()
             ->with(['status', 'priority.type', 'respondent'])
             ->when(! $user->isSuperAdmin(), function (Builder $query) use ($user) {
-                $userTeamId = $user->team?->getKey();
+                $userDepartmentId = $user->department?->getKey();
 
-                return $query->where(function (Builder $query) use ($userTeamId, $user) {
+                return $query->where(function (Builder $query) use ($userDepartmentId, $user) {
                     $query->whereHas('priority.type.managerUsers', function (Builder $query) use ($user) {
                         $query->where('users.id', $user->getKey());
                     })->orWhereHas('priority.type.auditorUsers', function (Builder $query) use ($user) {
                         $query->where('users.id', $user->getKey());
                     });
 
-                    if ($userTeamId) {
-                        $query->orWhereHas('priority.type.managerTeams', function (Builder $query) use ($userTeamId) {
-                            $query->where('teams.id', $userTeamId);
-                        })->orWhereHas('priority.type.auditorTeams', function (Builder $query) use ($userTeamId) {
-                            $query->where('teams.id', $userTeamId);
+                    if ($userDepartmentId) {
+                        $query->orWhereHas('priority.type.managerDepartments', function (Builder $query) use ($userDepartmentId) {
+                            $query->where('departments.id', $userDepartmentId);
+                        })->orWhereHas('priority.type.auditorDepartments', function (Builder $query) use ($userDepartmentId) {
+                            $query->where('departments.id', $userDepartmentId);
                         });
                     }
                 });

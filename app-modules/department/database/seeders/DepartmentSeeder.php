@@ -44,11 +44,11 @@ class DepartmentSeeder extends Seeder
 {
     public function run(): void
     {
-        $teams = Department::factory()
+        $departments = Department::factory()
             ->count(10)
             ->create();
 
         User::all()
-            ->each(fn (User $user) => $user->team()->associate($teams->random())->save());
+            ->each(fn (User $user) => $user->department()->associate($departments->random())->save());
     }
 }

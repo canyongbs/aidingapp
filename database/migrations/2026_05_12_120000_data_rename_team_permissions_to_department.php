@@ -34,39 +34,58 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+use CanyonGBS\Common\Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\PermissionRegistrar;
 
-use AidingApp\Department\Models\Department;
-use App\Features\TeamRenameFeature;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
-
-/**
- * @mixin IdeHelperProjectAuditorDepartment
- */
-class ProjectAuditorDepartment extends Pivot
-{
-    use HasUuids;
-
-    public function getTable(): string
-    {
-        return TeamRenameFeature::active() ? 'project_auditor_departments' : 'project_auditor_teams';
-    }
+return new class () extends Migration {
+    use CanModifyPermissions;
 
     /**
-     * @return BelongsTo<Project, $this>
+     * @var array<string, string>
      */
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(Project::class, 'project_id', 'id', 'project');
-    }
+    private array $permissionRenames = [
+        'team.view-any' => 'department.view-any',
+        'team.create' => 'department.create',
+        'team.*.view' => 'department.*.view',
+        'team.*.update' => 'department.*.update',
+        'team.*.delete' => 'department.*.delete',
+        'team.*.restore' => 'department.*.restore',
+        'team.*.force-delete' => 'department.*.force-delete',
+    ];
 
     /**
-     * @return BelongsTo<Department, $this>
+     * @var array<string>
      */
-    public function department(): BelongsTo
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
+    public function up(): void
     {
-        return $this->belongsTo(Department::class, TeamRenameFeature::active() ? 'department_id' : 'team_id', 'id', 'department');
+        DB::transaction(function () {
+            foreach ($this->guards as $guard) {
+                $this->renamePermissions($this->permissionRenames, $guard);
+            }
+
+            $this->renamePermissionGroups(['Team' => 'Department']);
+
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            $this->renamePermissionGroups(['Department' => 'Team']);
+
+            foreach ($this->guards as $guard) {
+                $this->renamePermissions(array_flip($this->permissionRenames), $guard);
+            }
+
+            app(PermissionRegistrar::class)->forgetCachedPermissions();
+        });
+    }
+};

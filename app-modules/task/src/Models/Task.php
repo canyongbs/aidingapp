@@ -44,6 +44,7 @@ use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Scopes\ConfidentialTaskScope;
 use AidingApp\Task\Observers\TaskObserver;
 use AidingApp\Department\Models\Department;
+use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Bvtterfly\ModelStateMachine\HasStateMachine;
@@ -161,9 +162,12 @@ class Task extends BaseModel implements Auditable
     /**
      * @return BelongsToMany<Department, $this, covariant ConfidentialTaskDepartment>
      */
-    public function confidentialAccessTeams(): BelongsToMany
+    public function confidentialAccessDepartments(): BelongsToMany
     {
-        return $this->belongsToMany(Department::class, 'confidential_task_teams')
+        return $this->belongsToMany(
+            Department::class,
+            TeamRenameFeature::active() ? 'confidential_task_departments' : 'confidential_task_teams',
+        )
             ->using(ConfidentialTaskDepartment::class)
             ->withTimestamps();
     }

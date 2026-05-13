@@ -136,25 +136,25 @@ it('can render if logged in user is superadmin, creator, or a manager of the pro
     ]))
         ->assertNotFound();
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
-    $secondUser->team()->associate($team)->save();
+    $secondUser->department()->associate($department)->save();
 
-    $project->managerTeams()->attach($team->getKey());
+    $project->managerDepartments()->attach($department->getKey());
 
     get(EditProject::getUrl([
         'record' => $project->getRouteKey(),
     ]))
         ->assertSuccessful();
 
-    $project->managerTeams()->detach($team->getKey());
+    $project->managerDepartments()->detach($department->getKey());
 
     get(EditProject::getUrl([
         'record' => $project->getRouteKey(),
     ]))
         ->assertNotFound();
 
-    $project->auditorTeams()->attach($team->getKey());
+    $project->auditorDepartments()->attach($department->getKey());
 
     get(EditProject::getUrl([
         'record' => $project->getRouteKey(),

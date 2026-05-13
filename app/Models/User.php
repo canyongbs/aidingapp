@@ -38,6 +38,7 @@ namespace App\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Authorization\Models\Role;
+use AidingApp\Department\Models\Department;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
@@ -57,7 +58,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserAuditor;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserManager;
 use AidingApp\Task\Models\Task;
-use AidingApp\Department\Models\Department;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use App\Enums\PresenceStatus;
 use App\Filament\Resources\Users\UserResource;
@@ -262,9 +262,9 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     /**
      * @return BelongsTo<Department, $this>
      */
-    public function team(): BelongsTo
+    public function department(): BelongsTo
     {
-        return $this->belongsTo(Department::class, 'team_id');
+        return $this->belongsTo(Department::class, TeamRenameFeature::active() ? 'department_id' : 'team_id');
     }
 
     /**
@@ -340,9 +340,9 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return "{$context}. When you respond please use this information about me to tailor your response.";
     }
 
-    public function assignTeam(string $teamId): void
+    public function assignDepartment(string $departmentId): void
     {
-        $this->team()->associate($teamId)->save();
+        $this->department()->associate($departmentId)->save();
     }
 
     /**

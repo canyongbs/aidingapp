@@ -160,23 +160,23 @@ it('can see project in list if logged in user is a superadmin, the creator, a ma
         ->assertCanNotSeeTableRecords([$project])
         ->assertSuccessful();
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
-    $secondUser->team()->associate($team)->save();
+    $secondUser->department()->associate($department)->save();
 
-    $project->managerTeams()->attach($team->getKey());
+    $project->managerDepartments()->attach($department->getKey());
 
     livewire(ListProjects::class)
         ->assertCanSeeTableRecords([$project])
         ->assertSuccessful();
 
-    $project->managerTeams()->detach($team->getKey());
+    $project->managerDepartments()->detach($department->getKey());
 
     livewire(ListProjects::class)
         ->assertCanNotSeeTableRecords([$project])
         ->assertSuccessful();
 
-    $project->auditorTeams()->attach($team->getKey());
+    $project->auditorDepartments()->attach($department->getKey());
 
     livewire(ListProjects::class)
         ->assertCanSeeTableRecords([$project])

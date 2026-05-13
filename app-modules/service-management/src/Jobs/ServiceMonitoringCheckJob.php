@@ -109,8 +109,8 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         if (! $success) {
             $recipients = $this->serviceMonitoringTarget->users()->get();
 
-            $this->serviceMonitoringTarget->teams()->each(function (Department $team) use (&$recipients) {
-                $users = $team->users()->get();
+            $this->serviceMonitoringTarget->departments()->each(function (Department $department) use (&$recipients) {
+                $users = $department->users()->get();
                 $recipients = $recipients->merge($users)->unique('id');
             });
 

@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Department\Filament\Resources\Teams\Pages;
+namespace AidingApp\Department\Filament\Resources\Departments\Pages;
 
-use AidingApp\Department\Filament\Resources\Teams\DepartmentResource;
+use AidingApp\Department\Filament\Resources\Departments\DepartmentResource;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;

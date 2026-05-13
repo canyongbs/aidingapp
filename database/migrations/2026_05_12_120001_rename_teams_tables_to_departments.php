@@ -34,16 +34,12 @@
 </COPYRIGHT>
 */
 
-use CanyonGBS\Common\Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Spatie\Permission\PermissionRegistrar;
 
 return new class () extends Migration {
-    use CanModifyPermissions;
-
     /**
      * @var array<string, string>
      */
@@ -54,27 +50,6 @@ return new class () extends Migration {
         'service_request_type_auditor_teams' => 'service_request_type_auditor_departments',
         'service_monitoring_target_team' => 'service_monitoring_target_department',
         'confidential_task_teams' => 'confidential_task_departments',
-    ];
-
-    /**
-     * @var array<string, string>
-     */
-    private array $permissionRenames = [
-        'team.view-any' => 'department.view-any',
-        'team.create' => 'department.create',
-        'team.*.view' => 'department.*.view',
-        'team.*.update' => 'department.*.update',
-        'team.*.delete' => 'department.*.delete',
-        'team.*.restore' => 'department.*.restore',
-        'team.*.force-delete' => 'department.*.force-delete',
-    ];
-
-    /**
-     * @var array<string>
-     */
-    private array $guards = [
-        'web',
-        'api',
     ];
 
     public function up(): void
@@ -88,7 +63,7 @@ return new class () extends Migration {
                 Schema::rename($old, $new);
             }
 
-            $this->renameConstraintsAndIndexes(forward: true);
+            $this->renameConstraintsAndIndexesForward();
 
             Schema::table('users', fn (Blueprint $table) => $table->renameColumn('team_id', 'department_id'));
             Schema::table('advisories', fn (Blueprint $table) => $table->renameColumn('assigned_team_id', 'assigned_department_id'));
@@ -98,34 +73,12 @@ return new class () extends Migration {
             }
 
             $this->addDepartmentForeignKeys();
-
-            DB::table('audits')
-                ->where('auditable_type', 'team')
-                ->update(['auditable_type' => 'department']);
-
-            foreach ($this->guards as $guard) {
-                $this->renamePermissions($this->permissionRenames, $guard);
-            }
-
-            $this->renamePermissionGroups(['Team' => 'Department']);
-
-            app(PermissionRegistrar::class)->forgetCachedPermissions();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            $this->renamePermissionGroups(['Department' => 'Team']);
-
-            foreach ($this->guards as $guard) {
-                $this->renamePermissions(array_flip($this->permissionRenames), $guard);
-            }
-
-            DB::table('audits')
-                ->where('auditable_type', 'department')
-                ->update(['auditable_type' => 'team']);
-
             $this->dropDepartmentForeignKeys();
 
             foreach ($this->pivotTables as $new) {
@@ -135,7 +88,7 @@ return new class () extends Migration {
             Schema::table('advisories', fn (Blueprint $table) => $table->renameColumn('assigned_department_id', 'assigned_team_id'));
             Schema::table('users', fn (Blueprint $table) => $table->renameColumn('department_id', 'team_id'));
 
-            $this->renameConstraintsAndIndexes(forward: false);
+            $this->renameConstraintsAndIndexesBackward();
 
             foreach (array_reverse($this->pivotTables, preserve_keys: true) as $old => $new) {
                 Schema::rename($new, $old);
@@ -144,8 +97,6 @@ return new class () extends Migration {
             Schema::rename('departments', 'teams');
 
             $this->addTeamForeignKeys();
-
-            app(PermissionRegistrar::class)->forgetCachedPermissions();
         });
     }
 
@@ -203,42 +154,53 @@ return new class () extends Migration {
         }
     }
 
-    private function renameConstraintsAndIndexes(bool $forward): void
+    /**
+     * Renames Postgres-internal index and constraint names so they reflect the new table name.
+     * IF EXISTS on index renames so the migration tolerates schemas where a particular
+     * auto-generated index never got created (Laravel's `constrained()` adds the FK
+     * constraint but not a separate column index).
+     */
+    private function renameConstraintsAndIndexesForward(): void
     {
-        $renames = [
-            ['ALTER INDEX %s RENAME TO %s', 'teams_pkey', 'departments_pkey'],
-            ['ALTER INDEX %s RENAME TO %s', 'teams_name_unique', 'departments_name_unique'],
-            ['ALTER INDEX %s RENAME TO %s', 'teams_division_id_index', 'departments_division_id_index'],
-            ['ALTER TABLE departments RENAME CONSTRAINT %s TO %s', 'teams_division_id_foreign', 'departments_division_id_foreign'],
-        ];
+        DB::statement('ALTER INDEX IF EXISTS teams_pkey RENAME TO departments_pkey');
+        DB::statement('ALTER INDEX IF EXISTS teams_name_unique RENAME TO departments_name_unique');
+        DB::statement('ALTER INDEX IF EXISTS teams_division_id_index RENAME TO departments_division_id_index');
+        DB::statement('ALTER TABLE departments RENAME CONSTRAINT teams_division_id_foreign TO departments_division_id_foreign');
 
-        foreach ($this->pivotTables as $old => $new) {
-            $renames[] = ['ALTER INDEX %s RENAME TO %s', "{$old}_pkey", "{$new}_pkey"];
-        }
+        DB::statement('ALTER INDEX IF EXISTS project_manager_teams_pkey RENAME TO project_manager_departments_pkey');
+        DB::statement('ALTER INDEX IF EXISTS project_auditor_teams_pkey RENAME TO project_auditor_departments_pkey');
+        DB::statement('ALTER INDEX IF EXISTS service_request_type_manager_teams_pkey RENAME TO service_request_type_manager_departments_pkey');
+        DB::statement('ALTER INDEX IF EXISTS service_request_type_auditor_teams_pkey RENAME TO service_request_type_auditor_departments_pkey');
+        DB::statement('ALTER INDEX IF EXISTS service_monitoring_target_team_pkey RENAME TO service_monitoring_target_department_pkey');
+        DB::statement('ALTER INDEX IF EXISTS confidential_task_teams_pkey RENAME TO confidential_task_departments_pkey');
 
-        $pivotForeignKeys = [
-            'project_manager_teams' => ['project_manager_departments', 'project_id'],
-            'project_auditor_teams' => ['project_auditor_departments', 'project_id'],
-            'service_request_type_manager_teams' => ['service_request_type_manager_departments', 'service_request_type_id'],
-            'service_request_type_auditor_teams' => ['service_request_type_auditor_departments', 'service_request_type_id'],
-            'service_monitoring_target_team' => ['service_monitoring_target_department', 'service_monitoring_target_id'],
-            'confidential_task_teams' => ['confidential_task_departments', 'task_id'],
-        ];
+        DB::statement('ALTER TABLE project_manager_departments RENAME CONSTRAINT project_manager_teams_project_id_foreign TO project_manager_departments_project_id_foreign');
+        DB::statement('ALTER TABLE project_auditor_departments RENAME CONSTRAINT project_auditor_teams_project_id_foreign TO project_auditor_departments_project_id_foreign');
+        DB::statement('ALTER TABLE service_request_type_manager_departments RENAME CONSTRAINT service_request_type_manager_teams_service_request_type_id_foreign TO service_request_type_manager_departments_service_request_type_id_foreign');
+        DB::statement('ALTER TABLE service_request_type_auditor_departments RENAME CONSTRAINT service_request_type_auditor_teams_service_request_type_id_foreign TO service_request_type_auditor_departments_service_request_type_id_foreign');
+        DB::statement('ALTER TABLE service_monitoring_target_department RENAME CONSTRAINT service_monitoring_target_team_service_monitoring_target_id_foreign TO service_monitoring_target_department_service_monitoring_target_id_foreign');
+        DB::statement('ALTER TABLE confidential_task_departments RENAME CONSTRAINT confidential_task_teams_task_id_foreign TO confidential_task_departments_task_id_foreign');
+    }
 
-        foreach ($pivotForeignKeys as $oldTable => [$newTable, $column]) {
-            $renames[] = [
-                "ALTER TABLE {$newTable} RENAME CONSTRAINT %s TO %s",
-                "{$oldTable}_{$column}_foreign",
-                "{$newTable}_{$column}_foreign",
-            ];
-        }
+    private function renameConstraintsAndIndexesBackward(): void
+    {
+        DB::statement('ALTER INDEX IF EXISTS departments_pkey RENAME TO teams_pkey');
+        DB::statement('ALTER INDEX IF EXISTS departments_name_unique RENAME TO teams_name_unique');
+        DB::statement('ALTER INDEX IF EXISTS departments_division_id_index RENAME TO teams_division_id_index');
+        DB::statement('ALTER TABLE teams RENAME CONSTRAINT departments_division_id_foreign TO teams_division_id_foreign');
 
-        foreach ($renames as [$template, $old, $new]) {
-            if ($forward) {
-                DB::statement(sprintf($template, $old, $new));
-            } else {
-                DB::statement(sprintf($template, $new, $old));
-            }
-        }
+        DB::statement('ALTER INDEX IF EXISTS project_manager_departments_pkey RENAME TO project_manager_teams_pkey');
+        DB::statement('ALTER INDEX IF EXISTS project_auditor_departments_pkey RENAME TO project_auditor_teams_pkey');
+        DB::statement('ALTER INDEX IF EXISTS service_request_type_manager_departments_pkey RENAME TO service_request_type_manager_teams_pkey');
+        DB::statement('ALTER INDEX IF EXISTS service_request_type_auditor_departments_pkey RENAME TO service_request_type_auditor_teams_pkey');
+        DB::statement('ALTER INDEX IF EXISTS service_monitoring_target_department_pkey RENAME TO service_monitoring_target_team_pkey');
+        DB::statement('ALTER INDEX IF EXISTS confidential_task_departments_pkey RENAME TO confidential_task_teams_pkey');
+
+        DB::statement('ALTER TABLE project_manager_teams RENAME CONSTRAINT project_manager_departments_project_id_foreign TO project_manager_teams_project_id_foreign');
+        DB::statement('ALTER TABLE project_auditor_teams RENAME CONSTRAINT project_auditor_departments_project_id_foreign TO project_auditor_teams_project_id_foreign');
+        DB::statement('ALTER TABLE service_request_type_manager_teams RENAME CONSTRAINT service_request_type_manager_departments_service_request_type_id_foreign TO service_request_type_manager_teams_service_request_type_id_foreign');
+        DB::statement('ALTER TABLE service_request_type_auditor_teams RENAME CONSTRAINT service_request_type_auditor_departments_service_request_type_id_foreign TO service_request_type_auditor_teams_service_request_type_id_foreign');
+        DB::statement('ALTER TABLE service_monitoring_target_team RENAME CONSTRAINT service_monitoring_target_department_service_monitoring_target_id_foreign TO service_monitoring_target_team_service_monitoring_target_id_foreign');
+        DB::statement('ALTER TABLE confidential_task_teams RENAME CONSTRAINT confidential_task_departments_task_id_foreign TO confidential_task_teams_task_id_foreign');
     }
 };

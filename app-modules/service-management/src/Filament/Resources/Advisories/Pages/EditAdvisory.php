@@ -82,11 +82,11 @@ class EditAdvisory extends EditRecord
                     ->preload()
                     ->searchable()
                     ->relationship('status', 'name'),
-                Select::make('assigned_team_id')
-                    ->label('Assigned Team')
+                Select::make('assigned_department_id')
+                    ->label('Assigned Department')
                     ->preload()
                     ->searchable()
-                    ->relationship('assignedTeam', 'name'),
+                    ->relationship('assignedDepartment', 'name'),
             ]);
     }
 

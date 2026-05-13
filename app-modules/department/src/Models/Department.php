@@ -46,6 +46,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeDepartmentAuditor;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeDepartmentManager;
 use AidingApp\Department\Database\Factories\DepartmentFactory;
+use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -60,6 +61,11 @@ class Department extends BaseModel
 {
     /** @use HasFactory<DepartmentFactory> */
     use HasFactory;
+
+    public function getTable(): string
+    {
+        return TeamRenameFeature::active() ? 'departments' : 'teams';
+    }
 
     protected $fillable = [
         'name',
@@ -120,7 +126,12 @@ class Department extends BaseModel
     public function managedProjects(): BelongsToMany
     {
         return $this
-            ->belongsToMany(Project::class, 'project_manager_teams', 'team_id', 'project_id')
+            ->belongsToMany(
+                Project::class,
+                TeamRenameFeature::active() ? 'project_manager_departments' : 'project_manager_teams',
+                TeamRenameFeature::active() ? 'department_id' : 'team_id',
+                'project_id',
+            )
             ->using(ProjectManagerDepartment::class)
             ->withTimestamps();
     }
@@ -131,7 +142,12 @@ class Department extends BaseModel
     public function auditedProjects(): BelongsToMany
     {
         return $this
-            ->belongsToMany(Project::class, 'project_auditor_teams', 'team_id', 'project_id')
+            ->belongsToMany(
+                Project::class,
+                TeamRenameFeature::active() ? 'project_auditor_departments' : 'project_auditor_teams',
+                TeamRenameFeature::active() ? 'department_id' : 'team_id',
+                'project_id',
+            )
             ->using(ProjectAuditorDepartment::class)
             ->withTimestamps();
     }

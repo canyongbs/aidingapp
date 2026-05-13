@@ -130,18 +130,18 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
     ]
 );
 
-test('CreateServiceMonitor with notification group User or Team', function () {
+test('CreateServiceMonitor with notification group User or Department', function () {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
-    expect($serviceMonitoringTarget->teams())->exists()->toBeFalse();
+    expect($serviceMonitoringTarget->departments())->exists()->toBeFalse();
     expect($serviceMonitoringTarget->users())->exists()->toBeFalse();
 
-    $serviceMonitoringTarget->teams()->attach(Department::factory()->create());
+    $serviceMonitoringTarget->departments()->attach(Department::factory()->create());
     $serviceMonitoringTarget->users()->attach(User::factory()->create());
 
-    expect($serviceMonitoringTarget->teams())->exists()->toBeTrue();
+    expect($serviceMonitoringTarget->departments())->exists()->toBeTrue();
     expect($serviceMonitoringTarget->users())->exists()->toBeTrue();
 });
 

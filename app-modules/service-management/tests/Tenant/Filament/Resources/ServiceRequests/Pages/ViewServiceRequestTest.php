@@ -186,9 +186,9 @@ test('view service request page visible if the user is an auditor of the service
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -196,7 +196,7 @@ test('view service request page visible if the user is an auditor of the service
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->auditorTeams()->attach($team);
+    $serviceRequestType->auditorDepartments()->attach($department);
 
     $serviceRequestsWithAuditor = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
@@ -254,9 +254,9 @@ test('view service request page visible if the user is a manager of the service 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -264,7 +264,7 @@ test('view service request page visible if the user is a manager of the service 
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([

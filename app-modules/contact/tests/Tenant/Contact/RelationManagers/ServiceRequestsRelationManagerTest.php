@@ -136,18 +136,18 @@ test('ServiceRequestsRelationManager filters service requests by status', functi
         ->assertCanNotSeeTableRecords([$serviceRequest2]);
 });
 
-test('Only service request types managed by user team are available in type select', function () {
+test('Only service request types managed by user department are available in type select', function () {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Department::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->givePermissionTo('service_request.create');
 
     $managedType = ServiceRequestType::factory()->create();
-    $managedType->managerTeams()->attach($team);
+    $managedType->managerDepartments()->attach($department);
 
     $unmanagedType = ServiceRequestType::factory()->create();
 
@@ -386,16 +386,16 @@ test('Non-super admin can only see service requests from managed or audited type
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Department::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
 
     $managedType = ServiceRequestType::factory()->create();
-    $managedType->managerTeams()->attach($team);
+    $managedType->managerDepartments()->attach($department);
 
     $auditedType = ServiceRequestType::factory()->create();
-    $auditedType->auditorTeams()->attach($team);
+    $auditedType->auditorDepartments()->attach($department);
 
     $unmanagedType = ServiceRequestType::factory()->create();
 

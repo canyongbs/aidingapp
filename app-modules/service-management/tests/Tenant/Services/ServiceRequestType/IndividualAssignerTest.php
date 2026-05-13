@@ -47,16 +47,16 @@ use App\Models\User;
 
 use function Tests\asSuperAdmin;
 
-test('individual assigner assigns to configured user via team manager', function () {
+test('individual assigner assigns to configured user via department manager', function () {
     asSuperAdmin();
 
     $user = User::factory()->create();
-    $team = Department::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()
-        ->hasAttached($team, relationship: 'managerTeams')
+        ->hasAttached($department, relationship: 'managerDepartments')
         ->state([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
             'assignment_type_individual_id' => $user->getKey(),

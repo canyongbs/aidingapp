@@ -81,17 +81,17 @@ test('users can access public tasks and confidential tasks that they have create
         ->not->toContain(...$privateTasks->pluck('created_by'));
 });
 
-test('users can access confidential tasks if they belong to a team with access', function () {
-    $teamUser = User::factory()->create();
+test('users can access confidential tasks if they belong to a department with access', function () {
+    $departmentUser = User::factory()->create();
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
-    $teamUser->team()->associate($team)->save();
+    $departmentUser->department()->associate($department)->save();
 
-    actingAs($teamUser);
+    actingAs($departmentUser);
 
     $ownedConfidentialTasks = Task::factory()
-        ->hasAttached($team, [], 'confidentialAccessTeams')
+        ->hasAttached($department, [], 'confidentialAccessDepartments')
         ->count(10)
         ->create([
             'is_confidential' => true,
@@ -236,15 +236,15 @@ test('users can access confidential tasks if they are a project manager user', f
     expect($tasks->pluck('id'))->not->toContain(...$privateTasks->pluck('id'));
 });
 
-test('users can access confidential tasks if their team is a project manager team', function () {
+test('users can access confidential tasks if their department is a project manager department', function () {
     $user = User::factory()->create();
-    $team = Department::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
 
     actingAs($user);
 
     $project = Project::factory()->create();
-    $project->managerTeams()->attach($team);
+    $project->managerDepartments()->attach($department);
 
     $accessibleConfidentialTasks = Task::factory()
         ->hasAttached($project, [], 'confidentialAccessProjects')
@@ -306,15 +306,15 @@ test('users can access confidential tasks if they are a project auditor user', f
     expect($tasks->pluck('id'))->not->toContain(...$privateTasks->pluck('id'));
 });
 
-test('users can access confidential tasks if their team is a project auditor team', function () {
+test('users can access confidential tasks if their department is a project auditor department', function () {
     $user = User::factory()->create();
-    $team = Department::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
 
     actingAs($user);
 
     $project = Project::factory()->create();
-    $project->auditorTeams()->attach($team);
+    $project->auditorDepartments()->attach($department);
 
     $accessibleConfidentialTasks = Task::factory()
         ->hasAttached($project, [], 'confidentialAccessProjects')

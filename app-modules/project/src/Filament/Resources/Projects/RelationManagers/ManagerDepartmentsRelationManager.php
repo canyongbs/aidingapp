@@ -34,18 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Actions;
+namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
 
-use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\Project\Models\Project;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class AssignServiceRequestToTeam
+class ManagerDepartmentsRelationManager extends RelationManager
 {
-    public function execute(ServiceRequest $serviceRequest): void
+    protected static string $relationship = 'managerDepartments';
+
+    protected static ?string $title = 'Departments';
+
+    public function table(Table $table): Table
     {
-        $serviceRequest->load('priority.type');
-
-        $assigner = $serviceRequest->priority?->type?->assignment_type?->getAssignerClass();
-
-        $assigner?->execute($serviceRequest);
+        return $table
+            ->recordTitleAttribute('name')
+            ->columns([
+                TextColumn::make('name'),
+            ])
+            ->headerActions([
+                AttachAction::make()
+                    ->authorize('update', Project::class),
+            ])
+            ->recordActions([
+                DetachAction::make()
+                    ->authorize('update', Project::class),
+            ])
+            ->toolbarActions([
+                DetachBulkAction::make()
+                    ->authorize('update', Project::class),
+            ])
+            ->inverseRelationship('managedProjects');
     }
 }

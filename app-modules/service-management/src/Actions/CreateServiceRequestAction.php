@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\DB;
 class CreateServiceRequestAction
 {
     public function __construct(
-        protected AssignServiceRequestToTeam $assignServiceRequestToTeam,
+        protected AssignServiceRequestToDepartment $assignServiceRequestToDepartment,
     ) {}
 
     public function execute(ServiceRequestDataObject $serviceRequestDataObject): ServiceRequest
@@ -52,7 +52,7 @@ class CreateServiceRequestAction
             $serviceRequest = new ServiceRequest($serviceRequestDataObject->toArray());
             $serviceRequest->save();
 
-            $this->assignServiceRequestToTeam->execute($serviceRequest);
+            $this->assignServiceRequestToDepartment->execute($serviceRequest);
 
             return $serviceRequest;
         });

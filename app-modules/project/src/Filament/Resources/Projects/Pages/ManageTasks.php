@@ -124,24 +124,24 @@ class ManageTasks extends ManageRelatedRecords
                     ->schema([
                         Checkbox::make('isActive')
                             ->label('My Tasks')
-                            ->afterStateUpdated(fn (Set $set, $state) => $state ? $set('../my_teams_tasks.isActive', false) : null)
+                            ->afterStateUpdated(fn (Set $set, $state) => $state ? $set('../my_departments_tasks.isActive', false) : null)
                             ->default(true),
                     ]),
-                Filter::make('my_teams_tasks')
-                    ->label("My Team's Tasks")
+                Filter::make('my_departments_tasks')
+                    ->label("My Department's Tasks")
                     ->query(
                         function (Builder $query) {
                             /** @var User $user */
                             $user = auth()->user();
 
-                            $teamUserIds = $user->team->users()->get()->pluck('id');
+                            $departmentUserIds = $user->department->users()->get()->pluck('id');
 
-                            return $query->whereIn('assigned_to', $teamUserIds)->get();
+                            return $query->whereIn('assigned_to', $departmentUserIds)->get();
                         }
                     )
                     ->schema([
                         Checkbox::make('isActive')
-                            ->label("My Team's Tasks")
+                            ->label("My Department's Tasks")
                             ->afterStateUpdated(function (Set $set, string $state) {
                                 return $state ? $set('../my_tasks.isActive', false) : null;
                             }),
@@ -178,12 +178,12 @@ class ManageTasks extends ManageRelatedRecords
                                     ->multiple()
                                     ->exists('users', 'id')
                                     ->visible(fn (Get $get) => $get('is_confidential')),
-                                Select::make('confidential_task_teams')
-                                    ->relationship('confidentialAccessTeams', 'name')
+                                Select::make('confidential_task_departments')
+                                    ->relationship('confidentialAccessDepartments', 'name')
                                     ->preload()
-                                    ->label('Teams')
+                                    ->label('Departments')
                                     ->multiple()
-                                    ->exists('teams', 'id')
+                                    ->exists('departments', 'id')
                                     ->visible(fn (Get $get) => $get('is_confidential')),
                             ]),
                         TextInput::make('title')

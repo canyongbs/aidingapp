@@ -34,13 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Department\Filament\Resources\Teams;
+namespace AidingApp\Department\Filament\Resources\Departments;
 
-use AidingApp\Department\Filament\Resources\Teams\Pages\CreateDepartment;
-use AidingApp\Department\Filament\Resources\Teams\Pages\EditDepartment;
-use AidingApp\Department\Filament\Resources\Teams\Pages\ListDepartments;
-use AidingApp\Department\Filament\Resources\Teams\Pages\ViewDepartment;
-use AidingApp\Department\Filament\Resources\Teams\RelationManagers\UsersRelationManager;
+use AidingApp\Department\Filament\Resources\Departments\Pages\CreateDepartment;
+use AidingApp\Department\Filament\Resources\Departments\Pages\EditDepartment;
+use AidingApp\Department\Filament\Resources\Departments\Pages\ListDepartments;
+use AidingApp\Department\Filament\Resources\Departments\Pages\ViewDepartment;
+use AidingApp\Department\Filament\Resources\Departments\RelationManagers\UsersRelationManager;
 use AidingApp\Department\Models\Department;
 use Filament\Resources\Resource;
 use UnitEnum;

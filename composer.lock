@@ -744,6 +744,41 @@
             }
         },
         {
+            "name": "canyon-gbs/aiding-app-department",
+            "version": "1.0",
+            "dist": {
+                "type": "path",
+                "url": "app-modules/department",
+                "reference": "815581f2f3bb9d10d572ca39b112c9f24db8324b"
+            },
+            "require": {
+                "filament/filament": "^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AidingApp\\Department\\Providers\\DepartmentServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AidingApp\\Department\\": "src/",
+                    "AidingApp\\Department\\Tests\\": "tests/",
+                    "AidingApp\\Department\\Database\\Factories\\": "database/factories/",
+                    "AidingApp\\Department\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
             "name": "canyon-gbs/aiding-app-division",
             "version": "1.0",
             "dist": {
@@ -1223,41 +1258,6 @@
                     "AidingApp\\Task\\Tests\\": "tests/",
                     "AidingApp\\Task\\Database\\Factories\\": "database/factories/",
                     "AidingApp\\Task\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/aiding-app-department",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/department",
-                "reference": "5e7aca8f02dfc2199ab0a8e2d449de88b36ec0e7"
-            },
-            "require": {
-                "filament/filament": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AidingApp\\Department\\Providers\\DepartmentServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AidingApp\\Department\\": "src/",
-                    "AidingApp\\Department\\Tests\\": "tests/",
-                    "AidingApp\\Department\\Database\\Factories\\": "database/factories/",
-                    "AidingApp\\Department\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [

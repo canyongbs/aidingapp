@@ -56,15 +56,15 @@ use function Tests\asSuperAdmin;
 
 // Authorization
 
-test('reclassify action is visible for manager team member with update permission', function () {
+test('reclassify action is visible for manager department member with update permission', function () {
     $user = User::factory()->create();
 
-    $team = Department::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -91,13 +91,13 @@ test('reclassify action is visible for manager team member with update permissio
 test('reclassify action is hidden for user without update permission', function () {
     $user = User::factory()->create();
 
-    $team = Department::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
-    $serviceRequestType->managerTeams()->attach($team);
-    $serviceRequestType->auditorTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
+    $serviceRequestType->auditorDepartments()->attach($department);
 
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -123,12 +123,12 @@ test('reclassify action is hidden for user without update permission', function 
 test('reclassify action is hidden on closed service requests', function () {
     $user = User::factory()->create();
 
-    $team = Department::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -314,10 +314,10 @@ test('override assign_to only lists eligible managers for selected type', functi
     $eligibleDirectManager = User::factory()->create(['name' => 'Eligible Direct']);
     $newType->managerUsers()->attach($eligibleDirectManager);
 
-    $eligibleTeamManager = User::factory()->create(['name' => 'Eligible Team']);
-    $team = Department::factory()->create();
-    $eligibleTeamManager->team()->associate($team)->save();
-    $newType->managerTeams()->attach($team);
+    $eligibleDepartmentManager = User::factory()->create(['name' => 'Eligible Department']);
+    $department = Department::factory()->create();
+    $eligibleDepartmentManager->department()->associate($department)->save();
+    $newType->managerDepartments()->attach($department);
 
     $ineligibleUser = User::factory()->create(['name' => 'Ineligible User']);
 
@@ -337,11 +337,11 @@ test('override assign_to only lists eligible managers for selected type', functi
             'type_id' => $newType->getKey(),
             'assignment_method' => 'override',
         ])
-        ->assertFormFieldExists('assign_to', function ($field) use ($eligibleDirectManager, $eligibleTeamManager, $ineligibleUser): bool {
+        ->assertFormFieldExists('assign_to', function ($field) use ($eligibleDirectManager, $eligibleDepartmentManager, $ineligibleUser): bool {
             $options = $field->getOptions();
 
             return isset($options[$eligibleDirectManager->getKey()])
-                && isset($options[$eligibleTeamManager->getKey()])
+                && isset($options[$eligibleDepartmentManager->getKey()])
                 && ! isset($options[$ineligibleUser->getKey()]);
         });
 });

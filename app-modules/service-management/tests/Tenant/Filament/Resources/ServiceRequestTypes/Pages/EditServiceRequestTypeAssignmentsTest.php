@@ -77,12 +77,12 @@ test('A successful action on the EditServiceRequestTypeAssignments page', functi
 });
 
 test('A successful action on the EditServiceRequestTypeAssignments page when the type selected is Individual', function () {
-    $managerTeam = Department::factory()->create();
+    $managerDepartment = Department::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()
         ->hasAttached(
-            factory: $managerTeam,
-            relationship: 'managerTeams'
+            factory: $managerDepartment,
+            relationship: 'managerDepartments'
         )
         ->create();
 
@@ -96,7 +96,7 @@ test('A successful action on the EditServiceRequestTypeAssignments page when the
 
     $editRequest = EditServiceRequestTypeAssignmentsRequestFactory::new()
         ->withIndividualType()
-        ->withIndividualId($managerTeam)
+        ->withIndividualId($managerDepartment)
         ->create();
 
     livewire(EditServiceRequestTypeAssignments::class, [

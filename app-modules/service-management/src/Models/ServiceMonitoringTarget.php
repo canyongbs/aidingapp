@@ -92,7 +92,7 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
     /**
      * @return BelongsToMany<Department, $this, covariant ServiceMonitoringTargetDepartment>
      */
-    public function teams(): BelongsToMany
+    public function departments(): BelongsToMany
     {
         return $this->belongsToMany(Department::class)
             ->using(ServiceMonitoringTargetDepartment::class)

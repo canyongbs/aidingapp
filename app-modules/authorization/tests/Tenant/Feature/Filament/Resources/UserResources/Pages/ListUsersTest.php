@@ -146,34 +146,34 @@ it('allows a user to leave impersonate', function () {
         ->and(auth()->id())->toBe($first->id);
 });
 
-it('can filter users by teams', function () {
+it('can filter users by departments', function () {
     asSuperAdmin();
 
-    $team1 = Department::factory()->create();
-    $team2 = Department::factory()->create();
+    $department1 = Department::factory()->create();
+    $department2 = Department::factory()->create();
 
-    $userWithoutTeam = User::factory()->count(5)->create();
+    $userWithoutDepartment = User::factory()->count(5)->create();
 
-    $userWithTeam1 = User::factory()
+    $userWithDepartment1 = User::factory()
         ->count(5)
-        ->for($team1)
+        ->for($department1)
         ->create();
 
-    $userWithTeam2 = User::factory()
+    $userWithDepartment2 = User::factory()
         ->count(5)
-        ->for($team2)
+        ->for($department2)
         ->create();
 
     livewire(ListUsers::class)
         ->set('tableRecordsPerPage', 16)
-        ->assertCanSeeTableRecords($userWithoutTeam->merge($userWithTeam1)->merge($userWithTeam2))
-        ->filterTable('team', [$team1->getKey()])
-        ->assertCanSeeTableRecords($userWithTeam1)
-        ->assertCanNotSeeTableRecords($userWithoutTeam->merge($userWithTeam2))
-        ->filterTable('team', [$team2->getKey()])
-        ->assertCanSeeTableRecords($userWithTeam2)
-        ->assertCanNotSeeTableRecords($userWithoutTeam->merge($userWithTeam1))
-        ->filterTable('team', [$team2->getKey(), $team1->getKey()])
-        ->assertCanSeeTableRecords($userWithTeam1->merge($userWithTeam2))
-        ->assertCanNotSeeTableRecords($userWithoutTeam);
+        ->assertCanSeeTableRecords($userWithoutDepartment->merge($userWithDepartment1)->merge($userWithDepartment2))
+        ->filterTable('department', [$department1->getKey()])
+        ->assertCanSeeTableRecords($userWithDepartment1)
+        ->assertCanNotSeeTableRecords($userWithoutDepartment->merge($userWithDepartment2))
+        ->filterTable('department', [$department2->getKey()])
+        ->assertCanSeeTableRecords($userWithDepartment2)
+        ->assertCanNotSeeTableRecords($userWithoutDepartment->merge($userWithDepartment1))
+        ->filterTable('department', [$department2->getKey(), $department1->getKey()])
+        ->assertCanSeeTableRecords($userWithDepartment1->merge($userWithDepartment2))
+        ->assertCanNotSeeTableRecords($userWithoutDepartment);
 });

@@ -50,7 +50,7 @@ class AdvisoryRequestFactory extends RequestFactory
             'description' => fake()->paragraph(),
             'severity_id' => AdvisorySeverity::factory(),
             'status_id' => AdvisoryStatus::factory(),
-            'assigned_team_id' => Department::factory(),
+            'assigned_department_id' => Department::factory(),
         ];
     }
 }

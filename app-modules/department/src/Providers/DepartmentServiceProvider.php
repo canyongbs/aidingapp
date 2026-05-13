@@ -36,8 +36,8 @@
 
 namespace AidingApp\Department\Providers;
 
-use AidingApp\Department\Models\Department;
 use AidingApp\Department\DepartmentPlugin;
+use AidingApp\Department\Models\Department;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;

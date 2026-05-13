@@ -36,8 +36,9 @@
 
 namespace AidingApp\Task\Models;
 
-use AidingApp\Task\Database\Factories\ConfidentialTaskTeamFactory;
+use AidingApp\Task\Database\Factories\ConfidentialTaskDepartmentFactory;
 use AidingApp\Department\Models\Department;
+use App\Features\TeamRenameFeature;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -48,10 +49,15 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  */
 class ConfidentialTaskDepartment extends Pivot
 {
-    /** @use HasFactory<ConfidentialTaskTeamFactory> */
+    /** @use HasFactory<ConfidentialTaskDepartmentFactory> */
     use HasFactory;
 
     use HasUuids;
+
+    public function getTable(): string
+    {
+        return TeamRenameFeature::active() ? 'confidential_task_departments' : 'confidential_task_teams';
+    }
 
     /**
     * @return BelongsTo<Task, $this>
@@ -64,8 +70,8 @@ class ConfidentialTaskDepartment extends Pivot
     /**
      * @return BelongsTo<Department, $this>
      */
-    public function team(): BelongsTo
+    public function department(): BelongsTo
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Department::class, TeamRenameFeature::active() ? 'department_id' : 'team_id');
     }
 }

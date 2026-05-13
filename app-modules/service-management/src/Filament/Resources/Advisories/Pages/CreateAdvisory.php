@@ -73,12 +73,12 @@ class CreateAdvisory extends CreateRecord
                     ->preload()
                     ->searchable()
                     ->relationship('status', 'name'),
-                Select::make('assigned_team_id')
-                    ->label('Assigned Team')
+                Select::make('assigned_department_id')
+                    ->label('Assigned Department')
                     ->preload()
                     ->searchable()
-                    ->relationship('assignedTeam', 'name')
-                    ->default(auth()->user()?->team?->getKey()),
+                    ->relationship('assignedDepartment', 'name')
+                    ->default(auth()->user()?->department?->getKey()),
             ]);
     }
 }

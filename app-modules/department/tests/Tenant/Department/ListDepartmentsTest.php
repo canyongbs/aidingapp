@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Department\Filament\Resources\Teams\DepartmentResource;
+use AidingApp\Department\Filament\Resources\Departments\DepartmentResource;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -49,7 +49,7 @@ test('ListDepartments is gated with proper access control', function () {
             DepartmentResource::getUrl('index')
         )->assertForbidden();
 
-    $user->givePermissionTo('team.view-any');
+    $user->givePermissionTo('department.view-any');
 
     actingAs($user)
         ->get(

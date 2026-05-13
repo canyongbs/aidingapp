@@ -52,7 +52,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-test('During assignment only Users that are on a Team that is Manager of the Type of this Service Request should be options', function () {
+test('During assignment only Users that are on a Department that is Manager of the Type of this Service Request should be options', function () {
     asSuperAdmin();
 
     $settings = app(LicenseSettings::class);
@@ -62,17 +62,17 @@ test('During assignment only Users that are on a Team that is Manager of the Typ
     $settings->save();
 
     $user = User::factory()->create();
-    $userWithoutTeam = User::factory()->create();
+    $userWithoutDepartment = User::factory()->create();
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
@@ -92,8 +92,8 @@ test('During assignment only Users that are on a Team that is Manager of the Typ
             return ! empty($options);
         })
         ->assertSuccessful()
-        ->assertFormFieldExists('userId', 'mountedActionSchema0', function (Select $select) use ($userWithoutTeam) {
-            $options = $select->getSearchResults($userWithoutTeam->name);
+        ->assertFormFieldExists('userId', 'mountedActionSchema0', function (Select $select) use ($userWithoutDepartment) {
+            $options = $select->getSearchResults($userWithoutDepartment->name);
 
             return empty($options);
         })
@@ -154,17 +154,17 @@ test('During reassignment current assigned user should not be in options', funct
     $user = User::factory()->create();
     $secondUser = User::factory()->create();
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
-    $secondUser->team()->associate($team)->save();
+    $secondUser->department()->associate($department)->save();
 
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
@@ -247,7 +247,7 @@ test('During reassignment current assigned direct managerUser should not be in o
         ->assertSuccessful();
 });
 
-test('Assign To Me action visible when the Service Request is unassigned and the logged-in user belongs to a Team that is Manager of the Type of this Service Request', function () {
+test('Assign To Me action visible when the Service Request is unassigned and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -258,15 +258,15 @@ test('Assign To Me action visible when the Service Request is unassigned and the
 
     $user->givePermissionTo('service_request.*.update');
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     actingAs($user);
 
@@ -321,7 +321,7 @@ test('Assign To Me action visible when the Service Request is unassigned and the
         ->assertTableActionVisible('assign-to-me');
 });
 
-test('Assign To Me action is not visible when the Service Request is already assigned and the logged-in user belongs to a Team that is Manager of the Type of this Service Request', function () {
+test('Assign To Me action is not visible when the Service Request is already assigned and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -334,15 +334,15 @@ test('Assign To Me action is not visible when the Service Request is already ass
 
     actingAs($user);
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
@@ -401,7 +401,7 @@ test('Assign To Me action is not visible when the Service Request is already ass
         ->assertTableActionHidden('assign-to-me');
 });
 
-test('Assign To Me action is not visible when the Service Request is unassigned and the logged-in user not belongs to a Team that is Manager of the Type of this Service Request', function () {
+test('Assign To Me action is not visible when the Service Request is unassigned and the logged-in user not belongs to a Department that is Manager of the Type of this Service Request', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -410,11 +410,11 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
 
     $user = User::factory()->create();
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     actingAs($user);
 
@@ -462,7 +462,7 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
         ->assertTableActionHidden('assign-to-me');
 });
 
-test('Assign Service Request action visible when the Service Request is unassigned and the logged-in user belongs to a Team that is Manager of the Type of this Service Request', function () {
+test('Assign Service Request action visible when the Service Request is unassigned and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -475,15 +475,15 @@ test('Assign Service Request action visible when the Service Request is unassign
 
     actingAs($user);
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -536,7 +536,7 @@ test('Assign Service Request action visible when the Service Request is unassign
         ->assertTableActionVisible('assign-service-request');
 });
 
-test('Assign Service Request action is not visible when the Service Request is unassigned and the logged-in user not belongs to a Team that is Manager of the Type of this Service Request', function () {
+test('Assign Service Request action is not visible when the Service Request is unassigned and the logged-in user not belongs to a Department that is Manager of the Type of this Service Request', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -545,11 +545,11 @@ test('Assign Service Request action is not visible when the Service Request is u
 
     $user = User::factory()->create();
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     actingAs($user);
 
@@ -597,7 +597,7 @@ test('Assign Service Request action is not visible when the Service Request is u
         ->assertTableActionHidden('assign-service-request');
 });
 
-test('Assign To Me action is not visible when the Service Request is Closed and the logged-in user belongs a Team that is Manager of the Type of this Service Request', function () {
+test('Assign To Me action is not visible when the Service Request is Closed and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -610,15 +610,15 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
 
     actingAs($user);
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
@@ -671,7 +671,7 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
         ->assertTableActionHidden('assign-to-me');
 });
 
-test('Assign Service Request action is not visible when the Service Request is Closed and the logged-in user belongs to a Team that is Manager of the Type of this Service Request', function () {
+test('Assign Service Request action is not visible when the Service Request is Closed and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -680,15 +680,15 @@ test('Assign Service Request action is not visible when the Service Request is C
 
     $user = User::factory()->create();
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     actingAs($user);
 

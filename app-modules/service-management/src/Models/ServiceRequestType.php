@@ -163,7 +163,7 @@ class ServiceRequestType extends BaseModel implements Auditable
     /**
      * @return BelongsToMany<Department, $this, covariant ServiceRequestTypeDepartmentManager>
      */
-    public function managerTeams(): BelongsToMany
+    public function managerDepartments(): BelongsToMany
     {
         return $this->belongsToMany(
             related: Department::class,
@@ -191,7 +191,7 @@ class ServiceRequestType extends BaseModel implements Auditable
     /**
      * @return BelongsToMany<Department, $this, covariant ServiceRequestTypeDepartmentAuditor>
      */
-    public function auditorTeams(): BelongsToMany
+    public function auditorDepartments(): BelongsToMany
     {
         return $this->belongsToMany(
             related: Department::class,

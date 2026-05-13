@@ -44,11 +44,11 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class AuditorTeamsRelationManager extends RelationManager
+class AuditorDepartmentsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'auditorTeams';
+    protected static string $relationship = 'auditorDepartments';
 
-    protected static ?string $title = 'Teams';
+    protected static ?string $title = 'Departments';
 
     public function table(Table $table): Table
     {

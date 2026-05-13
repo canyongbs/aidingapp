@@ -34,39 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\Department\Models\Department;
-use App\Features\TeamRenameFeature;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 
-/**
- * @mixin IdeHelperProjectAuditorDepartment
- */
-class ProjectAuditorDepartment extends Pivot
+class AssignServiceRequestToDepartment
 {
-    use HasUuids;
-
-    public function getTable(): string
+    public function execute(ServiceRequest $serviceRequest): void
     {
-        return TeamRenameFeature::active() ? 'project_auditor_departments' : 'project_auditor_teams';
-    }
+        $serviceRequest->load('priority.type');
 
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(Project::class, 'project_id', 'id', 'project');
-    }
+        $assigner = $serviceRequest->priority?->type?->assignment_type?->getAssignerClass();
 
-    /**
-     * @return BelongsTo<Department, $this>
-     */
-    public function department(): BelongsTo
-    {
-        return $this->belongsTo(Department::class, TeamRenameFeature::active() ? 'department_id' : 'team_id', 'id', 'department');
+        $assigner?->execute($serviceRequest);
     }
 }

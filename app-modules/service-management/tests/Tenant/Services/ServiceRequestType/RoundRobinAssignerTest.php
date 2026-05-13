@@ -51,18 +51,18 @@ use function Tests\asSuperAdmin;
 test('round robin assigner distributes requests evenly across managers', function () {
     asSuperAdmin();
 
-    $team = Department::factory()
+    $department = Department::factory()
         ->has(User::factory()->count(3), 'users')
         ->create();
 
     $serviceRequestType = ServiceRequestType::factory()
-        ->hasAttached($team, relationship: 'managerTeams')
+        ->hasAttached($department, relationship: 'managerDepartments')
         ->state([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin,
         ])
         ->create();
 
-    $users = $team->users()->orderBy('name')->orderBy('id')->get();
+    $users = $department->users()->orderBy('name')->orderBy('id')->get();
 
     travelTo(now()->subSeconds(count($users)));
 
@@ -92,18 +92,18 @@ test('round robin assigner distributes requests evenly across managers', functio
 test('round robin assigner wraps around after all managers have been assigned', function () {
     asSuperAdmin();
 
-    $team = Department::factory()
+    $department = Department::factory()
         ->has(User::factory()->count(3), 'users')
         ->create();
 
     $serviceRequestType = ServiceRequestType::factory()
-        ->hasAttached($team, relationship: 'managerTeams')
+        ->hasAttached($department, relationship: 'managerDepartments')
         ->state([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin,
         ])
         ->create();
 
-    $users = $team->users()->orderBy('name')->orderBy('id')->get();
+    $users = $department->users()->orderBy('name')->orderBy('id')->get();
     $firstUser = $users->first();
 
     travelTo(now()->subSeconds(count($users) + 1));

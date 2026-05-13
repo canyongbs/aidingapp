@@ -89,10 +89,10 @@ class ListServiceRequests extends ListRecords
                             $query->where('users.id', auth()->user()->getKey());
                         });
 
-                        $query->orWhereHas('priority.type.managerTeams', function (Builder $query): void {
-                            $query->where('teams.id', auth()->user()->team?->getKey());
-                        })->orWhereHas('priority.type.auditorTeams', function (Builder $query): void {
-                            $query->where('teams.id', auth()->user()->team?->getKey());
+                        $query->orWhereHas('priority.type.managerDepartments', function (Builder $query): void {
+                            $query->where('departments.id', auth()->user()->department?->getKey());
+                        })->orWhereHas('priority.type.auditorDepartments', function (Builder $query): void {
+                            $query->where('departments.id', auth()->user()->department?->getKey());
                         });
                     });
                 }))
@@ -231,8 +231,8 @@ class ListServiceRequests extends ListRecords
                                             $query->where('users.id', auth()->user()->getKey());
                                         });
 
-                                        $query->orWhereHas('priority.type.managerTeams', function (Builder $query): void {
-                                            $query->where('teams.id', auth()->user()->team?->getKey());
+                                        $query->orWhereHas('priority.type.managerDepartments', function (Builder $query): void {
+                                            $query->where('departments.id', auth()->user()->department?->getKey());
                                         });
                                     });
                                 })

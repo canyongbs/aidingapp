@@ -52,18 +52,18 @@ use function Tests\asSuperAdmin;
 test('workload assigner assigns to user with fewest active requests', function () {
     asSuperAdmin();
 
-    $team = Department::factory()
+    $department = Department::factory()
         ->has(User::factory()->count(3), 'users')
         ->create();
 
     $serviceRequestType = ServiceRequestType::factory()
-        ->hasAttached($team, relationship: 'managerTeams')
+        ->hasAttached($department, relationship: 'managerDepartments')
         ->state([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::Workload,
         ])
         ->create();
 
-    $users = $team->users()->orderBy('name')->orderBy('id')->get();
+    $users = $department->users()->orderBy('name')->orderBy('id')->get();
 
     // Give the first two users 2 active assignments each
     foreach ($users->take(2) as $user) {
@@ -106,18 +106,18 @@ test('workload assigner assigns to user with fewest active requests', function (
 test('workload assigner distributes evenly when all managers have same workload', function () {
     asSuperAdmin();
 
-    $team = Department::factory()
+    $department = Department::factory()
         ->has(User::factory()->count(3), 'users')
         ->create();
 
     $serviceRequestType = ServiceRequestType::factory()
-        ->hasAttached($team, relationship: 'managerTeams')
+        ->hasAttached($department, relationship: 'managerDepartments')
         ->state([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::Workload,
         ])
         ->create();
 
-    $users = $team->users()->orderBy('name')->orderBy('id')->get();
+    $users = $department->users()->orderBy('name')->orderBy('id')->get();
 
     travelTo(now()->subSeconds(count($users)));
 

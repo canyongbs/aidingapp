@@ -56,15 +56,15 @@ test('super admin passes ManagedServiceRequestType rule for any type', function 
     expect($validator->passes())->toBeTrue();
 });
 
-test('team manager passes ManagedServiceRequestType rule', function () {
+test('department manager passes ManagedServiceRequestType rule', function () {
     $user = User::factory()->create();
 
-    $team = Department::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     actingAs($user);
 

@@ -107,16 +107,16 @@ test('it can change status of multiple service requests for user directly assign
     });
 });
 
-test('it can change status of multiple service requests for user belonging to a manager team', function () {
+test('it can change status of multiple service requests for user belonging to a manager department', function () {
     $user = User::factory()->create();
 
-    $team = Department::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $newStatus = ServiceRequestStatus::factory()->open()->create();
 

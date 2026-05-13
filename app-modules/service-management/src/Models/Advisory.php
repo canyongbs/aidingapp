@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\ServiceManagement\Database\Factories\AdvisoryFactory;
 use AidingApp\Department\Models\Department;
+use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -62,7 +63,7 @@ class Advisory extends BaseModel implements Auditable
         'description',
         'severity_id',
         'status_id',
-        'assigned_team_id',
+        'assigned_department_id',
     ];
 
     protected $table = 'advisories';
@@ -70,9 +71,9 @@ class Advisory extends BaseModel implements Auditable
     /**
      * @return BelongsTo<Department, $this>
      */
-    public function assignedTeam(): BelongsTo
+    public function assignedDepartment(): BelongsTo
     {
-        return $this->belongsTo(Department::class, 'assigned_team_id', 'id');
+        return $this->belongsTo(Department::class, TeamRenameFeature::active() ? 'assigned_department_id' : 'assigned_team_id', 'id');
     }
 
     /**

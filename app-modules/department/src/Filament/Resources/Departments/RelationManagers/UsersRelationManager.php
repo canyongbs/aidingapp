@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Department\Filament\Resources\Teams\RelationManagers;
+namespace AidingApp\Department\Filament\Resources\Departments\RelationManagers;
 
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\WithoutAnyAdmin;
@@ -75,7 +75,7 @@ class UsersRelationManager extends RelationManager
             ])
             ->headerActions([
                 AssociateAction::make()
-                    ->label('Add user to this team')
+                    ->label('Add user to this department')
                     ->recordSelectOptionsQuery(function (Builder $query) {
                         $query->tap(new WithoutAnyAdmin());
                     })
@@ -83,12 +83,12 @@ class UsersRelationManager extends RelationManager
                         $action->getRecordSelect()
                             ->rules([
                                 fn (): Closure => function (string $attribute, mixed $value, Closure $fail) {
-                                    if (User::findOrFail($value)->team()->count() > 0) {
-                                        $fail('This user already belongs to a team.');
+                                    if (User::findOrFail($value)->department()->count() > 0) {
+                                        $fail('This user already belongs to a department.');
                                     }
 
                                     if (User::findOrFail($value)->isSuperAdmin()) {
-                                        $fail('Super admin users cannot be added to a team.');
+                                        $fail('Super admin users cannot be added to a department.');
                                     }
                                 },
                             ]),
@@ -96,7 +96,7 @@ class UsersRelationManager extends RelationManager
             ])
             ->recordActions([
                 DissociateAction::make()
-                    ->label('Remove from this team'),
+                    ->label('Remove from this department'),
             ])
             ->toolbarActions([]);
     }

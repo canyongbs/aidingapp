@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Department\Filament\Resources\Teams\Pages\CreateDepartment;
-use AidingApp\Department\Filament\Resources\Teams\DepartmentResource;
+use AidingApp\Department\Filament\Resources\Departments\Pages\CreateDepartment;
+use AidingApp\Department\Filament\Resources\Departments\DepartmentResource;
 use AidingApp\Department\Models\Department;
 use App\Models\User;
 
@@ -57,8 +57,8 @@ test('CreateDepartment is gated with proper access control', function () {
     livewire(CreateDepartment::class)
         ->assertForbidden();
 
-    $user->givePermissionTo('team.view-any');
-    $user->givePermissionTo('team.create');
+    $user->givePermissionTo('department.view-any');
+    $user->givePermissionTo('department.create');
 
     actingAs($user)
         ->get(

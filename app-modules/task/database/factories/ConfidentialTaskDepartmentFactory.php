@@ -44,7 +44,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<ConfidentialTaskDepartment>
  */
-class ConfidentialTaskTeamFactory extends Factory
+class ConfidentialTaskDepartmentFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -55,7 +55,7 @@ class ConfidentialTaskTeamFactory extends Factory
     {
         return [
             'task_id' => Task::factory(),
-            'team_id' => Department::factory(),
+            'department_id' => Department::factory(),
         ];
     }
 }

@@ -44,7 +44,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 /**
  * @extends Factory<ServiceRequestTypeDepartmentManager>
  */
-class ServiceRequestTypeTeamManagerFactory extends Factory
+class ServiceRequestTypeDepartmentManagerFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -55,7 +55,7 @@ class ServiceRequestTypeTeamManagerFactory extends Factory
     {
         return [
             'service_request_type_id' => ServiceRequestType::factory(),
-            'team_id' => Department::factory(),
+            'department_id' => Department::factory(),
         ];
     }
 }

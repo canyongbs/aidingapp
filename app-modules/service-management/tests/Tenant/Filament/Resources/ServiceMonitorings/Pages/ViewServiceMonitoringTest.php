@@ -105,8 +105,8 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
                 $serviceMonitoringTarget->domain,
                 'Frequency',
                 $serviceMonitoringTarget->frequency->getLabel(),
-                'Teams',
-                ...$serviceMonitoringTarget->teams()->pluck('name')->all(),
+                'Departments',
+                ...$serviceMonitoringTarget->departments()->pluck('name')->all(),
                 'Users',
                 ...$serviceMonitoringTarget->users()->pluck('name')->all(),
             ]

@@ -36,8 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeTeamManagerFactory;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeDepartmentManagerFactory;
 use AidingApp\Department\Models\Department;
+use App\Features\TeamRenameFeature;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -48,14 +49,14 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  */
 class ServiceRequestTypeDepartmentManager extends Pivot
 {
-    /** @use HasFactory<ServiceRequestTypeTeamManagerFactory> */
+    /** @use HasFactory<ServiceRequestTypeDepartmentManagerFactory> */
     use HasFactory;
 
     use HasUuids;
 
     public function getTable(): string
     {
-        return 'service_request_type_manager_teams';
+        return TeamRenameFeature::active() ? 'service_request_type_manager_departments' : 'service_request_type_manager_teams';
     }
 
     /**
@@ -69,8 +70,8 @@ class ServiceRequestTypeDepartmentManager extends Pivot
     /**
      * @return BelongsTo<Department, $this>
      */
-    public function team(): BelongsTo
+    public function department(): BelongsTo
     {
-        return $this->belongsTo(Department::class);
+        return $this->belongsTo(Department::class, TeamRenameFeature::active() ? 'department_id' : 'team_id');
     }
 }
