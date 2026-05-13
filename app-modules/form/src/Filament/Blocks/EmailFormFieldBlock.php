@@ -58,7 +58,7 @@ class EmailFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'email',
             'label' => $field->label,
-            'name' => $field->getKey(),
+            'name' => (string) $field->getKey(),
             'validation' => $field->is_required ? 'required|email' : 'email',
         ];
     }

@@ -53,7 +53,7 @@ class NumberFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'number',
             'label' => $field->label,
-            'name' => $field->getKey(),
+            'name' => (string) $field->getKey(),
             ...($field->is_required ? ['validation' => 'required'] : []),
         ];
     }

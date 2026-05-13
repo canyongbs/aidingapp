@@ -53,7 +53,7 @@ class TextAreaFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'textarea',
             'label' => $field->label,
-            'name' => $field->getKey(),
+            'name' => (string) $field->getKey(),
             ...($field->is_required ? ['validation' => 'required'] : []),
         ];
     }
