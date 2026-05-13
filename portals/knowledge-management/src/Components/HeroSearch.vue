@@ -95,9 +95,9 @@
                 "
             >
                 <TagIcon class="size-3" aria-hidden="true" />
-                <template v-if="tagsMode === 'selected' && selectedTags.length > 0"
-                    >Filter by tag · {{ selectedTags.length }}</template
-                >
+                <template v-if="tagsMode === 'selected' && selectedTags.length > 0">
+                    Filter by tag · {{ selectedTags.length }}
+                </template>
                 <template v-else>Filter by tag</template>
             </button>
 
