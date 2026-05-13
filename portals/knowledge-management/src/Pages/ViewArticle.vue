@@ -234,7 +234,7 @@
                 "
             ></div>
 
-            <div class="max-w-5xl mx-auto w-full flex flex-wrap items-center gap-4">
+            <div class="max-w-5xl mx-auto w-full flex flex-wrap items-center gap-4 border border-gray-200 rounded-lg p-4 bg-white">
                 <span class="text-sm font-medium text-gray-700">Was this article helpful?</span>
 
                 <div class="flex items-center gap-2">
