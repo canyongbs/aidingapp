@@ -51,6 +51,7 @@ use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
 use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Scopes\SetupIsComplete;
 use App\Models\Tenant;
+use App\Settings\LicenseSettings;
 use Filament\Actions\Imports\Models\FailedImportRow;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -96,35 +97,45 @@ class Kernel extends ConsoleKernel
 
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
-                            dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::FiveMinutes));
+                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
+                                dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::FiveMinutes));
+                            }
                         });
                     })
                         ->everyFiveMinutes();
 
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
-                            dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::FifteenMinutes));
+                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
+                                dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::FifteenMinutes));
+                            }
                         });
                     })
                         ->everyFifteenMinutes();
 
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
-                            dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::ThirtyMinutes));
+                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
+                                dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::ThirtyMinutes));
+                            }
                         });
                     })
                         ->everyThirtyMinutes();
 
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
-                            dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::OneHour));
+                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
+                                dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::OneHour));
+                            }
                         });
                     })
                         ->hourly();
 
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
-                            dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::TwentyFourHours));
+                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
+                                dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::TwentyFourHours));
+                            }
                         });
                     })
                         ->daily();

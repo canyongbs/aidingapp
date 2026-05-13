@@ -59,8 +59,10 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserManager;
 use AidingApp\Task\Models\Task;
 use AidingApp\Team\Models\Team;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
+use App\Enums\PresenceStatus;
 use App\Filament\Resources\Users\UserResource;
 use App\Settings\DisplaySettings;
+use App\Settings\PresenceSettings;
 use App\Support\HasAdvancedFilter;
 use Database\Factories\UserFactory;
 use DateTimeInterface;
@@ -111,6 +113,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     protected $casts = [
         'is_external' => 'boolean',
         'email_verified_at' => 'datetime',
+        'last_activity_at' => 'datetime',
     ];
 
     protected $fillable = [
@@ -129,6 +132,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'work_number',
         'work_extension',
         'mobile',
+        'last_activity_at',
     ];
 
     /**
@@ -159,6 +163,30 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public function canRecieveSms(): bool
     {
         return false;
+    }
+
+    public function presenceStatus(): PresenceStatus
+    {
+        if (! $this->last_activity_at) {
+            return PresenceStatus::Offline;
+        }
+
+        $settings = app(PresenceSettings::class);
+        $minutesAgo = $this->last_activity_at->diffInMinutes(now());
+
+        if ($minutesAgo < $settings->active_threshold) {
+            return PresenceStatus::Active;
+        }
+
+        if ($minutesAgo < $settings->idle_threshold) {
+            return PresenceStatus::Idle;
+        }
+
+        if ($minutesAgo < $settings->inactive_threshold) {
+            return PresenceStatus::Inactive;
+        }
+
+        return PresenceStatus::Offline;
     }
 
     /**

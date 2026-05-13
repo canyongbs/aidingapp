@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Settings\LicenseSettings;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
@@ -78,6 +79,10 @@ class ServiceMonitoringJob implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
+        if (! app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
+            return;
+        }
+
         ServiceMonitoringTarget::where('frequency', $this->interval)
             ->chunkById(100, function (Collection $serviceMonitoringTargets) {
                 foreach ($serviceMonitoringTargets as $serviceMonitoringTarget) {

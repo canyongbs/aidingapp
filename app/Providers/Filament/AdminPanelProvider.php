@@ -42,6 +42,7 @@ use App\Filament\Clusters\ProfileSettings;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ProductHealth;
 use App\Health\Checks\AzureCredentialsExpiringCheck;
+use App\Http\Middleware\TrackPresence;
 use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Tenant;
 use App\Multitenancy\Http\Middleware\NeedsTenant;
@@ -141,7 +142,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])
+                TrackPresence::class,
+            ], isPersistent: true)
             ->navigationGroups([
                 NavigationGroup::make()
                     ->label('Engagement')
