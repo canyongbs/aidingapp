@@ -53,7 +53,7 @@ class DateFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'date',
             'label' => $field->label,
-            'name' => $field->getKey(),
+            'name' => (string) $field->getKey(),
             ...($field->is_required ? ['validation' => 'required'] : []),
 
             ...self::getDescriptionSectionsSchema($field),

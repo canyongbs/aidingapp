@@ -53,7 +53,7 @@ class SignatureFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'signature',
             'label' => $field->label,
-            'name' => $field->getKey(),
+            'name' => (string) $field->getKey(),
             ...($field->is_required ? ['validation' => 'required'] : []),
 
             ...self::getDescriptionSectionsSchema($field),

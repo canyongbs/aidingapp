@@ -53,7 +53,7 @@ class CheckboxFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'checkbox',
             'label' => $field->label,
-            'name' => $field->getKey(),
+            'name' => (string) $field->getKey(),
             ...($field->is_required ? ['validation' => 'required'] : []),
 
             ...self::getDescriptionSectionsSchema($field),
