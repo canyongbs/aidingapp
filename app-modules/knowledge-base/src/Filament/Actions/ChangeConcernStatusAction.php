@@ -51,6 +51,7 @@ class ChangeConcernStatusAction extends Action
             ->label('Change Status')
             ->button()
             ->outlined()
+            ->authorize(fn () => auth()->user()->can('knowledge_base_item.view-any') && auth()->user()->can('knowledge_base_item.*.update'))
             ->modalDescription('Select what status this concern should have.')
             ->schema([
                 Select::make('status')

@@ -39,8 +39,28 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
+
+it('is gated by proper access control', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('knowledge_base_item.view-any');
+
+    asSuperAdmin();
+
+    $items = KnowledgeBaseItem::factory(3)->create();
+
+    actingAs($user);
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableBulkActionHidden('bulkManagers');
+
+    $user->givePermissionTo('knowledge_base_item.*.update');
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableBulkActionVisible('bulkManagers');
+});
 
 it('can bulk assign managers to items', function () {
     asSuperAdmin();
