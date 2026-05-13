@@ -32,40 +32,14 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { XMarkIcon } from '@heroicons/vue/24/outline/index.js';
-
     defineProps({
-        icon: {
-            type: Object,
-            default: null,
-        },
-        contained: {
-            type: Boolean,
-            default: true,
+        title: {
+            type: String,
+            required: true,
         },
     });
 </script>
 
 <template>
-    <section class="px-6 py-12" :class="contained && 'rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5'">
-        <div class="mx-auto grid max-w-lg justify-items-center text-center">
-            <div class="mb-4 flex size-12 items-center justify-center rounded-full bg-gray-100">
-                <component :is="icon || XMarkIcon" class="size-6 text-gray-400" />
-            </div>
-
-            <div class="grid justify-items-center text-center">
-                <h4 class="text-base font-semibold leading-6 text-gray-950">
-                    <slot name="heading" />
-                </h4>
-
-                <p v-if="$slots.description" class="mt-1 text-sm text-gray-500">
-                    <slot name="description" />
-                </p>
-
-                <div v-if="$slots.actions" class="mt-6">
-                    <slot name="actions" />
-                </div>
-            </div>
-        </div>
-    </section>
+    <h2 class="text-2xl font-bold tracking-tight text-gray-950">{{ title }}</h2>
 </template>

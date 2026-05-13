@@ -32,40 +32,52 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { XMarkIcon } from '@heroicons/vue/24/outline/index.js';
-
     defineProps({
-        icon: {
-            type: Object,
-            default: null,
+        tabs: {
+            type: Array,
+            required: true,
+        },
+        modelValue: {
+            type: String,
+            required: true,
         },
         contained: {
             type: Boolean,
-            default: true,
+            default: false,
         },
     });
+
+    const emit = defineEmits(['update:modelValue']);
 </script>
 
 <template>
-    <section class="px-6 py-12" :class="contained && 'rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5'">
-        <div class="mx-auto grid max-w-lg justify-items-center text-center">
-            <div class="mb-4 flex size-12 items-center justify-center rounded-full bg-gray-100">
-                <component :is="icon || XMarkIcon" class="size-6 text-gray-400" />
-            </div>
-
-            <div class="grid justify-items-center text-center">
-                <h4 class="text-base font-semibold leading-6 text-gray-950">
-                    <slot name="heading" />
-                </h4>
-
-                <p v-if="$slots.description" class="mt-1 text-sm text-gray-500">
-                    <slot name="description" />
-                </p>
-
-                <div v-if="$slots.actions" class="mt-6">
-                    <slot name="actions" />
-                </div>
-            </div>
-        </div>
-    </section>
+    <nav
+        class="flex max-w-full gap-x-1 overflow-x-auto"
+        :class="
+            contained
+                ? 'border-b border-gray-200 px-3 py-2.5'
+                : 'rounded-xl bg-white p-2 shadow-sm ring-1 ring-gray-950/5'
+        "
+    >
+        <button
+            v-for="tab in tabs"
+            :key="tab.value"
+            type="button"
+            @click="emit('update:modelValue', tab.value)"
+            class="flex items-center justify-center gap-x-2 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition duration-75 outline-none"
+            :class="modelValue === tab.value ? 'bg-gray-50' : 'hover:bg-gray-50 focus-visible:bg-gray-50'"
+        >
+            <component
+                v-if="tab.icon"
+                :is="tab.icon"
+                class="size-5 shrink-0 transition duration-75"
+                :class="modelValue === tab.value ? 'text-brand-600' : 'text-gray-400'"
+            />
+            <span
+                class="transition duration-75"
+                :class="modelValue === tab.value ? 'text-brand-700' : 'text-gray-500'"
+                >{{ tab.label }}</span
+            >
+        </button>
+    </nav>
 </template>

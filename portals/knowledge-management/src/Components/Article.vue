@@ -52,16 +52,14 @@
                 articleId: article.id,
             },
         }"
-        class="group p-3 grid space-y-2 text-sm font-medium text-gray-700"
+        class="group flex items-center gap-x-3 px-6 py-3 transition duration-75 hover:bg-gray-50"
     >
-        <div class="flex">
-            <span> {{ article.name }} </span>
-            <ChevronRightIcon
-                class="opacity-0 h-5 w-5 text-brand-600 transition-all group-hover:translate-x-2 group-hover:opacity-100"
-            />
+        <div class="flex-1 min-w-0 flex flex-col gap-y-1.5">
+            <span class="text-sm font-medium text-gray-700">{{ article.name }}</span>
+            <Tags :tags="article.tags" :featured="article.featured" />
         </div>
-        <Tags :tags="article.tags" :featured="article.featured" />
+        <ChevronRightIcon
+            class="size-5 shrink-0 text-gray-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
+        />
     </router-link>
 </template>
-
-<style scoped></style>

@@ -95,7 +95,7 @@
             success:
                 'bg-green-600 text-white border border-transparent hover:bg-green-700 active:bg-green-800 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-500',
             neutral:
-                'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 active:bg-gray-100 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400',
+                'bg-white text-gray-950 ring-1 ring-gray-950/10 hover:bg-gray-50 active:bg-gray-100 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-gray-400',
         };
 
         return variants[props.variant] ?? variants.primary;
