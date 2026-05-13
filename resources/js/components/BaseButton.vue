@@ -182,17 +182,16 @@
     );
 
     const stateClass = computed(() => {
-        if (isDisabled.value) return 'cursor-default opacity-70 pointer-events-none';
+        if (isDisabled.value) {
+            return 'cursor-default opacity-70 pointer-events-none';
+        }
 
-        return props.color === 'gray'
-            ? 'hover:bg-gray-50 focus-visible:ring-2'
-            : 'hover:bg-(--hover-bg) hover:text-(--hover-text) focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]';
+        if (props.color === 'gray') {
+            return 'hover:bg-gray-50 focus-visible:ring-2';
+        }
+
+        return 'hover:bg-(--hover-bg) hover:text-(--hover-text) focus-visible:ring-2 focus-visible:ring-[var(--focus-ring)]';
     });
-
-    const buttonStyle = computed(() => ({
-        ...colorVars.value,
-        'border-radius': 'var(--rounding-md, 0.5rem)',
-    }));
 
     const buttonClasses = computed(() => [
         'relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition duration-75 outline-none',
@@ -200,6 +199,11 @@
         colorClass.value,
         stateClass.value,
     ]);
+
+    const buttonStyle = computed(() => ({
+        ...colorVars.value,
+        'border-radius': 'var(--rounding-md, 0.5rem)',
+    }));
 
     const iconClasses = computed(() => [
         'shrink-0 transition duration-75',
