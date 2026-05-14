@@ -46,7 +46,7 @@ class CheckboxFormFieldBlock extends FormFieldBlock
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<string, string>
      */
     public static function getFormKitSchema(SubmissibleField $field): array
     {
