@@ -36,7 +36,6 @@
 
 namespace App\Filament\Pages;
 
-use App\Features\UserPresence;
 use App\Filament\Clusters\DisplaySettings as DisplaySettingsCluster;
 use App\Models\User;
 use App\Settings\PresenceSettings;
@@ -59,10 +58,6 @@ class ManagePresenceSettings extends SettingsPage
 
     public static function canAccess(): bool
     {
-        if (! UserPresence::active()) {
-            return false;
-        }
-
         /** @var User $user */
         $user = auth()->user();
 

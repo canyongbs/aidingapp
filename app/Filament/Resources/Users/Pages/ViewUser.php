@@ -36,7 +36,6 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
-use App\Features\UserPresence;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use App\Rules\EmailNotInUseOrSoftDeleted;
@@ -81,8 +80,7 @@ class ViewUser extends ViewRecord
                             ->badge()
                             ->color(fn (User $record) => $record->presenceStatus()->getColor())
                             ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
-                            ->formatStateUsing(fn (User $record) => $record->presenceStatus()->getLabel())
-                            ->visible(fn () => UserPresence::active()),
+                            ->formatStateUsing(fn (User $record) => $record->presenceStatus()->getLabel()),
                         TextInput::make('job_title')
                             ->string()
                             ->maxLength(255),

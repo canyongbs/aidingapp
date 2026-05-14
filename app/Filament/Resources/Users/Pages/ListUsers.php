@@ -36,7 +36,6 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
-use App\Features\UserPresence;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\Actions\AssignRolesBulkAction;
 use App\Filament\Resources\Users\Actions\AssignTeamBulkAction;
@@ -68,10 +67,10 @@ class ListUsers extends ListRecords
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('name')
-                    ->icon(fn (User $record) => UserPresence::active() ? $record->presenceStatus()->getIcon() : null)
-                    ->iconColor(fn (User $record) => UserPresence::active() ? $record->presenceStatus()->getColor() : null)
-                    ->tooltip(fn (User $record) => UserPresence::active() ? $record->presenceStatus()->getLabel() : null)
-                    ->extraAttributes(fn (User $record): array => UserPresence::active() ? ['aria-label' => $record->name . ' (' . $record->presenceStatus()->getLabel() . ')'] : []),
+                    ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
+                    ->iconColor(fn (User $record) => $record->presenceStatus()->getColor())
+                    ->tooltip(fn (User $record) => $record->presenceStatus()->getLabel())
+                    ->extraAttributes(fn (User $record): array => ['aria-label' => $record->name . ' (' . $record->presenceStatus()->getLabel() . ')']),
                 TextColumn::make('email')
                     ->label('Email address'),
                 TextColumn::make('job_title'),

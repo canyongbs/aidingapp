@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\UserPresence;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -47,16 +46,12 @@ return new class () extends Migration {
             Schema::table('users', function (Blueprint $table) {
                 $table->timestamp('last_activity_at')->nullable()->index();
             });
-
-            UserPresence::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            UserPresence::deactivate();
-
             Schema::table('users', function (Blueprint $table) {
                 $table->dropColumn('last_activity_at');
             });
