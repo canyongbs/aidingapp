@@ -1,0 +1,8 @@
+#!/command/with-contenv bash
+
+# Exit on error
+set -e
+
+echo "Starting Laravel Schedule Worker..."
+
+exec php /var/www/html/artisan schedule:work

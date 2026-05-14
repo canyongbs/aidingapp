@@ -16,16 +16,13 @@ if [ "${FIX_PERMISSIONS:="false"}" == "true" ]; then
   # log rotation when multiple containers mount the same volume simultaneously.
   find /var/www/html \
     \( -path /var/www/html/.git -o -path /var/www/html/public/storage -o -path /var/www/html/storage \) -prune -o \
-    \( -type d -exec chown "$PUID":"$PGID" {} + -exec chmod 755 {} + \) -o \
+    \( -type d -exec chown www-data:www-data {} + -exec chmod 755 {} + \) -o \
     \( -type f ! -path '*/docker/*' ! -path '*/node_modules/*' ! -path '*/vendor/*' \
-       -exec chown "$PUID":"$PGID" {} + -exec chmod 644 {} + \)
+       -exec chown www-data:www-data {} + -exec chmod 644 {} + \)
 
-  chown -R "$PUID":"$PGID" /var/www/html/storage /var/www/html/bootstrap/cache
+  chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
   chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
 
-  if [ -e /var/www/html/rr ]; then
-    chmod 0755 /var/www/html/rr
-  fi
   chmod +x /var/www/html/pls
 
   echo "Ownership and permissions fixed!"
