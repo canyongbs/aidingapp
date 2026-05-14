@@ -54,7 +54,7 @@
     const route = useRoute();
     const router = useRouter();
     const { user, requiresAuthentication } = storeToRefs(useAuthStore());
-    const { hasServiceManagement, hasAssets, hasLicense, hasTasks } = storeToRefs(useFeatureStore());
+    const { hasServiceManagement, hasAssets, hasLicense, hasTasks, isStatusEnabled, isAdvisoryEnabled, isAssetEnabled, isLicenseEnabled } = storeToRefs(useFeatureStore());
 
     const { removeToken } = useTokenStore();
 
@@ -107,28 +107,28 @@
             label: 'Status',
             routeName: 'status',
             icon: SignalIcon,
-            visible: computed(() => user.value !== null),
+            visible: computed(() => isStatusEnabled.value && user.value !== null),
             command: () => router.push({ name: 'status' }),
         },
         {
             label: 'Advisories',
             routeName: 'advisories',
             icon: ShieldExclamationIcon,
-            visible: computed(() => user.value !== null),
+            visible: computed(() => isAdvisoryEnabled.value && user.value !== null),
             command: () => router.push({ name: 'advisories' }),
         },
         {
             label: 'Assets',
             routeName: 'assets',
             icon: CubeIcon,
-            visible: computed(() => hasAssets.value && user.value !== null),
+            visible: computed(() => isAssetEnabled.value && hasAssets.value && user.value !== null),
             command: () => router.push({ name: 'assets' }),
         },
         {
             label: 'Licenses',
             routeName: 'licenses',
             icon: DocumentTextIcon,
-            visible: computed(() => hasLicense.value && user.value !== null),
+            visible: computed(() => isLicenseEnabled.value && hasLicense.value && user.value !== null),
             command: () => router.push({ name: 'licenses' }),
         },
         {

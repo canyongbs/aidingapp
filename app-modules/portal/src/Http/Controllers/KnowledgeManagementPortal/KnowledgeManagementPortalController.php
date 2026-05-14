@@ -62,6 +62,8 @@ class KnowledgeManagementPortalController extends Controller
             session()->put('guest_id', $portalGuest->getKey());
         }
 
+        $addons = resolve(LicenseSettings::class)->data?->addons;
+
         return response()->json([
             'header_logo' => $logo ? $logo->getTemporaryUrl(
                 expiration: now()->addMinutes(5),
@@ -77,9 +79,13 @@ class KnowledgeManagementPortalController extends Controller
                 ->all(),
             'rounding' => $settings->knowledge_management_portal_rounding,
             'requires_authentication' => $settings->knowledge_management_portal_requires_authentication,
-            'service_management_enabled' => $settings->knowledge_management_portal_service_management && resolve(LicenseSettings::class)->data?->addons?->serviceManagement,
-            'has_assets' => auth()->guard('contact')->user()?->assetCheckIns()->exists() || auth()->guard('contact')->user()?->assetCheckOuts()->exists() ?: false,
+            'service_management_enabled' => $settings->knowledge_management_portal_service_management && $addons?->serviceManagement,
+            'status_enabled' => $addons?->serviceMonitoring,
+            'advisory_enabled' => $addons?->advisoryManagement,
+            'has_assets' => (auth()->guard('contact')->user()?->assetCheckIns()->exists() || auth()->guard('contact')->user()?->assetCheckOuts()->exists()) ?: false,
+            'assets_enabled' => $addons?->assetManagement,
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
+            'license_enabled' => $addons?->licenseManagement,
             'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,
             'authentication_url' => URL::to(
                 URL::signedRoute(

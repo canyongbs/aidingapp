@@ -45,6 +45,7 @@ use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalRegisterRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Http\Controllers\Controller;
+use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -98,6 +99,7 @@ class KnowledgeManagementPortalRegisterController extends Controller
         }
 
         $settings = resolve(PortalSettings::class);
+        $addons = resolve(LicenseSettings::class)->data?->addons;
 
         $assistantEnabled = app(AiSupportAssistantSettings::class)->is_enabled && $settings->ai_support_assistant;
 
@@ -105,7 +107,11 @@ class KnowledgeManagementPortalRegisterController extends Controller
             'success' => true,
             'token' => $token->plainTextToken,
             'user' => auth('contact')->user(),
-            'service_management_enabled' => $settings->knowledge_management_portal_service_management,
+            'service_management_enabled' => $settings->knowledge_management_portal_service_management && $addons?->serviceManagement,
+            'status_enabled' => $addons?->serviceMonitoring,
+            'advisory_enabled' => $addons?->advisoryManagement,
+            'asset_enabled' => $addons?->assetManagement,
+            'license_enabled' => $addons?->licenseManagement,
             'has_assets' => $contact->assetCheckIns()->exists() || $contact->assetCheckOuts()->exists(),
             'has_license' => $contact->productLicenses()->exists(),
             'has_tasks' => $contact->tasks()->exists(),
