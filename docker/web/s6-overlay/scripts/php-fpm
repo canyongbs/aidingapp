@@ -1,6 +1,5 @@
 #!/command/with-contenv bash
 
-# Exit on error
 set -e
 
 echo "Starting PHP-FPM..."
