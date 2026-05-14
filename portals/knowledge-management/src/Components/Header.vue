@@ -54,7 +54,16 @@
     const route = useRoute();
     const router = useRouter();
     const { user, requiresAuthentication } = storeToRefs(useAuthStore());
-    const { hasServiceManagement, hasAssets, hasLicense, hasTasks, isStatusEnabled, isAdvisoryEnabled, isAssetEnabled, isLicenseEnabled } = storeToRefs(useFeatureStore());
+    const {
+        hasServiceManagement,
+        hasAssets,
+        hasLicense,
+        hasTasks,
+        isStatusEnabled,
+        isAdvisoryEnabled,
+        isAssetEnabled,
+        isLicenseEnabled,
+    } = storeToRefs(useFeatureStore());
 
     const { removeToken } = useTokenStore();
 

@@ -282,7 +282,16 @@
 
                 const { setRequiresAuthentication } = useAuthStore();
 
-                const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks, setIsStatusEnabled, setIsAdvisoryEnabled, setIsAssetEnabled, setIsLicenseEnabled } = useFeatureStore();
+                const {
+                    setHasServiceManagement,
+                    setHasAssets,
+                    setHasLicense,
+                    setHasTasks,
+                    setIsStatusEnabled,
+                    setIsAdvisoryEnabled,
+                    setIsAssetEnabled,
+                    setIsLicenseEnabled,
+                } = useFeatureStore();
 
                 portalPrimaryColor.value = response.data.primary_color;
 
@@ -451,7 +460,16 @@
         const { setToken } = useTokenStore();
         const { setUser } = useAuthStore();
 
-        const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks, setIsStatusEnabled, setIsAdvisoryEnabled, setIsAssetEnabled, setIsLicenseEnabled } = useFeatureStore();
+        const {
+            setHasServiceManagement,
+            setHasAssets,
+            setHasLicense,
+            setHasTasks,
+            setIsStatusEnabled,
+            setIsAdvisoryEnabled,
+            setIsAssetEnabled,
+            setIsLicenseEnabled,
+        } = useFeatureStore();
 
         if (authentication.value.isRequested) {
             let data = {
