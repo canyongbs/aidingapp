@@ -77,7 +77,7 @@ class Department extends BaseModel
      */
     public function users(): HasMany
     {
-        return $this->hasMany(User::class);
+        return $this->hasMany(User::class, TeamRenameFeature::active() ? 'department_id' : 'team_id');
     }
 
     /**

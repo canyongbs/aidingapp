@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Models\Advisory;
+use App\Features\TeamRenameFeature;
 use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -82,7 +83,7 @@ class EditAdvisory extends EditRecord
                     ->preload()
                     ->searchable()
                     ->relationship('status', 'name'),
-                Select::make('assigned_department_id')
+                Select::make(TeamRenameFeature::active() ? 'assigned_department_id' : 'assigned_team_id')
                     ->label('Assigned Department')
                     ->preload()
                     ->searchable()

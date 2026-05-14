@@ -44,6 +44,7 @@ use AidingApp\Task\Filament\Concerns\TaskEditForm;
 use AidingApp\Task\Filament\Concerns\TaskViewActionInfoList;
 use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 use AidingApp\Task\Models\Task;
+use App\Features\TeamRenameFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
@@ -134,7 +135,7 @@ class ManageTasks extends ManageRelatedRecords
                             /** @var User $user */
                             $user = auth()->user();
 
-                            $departmentUserIds = $user->department->users()->get()->pluck('id');
+                            $departmentUserIds = $user->department?->users()->get()->pluck('id') ?? collect();
 
                             return $query->whereIn('assigned_to', $departmentUserIds)->get();
                         }
@@ -183,7 +184,7 @@ class ManageTasks extends ManageRelatedRecords
                                     ->preload()
                                     ->label('Departments')
                                     ->multiple()
-                                    ->exists('departments', 'id')
+                                    ->exists(TeamRenameFeature::active() ? 'departments' : 'teams', 'id')
                                     ->visible(fn (Get $get) => $get('is_confidential')),
                             ]),
                         TextInput::make('title')

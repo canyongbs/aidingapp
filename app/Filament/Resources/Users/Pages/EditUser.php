@@ -37,6 +37,7 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Concerns\EditPageRedirection;
+use App\Features\TeamRenameFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -107,7 +108,7 @@ class EditUser extends EditRecord
                     ]),
                 Section::make('Department')
                     ->schema([
-                        Select::make('department_id')
+                        Select::make(TeamRenameFeature::active() ? 'department_id' : 'team_id')
                             ->label('')
                             ->relationship('department', 'name'),
                     ])

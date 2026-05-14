@@ -34,58 +34,39 @@
 </COPYRIGHT>
 */
 
-use CanyonGBS\Common\Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
-use Spatie\Permission\PermissionRegistrar;
 
 return new class () extends Migration {
-    use CanModifyPermissions;
-
-    /**
-     * @var array<string, string>
-     */
-    private array $permissionRenames = [
-        'team.view-any' => 'department.view-any',
-        'team.create' => 'department.create',
-        'team.*.view' => 'department.*.view',
-        'team.*.update' => 'department.*.update',
-        'team.*.delete' => 'department.*.delete',
-        'team.*.restore' => 'department.*.restore',
-        'team.*.force-delete' => 'department.*.force-delete',
-    ];
-
-    /**
-     * @var array<string>
-     */
-    private array $guards = [
-        'web',
-        'api',
-    ];
-
     public function up(): void
     {
         DB::transaction(function () {
-            foreach ($this->guards as $guard) {
-                $this->renamePermissions($this->permissionRenames, $guard);
-            }
+            DB::statement('ALTER TABLE advisory_severities RENAME CONSTRAINT incident_severities_pkey TO advisory_severities_pkey');
 
-            $this->renamePermissionGroups(['Team' => 'Department']);
+            DB::statement('ALTER TABLE advisory_statuses RENAME CONSTRAINT incident_statuses_pkey TO advisory_statuses_pkey');
 
-            app(PermissionRegistrar::class)->forgetCachedPermissions();
+            DB::statement('ALTER TABLE advisories RENAME CONSTRAINT incidents_pkey TO advisories_pkey');
+            DB::statement('ALTER TABLE advisories RENAME CONSTRAINT incidents_severity_id_foreign TO advisories_severity_id_foreign');
+            DB::statement('ALTER TABLE advisories RENAME CONSTRAINT incidents_status_id_foreign TO advisories_status_id_foreign');
+
+            DB::statement('ALTER TABLE advisory_updates RENAME CONSTRAINT incident_updates_pkey TO advisory_updates_pkey');
+            DB::statement('ALTER TABLE advisory_updates RENAME CONSTRAINT incident_updates_incident_id_foreign TO advisory_updates_advisory_id_foreign');
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            $this->renamePermissionGroups(['Department' => 'Team']);
+            DB::statement('ALTER TABLE advisory_updates RENAME CONSTRAINT advisory_updates_advisory_id_foreign TO incident_updates_incident_id_foreign');
+            DB::statement('ALTER TABLE advisory_updates RENAME CONSTRAINT advisory_updates_pkey TO incident_updates_pkey');
 
-            foreach ($this->guards as $guard) {
-                $this->renamePermissions(array_flip($this->permissionRenames), $guard);
-            }
+            DB::statement('ALTER TABLE advisories RENAME CONSTRAINT advisories_status_id_foreign TO incidents_status_id_foreign');
+            DB::statement('ALTER TABLE advisories RENAME CONSTRAINT advisories_severity_id_foreign TO incidents_severity_id_foreign');
+            DB::statement('ALTER TABLE advisories RENAME CONSTRAINT advisories_pkey TO incidents_pkey');
 
-            app(PermissionRegistrar::class)->forgetCachedPermissions();
+            DB::statement('ALTER TABLE advisory_statuses RENAME CONSTRAINT advisory_statuses_pkey TO incident_statuses_pkey');
+
+            DB::statement('ALTER TABLE advisory_severities RENAME CONSTRAINT advisory_severities_pkey TO incident_severities_pkey');
         });
     }
 };

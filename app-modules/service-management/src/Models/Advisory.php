@@ -63,6 +63,8 @@ class Advisory extends BaseModel implements Auditable
         'description',
         'severity_id',
         'status_id',
+        // TODO: TeamRenameFeature cleanup - remove 'assigned_team_id' when the feature flag is removed.
+        'assigned_team_id',
         'assigned_department_id',
     ];
 
