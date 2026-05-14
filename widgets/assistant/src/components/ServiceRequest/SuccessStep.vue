@@ -33,6 +33,7 @@
 -->
 <script setup>
     import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
+    import BaseButton from '../../../../../resources/js/components/BaseButton.vue';
 
     defineProps({
         title: { type: String, required: true },
@@ -68,12 +69,13 @@
             </p>
         </div>
 
-        <button
+        <BaseButton
             @click="$emit('back')"
-            class="mt-2 flex items-center gap-2 px-5 py-2.5 rounded bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium transition-all shadow-sm"
+            :icon="ArrowLeftIcon"
+            size="lg"
+            class="mt-2"
         >
-            <ArrowLeftIcon class="w-4 h-4" />
             Back to Assistant Chat
-        </button>
+        </BaseButton>
     </div>
 </template>

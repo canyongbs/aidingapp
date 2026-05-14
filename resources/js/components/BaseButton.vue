@@ -32,10 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import * as HeroiconsMini from '@heroicons/vue/20/solid';
-    import * as HeroiconsOutline from '@heroicons/vue/24/outline';
-    import * as HeroiconsSolid from '@heroicons/vue/24/solid';
-    import { ArrowPathIcon } from '@heroicons/vue/24/solid';
+    import LoadingIndicator from './LoadingIndicator.vue';
     import { computed, useAttrs, useSlots } from 'vue';
     import { RouterLink } from 'vue-router';
 
@@ -48,32 +45,32 @@
             '--focus-ring': 'rgba(var(--primary-500), 0.5)',
         },
         danger: {
-            '--bg': '#dc2626',
+            '--bg': 'var(--color-red-600)',
             '--text': '#ffffff',
-            '--hover-bg': '#ef4444',
+            '--hover-bg': 'var(--color-red-500)',
             '--hover-text': '#ffffff',
-            '--focus-ring': 'rgba(220, 38, 38, 0.5)',
+            '--focus-ring': 'color-mix(in srgb, var(--color-red-500) 50%, transparent)',
         },
         info: {
-            '--bg': '#0284c7',
+            '--bg': 'var(--color-sky-600)',
             '--text': '#ffffff',
-            '--hover-bg': '#0ea5e9',
+            '--hover-bg': 'var(--color-sky-500)',
             '--hover-text': '#ffffff',
-            '--focus-ring': 'rgba(2, 132, 199, 0.5)',
+            '--focus-ring': 'color-mix(in srgb, var(--color-sky-500) 50%, transparent)',
         },
         success: {
-            '--bg': '#16a34a',
+            '--bg': 'var(--color-green-600)',
             '--text': '#ffffff',
-            '--hover-bg': '#22c55e',
+            '--hover-bg': 'var(--color-green-500)',
             '--hover-text': '#ffffff',
-            '--focus-ring': 'rgba(22, 163, 74, 0.5)',
+            '--focus-ring': 'color-mix(in srgb, var(--color-green-500) 50%, transparent)',
         },
         warning: {
-            '--bg': '#d97706',
+            '--bg': 'var(--color-amber-600)',
             '--text': '#ffffff',
-            '--hover-bg': '#f59e0b',
+            '--hover-bg': 'var(--color-amber-500)',
             '--hover-text': '#ffffff',
-            '--focus-ring': 'rgba(217, 119, 6, 0.5)',
+            '--focus-ring': 'color-mix(in srgb, var(--color-amber-500) 50%, transparent)',
         },
     };
 
@@ -92,18 +89,6 @@
         lg: 'p-2.5',
         xl: 'p-3',
     };
-
-    const HEROICON_SETS = {
-        m: HeroiconsMini,
-        o: HeroiconsOutline,
-        s: HeroiconsSolid,
-    };
-
-    const toPascalCase = (value) =>
-        value
-            .split('-')
-            .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-            .join('');
 
     defineOptions({
         inheritAttrs: false,
@@ -142,7 +127,7 @@
             validator: (value) => ['xs', 'sm', 'md', 'lg', 'xl'].includes(value),
         },
         icon: {
-            type: [String, Object, Function],
+            type: [Object, Function],
             default: null,
         },
         iconPosition: {
@@ -211,21 +196,6 @@
         ['xs', 'sm'].includes(props.size) ? 'h-4 w-4' : 'h-5 w-5',
     ]);
 
-    const resolvedIcon = computed(() => {
-        if (!props.icon || typeof props.icon !== 'string') return props.icon;
-
-        if (props.icon.startsWith('heroicon-')) {
-            const [, prefix, ...rest] = props.icon.split('-');
-            const name = `${toPascalCase(rest.join('-'))}Icon`;
-
-            if (HEROICON_SETS[prefix]?.[name]) {
-                return HEROICON_SETS[prefix][name];
-            }
-        }
-
-        return HeroiconsOutline[props.icon] ?? HeroiconsSolid[props.icon] ?? HeroiconsMini[props.icon] ?? null;
-    });
-
     const hasLabel = computed(() => !props.iconOnly && !!slots.default);
 
     const componentAttrs = computed(() => {
@@ -271,18 +241,18 @@
         :style="buttonStyle"
         @click="handleClick"
     >
-        <template v-if="iconPosition === 'before' && (loading || resolvedIcon)">
-            <ArrowPathIcon v-if="loading" :class="[...iconClasses, 'animate-spin']" aria-hidden="true" />
+        <template v-if="iconPosition === 'before' && (loading || icon)">
+            <LoadingIndicator v-if="loading" :class="[...iconClasses, 'animate-spin']" aria-hidden="true" />
 
-            <component v-else :is="resolvedIcon" :class="iconClasses" aria-hidden="true" />
+            <component v-else-if="icon" :is="icon" :class="iconClasses" aria-hidden="true" />
         </template>
 
         <span v-if="hasLabel"><slot /></span>
 
-        <template v-if="iconPosition === 'after' && (loading || resolvedIcon)">
-            <ArrowPathIcon v-if="loading" :class="[...iconClasses, 'animate-spin']" aria-hidden="true" />
+        <template v-if="iconPosition === 'after' && (loading || icon)">
+            <LoadingIndicator v-if="loading" :class="[...iconClasses, 'animate-spin']" aria-hidden="true" />
 
-            <component v-else :is="resolvedIcon" :class="iconClasses" aria-hidden="true" />
+            <component v-else-if="icon" :is="icon" :class="iconClasses" aria-hidden="true" />
         </template>
     </component>
 </template>

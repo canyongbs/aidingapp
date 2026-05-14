@@ -35,6 +35,7 @@
     import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
     import { ArrowRightIcon } from '@heroicons/vue/20/solid';
     import { computed, provide, ref, toRaw } from 'vue';
+    import BaseButton from '../../../../../resources/js/components/BaseButton.vue';
 
     const props = defineProps({
         selectedType: { type: Object, required: true },
@@ -127,30 +128,16 @@
 
     <!-- Action footer -->
     <div class="shrink-0 px-4 pb-4 pt-3 border-t border-gray-100">
-        <button
+        <BaseButton
             @click="onAction"
-            :disabled="!canSubmit || isUploadProcessing"
-            :class="[
-                'w-full flex items-center justify-center gap-2 py-2.5 rounded text-sm font-medium transition-all',
-                canSubmit && !isUploadProcessing
-                    ? 'bg-brand-500 hover:bg-brand-600 text-white shadow-sm'
-                    : 'bg-gray-100 text-gray-300 cursor-not-allowed',
-            ]"
+            :disabled="!canSubmit"
+            :loading="isSubmitting || isUploadProcessing"
+            :icon="ArrowRightIcon"
+            icon-position="after"
+            size="lg"
+            class="w-full"
         >
-            <svg v-if="isSubmitting || isUploadProcessing" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-            </svg>
-            {{
-                isUploadProcessing
-                    ? 'Uploading…'
-                    : isSubmitting
-                      ? 'Submitting…'
-                      : hasNextStep
-                        ? 'Next'
-                        : 'Submit Service Request'
-            }}
-            <ArrowRightIcon v-if="!isSubmitting && !isUploadProcessing" class="w-4 h-4" />
-        </button>
+            {{ hasNextStep ? 'Next' : 'Submit Service Request' }}
+        </BaseButton>
     </div>
 </template>

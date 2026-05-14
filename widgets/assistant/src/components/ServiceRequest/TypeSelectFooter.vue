@@ -33,6 +33,7 @@
 -->
 <script setup>
     import { ArrowRightIcon } from '@heroicons/vue/20/solid';
+    import BaseButton from '../../../../../resources/js/components/BaseButton.vue';
 
     defineProps({
         selectedType: { type: Object, required: true },
@@ -75,25 +76,16 @@
                 </svg>
             </div>
 
-            <button
+            <BaseButton
                 @click="$emit('continue')"
-                :disabled="!modelValue || isLoading"
-                :class="[
-                    'shrink-0 h-9 flex items-center gap-1.5 px-4 rounded text-sm font-medium transition-all',
-                    modelValue && !isLoading
-                        ? 'bg-brand-500 hover:bg-brand-600 text-white shadow-sm'
-                        : 'bg-gray-100 text-gray-300 cursor-not-allowed',
-                ]"
+                :disabled="!modelValue"
+                :loading="isLoading"
+                :icon="ArrowRightIcon"
+                icon-position="after"
+                size="md"
             >
-                <svg v-if="isLoading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                <template v-else>
-                    Continue
-                    <ArrowRightIcon class="w-4 h-4" />
-                </template>
-            </button>
+                Continue
+            </BaseButton>
         </div>
     </div>
 </template>
