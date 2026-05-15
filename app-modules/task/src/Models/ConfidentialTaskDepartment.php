@@ -36,8 +36,8 @@
 
 namespace AidingApp\Task\Models;
 
-use AidingApp\Task\Database\Factories\ConfidentialTaskDepartmentFactory;
 use AidingApp\Department\Models\Department;
+use AidingApp\Task\Database\Factories\ConfidentialTaskDepartmentFactory;
 use App\Features\TeamRenameFeature;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

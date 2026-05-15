@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeDepartmentAuditor;
-use AidingApp\Department\Models\Department;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

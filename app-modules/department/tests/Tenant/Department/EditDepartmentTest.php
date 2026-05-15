@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Department\Filament\Resources\Departments\Pages\EditDepartment;
 use AidingApp\Department\Filament\Resources\Departments\DepartmentResource;
+use AidingApp\Department\Filament\Resources\Departments\Pages\EditDepartment;
 use AidingApp\Department\Models\Department;
 use App\Models\User;
 

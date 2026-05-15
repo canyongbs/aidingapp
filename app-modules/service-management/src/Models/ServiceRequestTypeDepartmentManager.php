@@ -36,8 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeDepartmentManagerFactory;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeDepartmentManagerFactory;
 use App\Features\TeamRenameFeature;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

@@ -41,6 +41,7 @@ use AidingApp\Contact\Database\Seeders\ContactSeeder;
 use AidingApp\Contact\Database\Seeders\ContactTypeSeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationIndustrySeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationTypeSeeder;
+use AidingApp\Department\Database\Seeders\DepartmentSeeder;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\MaintenanceProviderSeeder;
@@ -54,7 +55,6 @@ use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestUpdateSeeder;
 use AidingApp\Task\Database\Seeders\TaskSeeder;
-use AidingApp\Department\Database\Seeders\DepartmentSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Notification;
 

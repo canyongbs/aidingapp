@@ -36,8 +36,8 @@
 
 namespace AidingApp\Department\Filament\Resources\Departments\Pages;
 
-use AidingApp\Division\Models\Division;
 use AidingApp\Department\Filament\Resources\Departments\DepartmentResource;
+use AidingApp\Division\Models\Division;
 use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;

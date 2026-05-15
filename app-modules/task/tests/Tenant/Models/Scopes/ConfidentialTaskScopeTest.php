@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\Project\Models\Project;
 use AidingApp\Task\Models\Scopes\ConfidentialTaskScope;
 use AidingApp\Task\Models\Task;
-use AidingApp\Department\Models\Department;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;

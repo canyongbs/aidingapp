@@ -36,9 +36,9 @@
 
 namespace AidingApp\Task\Database\Factories;
 
+use AidingApp\Department\Models\Department;
 use AidingApp\Task\Models\ConfidentialTaskDepartment;
 use AidingApp\Task\Models\Task;
-use AidingApp\Department\Models\Department;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

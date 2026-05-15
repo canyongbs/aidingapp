@@ -36,8 +36,8 @@
 
 namespace AidingApp\Department\Database\Factories;
 
-use AidingApp\Division\Models\Division;
 use AidingApp\Department\Models\Department;
+use AidingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

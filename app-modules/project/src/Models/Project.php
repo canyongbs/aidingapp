@@ -37,12 +37,12 @@
 namespace AidingApp\Project\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Department\Models\Department;
 use AidingApp\Project\Database\Factories\ProjectFactory;
 use AidingApp\Project\Models\Scopes\ProjectVisibilityScope;
 use AidingApp\Project\Observers\ProjectObserver;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;
-use AidingApp\Department\Models\Department;
 use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;

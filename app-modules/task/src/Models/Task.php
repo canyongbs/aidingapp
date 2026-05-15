@@ -38,12 +38,12 @@ namespace AidingApp\Task\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Department\Models\Department;
 use AidingApp\Project\Models\Project;
 use AidingApp\Task\Database\Factories\TaskFactory;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Scopes\ConfidentialTaskScope;
 use AidingApp\Task\Observers\TaskObserver;
-use AidingApp\Department\Models\Department;
 use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;

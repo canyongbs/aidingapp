@@ -37,9 +37,9 @@
 namespace AidingApp\Division\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Department\Models\Department;
 use AidingApp\Division\Database\Factories\DivisionFactory;
 use AidingApp\Division\Observers\DivisionObserver;
-use AidingApp\Department\Models\Department;
 use App\Models\BaseModel;
 use App\Models\NotificationSettingPivot;
 use App\Models\User;

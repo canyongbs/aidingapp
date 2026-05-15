@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Models\Project;
-use AidingApp\Department\Models\Department;
 use App\Models\User;
 use Olympus\Crm\Models\Contact;
 

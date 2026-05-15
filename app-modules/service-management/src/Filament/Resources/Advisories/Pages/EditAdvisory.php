@@ -38,8 +38,8 @@ namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Models\Advisory;
-use App\Features\TeamRenameFeature;
 use App\Concerns\EditPageRedirection;
+use App\Features\TeamRenameFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;

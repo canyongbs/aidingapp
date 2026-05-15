@@ -36,8 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use App\Models\User;
 use Worksome\RequestFactories\RequestFactory;
 

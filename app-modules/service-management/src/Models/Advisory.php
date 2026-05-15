@@ -37,8 +37,8 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Database\Factories\AdvisoryFactory;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Database\Factories\AdvisoryFactory;
 use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

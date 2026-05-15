@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
-use AidingApp\Department\Models\Department;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
 

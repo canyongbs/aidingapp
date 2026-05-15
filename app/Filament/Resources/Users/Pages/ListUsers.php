@@ -37,8 +37,8 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Imports\UserImporter;
-use App\Filament\Resources\Users\Actions\AssignRolesBulkAction;
 use App\Filament\Resources\Users\Actions\AssignDepartmentBulkAction;
+use App\Filament\Resources\Users\Actions\AssignRolesBulkAction;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;

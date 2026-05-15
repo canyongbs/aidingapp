@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use AidingApp\Department\Models\Department;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**

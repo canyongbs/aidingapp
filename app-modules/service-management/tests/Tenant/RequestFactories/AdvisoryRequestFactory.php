@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use AidingApp\Department\Models\Department;
 use Worksome\RequestFactories\RequestFactory;
 
 class AdvisoryRequestFactory extends RequestFactory

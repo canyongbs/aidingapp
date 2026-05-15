@@ -36,6 +36,7 @@
 
 namespace AidingApp\Department\Models;
 
+use AidingApp\Department\Database\Factories\DepartmentFactory;
 use AidingApp\Division\Models\Division;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectAuditorDepartment;
@@ -45,7 +46,6 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetDepartment;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeDepartmentAuditor;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeDepartmentManager;
-use AidingApp\Department\Database\Factories\DepartmentFactory;
 use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
@@ -62,15 +62,15 @@ class Department extends BaseModel
     /** @use HasFactory<DepartmentFactory> */
     use HasFactory;
 
-    public function getTable(): string
-    {
-        return TeamRenameFeature::active() ? 'departments' : 'teams';
-    }
-
     protected $fillable = [
         'name',
         'description',
     ];
+
+    public function getTable(): string
+    {
+        return TeamRenameFeature::active() ? 'departments' : 'teams';
+    }
 
     /**
      * @return HasMany<User, $this>
