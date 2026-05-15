@@ -121,4 +121,18 @@ return [
         'database/migrations/.gitkeep' => base_path('stubs/app-modules/.gitkeep'),
         'database/seeders/.gitkeep' => base_path('stubs/app-modules/.gitkeep'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Custom override of event discovery
+    |--------------------------------------------------------------------------
+    |
+    | This is a custom override of the event discovery feature. If you want to
+    | disable event discovery, set this to false. If you want to enable event
+    | discovery, set this to true. We will still check the app namespace for
+    | the presence of event discovery.
+    |
+    */
+
+    'should_discover_events' => null,
 ];

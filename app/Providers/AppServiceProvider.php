@@ -56,6 +56,8 @@ use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
+use InterNACHI\Modular\PluginRegistry;
+use InterNACHI\ModularLivewire\ModularLivewirePlugin;
 use Laravel\Pennant\Feature;
 
 use function Sentry\configureScope;
@@ -70,6 +72,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        PluginRegistry::register(ModularLivewirePlugin::class);
+
         $this->app->bind(ImportCsv::class, ImportCsvOverride::class);
         $this->app->bind(PrepareCsvExport::class, PrepareCsvExportOverride::class);
 

@@ -10,7 +10,6 @@ services:
         environment:
             SERVICE: 'web'
             SSL_MODE: 'mixed'
-            LARAVEL_OCTANE_WATCH: '${LARAVEL_OCTANE_WATCH:-false}'
             CACHE_MODULES: '${CACHE_MODULES:-false}'
             CACHE_CONFIG: '${CACHE_CONFIG:-false}'
             CACHE_ROUTES: '${CACHE_ROUTES:-false}'
@@ -28,7 +27,7 @@ services:
             - "traefik.http.routers.aidingapp-app.rule=(Host(`aidingapp.local`) || HostRegexp(`^[a-z0-9]+\\.aidingapp\\.local$`))"
             - 'traefik.http.routers.aidingapp-app.entrypoints=websecure'
             - 'traefik.http.routers.aidingapp-app.tls=true'
-            - 'traefik.http.services.aidingapp-app.loadbalancer.server.port=443'
+            - 'traefik.http.services.aidingapp-app.loadbalancer.server.port=8443'
             - 'traefik.http.services.aidingapp-app.loadbalancer.server.scheme=https'
         extra_hosts:
             - 'host.docker.internal:host-gateway'
@@ -147,6 +146,7 @@ services:
 
     aidingapp-pgsql:
         image: 'postgres:16.8'
+        command: postgres -c max_locks_per_transaction=256
         ports:
             - '${FORWARD_DB_PORT:-5434}:5432'
         environment:
