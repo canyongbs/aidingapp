@@ -34,6 +34,11 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Ai\Settings\AiSupportAssistantSettings;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\Console\Command\Command;
+
 // Example migration test, leave commented out for future use as a template/example
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
 //    it('properly changed the data', function () {
@@ -52,3 +57,30 @@
 //        );
 //    });
 //});
+
+describe('2026_05_15_201835_tmp_update_ai_support_assistant_default_instructions', function () {
+    it('overwrites any existing AI support assistant instructions with the new default', function () {
+        isolatedMigration(
+            '2026_05_15_201835_tmp_update_ai_support_assistant_default_instructions',
+            function () {
+                DB::table('settings')
+                    ->where('group', 'ai-support-assistant')
+                    ->where('name', 'instructions')
+                    ->update(['payload' => json_encode('Tenant-customized instructions that must be overwritten.')]);
+
+                $migrate = Artisan::call('migrate', [
+                    '--path' => 'app-modules/ai/database/migrations/2026_05_15_201835_tmp_update_ai_support_assistant_default_instructions.php',
+                ]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                $payload = DB::table('settings')
+                    ->where('group', 'ai-support-assistant')
+                    ->where('name', 'instructions')
+                    ->value('payload');
+
+                expect(json_decode($payload, true))->toBe(AiSupportAssistantSettings::defaultInstructions());
+            }
+        );
+    });
+});
