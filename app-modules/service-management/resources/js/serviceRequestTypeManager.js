@@ -242,7 +242,7 @@ document.addEventListener('alpine:init', () => {
                 (category.types && category.types.length > 0) || (category.children && category.children.length > 0);
 
             return `<div class="category-wrapper" data-category-id="${category.id}">
-                        <div class="category-item ${this.canEdit ? 'draggable cursor-grab active:cursor-grabbing' : ''} flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-600 dark:bg-gray-700 transition-all duration-150 ease-out hover:bg-gray-50 hover:-translate-y-px hover:shadow-lg dark:hover:bg-gray-600" style="margin-left: ${indent}px" ${this.canEdit ? 'draggable="true"' : ''} data-category-id="${category.id}">
+                        <div class="category-item ${this.canEdit ? 'draggable cursor-grab active:cursor-grabbing' : ''} flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-600 dark:bg-gray-700 transition-all duration-150 ease-out hover:bg-gray-50 hover:-translate-y-px hover:shadow-lg dark:hover:bg-gray-600" style="margin-left: ${indent}px" ${this.canEdit ? 'draggable="true"' : ''} data-category-id="${category.id}">
                             ${
                                 this.canEdit
                                     ? `<div class="p-1 -m-1 cursor-grab">
