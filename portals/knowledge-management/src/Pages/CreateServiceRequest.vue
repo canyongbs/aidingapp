@@ -541,9 +541,7 @@
                                 <BaseButton color="success" size="md" @click="handleAiResolutionAccepted">
                                     Yes (Resolved)
                                 </BaseButton>
-                                <BaseButton color="gray" size="md" @click="handleAiResolutionDeclined">
-                                    No
-                                </BaseButton>
+                                <BaseButton color="gray" size="md" @click="handleAiResolutionDeclined"> No </BaseButton>
                             </div>
                         </div>
 

@@ -34,7 +34,6 @@
 <script setup>
     import { computed, useAttrs, useSlots } from 'vue';
     import { RouterLink } from 'vue-router';
-    import LoadingIndicator from './LoadingIndicator.vue';
 
     const COLOR_VARS = {
         primary: {
@@ -258,10 +257,7 @@
                     fill="currentColor"
                     opacity="0.2"
                 ></path>
-                <path
-                    d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z"
-                    fill="currentColor"
-                ></path>
+                <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill="currentColor"></path>
             </svg>
 
             <component v-else-if="icon" :is="icon" :class="iconClasses" aria-hidden="true" />
@@ -285,10 +281,7 @@
                     fill="currentColor"
                     opacity="0.2"
                 ></path>
-                <path
-                    d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z"
-                    fill="currentColor"
-                ></path>
+                <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill="currentColor"></path>
             </svg>
 
             <component v-else-if="icon" :is="icon" :class="iconClasses" aria-hidden="true" />
