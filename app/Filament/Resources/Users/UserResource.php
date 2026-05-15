@@ -52,7 +52,7 @@ class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'User Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Users';
 
     protected static ?int $navigationSort = 10;
 

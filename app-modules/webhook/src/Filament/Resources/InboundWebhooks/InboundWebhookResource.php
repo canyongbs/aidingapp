@@ -52,7 +52,7 @@ class InboundWebhookResource extends Resource
 
     protected static ?int $navigationSort = 40;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
+    protected static string | UnitEnum | null $navigationGroup = 'Global Admin';
 
     public static function canAccess(): bool
     {

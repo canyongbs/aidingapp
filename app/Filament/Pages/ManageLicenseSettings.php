@@ -58,7 +58,7 @@ class ManageLicenseSettings extends SettingsPage
 
     protected static string $settings = LicenseSettings::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
+    protected static string | UnitEnum | null $navigationGroup = 'Global Admin';
 
     public static function canAccess(): bool
     {
@@ -141,9 +141,9 @@ class ManageLicenseSettings extends SettingsPage
                             Toggle::make('data.addons.mobileApps')
                                 ->label('Mobile Apps'),
                             Toggle::make('data.addons.projectManagement')
-                                ->label('Project Management'),
+                                ->label('Projects'),
                             Toggle::make('data.addons.serviceManagement')
-                                ->label('Service Management'),
+                                ->label('Service Desk'),
                             Toggle::make('data.addons.serviceMonitoring')
                                 ->label('Service Monitoring'),
                         ]

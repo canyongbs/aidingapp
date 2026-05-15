@@ -50,7 +50,7 @@ class RoleResource extends Resource
 {
     protected static ?string $model = Role::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'User Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Users';
 
     protected static ?int $navigationSort = 30;
 
