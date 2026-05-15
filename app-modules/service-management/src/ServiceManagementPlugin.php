@@ -50,9 +50,9 @@ class ServiceManagementPlugin implements Plugin
     public function register(Panel $panel): void
     {
         $panel->discoverResources(
-                in: __DIR__ . '/Filament/Resources',
-                for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
-            )
+            in: __DIR__ . '/Filament/Resources',
+            for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
+        )
             ->livewireComponents([
                 ServiceRequestMediaTable::class,
             ]);

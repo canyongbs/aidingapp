@@ -344,6 +344,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                         ->toMediaCollection('uploads');
 
                     $respondent = $serviceRequest->respondent;
+
                     if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
                         $media->created_by_id = $respondent->getKey();
                         $media->created_by_type = $respondent->getMorphClass();
