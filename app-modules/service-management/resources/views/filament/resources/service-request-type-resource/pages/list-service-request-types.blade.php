@@ -92,7 +92,12 @@
             <div class="flex w-full justify-end gap-3 sm:w-auto">
                 {{-- Add Service Request Area Button --}}
                 <div id="show-category-wrapper">
-                    <x-filament::button id="show-category-btn" type="button" size="sm" class="fi-color fi-color-primary fi-bg-color-600 hover:fi-bg-color-500 dark:fi-bg-color-600 dark:hover:fi-bg-color-500 fi-text-color-0 hover:fi-text-color-0 dark:fi-text-color-0 dark:hover:fi-text-color-0">
+                    <x-filament::button
+                        id="show-category-btn"
+                        type="button"
+                        size="sm"
+                        class="fi-color fi-color-primary fi-bg-color-600 hover:fi-bg-color-500 dark:fi-bg-color-600 dark:hover:fi-bg-color-500 fi-text-color-0 hover:fi-text-color-0 dark:fi-text-color-0 dark:hover:fi-text-color-0"
+                    >
                         Add Service Request Area
                     </x-filament::button>
                     <div
@@ -121,7 +126,12 @@
 
                 {{-- Add Type Button --}}
                 <div id="show-type-wrapper">
-                    <x-filament::button id="show-type-btn" type="button" size="sm" class="fi-color fi-color-primary fi-bg-color-600 hover:fi-bg-color-500 dark:fi-bg-color-600 dark:hover:fi-bg-color-500 fi-text-color-0 hover:fi-text-color-0 dark:fi-text-color-0 dark:hover:fi-text-color-0">
+                    <x-filament::button
+                        id="show-type-btn"
+                        type="button"
+                        size="sm"
+                        class="fi-color fi-color-primary fi-bg-color-600 hover:fi-bg-color-500 dark:fi-bg-color-600 dark:hover:fi-bg-color-500 fi-text-color-0 hover:fi-text-color-0 dark:fi-text-color-0 dark:hover:fi-text-color-0"
+                    >
                         Add Type
                     </x-filament::button>
                     <div
