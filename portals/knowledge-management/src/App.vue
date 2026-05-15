@@ -34,7 +34,6 @@
 <script setup>
     import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
     import { RouterView, useRoute, useRouter } from 'vue-router';
-    import BaseButton from '../../../resources/js/components/BaseButton.vue';
     import AppLoading from './Components/AppLoading.vue';
     import Footer from './Components/Footer.vue';
     import Header from './Components/Header.vue';

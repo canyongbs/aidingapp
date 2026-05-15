@@ -40,7 +40,6 @@
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
     import PageCard from '../Components/PageCard.vue';
-    import BaseButton from '../Components/ui/BaseButton.vue';
     import { consumer } from '../Services/Consumer';
 
     const productLicenses = ref({});
@@ -226,9 +225,7 @@
         <EmptyState v-if="!loading && !productLicenses.activeLicense.length && !productLicenses.expiredLicense.length">
             <template #heading>There are no licenses to display.</template>
             <template #actions>
-                <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md">
-                    Return Home
-                </BaseButton>
+                <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md"> Return Home </BaseButton>
             </template>
         </EmptyState>
     </Page>

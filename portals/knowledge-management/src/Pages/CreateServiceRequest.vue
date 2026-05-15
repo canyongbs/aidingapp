@@ -43,7 +43,6 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';
     import PageCard from '../Components/PageCard.vue';
-    import BaseButton from '../Components/ui/BaseButton.vue';
     import wizard from '../FormKit/wizard.js';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
@@ -477,12 +476,7 @@
                             <p>Thank you. Your request has been submitted.</p>
                         </template>
 
-                        <BaseButton
-                            tag="router-link"
-                            :to="{ name: 'create-service-request' }"
-                            variant="gray"
-                            size="md"
-                        >
+                        <BaseButton tag="router-link" :to="{ name: 'create-service-request' }" variant="gray" size="md">
                             Submit Another Request
                         </BaseButton>
                     </main>
