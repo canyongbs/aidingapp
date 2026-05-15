@@ -51,6 +51,7 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -773,6 +774,8 @@ test('service requests not authorized if user is a direct auditorUser of the ser
 });
 
 test('EditServiceRequest page displays the uploaded files section', function () {
+    Storage::fake('s3');
+
     $serviceRequest = ServiceRequest::factory()->create();
     $serviceRequest
         ->addMedia(UploadedFile::fake()->image('doc.png'))
@@ -789,6 +792,8 @@ test('EditServiceRequest page displays the uploaded files section', function () 
 });
 
 test('ServiceRequestMediaTable renders uploaded files on edit page', function () {
+    Storage::fake('s3');
+
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -806,6 +811,8 @@ test('ServiceRequestMediaTable renders uploaded files on edit page', function ()
 });
 
 test('ServiceRequestMediaTable can search by file name on edit page', function () {
+    Storage::fake('s3');
+
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -832,6 +839,8 @@ test('ServiceRequestMediaTable can search by file name on edit page', function (
 });
 
 test('ServiceRequestMediaTable can search by uploader name on edit page', function () {
+    Storage::fake('s3');
+
     $userAlice = User::factory()->create(['name' => 'Alice Smith']);
     $userBob = User::factory()->create(['name' => 'Bob Jones']);
 

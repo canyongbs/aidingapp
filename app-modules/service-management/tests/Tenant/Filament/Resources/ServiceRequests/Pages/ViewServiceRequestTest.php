@@ -50,6 +50,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -313,6 +314,8 @@ test('view service request page visible if the user is a direct managerUser of t
 });
 
 test('ViewServiceRequest page displays the uploaded files section', function () {
+    Storage::fake('s3');
+
     $serviceRequest = ServiceRequest::factory()->create();
     $serviceRequest
         ->addMedia(UploadedFile::fake()->image('doc.png'))
@@ -329,6 +332,8 @@ test('ViewServiceRequest page displays the uploaded files section', function () 
 });
 
 test('ServiceRequestMediaTable renders uploaded files on view page', function () {
+    Storage::fake('s3');
+
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -346,6 +351,8 @@ test('ServiceRequestMediaTable renders uploaded files on view page', function ()
 });
 
 test('ServiceRequestMediaTable shows uploader name on view page', function () {
+    Storage::fake('s3');
+
     $user = User::factory()->create(['name' => 'Jane Doe']);
     actingAs($user);
 
@@ -364,6 +371,8 @@ test('ServiceRequestMediaTable shows uploader name on view page', function () {
 });
 
 test('ServiceRequestMediaTable can search by file name on view page', function () {
+    Storage::fake('s3');
+
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -390,6 +399,8 @@ test('ServiceRequestMediaTable can search by file name on view page', function (
 });
 
 test('ServiceRequestMediaTable can search by uploader name on view page', function () {
+    Storage::fake('s3');
+
     $userAlice = User::factory()->create(['name' => 'Alice Smith']);
     $userBob = User::factory()->create(['name' => 'Bob Jones']);
 

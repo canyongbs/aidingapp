@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -144,6 +145,8 @@ test('ViewServiceRequestUpdate is gated with proper feature access control', fun
 });
 
 test('ViewServiceRequestUpdate page displays the uploaded files section', function () {
+    Storage::fake('s3');
+
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
     $serviceRequestUpdate
         ->addMedia(UploadedFile::fake()->image('attachment.png'))
@@ -165,6 +168,8 @@ test('ViewServiceRequestUpdate page displays the uploaded files section', functi
 });
 
 test('ServiceRequestMediaTable renders uploaded files on service request update page', function () {
+    Storage::fake('s3');
+
     asSuperAdmin();
 
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
@@ -182,6 +187,8 @@ test('ServiceRequestMediaTable renders uploaded files on service request update 
 });
 
 test('ServiceRequestMediaTable can search by file name on service request update page', function () {
+    Storage::fake('s3');
+
     asSuperAdmin();
 
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
@@ -208,6 +215,8 @@ test('ServiceRequestMediaTable can search by file name on service request update
 });
 
 test('ServiceRequestMediaTable can search by uploader name on service request update page', function () {
+    Storage::fake('s3');
+
     $userAlice = User::factory()->create(['name' => 'Alice Smith']);
     $userBob = User::factory()->create(['name' => 'Bob Jones']);
 
