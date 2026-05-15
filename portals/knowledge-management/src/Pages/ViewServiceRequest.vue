@@ -393,7 +393,7 @@
                         </p>
                     </div>
                 </div>
-                <BaseButton type="submit" variant="primary" size="md" :loading="disableSubmitBtn">
+                <BaseButton type="submit" color="primary" size="md" :loading="disableSubmitBtn">
                     Submit Update
                 </BaseButton>
             </form>

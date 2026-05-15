@@ -39,7 +39,6 @@
     import Loader from '../Components/Loader.vue';
     import Page from '../Components/Page.vue';
     import PageCard from '../Components/PageCard.vue';
-    import BaseButton from '../Components/ui/BaseButton.vue';
     import { consumer } from '../Services/Consumer';
 
     const advisories = ref([]);

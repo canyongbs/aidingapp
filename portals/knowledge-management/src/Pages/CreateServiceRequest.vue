@@ -43,7 +43,6 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';
     import PageCard from '../Components/PageCard.vue';
-    import BaseButton from '../Components/ui/BaseButton.vue';
     import wizard from '../FormKit/wizard.js';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
@@ -480,7 +479,7 @@
                         <BaseButton
                             tag="router-link"
                             :to="{ name: 'create-service-request' }"
-                            variant="gray"
+                            color="gray"
                             size="md"
                         >
                             Submit Another Request
@@ -547,7 +546,7 @@
                                 <BaseButton color="success" size="md" @click="handleAiResolutionAccepted">
                                     Yes (Resolved)
                                 </BaseButton>
-                                <BaseButton color="neutral" size="md" @click="handleAiResolutionDeclined">
+                                <BaseButton color="gray" size="md" @click="handleAiResolutionDeclined">
                                     No
                                 </BaseButton>
                             </div>
