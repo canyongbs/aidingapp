@@ -137,9 +137,9 @@ class ViewServiceRequest extends ViewRecord
                             ->hiddenLabel(),
                     ]),
                 Section::make('Uploaded Files')
-                    ->schema([
+                    ->schema(fn (ServiceRequest $record): array => [
                         Livewire::make(ServiceRequestMediaTable::class, [
-                            'record' => $this->getRecord(),
+                            'record' => $record,
                             'collectionName' => $uploadsMediaCollection->getName(),
                         ]),
                     ]),

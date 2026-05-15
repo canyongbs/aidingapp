@@ -42,12 +42,14 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageA
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageServiceRequestUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Illuminate\Http\UploadedFile;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -308,4 +310,127 @@ test('view service request page visible if the user is a direct managerUser of t
         'record' => $serviceRequestsWithManager->getRouteKey(),
     ])
         ->assertSuccessful();
+});
+
+test('ViewServiceRequest page displays the uploaded files section', function () {
+    $serviceRequest = ServiceRequest::factory()->create();
+    $serviceRequest
+        ->addMedia(UploadedFile::fake()->image('doc.png'))
+        ->usingName('doc')
+        ->toMediaCollection('uploads');
+
+    asSuperAdmin()
+        ->get(ServiceRequestResource::getUrl('view', ['record' => $serviceRequest]))
+        ->assertSuccessful()
+        ->assertSeeText('Uploaded Files')
+        ->assertSeeText('File Name')
+        ->assertSeeText('Uploaded By')
+        ->assertSeeText('Date');
+});
+
+test('ServiceRequestMediaTable renders uploaded files on view page', function () {
+    asSuperAdmin();
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    $serviceRequest
+        ->addMedia(UploadedFile::fake()->image('report.png'))
+        ->usingName('report')
+        ->toMediaCollection('uploads');
+
+    livewire(ServiceRequestMediaTable::class, [
+        'record' => $serviceRequest,
+        'collectionName' => 'uploads',
+    ])
+        ->assertSuccessful()
+        ->assertCanSeeTableRecords($serviceRequest->getMedia('uploads'));
+});
+
+test('ServiceRequestMediaTable shows uploader name on view page', function () {
+    $user = User::factory()->create(['name' => 'Jane Doe']);
+    actingAs($user);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    $serviceRequest
+        ->addMedia(UploadedFile::fake()->image('report.png'))
+        ->usingName('report')
+        ->toMediaCollection('uploads');
+
+    livewire(ServiceRequestMediaTable::class, [
+        'record' => $serviceRequest,
+        'collectionName' => 'uploads',
+    ])
+        ->assertSuccessful()
+        ->assertSeeText('Jane Doe');
+});
+
+test('ServiceRequestMediaTable can search by file name on view page', function () {
+    asSuperAdmin();
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    $serviceRequest
+        ->addMedia(UploadedFile::fake()->image('annual-report.png'))
+        ->usingName('annual-report')
+        ->toMediaCollection('uploads');
+    $serviceRequest
+        ->addMedia(UploadedFile::fake()->image('invoice.png'))
+        ->usingName('invoice')
+        ->toMediaCollection('uploads');
+
+    $allMedia = $serviceRequest->getMedia('uploads');
+    $annualReport = $allMedia->first(fn ($m) => $m->name === 'annual-report');
+    $invoice = $allMedia->first(fn ($m) => $m->name === 'invoice');
+
+    livewire(ServiceRequestMediaTable::class, [
+        'record' => $serviceRequest,
+        'collectionName' => 'uploads',
+    ])
+        ->searchTable('annual')
+        ->assertCanSeeTableRecords([$annualReport])
+        ->assertCanNotSeeTableRecords([$invoice]);
+});
+
+test('ServiceRequestMediaTable can search by uploader name on view page', function () {
+    $userAlice = User::factory()->create(['name' => 'Alice Smith']);
+    $userBob = User::factory()->create(['name' => 'Bob Jones']);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    actingAs($userAlice);
+    $serviceRequest
+        ->addMedia(UploadedFile::fake()->image('alice-file.png'))
+        ->usingName('alice-file')
+        ->toMediaCollection('uploads');
+
+    actingAs($userBob);
+    $serviceRequest
+        ->addMedia(UploadedFile::fake()->image('bob-file.png'))
+        ->usingName('bob-file')
+        ->toMediaCollection('uploads');
+
+    $allMedia = $serviceRequest->getMedia('uploads');
+    $aliceMedia = $allMedia->first(fn ($m) => $m->name === 'alice-file');
+    $bobMedia = $allMedia->first(fn ($m) => $m->name === 'bob-file');
+
+    asSuperAdmin();
+
+    livewire(ServiceRequestMediaTable::class, [
+        'record' => $serviceRequest,
+        'collectionName' => 'uploads',
+    ])
+        ->searchTable('Alice')
+        ->assertCanSeeTableRecords([$aliceMedia])
+        ->assertCanNotSeeTableRecords([$bobMedia]);
+});
+
+test('ServiceRequestMediaTable shows empty state when no uploads exist on view page', function () {
+    asSuperAdmin();
+
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    livewire(ServiceRequestMediaTable::class, [
+        'record' => $serviceRequest,
+        'collectionName' => 'uploads',
+    ])
+        ->assertSuccessful()
+        ->assertSeeText('No uploads');
 });
