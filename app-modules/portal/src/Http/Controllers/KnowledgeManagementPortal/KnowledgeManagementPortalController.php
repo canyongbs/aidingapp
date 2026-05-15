@@ -52,6 +52,7 @@ class KnowledgeManagementPortalController extends Controller
     public function show(): JsonResponse
     {
         $settings = resolve(PortalSettings::class);
+        $addons = resolve(LicenseSettings::class)->data?->addons;
         $logo = $settings->getSettingsPropertyModel('portal.logo')
             ->getFirstMedia('logo');
         $favicon = $settings->getSettingsPropertyModel('portal.favicon')
@@ -61,8 +62,6 @@ class KnowledgeManagementPortalController extends Controller
             $portalGuest = PortalGuest::create();
             session()->put('guest_id', $portalGuest->getKey());
         }
-
-        $addons = resolve(LicenseSettings::class)->data?->addons;
 
         return response()->json([
             'header_logo' => $logo ? $logo->getTemporaryUrl(
