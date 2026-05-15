@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,29 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement;
+namespace App\Observers;
 
-use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use App\Features\MediaCreatedByFeature;
+use App\Models\Media;
+use Illuminate\Support\Facades\Auth;
 
-class ServiceManagementPlugin implements Plugin
+class MediaObserver
 {
-    public function getId(): string
+    public function creating(Media $media): void
     {
-        return 'service-request';
-    }
+        if (! MediaCreatedByFeature::active() || filled($media->created_by_id)) {
+            return;
+        }
 
-    public function register(Panel $panel): void
-    {
-        $panel->discoverResources(
-                in: __DIR__ . '/Filament/Resources',
-                for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
-            )
-            ->livewireComponents([
-                ServiceRequestMediaTable::class,
-            ]);
-    }
+        $user = Auth::user();
 
-    public function boot(Panel $panel): void {}
+        if ($user && ($key = $user->getKey()) !== null) {
+            $media->created_by_id = (string) $key;
+            $media->created_by_type = $user->getMorphClass();
+        }
+    }
 }

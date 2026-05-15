@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,29 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use App\Support\AbstractFeatureFlag;
 
-class ServiceManagementPlugin implements Plugin
+class MediaCreatedByFeature extends AbstractFeatureFlag
 {
-    public function getId(): string
+    public function resolve(mixed $scope): mixed
     {
-        return 'service-request';
+        return false;
     }
-
-    public function register(Panel $panel): void
-    {
-        $panel->discoverResources(
-                in: __DIR__ . '/Filament/Resources',
-                for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
-            )
-            ->livewireComponents([
-                ServiceRequestMediaTable::class,
-            ]);
-    }
-
-    public function boot(Panel $panel): void {}
 }

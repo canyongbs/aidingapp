@@ -44,23 +44,20 @@ use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Filament\Actions\ReclassifyServiceRequestAction;
 use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestLocked;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
-use Filament\Actions\Action;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\ImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Support\Enums\IconSize;
 use Illuminate\Support\HtmlString;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ViewServiceRequest extends ViewRecord
 {
@@ -139,53 +136,13 @@ class ViewServiceRequest extends ViewRecord
                         TextEntry::make('close_details')
                             ->hiddenLabel(),
                     ]),
-                Section::make('Uploads')
-                    ->visible(fn (ServiceRequest $record): bool => $record->hasMedia($uploadsMediaCollection->getName()))
-                    ->schema(
-                        fn (ServiceRequest $record) => $record
-                            ->getMedia($uploadsMediaCollection->getName())
-                            ->map(function (Media $media) {
-                                $mimeType = $media->mime_type;
-                                $isImage = in_array($mimeType, ['image/jpeg', 'image/png']);
-
-                                $downloadAction = Action::make('download')
-                                    ->label('Download')
-                                    ->icon('heroicon-m-arrow-down-tray')
-                                    ->color('primary')
-                                    ->url(route('service-request.media.download', ['media' => $media->getKey()]));
-
-                                $displayName = $media->name . '.' . pathinfo($media->file_name, PATHINFO_EXTENSION);
-
-                                if ($isImage) {
-                                    return ImageEntry::make($media->getKey())
-                                        ->label($displayName)
-                                        ->visibility('private')
-                                        ->getStateUsing($media->getTemporaryUrl(now()->addMinute()))
-                                        ->hintAction($downloadAction);
-                                }
-
-                                return IconEntry::make($media->getKey())
-                                    ->label($displayName)
-                                    ->state($mimeType)
-                                    ->icon(match ($mimeType) {
-                                        'application/pdf',
-                                        'application/vnd.ms-word',
-                                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                                        'image/pdf',
-                                        'text/markdown',
-                                        'text/plain' => 'heroicon-o-document-text',
-                                        'application/vnd.ms-excel',
-                                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                                        'text/csv' => 'heroicon-o-table-cells',
-                                        'application/vnd.ms-powerpoint',
-                                        'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'heroicon-o-presentation-chart-bar',
-                                        default => 'heroicon-o-paper-clip',
-                                    })
-                                    ->size(IconSize::TwoExtraLarge)
-                                    ->hintAction($downloadAction);
-                            })
-                            ->toArray()
-                    ),
+                Section::make('Uploaded Files')
+                    ->schema([
+                        Livewire::make(ServiceRequestMediaTable::class, [
+                            'record' => $this->getRecord(),
+                            'collectionName' => $uploadsMediaCollection->getName(),
+                        ]),
+                    ]),
                 Section::make('Form Details')
                     ->collapsed()
                     ->visible(fn (ServiceRequest $record): bool => ! is_null($record->serviceRequestFormSubmission))

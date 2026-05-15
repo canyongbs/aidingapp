@@ -37,6 +37,7 @@
 namespace AidingApp\Portal\Jobs;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\MediaCreatedByFeature;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -83,10 +84,17 @@ class PersistServiceRequestUpload implements ShouldQueue
         }
 
         try {
-            $this->serviceRequest
+            $media = $this->serviceRequest
                 ->addMediaFromDisk($this->path)
                 ->usingName(pathinfo($this->originalFileName, PATHINFO_FILENAME))
                 ->toMediaCollection($this->collection);
+
+            $respondent = $this->serviceRequest->respondent;
+            if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
+                $media->created_by_id = $respondent->getKey();
+                $media->created_by_type = $respondent->getMorphClass();
+                $media->saveQuietly();
+            }
         } finally {
             Storage::delete($this->path);
         }

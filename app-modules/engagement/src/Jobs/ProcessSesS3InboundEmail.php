@@ -53,6 +53,7 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
+use App\Features\MediaCreatedByFeature;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV3;
 use Aws\Kms\KmsClient;
@@ -337,10 +338,17 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             foreach ($parser->getAttachments(false) as $attachment) {
                 try {
-                    $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
+                    $media = $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
                         ->setName($attachment->getFilename())
                         ->setFileName($attachment->getFilename())
                         ->toMediaCollection('uploads');
+
+                    $respondent = $serviceRequest->respondent;
+                    if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
+                        $media->created_by_id = $respondent->getKey();
+                        $media->created_by_type = $respondent->getMorphClass();
+                        $media->saveQuietly();
+                    }
                 } catch (Throwable $throw) {
                     report($throw);
                 }
@@ -516,10 +524,16 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                 foreach ($parser->getAttachments(false) as $attachment) {
                     try {
-                        $serviceRequest->addMediaFromStream($attachment->getStream())
+                        $media = $serviceRequest->addMediaFromStream($attachment->getStream())
                             ->setName($attachment->getFilename())
                             ->setFileName($attachment->getFilename())
                             ->toMediaCollection('uploads');
+
+                        if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
+                            $media->created_by_id = $contact->getKey();
+                            $media->created_by_type = $contact->getMorphClass();
+                            $media->saveQuietly();
+                        }
                     } catch (Throwable $throw) {
                         report($throw);
                     }

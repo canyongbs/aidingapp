@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,29 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement;
+use App\Features\MediaCreatedByFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
-
-class ServiceManagementPlugin implements Plugin
-{
-    public function getId(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return 'service-request';
+        DB::transaction(function () {
+            Schema::table('media', function (Blueprint $table) {
+                if (! Schema::hasColumn('media', 'created_by_type')) {
+                    $table->string('created_by_type')->nullable();
+                }
+
+                if (! Schema::hasColumn('media', 'created_by_id')) {
+                    $table->uuid('created_by_id')->nullable()->index();
+                }
+            });
+
+            MediaCreatedByFeature::activate();
+        });
     }
 
-    public function register(Panel $panel): void
+    public function down(): void
     {
-        $panel->discoverResources(
-                in: __DIR__ . '/Filament/Resources',
-                for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
-            )
-            ->livewireComponents([
-                ServiceRequestMediaTable::class,
-            ]);
-    }
+        DB::transaction(function () {
+            MediaCreatedByFeature::deactivate();
 
-    public function boot(Panel $panel): void {}
-}
+            Schema::table('media', function (Blueprint $table) {
+                if (Schema::hasColumn('media', 'created_by_type')) {
+                    $table->dropColumn('created_by_type');
+                }
+
+                if (Schema::hasColumn('media', 'created_by_id')) {
+                    $table->dropColumn('created_by_id');
+                }
+            });
+        });
+    }
+};
