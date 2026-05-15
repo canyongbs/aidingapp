@@ -98,7 +98,7 @@ class CreateUser extends CreateRecord
                 Section::make('Department')
                     ->schema([
                         Select::make(TeamRenameFeature::active() ? 'department_id' : 'team_id')
-                            ->label('')
+                            ->hiddenLabel()
                             ->relationship('department', 'name'),
                     ])
                     ->hidden(fn (?User $record) => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
