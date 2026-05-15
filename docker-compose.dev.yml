@@ -5,8 +5,8 @@ services:
             dockerfile: Dockerfile
             target: web-development
             args:
-                PUID: '${PLS_USER_ID:-9999}'
-                PGID: '${PLS_GROUP_ID:-9999}'
+                USER_ID: '${PLS_USER_ID:-33}'
+                GROUP_ID: '${PLS_GROUP_ID:-33}'
         environment:
             SERVICE: 'web'
             SSL_MODE: 'mixed'
@@ -17,10 +17,7 @@ services:
             CACHE_EVENTS: '${CACHE_EVENTS:-false}'
             CACHE_ICONS: '${CACHE_ICONS:-false}'
             CACHE_FILAMENT_COMPONENTS: '${CACHE_FILAMENT_COMPONENTS:-false}'
-            PUID: '${PLS_USER_ID:-9999}'
-            PGID: '${PLS_GROUP_ID:-9999}'
             BUILD_ASSETS: '${BUILD_ASSETS:-false}'
-            FIX_PERMISSIONS: '${FIX_PERMISSIONS:-true}'
             PHP_MEMORY_LIMIT: '${PHP_MEMORY_LIMIT:-512M}'
         labels:
             - 'traefik.enable=true'
@@ -54,8 +51,8 @@ services:
             args:
                 TOTAL_QUEUE_WORKERS: '${TOTAL_QUEUE_WORKERS:-1}'
                 MULTIPLE_DEVELOPMENT_QUEUES: '${MULTIPLE_DEVELOPMENT_QUEUES:-false}'
-                PUID: '${PLS_USER_ID:-9999}'
-                PGID: '${PLS_GROUP_ID:-9999}'
+                USER_ID: '${PLS_USER_ID:-33}'
+                GROUP_ID: '${PLS_GROUP_ID:-33}'
         environment:
             SERVICE: 'worker'
             CACHE_MODULES: false
@@ -65,14 +62,11 @@ services:
             CACHE_EVENTS: false
             CACHE_ICONS: false
             CACHE_FILAMENT_COMPONENTS: false
-            PUID: '${PLS_USER_ID:-9999}'
-            PGID: '${PLS_GROUP_ID:-9999}'
             SQS_QUEUE: '${SQS_QUEUE:-default}'
             LANDLORD_SQS_QUEUE: '${LANDLORD_SQS_QUEUE:-landlord}'
             OUTBOUND_COMMUNICATION_QUEUE: '${OUTBOUND_COMMUNICATION_QUEUE:-outbound-communication}'
             AUDIT_QUEUE_QUEUE: '${AUDIT_QUEUE_QUEUE:-audit}'
             IMPORT_EXPORT_QUEUE: '${IMPORT_EXPORT_QUEUE:-import-export}'
-            FIX_PERMISSIONS: '${FIX_PERMISSIONS:-false}'
             CREATE_STORAGE_SYMLINK: '${WORKER_CREATE_STORAGE_SYMLINK:-false}'
         extra_hosts:
             - 'host.docker.internal:host-gateway'
@@ -92,8 +86,8 @@ services:
             dockerfile: Dockerfile
             target: scheduler-development
             args:
-                PUID: '${PLS_USER_ID:-9999}'
-                PGID: '${PLS_GROUP_ID:-9999}'
+                USER_ID: '${PLS_USER_ID:-33}'
+                GROUP_ID: '${PLS_GROUP_ID:-33}'
         environment:
             SERVICE: 'scheduler'
             CACHE_MODULES: false
@@ -103,9 +97,6 @@ services:
             CACHE_EVENTS: false
             CACHE_ICONS: false
             CACHE_FILAMENT_COMPONENTS: false
-            PUID: '${PLS_USER_ID:-9999}'
-            PGID: '${PLS_GROUP_ID:-9999}'
-            FIX_PERMISSIONS: '${FIX_PERMISSIONS:-false}'
             CREATE_STORAGE_SYMLINK: '${SCHEDULER_CREATE_STORAGE_SYMLINK:-false}'
         extra_hosts:
             - 'host.docker.internal:host-gateway'
