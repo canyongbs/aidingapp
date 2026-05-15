@@ -37,6 +37,7 @@
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';
+    import PageCard from '../Components/PageCard.vue';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
 
@@ -217,146 +218,148 @@
                     <Breadcrumbs :currentCrumb="currentCrumb" :breadcrumbs="breadcrumbs" />
                 </template>
 
-                <main>
-                    <h3 class="text-xl">
-                        <span v-if="!currentCategory">Select Category</span>
-                        <span v-else>{{ currentCategory.name }}</span>
-                    </h3>
+                <PageCard>
+                    <main>
+                        <h3 class="text-xl">
+                            <span v-if="!currentCategory">Select Category</span>
+                            <span v-else>{{ currentCategory.name }}</span>
+                        </h3>
 
-                    <div class="my-4 grid gap-y-4">
-                        <div v-if="currentCategory" class="mb-4">
-                            <button @click="backToParent" class="text-sm text-gray-500">&larr; Back</button>
-                        </div>
-
-                        <div
-                            v-for="category in displayedCategories"
-                            :key="category.id"
-                            class="group relative bg-brand-700 text-white p-6 rounded shadow-xs cursor-pointer hover:shadow-md"
-                            @click="openCategory(category)"
-                        >
-                            <div class="flex items-center gap-x-3">
-                                <div class="shrink-0">
-                                    <!-- Folder icon for categories (neutral color) -->
-                                    <div
-                                        class="w-10 h-10 flex items-center justify-center rounded bg-white/10 text-white/70"
-                                    >
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="w-6 h-6"
-                                        >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M3 7.5a2.25 2.25 0 0 1 2.25-2.25h3.375a1.125 1.125 0 0 0 .9-.45L11.25 2.25h7.5A2.25 2.25 0 0 1 21 4.5v13.5A2.25 2.25 0 0 1 18.75 20.25H5.25A2.25 2.25 0 0 1 3 18V7.5z"
-                                            />
-                                        </svg>
-                                    </div>
-                                </div>
-                                <div class="w-full">
-                                    <h3 class="text-base font-semibold leading-6">
-                                        <span class="absolute inset-0" aria-hidden="true" />
-                                        {{ category.name }}
-                                    </h3>
-                                </div>
-                                <span
-                                    class="pointer-events-none text-white/60 group-hover:text-white/80"
-                                    aria-hidden="true"
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="w-6 h-6"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M8.25 4.5 15.75 12 8.25 19.5"
-                                        />
-                                    </svg>
-                                </span>
+                        <div class="my-4 grid gap-y-4">
+                            <div v-if="currentCategory" class="mb-4">
+                                <button @click="backToParent" class="text-sm text-gray-500">&larr; Back</button>
                             </div>
-                        </div>
 
-                        <div
-                            v-for="type in displayedTypes"
-                            :key="type.id"
-                            class="group relative bg-white p-6 rounded shadow-xs border-l-4 border-transparent hover:border-brand-500"
-                        >
-                            <div class="flex items-center gap-x-3">
-                                <div class="shrink-0">
-                                    <!-- Type icon container; fall back to a document icon when no custom icon is provided -->
-                                    <div
-                                        class="w-10 h-10 flex items-center justify-center rounded bg-gray-100 text-brand-600"
-                                    >
-                                        <span v-if="type.icon" v-html="type.icon"></span>
-                                        <svg
-                                            v-else
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            stroke-width="1.5"
-                                            stroke="currentColor"
-                                            class="w-6 h-6"
+                            <div
+                                v-for="category in displayedCategories"
+                                :key="category.id"
+                                class="group relative bg-brand-700 text-white p-6 rounded shadow-xs cursor-pointer hover:shadow-md"
+                                @click="openCategory(category)"
+                            >
+                                <div class="flex items-center gap-x-3">
+                                    <div class="shrink-0">
+                                        <!-- Folder icon for categories (neutral color) -->
+                                        <div
+                                            class="w-10 h-10 flex items-center justify-center rounded bg-white/10 text-white/70"
                                         >
-                                            <path
-                                                stroke-linecap="round"
-                                                stroke-linejoin="round"
-                                                d="M7.5 3.75h6.75L21 9.75v9a1.5 1.5 0 0 1-1.5 1.5H6a1.5 1.5 0 0 1-1.5-1.5V5.25A1.5 1.5 0 0 1 6 3.75h1.5z"
-                                            />
-                                        </svg>
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke-width="1.5"
+                                                stroke="currentColor"
+                                                class="w-6 h-6"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    d="M3 7.5a2.25 2.25 0 0 1 2.25-2.25h3.375a1.125 1.125 0 0 0 .9-.45L11.25 2.25h7.5A2.25 2.25 0 0 1 21 4.5v13.5A2.25 2.25 0 0 1 18.75 20.25H5.25A2.25 2.25 0 0 1 3 18V7.5z"
+                                                />
+                                            </svg>
+                                        </div>
                                     </div>
-                                </div>
-                                <div class="w-full">
-                                    <h3 class="text-base font-medium leading-6 text-gray-900">
-                                        <router-link
-                                            :to="{
-                                                name: 'create-service-request-from-type',
-                                                params: { typeId: type.id },
-                                            }"
-                                        >
+                                    <div class="w-full">
+                                        <h3 class="text-base font-semibold leading-6">
                                             <span class="absolute inset-0" aria-hidden="true" />
-                                            {{ type.name }}
-                                        </router-link>
-                                    </h3>
-                                    <p class="mt-2 text-sm text-gray-500">{{ type.description }}</p>
-                                </div>
-                                <span
-                                    class="pointer-events-none text-gray-300 group-hover:text-brand-600"
-                                    aria-hidden="true"
-                                >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="w-6 h-6"
+                                            {{ category.name }}
+                                        </h3>
+                                    </div>
+                                    <span
+                                        class="pointer-events-none text-white/60 group-hover:text-white/80"
+                                        aria-hidden="true"
                                     >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="m8.25 4.5 7.5 7.5-7.5 7.5"
-                                        />
-                                    </svg>
-                                </span>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="w-6 h-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="M8.25 4.5 15.75 12 8.25 19.5"
+                                            />
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div
+                                v-for="type in displayedTypes"
+                                :key="type.id"
+                                class="group relative bg-white p-6 rounded shadow-xs border-l-4 border-transparent hover:border-brand-500"
+                            >
+                                <div class="flex items-center gap-x-3">
+                                    <div class="shrink-0">
+                                        <!-- Type icon container; fall back to a document icon when no custom icon is provided -->
+                                        <div
+                                            class="w-10 h-10 flex items-center justify-center rounded bg-gray-100 text-brand-600"
+                                        >
+                                            <span v-if="type.icon" v-html="type.icon"></span>
+                                            <svg
+                                                v-else
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke-width="1.5"
+                                                stroke="currentColor"
+                                                class="w-6 h-6"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    d="M7.5 3.75h6.75L21 9.75v9a1.5 1.5 0 0 1-1.5 1.5H6a1.5 1.5 0 0 1-1.5-1.5V5.25A1.5 1.5 0 0 1 6 3.75h1.5z"
+                                                />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div class="w-full">
+                                        <h3 class="text-base font-medium leading-6 text-gray-900">
+                                            <router-link
+                                                :to="{
+                                                    name: 'create-service-request-from-type',
+                                                    params: { typeId: type.id },
+                                                }"
+                                            >
+                                                <span class="absolute inset-0" aria-hidden="true" />
+                                                {{ type.name }}
+                                            </router-link>
+                                        </h3>
+                                        <p class="mt-2 text-sm text-gray-500">{{ type.description }}</p>
+                                    </div>
+                                    <span
+                                        class="pointer-events-none text-gray-300 group-hover:text-brand-600"
+                                        aria-hidden="true"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke-width="1.5"
+                                            stroke="currentColor"
+                                            class="w-6 h-6"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                                            />
+                                        </svg>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div
+                                v-if="displayedCategories.length === 0 && displayedTypes.length === 0"
+                                class="text-gray-500 p-6 bg-white rounded shadow-xs"
+                            >
+                                No categories or types found.
                             </div>
                         </div>
-
-                        <div
-                            v-if="displayedCategories.length === 0 && displayedTypes.length === 0"
-                            class="text-gray-500 p-6 bg-white rounded shadow-xs"
-                        >
-                            No categories or types found.
-                        </div>
-                    </div>
-                </main>
+                    </main>
+                </PageCard>
             </Page>
         </div>
     </div>

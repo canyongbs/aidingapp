@@ -32,12 +32,14 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ChevronRightIcon, XMarkIcon } from '@heroicons/vue/20/solid';
+    import { ChevronRightIcon } from '@heroicons/vue/20/solid';
+    import { DocumentTextIcon, FolderIcon } from '@heroicons/vue/24/outline';
     import { defineProps } from 'vue';
     import Article from './Article.vue';
-    import FilterComponent from './FilterComponent.vue';
     import Pagination from './Pagination.vue';
     import SearchLoading from './SearchLoading.vue';
+    import Subheading from './Subheading.vue';
+    import Tabs from './Tabs.vue';
 
     const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage', 'change-filter']);
 
@@ -80,6 +82,12 @@
         },
     });
 
+    const filterTabs = [
+        { label: 'All Articles', value: 'all-articles' },
+        { label: 'Featured', value: 'featured' },
+        { label: 'Most Viewed', value: 'most-viewed' },
+    ];
+
     const updateFilter = (value) => {
         emit('change-filter', value);
     };
@@ -101,13 +109,19 @@
     </div>
 
     <div v-if="!loadingResults && searchResults?.data" class="flex flex-col gap-6">
-        <h3 class="text-2xl font-bold text-brand-950">
-            Search results: <span class="font-normal">{{ searchQuery }}</span>
-        </h3>
+        <Subheading>
+            Search results<template v-if="searchQuery">
+                for <span class="text-gray-500">&ldquo;{{ searchQuery }}&rdquo;</span></template
+            >
+        </Subheading>
 
-        <filter-component @change-filter="updateFilter" :selected-filter="selectedFilter"></filter-component>
-        <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-xs px-3 pt-3 pb-1 rounded bg-white">
-            <h4 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">Articles ({{ totalArticles }})</h4>
+        <div class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
+            <Tabs
+                :tabs="filterTabs"
+                :modelValue="selectedFilter || 'all-articles'"
+                @update:modelValue="updateFilter"
+                :contained="true"
+            />
 
             <div v-if="searchResults.data.articles.data.length > 0">
                 <ul role="list" class="divide-y">
@@ -126,39 +140,54 @@
                     @fetchPage="fetchPage"
                 />
             </div>
-            <div v-else class="p-3 flex items-start gap-2">
-                <XMarkIcon class="h-5 w-5 text-gray-400" />
 
-                <p class="text-gray-600 text-sm font-medium">No articles found that match this search.</p>
-            </div>
+            <section v-else class="px-6 py-4 flex items-start gap-x-4">
+                <div class="flex size-12 items-center justify-center rounded-full bg-gray-100">
+                    <DocumentTextIcon class="size-6 text-gray-400" />
+                </div>
+
+                <div class="flex-1">
+                    <h4 class="text-base font-semibold leading-6 text-gray-950">No articles found</h4>
+
+                    <p class="mt-1 text-sm text-gray-500">No articles match your current search criteria.</p>
+                </div>
+            </section>
         </div>
 
-        <div class="flex flex-col divide-y ring-1 ring-black/5 shadow-xs px-3 pt-3 pb-1 rounded bg-white">
-            <h4 class="text-lg font-semibold text-gray-800 px-3 pt-1 pb-3">Categories</h4>
-
-            <div v-if="searchResults.data.categories.length > 0">
-                <ul role="list" class="divide-y">
-                    <li v-for="category in searchResults.data.categories" :key="category.slug">
-                        <router-link
-                            :to="{ name: 'view-category', params: { categorySlug: category.slug } }"
-                            class="group p-3 flex items-start text-sm font-medium text-gray-700"
-                        >
-                            <h5>
-                                {{ category.name }}
-                            </h5>
-
-                            <ChevronRightIcon
-                                class="opacity-0 h-5 w-5 text-brand-600 transition-all group-hover:translate-x-2 group-hover:opacity-100"
-                            />
-                        </router-link>
-                    </li>
-                </ul>
+        <div
+            v-if="searchResults.data.categories.length > 0"
+            class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5"
+        >
+            <div class="px-6 py-3 border-b border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-950">Categories</h3>
             </div>
-            <div v-else class="p-3 flex items-start gap-2">
-                <XMarkIcon class="h-5 w-5 text-gray-400" />
 
-                <p class="text-gray-600 text-sm font-medium">No categories found that match this search.</p>
-            </div>
+            <ul role="list" class="divide-y">
+                <li v-for="category in searchResults.data.categories" :key="category.slug">
+                    <router-link
+                        :to="{ name: 'view-category', params: { categorySlug: category.slug } }"
+                        class="group flex items-center px-6 py-3 text-sm font-medium text-gray-700 transition duration-75 hover:bg-gray-50"
+                    >
+                        <span class="flex-1">{{ category.name }}</span>
+
+                        <ChevronRightIcon
+                            class="size-5 text-gray-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
+                        />
+                    </router-link>
+                </li>
+            </ul>
         </div>
+
+        <section v-else class="rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 px-6 py-4 flex items-start gap-x-4">
+            <div class="flex size-12 items-center justify-center rounded-full bg-gray-100">
+                <FolderIcon class="size-6 text-gray-400" />
+            </div>
+
+            <div class="flex-1">
+                <h4 class="text-base font-semibold leading-6 text-gray-950">No categories found</h4>
+
+                <p class="mt-1 text-sm text-gray-500">No categories match your current search criteria.</p>
+            </div>
+        </section>
     </div>
 </template>

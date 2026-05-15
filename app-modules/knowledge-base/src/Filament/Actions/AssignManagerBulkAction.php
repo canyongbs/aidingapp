@@ -55,6 +55,7 @@ class AssignManagerBulkAction
             ->label('Assign Managers')
             ->icon('heroicon-s-user-group')
             ->modalHeading('Bulk Assign Managers')
+            ->authorize(fn () => auth()->user()->can('knowledge_base_item.view-any') && auth()->user()->can('knowledge_base_item.*.update'))
             ->modalDescription(fn (Collection $records) => "You have selected {$records->count()} " . Str::plural('item', $records->count()) . ' to assign manager(s).')
             ->schema([
                 Select::make('manager_ids')

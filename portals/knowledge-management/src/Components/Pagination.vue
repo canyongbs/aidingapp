@@ -60,101 +60,117 @@
         },
     });
 
-    const visiblePages = computed(() => {
-        const range = 2;
-        const start = Math.max(props.currentPage - range, 1);
-        const end = Math.min(props.currentPage + range, props.lastPage);
-        return Array.from({ length: end - start + 1 }, (_, i) => i + start);
+    const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage']);
+
+    const paginationElements = computed(() => {
+        const elements = [];
+        const current = props.currentPage;
+        const last = props.lastPage;
+
+        if (last <= 7) {
+            for (let i = 1; i <= last; i++) elements.push(i);
+            return elements;
+        }
+
+        elements.push(1);
+
+        if (current > 3) elements.push('...');
+
+        const start = Math.max(2, current - 1);
+        const end = Math.min(last - 1, current + 1);
+
+        for (let i = start; i <= end; i++) elements.push(i);
+
+        if (current < last - 2) elements.push('...');
+
+        elements.push(last);
+
+        return elements;
     });
 </script>
 
 <template>
-    <div class="flex items-center justify-between bg-white px-4 py-3 sm:px-6">
-        <div class="flex flex-1 justify-between sm:hidden">
-            <BaseButton color="gray" size="md" :disabled="currentPage === 1" @click="$emit('fetchPreviousPage')">
-                Previous
-            </BaseButton>
-            <BaseButton color="gray" size="md" :disabled="currentPage === lastPage" @click="$emit('fetchNextPage')">
-                Next
-            </BaseButton>
-        </div>
-        <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm text-gray-700">
-                    Showing
-                    <span class="font-medium">{{ fromArticle }}</span>
-                    to
-                    <span class="font-medium">{{ toArticle }}</span>
-                    of
-                    <span class="font-medium">{{ totalArticles }}</span>
-                    results
-                </p>
-            </div>
-            <!-- Pagination buttons -->
-            <div>
-                <nav class="isolate inline-flex -space-x-px rounded-md shadow-xs" aria-label="Pagination">
-                    <BaseButton
-                        color="gray"
-                        size="md"
-                        icon-only
-                        :icon="ChevronLeftIcon"
-                        :disabled="currentPage === 1"
-                        class="!rounded-r-none"
-                        aria-label="Previous page"
-                        @click="$emit('fetchPreviousPage')"
-                    />
+    <nav
+        aria-label="Pagination"
+        role="navigation"
+        class="grid grid-cols-[1fr_auto_1fr] items-center gap-x-3 border-t border-gray-200 px-6 py-3"
+        :class="lastPage <= 1 && 'hidden md:grid'"
+    >
+        <button
+            v-if="currentPage > 1"
+            type="button"
+            @click="emit('fetchPreviousPage')"
+            class="justify-self-start md:hidden relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 text-gray-950 ring-1 ring-gray-950/10 hover:bg-gray-50 focus-visible:ring-2"
+        >
+            Previous
+        </button>
 
-                    <!-- First Page Button -->
-                    <BaseButton
-                        v-if="currentPage > 4"
-                        color="gray"
-                        size="md"
-                        class="!rounded-none min-w-9 justify-center"
-                        @click="$emit('fetchPage', 1)"
+        <span class="hidden md:inline text-sm font-medium text-gray-700">
+            Showing {{ fromArticle }} to {{ toArticle }} of {{ totalArticles }} results
+        </span>
+
+        <button
+            v-if="currentPage < lastPage"
+            type="button"
+            @click="emit('fetchNextPage')"
+            class="col-start-3 justify-self-end md:hidden relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 text-gray-950 ring-1 ring-gray-950/10 hover:bg-gray-50 focus-visible:ring-2"
+        >
+            Next
+        </button>
+
+        <ol
+            v-if="lastPage > 1"
+            class="hidden md:flex col-start-3 justify-self-end divide-x divide-gray-200 rounded-lg bg-white shadow-sm ring-1 ring-gray-950/10"
+        >
+            <li>
+                <button
+                    type="button"
+                    :disabled="currentPage === 1"
+                    aria-label="Previous page"
+                    @click="emit('fetchPreviousPage')"
+                    class="relative flex overflow-hidden p-2 transition duration-75 outline-none rounded-s-lg enabled:hover:bg-gray-50 enabled:focus-visible:z-10 enabled:focus-visible:ring-2 enabled:focus-visible:ring-brand-600"
+                >
+                    <ChevronLeftIcon class="size-5 text-gray-400 transition duration-75" />
+                </button>
+            </li>
+
+            <li v-for="(element, index) in paginationElements" :key="index">
+                <button
+                    v-if="element === '...'"
+                    type="button"
+                    disabled
+                    class="relative flex overflow-hidden p-2 transition duration-75 outline-none"
+                >
+                    <span class="px-1.5 text-sm font-semibold text-gray-500">&hellip;</span>
+                </button>
+                <button
+                    v-else
+                    type="button"
+                    :aria-label="`Go to page ${element}`"
+                    @click="emit('fetchPage', element)"
+                    class="relative flex overflow-hidden p-2 transition duration-75 outline-none enabled:hover:bg-gray-50 enabled:focus-visible:z-10 enabled:focus-visible:ring-2 enabled:focus-visible:ring-brand-600"
+                    :class="element === currentPage && 'bg-gray-50'"
+                >
+                    <span
+                        class="px-1.5 text-sm font-semibold"
+                        :class="element === currentPage ? 'text-brand-700' : 'text-gray-700'"
                     >
-                        1
-                    </BaseButton>
-                    <span v-if="currentPage > 4" class="inline-flex items-center px-2 text-gray-500 text-sm">
-                        &hellip;
+                        {{ element }}
                     </span>
+                </button>
+            </li>
 
-                    <!-- Page Numbers -->
-                    <BaseButton
-                        v-for="page in visiblePages"
-                        :key="page"
-                        :color="page === currentPage ? 'primary' : 'gray'"
-                        :disabled="page === currentPage"
-                        size="md"
-                        class="!rounded-none min-w-9 justify-center"
-                        @click="$emit('fetchPage', page)"
-                    >
-                        {{ page }}
-                    </BaseButton>
-
-                    <span v-if="currentPage < lastPage - 3" class="inline-flex items-center px-2 text-gray-500 text-sm">
-                        &hellip;
-                    </span>
-                    <BaseButton
-                        v-if="currentPage < lastPage - 3"
-                        color="gray"
-                        size="md"
-                        class="!rounded-none min-w-9 justify-center"
-                        @click="$emit('fetchPage', lastPage)"
-                    >
-                        {{ lastPage }}
-                    </BaseButton>
-                    <BaseButton
-                        color="gray"
-                        size="md"
-                        icon-only
-                        :icon="ChevronRightIcon"
-                        :disabled="currentPage === lastPage"
-                        class="!rounded-l-none"
-                        aria-label="Next page"
-                        @click="$emit('fetchNextPage')"
-                    />
-                </nav>
-            </div>
-        </div>
-    </div>
+            <li>
+                <button
+                    type="button"
+                    :disabled="currentPage === lastPage"
+                    aria-label="Next page"
+                    @click="emit('fetchNextPage')"
+                    class="relative flex overflow-hidden p-2 transition duration-75 outline-none rounded-e-lg enabled:hover:bg-gray-50 enabled:focus-visible:z-10 enabled:focus-visible:ring-2 enabled:focus-visible:ring-brand-600"
+                >
+                    <ChevronRightIcon class="size-5 text-gray-400 transition duration-75" />
+                </button>
+            </li>
+        </ol>
+    </nav>
 </template>

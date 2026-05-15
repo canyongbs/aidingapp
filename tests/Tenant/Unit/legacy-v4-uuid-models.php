@@ -78,7 +78,6 @@ use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 use AidingApp\InventoryManagement\Models\MaintenanceProvider;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\LicenseManagement\Models\ProductLicense;
@@ -202,7 +201,6 @@ return [
     MaintenanceProvider::class,
     KnowledgeBaseCategory::class,
     KnowledgeBaseItem::class,
-    KnowledgeBaseQuality::class,
     KnowledgeBaseStatus::class,
     Product::class,
     ProductLicense::class,

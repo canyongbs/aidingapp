@@ -41,7 +41,6 @@ use AidingApp\KnowledgeBase\Filament\Actions\AssignManagerBulkAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\TagsForClass;
@@ -56,6 +55,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Section;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
@@ -78,7 +78,7 @@ class ListKnowledgeBaseItems extends ListRecords
             ->modifyQueryUsing(fn (Builder $query) => $query->withCount([
                 'votes',
                 'votes as helpful_votes_count' => fn (Builder $query) => $query->where('is_helpful', true),
-            ]))
+            ])->with(['managers', 'concerns']))
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('title')
@@ -106,10 +106,10 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->label('Category')
                     ->toggleable()
                     ->sortable(),
-                TextColumn::make('quality.name')
-                    ->label('Quality')
+                IconColumn::make('health')
+                    ->label('Health')
                     ->toggleable()
-                    ->sortable(),
+                    ->boolean(),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->toggleable()
@@ -134,10 +134,6 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                SelectFilter::make('quality')
-                    ->relationship('quality', 'name')
-                    ->multiple()
-                    ->preload(),
                 SelectFilter::make('status')
                     ->relationship('status', 'name')
                     ->multiple()
@@ -207,12 +203,6 @@ class ListKnowledgeBaseItems extends ListRecords
                             ]),
                         Section::make()
                             ->schema([
-                                Select::make('quality_id')
-                                    ->label('Quality')
-                                    ->relationship('quality', 'name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->exists((new KnowledgeBaseQuality())->getTable(), (new KnowledgeBaseQuality())->getKeyName()),
                                 Select::make('status_id')
                                     ->label('Status')
                                     ->relationship('status', 'name')

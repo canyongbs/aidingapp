@@ -34,6 +34,7 @@
 <script setup>
     import { defineProps } from 'vue';
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';
+    import PageCard from '../Components/PageCard.vue';
     import Breadcrumbs from './../Components/Breadcrumbs.vue';
     import EmptyState from './../Components/EmptyState.vue';
     import Page from './../Components/Page.vue';
@@ -53,75 +54,77 @@
 <template>
     <Page>
         <template #heading> Service Requests </template>
+        <template #description> Track and manage your support requests </template>
 
         <template #breadcrumbs>
             <Breadcrumbs :currentCrumb="'Service'" />
         </template>
 
-        <div
-            v-if="serviceRequests?.length > 0"
-            class="overflow-hidden rounded bg-gray-200 shadow-xs ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
-        >
+        <PageCard v-if="serviceRequests?.length > 0">
             <div
-                v-for="serviceRequest in serviceRequests"
-                :key="serviceRequest.id"
-                class="group relative bg-white p-6 focus-within:bg-gray-50"
+                class="overflow-hidden rounded bg-gray-200 shadow-xs ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
             >
-                <div class="grid">
-                    <div class="flex justify-between">
-                        <div class="flex gap-x-2">
+                <div
+                    v-for="serviceRequest in serviceRequests"
+                    :key="serviceRequest.id"
+                    class="group relative bg-white p-6 focus-within:bg-gray-50"
+                >
+                    <div class="grid">
+                        <div class="flex justify-between">
+                            <div class="flex gap-x-2">
+                                <div
+                                    v-if="serviceRequest.icon"
+                                    v-html="serviceRequest.icon"
+                                    class="pointer-events-none text-brand-700"
+                                    aria-hidden="true"
+                                ></div>
+
+                                <p>{{ serviceRequest.number }}</p>
+                            </div>
+
                             <div
-                                v-if="serviceRequest.icon"
-                                v-html="serviceRequest.icon"
-                                class="pointer-events-none text-brand-700"
+                                class="pointer-events-none absolute right-6 top-6 text-gray-300 transition group-hover:text-brand-500"
                                 aria-hidden="true"
-                            ></div>
-
-                            <p>{{ serviceRequest.number }}</p>
-                        </div>
-
-                        <div
-                            class="pointer-events-none absolute right-6 top-6 text-gray-300 transition group-hover:text-brand-500"
-                            aria-hidden="true"
-                        >
-                            <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path
-                                    d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z"
-                                />
-                            </svg>
-                        </div>
-                    </div>
-
-                    <div class="w-full mt-8">
-                        <h3 class="text-base font-semibold leading-6 text-gray-900">
-                            <router-link
-                                :to="{
-                                    name: 'view-service-request',
-                                    params: { serviceRequestId: serviceRequest.id },
-                                }"
                             >
-                                <span class="absolute inset-0" aria-hidden="true" />
-                                {{ serviceRequest.title }}
-                            </router-link>
-                        </h3>
-                        <div class="mt-2">
-                            <span
-                                class="px-2 py-1 text-sm font-bold text-white rounded"
-                                :style="'background-color: rgb(' + serviceRequest.status_color + ')'"
-                            >
-                                Status: {{ serviceRequest.status_name }}
-                            </span>
+                                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z"
+                                    />
+                                </svg>
+                            </div>
                         </div>
-                        <p class="mt-2 text-xs text-gray-500">Last Updated: {{ serviceRequest.updated_at }}</p>
+
+                        <div class="w-full mt-8">
+                            <h3 class="text-base font-semibold leading-6 text-gray-900">
+                                <router-link
+                                    :to="{
+                                        name: 'view-service-request',
+                                        params: { serviceRequestId: serviceRequest.id },
+                                    }"
+                                >
+                                    <span class="absolute inset-0" aria-hidden="true" />
+                                    {{ serviceRequest.title }}
+                                </router-link>
+                            </h3>
+                            <div class="mt-2">
+                                <span
+                                    class="px-2 py-1 text-sm font-bold text-white rounded"
+                                    :style="'background-color: rgb(' + serviceRequest.status_color + ')'"
+                                >
+                                    Status: {{ serviceRequest.status_name }}
+                                </span>
+                            </div>
+                            <p class="mt-2 text-xs text-gray-500">Last Updated: {{ serviceRequest.updated_at }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </PageCard>
 
         <EmptyState v-else>
             <template #heading>There are no service requests to display.</template>
             <template #actions>
-                <BaseButton tag="router-link" :to="{ name: 'create-service-request' }" color="primary" size="md">
+                <BaseButton tag="router-link" :to="{ name: 'create-service-request' }" color="gray" size="md">
                     New Request
                 </BaseButton>
             </template>

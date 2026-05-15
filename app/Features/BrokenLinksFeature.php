@@ -34,44 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Models;
+namespace App\Features;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseQualityFactory;
-use App\Models\BaseModel;
-use DateTimeInterface;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperKnowledgeBaseQuality
- */
-class KnowledgeBaseQuality extends BaseModel implements Auditable
+class BrokenLinksFeature extends AbstractFeatureFlag
 {
-    use SoftDeletes;
-    use AuditableTrait;
-    use HasUuids;
-
-    /** @use HasFactory<KnowledgeBaseQualityFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-    ];
-
-    /**
-     * @return HasMany<KnowledgeBaseItem, $this>
-     */
-    public function knowledgeBaseItems(): HasMany
+    public function resolve(mixed $scope): mixed
     {
-        return $this->hasMany(KnowledgeBaseItem::class, 'quality_id');
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+        return false;
     }
 }

@@ -44,12 +44,16 @@
             type: Boolean,
             default: false,
         },
+        variant: {
+            type: String,
+            default: 'default',
+        },
     });
 </script>
 
 <template>
     <div class="flex flex-wrap gap-2">
-        <Badge v-if="featured" value="Featured" />
-        <Badge v-for="tag in tags" :key="tag.id" :value="tag.name" />
+        <Badge v-if="featured" value="Featured" :variant="variant" />
+        <Badge v-for="tag in tags" :key="tag.id" :value="tag.name" :variant="variant" />
     </div>
 </template>

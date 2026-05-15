@@ -34,20 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<KnowledgeBaseQuality>
- */
-class KnowledgeBaseQualityFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => $this->faker->word(),
-        ];
+        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            $table->boolean('are_broken_links_detected')->default(false);
+            $table->jsonb('broken_links')->nullable();
+            $table->boolean('are_broken_images_detected')->default(false);
+            $table->jsonb('broken_images')->nullable();
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            $table->dropColumn('are_broken_links_detected');
+            $table->dropColumn('broken_links');
+            $table->dropColumn('are_broken_images_detected');
+            $table->dropColumn('broken_images');
+        });
+    }
+};

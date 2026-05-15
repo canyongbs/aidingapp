@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,38 +30,16 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    defineProps({
+        title: {
+            type: String,
+            required: true,
+        },
+    });
+</script>
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages;
-
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\KnowledgeBaseQualityResource;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
-
-class ViewKnowledgeBaseQuality extends ViewRecord
-{
-    protected static string $resource = KnowledgeBaseQualityResource::class;
-
-    public function infolist(Schema $schema): Schema
-    {
-        return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name'),
-                    ])
-                    ->columns(),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            EditAction::make(),
-        ];
-    }
-}
+<template>
+    <h2 class="text-2xl font-bold tracking-tight text-gray-950">{{ title }}</h2>
+</template>

@@ -78,7 +78,7 @@ class KnowledgeBaseItemResource extends Resource
     public static function getGlobalSearchEloquentQuery(): Builder
     {
         return parent::getGlobalSearchEloquentQuery()
-            ->with(['quality', 'status', 'category', 'division']);
+            ->with(['status', 'category', 'division']);
     }
 
     /**
@@ -87,7 +87,6 @@ class KnowledgeBaseItemResource extends Resource
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         return array_filter([
-            'Quality' => $record->quality?->name,
             'Status' => $record->status?->name,
             'Category' => $record->category?->name,
             'Division' => $record->division->pluck('name')->implode(', '),

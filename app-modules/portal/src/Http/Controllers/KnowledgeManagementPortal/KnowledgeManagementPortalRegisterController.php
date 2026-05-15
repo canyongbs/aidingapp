@@ -36,15 +36,18 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Portal\Actions\FindOrganizationByEmailDomain;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalRegisterRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
+use AidingApp\Portal\Settings\PortalSettings;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class KnowledgeManagementPortalRegisterController extends Controller
 {
@@ -94,10 +97,25 @@ class KnowledgeManagementPortalRegisterController extends Controller
             $request->session()->regenerate();
         }
 
+        $settings = resolve(PortalSettings::class);
+
+        $assistantEnabled = app(AiSupportAssistantSettings::class)->is_enabled && $settings->ai_support_assistant;
+
         return response()->json([
             'success' => true,
             'token' => $token->plainTextToken,
             'user' => auth('contact')->user(),
+            'service_management_enabled' => $settings->knowledge_management_portal_service_management,
+            'has_assets' => $contact->assetCheckIns()->exists() || $contact->assetCheckOuts()->exists(),
+            'has_license' => $contact->productLicenses()->exists(),
+            'has_tasks' => $contact->tasks()->exists(),
+            'assistant_enabled' => $assistantEnabled,
+            'assistant_widget_loader_url' => $assistantEnabled
+                ? url('widgets/assistant/' . json_decode(Storage::disk('public')->get('widgets/assistant/.vite/manifest.json'), true)['src/loader.js']['file'])
+                : null,
+            'assistant_widget_config_url' => $assistantEnabled
+                ? route('widgets.assistant.api.config')
+                : null,
         ]);
     }
 }

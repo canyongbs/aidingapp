@@ -40,8 +40,10 @@ use AidingApp\Ai\Models\Contracts\AiFile;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseItemFactory;
+use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Observers\KnowledgeBaseItemObserver;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
+use App\Features\BrokenLinksFeature;
 use App\Models\BaseModel;
 use App\Models\Concerns\InteractsWithTags;
 use App\Models\Contracts\HasTags;
@@ -53,6 +55,7 @@ use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichConten
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -86,6 +89,10 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
         'public' => 'boolean',
         'article_details' => 'array',
         'has_table_of_contents' => 'boolean',
+        'are_broken_links_detected' => 'boolean',
+        'broken_links' => 'array',
+        'are_broken_images_detected' => 'boolean',
+        'broken_images' => 'array',
     ];
 
     protected $fillable = [
@@ -93,20 +100,15 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
         'category_id',
         'notes',
         'public',
-        'quality_id',
         'status_id',
         'title',
         'is_featured',
         'has_table_of_contents',
+        'are_broken_links_detected',
+        'broken_links',
+        'are_broken_images_detected',
+        'broken_images',
     ];
-
-    /**
-     * @return BelongsTo<KnowledgeBaseQuality, $this>
-     */
-    public function quality(): BelongsTo
-    {
-        return $this->belongsTo(KnowledgeBaseQuality::class);
-    }
 
     /**
      * @return BelongsTo<KnowledgeBaseStatus, $this>
@@ -199,6 +201,103 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     public function getParsingResults(): ?string
     {
         return $this->article_details_fulltext;
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function titleFilled(): Attribute
+    {
+        return Attribute::make(
+            get: fn (mixed $value, array $attributes) => ! empty($attributes['title']),
+        );
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function articleFilled(): Attribute
+    {
+        return Attribute::make(
+            get: function (): bool {
+                if (blank($this->article_details)) {
+                    return false;
+                }
+
+                if (($this->article_details['type'] ?? null) === 'doc'
+                    && collect((array) ($this->article_details['content'] ?? []))
+                        ->every(fn (array $node) => empty($node['content'] ?? []) || $node['content'] === [['type' => 'text', 'text' => '']])
+                ) {
+                    return false;
+                }
+
+                return true;
+            },
+        );
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function managerAssigned(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->managers->isNotEmpty(),
+        );
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function noUnresolvedConcerns(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->concerns
+                ->where('status', '!=', ConcernStatus::Resolved)
+                ->where('status', '!=', ConcernStatus::Archived)
+                ->isEmpty(),
+        );
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function noBrokenLinks(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => ! $this->are_broken_links_detected,
+        );
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function noBrokenImages(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => ! $this->are_broken_images_detected,
+        );
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function health(): Attribute
+    {
+        return Attribute::make(
+            get: function (): bool {
+                $healthy = $this->title_filled
+                    && $this->article_filled
+                    && $this->manager_assigned
+                    && $this->no_unresolved_concerns;
+
+                if (! BrokenLinksFeature::active()) {
+                    return $healthy;
+                }
+
+                return $healthy && $this->no_broken_links && $this->no_broken_images;
+            },
+        );
     }
 
     protected function serializeDate(DateTimeInterface $date): string

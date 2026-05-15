@@ -34,38 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages;
+use AidingApp\Ai\Settings\AiSupportAssistantSettings;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\KnowledgeBaseQualityResource;
-use App\Concerns\EditPageRedirection;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
-
-class EditKnowledgeBaseQuality extends EditRecord
-{
-    use EditPageRedirection;
-
-    protected static string $resource = KnowledgeBaseQualityResource::class;
-
-    public function form(Schema $schema): Schema
+return new class () extends Migration {
+    public function up(): void
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->string(),
-            ]);
+        DB::transaction(function () {
+            $settings = app(AiSupportAssistantSettings::class);
+
+            if (blank($settings->instructions)) {
+                $settings->instructions = AiSupportAssistantSettings::defaultInstructions();
+                $settings->save();
+            }
+        });
     }
 
-    protected function getHeaderActions(): array
+    public function down(): void
     {
-        return [
-            ViewAction::make(),
-            DeleteAction::make(),
-        ];
+        DB::transaction(function () {
+            $settings = app(AiSupportAssistantSettings::class);
+
+            if ($settings->instructions === AiSupportAssistantSettings::defaultInstructions()) {
+                $settings->instructions = '';
+                $settings->save();
+            }
+        });
     }
-}
+};

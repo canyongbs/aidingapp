@@ -31,29 +31,19 @@
 
 </COPYRIGHT>
 -->
-<script setup>
-    import { storeToRefs } from 'pinia';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
-    import { useAuthStore } from '../Stores/auth.js';
-    import { useFeatureStore } from '../Stores/feature.js';
-
-    const { user } = storeToRefs(useAuthStore());
-    const { hasServiceManagement } = storeToRefs(useFeatureStore());
-</script>
+<script setup></script>
 
 <template>
     <div class="flex-1 bg-gray-50">
-        <div class="bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))] px-6">
-            <div class="max-w-(--breakpoint-xl) flex flex-col gap-y-6 mx-auto py-8">
-                <div class="text-right" v-if="hasServiceManagement && user">
-                    <BaseButton tag="router-link" :to="{ name: 'create-service-request' }" color="gray" size="md">
-                        New Request
-                    </BaseButton>
-                </div>
+        <div class="bg-[linear-gradient(to_right_bottom,rgba(var(--primary-500),1),rgba(var(--primary-800),1))]">
+            <div class="max-w-(--breakpoint-xl) flex flex-col gap-y-6 mx-auto px-6 py-12">
+                <div class="flex flex-col gap-y-3 text-left">
+                    <slot name="breadcrumbs" />
 
-                <div class="flex flex-col gap-y-1 text-left">
-                    <h3 class="text-3xl font-semibold text-white"><slot name="heading" /></h3>
-                    <div class="text-brand-100"><slot name="description" /></div>
+                    <div class="flex flex-col gap-y-2">
+                        <h1 class="text-3xl font-bold text-white"><slot name="heading" /></h1>
+                        <div v-if="$slots.description" class="text-sm text-white/75"><slot name="description" /></div>
+                    </div>
                 </div>
 
                 <div v-if="$slots.belowHeaderContent">
@@ -62,21 +52,8 @@
             </div>
         </div>
 
-        <div class="xl:px-6 max-w-(--breakpoint-xl) flex flex-col gap-y-6 mx-auto py-8">
-            <div class="px-6 xl:px-0" v-if="$slots.breadcrumbs">
-                <slot name="breadcrumbs" />
-            </div>
-
-            <div
-                v-if="$slots.default"
-                class="ring-1 ring-black/5 shadow-xs xl:-mx-6 px-6 py-4 flex flex-col gap-y-6 xl:rounded bg-white"
-            >
-                <slot />
-            </div>
-
-            <div v-if="$slots.rawContent" class="px-6 xl:px-0 flex flex-col gap-y-4">
-                <slot name="rawContent" />
-            </div>
+        <div class="max-w-(--breakpoint-xl) mx-auto px-6 py-8 flex flex-col gap-y-6">
+            <slot />
         </div>
     </div>
 </template>

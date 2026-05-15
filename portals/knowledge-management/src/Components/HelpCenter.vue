@@ -32,7 +32,8 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps } from 'vue';
+    import { ChevronRightIcon } from '@heroicons/vue/20/solid';
+    import Subheading from './Subheading.vue';
 
     defineProps({
         categories: {
@@ -47,54 +48,34 @@
 </script>
 
 <template>
-    <div class="grid gap-4">
-        <div>
-            <h3 class="text-xl">Article Categories</h3>
-            <div
-                class="mt-4 overflow-hidden rounded bg-gray-200 shadow-xs ring-1 ring-black/5 grid gap-px divide-y-0 lg:grid-cols-2"
+    <div class="flex flex-col gap-4">
+        <Subheading title="Article Categories" />
+
+        <div class="grid gap-3 md:grid-cols-2">
+            <router-link
+                v-for="category in categories"
+                :key="category.slug"
+                :to="{ name: 'view-category', params: { categorySlug: category.slug } }"
+                class="group flex w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5 transition duration-75 hover:bg-gray-50"
             >
                 <div
-                    v-for="category in categories"
-                    :key="category.slug"
-                    class="group relative bg-white p-6 focus-within:bg-gray-50"
-                >
-                    <div class="grid">
-                        <div class="flex" :class="[category.icon ? 'justify-between' : 'justify-end']">
-                            <div
-                                v-if="category.icon"
-                                v-html="category.icon"
-                                class="pointer-events-none absolute top-6 text-brand-700"
-                                aria-hidden="true"
-                            ></div>
+                    v-if="category.icon"
+                    v-html="category.icon"
+                    class="shrink-0 text-gray-400 [&>svg]:size-6 transition duration-75 group-hover:text-brand-500"
+                    aria-hidden="true"
+                ></div>
 
-                            <div
-                                class="pointer-events-none absolute right-6 top-6 text-gray-300 transition group-hover:text-brand-500"
-                                aria-hidden="true"
-                            >
-                                <svg class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        d="M20 4h1a1 1 0 00-1-1v1zm-1 12a1 1 0 102 0h-2zM8 3a1 1 0 000 2V3zM3.293 19.293a1 1 0 101.414 1.414l-1.414-1.414zM19 4v12h2V4h-2zm1-1H8v2h12V3zm-.707.293l-16 16 1.414 1.414 16-16-1.414-1.414z"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-
-                        <div class="w-full mt-8">
-                            <h3 class="text-base font-semibold leading-6 text-gray-900">
-                                <router-link :to="{ name: 'view-category', params: { categorySlug: category.slug } }">
-                                    <span class="absolute inset-0" aria-hidden="true" />
-                                    {{ category.name }}
-                                </router-link>
-                            </h3>
-                            <p class="mt-2 text-sm text-gray-500">
-                                {{ category.description }}
-                            </p>
-                        </div>
-                    </div>
+                <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
+                    <span class="text-sm font-medium text-gray-950">{{ category.name }}</span>
+                    <p class="overflow-hidden text-sm text-pretty break-words text-gray-500">
+                        {{ category.description }}
+                    </p>
                 </div>
 
-                <div v-show="categories.length % 2 === 1" class="hidden sm:block bg-white"></div>
-            </div>
+                <ChevronRightIcon
+                    class="shrink-0 size-5 self-center text-gray-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
+                />
+            </router-link>
         </div>
     </div>
 </template>

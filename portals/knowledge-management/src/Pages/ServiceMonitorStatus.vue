@@ -37,6 +37,7 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
+    import PageCard from '../Components/PageCard.vue';
     import Pagination from '../Components/Pagination.vue';
     import ServiceMonitorCard from '../Components/ServiceMonitorCard.vue';
     import { consumer } from '../Services/Consumer.js';
@@ -135,49 +136,51 @@
 <template>
     <Page>
         <template #heading> Status </template>
+        <template #description> Real-time status of services and systems </template>
 
         <template #breadcrumbs>
             <Breadcrumbs :currentCrumb="'Status'" />
         </template>
 
         <template v-if="!loading">
-            <div v-if="result.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <div v-for="(serviceMonitor, index) in result" :key="index">
-                    <ServiceMonitorCard
-                        :name="serviceMonitor.name"
-                        :status="serviceMonitor.latest_history?.succeeded ?? true"
-                        :message="
-                            serviceMonitor.latest_history?.status_message ??
-                            'No known issues (monitoring not yet started).'
-                        "
-                    />
+            <PageCard v-if="result.length > 0">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div v-for="(serviceMonitor, index) in result" :key="index">
+                        <ServiceMonitorCard
+                            :name="serviceMonitor.name"
+                            :status="serviceMonitor.latest_history?.succeeded ?? true"
+                            :message="
+                                serviceMonitor.latest_history?.status_message ??
+                                'No known issues (monitoring not yet started).'
+                            "
+                        />
+                    </div>
                 </div>
-            </div>
+
+                <Pagination
+                    v-if="lastPage > 1"
+                    :currentPage="currentPage"
+                    :lastPage="lastPage"
+                    :fromArticle="fromArticle"
+                    :toArticle="toArticle"
+                    :totalArticles="totalArticles"
+                    @fetchNextPage="fetchNextPage"
+                    @fetchPreviousPage="fetchPreviousPage"
+                    @fetchPage="fetchPage"
+                />
+            </PageCard>
 
             <EmptyState v-else>
                 <template #heading>There are no service monitors to display.</template>
                 <template #actions>
-                    <BaseButton tag="router-link" :to="{ name: 'home' }" color="primary" size="md">
+                    <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md">
                         Return Home
                     </BaseButton>
                 </template>
             </EmptyState>
-
-            <Pagination
-                class="mt-3"
-                v-if="result.length > 0"
-                :currentPage="currentPage"
-                :lastPage="lastPage"
-                :fromArticle="fromArticle"
-                :toArticle="toArticle"
-                :totalArticles="totalArticles"
-                @fetchNextPage="fetchNextPage"
-                @fetchPreviousPage="fetchPreviousPage"
-                @fetchPage="fetchPage"
-            />
         </template>
 
-        <template v-else>
+        <PageCard v-else>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
                 <div
                     v-for="n in 15"
@@ -196,6 +199,6 @@
                     <div class="h-5 w-5 bg-gray-300 rounded-full"></div>
                 </div>
             </div>
-        </template>
+        </PageCard>
     </Page>
 </template>

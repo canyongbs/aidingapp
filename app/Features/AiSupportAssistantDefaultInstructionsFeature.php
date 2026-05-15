@@ -34,25 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages;
+namespace App\Features;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\KnowledgeBaseQualityResource;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Schema;
+use App\Support\AbstractFeatureFlag;
 
-class CreateKnowledgeBaseQuality extends CreateRecord
+class AiSupportAssistantDefaultInstructionsFeature extends AbstractFeatureFlag
 {
-    protected static string $resource = KnowledgeBaseQualityResource::class;
-
-    public function form(Schema $schema): Schema
+    public function resolve(mixed $scope): mixed
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->string(),
-            ]);
+        return false;
     }
 }

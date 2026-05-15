@@ -34,52 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages;
+use App\Features\AiSupportAssistantDefaultInstructionsFeature;
+use Illuminate\Support\Facades\DB;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\KnowledgeBaseQualityResource;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-
-class ListKnowledgeBaseQualities extends ListRecords
-{
-    protected static string $resource = KnowledgeBaseQualityResource::class;
-
-    public function table(Table $table): Table
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name')
-                    ->label('Name')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('knowledge_base_items_count')
-                    ->label('# of Knowledge Base Items')
-                    ->counts('knowledgeBaseItems')
-                    ->sortable(),
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+        DB::transaction(function () {
+            try {
+                $this->migrator->add('ai-support-assistant.instructions', '');
+            } catch (SettingAlreadyExists $exception) {
+                // do nothing
+            }
+
+            AiSupportAssistantDefaultInstructionsFeature::activate();
+        });
     }
 
-    protected function getHeaderActions(): array
+    public function down(): void
     {
-        return [
-            CreateAction::make(),
-        ];
+        DB::transaction(function () {
+            AiSupportAssistantDefaultInstructionsFeature::deactivate();
+
+            $this->migrator->deleteIfExists('ai-support-assistant.instructions');
+        });
     }
-}
+};

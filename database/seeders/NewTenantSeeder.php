@@ -36,6 +36,7 @@
 
 namespace Database\Seeders;
 
+use AidingApp\Ai\Database\Seeders\AiSupportAssistantSettingsSeeder;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Contact\Database\Seeders\ContactTypeSeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationIndustrySeeder;
@@ -43,7 +44,6 @@ use AidingApp\Contact\Database\Seeders\OrganizationTypeSeeder;
 use AidingApp\Division\Database\Seeders\DivisionSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
-use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseQualitySeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
 use AidingApp\Project\Database\Seeders\ProjectMilestoneStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
@@ -68,7 +68,6 @@ class NewTenantSeeder extends Seeder
             ServiceRequestTypeSeeder::class,
             ContactTypeSeeder::class,
             KnowledgeBaseCategorySeeder::class,
-            KnowledgeBaseQualitySeeder::class,
             KnowledgeBaseStatusSeeder::class,
             PronounsSeeder::class,
 
@@ -84,6 +83,9 @@ class NewTenantSeeder extends Seeder
             OrganizationIndustrySeeder::class,
 
             ProjectMilestoneStatusSeeder::class,
+
+            // AI
+            AiSupportAssistantSettingsSeeder::class,
         ]);
     }
 }

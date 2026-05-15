@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,35 +30,54 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    defineProps({
+        tabs: {
+            type: Array,
+            required: true,
+        },
+        modelValue: {
+            type: String,
+            required: true,
+        },
+        contained: {
+            type: Boolean,
+            default: false,
+        },
+    });
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities;
+    const emit = defineEmits(['update:modelValue']);
+</script>
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages\CreateKnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages\EditKnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages\ListKnowledgeBaseQualities;
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseQualities\Pages\ViewKnowledgeBaseQuality;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use App\Filament\Clusters\KnowledgeManagement;
-use Filament\Resources\Resource;
-
-class KnowledgeBaseQualityResource extends Resource
-{
-    protected static ?string $model = KnowledgeBaseQuality::class;
-
-    protected static ?string $navigationLabel = 'Qualities';
-
-    protected static ?int $navigationSort = 2;
-
-    protected static ?string $cluster = KnowledgeManagement::class;
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListKnowledgeBaseQualities::route('/'),
-            'create' => CreateKnowledgeBaseQuality::route('/create'),
-            'view' => ViewKnowledgeBaseQuality::route('/{record}'),
-            'edit' => EditKnowledgeBaseQuality::route('/{record}/edit'),
-        ];
-    }
-}
+<template>
+    <nav
+        class="flex max-w-full gap-x-1 overflow-x-auto"
+        :class="
+            contained
+                ? 'border-b border-gray-200 px-3 py-2.5'
+                : 'rounded-xl bg-white p-2 shadow-sm ring-1 ring-gray-950/5'
+        "
+    >
+        <button
+            v-for="tab in tabs"
+            :key="tab.value"
+            type="button"
+            @click="emit('update:modelValue', tab.value)"
+            class="flex items-center justify-center gap-x-2 rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition duration-75 outline-none"
+            :class="modelValue === tab.value ? 'bg-gray-50' : 'hover:bg-gray-50 focus-visible:bg-gray-50'"
+        >
+            <component
+                v-if="tab.icon"
+                :is="tab.icon"
+                class="size-5 shrink-0 transition duration-75"
+                :class="modelValue === tab.value ? 'text-brand-600' : 'text-gray-400'"
+            />
+            <span
+                class="transition duration-75"
+                :class="modelValue === tab.value ? 'text-brand-700' : 'text-gray-500'"
+                >{{ tab.label }}</span
+            >
+        </button>
+    </nav>
+</template>

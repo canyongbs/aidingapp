@@ -34,21 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Database\Seeders;
+use App\Features\BrokenLinksFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseQuality;
-use Illuminate\Database\Seeder;
-
-class KnowledgeBaseQualitySeeder extends Seeder
-{
-    public function run(): void
+return new class () extends Migration {
+    public function up(): void
     {
-        KnowledgeBaseQuality::factory()
-            ->createMany(
-                [
-                    ['name' => 'Good'],
-                    ['name' => 'Review Needed'],
-                ]
-            );
+        DB::transaction(function () {
+            Schema::dropIfExists('knowledge_base_qualities');
+
+            BrokenLinksFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            BrokenLinksFeature::deactivate();
+
+            Schema::create('knowledge_base_qualities', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->string('name');
+                $table->timestamps();
+            });
+        });
+    }
+};

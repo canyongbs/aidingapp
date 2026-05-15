@@ -34,16 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseQualities\RequestFactories;
+namespace AidingApp\Ai\Database\Seeders;
 
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\Ai\Settings\AiSupportAssistantSettings;
+use Illuminate\Database\Seeder;
 
-class CreateKnowledgeBaseQualityRequestFactory extends RequestFactory
+class AiSupportAssistantSettingsSeeder extends Seeder
 {
-    public function definition(): array
+    public function run(): void
     {
-        return [
-            'name' => $this->faker->word(),
-        ];
+        $settings = app(AiSupportAssistantSettings::class);
+        $settings->instructions = AiSupportAssistantSettings::defaultInstructions();
+        $settings->save();
     }
 }

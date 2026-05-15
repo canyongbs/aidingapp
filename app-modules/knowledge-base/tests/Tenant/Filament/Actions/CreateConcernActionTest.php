@@ -37,9 +37,32 @@
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ViewKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Actions\RequestFactories\CreateConcernActionRequestFactory;
+use App\Models\User;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
+
+it('is gated by proper access control', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('knowledge_base_item.view-any');
+    $user->givePermissionTo('knowledge_base_item.*.view');
+
+    asSuperAdmin();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
+
+    actingAs($user);
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertActionVisible('raiseConcern');
+
+    $user->revokePermissionTo('knowledge_base_item.view-any');
+    $user->refresh();
+
+    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->assertForbidden();
+});
 
 it('can create a concern properly', function () {
     asSuperAdmin();
