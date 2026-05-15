@@ -45,7 +45,6 @@
     import { storeToRefs } from 'pinia';
     import { computed, ref } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';

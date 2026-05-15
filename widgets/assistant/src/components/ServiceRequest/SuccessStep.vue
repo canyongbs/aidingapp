@@ -69,12 +69,7 @@
             </p>
         </div>
 
-        <BaseButton
-            @click="$emit('back')"
-            :icon="ArrowLeftIcon"
-            size="lg"
-            class="mt-2"
-        >
+        <BaseButton @click="$emit('back')" :icon="ArrowLeftIcon" size="lg" class="mt-2">
             Back to Assistant Chat
         </BaseButton>
     </div>

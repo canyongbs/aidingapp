@@ -34,6 +34,7 @@
 <script setup>
     import { computed, useAttrs, useSlots } from 'vue';
     import { RouterLink } from 'vue-router';
+    import LoadingIndicator from './LoadingIndicator.vue';
 
     const COLOR_VARS = {
         primary: {

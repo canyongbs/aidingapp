@@ -35,7 +35,6 @@
 <script setup>
     import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/vue/20/solid';
     import { computed, defineProps } from 'vue';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
 
     const props = defineProps({
         currentPage: {

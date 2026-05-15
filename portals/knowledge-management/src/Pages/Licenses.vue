@@ -225,9 +225,7 @@
         <EmptyState v-if="!loading && !productLicenses.activeLicense.length && !productLicenses.expiredLicense.length">
             <template #heading>There are no licenses to display.</template>
             <template #actions>
-                <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md">
-                    Return Home
-                </BaseButton>
+                <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md"> Return Home </BaseButton>
             </template>
         </EmptyState>
     </Page>

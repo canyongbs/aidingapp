@@ -476,12 +476,7 @@
                             <p>Thank you. Your request has been submitted.</p>
                         </template>
 
-                        <BaseButton
-                            tag="router-link"
-                            :to="{ name: 'create-service-request' }"
-                            color="gray"
-                            size="md"
-                        >
+                        <BaseButton tag="router-link" :to="{ name: 'create-service-request' }" variant="gray" size="md">
                             Submit Another Request
                         </BaseButton>
                     </main>
