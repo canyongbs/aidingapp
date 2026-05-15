@@ -78,6 +78,7 @@ class KnowledgeManagementPortalSearchController extends Controller
                             "ts_rank_cd(search_vector, websearch_to_tsquery('english', ?)) DESC",
                             [$search]
                         )
+                        ->orderBy('id')
                 )
                 ->when($tags->isNotEmpty(), fn (Builder $query) => $query->whereHas('tags', fn (Builder $query) => $query->whereIn('id', $tags)))
                 ->when($request->get('filter') === 'featured', function (Builder $query) {
