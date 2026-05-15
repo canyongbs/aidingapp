@@ -41,7 +41,6 @@ use AidingApp\KnowledgeBase\Filament\Actions\CreateConcernAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use App\Features\BrokenLinksFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
@@ -152,15 +151,13 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                     ->boolean()
                                     ->tooltip(fn (KnowledgeBaseItem $record): string => $record->are_broken_links_detected
                                         ? implode("\n", $record->broken_links ?? [])
-                                        : 'No broken links were detected in this article.')
-                                    ->visible(fn (): bool => BrokenLinksFeature::active()),
+                                        : 'No broken links were detected in this article.'),
                                 IconEntry::make('no_broken_images')
                                     ->label('No Broken Images Detected')
                                     ->boolean()
                                     ->tooltip(fn (KnowledgeBaseItem $record): string => $record->are_broken_images_detected
                                         ? implode("\n", $record->broken_images ?? [])
-                                        : 'No broken images were detected in this article.')
-                                    ->visible(fn (): bool => BrokenLinksFeature::active()),
+                                        : 'No broken images were detected in this article.'),
                             ])
                             ->columns(2)
                             ->id('health'),

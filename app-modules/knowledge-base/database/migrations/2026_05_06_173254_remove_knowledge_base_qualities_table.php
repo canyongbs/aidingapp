@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\BrokenLinksFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -45,16 +44,12 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::dropIfExists('knowledge_base_qualities');
-
-            BrokenLinksFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            BrokenLinksFeature::deactivate();
-
             Schema::create('knowledge_base_qualities', function (Blueprint $table) {
                 $table->uuid('id')->primary();
                 $table->string('name');
