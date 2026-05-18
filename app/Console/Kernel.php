@@ -51,7 +51,6 @@ use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Jobs\AutoSubmitStaleDraftServiceRequests;
 use AidingApp\ServiceManagement\Jobs\SendClosedServiceRequestFeedbackReminders;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
-use App\Features\BrokenLinksFeature;
 use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Scopes\SetupIsComplete;
 use App\Models\Tenant;
@@ -170,12 +169,10 @@ class Kernel extends ConsoleKernel
 
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
-                            if (BrokenLinksFeature::active()) {
-                                KnowledgeBaseItem::each(function (KnowledgeBaseItem $article) {
-                                    CheckKnowledgeBaseArticleLinksJob::dispatch($article);
-                                    CheckKnowledgeBaseArticleImagesJob::dispatch($article);
-                                });
-                            }
+                            KnowledgeBaseItem::each(function (KnowledgeBaseItem $article) {
+                                CheckKnowledgeBaseArticleLinksJob::dispatch($article);
+                                CheckKnowledgeBaseArticleImagesJob::dispatch($article);
+                            });
                         });
                     })
                         ->daily()
