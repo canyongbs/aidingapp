@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2c2a1faf97ff112b04fc936ce310be73",
+    "content-hash": "29abc11f482a7127beef125a7336d37d",
     "packages": [
         {
             "name": "ably/ably-php",
