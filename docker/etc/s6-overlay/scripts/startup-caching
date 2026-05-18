@@ -8,13 +8,11 @@ if [ ! -f "$WEBUSER_HOME/artisan" ]; then
   exit 1
 fi
 
-USERNAME=$(id -nu "$PUID")
-
 # Symlink storage
 if [ "${CREATE_STORAGE_SYMLINK:="true"}" == "true" ]; then
     echo "Creating storage symlink..."
 
-    s6-setuidgid "$USERNAME" php "$WEBUSER_HOME/artisan" storage:link --force
+    php "$WEBUSER_HOME/artisan" storage:link --force
 
     echo "Storage symlink created!"
 else
@@ -26,7 +24,7 @@ fi
 if [ "${CACHE_MODULES:="false"}" == "true" ]; then
   echo "Caching modules..."
 
-  s6-setuidgid "$USERNAME" php "$WEBUSER_HOME/artisan" modules:cache
+  php "$WEBUSER_HOME/artisan" modules:cache
 
   echo "Modules cached!"
 else
@@ -38,7 +36,7 @@ fi
 if [ "${CACHE_CONFIG:="false"}" == "true" ]; then
   echo "Caching config..."
 
-  s6-setuidgid "$USERNAME" php "$WEBUSER_HOME/artisan" config:cache
+  php "$WEBUSER_HOME/artisan" config:cache
 
   echo "Config cached!"
 else
@@ -50,7 +48,7 @@ fi
 if [ "${CACHE_ROUTES:="false"}" == "true" ]; then
   echo "Caching routes..."
 
-  s6-setuidgid "$USERNAME" php "$WEBUSER_HOME/artisan" route:cache
+  php "$WEBUSER_HOME/artisan" route:cache
 
   echo "Routes cached!"
 else
@@ -62,7 +60,7 @@ fi
 if [ "${CACHE_VIEWS:="false"}" == "true" ]; then
   echo "Caching views..."
 
-  s6-setuidgid "$USERNAME" php "$WEBUSER_HOME/artisan" view:cache
+  php "$WEBUSER_HOME/artisan" view:cache
 
   echo "Views cached!"
 else
@@ -74,7 +72,7 @@ fi
 if [ "${CACHE_EVENTS:="false"}" == "true" ]; then
   echo "Caching events..."
 
-  s6-setuidgid "$USERNAME" php "$WEBUSER_HOME/artisan" event:cache
+  php "$WEBUSER_HOME/artisan" event:cache
 
   echo "Events cached!"
 else
@@ -86,7 +84,7 @@ fi
 if [ "${CACHE_ICONS:="false"}" == "true" ]; then
   echo "Caching icons..."
 
-  s6-setuidgid "$USERNAME" php "$WEBUSER_HOME/artisan" icons:cache
+  php "$WEBUSER_HOME/artisan" icons:cache
 
   echo "Icons cached!"
 else
@@ -98,7 +96,7 @@ fi
 if [ "${CACHE_FILAMENT_COMPONENTS:="false"}" == "true" ]; then
   echo "Caching Filament components..."
 
-  s6-setuidgid "$USERNAME" php "$WEBUSER_HOME/artisan" filament:cache-components
+  php "$WEBUSER_HOME/artisan" filament:cache-components
 
   echo "Filament components cached!"
 else
