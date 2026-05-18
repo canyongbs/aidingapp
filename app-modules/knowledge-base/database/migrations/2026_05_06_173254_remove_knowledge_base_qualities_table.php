@@ -34,32 +34,22 @@
 </COPYRIGHT>
 */
 
-use App\Features\BrokenLinksFeature;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::dropIfExists('knowledge_base_qualities');
-
-            BrokenLinksFeature::activate();
-        });
+        Schema::dropIfExists('knowledge_base_qualities');
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            BrokenLinksFeature::deactivate();
-
-            Schema::create('knowledge_base_qualities', function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->string('name');
-                $table->timestamps();
-            });
+        Schema::create('knowledge_base_qualities', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('name');
+            $table->timestamps();
         });
     }
 };
