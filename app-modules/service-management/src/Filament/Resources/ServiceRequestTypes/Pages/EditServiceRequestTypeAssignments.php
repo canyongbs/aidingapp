@@ -41,15 +41,20 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRe
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
 use App\Concerns\EditPageRedirection;
+use App\Enums\Feature;
+use App\Features\ServiceRequestTypeLiveChatSettingsFeature;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
 use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
 
 class EditServiceRequestTypeAssignments extends EditRecord
@@ -120,6 +125,23 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->required()
                             ->rules(fn (ServiceRequestType $record) => [new ServiceRequestTypeAssignmentsIndividualUserMustBeAManager($record)])
                             ->visible(fn (Get $get) => $get('assignment_type') === ServiceRequestTypeAssignmentTypes::Individual),
+                        Toggle::make('is_live_chat_enabled')
+                            ->label('Live Chat')
+                            ->columnSpanFull()
+                            ->visible(fn (): bool => Gate::check(Feature::RealtimeChat->getGateName()) && ServiceRequestTypeLiveChatSettingsFeature::active()),
+                        Select::make('max_simultaneous_chats')
+                            ->label('Maximum Simultaneous Chats')
+                            ->options([
+                                null => 'Unlimited',
+                                1 => '1',
+                                2 => '2',
+                                3 => '3',
+                                4 => '4',
+                                5 => '5',
+                            ])
+                            ->placeholder('Unlimited')
+                            ->columnSpanFull()
+                            ->visible(fn (): bool => Gate::check(Feature::RealtimeChat->getGateName()) && ServiceRequestTypeLiveChatSettingsFeature::active()),
                     ]),
             ]);
     }
