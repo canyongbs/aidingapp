@@ -54,12 +54,16 @@ class AllUsersController extends Controller
                 User::query()
                     ->cursor()
                     ->each(function (User $user) use (&$users, $tenant) {
+                        $departmentName = $user->department->name ?? null;
+
+                        // TODO: TeamRenameFeature cleanup - remove the 'team' key below when the feature flag is removed.
                         $users[] = [
                             'id' => $user->id,
                             'tenant_id' => $tenant->getKey(),
                             'name' => $user->name,
                             'job_title' => $user->job_title,
-                            'department' => $user->department->name ?? null,
+                            'team' => $departmentName,
+                            'department' => $departmentName,
                             'email' => $user->email,
                             'timezone' => $user->timezone,
                             'updated_at' => $user->updated_at,

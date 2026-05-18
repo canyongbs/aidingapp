@@ -47,6 +47,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\Service
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
+use App\Features\TeamRenameFeature;
 use App\Models\User;
 use BackedEnum;
 use Filament\Resources\Pages\Page;
@@ -99,9 +100,9 @@ class ServiceRequestResource extends Resource
 
                     if ($userDepartmentId) {
                         $query->orWhereHas('priority.type.managerDepartments', function (Builder $query) use ($userDepartmentId) {
-                            $query->where('departments.id', $userDepartmentId);
+                            $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), $userDepartmentId);
                         })->orWhereHas('priority.type.auditorDepartments', function (Builder $query) use ($userDepartmentId) {
-                            $query->where('departments.id', $userDepartmentId);
+                            $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), $userDepartmentId);
                         });
                     }
                 });

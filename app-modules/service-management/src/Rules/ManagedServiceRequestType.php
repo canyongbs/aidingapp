@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Rules;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\TeamRenameFeature;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Builder;
@@ -62,7 +63,7 @@ class ManagedServiceRequestType implements ValidationRule
         $isManager = ServiceRequestType::where('id', $value)
             ->where(function (Builder $query) use ($department, $user) {
                 $query->whereHas('managerDepartments', function (Builder $query) use ($department) {
-                    $query->where('departments.id', $department?->getKey());
+                    $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), $department?->getKey());
                 });
 
                 $query->orWhereHas('managerUsers', function (Builder $query) use ($user) {

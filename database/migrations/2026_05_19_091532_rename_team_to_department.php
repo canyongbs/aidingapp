@@ -34,15 +34,17 @@
 </COPYRIGHT>
 */
 
+use App\Features\TeamRenameFeature;
+use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
+    use CanModifyPermissions;
+
     /**
-     * Pivot tables to be renamed: old name => new name.
-     *
      * @var array<string, string>
      */
     private array $pivotTables = [
@@ -54,42 +56,85 @@ return new class () extends Migration {
         'confidential_task_teams' => 'confidential_task_departments',
     ];
 
+    /**
+     * @var array<string, string>
+     */
+    private array $permissionRenames = [
+        'team.view-any' => 'department.view-any',
+        'team.create' => 'department.create',
+        'team.*.view' => 'department.*.view',
+        'team.*.update' => 'department.*.update',
+        'team.*.delete' => 'department.*.delete',
+        'team.*.restore' => 'department.*.restore',
+        'team.*.force-delete' => 'department.*.force-delete',
+    ];
+
+    /**
+     * @var array<string>
+     */
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
     public function up(): void
     {
         DB::transaction(function () {
             Schema::rename('teams', 'departments');
-
             foreach ($this->pivotTables as $old => $new) {
                 Schema::rename($old, $new);
             }
 
             Schema::table('users', fn (Blueprint $table) => $table->renameColumn('team_id', 'department_id'));
             Schema::table('advisories', fn (Blueprint $table) => $table->renameColumn('assigned_team_id', 'assigned_department_id'));
-
             foreach ($this->pivotTables as $new) {
                 Schema::table($new, fn (Blueprint $table) => $table->renameColumn('team_id', 'department_id'));
             }
 
             $this->renameConstraintsForward();
+
+            DB::table('audits')
+                ->where('auditable_type', 'team')
+                ->update(['auditable_type' => 'department']);
+
+            collect($this->guards)->each(function (string $guard) {
+                $this->renamePermissions($this->permissionRenames, $guard);
+            });
+            $this->renamePermissionGroups(['Team' => 'Department']);
+
+            $this->renameAdvisoryConstraintsForward();
+
+            TeamRenameFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
+            TeamRenameFeature::deactivate();
+
+            $this->renameAdvisoryConstraintsBackward();
+
+            $this->renamePermissionGroups(['Department' => 'Team']);
+            collect($this->guards)->each(function (string $guard) {
+                $this->renamePermissions(array_flip($this->permissionRenames), $guard);
+            });
+
+            DB::table('audits')
+                ->where('auditable_type', 'department')
+                ->update(['auditable_type' => 'team']);
+
             $this->renameConstraintsBackward();
 
             foreach ($this->pivotTables as $new) {
                 Schema::table($new, fn (Blueprint $table) => $table->renameColumn('department_id', 'team_id'));
             }
-
             Schema::table('advisories', fn (Blueprint $table) => $table->renameColumn('assigned_department_id', 'assigned_team_id'));
             Schema::table('users', fn (Blueprint $table) => $table->renameColumn('department_id', 'team_id'));
 
             foreach (array_reverse($this->pivotTables, preserve_keys: true) as $old => $new) {
                 Schema::rename($new, $old);
             }
-
             Schema::rename('departments', 'teams');
         });
     }
@@ -162,5 +207,27 @@ return new class () extends Migration {
         DB::statement('ALTER TABLE service_request_type_auditor_departments RENAME CONSTRAINT service_request_type_auditor_departments_pkey TO service_request_type_auditors_pkey');
         DB::statement('ALTER TABLE service_request_type_auditor_departments RENAME CONSTRAINT service_request_type_auditor_departments_service_request_type_id_foreign TO service_request_type_auditors_service_request_type_id_foreign');
         DB::statement('ALTER TABLE service_request_type_auditor_departments RENAME CONSTRAINT service_request_type_auditor_departments_department_id_foreign TO service_request_type_auditors_team_id_foreign');
+    }
+
+    private function renameAdvisoryConstraintsForward(): void
+    {
+        DB::statement('ALTER TABLE advisory_severities RENAME CONSTRAINT incident_severities_pkey TO advisory_severities_pkey');
+        DB::statement('ALTER TABLE advisory_statuses RENAME CONSTRAINT incident_statuses_pkey TO advisory_statuses_pkey');
+        DB::statement('ALTER TABLE advisories RENAME CONSTRAINT incidents_pkey TO advisories_pkey');
+        DB::statement('ALTER TABLE advisories RENAME CONSTRAINT incidents_severity_id_foreign TO advisories_severity_id_foreign');
+        DB::statement('ALTER TABLE advisories RENAME CONSTRAINT incidents_status_id_foreign TO advisories_status_id_foreign');
+        DB::statement('ALTER TABLE advisory_updates RENAME CONSTRAINT incident_updates_pkey TO advisory_updates_pkey');
+        DB::statement('ALTER TABLE advisory_updates RENAME CONSTRAINT incident_updates_incident_id_foreign TO advisory_updates_advisory_id_foreign');
+    }
+
+    private function renameAdvisoryConstraintsBackward(): void
+    {
+        DB::statement('ALTER TABLE advisory_updates RENAME CONSTRAINT advisory_updates_advisory_id_foreign TO incident_updates_incident_id_foreign');
+        DB::statement('ALTER TABLE advisory_updates RENAME CONSTRAINT advisory_updates_pkey TO incident_updates_pkey');
+        DB::statement('ALTER TABLE advisories RENAME CONSTRAINT advisories_status_id_foreign TO incidents_status_id_foreign');
+        DB::statement('ALTER TABLE advisories RENAME CONSTRAINT advisories_severity_id_foreign TO incidents_severity_id_foreign');
+        DB::statement('ALTER TABLE advisories RENAME CONSTRAINT advisories_pkey TO incidents_pkey');
+        DB::statement('ALTER TABLE advisory_statuses RENAME CONSTRAINT advisory_statuses_pkey TO incident_statuses_pkey');
+        DB::statement('ALTER TABLE advisory_severities RENAME CONSTRAINT advisory_severities_pkey TO incident_severities_pkey');
     }
 };

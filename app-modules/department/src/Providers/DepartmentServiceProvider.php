@@ -51,7 +51,15 @@ class DepartmentServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // TODO: Cleanup Task - Once TeamRenameFeature is removed, delete the 'team' line below
+        // so only 'department' => Department::class remains in the morph map.
+        //
+        // The 'team' alias exists because, before the rename migration runs, the `audits` table
+        // still holds rows with auditable_type='team' (the old morph alias auto-derived from the
+        // pre-rename Team class name). Eloquent needs both aliases registered so those legacy
+        // rows resolve to Department::class until the migration rewrites them to 'department'.
         Relation::morphMap([
+            'team' => Department::class,
             'department' => Department::class,
         ]);
     }

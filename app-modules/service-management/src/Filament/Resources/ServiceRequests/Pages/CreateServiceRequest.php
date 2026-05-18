@@ -50,6 +50,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
+use App\Features\TeamRenameFeature;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -110,7 +111,7 @@ class CreateServiceRequest extends CreateRecord
                                         $query->whereHas('managerUsers', function (Builder $query): void {
                                             $query->where('users.id', auth()->user()->getKey());
                                         })->orWhereHas('managerDepartments', function (Builder $query): void {
-                                            $query->where('departments.id', auth()->user()->department?->getKey());
+                                            $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), auth()->user()->department?->getKey());
                                         });
                                     })
                                         ->pluck('name', 'id'))

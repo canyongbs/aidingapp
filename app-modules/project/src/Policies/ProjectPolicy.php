@@ -39,6 +39,7 @@ namespace AidingApp\Project\Policies;
 use AidingApp\Project\Models\Project;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
+use App\Features\TeamRenameFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -84,7 +85,7 @@ class ProjectPolicy
         if (! auth()->user()->isSuperAdmin()) {
             $department = auth()->user()->department;
 
-            $departmentExists = $project->managerDepartments()->where('departments.id', $department?->getKey())->exists();
+            $departmentExists = $project->managerDepartments()->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), $department?->getKey())->exists();
             $userExists = $project->managerUsers()->where('users.id', auth()->user()->getKey())->exists();
 
             if (! $departmentExists && ! $userExists && ! $project->createdBy->is(auth()->user())) {
@@ -103,7 +104,7 @@ class ProjectPolicy
         if (! auth()->user()->isSuperAdmin()) {
             $department = auth()->user()->department;
 
-            $departmentExists = $project->managerDepartments()->where('departments.id', $department?->getKey())->exists();
+            $departmentExists = $project->managerDepartments()->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), $department?->getKey())->exists();
             $userExists = $project->managerUsers()->where('users.id', auth()->user()->getKey())->exists();
 
             if (! $departmentExists && ! $userExists && ! $project->createdBy->is(auth()->user())) {
@@ -122,7 +123,7 @@ class ProjectPolicy
         if (! auth()->user()->isSuperAdmin()) {
             $department = auth()->user()->department;
 
-            $departmentExists = $project->managerDepartments()->where('departments.id', $department?->getKey())->exists();
+            $departmentExists = $project->managerDepartments()->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), $department?->getKey())->exists();
             $userExists = $project->managerUsers()->where('users.id', auth()->user()->getKey())->exists();
 
             if (! $departmentExists && ! $userExists && ! $project->createdBy->is(auth()->user())) {
@@ -141,7 +142,7 @@ class ProjectPolicy
         if (! auth()->user()->isSuperAdmin()) {
             $department = auth()->user()->department;
 
-            $departmentExists = $project->managerDepartments()->where('departments.id', $department?->getKey())->exists();
+            $departmentExists = $project->managerDepartments()->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), $department?->getKey())->exists();
             $userExists = $project->managerUsers()->where('users.id', auth()->user()->getKey())->exists();
 
             if (! $departmentExists && ! $userExists && ! $project->createdBy->is(auth()->user())) {
