@@ -61,7 +61,7 @@ show_help() {
   echo "                   One or more names of the services, seperated by spaces, can be passed as arguments to filter the logs (e.g. ${BLUE}pls log apps${RESET} or ${BLUE}pls logs app worker${RESET})"
   echo "                   The -f option can be used to follow the logs (e.g. ${BLUE}pls logs app -f${RESET})"
   echo "  exec           Execute a command in a running container"
-  echo "  shell          Start a shell in a running container as webuser"
+  echo "  shell          Start a shell in a running container as www-data"
   echo "  rshell         Start a shell in a running container as root"
   echo "  install        Install pls to $HOME/bin"
   echo "  ih             (Install Helper) Runs the passed command in a CLI container with the same environment as the app container"
@@ -105,7 +105,7 @@ main() {
         service=app
       fi
 
-      exec "${COMPOSE_CMD[@]}" exec -it -u webuser "$service" /bin/bash
+      exec "${COMPOSE_CMD[@]}" exec -it -u "${PLS_EXEC_USER:-www-data}" "$service" /bin/bash
       ;;
     rshell)
       local service=$1
@@ -117,15 +117,15 @@ main() {
       exec "${COMPOSE_CMD[@]}" exec -it "$service" /bin/bash
       ;;
     ih)
-      exec docker compose -f docker-compose.local-cli.yml run -e PUID="${PLS_USER_ID}" -e PGID="${PLS_GROUP_ID}" --rm --build local-cli "$@"
+      exec docker compose -f docker-compose.local-cli.yml run --rm --build local-cli "$@"
       ;;
     npmsetup)
-      exec docker compose -f docker-compose.local-cli.yml run -e PUID="${PLS_USER_ID}" -e PGID="${PLS_GROUP_ID}" --rm --build local-cli \
-        /bin/bash -c "npm ci && chown -R "$PLS_USER_ID":"$PLS_GROUP_ID" /var/www/html/node_modules && npm run build"
+      exec docker compose -f docker-compose.local-cli.yml run --rm --build local-cli \
+        /bin/bash -c "npm ci && npm run build"
       ;;
     composersetup)
-      exec docker compose -f docker-compose.local-cli.yml run -e PUID="${PLS_USER_ID}" -e PGID="${PLS_GROUP_ID}" --rm --build local-cli \
-        /bin/bash -c "composer install && chown -R "$PLS_USER_ID":"$PLS_GROUP_ID" /var/www/html/vendor"
+      exec docker compose -f docker-compose.local-cli.yml run --rm --build local-cli \
+        /bin/bash -c "composer install"
       ;;
     -h|--help)
       show_help

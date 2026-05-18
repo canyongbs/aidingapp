@@ -152,10 +152,10 @@ test('EditServiceRequestTypeAssignments requires valid data', function (EditServ
     assertDatabaseHas(ServiceRequestType::class, $serviceRequestType->fresh()->toArray());
 })->with(
     [
-        'assignment_type is required' => [EditServiceRequestTypeAssignmentsRequestFactory::new()->state(['assignment_type' => null]), ['assignment_type' => 'required']],
-        'assignment_type is not a valid enum value' => [EditServiceRequestTypeAssignmentsRequestFactory::new()->state(['assignment_type' => 'blah']), ['assignment_type' => 'in']],
-        'assignment_type_individual_id is required when assignment_type is Individual' => [EditServiceRequestTypeAssignmentsRequestFactory::new()->withIndividualType()->state(['assignment_type_individual_id' => null]), ['assignment_type_individual_id' => 'required']],
-        'assignment_type_individual_id must be a User in the ServiceRequestTypes managers' => [EditServiceRequestTypeAssignmentsRequestFactory::new()->withIndividualType()->state(['assignment_type_individual_id' => User::factory()]), ['assignment_type_individual_id' => ServiceRequestTypeAssignmentsIndividualUserMustBeAManager::class]],
+        'assignment_type is required' => [fn () => EditServiceRequestTypeAssignmentsRequestFactory::new()->state(['assignment_type' => null]), ['assignment_type' => 'required']],
+        'assignment_type is not a valid enum value' => [fn () => EditServiceRequestTypeAssignmentsRequestFactory::new()->state(['assignment_type' => 'blah']), ['assignment_type' => 'in']],
+        'assignment_type_individual_id is required when assignment_type is Individual' => [fn () => EditServiceRequestTypeAssignmentsRequestFactory::new()->withIndividualType()->state(['assignment_type_individual_id' => null]), ['assignment_type_individual_id' => 'required']],
+        'assignment_type_individual_id must be a User in the ServiceRequestTypes managers' => [fn () => EditServiceRequestTypeAssignmentsRequestFactory::new()->withIndividualType()->state(['assignment_type_individual_id' => User::factory()]), ['assignment_type_individual_id' => ServiceRequestTypeAssignmentsIndividualUserMustBeAManager::class]],
     ]
 );
 

@@ -55,10 +55,9 @@ following in your local `/etc/hosts` (or equivalent) file:
 Going forward this document will make reference to the `pls` command.
 
 The `pls` command is a custom-made script that acts as a tool to run our sometimes complex `docker compose` and other
-related commands. It is located in the root directory of the project and can be run by using `./pls`.
-
-It comes with an install command `./pls install` that will "install" the current version into your home directory `bin`
-folder so that it can be used like a regular command `pls`. This documentation will assume you have done so.
+related commands. For installation and usage details, see the
+[pls installation guide](common/pls.md).
+This documentation will assume you have installed `pls` and it is available in your shell.
 
 #### 1. Initial setup
 

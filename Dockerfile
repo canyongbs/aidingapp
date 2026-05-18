@@ -142,18 +142,22 @@ ENV BUILD_PHP_VERSION=$PHP_VERSION \
     PHP_ERROR_REPORTING="22527" \
     PHP_MAX_EXECUTION_TIME="99" \
     PHP_MAX_INPUT_TIME="-1" \
+    PHP_MAX_INPUT_VARS="5000" \
     PHP_MEMORY_LIMIT="256M" \
     PHP_OPCACHE_ENABLE="0" \
-    PHP_OPCACHE_INTERNED_STRINGS_BUFFER="8" \
-    PHP_OPCACHE_MAX_ACCELERATED_FILES="10000" \
-    PHP_OPCACHE_MEMORY_CONSUMPTION="128" \
-    PHP_OPCACHE_REVALIDATE_FREQ="2" \
+    PHP_OPCACHE_INTERNED_STRINGS_BUFFER="16" \
+    PHP_OPCACHE_JIT="disable" \
+    PHP_OPCACHE_JIT_BUFFER_SIZE="0" \
+    PHP_OPCACHE_MAX_ACCELERATED_FILES="30000" \
+    PHP_OPCACHE_MEMORY_CONSUMPTION="256" \
+    PHP_OPCACHE_REVALIDATE_FREQ="0" \
+    PHP_OPCACHE_VALIDATE_TIMESTAMPS="1" \
     PHP_OPEN_BASEDIR="" \
     PHP_POST_MAX_SIZE="100M" \
+    PHP_REALPATH_CACHE_SIZE="4096k" \
+    PHP_REALPATH_CACHE_TTL="120" \
     PHP_SESSION_COOKIE_SECURE=true \
-    PHP_UPLOAD_MAX_FILE_SIZE="100M" \
-    PUID=9999 \
-    PGID=9999
+    PHP_UPLOAD_MAX_FILE_SIZE="100M"
 
 # Bring over the s6 overlay setup
 COPY --from=setup /opt/s6/ /
@@ -171,9 +175,9 @@ COPY --from=imagemagick-builder /usr/lib/php/${PHP_API_VERSION}/imagick.so /usr/
 
 RUN apt-get update \
     \
-    # configure web user and group \
-    && groupadd -r -g "$PGID" webgroup \
-    && useradd --no-log-init -r -s /usr/bin/bash -d "$WEBUSER_HOME" -u "$PUID" -g "$PGID" webuser \
+    # configure www-data user home directory \
+    && usermod -d "$WEBUSER_HOME" www-data \
+    && usermod -s /usr/bin/bash www-data \
     \
     # install dependencies \
     && apt-get -y --no-install-recommends install \
@@ -193,6 +197,7 @@ RUN apt-get update \
     php8.4-cli \
     php8.4-common \
     php8.4-curl \
+    php8.4-fpm \
     php8.4-gd \
     php8.4-intl \
     php8.4-mailparse \
@@ -244,7 +249,17 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
-COPY --chmod=755 docker/etc/php/8.4/cli/php.ini /etc/php/8.4/cli/php.ini
+COPY --chmod=644 docker/etc/php/8.4/cli/php.ini /etc/php/8.4/cli/php.ini
+
+# Bring in FPM configuration
+COPY --chmod=644 docker/etc/php/8.4/fpm/php-fpm.conf /etc/php/8.4/fpm/php-fpm.conf
+COPY --chmod=644 docker/etc/php/8.4/fpm/pool.d/www.conf /etc/php/8.4/fpm/pool.d/www.conf
+COPY --chmod=644 docker/etc/php/8.4/fpm/php.ini /etc/php/8.4/fpm/php.ini
+
+# Ensure www-data owns necessary directories
+RUN mkdir -p /var/www/html /composer \
+    && chown -R www-data:www-data /var/www/html /run /composer \
+    && git config --system --add safe.directory /var/www/html
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
@@ -275,9 +290,7 @@ ENTRYPOINT ["/init"]
 
 FROM base AS web-base
 
-ENV NGINX_FASTCGI_BUFFERS="8 8k" \
-    NGINX_FASTCGI_BUFFER_SIZE="8k" \
-    NGINX_SERVER_TOKENS=off \
+ENV NGINX_SERVER_TOKENS=off \
     NGINX_WEBROOT=/var/www/html/public
 
 RUN apt-get update \
@@ -285,7 +298,11 @@ RUN apt-get update \
     nginx \
     \
     # ensure web permissions are correct \
-    && chown -R webuser:webgroup /var/www/html/ \
+    && chown -R www-data:www-data /var/www/html/ \
+    \
+    # ensure nginx/fpm directories are writable by www-data (non-root) \
+    && mkdir -p /var/cache/nginx /var/log/nginx /var/lib/nginx /etc/ssl/web \
+    && chown -R www-data:www-data /var/cache/nginx /var/log/nginx /var/lib/nginx /run /etc/ssl/web \
     \
     # cleanup \
     && apt-get clean \
@@ -294,34 +311,33 @@ RUN apt-get update \
 
 COPY docker/etc/nginx/ /etc/nginx/
 
-COPY --from=ghcr.io/roadrunner-server/roadrunner:2025.1.13 --chown=$PUID:$PGID --chmod=0755 /usr/bin/rr /usr/local/bin/rr
+# Only grant www-data write access to the directory that needs runtime modification
+RUN chown -R www-data:www-data /etc/nginx/sites-enabled/
 
 COPY --chmod=755 ./docker/web/s6-overlay/ /etc/s6-overlay/
 
-EXPOSE 80 443
+EXPOSE 8080 8443
 
 FROM web-base AS web-development
 
-# Change the dialout group GID to avoid conflict with macOS 'staff' (GID 20)
-RUN groupmod -g 1200 dialout
+# Fix permission issues in development by setting the "www-data"
+# user to the same UID/GID as the host user running docker.
+COPY --chmod=755 ./docker/set-id /set-id
+COPY --chmod=755 ./docker/set-file-permissions /set-file-permissions
 
-# Fix permission issues in development by setting the "webuser"
-# user to the same user and group that is running docker.
-COPY ./docker/set-id /set-id
+ARG USER_ID
+ARG GROUP_ID
+RUN /set-id www-data ${USER_ID}:${GROUP_ID} && \
+    /set-file-permissions --owner ${USER_ID}:${GROUP_ID} --service web && \
+    rm /set-id /set-file-permissions
 
-ARG PUID
-ARG PGID
-RUN set-id webuser ${PUID} ${PGID} ; \
-    rm /set-id
+RUN chmod g+s -R /var/www/html
 
-RUN chown -R "$PUID":"$PGID" /var/www/html \
-    && chmod g+s -R /var/www/html
+USER www-data
 
 FROM web-base AS web-deploy
 
-COPY . /var/www/html
-
-RUN chown -R $(id -un):$(id -gn) /var/www/html
+COPY --chown=www-data:www-data . /var/www/html
 
 RUN npm ci --ignore-scripts \
     && rm -rf /var/www/html/vendor \
@@ -329,12 +345,11 @@ RUN npm ci --ignore-scripts \
     && npm run build \
     && npm ci --omit=dev
 
-RUN chown -R "$PUID":"$PGID" /var/www/html \
-    && chgrp "$PGID" /var/www/html/storage/logs \
-    && chmod g+s /var/www/html/storage/logs \
-    && find /var/www/html -type d -print0 | xargs -0 chmod 755 \
+RUN find /var/www/html -type d -print0 | xargs -0 chmod 755 \
     && find /var/www/html \( -path /var/www/html/docker -o -path /var/www/html/node_modules -o -path /var/www/html/vendor \) -prune -o -type f -print0 | xargs -0 chmod 644 \
     && chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
+
+USER www-data
 
 FROM base AS worker-base
 
@@ -346,17 +361,16 @@ RUN chmod +x /generate-queues.sh
 
 FROM worker-base AS worker-development
 
-# Change the dialout group GID to avoid conflict with macOS 'staff' (GID 20)
-RUN groupmod -g 1200 dialout
+# Fix permission issues in development by setting the "www-data"
+# user to the same UID/GID as the host user running docker.
+COPY --chmod=755 ./docker/set-id /set-id
+COPY --chmod=755 ./docker/set-file-permissions /set-file-permissions
 
-# Fix permission issues in development by setting the "webuser"
-# user to the same user and group that is running docker.
-COPY ./docker/set-id /set-id
-
-ARG PUID
-ARG PGID
-RUN set-id webuser ${PUID} ${PGID} ; \
-    rm /set-id
+ARG USER_ID
+ARG GROUP_ID
+RUN /set-id www-data ${USER_ID}:${GROUP_ID} && \
+    /set-file-permissions --owner ${USER_ID}:${GROUP_ID} --service worker && \
+    rm /set-id /set-file-permissions
 
 ARG MULTIPLE_DEVELOPMENT_QUEUES=false
 
@@ -372,8 +386,9 @@ RUN if [[ -z "$MULTIPLE_DEVELOPMENT_QUEUES" ]] ; then \
 
 RUN rm /generate-queues.sh
 
-RUN chown -R "$PUID":"$PGID" /var/www/html \
-    && chmod g+s -R /var/www/html
+RUN chmod g+s -R /var/www/html
+
+USER www-data
 
 FROM worker-base AS worker-deploy
 
@@ -385,9 +400,7 @@ RUN /generate-queues.sh "default" "\$SQS_QUEUE" \
 
 RUN rm /generate-queues.sh
 
-COPY . /var/www/html
-
-RUN chown -R $(id -un):$(id -gn) /var/www/html
+COPY --chown=www-data:www-data . /var/www/html
 
 RUN npm ci --ignore-scripts \
     && rm -rf /var/www/html/vendor \
@@ -395,46 +408,36 @@ RUN npm ci --ignore-scripts \
     && npm run build \
     && npm ci --omit=dev
 
-RUN chown -R "$PUID":"$PGID" /var/www/html \
-    && chgrp "$PGID" /var/www/html/storage/logs \
-    && chmod g+s /var/www/html/storage/logs \
-    && find /var/www/html -type d -print0 | xargs -0 chmod 755 \
+RUN find /var/www/html -type d -print0 | xargs -0 chmod 755 \
     && find /var/www/html \( -path /var/www/html/docker -o -path /var/www/html/node_modules -o -path /var/www/html/vendor \) -prune -o -type f -print0 | xargs -0 chmod 644 \
     && chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
+
+USER www-data
 
 FROM base AS scheduler-base
 
-COPY --chmod=644 ./docker/cron.d/ /etc/cron.d/
 COPY --chmod=755 ./docker/scheduler/s6-overlay/ /etc/s6-overlay/
-
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-    cron \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
 FROM scheduler-base AS scheduler-development
 
-# Change the dialout group GID to avoid conflict with macOS 'staff' (GID 20)
-RUN groupmod -g 1200 dialout
+# Fix permission issues in development by setting the "www-data"
+# user to the same UID/GID as the host user running docker.
+COPY --chmod=755 ./docker/set-id /set-id
+COPY --chmod=755 ./docker/set-file-permissions /set-file-permissions
 
-# Fix permission issues in development by setting the "webuser"
-# user to the same user and group that is running docker.
-COPY ./docker/set-id /set-id
+ARG USER_ID
+ARG GROUP_ID
+RUN /set-id www-data ${USER_ID}:${GROUP_ID} && \
+    /set-file-permissions --owner ${USER_ID}:${GROUP_ID} --service scheduler && \
+    rm /set-id /set-file-permissions
 
-ARG PUID
-ARG PGID
-RUN set-id webuser ${PUID} ${PGID} ; \
-    rm /set-id
+RUN chmod g+s -R /var/www/html
 
-RUN chown -R "$PUID":"$PGID" /var/www/html \
-    && chmod g+s -R /var/www/html
+USER www-data
 
 FROM scheduler-base AS scheduler-deploy
 
-COPY . /var/www/html
-
-RUN chown -R $(id -un):$(id -gn) /var/www/html
+COPY --chown=www-data:www-data . /var/www/html
 
 RUN npm ci --ignore-scripts \
     && rm -rf /var/www/html/vendor \
@@ -442,32 +445,38 @@ RUN npm ci --ignore-scripts \
     && npm run build \
     && npm ci --omit=dev
 
-RUN chown -R "$PUID":"$PGID" /var/www/html \
-    && chgrp "$PGID" /var/www/html/storage/logs \
-    && chmod g+s /var/www/html/storage/logs \
-    && find /var/www/html -type d -print0 | xargs -0 chmod 755 \
+RUN find /var/www/html -type d -print0 | xargs -0 chmod 755 \
     && find /var/www/html \( -path /var/www/html/docker -o -path /var/www/html/node_modules -o -path /var/www/html/vendor \) -prune -o -type f -print0 | xargs -0 chmod 644 \
     && chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
+
+USER www-data
 
 FROM base AS release-automation
 
 COPY --chmod=755 ./docker/release-automation/s6-overlay/ /etc/s6-overlay/
 
-COPY . /var/www/html
-
-RUN chown -R $(id -un):$(id -gn) /var/www/html
+COPY --chown=www-data:www-data . /var/www/html
 
 RUN rm -rf /var/www/html/vendor \
     && composer install --no-dev --no-interaction --no-progress --optimize-autoloader --apcu-autoloader
 
-RUN chown -R "$PUID":"$PGID" /var/www/html \
-    && chgrp "$PGID" /var/www/html/storage/logs \
-    && chmod g+s /var/www/html/storage/logs \
-    && find /var/www/html -type d -print0 | xargs -0 chmod 755 \
+RUN find /var/www/html -type d -print0 | xargs -0 chmod 755 \
     && find /var/www/html \( -path /var/www/html/docker -o -path /var/www/html/vendor \) -prune -o -type f -print0 | xargs -0 chmod 644 \
     && chmod -R ug+rwx /var/www/html/storage /var/www/html/bootstrap/cache
 
+USER www-data
+
 FROM base AS cli-local-tooling
 
-# Change the dialout group GID to avoid conflict with macOS 'staff' (GID 20)
-RUN groupmod -g 1200 dialout
+# Fix permission issues in development by setting the "www-data"
+# user to the same UID/GID as the host user running docker.
+COPY --chmod=755 ./docker/set-id /set-id
+COPY --chmod=755 ./docker/set-file-permissions /set-file-permissions
+
+ARG USER_ID
+ARG GROUP_ID
+RUN /set-id www-data ${USER_ID}:${GROUP_ID} && \
+    /set-file-permissions --owner ${USER_ID}:${GROUP_ID} --service cli && \
+    rm /set-id /set-file-permissions
+
+USER www-data
