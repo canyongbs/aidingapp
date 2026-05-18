@@ -40,15 +40,12 @@ use AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages\ListInboundWebhoo
 use AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages\ViewInboundWebhook;
 use AidingApp\Webhook\Models\InboundWebhook;
 use App\Models\User;
-use BackedEnum;
 use Filament\Resources\Resource;
 use UnitEnum;
 
 class InboundWebhookResource extends Resource
 {
     protected static ?string $model = InboundWebhook::class;
-
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-signal';
 
     protected static ?int $navigationSort = 40;
 

@@ -48,7 +48,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewSer
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
 use App\Models\User;
-use BackedEnum;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
@@ -59,8 +58,6 @@ use UnitEnum;
 class ServiceRequestResource extends Resource
 {
     protected static ?string $model = ServiceRequest::class;
-
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-briefcase';
 
     protected static string | UnitEnum | null $navigationGroup = 'Service Management';
 
