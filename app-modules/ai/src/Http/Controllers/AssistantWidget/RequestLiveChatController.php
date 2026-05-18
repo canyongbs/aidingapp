@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,14 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
-use App\Support\AbstractFeatureFlag;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Actions\RequestServiceRequestLiveChat;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response;
 
-class ServiceRequestTypeLiveChatSettingsFeature extends AbstractFeatureFlag
+class RequestLiveChatController extends Controller
 {
-    public function resolve(mixed $scope): mixed
+    public function __invoke(Request $request, ServiceRequest $serviceRequest): JsonResponse
     {
-        return false;
+        $contact = auth('contact')->user() ?? $request->user();
+
+        abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
+        abort_if(! $serviceRequest->respondent()->is($contact), Response::HTTP_FORBIDDEN);
+
+        try {
+            $conversation = app(RequestServiceRequestLiveChat::class)->execute($serviceRequest, $contact);
+        } catch (ValidationException $exception) {
+            return response()->json([
+                'errors' => $exception->errors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        return response()->json([
+            'id' => $conversation->getKey(),
+            'status' => 'queued',
+        ]);
     }
 }

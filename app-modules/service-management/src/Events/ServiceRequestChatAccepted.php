@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,14 +34,49 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\ServiceManagement\Events;
 
-use App\Support\AbstractFeatureFlag;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 
-class ServiceRequestTypeLiveChatSettingsFeature extends AbstractFeatureFlag
+class ServiceRequestChatAccepted implements ShouldBroadcastNow
 {
-    public function resolve(mixed $scope): mixed
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
+
+    public function __construct(
+        public ServiceRequestConversation $serviceRequestConversation,
+    ) {}
+
+    public function broadcastAs(): string
     {
-        return false;
+        return 'service-request-chat.accepted';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function broadcastWith(): array
+    {
+        return [
+            'id' => $this->serviceRequestConversation->getKey(),
+            'conversation_id' => $this->serviceRequestConversation->conversation_id,
+        ];
+    }
+
+    /**
+     * @return array<int, Channel>
+     */
+    public function broadcastOn(): array
+    {
+        return [
+            new PrivateChannel("service-request-chat.{$this->serviceRequestConversation->getKey()}"),
+        ];
     }
 }

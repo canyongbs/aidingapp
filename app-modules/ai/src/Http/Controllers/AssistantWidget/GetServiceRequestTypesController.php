@@ -42,6 +42,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeLiveChatSettingsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -64,6 +65,7 @@ class GetServiceRequestTypesController extends Controller
 
         $aiClarificationGlobalEnabled = app(AiClarificationSettings::class)->is_enabled;
         $aiResolutionGlobalEnabled = app(AiResolutionSettings::class)->is_enabled;
+        $liveChatFeatureEnabled = ServiceRequestTypeLiveChatSettingsFeature::active();
 
         $categoriesById = [];
 
@@ -90,6 +92,7 @@ class GetServiceRequestTypesController extends Controller
                 'category_id' => $type->category_id,
                 'is_ai_clarification_enabled' => $aiClarificationGlobalEnabled && $type->is_ai_clarification_enabled,
                 'is_ai_resolution_enabled' => $aiResolutionGlobalEnabled && $type->is_ai_resolution_enabled,
+                'is_live_chat_enabled' => $liveChatFeatureEnabled && $type->is_live_chat_enabled,
                 'priorities' => $type->priorities->map(fn ($priority) => [
                     'id' => $priority->getKey(),
                     'name' => $priority->name,
@@ -140,6 +143,8 @@ class GetServiceRequestTypesController extends Controller
             'form_url_base' => route('widgets.assistant.api.service-request-form', ['type' => '__TYPE__']),
             'generate_question_url_base' => route('widgets.assistant.api.service-request.generate-question', ['type' => '__TYPE__']),
             'evaluate_ai_resolution_url_base' => route('widgets.assistant.api.service-request.evaluate-ai-resolution', ['type' => '__TYPE__']),
+            'live_chat_eligibility_url_base' => route('widgets.assistant.api.service-request.live-chat.eligibility', ['serviceRequest' => '__SR__']),
+            'live_chat_request_url_base' => route('widgets.assistant.api.service-request.live-chat.request', ['serviceRequest' => '__SR__']),
             'accepted_mime_types' => ($uploadsCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)())->getMimes(),
             'max_file_size_mb' => $uploadsCollection->getMaxFileSizeInMB(),
             'max_files' => $uploadsCollection->getMaxNumberOfFiles(),

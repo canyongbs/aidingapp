@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -49,6 +49,19 @@ return new class () extends Migration {
                 $table->unsignedInteger('max_simultaneous_chats')->nullable();
             });
 
+            Schema::create('service_request_conversations', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->foreignUuid('service_request_id')->constrained('service_requests')->cascadeOnDelete();
+                $table->foreignUuid('contact_id')->constrained('contacts')->cascadeOnDelete();
+                $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
+                $table->foreignUuid('conversation_id')->nullable()->constrained('conversations')->nullOnDelete();
+                $table->timestamp('queued_at');
+                $table->timestamp('accepted_at')->nullable();
+                $table->timestamp('finished_at')->nullable();
+                $table->string('finished_reason')->nullable();
+                $table->timestamps();
+            });
+
             ServiceRequestTypeLiveChatSettingsFeature::activate();
         });
     }
@@ -57,6 +70,8 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             ServiceRequestTypeLiveChatSettingsFeature::deactivate();
+
+            Schema::dropIfExists('service_request_conversations');
 
             Schema::table('service_request_types', function (Blueprint $table) {
                 $table->dropColumn('is_live_chat_enabled');

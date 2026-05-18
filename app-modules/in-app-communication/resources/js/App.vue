@@ -95,6 +95,7 @@
     const showNewConversationModal = ref(false);
     const showFindChannelsModal = ref(false);
     const showParticipants = ref(false);
+    const conversationListRef = ref(null);
 
     function handlePageClose() {
         disconnect();
@@ -123,6 +124,9 @@
                 await fetchConversation(conversationId);
                 subscribeToConversation(conversationId);
             },
+            onQueueItem: (item) => {
+                conversationListRef.value?.addQueueItem(item);
+            },
         });
 
         const loaded = await loadConversations();
@@ -141,6 +145,10 @@
                 subscribeToConversation(conversationId);
                 store.selectConversation(conversationId);
             }
+        }
+
+        if (urlParams.get('tab') === 'queue') {
+            conversationListRef.value?.focusQueue();
         }
 
         // Handle browser tab close/navigation
@@ -263,6 +271,12 @@
     function handleDismissMessage(messageId) {
         removeFailedMessage(messageId);
     }
+
+    async function handleQueueAccepted(conversationId) {
+        await fetchConversation(conversationId);
+        subscribeToConversation(conversationId);
+        store.selectConversation(conversationId);
+    }
 </script>
 
 <template>
@@ -274,6 +288,7 @@
             :class="[selectedConversationId ? 'hidden lg:block' : 'block']"
         >
             <ConversationList
+                ref="conversationListRef"
                 :conversations="conversations"
                 :selected-id="selectedConversationId"
                 :unread-counts="store.unreadCounts"
@@ -286,6 +301,7 @@
                 @find-channels="handleFindChannels"
                 @pin="handleTogglePin"
                 @load-more="handleLoadMoreConversations"
+                @queue-accepted="handleQueueAccepted"
             />
         </div>
 

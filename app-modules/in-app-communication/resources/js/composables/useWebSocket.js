@@ -46,7 +46,7 @@ export function useWebSocket() {
         return window.Echo;
     }
 
-    function subscribeToUserChannel(userId, { onNewConversation, onUnknownConversation } = {}) {
+    function subscribeToUserChannel(userId, { onNewConversation, onUnknownConversation, onQueueItem } = {}) {
         const echo = getEcho();
         if (!echo || userChannelSubscribed.value) {
             return;
@@ -95,6 +95,11 @@ export function useWebSocket() {
                 if (event.participant_id === userId && event.conversation) {
                     store.addConversation(event.conversation);
                     subscribeToConversation(event.conversation.id);
+                }
+            })
+            .listen('.service-request-chat.queued', (event) => {
+                if (onQueueItem) {
+                    onQueueItem(event);
                 }
             });
 

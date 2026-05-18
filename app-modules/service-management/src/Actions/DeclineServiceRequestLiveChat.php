@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,14 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\ServiceManagement\Actions;
 
-use App\Support\AbstractFeatureFlag;
+use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
+use AidingApp\ServiceManagement\Events\ServiceRequestChatDeclined;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 
-class ServiceRequestTypeLiveChatSettingsFeature extends AbstractFeatureFlag
+class DeclineServiceRequestLiveChat
 {
-    public function resolve(mixed $scope): mixed
+    public function execute(ServiceRequestConversation $serviceRequestConversation): void
     {
-        return false;
+        if (! $serviceRequestConversation->isPending()) {
+            return;
+        }
+
+        $serviceRequestConversation->update([
+            'finished_at' => now(),
+            'finished_reason' => ServiceRequestConversationFinishedReason::AgentDeclined,
+        ]);
+
+        broadcast(new ServiceRequestChatDeclined($serviceRequestConversation));
     }
 }

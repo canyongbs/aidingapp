@@ -36,6 +36,7 @@
 
 use AidingApp\Ai\Http\Controllers\AssistantWidget\AuthenticateController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\AuthorizeBroadcastController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\CheckLiveChatEligibilityController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\EvaluateServiceRequestAiResolutionController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GenerateServiceRequestQuestionController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestFormController;
@@ -43,6 +44,7 @@ use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestTypesControll
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestUploadUrlController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GetWidgetConfigController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\RequestAuthenticationController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\RequestLiveChatController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\SendMessageController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\ServeWidgetAssetController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\StoreServiceRequestController;
@@ -109,6 +111,14 @@ Route::middleware([
                         Route::post('service-request/{type}/evaluate-ai-resolution', EvaluateServiceRequestAiResolutionController::class)
                             ->middleware(['auth:sanctum'])
                             ->name('service-request.evaluate-ai-resolution');
+
+                        Route::get('service-request/{serviceRequest}/live-chat/eligibility', CheckLiveChatEligibilityController::class)
+                            ->middleware(['auth:sanctum'])
+                            ->name('service-request.live-chat.eligibility');
+
+                        Route::post('service-request/{serviceRequest}/live-chat', RequestLiveChatController::class)
+                            ->middleware(['auth:sanctum'])
+                            ->name('service-request.live-chat.request');
 
                         Route::match(
                             ['GET', 'POST', 'HEAD'],

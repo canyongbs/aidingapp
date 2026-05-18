@@ -42,6 +42,8 @@
 
     defineProps({
         serviceRequestTypesUrl: { type: String, required: true },
+        websocketsConfig: { type: Object, default: null },
+        authEndpoint: { type: String, default: null },
     });
 
     defineEmits(['back']);
@@ -56,6 +58,7 @@
         isSubmitting,
         submitError,
         fieldErrors,
+        serviceRequestId,
         aiClarificationEnabled,
         aiResolutionEnabled,
         questionsAndAnswers,
@@ -101,6 +104,7 @@
             @success="
                 (title) => {
                     submittedTitle = title;
+                    serviceRequestId = submitState?.serviceRequestId ?? null;
                     step = 'success';
                 }
             "
@@ -189,6 +193,9 @@
             v-if="step === 'success'"
             :title="submittedTitle"
             :ai-resolved="wasAiResolved"
+            :service-request-id="serviceRequestId"
+            :websockets-config="websocketsConfig"
+            :auth-endpoint="authEndpoint"
             @back="$emit('back')"
         />
     </div>

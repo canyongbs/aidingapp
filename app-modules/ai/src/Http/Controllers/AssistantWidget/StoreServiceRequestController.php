@@ -182,6 +182,7 @@ class StoreServiceRequestController extends Controller
 
         return response()->json([
             'message' => 'Service request submitted successfully.',
+            'service_request_id' => $serviceRequest->getKey(),
         ]);
     }
 

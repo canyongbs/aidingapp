@@ -34,7 +34,9 @@
 
 <script setup>
     import { ChatBubbleLeftRightIcon, HashtagIcon, PlusIcon } from '@heroicons/vue/24/outline';
-    import { computed, ref } from 'vue';
+    import axios from 'axios';
+    import { computed, onMounted, onUnmounted, ref } from 'vue';
+    import ChatRequestQueue from './ChatRequestQueue.vue';
     import ConversationListItem from './ConversationListItem.vue';
     import EmptyState from './ui/EmptyState.vue';
 
@@ -48,13 +50,55 @@
         currentUserId: { type: String, required: true },
     });
 
-    const emit = defineEmits(['select', 'new-conversation', 'find-channels', 'pin', 'load-more']);
+    const emit = defineEmits(['select', 'new-conversation', 'find-channels', 'pin', 'load-more', 'queue-accepted']);
 
     const scrollContainer = ref(null);
+    const activeTab = ref('conversations');
+    const queueItems = ref([]);
+    const queueLoading = ref(true);
+    const now = ref(Date.now());
+    let queueInterval = null;
+    let tickInterval = null;
+
+    const MAX_AGE_MS = 5 * 60 * 1000;
+
+    const queueCount = computed(
+        () =>
+            queueItems.value.filter((item) => {
+                const timestamp = /[Z+\-]\d{0,2}:?\d{0,2}$/.test(item.queued_at)
+                    ? item.queued_at
+                    : item.queued_at + 'Z';
+                return now.value - new Date(timestamp).getTime() < MAX_AGE_MS;
+            }).length,
+    );
 
     const pinnedConversations = computed(() => props.conversations.filter((conversation) => conversation.is_pinned));
 
     const unpinnedConversations = computed(() => props.conversations.filter((conversation) => !conversation.is_pinned));
+
+    async function fetchQueueCount() {
+        try {
+            const response = await axios.get('/api/chat/service-request-queue');
+            queueItems.value = response.data.data;
+        } catch {
+            // silently fail
+        } finally {
+            queueLoading.value = false;
+        }
+    }
+
+    onMounted(() => {
+        fetchQueueCount();
+        queueInterval = setInterval(fetchQueueCount, 15000);
+        tickInterval = setInterval(() => {
+            now.value = Date.now();
+        }, 1000);
+    });
+
+    onUnmounted(() => {
+        if (queueInterval) clearInterval(queueInterval);
+        if (tickInterval) clearInterval(tickInterval);
+    });
 
     function handleScroll(event) {
         if (props.loadingMore || !props.hasMore) return;
@@ -62,11 +106,29 @@
         const container = event.target;
         const scrollBottom = container.scrollHeight - container.scrollTop - container.clientHeight;
 
-        // Load more when within 100px of the bottom
         if (scrollBottom < 100) {
             emit('load-more');
         }
     }
+
+    function handleQueueAccepted(conversationId) {
+        activeTab.value = 'conversations';
+        fetchQueueCount();
+        emit('queue-accepted', conversationId);
+    }
+
+    function focusQueue() {
+        activeTab.value = 'queue';
+    }
+
+    function addQueueItem(item) {
+        const exists = queueItems.value.some((i) => i.id === item.id);
+        if (!exists) {
+            queueItems.value = [...queueItems.value, item];
+        }
+    }
+
+    defineExpose({ focusQueue, addQueueItem });
 </script>
 
 <template>
@@ -101,8 +163,53 @@
             </div>
         </div>
 
+        <!-- Tabs -->
+        <div class="px-3 pt-2 pb-1 shrink-0">
+            <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
+                <button
+                    type="button"
+                    :class="[
+                        'flex-1 text-sm font-medium py-2 rounded-md transition-all',
+                        activeTab === 'conversations'
+                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+                    ]"
+                    @click="activeTab = 'conversations'"
+                >
+                    Conversations
+                </button>
+                <button
+                    type="button"
+                    :class="[
+                        'flex-1 text-sm font-medium py-2 rounded-md transition-all relative',
+                        activeTab === 'queue'
+                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
+                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+                    ]"
+                    @click="activeTab = 'queue'"
+                >
+                    Queue
+                    <span
+                        v-if="queueCount > 0"
+                        class="ml-1 inline-flex items-center justify-center min-w-5 h-5 px-1 text-xs font-bold text-white bg-primary-500 rounded-full"
+                    >
+                        {{ queueCount }}
+                    </span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Queue Content -->
+        <ChatRequestQueue
+            v-if="activeTab === 'queue'"
+            :items="queueItems"
+            :loading="queueLoading"
+            @accepted="handleQueueAccepted"
+            @refresh="fetchQueueCount"
+        />
+
         <!-- Conversation List -->
-        <div ref="scrollContainer" class="flex-1 overflow-y-auto" @scroll="handleScroll">
+        <div v-else ref="scrollContainer" class="flex-1 overflow-y-auto" @scroll="handleScroll">
             <div v-if="loading" class="flex items-center justify-center p-8">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 bg-primary-400 rounded-full animate-bounce"></div>

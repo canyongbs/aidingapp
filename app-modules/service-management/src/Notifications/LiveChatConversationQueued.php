@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,14 +34,48 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\ServiceManagement\Notifications;
 
-use App\Support\AbstractFeatureFlag;
+use AidingApp\InAppCommunication\Filament\Pages\UserChat;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
+use Illuminate\Notifications\Notification as BaseNotification;
 
-class ServiceRequestTypeLiveChatSettingsFeature extends AbstractFeatureFlag
+class LiveChatConversationQueued extends BaseNotification implements ShouldQueue
 {
-    public function resolve(mixed $scope): mixed
+    use Queueable;
+
+    public function __construct(
+        public ServiceRequestConversation $serviceRequestConversation,
+    ) {}
+
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
     {
-        return false;
+        return ['broadcast'];
+    }
+
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        $contact = $this->serviceRequestConversation->contact;
+
+        return Notification::make()
+            ->warning()
+            ->title('Incoming Live Chat')
+            ->body("{$contact->full_name} is waiting for assistance.")
+            ->persistent()
+            ->actions([
+                Action::make('view_queue')
+                    ->button()
+                    ->label('View Queue')
+                    ->url(UserChat::getUrl() . '?tab=queue'),
+            ])
+            ->getBroadcastMessage();
     }
 }

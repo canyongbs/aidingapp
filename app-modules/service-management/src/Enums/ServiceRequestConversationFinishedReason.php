@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,14 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\ServiceManagement\Enums;
 
-use App\Support\AbstractFeatureFlag;
+use Filament\Support\Contracts\HasLabel;
 
-class ServiceRequestTypeLiveChatSettingsFeature extends AbstractFeatureFlag
+enum ServiceRequestConversationFinishedReason: string implements HasLabel
 {
-    public function resolve(mixed $scope): mixed
+    case QueueExpired = 'queue_expired';
+
+    case AgentInactive = 'agent_inactive';
+
+    case ContactInactive = 'contact_inactive';
+
+    case AgentEnded = 'agent_ended';
+
+    case ContactEnded = 'contact_ended';
+
+    case AgentDeclined = 'agent_declined';
+
+    public function getLabel(): string
     {
-        return false;
+        return match ($this) {
+            self::QueueExpired => 'Queue Expired',
+            self::AgentInactive => 'Agent Inactive',
+            self::ContactInactive => 'Contact Inactive',
+            self::AgentEnded => 'Agent Ended',
+            self::ContactEnded => 'Contact Ended',
+            self::AgentDeclined => 'Agent Declined',
+        };
     }
 }

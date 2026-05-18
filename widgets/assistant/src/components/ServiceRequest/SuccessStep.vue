@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -32,14 +32,66 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
+    import { ArrowLeftIcon, ChatBubbleLeftRightIcon } from '@heroicons/vue/16/solid';
+    import { onMounted, ref, watch } from 'vue';
+    import { useServiceRequestLiveChat } from '../../composables/useServiceRequestLiveChat.js';
 
-    defineProps({
+    const props = defineProps({
         title: { type: String, required: true },
         aiResolved: { type: Boolean, default: false },
+        serviceRequestId: { type: String, default: null },
+        websocketsConfig: { type: Object, default: null },
+        authEndpoint: { type: String, default: null },
     });
 
     defineEmits(['back']);
+
+    const { eligible, agentName, status, error, checkEligibility, requestChat, cleanup } = useServiceRequestLiveChat(
+        props.websocketsConfig,
+        props.authEndpoint,
+    );
+
+    const countdown = ref(300);
+    let countdownInterval = null;
+
+    onMounted(() => {
+        if (!props.aiResolved && props.serviceRequestId) {
+            checkEligibility(props.serviceRequestId);
+        }
+    });
+
+    function startChat() {
+        requestChat(props.serviceRequestId);
+        startCountdown();
+    }
+
+    function startCountdown() {
+        countdown.value = 300;
+        countdownInterval = setInterval(() => {
+            countdown.value--;
+            if (countdown.value <= 0) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+                if (status.value === 'queued') {
+                    status.value = 'expired';
+                    cleanup();
+                }
+            }
+        }, 1000);
+    }
+
+    watch(status, (newStatus) => {
+        if (['accepted', 'declined', 'expired'].includes(newStatus) && countdownInterval) {
+            clearInterval(countdownInterval);
+            countdownInterval = null;
+        }
+    });
+
+    function formatCountdown(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
 </script>
 
 <template>
@@ -67,6 +119,92 @@
                 </template>
             </p>
         </div>
+
+        <!-- Checking availability -->
+        <template v-if="!aiResolved && status === 'checking'">
+            <div class="w-full border-t border-gray-100 pt-4 flex items-center justify-center gap-2">
+                <svg
+                    class="animate-spin h-4 w-4 text-gray-400"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                >
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                </svg>
+                <span class="text-sm text-gray-500">Checking agent availability...</span>
+            </div>
+        </template>
+
+        <!-- Live Chat offer -->
+        <template v-if="!aiResolved && eligible && status === 'idle'">
+            <div class="w-full border-t border-gray-100 pt-4">
+                <p class="text-sm text-gray-500 mb-3">An agent may be available to chat with you now.</p>
+                <button
+                    @click="startChat"
+                    class="flex items-center justify-center gap-2 w-full px-5 py-2.5 rounded bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium transition-all shadow-sm"
+                >
+                    <ChatBubbleLeftRightIcon class="w-4 h-4" />
+                    Request Live Chat
+                </button>
+            </div>
+        </template>
+
+        <!-- Waiting for agent -->
+        <template v-if="status === 'queued'">
+            <div class="w-full border-t border-gray-100 pt-4 flex flex-col items-center gap-3">
+                <div class="flex items-center gap-2">
+                    <svg
+                        class="animate-spin h-4 w-4 text-brand-500"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                    >
+                        <circle
+                            class="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            stroke-width="4"
+                        ></circle>
+                        <path
+                            class="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+                        ></path>
+                    </svg>
+                    <span class="text-sm text-gray-500">Waiting for an agent to accept...</span>
+                </div>
+                <span class="text-xs text-gray-400 tabular-nums">{{ formatCountdown(countdown) }}</span>
+            </div>
+        </template>
+
+        <!-- Accepted -->
+        <template v-if="status === 'accepted'">
+            <div class="w-full border-t border-gray-100 pt-4 flex flex-col items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                    <ChatBubbleLeftRightIcon class="w-5 h-5 text-green-600" />
+                </div>
+                <p class="text-sm text-gray-700 font-medium">Agent connected! Your chat is ready.</p>
+            </div>
+        </template>
+
+        <!-- Declined or Expired -->
+        <template v-if="status === 'declined' || status === 'expired'">
+            <div class="w-full border-t border-gray-100 pt-4 flex flex-col items-center gap-2">
+                <p class="text-sm text-gray-500">
+                    No agents are available right now. Our team will follow up on your request.
+                </p>
+            </div>
+        </template>
+
+        <!-- Error -->
+        <template v-if="status === 'error'">
+            <div class="w-full border-t border-gray-100 pt-4 flex flex-col items-center gap-2">
+                <p class="text-sm text-gray-500">{{ error }}</p>
+            </div>
+        </template>
 
         <button
             @click="$emit('back')"

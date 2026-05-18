@@ -128,6 +128,8 @@
             <ServiceRequestView
                 v-else-if="currentView === 'service-request'"
                 :service-request-types-url="serviceRequestTypesUrl"
+                :websockets-config="websocketsConfig"
+                :auth-endpoint="websocketsConfig.authEndpoint || '/api/broadcasting/auth'"
                 @back="onBack"
             />
 

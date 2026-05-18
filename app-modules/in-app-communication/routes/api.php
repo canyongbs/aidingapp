@@ -49,6 +49,7 @@ use AidingApp\InAppCommunication\Http\Controllers\Conversations\UpdateSettingsCo
 use AidingApp\InAppCommunication\Http\Controllers\Messages\CreateMessageController;
 use AidingApp\InAppCommunication\Http\Controllers\Messages\ListMessagesController;
 use AidingApp\InAppCommunication\Http\Controllers\Users\SearchUsersController;
+use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestChatQueueController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['web', 'auth'])
@@ -99,4 +100,13 @@ Route::middleware(['web', 'auth'])
 
         Route::post('/conversations/{conversation}/messages', CreateMessageController::class)
             ->name('conversations.messages.store');
+
+        Route::get('/service-request-queue', [ServiceRequestChatQueueController::class, 'index'])
+            ->name('service-request-queue.index');
+
+        Route::post('/service-request-queue/{serviceRequestConversation}/accept', [ServiceRequestChatQueueController::class, 'accept'])
+            ->name('service-request-queue.accept');
+
+        Route::post('/service-request-queue/{serviceRequestConversation}/decline', [ServiceRequestChatQueueController::class, 'decline'])
+            ->name('service-request-queue.decline');
     });

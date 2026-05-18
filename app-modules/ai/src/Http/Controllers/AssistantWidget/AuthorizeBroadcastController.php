@@ -38,6 +38,7 @@ namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use Illuminate\Contracts\Broadcasting\Broadcaster;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -61,6 +62,10 @@ class AuthorizeBroadcastController extends Controller
 
         // @phpstan-ignore function.alreadyNarrowedType
         $normalizedName = method_exists($broadcaster, 'normalizeChannelName') ? $broadcaster->normalizeChannelName($channelName) : $channelName;
+
+        if (Str::startsWith($normalizedName, 'service-request-chat.')) {
+            return $this->authorizeServiceRequestChat($request, $broadcaster, $normalizedName);
+        }
 
         if (! Str::startsWith($normalizedName, 'portal-assistant-thread-')) {
             throw new AccessDeniedHttpException();
@@ -89,6 +94,24 @@ class AuthorizeBroadcastController extends Controller
             if ($guestToken && $thread->guest_token === $guestToken) {
                 return $broadcaster->validAuthenticationResponse($request, true);
             }
+        }
+
+        throw new AccessDeniedHttpException();
+    }
+
+    protected function authorizeServiceRequestChat(Request $request, Broadcaster $broadcaster, string $normalizedName): mixed
+    {
+        $conversationId = Str::after($normalizedName, 'service-request-chat.');
+        $conversation = ServiceRequestConversation::find($conversationId);
+
+        if (! $conversation) {
+            throw new AccessDeniedHttpException();
+        }
+
+        $user = Auth::guard('contact')->user();
+
+        if ($user instanceof Contact && $conversation->contact()->is($user)) {
+            return $broadcaster->validAuthenticationResponse($request, true);
         }
 
         throw new AccessDeniedHttpException();
