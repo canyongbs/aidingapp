@@ -55,7 +55,7 @@ class ProjectResource extends Resource
 {
     protected static ?string $model = Project::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Project Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Projects';
 
     protected static ?int $navigationSort = 10;
 

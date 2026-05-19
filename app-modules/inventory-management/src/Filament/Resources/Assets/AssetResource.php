@@ -62,7 +62,7 @@ class AssetResource extends Resource
 
     protected static ?string $navigationLabel = 'Asset Management';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
 
     protected static ?int $navigationSort = 30;
 

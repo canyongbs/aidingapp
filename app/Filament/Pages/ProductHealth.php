@@ -61,7 +61,7 @@ class ProductHealth extends HealthCheckResults
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Global Administration';
+        return 'Global Admin';
     }
 
     public static function getNavigationSort(): ?int

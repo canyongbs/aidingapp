@@ -56,7 +56,7 @@ class AdvisoryResource extends Resource
 
     protected static ?string $slug = 'advisories';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
 
     protected static ?int $navigationSort = 60;
 

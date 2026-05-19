@@ -41,7 +41,7 @@ use UnitEnum;
 
 class GlobalArtificialIntelligence extends Cluster
 {
-    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
+    protected static string | UnitEnum | null $navigationGroup = 'Global Admin';
 
     protected static ?string $title = 'Artificial Intelligence';
 

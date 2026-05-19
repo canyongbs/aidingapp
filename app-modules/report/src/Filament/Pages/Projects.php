@@ -47,7 +47,7 @@ class Projects extends Dashboard
 {
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Project Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Projects';
 
     protected static ?string $navigationLabel = 'Projects';
 

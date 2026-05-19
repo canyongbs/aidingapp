@@ -50,7 +50,7 @@ class ChangeRequestResource extends Resource
 
     protected static ?string $navigationLabel = 'Change Management';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
 
     protected static ?int $navigationSort = 70;
 
