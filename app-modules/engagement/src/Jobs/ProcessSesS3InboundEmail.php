@@ -45,7 +45,6 @@ use AidingApp\Engagement\Exceptions\SesS3InboundServiceRequestTypeNotFound;
 use AidingApp\Engagement\Exceptions\SesS3InboundSpamOrVirusDetected;
 use AidingApp\Engagement\Exceptions\UnableToDetectTenantFromSesS3EmailPayload;
 use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload;
-use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
 use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
@@ -271,7 +270,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             }
 
             $contacts->each(function (Contact $contact) use ($parser, $content) {
-                /** @var EngagementResponse $engagementResponse */
                 $engagementResponse = $contact->engagementResponses()
                     ->create([
                         'subject' => $parser->getHeader('subject'),
@@ -281,12 +279,17 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                         'raw' => $content,
                     ]);
 
-                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse) {
+                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse, $contact) {
                     try {
-                        $engagementResponse->addMediaFromStream($attachment->getStream())
+                        $media = $engagementResponse->addMediaFromStream($attachment->getStream())
                             ->setName($attachment->getFilename())
                             ->setFileName($attachment->getFilename())
                             ->toMediaCollection('attachments');
+
+                        if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
+                            $media->createdBy()->associate($contact);
+                            $media->saveQuietly();
+                        }
                     } catch (Throwable $throw) {
                         report($throw);
                     }
