@@ -146,28 +146,28 @@ class AdminPanelProvider extends PanelProvider
             ], isPersistent: true)
             ->navigationGroups([
                 NavigationGroup::make()
-                    ->label('Engagement')
-                    ->icon('heroicon-o-users')
+                    ->label('Live Chat')
+                    ->icon('heroicon-o-chat-bubble-left-right')
                     ->collapsed(),
                 NavigationGroup::make()
                     ->label('Clients')
-                    ->icon('heroicon-o-users')
+                    ->icon('heroicon-o-building-office-2')
                     ->collapsed(),
                 NavigationGroup::make()
-                    ->label('Project Management')
-                    ->icon('heroicon-o-clipboard-document-check')
+                    ->label('Projects')
+                    ->icon('heroicon-o-folder')
                     ->collapsed(),
                 NavigationGroup::make()
-                    ->label('Service Management')
-                    ->icon('heroicon-o-wrench-screwdriver')
+                    ->label('Service Desk')
+                    ->icon('heroicon-o-lifebuoy')
                     ->collapsed(),
                 NavigationGroup::make()
                     ->label('Purchasing')
-                    ->icon('heroicon-o-building-storefront')
+                    ->icon('heroicon-o-document-text')
                     ->collapsed(),
                 NavigationGroup::make()
                     ->label('Analytics')
-                    ->icon('heroicon-o-document-chart-bar')
+                    ->icon('heroicon-o-chart-bar-square')
                     ->collapsed(),
                 NavigationGroup::make()
                     ->label('Engagement Features')
@@ -178,16 +178,16 @@ class AdminPanelProvider extends PanelProvider
                     ->icon('heroicon-o-rocket-launch')
                     ->collapsed(),
                 NavigationGroup::make()
-                    ->label('User Management')
-                    ->icon('heroicon-o-users')
+                    ->label('Users')
+                    ->icon('heroicon-o-user-group')
                     ->collapsed(),
                 NavigationGroup::make()
                     ->label('Settings')
-                    ->icon('heroicon-o-wrench-screwdriver')
+                    ->icon('heroicon-o-adjustments-vertical')
                     ->collapsed(),
                 NavigationGroup::make()
-                    ->label('Global Administration')
-                    ->icon('heroicon-o-adjustments-vertical')
+                    ->label('Global Admin')
+                    ->icon('heroicon-o-shield-check')
                     ->collapsed(),
             ])
             ->sidebarCollapsibleOnDesktop()
