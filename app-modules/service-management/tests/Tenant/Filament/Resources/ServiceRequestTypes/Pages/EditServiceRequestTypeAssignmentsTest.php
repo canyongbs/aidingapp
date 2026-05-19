@@ -35,12 +35,12 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\EditServiceRequestTypeAssignments;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestTypeAssignmentsRequestFactory;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -77,12 +77,12 @@ test('A successful action on the EditServiceRequestTypeAssignments page', functi
 });
 
 test('A successful action on the EditServiceRequestTypeAssignments page when the type selected is Individual', function () {
-    $managerTeam = Team::factory()->create();
+    $managerDepartment = Department::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()
         ->hasAttached(
-            factory: $managerTeam,
-            relationship: 'managerTeams'
+            factory: $managerDepartment,
+            relationship: 'managerDepartments'
         )
         ->create();
 
@@ -96,7 +96,7 @@ test('A successful action on the EditServiceRequestTypeAssignments page when the
 
     $editRequest = EditServiceRequestTypeAssignmentsRequestFactory::new()
         ->withIndividualType()
-        ->withIndividualId($managerTeam)
+        ->withIndividualId($managerDepartment)
         ->create();
 
     livewire(EditServiceRequestTypeAssignments::class, [

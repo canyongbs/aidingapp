@@ -36,6 +36,7 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Features\TeamRenameFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -94,11 +95,11 @@ class CreateUser extends CreateRecord
                             ->formatStateUsing(fn ($state) => Carbon::parse($state)->format(config('project.datetime_format') ?? 'Y-m-d H:i:s'))
                             ->disabled(),
                     ]),
-                Section::make('Team')
+                Section::make('Department')
                     ->schema([
-                        Select::make('team_id')
-                            ->label('')
-                            ->relationship('team', 'name'),
+                        Select::make(TeamRenameFeature::active() ? 'department_id' : 'team_id')
+                            ->hiddenLabel()
+                            ->relationship('department', 'name'),
                     ])
                     ->hidden(fn (?User $record) => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
             ]);

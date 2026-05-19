@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\Feedback;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
@@ -44,7 +45,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -110,8 +110,8 @@ test('Feedback page is gated based on access to the service request', function (
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
 
     $serviceRequest = ServiceRequest::factory()->create();
 
@@ -136,8 +136,8 @@ test('Feedback page is accessible when user is a manager of the service request 
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
 
     $type = ServiceRequestType::factory()->create([
         'has_enabled_feedback_collection' => true,
@@ -149,8 +149,8 @@ test('Feedback page is accessible when user is a manager of the service request 
         ])->getKey(),
     ]);
 
-    // Attach the team as manager of this service request type
-    $type->managerTeams()->attach($team);
+    // Attach the department as manager of this service request type
+    $type->managerDepartments()->attach($department);
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');

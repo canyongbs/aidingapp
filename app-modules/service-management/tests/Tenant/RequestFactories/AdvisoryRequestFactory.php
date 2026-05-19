@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use AidingApp\Team\Models\Team;
 use Worksome\RequestFactories\RequestFactory;
 
 class AdvisoryRequestFactory extends RequestFactory
@@ -50,7 +50,7 @@ class AdvisoryRequestFactory extends RequestFactory
             'description' => fake()->paragraph(),
             'severity_id' => AdvisorySeverity::factory(),
             'status_id' => AdvisoryStatus::factory(),
-            'assigned_team_id' => Team::factory(),
+            'assigned_department_id' => Department::factory(),
         ];
     }
 }

@@ -66,7 +66,7 @@ class ChangeServiceRequestStatusBulkAction
             ->action(function (array $data, Collection $records) {
                 $records->loadMissing([
                     'priority.type.managerUsers',
-                    'priority.type.managerTeams',
+                    'priority.type.managerDepartments',
                     'respondent',
                     'status',
                 ]);
@@ -107,10 +107,10 @@ class ChangeServiceRequestStatusBulkAction
                             return null;
                         }
 
-                        $team = $user->team;
+                        $department = $user->department;
 
                         if (($serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey())) ||
-                            $serviceRequest->priority?->type?->managerTeams?->contains('id', $team?->getKey())
+                            $serviceRequest->priority?->type?->managerDepartments?->contains('id', $department?->getKey())
                         ) {
                             return null;
                         }
