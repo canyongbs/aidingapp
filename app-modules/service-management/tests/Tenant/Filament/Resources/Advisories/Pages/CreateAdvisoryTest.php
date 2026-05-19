@@ -124,9 +124,9 @@ test('CreateAdvisory validates the inputs', function ($data, $errors) {
             AdvisoryRequestFactory::new()->state(['status_id' => fake()->uuid()]),
             ['status_id' => 'in'],
         ],
-        'assigned_team_id does not exist' => [
-            AdvisoryRequestFactory::new()->state(['assigned_team_id' => fake()->uuid()]),
-            ['assigned_team_id' => 'in'],
+        'assigned_department_id does not exist' => [
+            AdvisoryRequestFactory::new()->state(['assigned_department_id' => fake()->uuid()]),
+            ['assigned_department_id' => 'in'],
         ],
     ]
 );

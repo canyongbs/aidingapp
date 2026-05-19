@@ -37,8 +37,8 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use App\Filament\Imports\UserImporter;
+use App\Filament\Resources\Users\Actions\AssignDepartmentBulkAction;
 use App\Filament\Resources\Users\Actions\AssignRolesBulkAction;
-use App\Filament\Resources\Users\Actions\AssignTeamBulkAction;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
@@ -84,9 +84,9 @@ class ListUsers extends ListRecords
                     ->sortable(),
             ])
             ->filters([
-                SelectFilter::make('team')
-                    ->label('Team')
-                    ->relationship('team', 'name')
+                SelectFilter::make('department')
+                    ->label('Department')
+                    ->relationship('department', 'name')
                     ->multiple()
                     ->searchable()
                     ->preload(),
@@ -99,7 +99,7 @@ class ListUsers extends ListRecords
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
-                    AssignTeamBulkAction::make()
+                    AssignDepartmentBulkAction::make()
                         ->visible(function (): bool {
                             /** @var User $user */
                             $user = auth()->user();

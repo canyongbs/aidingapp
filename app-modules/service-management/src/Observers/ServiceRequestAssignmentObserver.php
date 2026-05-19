@@ -60,7 +60,7 @@ class ServiceRequestAssignmentObserver
         $type = $serviceRequestAssignment->serviceRequest->priority->type;
 
         $isManager = $type->managerUsers()->where('users.id', $serviceRequestAssignment->user_id)->exists() ||
-            $type->managerTeams()->whereRelation('users', 'users.id', $serviceRequestAssignment->user_id)->exists();
+            $type->managerDepartments()->whereRelation('users', 'users.id', $serviceRequestAssignment->user_id)->exists();
 
         throw_if(! $isManager, new AttemptedToAssignNonManagerToServiceRequest());
 

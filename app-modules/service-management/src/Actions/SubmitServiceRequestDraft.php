@@ -45,20 +45,20 @@ use Carbon\CarbonImmutable;
 class SubmitServiceRequestDraft
 {
     public function __construct(
-        protected AssignServiceRequestToTeam $assignServiceRequestToTeam,
+        protected AssignServiceRequestToDepartment $assignServiceRequestToDepartment,
     ) {}
 
     public function execute(
         ServiceRequest $draft,
         SystemServiceRequestClassification $statusClassification = SystemServiceRequestClassification::Open,
-        bool $assignToTeam = true,
+        bool $assignToDepartment = true,
     ): string {
         $this->assignStatus($draft, $statusClassification);
         $this->assignRequestNumber($draft);
         $this->markAsSubmitted($draft);
 
-        if ($assignToTeam) {
-            $this->assignToTeam($draft);
+        if ($assignToDepartment) {
+            $this->assignToDepartment($draft);
         }
 
         return $draft->service_request_number;
@@ -98,8 +98,8 @@ class SubmitServiceRequestDraft
         $draft->save();
     }
 
-    protected function assignToTeam(ServiceRequest $draft): void
+    protected function assignToDepartment(ServiceRequest $draft): void
     {
-        $this->assignServiceRequestToTeam->execute($draft);
+        $this->assignServiceRequestToDepartment->execute($draft);
     }
 }

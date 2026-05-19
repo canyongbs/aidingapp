@@ -39,6 +39,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceMan
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
@@ -48,7 +49,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -63,15 +63,15 @@ test('The correct details are displayed on the ListServiceRequests page', functi
 
     $user->givePermissionTo('service_request.*.update');
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequests = ServiceRequest::factory()
         ->has(
@@ -324,9 +324,9 @@ test('service requests only visible to service request type managers', function 
 
     $user->givePermissionTo('service_request.view-any');
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -338,7 +338,7 @@ test('service requests only visible to service request type managers', function 
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
@@ -402,9 +402,9 @@ test('service requests only visible to service request type auditors', function 
 
     $user->givePermissionTo('service_request.view-any');
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -416,7 +416,7 @@ test('service requests only visible to service request type auditors', function 
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->auditorTeams()->attach($team);
+    $serviceRequestType->auditorDepartments()->attach($department);
 
     $serviceRequestsWithAuditors = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
@@ -471,8 +471,8 @@ test('service requests only visible to direct user service request type auditors
 
 test('can list audit member to service request type', function () {
     $user = User::factory()->create();
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->refresh();
 
     $contact = Contact::factory()->create();
@@ -484,7 +484,7 @@ test('can list audit member to service request type', function () {
 
     $serviceRequests = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
-            ->hasAttached($team, [], 'managerTeams'), 'type'),
+            ->hasAttached($department, [], 'managerDepartments'), 'type'),
     ])
         ->for($contact, 'respondent')
         ->count(3)
@@ -499,7 +499,7 @@ test('can list audit member to service request type', function () {
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
-    $user->givePermissionTo('team.view-any');
+    $user->givePermissionTo('department.view-any');
     $user->givePermissionTo('contact.view-any');
 
     actingAs($user);
@@ -539,7 +539,7 @@ test('can list direct user manager to service request type', function () {
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
-    $user->givePermissionTo('team.view-any');
+    $user->givePermissionTo('department.view-any');
     $user->givePermissionTo('contact.view-any');
 
     actingAs($user);
@@ -561,11 +561,11 @@ it('can filter service requests by assigned to with unassigned option', function
 
     $user->givePermissionTo('service_request.*.update');
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
-    $secondUser->team()->associate($team)->save();
+    $secondUser->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -573,7 +573,7 @@ it('can filter service requests by assigned to with unassigned option', function
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     asSuperAdmin();
 
@@ -704,15 +704,15 @@ it('can filter service requests by searched assigned user outside initial preloa
     $searchedUser = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    $searchedUserTeam = Team::factory()->create();
-    $otherUserTeam = Team::factory()->create();
+    $searchedUserDepartment = Department::factory()->create();
+    $otherUserDepartment = Department::factory()->create();
 
-    $searchedUser->team()->associate($searchedUserTeam)->save();
-    $otherUser->team()->associate($otherUserTeam)->save();
+    $searchedUser->department()->associate($searchedUserDepartment)->save();
+    $otherUser->department()->associate($otherUserDepartment)->save();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach([$searchedUserTeam->getKey(), $otherUserTeam->getKey()]);
+    $serviceRequestType->managerDepartments()->attach([$searchedUserDepartment->getKey(), $otherUserDepartment->getKey()]);
 
     $priority = ServiceRequestPriority::factory()->create([
         'type_id' => $serviceRequestType->getKey(),

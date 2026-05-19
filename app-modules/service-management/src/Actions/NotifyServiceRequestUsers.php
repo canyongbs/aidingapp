@@ -55,7 +55,7 @@ class NotifyServiceRequestUsers
             ->where(function (Builder $query) use ($serviceRequest, $shouldSendToManagers, $shouldSendToAuditors, $typeKey) {
                 if ($shouldSendToManagers) {
                     $query->whereHas(
-                        'team',
+                        'department',
                         fn (Builder $query) => $query->whereHas(
                             'manageableServiceRequestTypes',
                             fn (Builder $query) => $query->where('service_request_type_id', $typeKey)->whereHas(
@@ -76,7 +76,7 @@ class NotifyServiceRequestUsers
 
                 if ($shouldSendToAuditors) {
                     $query->{$shouldSendToManagers ? 'orWhereHas' : 'whereHas'}(
-                        'team',
+                        'department',
                         fn (Builder $query) => $query->whereHas(
                             'auditableServiceRequestTypes',
                             fn (Builder $query) => $query->where('service_request_type_id', $typeKey)->whereHas(

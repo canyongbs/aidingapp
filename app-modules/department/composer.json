@@ -1,0 +1,26 @@
+{
+    "name": "canyon-gbs/aiding-app-department",
+    "description": "",
+    "type": "library",
+    "version": "1.0",
+    "license": "proprietary",
+    "require": {
+        "filament/filament": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "AidingApp\\Department\\": "src/",
+            "AidingApp\\Department\\Tests\\": "tests/",
+            "AidingApp\\Department\\Database\\Factories\\": "database/factories/",
+            "AidingApp\\Department\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "minimum-stability": "stable",
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AidingApp\\Department\\Providers\\DepartmentServiceProvider"
+            ]
+        }
+    }
+}

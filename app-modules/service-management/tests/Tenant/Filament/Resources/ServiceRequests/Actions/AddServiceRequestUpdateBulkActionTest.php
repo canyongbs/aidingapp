@@ -35,12 +35,12 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -124,16 +124,16 @@ test('it can add updates to multiple service requests for user directly assigned
     });
 });
 
-test('it can add updates to multiple service requests for user belonging to a manager team', function () {
+test('it can add updates to multiple service requests for user belonging to a manager department', function () {
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequests = ServiceRequest::factory()
         ->has(
