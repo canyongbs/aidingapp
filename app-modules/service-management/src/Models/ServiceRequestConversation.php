@@ -100,8 +100,6 @@ class ServiceRequestConversation extends BaseModel
 
     public function isPending(): bool
     {
-        return $this->queued_at
-            && ! $this->accepted_at
-            && ! $this->finished_at;
+        return (! $this->accepted_at) && (! $this->finished_at);
     }
 }
