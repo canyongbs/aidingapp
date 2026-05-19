@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Actions\EndServiceRequestConversation;
 use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
 use AidingApp\ServiceManagement\Events\ServiceRequestConversationExpired;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+use App\Features\ServiceRequestTypeLiveChatSettingsFeature;
 use App\Models\User;
 use App\Settings\PresenceSettings;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -59,6 +60,10 @@ class EndServiceRequestConversations implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
+        if (! ServiceRequestTypeLiveChatSettingsFeature::active()) {
+            return;
+        }
+
         $this->expireQueuedConversations();
         $this->endInactiveConversations();
     }
