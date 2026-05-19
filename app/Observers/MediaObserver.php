@@ -44,15 +44,14 @@ class MediaObserver
 {
     public function creating(Media $media): void
     {
-        if (! MediaCreatedByFeature::active() || filled($media->created_by_id)) {
+        if (! MediaCreatedByFeature::active() || $media->createdBy) {
             return;
         }
 
-        $user = Auth::user();
+        $creator = Auth::user();
 
-        if ($user && ($key = $user->getKey()) !== null) {
-            $media->created_by_id = (string) $key;
-            $media->created_by_type = $user->getMorphClass();
+        if ($creator) {
+            $media->createdBy()->associate($creator);
         }
     }
 }

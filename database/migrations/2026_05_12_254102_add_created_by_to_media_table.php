@@ -45,13 +45,7 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::table('media', function (Blueprint $table) {
-                if (! Schema::hasColumn('media', 'created_by_type')) {
-                    $table->string('created_by_type')->nullable();
-                }
-
-                if (! Schema::hasColumn('media', 'created_by_id')) {
-                    $table->uuid('created_by_id')->nullable()->index();
-                }
+                $table->nullableUuidMorphs('created_by');
             });
 
             MediaCreatedByFeature::activate();
@@ -64,13 +58,7 @@ return new class () extends Migration {
             MediaCreatedByFeature::deactivate();
 
             Schema::table('media', function (Blueprint $table) {
-                if (Schema::hasColumn('media', 'created_by_type')) {
-                    $table->dropColumn('created_by_type');
-                }
-
-                if (Schema::hasColumn('media', 'created_by_id')) {
-                    $table->dropColumn('created_by_id');
-                }
+                $table->dropMorphs('created_by');
             });
         });
     }

@@ -346,8 +346,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     $respondent = $serviceRequest->respondent;
 
                     if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
-                        $media->created_by_id = $respondent->getKey();
-                        $media->created_by_type = $respondent->getMorphClass();
+                        $media->createdBy()->associate($respondent);
                         $media->saveQuietly();
                     }
                 } catch (Throwable $throw) {
@@ -531,8 +530,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                             ->toMediaCollection('uploads');
 
                         if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
-                            $media->created_by_id = $contact->getKey();
-                            $media->created_by_type = $contact->getMorphClass();
+                            $media->createdBy()->associate($contact);
                             $media->saveQuietly();
                         }
                     } catch (Throwable $throw) {

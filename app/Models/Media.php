@@ -36,6 +36,7 @@
 
 namespace App\Models;
 
+use AidingApp\Contact\Models\Contact;
 use App\Features\MediaCreatedByFeature;
 use App\Observers\MediaObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -43,16 +44,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Spatie\MediaLibrary\MediaCollections\Models\Media as SpatieMedia;
 
+/**
+ * @mixin IdeHelperMedia
+ */
 #[ObservedBy([MediaObserver::class])]
 class Media extends SpatieMedia
 {
     /**
-     * @return MorphTo<Model, Media>
+     * @return MorphTo<Model, $this>
      */
     public function createdBy(): MorphTo
     {
-        /** @var MorphTo<Model, Media> */
-        return $this->morphTo('createdBy', 'created_by_type', 'created_by_id');
+        return $this->morphTo('createdBy');
     }
 
     public function getCreatedByNameAttribute(): string
@@ -61,15 +64,11 @@ class Media extends SpatieMedia
             return 'N/A';
         }
 
-        // Handle User (has 'name')
-        if (isset($creator->name)) {
-            return (string) $creator->name;
-        }
-
-        // Handle Contact (has 'first_name', 'last_name')
-        $fullName = trim(trim($creator->first_name ?? '') . ' ' . trim($creator->last_name ?? ''));
-
-        return $fullName ?: 'N/A';
+        return match (true) {
+            $creator instanceof User => (string) $creator->name,
+            $creator instanceof Contact => trim("{$creator->first_name} {$creator->last_name}") ?: 'N/A',
+            default => 'N/A',
+        };
     }
 
     public function getCreatedBySubLabelAttribute(): ?string
@@ -78,28 +77,34 @@ class Media extends SpatieMedia
             return null;
         }
 
-        if (isset($creator->job_title)) {
-            $jobTitle = (string) ($creator->job_title ?? '');
-            $teamName = (string) (($creator->getAttribute('team')?->getAttribute('name')) ?? '');
+        return match (true) {
+            $creator instanceof User => $this->getUserSubLabel($creator),
+            $creator instanceof Contact => $this->getContactSubLabel($creator),
+            default => null,
+        };
+    }
 
-            if ($jobTitle && $teamName) {
-                return "{$jobTitle} ({$teamName})";
-            }
+    private function getUserSubLabel(User $creator): ?string
+    {
+        $jobTitle = (string) ($creator->job_title ?? '');
+        $teamName = (string) ($creator->team->name ?? '');
 
-            return $jobTitle ?: ($teamName ?: null);
+        if ($jobTitle && $teamName) {
+            return "{$jobTitle} ({$teamName})";
         }
 
-        if (isset($creator->type)) {
-            $typeName = (string) ($creator->type->getAttribute('name') ?? '');
-            $orgName = (string) ($creator->getAttribute('organization')?->getAttribute('name') ?? '');
+        return $jobTitle ?: ($teamName ?: null);
+    }
 
-            if ($typeName && $orgName) {
-                return "{$typeName} - {$orgName}";
-            }
+    private function getContactSubLabel(Contact $creator): ?string
+    {
+        $typeName = (string) ($creator->type->name ?? '');
+        $orgName = (string) ($creator->organization->name ?? '');
 
-            return $typeName ?: ($orgName ?: null);
+        if ($typeName && $orgName) {
+            return "{$typeName} - {$orgName}";
         }
 
-        return null;
+        return $typeName ?: ($orgName ?: null);
     }
 }
