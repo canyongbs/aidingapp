@@ -32,8 +32,8 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import LoadingIndicator from './LoadingIndicator.vue';
     import { computed, useAttrs, useSlots } from 'vue';
+    import LoadingIndicator from './LoadingIndicator.vue';
 
     const COLOR_VARS = {
         primary: {
