@@ -92,10 +92,7 @@
             <div class="flex w-full justify-end gap-3 sm:w-auto">
                 {{-- Add Service Request Area Button --}}
                 <div id="show-category-wrapper">
-                    <x-filament::button
-                        id="show-category-btn"
-                        type="button"
-                        size="sm">
+                    <x-filament::button id="show-category-btn" type="button" size="sm">
                         Add Service Request Area
                     </x-filament::button>
                     <div
@@ -124,12 +121,7 @@
 
                 {{-- Add Type Button --}}
                 <div id="show-type-wrapper">
-                    <x-filament::button
-                        id="show-type-btn"
-                        type="button"
-                        size="sm">
-                        Add Type
-                    </x-filament::button>
+                    <x-filament::button id="show-type-btn" type="button" size="sm">Add Type</x-filament::button>
                     <div
                         class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"
                         id="type-input-form"
