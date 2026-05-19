@@ -101,8 +101,8 @@ class ServiceRequestMediaTable extends TableWidget
                                 if ($type === User::class) {
                                     $subQuery->whereRaw('LOWER(name) LIKE ?', ['%' . $searchLower . '%']);
                                 } elseif ($type === Contact::class) {
-                                    $subQuery->where(function (Builder $q) use ($searchLower): void {
-                                        $q->whereRaw('LOWER(first_name) LIKE ?', ['%' . $searchLower . '%'])
+                                    $subQuery->where(function (Builder $query) use ($searchLower): void {
+                                        $query->whereRaw('LOWER(first_name) LIKE ?', ['%' . $searchLower . '%'])
                                             ->orWhereRaw('LOWER(last_name) LIKE ?', ['%' . $searchLower . '%'])
                                             ->orWhereRaw('LOWER(full_name) LIKE ?', ['%' . $searchLower . '%']);
                                     });
