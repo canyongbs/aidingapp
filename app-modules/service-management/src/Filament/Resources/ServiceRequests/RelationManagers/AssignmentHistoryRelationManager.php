@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Features\ServiceRequestAssignmentHistoryFeature;
 use App\Models\User;
 use App\Settings\DisplaySettings;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -55,8 +54,7 @@ class AssignmentHistoryRelationManager extends RelationManager
 
     public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
-        return ServiceRequestAssignmentHistoryFeature::active()
-            && parent::canViewForRecord($ownerRecord, $pageClass);
+        return parent::canViewForRecord($ownerRecord, $pageClass);
     }
 
     #[On('assignment-history-refresh')]
