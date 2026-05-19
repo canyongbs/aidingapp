@@ -32,12 +32,6 @@
 </COPYRIGHT>
 -->
 
-<!--
-    Matches Filament's DefaultLoadingIndicator SVG exactly.
-    Size and animation classes (e.g. h-4 w-4 animate-spin) are passed from the
-    parent via class/attrs, which Vue applies to the root <svg> element.
-    See: filamentphp/filament — packages/support/src/View/DefaultLoadingIndicator.php
--->
 <template>
     <svg fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path
