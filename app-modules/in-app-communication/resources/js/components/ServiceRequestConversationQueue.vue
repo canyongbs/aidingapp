@@ -68,7 +68,7 @@
 
     async function accept(item) {
         try {
-            const response = await axios.post(`/api/chat/service-request-queue/${item.id}/accept`);
+            const response = await axios.post(`/api/chat/service-request-conversations/${item.id}/accept`);
             emit('accepted', response.data.conversation_id);
         } catch {
             emit('refresh');
@@ -77,7 +77,7 @@
 
     async function decline(item) {
         try {
-            await axios.post(`/api/chat/service-request-queue/${item.id}/decline`);
+            await axios.post(`/api/chat/service-request-conversations/${item.id}/decline`);
             emit('refresh');
         } catch {
             emit('refresh');

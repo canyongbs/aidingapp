@@ -36,8 +36,8 @@
     import { ChatBubbleLeftRightIcon, HashtagIcon, PlusIcon } from '@heroicons/vue/24/outline';
     import axios from 'axios';
     import { computed, onMounted, onUnmounted, ref } from 'vue';
-    import ChatRequestQueue from './ChatRequestQueue.vue';
     import ConversationListItem from './ConversationListItem.vue';
+    import ServiceRequestConversationQueue from './ServiceRequestConversationQueue.vue';
     import EmptyState from './ui/EmptyState.vue';
 
     const props = defineProps({
@@ -78,7 +78,7 @@
 
     async function fetchQueueCount() {
         try {
-            const response = await axios.get('/api/chat/service-request-queue');
+            const response = await axios.get('/api/chat/service-request-conversations/queue');
             queueItems.value = response.data.data;
         } catch {
             // silently fail
@@ -200,7 +200,7 @@
         </div>
 
         <!-- Queue Content -->
-        <ChatRequestQueue
+        <ServiceRequestConversationQueue
             v-if="activeTab === 'queue'"
             :items="queueItems"
             :loading="queueLoading"

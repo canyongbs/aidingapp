@@ -44,7 +44,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ServiceRequestChatExpired implements ShouldBroadcastNow
+class ServiceRequestConversationDeclined implements ShouldBroadcastNow
 {
     use Dispatchable;
     use InteractsWithSockets;
@@ -56,7 +56,7 @@ class ServiceRequestChatExpired implements ShouldBroadcastNow
 
     public function broadcastAs(): string
     {
-        return 'service-request-chat.expired';
+        return 'service-request-conversation.declined';
     }
 
     /**
@@ -76,7 +76,7 @@ class ServiceRequestChatExpired implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel("service-request-chat.{$this->serviceRequestConversation->getKey()}"),
+            new PrivateChannel("service-request-conversation.{$this->serviceRequestConversation->getKey()}"),
         ];
     }
 }

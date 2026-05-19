@@ -97,7 +97,7 @@ export function useWebSocket() {
                     subscribeToConversation(event.conversation.id);
                 }
             })
-            .listen('.service-request-chat.queued', (event) => {
+            .listen('.service-request-conversation.queued', (event) => {
                 if (onQueueItem) {
                     onQueueItem(event);
                 }

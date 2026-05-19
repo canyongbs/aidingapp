@@ -37,10 +37,10 @@
 namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Events\ServiceRequestChatQueued;
+use AidingApp\ServiceManagement\Events\ServiceRequestConversationQueued;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
-use AidingApp\ServiceManagement\Notifications\LiveChatConversationQueued;
+use AidingApp\ServiceManagement\Notifications\ServiceRequestConversationQueued as ServiceRequestConversationQueuedNotification;
 use App\Enums\Feature;
 use App\Enums\PresenceStatus;
 use App\Features\ServiceRequestTypeLiveChatSettingsFeature;
@@ -49,14 +49,14 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
-class RequestServiceRequestLiveChat
+class QueueServiceRequestConversation
 {
     public function execute(ServiceRequest $serviceRequest, Contact $contact): ServiceRequestConversation
     {
         $assignment = $serviceRequest->assignedTo;
 
         if (! $assignment) {
-            throw ValidationException::withMessages(['live_chat' => 'No agent is assigned to this service request.']);
+            throw ValidationException::withMessages(['conversation' => 'An agent is not currently available.']);
         }
 
         $agent = $assignment->user;
@@ -71,9 +71,9 @@ class RequestServiceRequestLiveChat
             'queued_at' => now(),
         ]);
 
-        $agent->notify(new LiveChatConversationQueued($conversation));
+        $agent->notify(new ServiceRequestConversationQueuedNotification($conversation));
 
-        broadcast(new ServiceRequestChatQueued($conversation));
+        broadcast(new ServiceRequestConversationQueued($conversation));
 
         return $conversation;
     }
@@ -81,21 +81,21 @@ class RequestServiceRequestLiveChat
     protected function validateEligibility(ServiceRequest $serviceRequest, User $agent): void
     {
         if (! Gate::check(Feature::RealtimeChat->getGateName())) {
-            throw ValidationException::withMessages(['live_chat' => 'Live chat is not available.']);
+            throw ValidationException::withMessages(['conversation' => 'An agent is not currently available.']);
         }
 
         if (! ServiceRequestTypeLiveChatSettingsFeature::active()) {
-            throw ValidationException::withMessages(['live_chat' => 'Live chat is not available.']);
+            throw ValidationException::withMessages(['conversation' => 'An agent is not currently available.']);
         }
 
         $type = $serviceRequest->priority->type;
 
         if (! $type->is_live_chat_enabled) {
-            throw ValidationException::withMessages(['live_chat' => 'Live chat is not enabled for this service request type.']);
+            throw ValidationException::withMessages(['conversation' => 'An agent is not currently available.']);
         }
 
         if ($agent->presenceStatus() !== PresenceStatus::Active) {
-            throw ValidationException::withMessages(['live_chat' => 'The assigned agent is not currently available.']);
+            throw ValidationException::withMessages(['conversation' => 'The assigned agent is not currently available.']);
         }
     }
 
@@ -122,7 +122,7 @@ class RequestServiceRequestLiveChat
             ->count();
 
         if ($count >= $type->max_simultaneous_chats) {
-            throw ValidationException::withMessages(['live_chat' => 'The agent has reached their maximum number of simultaneous chats.']);
+            throw ValidationException::withMessages(['conversation' => 'An agent is not currently available.']);
         }
     }
 }

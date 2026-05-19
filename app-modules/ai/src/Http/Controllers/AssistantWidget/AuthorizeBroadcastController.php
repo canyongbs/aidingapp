@@ -63,8 +63,8 @@ class AuthorizeBroadcastController extends Controller
         // @phpstan-ignore function.alreadyNarrowedType
         $normalizedName = method_exists($broadcaster, 'normalizeChannelName') ? $broadcaster->normalizeChannelName($channelName) : $channelName;
 
-        if (Str::startsWith($normalizedName, 'service-request-chat.')) {
-            return $this->authorizeServiceRequestChat($request, $broadcaster, $normalizedName);
+        if (Str::startsWith($normalizedName, 'service-request-conversation.')) {
+            return $this->authorizeServiceRequestConversation($request, $broadcaster, $normalizedName);
         }
 
         if (! Str::startsWith($normalizedName, 'portal-assistant-thread-')) {
@@ -99,9 +99,9 @@ class AuthorizeBroadcastController extends Controller
         throw new AccessDeniedHttpException();
     }
 
-    protected function authorizeServiceRequestChat(Request $request, Broadcaster $broadcaster, string $normalizedName): mixed
+    protected function authorizeServiceRequestConversation(Request $request, Broadcaster $broadcaster, string $normalizedName): mixed
     {
-        $conversationId = Str::after($normalizedName, 'service-request-chat.');
+        $conversationId = Str::after($normalizedName, 'service-request-conversation.');
         $conversation = ServiceRequestConversation::find($conversationId);
 
         if (! $conversation) {

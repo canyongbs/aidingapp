@@ -40,12 +40,12 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
-use AidingApp\ServiceManagement\Events\ServiceRequestChatAccepted;
+use AidingApp\ServiceManagement\Events\ServiceRequestConversationAccepted;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-class AcceptServiceRequestLiveChat
+class AcceptServiceRequestConversation
 {
     public function execute(ServiceRequestConversation $serviceRequestConversation): void
     {
@@ -65,7 +65,7 @@ class AcceptServiceRequestLiveChat
             ]);
         });
 
-        broadcast(new ServiceRequestChatAccepted($serviceRequestConversation->fresh()));
+        broadcast(new ServiceRequestConversationAccepted($serviceRequestConversation->fresh()));
     }
 
     protected function createConversation(User $agent, Contact $contact): Conversation

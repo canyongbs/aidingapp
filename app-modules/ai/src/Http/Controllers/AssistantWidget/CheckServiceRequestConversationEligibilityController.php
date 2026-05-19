@@ -49,7 +49,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
-class CheckLiveChatEligibilityController extends Controller
+class CheckServiceRequestConversationEligibilityController extends Controller
 {
     public function __invoke(Request $request, ServiceRequest $serviceRequest): JsonResponse
     {

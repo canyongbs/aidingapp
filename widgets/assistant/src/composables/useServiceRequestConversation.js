@@ -41,7 +41,7 @@ if (typeof window !== 'undefined') {
     window.Pusher = Pusher;
 }
 
-export function useServiceRequestLiveChat(websocketsConfig, authEndpoint) {
+export function useServiceRequestConversation(websocketsConfig, authEndpoint) {
     const eligible = ref(false);
     const agentName = ref(null);
     const status = ref('idle');
@@ -58,7 +58,7 @@ export function useServiceRequestLiveChat(websocketsConfig, authEndpoint) {
         error.value = null;
 
         try {
-            const url = `/widgets/assistant/api/service-request/${serviceRequestId}/live-chat/eligibility`;
+            const url = `/widgets/assistant/api/service-request/${serviceRequestId}/conversation/eligibility`;
             const response = await axios.get(url, { headers: getAuthHeaders() });
 
             eligible.value = response.data.eligible;
@@ -70,14 +70,14 @@ export function useServiceRequestLiveChat(websocketsConfig, authEndpoint) {
         }
     }
 
-    async function requestChat(serviceRequestId) {
+    async function requestConversation(serviceRequestId) {
         if (!serviceRequestId) return;
 
         status.value = 'queued';
         error.value = null;
 
         try {
-            const url = `/widgets/assistant/api/service-request/${serviceRequestId}/live-chat`;
+            const url = `/widgets/assistant/api/service-request/${serviceRequestId}/conversation`;
             const response = await axios.post(url, {}, { headers: getAuthHeaders() });
 
             const recordId = response.data.id;
@@ -95,7 +95,7 @@ export function useServiceRequestLiveChat(websocketsConfig, authEndpoint) {
     function subscribeToChannel(recordId) {
         if (!websocketsConfig) return;
 
-        channelName = `service-request-chat.${recordId}`;
+        channelName = `service-request-conversation.${recordId}`;
 
         echo = new Echo({
             ...websocketsConfig,
@@ -125,17 +125,17 @@ export function useServiceRequestLiveChat(websocketsConfig, authEndpoint) {
 
         const channel = echo.private(channelName);
 
-        channel.listen('.service-request-chat.accepted', (event) => {
+        channel.listen('.service-request-conversation.accepted', (event) => {
             status.value = 'accepted';
             conversationId.value = event.conversation_id;
         });
 
-        channel.listen('.service-request-chat.declined', () => {
+        channel.listen('.service-request-conversation.declined', () => {
             status.value = 'declined';
             cleanup();
         });
 
-        channel.listen('.service-request-chat.expired', () => {
+        channel.listen('.service-request-conversation.expired', () => {
             status.value = 'expired';
             cleanup();
         });
@@ -163,7 +163,7 @@ export function useServiceRequestLiveChat(websocketsConfig, authEndpoint) {
         conversationId,
         error,
         checkEligibility,
-        requestChat,
+        requestConversation,
         cleanup,
     };
 }

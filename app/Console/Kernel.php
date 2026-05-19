@@ -49,7 +49,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Project\Models\ProjectFile;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Jobs\AutoSubmitStaleDraftServiceRequests;
-use AidingApp\ServiceManagement\Jobs\ExpireServiceRequestChatRequests;
+use AidingApp\ServiceManagement\Jobs\ExpireServiceRequestConversations;
 use AidingApp\ServiceManagement\Jobs\SendClosedServiceRequestFeedbackReminders;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
 use App\Features\BrokenLinksFeature;
@@ -161,7 +161,7 @@ class Kernel extends ConsoleKernel
 
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
-                            dispatch(new ExpireServiceRequestChatRequests());
+                            dispatch(new ExpireServiceRequestConversations());
                         });
                     })
                         ->everyMinute()

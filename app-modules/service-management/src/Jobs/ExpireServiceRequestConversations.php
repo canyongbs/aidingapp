@@ -37,7 +37,7 @@
 namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
-use AidingApp\ServiceManagement\Events\ServiceRequestChatExpired;
+use AidingApp\ServiceManagement\Events\ServiceRequestConversationExpired;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use App\Settings\PresenceSettings;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -48,7 +48,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ExpireServiceRequestChatRequests implements ShouldQueue, ShouldBeUnique
+class ExpireServiceRequestConversations implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -68,7 +68,7 @@ class ExpireServiceRequestChatRequests implements ShouldQueue, ShouldBeUnique
                     'finished_reason' => ServiceRequestConversationFinishedReason::QueueExpired,
                 ]);
 
-                broadcast(new ServiceRequestChatExpired($record));
+                broadcast(new ServiceRequestConversationExpired($record));
             });
 
         ServiceRequestConversation::query()
@@ -89,7 +89,7 @@ class ExpireServiceRequestChatRequests implements ShouldQueue, ShouldBeUnique
                     'finished_reason' => ServiceRequestConversationFinishedReason::AgentInactive,
                 ]);
 
-                broadcast(new ServiceRequestChatExpired($record));
+                broadcast(new ServiceRequestConversationExpired($record));
             });
     }
 }

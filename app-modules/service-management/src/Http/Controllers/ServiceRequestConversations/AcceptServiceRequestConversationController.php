@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,41 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Http\Controllers;
+namespace AidingApp\ServiceManagement\Http\Controllers\ServiceRequestConversations;
 
-use AidingApp\ServiceManagement\Actions\AcceptServiceRequestLiveChat;
-use AidingApp\ServiceManagement\Actions\DeclineServiceRequestLiveChat;
+use AidingApp\ServiceManagement\Actions\AcceptServiceRequestConversation;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class ServiceRequestChatQueueController extends Controller
+class AcceptServiceRequestConversationController extends Controller
 {
-    public function index(Request $request): JsonResponse
-    {
-        $user = $request->user();
-
-        $items = ServiceRequestConversation::query()
-            ->where('user_id', $user->getKey())
-            ->whereNotNull('queued_at')
-            ->whereNull('accepted_at')
-            ->whereNull('finished_at')
-            ->with(['contact', 'serviceRequest'])
-            ->orderBy('queued_at')
-            ->get()
-            ->map(fn (ServiceRequestConversation $item) => [
-                'id' => $item->getKey(),
-                'contact_name' => $item->contact->full_name,
-                'service_request_number' => $item->serviceRequest->service_request_number ?? $item->serviceRequest->getKey(),
-                'service_request_title' => $item->serviceRequest->title,
-                'queued_at' => $item->queued_at->toIso8601String(),
-            ]);
-
-        return response()->json(['data' => $items]);
-    }
-
-    public function accept(Request $request, ServiceRequestConversation $serviceRequestConversation): JsonResponse
+    public function __invoke(Request $request, ServiceRequestConversation $serviceRequestConversation): JsonResponse
     {
         $user = $request->user();
 
@@ -76,23 +52,10 @@ class ServiceRequestChatQueueController extends Controller
             abort(403);
         }
 
-        app(AcceptServiceRequestLiveChat::class)->execute($serviceRequestConversation);
+        app(AcceptServiceRequestConversation::class)->execute($serviceRequestConversation);
 
         return response()->json([
             'conversation_id' => $serviceRequestConversation->fresh()->conversation_id,
         ]);
-    }
-
-    public function decline(Request $request, ServiceRequestConversation $serviceRequestConversation): JsonResponse
-    {
-        $user = $request->user();
-
-        if ($serviceRequestConversation->user_id !== $user->getKey()) {
-            abort(403);
-        }
-
-        app(DeclineServiceRequestLiveChat::class)->execute($serviceRequestConversation);
-
-        return response()->json(['status' => 'declined']);
     }
 }

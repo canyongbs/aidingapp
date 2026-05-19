@@ -34,48 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Notifications;
+namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\InAppCommunication\Filament\Pages\UserChat;
+use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
+use AidingApp\ServiceManagement\Events\ServiceRequestConversationDeclined;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
-use Filament\Actions\Action;
-use Filament\Notifications\Notification;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\BroadcastMessage;
-use Illuminate\Notifications\Notification as BaseNotification;
 
-class LiveChatConversationQueued extends BaseNotification implements ShouldQueue
+class DeclineServiceRequestConversation
 {
-    use Queueable;
-
-    public function __construct(
-        public ServiceRequestConversation $serviceRequestConversation,
-    ) {}
-
-    /**
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
+    public function execute(ServiceRequestConversation $serviceRequestConversation): void
     {
-        return ['broadcast'];
-    }
+        if (! $serviceRequestConversation->isPending()) {
+            return;
+        }
 
-    public function toBroadcast(object $notifiable): BroadcastMessage
-    {
-        $contact = $this->serviceRequestConversation->contact;
+        $serviceRequestConversation->update([
+            'finished_at' => now(),
+            'finished_reason' => ServiceRequestConversationFinishedReason::AgentDeclined,
+        ]);
 
-        return Notification::make()
-            ->warning()
-            ->title('Incoming Live Chat')
-            ->body("{$contact->full_name} is waiting for assistance.")
-            ->persistent()
-            ->actions([
-                Action::make('view_queue')
-                    ->button()
-                    ->label('View Queue')
-                    ->url(UserChat::getUrl() . '?tab=queue'),
-            ])
-            ->getBroadcastMessage();
+        broadcast(new ServiceRequestConversationDeclined($serviceRequestConversation));
     }
 }

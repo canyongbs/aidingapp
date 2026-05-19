@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,37 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
+namespace AidingApp\ServiceManagement\Http\Controllers\ServiceRequestConversations;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Actions\RequestServiceRequestLiveChat;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpFoundation\Response;
 
-class RequestLiveChatController extends Controller
+class ListServiceRequestConversationQueueController extends Controller
 {
-    public function __invoke(Request $request, ServiceRequest $serviceRequest): JsonResponse
+    public function __invoke(Request $request): JsonResponse
     {
-        $contact = auth('contact')->user() ?? $request->user();
+        $user = $request->user();
 
-        abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
-        abort_if(! $serviceRequest->respondent()->is($contact), Response::HTTP_FORBIDDEN);
+        $items = ServiceRequestConversation::query()
+            ->where('user_id', $user->getKey())
+            ->whereNotNull('queued_at')
+            ->whereNull('accepted_at')
+            ->whereNull('finished_at')
+            ->with(['contact', 'serviceRequest'])
+            ->orderBy('queued_at')
+            ->get()
+            ->map(fn (ServiceRequestConversation $item) => [
+                'id' => $item->getKey(),
+                'contact_name' => $item->contact->full_name,
+                'service_request_number' => $item->serviceRequest->service_request_number ?? $item->serviceRequest->getKey(),
+                'service_request_title' => $item->serviceRequest->title,
+                'queued_at' => $item->queued_at->toIso8601String(),
+            ]);
 
-        try {
-            $conversation = app(RequestServiceRequestLiveChat::class)->execute($serviceRequest, $contact);
-        } catch (ValidationException $exception) {
-            return response()->json([
-                'errors' => $exception->errors(),
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-
-        return response()->json([
-            'id' => $conversation->getKey(),
-            'status' => 'queued',
-        ]);
+        return response()->json(['data' => $items]);
     }
 }

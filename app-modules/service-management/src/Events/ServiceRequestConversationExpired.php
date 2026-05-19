@@ -44,7 +44,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class ServiceRequestChatQueued implements ShouldBroadcastNow
+class ServiceRequestConversationExpired implements ShouldBroadcastNow
 {
     use Dispatchable;
     use InteractsWithSockets;
@@ -56,7 +56,7 @@ class ServiceRequestChatQueued implements ShouldBroadcastNow
 
     public function broadcastAs(): string
     {
-        return 'service-request-chat.queued';
+        return 'service-request-conversation.expired';
     }
 
     /**
@@ -64,14 +64,9 @@ class ServiceRequestChatQueued implements ShouldBroadcastNow
      */
     public function broadcastWith(): array
     {
-        $this->serviceRequestConversation->loadMissing(['contact', 'serviceRequest']);
-
         return [
             'id' => $this->serviceRequestConversation->getKey(),
-            'contact_name' => $this->serviceRequestConversation->contact->full_name,
-            'service_request_number' => $this->serviceRequestConversation->serviceRequest->service_request_number ?? $this->serviceRequestConversation->serviceRequest->getKey(),
-            'service_request_title' => $this->serviceRequestConversation->serviceRequest->title,
-            'queued_at' => $this->serviceRequestConversation->queued_at->toIso8601String(),
+            'finished_reason' => $this->serviceRequestConversation->finished_reason?->value,
         ];
     }
 
@@ -81,7 +76,7 @@ class ServiceRequestChatQueued implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel("user.{$this->serviceRequestConversation->user_id}"),
+            new PrivateChannel("service-request-conversation.{$this->serviceRequestConversation->getKey()}"),
         ];
     }
 }

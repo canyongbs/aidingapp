@@ -34,49 +34,48 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Events;
+namespace AidingApp\ServiceManagement\Notifications;
 
+use AidingApp\InAppCommunication\Filament\Pages\UserChat;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
-use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\BroadcastMessage;
+use Illuminate\Notifications\Notification as BaseNotification;
 
-class ServiceRequestChatDeclined implements ShouldBroadcastNow
+class ServiceRequestConversationQueued extends BaseNotification implements ShouldQueue
 {
-    use Dispatchable;
-    use InteractsWithSockets;
-    use SerializesModels;
+    use Queueable;
 
     public function __construct(
         public ServiceRequestConversation $serviceRequestConversation,
     ) {}
 
-    public function broadcastAs(): string
+    /**
+     * @return array<int, string>
+     */
+    public function via(object $notifiable): array
     {
-        return 'service-request-chat.declined';
+        return ['broadcast'];
     }
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function broadcastWith(): array
+    public function toBroadcast(object $notifiable): BroadcastMessage
     {
-        return [
-            'id' => $this->serviceRequestConversation->getKey(),
-            'finished_reason' => $this->serviceRequestConversation->finished_reason?->value,
-        ];
-    }
+        $contact = $this->serviceRequestConversation->contact;
 
-    /**
-     * @return array<int, Channel>
-     */
-    public function broadcastOn(): array
-    {
-        return [
-            new PrivateChannel("service-request-chat.{$this->serviceRequestConversation->getKey()}"),
-        ];
+        return Notification::make()
+            ->warning()
+            ->title('Incoming Live Chat')
+            ->body("{$contact->full_name} is waiting for assistance.")
+            ->persistent()
+            ->actions([
+                Action::make('view_queue')
+                    ->button()
+                    ->label('View Queue')
+                    ->url(UserChat::getUrl() . '?tab=queue'),
+            ])
+            ->getBroadcastMessage();
     }
 }
