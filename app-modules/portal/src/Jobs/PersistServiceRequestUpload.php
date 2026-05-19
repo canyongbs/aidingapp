@@ -38,7 +38,6 @@ namespace AidingApp\Portal\Jobs;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\MediaCreatedByFeature;
-use App\Models\Media;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -85,7 +84,6 @@ class PersistServiceRequestUpload implements ShouldQueue
         }
 
         try {
-            /** @var Media $media */
             $media = $this->serviceRequest
                 ->addMediaFromDisk($this->path)
                 ->usingName(pathinfo($this->originalFileName, PATHINFO_FILENAME))

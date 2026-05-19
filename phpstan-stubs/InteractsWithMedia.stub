@@ -1,0 +1,8 @@
+<?php
+
+namespace Spatie\MediaLibrary;
+
+/**
+ * @template TMedia of \Spatie\MediaLibrary\MediaCollections\Models\Media = \App\Models\Media
+ */
+trait InteractsWithMedia {}

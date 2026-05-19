@@ -54,7 +54,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
 use App\Features\MediaCreatedByFeature;
-use App\Models\Media;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV3;
 use Aws\Kms\KmsClient;
@@ -339,7 +338,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             foreach ($parser->getAttachments(false) as $attachment) {
                 try {
-                    /** @var Media $media */
                     $media = $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
                         ->setName($attachment->getFilename())
                         ->setFileName($attachment->getFilename())
@@ -526,7 +524,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                 foreach ($parser->getAttachments(false) as $attachment) {
                     try {
-                        /** @var Media $media */
                         $media = $serviceRequest->addMediaFromStream($attachment->getStream())
                             ->setName($attachment->getFilename())
                             ->setFileName($attachment->getFilename())
