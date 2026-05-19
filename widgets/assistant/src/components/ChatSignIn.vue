@@ -76,7 +76,7 @@
 
             <p v-if="errorMessage" class="text-sm text-red-600">{{ errorMessage }}</p>
 
-            <BaseButton type="submit" :loading="isSubmitting" size="lg" class="w-full"> Send Code </BaseButton>
+            <BaseButton type="submit" :loading="isSubmitting" loading-text="Sending…" size="lg" class="w-full"> Send Code </BaseButton>
         </form>
 
         <form v-else class="w-full flex flex-col gap-4" @submit.prevent="submitCode">
@@ -98,7 +98,7 @@
 
             <p v-if="errorMessage" class="text-sm text-red-600">{{ errorMessage }}</p>
 
-            <BaseButton type="submit" :loading="isSubmitting" size="lg" class="w-full"> Verify Code </BaseButton>
+            <BaseButton type="submit" :loading="isSubmitting" loading-text="Verifying…" size="lg" class="w-full"> Verify Code </BaseButton>
 
             <button
                 type="button"

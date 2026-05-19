@@ -169,6 +169,7 @@
                 :disabled="isSubmitting && submittingAction !== 'accepted'"
                 color="success"
                 size="lg"
+                loading-text="Submitting…"
                 class="w-full"
             >
                 Yes, this resolved my issue
@@ -179,6 +180,7 @@
                 :disabled="isSubmitting && submittingAction !== 'declined'"
                 color="gray"
                 size="lg"
+                loading-text="Submitting…"
                 class="w-full"
             >
                 No, submit my request

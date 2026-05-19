@@ -162,6 +162,7 @@
                 @click="validateAndProceed"
                 :disabled="!isFormValid"
                 :loading="isUploadProcessing || isSubmitting"
+                :loading-text="isUploadProcessing ? 'Uploading…' : 'Submitting…'"
                 :icon="ArrowRightIcon"
                 icon-position="after"
                 size="lg"

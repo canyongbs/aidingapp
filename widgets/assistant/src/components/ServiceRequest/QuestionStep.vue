@@ -205,6 +205,7 @@
                 @click="validateAndProceed"
                 :disabled="!isFormValid"
                 :loading="isSubmitting"
+                loading-text="Submitting…"
                 :icon="ArrowRightIcon"
                 icon-position="after"
                 size="lg"

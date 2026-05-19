@@ -132,6 +132,7 @@
             @click="onAction"
             :disabled="!canSubmit"
             :loading="isSubmitting || isUploadProcessing"
+            :loading-text="isUploadProcessing ? 'Uploading…' : 'Submitting…'"
             :icon="ArrowRightIcon"
             icon-position="after"
             size="lg"
