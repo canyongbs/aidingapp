@@ -328,20 +328,20 @@
                     hasTasks.value = response.data.has_tasks;
                 });
 
-                setIsStatusEnabled(response.data.status_enabled).then(() => {
-                    isStatusEnabled.value = response.data.status_enabled;
+                setIsStatusEnabled(response.data.service_monitoring_enabled).then(() => {
+                    isStatusEnabled.value = response.data.service_monitoring_enabled;
                 });
 
-                setIsAdvisoryEnabled(response.data.advisory_enabled).then(() => {
-                    isAdvisoryEnabled.value = response.data.advisory_enabled;
+                setIsAdvisoryEnabled(response.data.advisory_management_enabled).then(() => {
+                    isAdvisoryEnabled.value = response.data.advisory_management_enabled;
                 });
 
-                setIsAssetEnabled(response.data.assets_enabled).then(() => {
-                    isAssetEnabled.value = response.data.assets_enabled;
+                setIsAssetEnabled(response.data.asset_management_enabled).then(() => {
+                    isAssetEnabled.value = response.data.asset_management_enabled;
                 });
 
-                setIsLicenseEnabled(response.data.license_enabled).then(() => {
-                    isLicenseEnabled.value = response.data.license_enabled;
+                setIsLicenseEnabled(response.data.license_management_enabled).then(() => {
+                    isLicenseEnabled.value = response.data.license_management_enabled;
                 });
 
                 authentication.value.requestUrl = response.data.authentication_url ?? null;
@@ -529,20 +529,20 @@
                             hasTasks.value = response.data.has_tasks;
                         });
 
-                        setIsStatusEnabled(response.data.status_enabled).then(() => {
-                            isStatusEnabled.value = response.data.status_enabled;
+                        setIsStatusEnabled(response.data.service_monitoring_enabled).then(() => {
+                            isStatusEnabled.value = response.data.service_monitoring_enabled;
                         });
 
-                        setIsAdvisoryEnabled(response.data.advisory_enabled).then(() => {
-                            isAdvisoryEnabled.value = response.data.advisory_enabled;
+                        setIsAdvisoryEnabled(response.data.advisory_management_enabled).then(() => {
+                            isAdvisoryEnabled.value = response.data.advisory_management_enabled;
                         });
 
-                        setIsAssetEnabled(response.data.assets_enabled).then(() => {
-                            isAssetEnabled.value = response.data.assets_enabled;
+                        setIsAssetEnabled(response.data.asset_management_enabled).then(() => {
+                            isAssetEnabled.value = response.data.asset_management_enabled;
                         });
 
-                        setIsLicenseEnabled(response.data.license_enabled).then(() => {
-                            isLicenseEnabled.value = response.data.license_enabled;
+                        setIsLicenseEnabled(response.data.license_management_enabled).then(() => {
+                            isLicenseEnabled.value = response.data.license_management_enabled;
                         });
 
                         if (response.data.assistant_widget_loader_url && response.data.assistant_widget_config_url) {
