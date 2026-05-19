@@ -45,7 +45,7 @@ export function useConversations() {
     const loading = computed(() => store.conversationsLoading);
     const hasMore = computed(() => store.conversationsHasMore);
 
-    async function loadConversations(loadMore = false) {
+    async function loadConversations(loadMore = false, participantType = null) {
         if (store.conversationsLoading) return store.conversations;
 
         if (!loadMore) {
@@ -55,6 +55,9 @@ export function useConversations() {
             const params = {};
             if (loadMore && store.conversationsNextCursor) {
                 params.cursor = store.conversationsNextCursor;
+            }
+            if (participantType) {
+                params.participant_type = participantType;
             }
 
             const { data } = await api.get('/conversations', { params });

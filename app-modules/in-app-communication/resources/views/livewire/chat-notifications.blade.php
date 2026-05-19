@@ -78,7 +78,7 @@
                                 >
                                     <x-heroicon-o-hashtag class="text-primary-600 dark:text-primary-400 h-5 w-5" />
                                 </div>
-                            @else
+                            @elseif (! $notification['is_contact_conversation'])
                                 <img
                                     class="h-10 w-10 shrink-0 rounded-full object-cover"
                                     src="{{ $notification['avatar_url'] }}"

@@ -55,6 +55,7 @@
     // 'chat' | 'sign-in' | 'service-request'
     const currentView = ref('chat');
     const pendingView = ref(null);
+    const activeServiceRequestNumber = ref(null);
 
     const { messages, isSending, isAssistantResponding, sendMessage, setAuthenticated } = useAssistantChat(
         props.sendMessageUrl,
@@ -74,6 +75,11 @@
     function onBack() {
         currentView.value = 'chat';
         pendingView.value = null;
+        activeServiceRequestNumber.value = null;
+    }
+
+    function onConversationActive(serviceRequestNumber) {
+        activeServiceRequestNumber.value = serviceRequestNumber;
     }
 
     function onAuthenticated(token) {
@@ -113,6 +119,7 @@
             <ChatHeader
                 :service-request-enabled="!!serviceRequestTypesUrl && portalServiceManagement"
                 :current-view="currentView"
+                :active-service-request-number="activeServiceRequestNumber"
                 @close="emit('close')"
                 @open-service-request="onOpenServiceRequest"
                 @back="onBack"
@@ -131,6 +138,7 @@
                 :websockets-config="websocketsConfig"
                 :auth-endpoint="websocketsConfig.authEndpoint || '/api/broadcasting/auth'"
                 @back="onBack"
+                @conversation-active="onConversationActive"
             />
 
             <template v-else>

@@ -36,10 +36,12 @@
 
 namespace AidingApp\InAppCommunication\Events;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\InAppCommunication\Models\Message;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -64,7 +66,13 @@ class MessageSent implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         $author = $this->message->author;
-        $authorName = $author instanceof User ? $author->name : 'Unknown';
+
+        $authorName = match (true) {
+            $author instanceof User => $author->name,
+            $author instanceof Contact => $author->full_name,
+            default => 'Unknown',
+        };
+
         $authorAvatar = $author instanceof User ? Filament::getUserAvatarUrl($author) : null;
 
         return [
@@ -80,7 +88,7 @@ class MessageSent implements ShouldBroadcastNow
     }
 
     /**
-     * @return array<int, PrivateChannel>
+     * @return array<int, PrivateChannel|PresenceChannel>
      */
     public function broadcastOn(): array
     {
@@ -89,8 +97,13 @@ class MessageSent implements ShouldBroadcastNow
             ->where('participant_id', '!=', $this->message->author_id)
             ->pluck('participant_id');
 
-        return $participantIds->map(
+        $channels = $participantIds->map(
             fn (string $id) => new PrivateChannel("user.{$id}")
         )->all();
+
+        $channels[] = new PrivateChannel("conversation.{$this->message->conversation_id}");
+        $channels[] = new PresenceChannel("conversation.{$this->message->conversation_id}");
+
+        return $channels;
     }
 }

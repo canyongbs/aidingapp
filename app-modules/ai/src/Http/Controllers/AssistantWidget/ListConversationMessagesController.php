@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,42 +34,48 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Http\Resources;
+namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\InAppCommunication\Models\Message;
-use App\Models\User;
-use Filament\Facades\Filament;
+use AidingApp\InAppCommunication\Actions\GetConversationMessages;
+use AidingApp\InAppCommunication\Http\Resources\MessageResource;
+use AidingApp\InAppCommunication\Models\Conversation;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use Symfony\Component\HttpFoundation\Response;
 
-/**
- * @mixin Message
- */
-class MessageResource extends JsonResource
+class ListConversationMessagesController extends Controller
 {
-    /**
-     * @return array<string, mixed>
-     */
-    public function toArray(Request $request): array
+    public function __invoke(Request $request, Conversation $conversation): JsonResponse
     {
-        $author = $this->author;
+        $contact = auth('contact')->user() ?? $request->user();
 
-        $authorName = match (true) {
-            $author instanceof User => $author->name,
-            $author instanceof Contact => $author->full_name,
-            default => null,
-        };
+        abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
 
-        return [
-            'id' => $this->getKey(),
-            'conversation_id' => $this->conversation_id,
-            'author_type' => $this->author_type,
-            'author_id' => $this->author_id,
-            'author_name' => $authorName,
-            'author_avatar' => $author instanceof User ? Filament::getUserAvatarUrl($author) : null,
-            'content' => $this->content,
-            'created_at' => $this->created_at->toIso8601String(),
-        ];
+        $isParticipant = $conversation->conversationParticipants()
+            ->whereMorphedTo('participant', $contact)
+            ->exists();
+
+        abort_if(! $isParticipant, Response::HTTP_FORBIDDEN);
+
+        $limit = min((int) $request->query('limit', 25), 100);
+        $beforeId = $request->query('before');
+
+        $messages = app(GetConversationMessages::class)(
+            conversation: $conversation,
+            limit: $limit + 1,
+            beforeId: $beforeId,
+        );
+
+        $hasMore = $messages->count() > $limit;
+        $messages = $messages->take($limit);
+
+        return response()->json([
+            'data' => MessageResource::collection($messages->reverse()->values())->resolve(),
+            'meta' => [
+                'has_more' => $hasMore,
+            ],
+        ]);
     }
 }

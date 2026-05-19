@@ -38,13 +38,14 @@
     const props = defineProps({
         serviceRequestEnabled: { type: Boolean, default: false },
         currentView: { type: String, default: 'chat' },
+        activeServiceRequestNumber: { type: String, default: null },
     });
 
     defineEmits(['close', 'open-service-request', 'back']);
 
     const viewTitles = {
         'sign-in': 'Sign In',
-        'service-request': 'Open Service Request',
+        'service-request': 'Service Request',
     };
 </script>
 
@@ -66,8 +67,12 @@
 
             <div class="flex flex-col min-w-0 gap-1">
                 <h2 class="text-sm font-semibold tracking-tight truncate leading-tight">
-                    {{ currentView === 'chat' ? 'Support Assistant' : viewTitles[currentView] }}
+                    <template v-if="currentView === 'chat'">Support Assistant</template>
+                    <template v-else-if="activeServiceRequestNumber">{{ activeServiceRequestNumber }}</template>
+                    <template v-else>{{ viewTitles[currentView] }}</template>
                 </h2>
+
+                <p v-if="activeServiceRequestNumber" class="text-xs text-white/70 leading-tight">Live Chat</p>
 
                 <button
                     v-if="currentView === 'chat' && serviceRequestEnabled"

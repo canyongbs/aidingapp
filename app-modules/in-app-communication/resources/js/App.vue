@@ -81,6 +81,25 @@
     const selectedConversationId = computed(() => store.selectedConversationId);
     const selectedConversation = computed(() => store.selectedConversation);
 
+    const filteredConversations = computed(() => {
+        if (activeParticipantType.value === 'contact') {
+            return conversations.value.filter((conversation) => conversation.service_request_number);
+        }
+        return conversations.value.filter((conversation) => !conversation.service_request_number);
+    });
+
+    const usersUnreadCount = computed(() => {
+        return conversations.value
+            .filter((conversation) => !conversation.service_request_number)
+            .reduce((sum, conversation) => sum + (store.unreadCounts[conversation.id] || 0), 0);
+    });
+
+    const contactsUnreadCount = computed(() => {
+        return conversations.value
+            .filter((conversation) => conversation.service_request_number)
+            .reduce((sum, conversation) => sum + (store.unreadCounts[conversation.id] || 0), 0);
+    });
+
     const {
         messages,
         loading: messagesLoading,
@@ -96,6 +115,10 @@
     const showFindChannelsModal = ref(false);
     const showParticipants = ref(false);
     const conversationListRef = ref(null);
+
+    const initialUrlParams = new URLSearchParams(window.location.search);
+    const initialTab = initialUrlParams.get('tab') === 'contacts' ? 'contacts' : 'users';
+    const activeParticipantType = ref(initialTab === 'contacts' ? 'contact' : 'user');
 
     function handlePageClose() {
         disconnect();
@@ -129,7 +152,7 @@
             },
         });
 
-        const loaded = await loadConversations();
+        const loaded = await loadConversations(false, activeParticipantType.value);
         subscribeToAllConversations(loaded);
 
         // Check for conversation query parameter and auto-select
@@ -141,14 +164,18 @@
                 store.selectConversation(conversationId);
             } else {
                 // Conversation not in first page, fetch it directly
-                await fetchConversation(conversationId);
+                const fetched = await fetchConversation(conversationId);
                 subscribeToConversation(conversationId);
+
+                // If this is a contact conversation and we're not already on contacts tab, switch
+                if (fetched.service_request_number && activeParticipantType.value !== 'contact') {
+                    activeParticipantType.value = 'contact';
+                    conversationListRef.value?.focusContacts();
+                    await loadConversations(false, 'contact');
+                }
+
                 store.selectConversation(conversationId);
             }
-        }
-
-        if (urlParams.get('tab') === 'queue') {
-            conversationListRef.value?.focusQueue();
         }
 
         // Handle browser tab close/navigation
@@ -170,8 +197,7 @@
         if (newId) {
             url.searchParams.set('conversation', newId);
             joinPresence(newId);
-            await fetchConversation(newId);
-            await loadMessages();
+            await Promise.all([fetchConversation(newId), loadMessages()]);
             await markAsRead(newId);
         } else {
             url.searchParams.delete('conversation');
@@ -247,11 +273,23 @@
 
         loadingMoreConversations.value = true;
         try {
-            const loaded = await loadConversations(true);
+            const loaded = await loadConversations(true, activeParticipantType.value);
             subscribeToAllConversations(loaded);
         } finally {
             loadingMoreConversations.value = false;
         }
+    }
+
+    async function handleTabChanged(tab) {
+        activeParticipantType.value = tab === 'contacts' ? 'contact' : 'user';
+
+        // Sync tab to URL
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab);
+        window.history.replaceState({}, '', url);
+
+        const loaded = await loadConversations(false, activeParticipantType.value);
+        subscribeToAllConversations(loaded);
     }
 
     async function handleParticipantsUpdated() {
@@ -289,19 +327,23 @@
         >
             <ConversationList
                 ref="conversationListRef"
-                :conversations="conversations"
+                :conversations="filteredConversations"
                 :selected-id="selectedConversationId"
                 :unread-counts="store.unreadCounts"
                 :loading="conversationsLoading"
                 :loading-more="loadingMoreConversations"
                 :has-more="conversationsHasMore"
                 :current-user-id="userId"
+                :initial-tab="initialTab"
+                :users-unread-count="usersUnreadCount"
+                :contacts-unread-count="contactsUnreadCount"
                 @select="handleSelectConversation"
                 @new-conversation="handleNewConversation"
                 @find-channels="handleFindChannels"
                 @pin="handleTogglePin"
                 @load-more="handleLoadMoreConversations"
                 @queue-accepted="handleQueueAccepted"
+                @tab-changed="handleTabChanged"
             />
         </div>
 
@@ -345,7 +387,9 @@
 
                 <MessageInput
                     :disabled="false"
-                    :participants="selectedConversation.participants || []"
+                    :participants="
+                        selectedConversation.service_request_number ? [] : selectedConversation.participants || []
+                    "
                     :current-user-id="userId"
                     @send="handleSendMessage"
                     @typing="onTyping"

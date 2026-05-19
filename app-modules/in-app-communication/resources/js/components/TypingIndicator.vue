@@ -43,12 +43,13 @@
 
     const typingNames = computed(() => {
         return props.typingUsers
-            .filter((userId) => userId !== props.currentUserId)
-            .map((userId) => {
+            .filter((entry) => entry.id !== props.currentUserId)
+            .map((entry) => {
+                if (entry.name) return entry.name;
                 const participant = props.conversation.participants?.find(
-                    (conversationParticipant) => conversationParticipant.participant_id === userId,
+                    (conversationParticipant) => conversationParticipant.participant_id === entry.id,
                 );
-                return participant?.participant?.name || 'Someone';
+                return participant?.participant?.name || props.conversation.display_name || 'Someone';
             });
     });
 

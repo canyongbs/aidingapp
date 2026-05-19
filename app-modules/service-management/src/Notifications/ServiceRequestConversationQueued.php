@@ -74,7 +74,7 @@ class ServiceRequestConversationQueued extends BaseNotification implements Shoul
                 Action::make('view_queue')
                     ->button()
                     ->label('View Queue')
-                    ->url(UserChat::getUrl() . '?tab=queue'),
+                    ->url(UserChat::getUrl(['tab' => 'contacts'])),
             ])
             ->getBroadcastMessage();
     }

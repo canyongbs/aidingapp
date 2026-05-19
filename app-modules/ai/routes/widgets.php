@@ -36,6 +36,7 @@
 
 use AidingApp\Ai\Http\Controllers\AssistantWidget\AuthenticateController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\AuthorizeBroadcastController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\BroadcastTypingController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\CheckServiceRequestConversationEligibilityController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\EvaluateServiceRequestAiResolutionController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GenerateServiceRequestQuestionController;
@@ -43,8 +44,10 @@ use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestFormControlle
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestTypesController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestUploadUrlController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GetWidgetConfigController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\ListConversationMessagesController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\RequestAuthenticationController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\RequestServiceRequestConversationController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\SendConversationMessageController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\SendMessageController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\ServeWidgetAssetController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\StoreServiceRequestController;
@@ -119,6 +122,18 @@ Route::middleware([
                         Route::post('service-request/{serviceRequest}/conversation', RequestServiceRequestConversationController::class)
                             ->middleware(['auth:sanctum'])
                             ->name('service-request.conversation.request');
+
+                        Route::get('conversations/{conversation}/messages', ListConversationMessagesController::class)
+                            ->middleware(['auth:sanctum'])
+                            ->name('conversations.messages.index');
+
+                        Route::post('conversations/{conversation}/messages', SendConversationMessageController::class)
+                            ->middleware(['auth:sanctum'])
+                            ->name('conversations.messages.store');
+
+                        Route::post('conversations/{conversation}/typing', BroadcastTypingController::class)
+                            ->middleware(['auth:sanctum'])
+                            ->name('conversations.typing');
 
                         Route::match(
                             ['GET', 'POST', 'HEAD'],

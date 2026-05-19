@@ -46,7 +46,7 @@
         authEndpoint: { type: String, default: null },
     });
 
-    defineEmits(['back']);
+    defineEmits(['back', 'conversation-active']);
 
     const {
         step,
@@ -59,6 +59,7 @@
         submitError,
         fieldErrors,
         serviceRequestId,
+        serviceRequestNumber,
         aiClarificationEnabled,
         aiResolutionEnabled,
         questionsAndAnswers,
@@ -105,6 +106,7 @@
                 (title) => {
                     submittedTitle = title;
                     serviceRequestId = submitState?.serviceRequestId ?? null;
+                    serviceRequestNumber = submitState?.serviceRequestNumber ?? null;
                     step = 'success';
                 }
             "
@@ -192,11 +194,13 @@
         <SuccessStep
             v-if="step === 'success'"
             :title="submittedTitle"
+            :service-request-number="serviceRequestNumber"
             :ai-resolved="wasAiResolved"
             :service-request-id="serviceRequestId"
             :websockets-config="websocketsConfig"
             :auth-endpoint="authEndpoint"
             @back="$emit('back')"
+            @conversation-active="$emit('conversation-active', $event)"
         />
     </div>
 </template>

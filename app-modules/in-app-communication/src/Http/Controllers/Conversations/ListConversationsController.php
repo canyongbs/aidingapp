@@ -36,11 +36,13 @@
 
 namespace AidingApp\InAppCommunication\Http\Controllers\Conversations;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\InAppCommunication\Actions\GetUserConversations;
 use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Carbon\Carbon;
@@ -58,13 +60,14 @@ class ListConversationsController extends Controller
         $cursor = $request->query('cursor');
         $limit = min((int) $request->query('limit', 25), 50);
         $currentUserId = $request->user()->getKey();
+        $participantType = $request->query('participant_type');
 
         $getUserConversations = app(GetUserConversations::class);
 
         $pinnedConversations = [];
 
         if (! $cursor) {
-            $pinnedItems = $getUserConversations->pinned($request->user());
+            $pinnedItems = $getUserConversations->pinned($request->user(), $participantType);
             $pinnedConversations = $this->formatConversations($pinnedItems, $currentUserId);
         }
 
@@ -73,6 +76,7 @@ class ListConversationsController extends Controller
             limit: $limit,
             cursor: $cursor,
             excludePinned: true,
+            participantType: $participantType,
         );
 
         /** @var array<int, Conversation> $items */
@@ -131,7 +135,13 @@ class ListConversationsController extends Controller
             ->get()
             ->keyBy('conversation_id');
 
-        return $items->map(function (Conversation $conversation) use ($otherParticipants): array {
+        $serviceRequestConversations = ServiceRequestConversation::query()
+            ->whereIn('conversation_id', $dmConversationIds)
+            ->with('serviceRequest')
+            ->get()
+            ->keyBy('conversation_id');
+
+        return $items->map(function (Conversation $conversation) use ($otherParticipants, $serviceRequestConversations): array {
             /** @var bool $isPinned */
             $isPinned = $conversation->getAttribute('current_participant_is_pinned') ?? false;
 
@@ -151,12 +161,21 @@ class ListConversationsController extends Controller
                 $displayName = $conversation->name ?? 'Unnamed Channel';
                 $avatarUrl = null;
             } else {
-                $otherUser = $otherParticipants->get($conversation->getKey())?->participant;
-                $displayName = $otherUser instanceof User ? $otherUser->name : 'Unknown User';
-                $avatarUrl = $otherUser instanceof User ? Filament::getUserAvatarUrl($otherUser) : null;
+                $otherParticipant = $otherParticipants->get($conversation->getKey());
+                $otherModel = $otherParticipant?->participant;
+
+                $displayName = match (true) {
+                    $otherModel instanceof User => $otherModel->name,
+                    $otherModel instanceof Contact => $otherModel->full_name,
+                    default => 'Unknown User',
+                };
+
+                $avatarUrl = $otherModel instanceof User ? Filament::getUserAvatarUrl($otherModel) : null;
             }
 
-            return [
+            $srConversation = $serviceRequestConversations->get($conversation->getKey());
+
+            $result = [
                 'id' => $conversation->getKey(),
                 'type' => $conversation->type->value,
                 'name' => $conversation->name,
@@ -177,6 +196,12 @@ class ListConversationsController extends Controller
                 'participant_count' => $participantCount,
                 'created_at' => $conversation->created_at->toIso8601String(),
             ];
+
+            if ($srConversation?->serviceRequest) {
+                $result['service_request_number'] = $srConversation->serviceRequest->service_request_number;
+            }
+
+            return $result;
         })->all();
     }
 }

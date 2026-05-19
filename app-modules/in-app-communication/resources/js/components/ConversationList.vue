@@ -35,7 +35,7 @@
 <script setup>
     import { ChatBubbleLeftRightIcon, HashtagIcon, PlusIcon } from '@heroicons/vue/24/outline';
     import axios from 'axios';
-    import { computed, onMounted, onUnmounted, ref } from 'vue';
+    import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
     import ConversationListItem from './ConversationListItem.vue';
     import ServiceRequestConversationQueue from './ServiceRequestConversationQueue.vue';
     import EmptyState from './ui/EmptyState.vue';
@@ -48,12 +48,23 @@
         loadingMore: { type: Boolean, default: false },
         hasMore: { type: Boolean, default: false },
         currentUserId: { type: String, required: true },
+        initialTab: { type: String, default: 'users' },
+        usersUnreadCount: { type: Number, default: 0 },
+        contactsUnreadCount: { type: Number, default: 0 },
     });
 
-    const emit = defineEmits(['select', 'new-conversation', 'find-channels', 'pin', 'load-more', 'queue-accepted']);
+    const emit = defineEmits([
+        'select',
+        'new-conversation',
+        'find-channels',
+        'pin',
+        'load-more',
+        'queue-accepted',
+        'tab-changed',
+    ]);
 
     const scrollContainer = ref(null);
-    const activeTab = ref('conversations');
+    const activeTab = ref(props.initialTab);
     const queueItems = ref([]);
     const queueLoading = ref(true);
     const now = ref(Date.now());
@@ -112,14 +123,13 @@
     }
 
     function handleQueueAccepted(conversationId) {
-        activeTab.value = 'conversations';
         fetchQueueCount();
         emit('queue-accepted', conversationId);
     }
 
-    function focusQueue() {
-        activeTab.value = 'queue';
-    }
+    watch(activeTab, (newTab) => {
+        emit('tab-changed', newTab);
+    });
 
     function addQueueItem(item) {
         const exists = queueItems.value.some((i) => i.id === item.id);
@@ -128,7 +138,11 @@
         }
     }
 
-    defineExpose({ focusQueue, addQueueItem });
+    function focusContacts() {
+        activeTab.value = 'contacts';
+    }
+
+    defineExpose({ focusContacts, addQueueItem });
 </script>
 
 <template>
@@ -169,47 +183,44 @@
                 <button
                     type="button"
                     :class="[
-                        'flex-1 text-sm font-medium py-2 rounded-md transition-all',
-                        activeTab === 'conversations'
+                        'flex-1 text-sm font-medium py-2 rounded-md transition-all relative',
+                        activeTab === 'users'
                             ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
                     ]"
-                    @click="activeTab = 'conversations'"
+                    @click="activeTab = 'users'"
                 >
-                    Conversations
+                    Users
+                    <span
+                        v-if="usersUnreadCount > 0"
+                        class="ml-1 inline-flex items-center justify-center min-w-5 h-5 px-1 text-xs font-bold text-white bg-primary-500 rounded-full"
+                    >
+                        {{ usersUnreadCount > 99 ? '99+' : usersUnreadCount }}
+                    </span>
                 </button>
                 <button
                     type="button"
                     :class="[
                         'flex-1 text-sm font-medium py-2 rounded-md transition-all relative',
-                        activeTab === 'queue'
+                        activeTab === 'contacts'
                             ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
                     ]"
-                    @click="activeTab = 'queue'"
+                    @click="activeTab = 'contacts'"
                 >
-                    Queue
+                    Contacts
                     <span
-                        v-if="queueCount > 0"
+                        v-if="contactsUnreadCount + queueCount > 0"
                         class="ml-1 inline-flex items-center justify-center min-w-5 h-5 px-1 text-xs font-bold text-white bg-primary-500 rounded-full"
                     >
-                        {{ queueCount }}
+                        {{ contactsUnreadCount + queueCount > 99 ? '99+' : contactsUnreadCount + queueCount }}
                     </span>
                 </button>
             </div>
         </div>
 
-        <!-- Queue Content -->
-        <ServiceRequestConversationQueue
-            v-if="activeTab === 'queue'"
-            :items="queueItems"
-            :loading="queueLoading"
-            @accepted="handleQueueAccepted"
-            @refresh="fetchQueueCount"
-        />
-
         <!-- Conversation List -->
-        <div v-else ref="scrollContainer" class="flex-1 overflow-y-auto" @scroll="handleScroll">
+        <div ref="scrollContainer" class="flex-1 overflow-y-auto" @scroll="handleScroll">
             <div v-if="loading" class="flex items-center justify-center p-8">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 bg-primary-400 rounded-full animate-bounce"></div>
@@ -218,74 +229,91 @@
                 </div>
             </div>
 
-            <EmptyState
-                v-else-if="conversations.length === 0"
-                :icon="ChatBubbleLeftRightIcon"
-                message="No conversations yet"
-                class="p-8"
-            >
-                <button
-                    type="button"
-                    class="mt-3 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
-                    @click="emit('new-conversation')"
+            <template v-else>
+                <!-- Queue Section (Contacts tab only) -->
+                <ServiceRequestConversationQueue
+                    v-if="activeTab === 'contacts' && queueCount > 0"
+                    :items="queueItems"
+                    :loading="queueLoading"
+                    :inline="true"
+                    @accepted="handleQueueAccepted"
+                    @refresh="fetchQueueCount"
+                />
+
+                <EmptyState
+                    v-if="conversations.length === 0 && (activeTab !== 'contacts' || queueCount === 0)"
+                    :icon="ChatBubbleLeftRightIcon"
+                    message="No conversations yet"
+                    class="p-8"
                 >
-                    Start a new conversation
-                </button>
-            </EmptyState>
-
-            <div v-else>
-                <!-- Pinned Section -->
-                <div v-if="pinnedConversations.length > 0">
-                    <div
-                        class="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50"
+                    <button
+                        v-if="activeTab === 'users'"
+                        type="button"
+                        class="mt-3 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300"
+                        @click="emit('new-conversation')"
                     >
-                        Pinned
-                    </div>
-                    <div class="divide-y divide-gray-100 dark:divide-gray-800">
-                        <ConversationListItem
-                            v-for="conversation in pinnedConversations"
-                            :key="conversation.id"
-                            :conversation="conversation"
-                            :is-selected="selectedId === conversation.id"
-                            :unread-count="unreadCounts[conversation.id] || 0"
-                            :current-user-id="currentUserId"
-                            @click="emit('select', conversation.id)"
-                            @pin="emit('pin', $event)"
-                        />
-                    </div>
-                </div>
+                        Start a new conversation
+                    </button>
+                </EmptyState>
 
-                <!-- Unpinned Section -->
-                <div v-if="unpinnedConversations.length > 0">
-                    <div
-                        v-if="pinnedConversations.length > 0"
-                        class="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50"
-                    >
-                        All Messages
+                <div v-if="conversations.length > 0">
+                    <!-- Pinned Section -->
+                    <div v-if="pinnedConversations.length > 0">
+                        <div
+                            class="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50"
+                        >
+                            Pinned
+                        </div>
+                        <div class="divide-y divide-gray-100 dark:divide-gray-800">
+                            <ConversationListItem
+                                v-for="conversation in pinnedConversations"
+                                :key="conversation.id"
+                                :conversation="conversation"
+                                :is-selected="selectedId === conversation.id"
+                                :unread-count="unreadCounts[conversation.id] || 0"
+                                :current-user-id="currentUserId"
+                                @click="emit('select', conversation.id)"
+                                @pin="emit('pin', $event)"
+                            />
+                        </div>
                     </div>
-                    <div class="divide-y divide-gray-100 dark:divide-gray-800">
-                        <ConversationListItem
-                            v-for="conversation in unpinnedConversations"
-                            :key="conversation.id"
-                            :conversation="conversation"
-                            :is-selected="selectedId === conversation.id"
-                            :unread-count="unreadCounts[conversation.id] || 0"
-                            :current-user-id="currentUserId"
-                            @click="emit('select', conversation.id)"
-                            @pin="emit('pin', $event)"
-                        />
-                    </div>
-                </div>
 
-                <!-- Loading More Indicator -->
-                <div v-if="loadingMore" class="flex items-center justify-center py-4">
-                    <div class="flex items-center space-x-2">
-                        <div class="w-2 h-2 bg-primary-400 rounded-full animate-bounce"></div>
-                        <div class="w-2 h-2 bg-primary-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                        <div class="w-2 h-2 bg-primary-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                    <!-- Unpinned Section -->
+                    <div v-if="unpinnedConversations.length > 0">
+                        <div
+                            v-if="pinnedConversations.length > 0 || (activeTab === 'contacts' && queueCount > 0)"
+                            class="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50"
+                        >
+                            {{ activeTab === 'contacts' ? 'Conversations' : 'All Messages' }}
+                        </div>
+                        <div class="divide-y divide-gray-100 dark:divide-gray-800">
+                            <ConversationListItem
+                                v-for="conversation in unpinnedConversations"
+                                :key="conversation.id"
+                                :conversation="conversation"
+                                :is-selected="selectedId === conversation.id"
+                                :unread-count="unreadCounts[conversation.id] || 0"
+                                :current-user-id="currentUserId"
+                                @click="emit('select', conversation.id)"
+                                @pin="emit('pin', $event)"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Loading More Indicator -->
+                    <div v-if="loadingMore" class="flex items-center justify-center py-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-primary-400 rounded-full animate-bounce"></div>
+                            <div
+                                class="w-2 h-2 bg-primary-400 rounded-full animate-bounce [animation-delay:0.2s]"
+                            ></div>
+                            <div
+                                class="w-2 h-2 bg-primary-400 rounded-full animate-bounce [animation-delay:0.4s]"
+                            ></div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            </template>
         </div>
     </div>
 </template>

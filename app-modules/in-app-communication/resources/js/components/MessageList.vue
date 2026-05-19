@@ -33,7 +33,7 @@
 -->
 
 <script setup>
-    import { ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/24/outline';
+    import { ArrowTopRightOnSquareIcon, ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/24/outline';
     import { computed, nextTick, onMounted, ref, watch } from 'vue';
     import MessageBubble from './MessageBubble.vue';
     import TypingIndicator from './TypingIndicator.vue';
@@ -236,15 +236,53 @@
             <LoadingSpinner label="Loading messages..." />
         </div>
 
+        <!-- Service Request Info Card -->
+        <div
+            v-if="conversation.service_request_number && !loading"
+            class="mb-6 rounded-lg border border-primary-200 dark:border-primary-800 bg-primary-50 dark:bg-primary-900/20 p-4"
+        >
+            <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                    <p class="text-xs font-medium text-primary-600 dark:text-primary-400 mb-1">
+                        {{ conversation.service_request_number }}
+                    </p>
+                    <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {{ conversation.service_request_title }}
+                    </p>
+                    <p
+                        v-if="conversation.service_request_description"
+                        class="mt-1 text-xs text-gray-600 dark:text-gray-400 line-clamp-2"
+                    >
+                        {{ conversation.service_request_description }}
+                    </p>
+                </div>
+                <a
+                    :href="`/service-requests/${conversation.service_request_id || ''}`"
+                    target="_blank"
+                    class="shrink-0 p-1.5 rounded-md text-primary-600 dark:text-primary-400 hover:bg-primary-100 dark:hover:bg-primary-800/50 transition-colors"
+                    title="View service request"
+                >
+                    <ArrowTopRightOnSquareIcon class="w-4 h-4" />
+                </a>
+            </div>
+        </div>
+
         <!-- Empty State -->
-        <div v-if="messages.length === 0 && !loading" class="flex h-full items-center justify-center">
+        <div
+            v-if="messages.length === 0 && !loading"
+            class="flex items-center justify-center"
+            :class="conversation.service_request_number ? 'h-64' : 'h-full'"
+        >
             <div class="text-center">
                 <div
                     class="mx-auto w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mb-3"
                 >
                     <ChatBubbleLeftEllipsisIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">No messages yet. Start the conversation!</p>
+                <p v-if="conversation.service_request_number" class="text-sm text-gray-600 dark:text-gray-400">
+                    You are now connected with {{ conversation.display_name }}.
+                </p>
+                <p v-else class="text-sm text-gray-600 dark:text-gray-400">No messages yet. Start the conversation!</p>
             </div>
         </div>
 

@@ -170,7 +170,7 @@
                     />
                 </div>
             </template>
-            <template v-else>
+            <template v-else-if="!conversation.service_request_number">
                 <img
                     :src="avatarUrl"
                     :alt="displayName"

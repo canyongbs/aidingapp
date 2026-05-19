@@ -47,6 +47,7 @@ export function useServiceRequestWizard() {
     const submitError = ref(null);
     const fieldErrors = ref({});
     const serviceRequestId = ref(null);
+    const serviceRequestNumber = ref(null);
 
     const aiClarificationEnabled = ref(false);
     const aiResolutionEnabled = ref(false);
@@ -222,6 +223,7 @@ export function useServiceRequestWizard() {
                 submittedTitle.value = titleSnapshot;
                 wasAiResolved.value = aiResolutionResult.value?.successful === true;
                 serviceRequestId.value = submitState.value?.serviceRequestId ?? null;
+                serviceRequestNumber.value = submitState.value?.serviceRequestNumber ?? null;
                 step.value = 'success';
             },
         );
@@ -267,6 +269,7 @@ export function useServiceRequestWizard() {
         submitError,
         fieldErrors,
         serviceRequestId,
+        serviceRequestNumber,
         aiClarificationEnabled,
         aiResolutionEnabled,
         questionsAndAnswers,
