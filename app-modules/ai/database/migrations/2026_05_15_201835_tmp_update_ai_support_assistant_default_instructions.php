@@ -34,14 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+use AidingApp\Ai\Settings\AiSupportAssistantSettings;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-use App\Support\AbstractFeatureFlag;
-
-class BrokenLinksFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
+return new class () extends Migration {
+    public function up(): void
     {
-        return false;
+        DB::transaction(function () {
+            DB::table('settings')
+                ->where('group', 'ai-support-assistant')
+                ->where('name', 'instructions')
+                ->update([
+                    'payload' => json_encode(AiSupportAssistantSettings::defaultInstructions()),
+                    'updated_at' => now(),
+                ]);
+        });
     }
-}
+};
