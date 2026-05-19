@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Observers\ServiceRequestUpdateObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Timelines\ServiceRequestUpdateTimeline;
 use App\Models\BaseModel;
+use App\Models\Media;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
@@ -55,7 +56,6 @@ use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 /**
  * @mixin IdeHelperServiceRequestUpdate
@@ -67,7 +67,7 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
     use HasUuids;
     use AuditableTrait;
 
-    /** @use InteractsWithMedia<\App\Models\Media> */
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
 
     /** @use HasFactory<ServiceRequestUpdateFactory> */
