@@ -81,12 +81,14 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::rename('teams', 'departments');
+
             foreach ($this->pivotTables as $old => $new) {
                 Schema::rename($old, $new);
             }
 
             Schema::table('users', fn (Blueprint $table) => $table->renameColumn('team_id', 'department_id'));
             Schema::table('advisories', fn (Blueprint $table) => $table->renameColumn('assigned_team_id', 'assigned_department_id'));
+
             foreach ($this->pivotTables as $new) {
                 Schema::table($new, fn (Blueprint $table) => $table->renameColumn('team_id', 'department_id'));
             }
