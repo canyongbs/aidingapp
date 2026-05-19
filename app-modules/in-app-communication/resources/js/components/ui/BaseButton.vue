@@ -57,7 +57,7 @@
                 'bg-primary-600 text-white hover:bg-primary-700 active:bg-primary-800 disabled:bg-gray-400 shadow-sm',
             secondary:
                 'border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 bg-transparent',
-            danger: 'border border-red-300 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 bg-transparent',
+            danger: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 disabled:bg-gray-400 shadow-sm',
             ghost: 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 bg-transparent',
         };
         return variants[props.variant];

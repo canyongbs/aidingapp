@@ -32,9 +32,11 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { PaperAirplaneIcon, UserIcon } from '@heroicons/vue/24/outline';
+    import { PaperAirplaneIcon, UserIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+    import axios from 'axios';
     import { nextTick, onMounted, ref, watch } from 'vue';
     import { useConversationMessages } from '../../composables/useConversationMessages.js';
+    import { getAuthHeaders } from '../../utils/token.js';
 
     const props = defineProps({
         conversationId: { type: String, required: true },
@@ -43,7 +45,28 @@
         serviceRequestTitle: { type: String, default: null },
         serviceRequestNumber: { type: String, default: null },
         agentName: { type: String, default: null },
+        isEnded: { type: Boolean, default: false },
     });
+
+    const showEndConfirm = ref(false);
+    const isEnding = ref(false);
+
+    async function endConversation() {
+        if (isEnding.value) return;
+        isEnding.value = true;
+        try {
+            await axios.post(
+                `/widgets/assistant/api/conversations/${props.conversationId}/end`,
+                {},
+                {
+                    headers: getAuthHeaders(),
+                },
+            );
+        } finally {
+            isEnding.value = false;
+            showEndConfirm.value = false;
+        }
+    }
 
     const { messages, loading, sending, typingName, loadMessages, sendMessage, subscribe, broadcastTyping } =
         useConversationMessages(props.websocketsConfig, props.authEndpoint);
@@ -128,6 +151,48 @@
 
 <template>
     <div class="flex flex-col h-full">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-4 py-2.5 border-b border-gray-200 bg-gray-50 shrink-0">
+            <span class="text-sm font-medium text-gray-700 truncate">
+                {{ agentName ? `Chat with ${agentName}` : 'Live Chat' }}
+            </span>
+            <button
+                v-if="!isEnded"
+                type="button"
+                class="flex items-center gap-1 text-xs font-medium text-red-600 hover:text-red-700 hover:bg-red-50 rounded px-2 py-1 transition-colors"
+                @click="showEndConfirm = true"
+            >
+                <XMarkIcon class="w-3.5 h-3.5" />
+                End
+            </button>
+        </div>
+
+        <!-- End Confirmation -->
+        <div
+            v-if="showEndConfirm"
+            class="flex items-center justify-between gap-3 px-4 py-2.5 bg-red-50 border-b border-red-200 shrink-0"
+        >
+            <span class="text-sm text-red-700">End this conversation?</span>
+            <div class="flex gap-2 shrink-0">
+                <button
+                    type="button"
+                    class="px-3 py-1 text-xs font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                    :disabled="isEnding"
+                    @click="showEndConfirm = false"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="button"
+                    class="px-3 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded transition-colors"
+                    :disabled="isEnding"
+                    @click="endConversation"
+                >
+                    {{ isEnding ? 'Ending...' : 'End chat' }}
+                </button>
+            </div>
+        </div>
+
         <!-- Messages -->
         <div ref="messagesContainer" class="flex-1 overflow-y-auto p-6 bg-white">
             <template v-if="loading">
@@ -214,8 +279,13 @@
             </template>
         </div>
 
+        <!-- Ended Banner -->
+        <div v-if="isEnded" class="border-t border-gray-200/80 bg-gray-50 p-4 text-center shrink-0">
+            <p class="text-sm text-gray-500">This conversation has ended.</p>
+        </div>
+
         <!-- Input -->
-        <div class="border-t border-gray-200/80 bg-white p-4 shadow-lg shrink-0">
+        <div v-else class="border-t border-gray-200/80 bg-white p-4 shadow-lg shrink-0">
             <div class="flex items-end gap-2">
                 <textarea
                     ref="textarea"

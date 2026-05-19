@@ -66,6 +66,7 @@
         updateConversation,
         togglePin,
         fetchConversation,
+        endConversation,
     } = useConversations();
 
     const loadingMoreConversations = ref(false);
@@ -315,6 +316,11 @@
         subscribeToConversation(conversationId);
         store.selectConversation(conversationId);
     }
+
+    async function handleEndConversation() {
+        if (!selectedConversationId.value) return;
+        await endConversation(selectedConversationId.value);
+    }
 </script>
 
 <template>
@@ -360,6 +366,7 @@
                     @show-participants="handleToggleParticipants"
                     @update-settings="handleUpdateSettings"
                     @update-conversation="handleUpdateConversation"
+                    @end-conversation="handleEndConversation"
                 >
                     <!-- Mobile back button -->
                     <template #prepend>

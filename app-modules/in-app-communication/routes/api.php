@@ -51,6 +51,7 @@ use AidingApp\InAppCommunication\Http\Controllers\Messages\ListMessagesControlle
 use AidingApp\InAppCommunication\Http\Controllers\Users\SearchUsersController;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestConversations\AcceptServiceRequestConversationController;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestConversations\DeclineServiceRequestConversationController;
+use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestConversations\EndServiceRequestConversationController;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestConversations\ListServiceRequestConversationQueueController;
 use Illuminate\Support\Facades\Route;
 
@@ -111,4 +112,7 @@ Route::middleware(['web', 'auth'])
 
         Route::post('/service-request-conversations/{serviceRequestConversation}/decline', DeclineServiceRequestConversationController::class)
             ->name('service-request-conversations.decline');
+
+        Route::post('/conversations/{conversation}/end', EndServiceRequestConversationController::class)
+            ->name('conversations.end');
     });

@@ -100,9 +100,13 @@
 <template>
     <div
         class="flex-1 flex flex-col items-center text-center gap-5"
-        :class="status === 'accepted' ? 'justify-start overflow-hidden p-0' : 'justify-center px-8 py-10'"
+        :class="
+            status === 'accepted' || status === 'ended'
+                ? 'justify-start overflow-hidden p-0'
+                : 'justify-center px-8 py-10'
+        "
     >
-        <template v-if="status !== 'accepted'">
+        <template v-if="status !== 'accepted' && status !== 'ended'">
             <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center">
                 <svg
                     class="w-8 h-8 text-green-500"
@@ -194,8 +198,8 @@
             </div>
         </template>
 
-        <!-- Accepted -->
-        <template v-if="status === 'accepted'">
+        <!-- Accepted / Ended -->
+        <template v-if="status === 'accepted' || status === 'ended'">
             <div class="w-full flex-1 flex flex-col min-h-0">
                 <ServiceRequestConversationChat
                     :conversation-id="conversationId"
@@ -204,6 +208,7 @@
                     :service-request-title="title"
                     :service-request-number="serviceRequestNumber"
                     :agent-name="agentName"
+                    :is-ended="status === 'ended'"
                 />
             </div>
         </template>
@@ -225,7 +230,7 @@
         </template>
 
         <button
-            v-if="status !== 'accepted'"
+            v-if="status !== 'accepted' && status !== 'ended'"
             @click="$emit('back')"
             class="mt-2 flex items-center gap-2 px-5 py-2.5 rounded bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium transition-all shadow-sm"
         >
