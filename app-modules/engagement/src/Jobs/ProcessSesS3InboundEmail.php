@@ -338,6 +338,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             foreach ($parser->getAttachments(false) as $attachment) {
                 try {
+                    /** @var \App\Models\Media $media */
                     $media = $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
                         ->setName($attachment->getFilename())
                         ->setFileName($attachment->getFilename())
@@ -524,6 +525,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                 foreach ($parser->getAttachments(false) as $attachment) {
                     try {
+                        /** @var \App\Models\Media $media */
                         $media = $serviceRequest->addMediaFromStream($attachment->getStream())
                             ->setName($attachment->getFilename())
                             ->setFileName($attachment->getFilename())

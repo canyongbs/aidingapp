@@ -84,6 +84,7 @@ class PersistServiceRequestUpload implements ShouldQueue
         }
 
         try {
+            /** @var \App\Models\Media $media */
             $media = $this->serviceRequest
                 ->addMediaFromDisk($this->path)
                 ->usingName(pathinfo($this->originalFileName, PATHINFO_FILENAME))
