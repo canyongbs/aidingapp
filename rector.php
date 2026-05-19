@@ -40,6 +40,10 @@ use App\Rector\AddInteractsWithMediaUseTagRector;
 use Rector\Config\RectorConfig;
 
 return static function (RectorConfig $rectorConfig): void {
+    $rectorConfig->autoloadPaths([
+        __DIR__ . '/rector-rules',
+    ]);
+
     $rectorConfig->paths([
         __DIR__ . '/app',
         __DIR__ . '/app-modules',
