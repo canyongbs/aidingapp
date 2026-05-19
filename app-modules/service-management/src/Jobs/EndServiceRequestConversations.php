@@ -110,7 +110,7 @@ class EndServiceRequestConversations implements ShouldQueue, ShouldBeUnique
             ->eachById(function (ServiceRequestConversation $record) {
                 $lastMessage = $record->conversation?->messages()->latest()->first();
 
-                $lastActivity = $lastMessage?->created_at ?? $record->accepted_at;
+                $lastActivity = $lastMessage->created_at ?? $record->accepted_at;
 
                 if ($lastActivity >= now()->subMinutes(20)) {
                     return;
