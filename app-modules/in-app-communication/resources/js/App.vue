@@ -53,6 +53,7 @@
         userId: { type: String, required: true },
         userName: { type: String, required: true },
         userAvatar: { type: String, default: null },
+        serviceManagementEnabled: { type: Boolean, default: false },
     });
 
     const store = useChatStore();
@@ -343,6 +344,7 @@
                 :initial-tab="initialTab"
                 :users-unread-count="usersUnreadCount"
                 :contacts-unread-count="contactsUnreadCount"
+                :service-management-enabled="serviceManagementEnabled"
                 @select="handleSelectConversation"
                 @new-conversation="handleNewConversation"
                 @find-channels="handleFindChannels"
