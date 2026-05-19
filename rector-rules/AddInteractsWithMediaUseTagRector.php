@@ -34,14 +34,18 @@
 </COPYRIGHT>
 */
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Rector;
 
 use PhpParser\Comment\Doc;
 use PhpParser\Node;
+use PhpParser\Node\Name;
 use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\TraitUse;
+use PhpParser\Node\Stmt\Use_;
+use PhpParser\Node\UseItem;
 use Rector\Rector\AbstractRector;
 use Symplify\RuleDocGenerator\ValueObject\CodeSample\CodeSample;
 use Symplify\RuleDocGenerator\ValueObject\RuleDefinition;
@@ -63,11 +67,12 @@ class AddInteractsWithMediaUseTagRector extends AbstractRector
                         }
                         CODE_SAMPLE,
                     <<<'CODE_SAMPLE'
+                        use App\Models\Media;
                         use Spatie\MediaLibrary\InteractsWithMedia;
 
                         class MyModel extends Model
                         {
-                            /** @use InteractsWithMedia<\App\Models\Media> */
+                            /** @use InteractsWithMedia<Media> */
                             use InteractsWithMedia;
                         }
                         CODE_SAMPLE,
@@ -78,28 +83,58 @@ class AddInteractsWithMediaUseTagRector extends AbstractRector
 
     public function getNodeTypes(): array
     {
-        return [Class_::class];
+        return [Namespace_::class];
     }
 
     public function refactor(Node $node): ?Node
     {
-        /** @var Class_ $node */
-        foreach ($node->stmts as $stmt) {
-            if (! $stmt instanceof TraitUse) {
-                continue;
+        /** @var Namespace_ $node */
+        $class = $this->findClass($node);
+
+        if ($class === null) {
+            return null;
+        }
+
+        $traitUse = $this->findInteractsWithMediaTraitUse($class);
+
+        if ($traitUse === null) {
+            return null;
+        }
+
+        if ($this->hasUseTag($traitUse)) {
+            return null;
+        }
+
+        if ($this->hasConflictingMediaImport($node)) {
+            $traitUse->setDocComment(new Doc('/** @use InteractsWithMedia<\App\Models\Media> */'));
+        } else {
+            $traitUse->setDocComment(new Doc('/** @use InteractsWithMedia<Media> */'));
+
+            if (! $this->hasUseImport($node, 'App\Models\Media')) {
+                $this->addUseImport($node, 'App\Models\Media');
             }
+        }
 
-            if (! $this->hasInteractsWithMediaTrait($stmt)) {
-                continue;
+        return $node;
+    }
+
+    private function findClass(Namespace_ $namespace): ?Class_
+    {
+        foreach ($namespace->stmts as $stmt) {
+            if ($stmt instanceof Class_) {
+                return $stmt;
             }
+        }
 
-            if ($this->hasUseTag($stmt)) {
-                return null;
+        return null;
+    }
+
+    private function findInteractsWithMediaTraitUse(Class_ $class): ?TraitUse
+    {
+        foreach ($class->stmts as $stmt) {
+            if ($stmt instanceof TraitUse && $this->hasInteractsWithMediaTrait($stmt)) {
+                return $stmt;
             }
-
-            $stmt->setDocComment(new Doc('/** @use InteractsWithMedia<\App\Models\Media> */'));
-
-            return $node;
         }
 
         return null;
@@ -125,5 +160,59 @@ class AddInteractsWithMediaUseTagRector extends AbstractRector
         }
 
         return str_contains($docComment->getText(), '@use InteractsWithMedia<');
+    }
+
+    private function hasUseImport(Namespace_ $namespace, string $fullyQualifiedName): bool
+    {
+        foreach ($namespace->stmts as $stmt) {
+            if (! $stmt instanceof Use_) {
+                continue;
+            }
+
+            foreach ($stmt->uses as $use) {
+                if ($use->name->toString() === $fullyQualifiedName) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function hasConflictingMediaImport(Namespace_ $namespace): bool
+    {
+        foreach ($namespace->stmts as $stmt) {
+            if (! $stmt instanceof Use_) {
+                continue;
+            }
+
+            foreach ($stmt->uses as $use) {
+                $shortName = $use->alias?->toString() ?? $use->name->getLast();
+
+                if ($shortName === 'Media' && $use->name->toString() !== 'App\Models\Media') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private function addUseImport(Namespace_ $namespace, string $fullyQualifiedName): void
+    {
+        $newUse = new Use_([new UseItem(new Name($fullyQualifiedName))]);
+
+        // Find the last use statement and insert after it
+        $lastUseIndex = null;
+
+        foreach ($namespace->stmts as $index => $stmt) {
+            if ($stmt instanceof Use_) {
+                $lastUseIndex = $index;
+            }
+        }
+
+        if ($lastUseIndex !== null) {
+            array_splice($namespace->stmts, $lastUseIndex + 1, 0, [$newUse]);
+        }
     }
 }

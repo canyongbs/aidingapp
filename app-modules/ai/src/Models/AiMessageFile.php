@@ -39,6 +39,7 @@ namespace AidingApp\Ai\Models;
 use AidingApp\Ai\Database\Factories\AiMessageFileFactory;
 use AidingApp\Ai\Models\Contracts\AiFile;
 use AidingApp\IntegrationOpenAi\Models\OpenAiVectorStore;
+use App\Models\Media;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -60,7 +61,10 @@ class AiMessageFile extends Model implements AiFile, HasMedia
 
     use HasUuids;
     use SoftDeletes;
+
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
+
     use Prunable;
 
     protected $fillable = [

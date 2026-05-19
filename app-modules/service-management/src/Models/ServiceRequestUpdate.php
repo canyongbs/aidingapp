@@ -66,6 +66,8 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
     use SoftDeletes;
     use HasUuids;
     use AuditableTrait;
+
+    /** @use InteractsWithMedia<\App\Models\Media> */
     use InteractsWithMedia;
 
     /** @use HasFactory<ServiceRequestUpdateFactory> */
