@@ -95,9 +95,7 @@
                     <x-filament::button
                         id="show-category-btn"
                         type="button"
-                        size="sm"
-                        class="fi-color fi-color-primary fi-bg-color-600 hover:fi-bg-color-500 dark:fi-bg-color-600 dark:hover:fi-bg-color-500 fi-text-color-0 hover:fi-text-color-0 dark:fi-text-color-0 dark:hover:fi-text-color-0"
-                    >
+                        size="sm">
                         Add Service Request Area
                     </x-filament::button>
                     <div
@@ -129,9 +127,7 @@
                     <x-filament::button
                         id="show-type-btn"
                         type="button"
-                        size="sm"
-                        class="fi-color fi-color-primary fi-bg-color-600 hover:fi-bg-color-500 dark:fi-bg-color-600 dark:hover:fi-bg-color-500 fi-text-color-0 hover:fi-text-color-0 dark:fi-text-color-0 dark:hover:fi-text-color-0"
-                    >
+                        size="sm">
                         Add Type
                     </x-filament::button>
                     <div
