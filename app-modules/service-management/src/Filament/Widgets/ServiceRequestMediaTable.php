@@ -36,7 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Filament\Widgets;
 
+use AidingApp\Contact\Models\Contact;
 use App\Models\Media;
+use App\Models\User;
 use App\Settings\DisplaySettings;
 use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
@@ -80,7 +82,9 @@ class ServiceRequestMediaTable extends TableWidget
                 TextColumn::make('display_name')
                     ->label('File Name')
                     ->getStateUsing(fn (Media $record): string => $record->name . '.' . pathinfo($record->file_name, PATHINFO_EXTENSION))
-                    ->searchable('name')
+                    ->searchable(
+                        query: fn (Builder $query, string $search) => $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%'])
+                    )
                     ->wrap(),
 
                 TextColumn::make('created_by_name')
@@ -90,8 +94,20 @@ class ServiceRequestMediaTable extends TableWidget
                     ->searchable(
                         query: fn (Builder $query, string $search) => $query->whereHasMorph(
                             'createdBy',
-                            '*',
-                            fn ($subQuery) => $subQuery->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%'])
+                            [User::class, Contact::class],
+                            function (Builder $subQuery, string $type) use ($search): void {
+                                $searchLower = strtolower($search);
+
+                                if ($type === User::class) {
+                                    $subQuery->whereRaw('LOWER(name) LIKE ?', ['%' . $searchLower . '%']);
+                                } elseif ($type === Contact::class) {
+                                    $subQuery->where(function (Builder $q) use ($searchLower): void {
+                                        $q->whereRaw('LOWER(first_name) LIKE ?', ['%' . $searchLower . '%'])
+                                            ->orWhereRaw('LOWER(last_name) LIKE ?', ['%' . $searchLower . '%'])
+                                            ->orWhereRaw('LOWER(full_name) LIKE ?', ['%' . $searchLower . '%']);
+                                    });
+                                }
+                            }
                         )
                     ),
 

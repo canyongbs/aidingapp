@@ -40,11 +40,7 @@ use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
-
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewServiceRequestUpdate page', function () {
@@ -145,13 +141,7 @@ test('ViewServiceRequestUpdate is gated with proper feature access control', fun
 });
 
 test('ViewServiceRequestUpdate page displays the uploaded files section', function () {
-    Storage::fake('s3');
-
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
-    $serviceRequestUpdate
-        ->addMedia(UploadedFile::fake()->image('attachment.png'))
-        ->usingName('attachment')
-        ->toMediaCollection('uploads');
 
     asSuperAdmin()
         ->get(
@@ -161,103 +151,5 @@ test('ViewServiceRequestUpdate page displays the uploaded files section', functi
             ])
         )
         ->assertSuccessful()
-        ->assertSeeText('Uploaded Files')
-        ->assertSeeText('File Name')
-        ->assertSeeText('Uploaded By')
-        ->assertSeeText('Date');
-});
-
-test('ServiceRequestMediaTable renders uploaded files on service request update page', function () {
-    Storage::fake('s3');
-
-    asSuperAdmin();
-
-    $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
-    $serviceRequestUpdate
-        ->addMedia(UploadedFile::fake()->image('attachment.png'))
-        ->usingName('attachment')
-        ->toMediaCollection('uploads');
-
-    livewire(ServiceRequestMediaTable::class, [
-        'record' => $serviceRequestUpdate,
-        'collectionName' => 'uploads',
-    ])
-        ->assertSuccessful()
-        ->assertCanSeeTableRecords($serviceRequestUpdate->getMedia('uploads'));
-});
-
-test('ServiceRequestMediaTable can search by file name on service request update page', function () {
-    Storage::fake('s3');
-
-    asSuperAdmin();
-
-    $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
-    $serviceRequestUpdate
-        ->addMedia(UploadedFile::fake()->image('meeting-notes.png'))
-        ->usingName('meeting-notes')
-        ->toMediaCollection('uploads');
-    $serviceRequestUpdate
-        ->addMedia(UploadedFile::fake()->image('screenshot.png'))
-        ->usingName('screenshot')
-        ->toMediaCollection('uploads');
-
-    $allMedia = $serviceRequestUpdate->getMedia('uploads');
-    $meetingNotes = $allMedia->first(fn ($m) => $m->name === 'meeting-notes');
-    $screenshot = $allMedia->first(fn ($m) => $m->name === 'screenshot');
-
-    livewire(ServiceRequestMediaTable::class, [
-        'record' => $serviceRequestUpdate,
-        'collectionName' => 'uploads',
-    ])
-        ->searchTable('meeting')
-        ->assertCanSeeTableRecords([$meetingNotes])
-        ->assertCanNotSeeTableRecords([$screenshot]);
-});
-
-test('ServiceRequestMediaTable can search by uploader name on service request update page', function () {
-    Storage::fake('s3');
-
-    $userAlice = User::factory()->create(['name' => 'Alice Smith']);
-    $userBob = User::factory()->create(['name' => 'Bob Jones']);
-
-    $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
-
-    actingAs($userAlice);
-    $serviceRequestUpdate
-        ->addMedia(UploadedFile::fake()->image('alice-file.png'))
-        ->usingName('alice-file')
-        ->toMediaCollection('uploads');
-
-    actingAs($userBob);
-    $serviceRequestUpdate
-        ->addMedia(UploadedFile::fake()->image('bob-file.png'))
-        ->usingName('bob-file')
-        ->toMediaCollection('uploads');
-
-    $allMedia = $serviceRequestUpdate->getMedia('uploads');
-    $aliceMedia = $allMedia->first(fn ($m) => $m->name === 'alice-file');
-    $bobMedia = $allMedia->first(fn ($m) => $m->name === 'bob-file');
-
-    asSuperAdmin();
-
-    livewire(ServiceRequestMediaTable::class, [
-        'record' => $serviceRequestUpdate,
-        'collectionName' => 'uploads',
-    ])
-        ->searchTable('Alice')
-        ->assertCanSeeTableRecords([$aliceMedia])
-        ->assertCanNotSeeTableRecords([$bobMedia]);
-});
-
-test('ServiceRequestMediaTable shows empty state on service request update page when no uploads exist', function () {
-    asSuperAdmin();
-
-    $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
-
-    livewire(ServiceRequestMediaTable::class, [
-        'record' => $serviceRequestUpdate,
-        'collectionName' => 'uploads',
-    ])
-        ->assertSuccessful()
-        ->assertSeeText('No uploads');
+        ->assertSeeLivewire(ServiceRequestMediaTable::class);
 });

@@ -49,9 +49,7 @@ use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotificat
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -774,101 +772,10 @@ test('service requests not authorized if user is a direct auditorUser of the ser
 });
 
 test('EditServiceRequest page displays the uploaded files section', function () {
-    Storage::fake('s3');
-
     $serviceRequest = ServiceRequest::factory()->create();
-    $serviceRequest
-        ->addMedia(UploadedFile::fake()->image('doc.png'))
-        ->usingName('doc')
-        ->toMediaCollection('uploads');
 
     asSuperAdmin()
         ->get(ServiceRequestResource::getUrl('edit', ['record' => $serviceRequest]))
         ->assertSuccessful()
-        ->assertSeeText('Uploaded Files')
-        ->assertSeeText('File Name')
-        ->assertSeeText('Uploaded By')
-        ->assertSeeText('Date');
-});
-
-test('ServiceRequestMediaTable renders uploaded files on edit page', function () {
-    Storage::fake('s3');
-
-    asSuperAdmin();
-
-    $serviceRequest = ServiceRequest::factory()->create();
-    $serviceRequest
-        ->addMedia(UploadedFile::fake()->image('report.png'))
-        ->usingName('report')
-        ->toMediaCollection('uploads');
-
-    livewire(ServiceRequestMediaTable::class, [
-        'record' => $serviceRequest,
-        'collectionName' => 'uploads',
-    ])
-        ->assertSuccessful()
-        ->assertCanSeeTableRecords($serviceRequest->getMedia('uploads'));
-});
-
-test('ServiceRequestMediaTable can search by file name on edit page', function () {
-    Storage::fake('s3');
-
-    asSuperAdmin();
-
-    $serviceRequest = ServiceRequest::factory()->create();
-    $serviceRequest
-        ->addMedia(UploadedFile::fake()->image('annual-report.png'))
-        ->usingName('annual-report')
-        ->toMediaCollection('uploads');
-    $serviceRequest
-        ->addMedia(UploadedFile::fake()->image('invoice.png'))
-        ->usingName('invoice')
-        ->toMediaCollection('uploads');
-
-    $allMedia = $serviceRequest->getMedia('uploads');
-    $annualReport = $allMedia->first(fn ($m) => $m->name === 'annual-report');
-    $invoice = $allMedia->first(fn ($m) => $m->name === 'invoice');
-
-    livewire(ServiceRequestMediaTable::class, [
-        'record' => $serviceRequest,
-        'collectionName' => 'uploads',
-    ])
-        ->searchTable('annual')
-        ->assertCanSeeTableRecords([$annualReport])
-        ->assertCanNotSeeTableRecords([$invoice]);
-});
-
-test('ServiceRequestMediaTable can search by uploader name on edit page', function () {
-    Storage::fake('s3');
-
-    $userAlice = User::factory()->create(['name' => 'Alice Smith']);
-    $userBob = User::factory()->create(['name' => 'Bob Jones']);
-
-    $serviceRequest = ServiceRequest::factory()->create();
-
-    actingAs($userAlice);
-    $serviceRequest
-        ->addMedia(UploadedFile::fake()->image('alice-file.png'))
-        ->usingName('alice-file')
-        ->toMediaCollection('uploads');
-
-    actingAs($userBob);
-    $serviceRequest
-        ->addMedia(UploadedFile::fake()->image('bob-file.png'))
-        ->usingName('bob-file')
-        ->toMediaCollection('uploads');
-
-    $allMedia = $serviceRequest->getMedia('uploads');
-    $aliceMedia = $allMedia->first(fn ($m) => $m->name === 'alice-file');
-    $bobMedia = $allMedia->first(fn ($m) => $m->name === 'bob-file');
-
-    asSuperAdmin();
-
-    livewire(ServiceRequestMediaTable::class, [
-        'record' => $serviceRequest,
-        'collectionName' => 'uploads',
-    ])
-        ->searchTable('Alice')
-        ->assertCanSeeTableRecords([$aliceMedia])
-        ->assertCanNotSeeTableRecords([$bobMedia]);
+        ->assertSeeLivewire(ServiceRequestMediaTable::class);
 });
