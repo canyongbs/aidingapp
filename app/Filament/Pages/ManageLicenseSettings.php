@@ -141,9 +141,9 @@ class ManageLicenseSettings extends SettingsPage
                             Toggle::make('data.addons.mobileApps')
                                 ->label('Mobile Apps'),
                             Toggle::make('data.addons.projectManagement')
-                                ->label('Projects'),
+                                ->label('Project Management'),
                             Toggle::make('data.addons.serviceManagement')
-                                ->label('Service Desk'),
+                                ->label('Service Management'),
                             Toggle::make('data.addons.serviceMonitoring')
                                 ->label('Service Monitoring'),
                         ]
