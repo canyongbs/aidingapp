@@ -34,7 +34,7 @@
 <script setup>
     import { FormKitSchema } from '@formkit/vue';
     import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
-    import { ArrowRightIcon } from '@heroicons/vue/20/solid';
+    import { ArrowRightIcon } from '@heroicons/vue/16/solid';
     import axios from 'axios';
     import { onMounted, ref } from 'vue';
     import BaseButton from '../../../../../resources/js/components/BaseButton.vue';

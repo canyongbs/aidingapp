@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { PaperAirplaneIcon } from '@heroicons/vue/24/outline';
+    import { PaperAirplaneIcon } from '@heroicons/vue/16/solid';
     import { nextTick, ref } from 'vue';
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';
 

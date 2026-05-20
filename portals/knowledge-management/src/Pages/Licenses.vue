@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
+    import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/16/solid';
     import { Card } from 'primevue';
     import { onMounted, ref } from 'vue';
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';

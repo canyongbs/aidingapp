@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { HomeIcon } from '@heroicons/vue/24/outline';
+    import { HomeIcon } from '@heroicons/vue/16/solid';
     import { useRouter } from 'vue-router';
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     const router = useRouter();
