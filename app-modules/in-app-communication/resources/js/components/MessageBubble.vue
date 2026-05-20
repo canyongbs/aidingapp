@@ -120,8 +120,8 @@
 
 <template>
     <div class="flex gap-3" :class="[isOwn ? 'justify-end' : '', showTimestamp ? 'mb-4' : 'mb-1']">
-        <!-- Avatar (for received messages) -->
-        <div v-if="!isOwn" class="shrink-0 w-8">
+        <!-- Avatar (for received messages from users only) -->
+        <div v-if="!isOwn && message.author_type !== 'contact'" class="shrink-0 w-8">
             <Avatar
                 v-if="!isGrouped"
                 :src="message.author_avatar"
@@ -129,7 +129,6 @@
                 size="sm"
                 ring
             />
-            <!-- Empty space to maintain alignment when grouped -->
         </div>
 
         <!-- Message Content -->

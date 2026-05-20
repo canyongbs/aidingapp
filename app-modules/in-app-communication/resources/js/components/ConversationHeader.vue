@@ -43,6 +43,7 @@
         LockClosedIcon,
         PencilIcon,
         UserGroupIcon,
+        XMarkIcon,
     } from '@heroicons/vue/24/outline';
     import { computed, ref } from 'vue';
     import { useConversationDisplay } from '../composables/useConversationDisplay';
@@ -57,7 +58,7 @@
         currentUserId: { type: String, required: true },
     });
 
-    const emit = defineEmits(['show-participants', 'update-settings', 'update-conversation']);
+    const emit = defineEmits(['show-participants', 'update-settings', 'update-conversation', 'end-conversation']);
 
     const isUpdatingPrivacy = ref(false);
     const showPrivacyConfirm = ref(false);
@@ -145,6 +146,20 @@
 
     const notificationMenuRef = ref(null);
     const settingsMenuRef = ref(null);
+    const showEndConfirm = ref(false);
+
+    function requestEndConversation() {
+        showEndConfirm.value = true;
+    }
+
+    function confirmEndConversation() {
+        showEndConfirm.value = false;
+        emit('end-conversation');
+    }
+
+    function cancelEndConversation() {
+        showEndConfirm.value = false;
+    }
 
     const { displayName, subtitle, avatarUrl } = useConversationDisplay(
         () => props.conversation,
@@ -170,7 +185,7 @@
                     />
                 </div>
             </template>
-            <template v-else>
+            <template v-else-if="!conversation.service_request_number">
                 <img
                     :src="avatarUrl"
                     :alt="displayName"
@@ -187,6 +202,18 @@
 
         <!-- Actions -->
         <div class="flex items-center gap-2">
+            <!-- End Conversation (Service Request chats only) -->
+            <button
+                v-if="conversation.service_request_number"
+                type="button"
+                class="text-white/90 hover:text-white hover:bg-red-500/20 transition-all rounded-lg px-2.5 py-1.5 text-sm font-medium flex items-center gap-1.5"
+                title="End conversation"
+                @click="requestEndConversation"
+            >
+                <XMarkIcon class="w-4 h-4" />
+                <span>End</span>
+            </button>
+
             <!-- Notification Preferences -->
             <DropdownMenu ref="notificationMenuRef" title="Notification Settings">
                 <template #trigger="{ toggle }">
@@ -337,4 +364,15 @@
             </BaseButton>
         </template>
     </BaseModal>
+
+    <!-- End Conversation Confirmation Modal -->
+    <ConfirmModal
+        :is-open="showEndConfirm"
+        title="End Conversation"
+        message="Are you sure you want to end this conversation? This cannot be undone."
+        confirm-text="End Conversation"
+        variant="danger"
+        @confirm="confirmEndConversation"
+        @cancel="cancelEndConversation"
+    />
 </template>

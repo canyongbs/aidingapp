@@ -413,11 +413,13 @@ it('broadcasts `MessageSent` event to user channels for all participants except 
     $event = new MessageSent($message);
     $channels = $event->broadcastOn();
 
-    // Should broadcast to participant1 and participant2, but NOT author
-    expect($channels)->toHaveCount(2);
+    // Should broadcast to participant1 and participant2 user channels, plus conversation private and presence channels
+    expect($channels)->toHaveCount(4);
 
     $channelNames = collect($channels)->map(fn ($channel) => $channel->name)->all();
     expect($channelNames)->toContain("private-user.{$participant1->getKey()}");
     expect($channelNames)->toContain("private-user.{$participant2->getKey()}");
     expect($channelNames)->not->toContain("private-user.{$author->getKey()}");
+    expect($channelNames)->toContain("private-conversation.{$conversation->getKey()}");
+    expect($channelNames)->toContain("presence-conversation.{$conversation->getKey()}");
 });

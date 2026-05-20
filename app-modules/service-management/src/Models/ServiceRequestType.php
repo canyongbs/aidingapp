@@ -123,6 +123,8 @@ class ServiceRequestType extends BaseModel implements Auditable
         'category_id',
         'is_ai_clarification_enabled',
         'is_ai_resolution_enabled',
+        'is_live_chat_enabled',
+        'max_simultaneous_chats',
     ];
 
     public function serviceRequests(): HasManyThrough
@@ -304,6 +306,8 @@ class ServiceRequestType extends BaseModel implements Auditable
             'sort' => 'integer',
             'is_ai_clarification_enabled' => 'boolean',
             'is_ai_resolution_enabled' => 'boolean',
+            'is_live_chat_enabled' => 'boolean',
+            'max_simultaneous_chats' => 'integer',
         ];
     }
 

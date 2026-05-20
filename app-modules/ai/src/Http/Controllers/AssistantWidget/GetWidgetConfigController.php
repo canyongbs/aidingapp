@@ -37,11 +37,13 @@
 namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Enums\Feature;
 use App\Http\Controllers\Controller;
 use Filament\Support\Colors\Color;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 
 class GetWidgetConfigController extends Controller
@@ -55,6 +57,9 @@ class GetWidgetConfigController extends Controller
         $widgetEntry = $manifest['src/widget.js'];
 
         $settings = app(PortalSettings::class);
+
+        $serviceManagementEnabled = $settings->knowledge_management_portal_service_management
+            && Gate::check(Feature::ServiceManagement->getGateName());
 
         $websocketsConfig = config('filament.broadcasting.echo');
 
@@ -76,10 +81,10 @@ class GetWidgetConfigController extends Controller
                     absolute: false,
                 )
             ),
-            'service_request_types_url' => $settings->knowledge_management_portal_service_management
+            'service_request_types_url' => $serviceManagementEnabled
                 ? route('widgets.assistant.api.service-request-types')
                 : null,
-            'portal_service_management' => (bool) $settings->knowledge_management_portal_service_management,
+            'portal_service_management' => $serviceManagementEnabled,
         ]);
     }
 }
