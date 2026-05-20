@@ -32,6 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import { useWidgetSignIn } from '../composables/useWidgetSignIn.js';
 
     const props = defineProps({
@@ -75,13 +76,9 @@
 
             <p v-if="errorMessage" class="text-sm text-red-600">{{ errorMessage }}</p>
 
-            <button
-                type="submit"
-                :disabled="isSubmitting"
-                class="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white font-medium text-sm rounded px-4 py-2.5 transition-colors"
-            >
-                {{ isSubmitting ? 'Sending...' : 'Send Code' }}
-            </button>
+            <BaseButton type="submit" :loading="isSubmitting" loading-text="Sending…" size="lg" class="w-full">
+                Send Code
+            </BaseButton>
         </form>
 
         <form v-else class="w-full flex flex-col gap-4" @submit.prevent="submitCode">
@@ -103,13 +100,9 @@
 
             <p v-if="errorMessage" class="text-sm text-red-600">{{ errorMessage }}</p>
 
-            <button
-                type="submit"
-                :disabled="isSubmitting"
-                class="w-full bg-brand-500 hover:bg-brand-600 disabled:opacity-60 text-white font-medium text-sm rounded px-4 py-2.5 transition-colors"
-            >
-                {{ isSubmitting ? 'Verifying...' : 'Verify Code' }}
-            </button>
+            <BaseButton type="submit" :loading="isSubmitting" loading-text="Verifying…" size="lg" class="w-full">
+                Verify Code
+            </BaseButton>
 
             <button
                 type="button"

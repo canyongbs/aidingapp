@@ -46,6 +46,7 @@ use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use App\Models\BaseModel;
 use App\Models\Concerns\InteractsWithTags;
 use App\Models\Contracts\HasTags;
+use App\Models\Media;
 use App\Models\User;
 use CanyonGBS\Common\Filament\Forms\RichContentPlugins\VideoRichContentPlugin;
 use DateTimeInterface;
@@ -73,7 +74,10 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
 {
     use AuditableTrait;
     use HasUuids;
+
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
+
     use InteractsWithRichContent;
     use SoftDeletes;
     use InteractsWithTags;

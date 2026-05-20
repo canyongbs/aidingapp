@@ -40,6 +40,7 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Database\Factories\EngagementFileFactory;
 use App\Models\BaseModel;
+use App\Models\Media;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Prunable;
@@ -53,7 +54,9 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  */
 class EngagementFile extends BaseModel implements HasMedia, Auditable
 {
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
+
     use AuditableTrait;
     use Prunable;
 

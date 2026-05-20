@@ -37,13 +37,12 @@
 namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Actions\CountActiveServiceRequestConversations;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use App\Enums\Feature;
 use App\Enums\PresenceStatus;
 use App\Features\ServiceRequestTypeLiveChatSettingsFeature;
 use App\Http\Controllers\Controller;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -85,19 +84,7 @@ class CheckServiceRequestConversationEligibilityController extends Controller
         }
 
         if ($type->max_simultaneous_chats !== null) {
-            $count = ServiceRequestConversation::query()
-                ->whereBelongsTo($agent)
-                ->whereHas('serviceRequest.priority', fn (Builder $query) => $query->whereBelongsTo($type, 'type'))
-                ->where(
-                    fn (Builder $query) => $query
-                        ->whereNotNull('queued_at')
-                        ->whereNull('accepted_at')
-                        ->whereNull('finished_at')
-                        ->orWhere(fn (Builder $query) => $query
-                            ->whereNotNull('accepted_at')
-                            ->whereNull('finished_at'))
-                )
-                ->count();
+            $count = app(CountActiveServiceRequestConversations::class)->execute($agent, $type);
 
             if ($count >= $type->max_simultaneous_chats) {
                 return response()->json(['eligible' => false]);

@@ -34,31 +34,21 @@
 </COPYRIGHT>
 */
 
-use App\Features\AiSupportAssistantDefaultInstructionsFeature;
-use Illuminate\Support\Facades\DB;
 use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
 return new class () extends SettingsMigration {
     public function up(): void
     {
-        DB::transaction(function () {
-            try {
-                $this->migrator->add('ai-support-assistant.instructions', '');
-            } catch (SettingAlreadyExists $exception) {
-                // do nothing
-            }
-
-            AiSupportAssistantDefaultInstructionsFeature::activate();
-        });
+        try {
+            $this->migrator->add('ai-support-assistant.instructions', '');
+        } catch (SettingAlreadyExists $exception) {
+            // do nothing
+        }
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            AiSupportAssistantDefaultInstructionsFeature::deactivate();
-
-            $this->migrator->deleteIfExists('ai-support-assistant.instructions');
-        });
+        $this->migrator->deleteIfExists('ai-support-assistant.instructions');
     }
 };

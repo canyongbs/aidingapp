@@ -33,10 +33,10 @@
 -->
 <script setup>
     import { FormKitSchema } from '@formkit/vue';
-    import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
-    import { ArrowRightIcon } from '@heroicons/vue/20/solid';
+    import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/vue/16/solid';
     import axios from 'axios';
     import { onMounted, ref } from 'vue';
+    import BaseButton from '../../../../../resources/js/components/BaseButton.vue';
     import { getAuthHeaders } from '../../utils/token.js';
 
     const props = defineProps({
@@ -200,23 +200,18 @@
 
         <!-- Navigation footer -->
         <div v-if="!isLoading && !loadError" class="shrink-0 px-4 pb-4 pt-3 border-t border-gray-100">
-            <button
+            <BaseButton
                 @click="validateAndProceed"
-                :disabled="!isFormValid || isSubmitting"
-                :class="[
-                    'w-full flex items-center justify-center gap-2 py-2.5 rounded text-sm font-medium transition-all',
-                    isFormValid && !isSubmitting
-                        ? 'bg-brand-500 hover:bg-brand-600 text-white shadow-sm'
-                        : 'bg-gray-100 text-gray-300 cursor-not-allowed',
-                ]"
+                :disabled="!isFormValid"
+                :loading="isSubmitting"
+                loading-text="Submitting…"
+                :icon="ArrowRightIcon"
+                icon-position="after"
+                size="lg"
+                class="w-full"
             >
-                <svg v-if="isSubmitting" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                {{ isSubmitting ? 'Submitting…' : isFinalStep ? 'Submit Service Request' : 'Next' }}
-                <ArrowRightIcon v-if="!isSubmitting" class="w-4 h-4" />
-            </button>
+                {{ isFinalStep ? 'Submit Service Request' : 'Next' }}
+            </BaseButton>
         </div>
     </div>
 </template>

@@ -34,32 +34,30 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Ai\Settings\AiSupportAssistantSettings;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
+namespace AidingApp\ServiceManagement\Actions;
 
-return new class () extends Migration {
-    public function up(): void
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+
+class CountActiveServiceRequestConversations
+{
+    public function execute(User $agent, ServiceRequestType $type): int
     {
-        DB::transaction(function () {
-            $settings = app(AiSupportAssistantSettings::class);
-
-            if (blank($settings->instructions)) {
-                $settings->instructions = AiSupportAssistantSettings::defaultInstructions();
-                $settings->save();
-            }
-        });
+        return ServiceRequestConversation::query()
+            ->whereBelongsTo($agent)
+            ->whereHas('serviceRequest.priority', fn (Builder $query) => $query->whereBelongsTo($type, 'type'))
+            ->where(
+                fn (Builder $query) => $query
+                    ->where(fn (Builder $query) => $query
+                        ->whereNotNull('queued_at')
+                        ->whereNull('accepted_at')
+                        ->whereNull('finished_at'))
+                    ->orWhere(fn (Builder $query) => $query
+                        ->whereNotNull('accepted_at')
+                        ->whereNull('finished_at'))
+            )
+            ->count();
     }
-
-    public function down(): void
-    {
-        DB::transaction(function () {
-            $settings = app(AiSupportAssistantSettings::class);
-
-            if ($settings->instructions === AiSupportAssistantSettings::defaultInstructions()) {
-                $settings->instructions = '';
-                $settings->save();
-            }
-        });
-    }
-};
+}

@@ -36,6 +36,7 @@
 
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
+use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -138,4 +139,18 @@ test('ViewServiceRequestUpdate is gated with proper feature access control', fun
                 'service_request' => $serviceRequestUpdate->service_request_id,
             ])
         )->assertSuccessful();
+});
+
+test('ViewServiceRequestUpdate page displays the uploaded files section', function () {
+    $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+
+    asSuperAdmin()
+        ->get(
+            ServiceRequestUpdateResource::getUrl('view', [
+                'record' => $serviceRequestUpdate,
+                'service_request' => $serviceRequestUpdate->service_request_id,
+            ])
+        )
+        ->assertSuccessful()
+        ->assertSeeLivewire(ServiceRequestMediaTable::class);
 });

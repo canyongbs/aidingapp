@@ -73,20 +73,18 @@ class AcceptServiceRequestConversation
         $conversation = new Conversation();
         $conversation->type = ConversationType::Direct;
         $conversation->is_private = true;
-        $conversation->created_by = $agent->getKey();
+        $conversation->creator()->associate($agent);
         $conversation->save();
 
         $agentParticipant = new ConversationParticipant();
-        $agentParticipant->conversation_id = $conversation->getKey();
-        $agentParticipant->participant_type = $agent->getMorphClass();
-        $agentParticipant->participant_id = $agent->getKey();
+        $agentParticipant->conversation()->associate($conversation);
+        $agentParticipant->participant()->associate($agent);
         $agentParticipant->last_activity_at = now();
         $agentParticipant->save();
 
         $contactParticipant = new ConversationParticipant();
-        $contactParticipant->conversation_id = $conversation->getKey();
-        $contactParticipant->participant_type = $contact->getMorphClass();
-        $contactParticipant->participant_id = $contact->getKey();
+        $agentParticipant->conversation()->associate($conversation);
+        $agentParticipant->participant()->associate($contact);
         $contactParticipant->last_activity_at = now();
         $contactParticipant->save();
 

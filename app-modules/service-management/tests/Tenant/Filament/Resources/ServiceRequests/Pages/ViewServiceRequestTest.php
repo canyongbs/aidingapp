@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageA
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageServiceRequestUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -308,4 +309,13 @@ test('view service request page visible if the user is a direct managerUser of t
         'record' => $serviceRequestsWithManager->getRouteKey(),
     ])
         ->assertSuccessful();
+});
+
+test('ViewServiceRequest page displays the uploaded files section', function () {
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    asSuperAdmin()
+        ->get(ServiceRequestResource::getUrl('view', ['record' => $serviceRequest]))
+        ->assertSuccessful()
+        ->assertSeeLivewire(ServiceRequestMediaTable::class);
 });
