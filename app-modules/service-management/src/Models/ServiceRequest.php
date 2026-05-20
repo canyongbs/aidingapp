@@ -51,6 +51,7 @@ use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Models\BaseModel;
+use App\Models\Media;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Closure;
@@ -82,6 +83,8 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     use SoftDeletes;
     use AuditableTrait;
     use HasRelationships;
+
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
 
     /** @use HasFactory<ServiceRequestFactory> */

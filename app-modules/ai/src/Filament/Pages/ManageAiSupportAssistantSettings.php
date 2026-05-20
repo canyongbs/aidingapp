@@ -38,7 +38,6 @@ namespace AidingApp\Ai\Filament\Pages;
 
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\AiSupportAssistantDefaultInstructionsFeature;
 use App\Filament\Clusters\GlobalArtificialIntelligence;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -88,7 +87,6 @@ class ManageAiSupportAssistantSettings extends SettingsPage
                     ]),
                 Section::make('Assistant Instructions')
                     ->description('The system prompt sent to the AI on every conversation. Tune this to control how the assistant engages — for example, to make it more inquisitive, stricter about staying on topic, or more concise.')
-                    ->visible(fn () => AiSupportAssistantDefaultInstructionsFeature::active())
                     ->schema([
                         Textarea::make('instructions')
                             ->label('Instructions')

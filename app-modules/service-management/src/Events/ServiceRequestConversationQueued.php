@@ -69,7 +69,7 @@ class ServiceRequestConversationQueued implements ShouldBroadcastNow
         return [
             'id' => $this->serviceRequestConversation->getKey(),
             'contact_name' => $this->serviceRequestConversation->contact->full_name,
-            'service_request_number' => $this->serviceRequestConversation->serviceRequest->service_request_number ?? $this->serviceRequestConversation->serviceRequest->getKey(),
+            'service_request_number' => $this->serviceRequestConversation->serviceRequest->service_request_number,
             'service_request_title' => $this->serviceRequestConversation->serviceRequest->title,
             'queued_at' => $this->serviceRequestConversation->queued_at->toIso8601String(),
         ];

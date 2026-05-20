@@ -36,14 +36,11 @@
 
 namespace App\Filament\Clusters;
 
-use BackedEnum;
 use Filament\Clusters\Cluster;
 use UnitEnum;
 
 class ReportLibrary extends Cluster
 {
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
-
     protected static string | UnitEnum | null $navigationGroup = 'Analytics';
 
     protected static ?int $navigationSort = 1;

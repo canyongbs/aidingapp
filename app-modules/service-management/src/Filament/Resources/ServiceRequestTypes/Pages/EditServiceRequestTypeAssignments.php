@@ -128,6 +128,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                         Toggle::make('is_live_chat_enabled')
                             ->label('Live Chat')
                             ->columnSpanFull()
+                            ->live()
                             ->visible(fn (): bool => Gate::check(Feature::RealtimeChat->getGateName()) && ServiceRequestTypeLiveChatSettingsFeature::active()),
                         Select::make('max_simultaneous_chats')
                             ->label('Maximum Simultaneous Chats')
@@ -141,7 +142,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ])
                             ->placeholder('Unlimited')
                             ->columnSpanFull()
-                            ->visible(fn (): bool => Gate::check(Feature::RealtimeChat->getGateName()) && ServiceRequestTypeLiveChatSettingsFeature::active()),
+                            ->visible(fn (Get $get): bool => $get('is_live_chat_enabled') && Gate::check(Feature::RealtimeChat->getGateName()) && ServiceRequestTypeLiveChatSettingsFeature::active()),
                     ]),
             ]);
     }
