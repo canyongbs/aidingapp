@@ -38,8 +38,8 @@ namespace AidingApp\ServiceManagement\Http\Controllers;
 
 use AidingApp\ServiceManagement\Http\Requests\ServiceRequestMediaDownloadRequest;
 use App\Http\Controllers\Controller;
+use App\Models\Media;
 use Illuminate\Http\RedirectResponse;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class ServiceRequestMediaDownloadController extends Controller
 {

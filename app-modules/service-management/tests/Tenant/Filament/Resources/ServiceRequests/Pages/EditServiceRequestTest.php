@@ -40,6 +40,7 @@ use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -768,4 +769,13 @@ test('service requests not authorized if user is a direct auditorUser of the ser
     livewire(EditServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])->assertForbidden();
+});
+
+test('EditServiceRequest page displays the uploaded files section', function () {
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    asSuperAdmin()
+        ->get(ServiceRequestResource::getUrl('edit', ['record' => $serviceRequest]))
+        ->assertSuccessful()
+        ->assertSeeLivewire(ServiceRequestMediaTable::class);
 });

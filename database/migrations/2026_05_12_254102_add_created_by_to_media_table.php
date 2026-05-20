@@ -34,14 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+use App\Features\MediaCreatedByFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-use App\Support\AbstractFeatureFlag;
-
-class AiSupportAssistantDefaultInstructionsFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
+return new class () extends Migration {
+    public function up(): void
     {
-        return false;
+        DB::transaction(function () {
+            Schema::table('media', function (Blueprint $table) {
+                $table->nullableUuidMorphs('created_by');
+            });
+
+            MediaCreatedByFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            MediaCreatedByFeature::deactivate();
+
+            Schema::table('media', function (Blueprint $table) {
+                $table->dropMorphs('created_by');
+            });
+        });
+    }
+};

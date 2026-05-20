@@ -48,6 +48,7 @@ use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\EngagementTimeline;
 use App\Models\BaseModel;
 use App\Models\Contracts\Educatable;
+use App\Models\Media;
 use App\Models\User;
 use Closure;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
@@ -77,7 +78,10 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class Engagement extends BaseModel implements Auditable, ProvidesATimeline, HasDeliveryMethod, HasMedia, HasRichContent
 {
     use AuditableTrait;
+
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
+
     use InteractsWithRichContent;
     use SoftDeletes;
 
