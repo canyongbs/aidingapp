@@ -34,42 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Http\Resources;
+namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\InAppCommunication\Models\Message;
-use App\Models\User;
-use Filament\Facades\Filament;
+use AidingApp\InAppCommunication\Events\TypingBroadcast;
+use AidingApp\InAppCommunication\Models\Conversation;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response as ResponseCode;
 
-/**
- * @mixin Message
- */
-class MessageResource extends JsonResource
+class BroadcastTypingController extends Controller
 {
-    /**
-     * @return array<string, mixed>
-     */
-    public function toArray(Request $request): array
+    public function __invoke(Request $request, Conversation $conversation): Response
     {
-        $author = $this->author;
+        $contact = auth('contact')->user() ?? $request->user();
 
-        $authorName = match (true) {
-            $author instanceof User => $author->name,
-            $author instanceof Contact => $author->full_name,
-            default => null,
-        };
+        abort_if(! ($contact instanceof Contact), ResponseCode::HTTP_UNAUTHORIZED);
 
-        return [
-            'id' => $this->getKey(),
-            'conversation_id' => $this->conversation_id,
-            'author_type' => $this->author_type,
-            'author_id' => $this->author_id,
-            'author_name' => $authorName,
-            'author_avatar' => $author instanceof User ? Filament::getUserAvatarUrl($author) : null,
-            'content' => $this->content,
-            'created_at' => $this->created_at->toIso8601String(),
-        ];
+        $isParticipant = $conversation->conversationParticipants()
+            ->whereMorphedTo('participant', $contact)
+            ->exists();
+
+        abort_if(! $isParticipant, ResponseCode::HTTP_FORBIDDEN);
+
+        event(new TypingBroadcast(
+            conversation: $conversation,
+            userId: $contact->getKey(),
+            userName: $contact->full_name,
+        ));
+
+        return response()->noContent();
     }
 }

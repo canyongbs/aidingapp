@@ -36,11 +36,13 @@
 
 namespace AidingApp\InAppCommunication\Http\Controllers\Conversations;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\InAppCommunication\Enums\ConversationNotificationPreference;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Http\Resources\ConversationParticipantResource;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Filament\Facades\Filament;
@@ -89,8 +91,33 @@ class ShowConversationController extends Controller
             $otherParticipant = $conversation->conversationParticipants
                 ->first(fn (ConversationParticipant $conversationParticipant) => $conversationParticipant->participant_id !== $userId);
             $otherUser = $otherParticipant?->participant;
-            $displayName = $otherUser instanceof User ? $otherUser->name : 'Unknown User';
+
+            $displayName = match (true) {
+                $otherUser instanceof User => $otherUser->name,
+                $otherUser instanceof Contact => $otherUser->full_name,
+                default => 'Unknown User',
+            };
+
             $avatarUrl = $otherUser instanceof User ? Filament::getUserAvatarUrl($otherUser) : null;
+        }
+
+        $serviceRequestNumber = null;
+        $serviceRequestTitle = null;
+        $serviceRequestDescription = null;
+        $serviceRequestId = null;
+
+        if ($conversation->type === ConversationType::Direct) {
+            $srConversation = ServiceRequestConversation::query()
+                ->whereBelongsTo($conversation)
+                ->with('serviceRequest')
+                ->first();
+
+            if ($srConversation?->serviceRequest) {
+                $serviceRequestNumber = $srConversation->serviceRequest->service_request_number;
+                $serviceRequestTitle = $srConversation->serviceRequest->title;
+                $serviceRequestDescription = $srConversation->serviceRequest->close_details;
+                $serviceRequestId = $srConversation->serviceRequest->getKey();
+            }
         }
 
         return response()->json([
@@ -107,6 +134,10 @@ class ShowConversationController extends Controller
                 'participants' => $participants,
                 'created_by' => $conversation->created_by,
                 'created_at' => $conversation->created_at->toIso8601String(),
+                'service_request_number' => $serviceRequestNumber,
+                'service_request_title' => $serviceRequestTitle,
+                'service_request_description' => $serviceRequestDescription,
+                'service_request_id' => $serviceRequestId,
             ],
         ]);
     }

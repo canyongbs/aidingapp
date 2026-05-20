@@ -34,42 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Http\Resources;
+namespace AidingApp\ServiceManagement\Http\Controllers\ServiceRequestConversations;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\InAppCommunication\Models\Message;
-use App\Models\User;
-use Filament\Facades\Filament;
+use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\ServiceManagement\Actions\EndServiceRequestConversation;
+use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * @mixin Message
- */
-class MessageResource extends JsonResource
+class EndServiceRequestConversationController extends Controller
 {
-    /**
-     * @return array<string, mixed>
-     */
-    public function toArray(Request $request): array
+    public function __invoke(Request $request, Conversation $conversation): JsonResponse
     {
-        $author = $this->author;
+        $serviceRequestConversation = ServiceRequestConversation::where('conversation_id', $conversation->getKey())->firstOrFail();
 
-        $authorName = match (true) {
-            $author instanceof User => $author->name,
-            $author instanceof Contact => $author->full_name,
-            default => null,
-        };
+        if ($serviceRequestConversation->user_id !== $request->user()->getKey()) {
+            abort(403);
+        }
 
-        return [
-            'id' => $this->getKey(),
-            'conversation_id' => $this->conversation_id,
-            'author_type' => $this->author_type,
-            'author_id' => $this->author_id,
-            'author_name' => $authorName,
-            'author_avatar' => $author instanceof User ? Filament::getUserAvatarUrl($author) : null,
-            'content' => $this->content,
-            'created_at' => $this->created_at->toIso8601String(),
-        ];
+        app(EndServiceRequestConversation::class)->execute(
+            $serviceRequestConversation,
+            ServiceRequestConversationFinishedReason::AgentEnded,
+        );
+
+        return response()->json(['status' => 'ended']);
     }
 }

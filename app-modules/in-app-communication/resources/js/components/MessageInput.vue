@@ -246,7 +246,9 @@
         </div>
 
         <p class="mt-2 text-xs text-gray-500 dark:text-gray-500">
-            Press Enter to send, Shift+Enter for new line. Type @ to mention someone.
+            Press Enter to send, Shift+Enter for new line.<template v-if="participants.length > 0">
+                Type @ to mention someone.</template
+            >
         </p>
     </div>
 </template>

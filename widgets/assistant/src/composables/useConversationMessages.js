@@ -41,61 +41,59 @@ if (typeof window !== 'undefined') {
     window.Pusher = Pusher;
 }
 
-export function useServiceRequestConversation(websocketsConfig, authEndpoint) {
-    const eligible = ref(false);
-    const agentName = ref(null);
-    const status = ref('idle');
-    const conversationId = ref(null);
-    const error = ref(null);
+export function useConversationMessages(websocketsConfig, authEndpoint) {
+    const messages = ref([]);
+    const loading = ref(false);
+    const hasMore = ref(false);
+    const sending = ref(false);
+    const typingName = ref(null);
 
     let echo = null;
     let channelName = null;
+    let typingTimeout = null;
+    let typingThrottleTimer = null;
 
-    async function checkEligibility(serviceRequestId) {
-        if (!serviceRequestId) return;
+    async function loadMessages(conversationId) {
+        if (!conversationId) return;
 
-        status.value = 'checking';
-        error.value = null;
+        loading.value = true;
 
         try {
-            const url = `/widgets/assistant/api/service-request/${serviceRequestId}/conversation/eligibility`;
+            const url = `/widgets/assistant/api/conversations/${conversationId}/messages`;
             const response = await axios.get(url, { headers: getAuthHeaders() });
 
-            eligible.value = response.data.eligible;
-            agentName.value = response.data.agent_name ?? null;
-            status.value = 'idle';
-        } catch (e) {
-            eligible.value = false;
-            status.value = 'idle';
+            messages.value = response.data.data;
+            hasMore.value = response.data.meta.has_more;
+        } catch {
+            messages.value = [];
+        } finally {
+            loading.value = false;
         }
     }
 
-    async function requestConversation(serviceRequestId) {
-        if (!serviceRequestId) return;
+    async function sendMessage(conversationId, body) {
+        if (!conversationId || !body.trim() || sending.value) return;
 
-        status.value = 'queued';
-        error.value = null;
+        sending.value = true;
 
         try {
-            const url = `/widgets/assistant/api/service-request/${serviceRequestId}/conversation`;
-            const response = await axios.post(url, {}, { headers: getAuthHeaders() });
+            const url = `/widgets/assistant/api/conversations/${conversationId}/messages`;
+            const response = await axios.post(url, { body }, { headers: getAuthHeaders() });
 
-            const recordId = response.data.id;
-            subscribeToChannel(recordId);
-        } catch (e) {
-            if (e.response?.status === 422) {
-                error.value = Object.values(e.response.data.errors ?? {})[0]?.[0] ?? 'Unable to connect.';
-            } else {
-                error.value = 'Something went wrong. Please try again.';
+            const newMessage = response.data.data;
+            const exists = messages.value.some((m) => m.id === newMessage.id);
+            if (!exists) {
+                messages.value = [...messages.value, newMessage];
             }
-            status.value = 'error';
+        } finally {
+            sending.value = false;
         }
     }
 
-    function subscribeToChannel(recordId) {
-        if (!websocketsConfig) return;
+    function subscribe(conversationId) {
+        if (!websocketsConfig || !conversationId) return;
 
-        channelName = `service-request-conversation.${recordId}`;
+        channelName = `conversation.${conversationId}`;
 
         echo = new Echo({
             ...websocketsConfig,
@@ -116,33 +114,44 @@ export function useServiceRequestConversation(websocketsConfig, authEndpoint) {
                                 },
                                 { headers },
                             )
-                            .then((response) => callback(false, response.data))
+                            .then((response) => {
+                                callback(false, response.data);
+                            })
                             .catch((err) => callback(true, err));
                     },
                 };
             },
         });
 
-        const channel = echo.private(channelName);
+        echo.join(channelName)
+            .listen('.message.sent', (event) => {
+                const exists = messages.value.some((m) => m.id === event.id);
+                if (!exists) {
+                    messages.value = [...messages.value, event];
+                }
+                typingName.value = null;
+            })
+            .listenForWhisper('typing', (event) => {
+                typingName.value = event.user_name || 'Agent';
 
-        channel.listen('.service-request-conversation.accepted', (event) => {
-            status.value = 'accepted';
-            conversationId.value = event.conversation_id;
-        });
+                if (typingTimeout) clearTimeout(typingTimeout);
+                typingTimeout = setTimeout(() => {
+                    typingName.value = null;
+                }, 4000);
+            });
+    }
 
-        channel.listen('.service-request-conversation.declined', () => {
-            status.value = 'declined';
-            cleanup();
-        });
+    function broadcastTyping() {
+        if (!channelName) return;
+        if (typingThrottleTimer) return;
 
-        channel.listen('.service-request-conversation.expired', () => {
-            status.value = 'expired';
-            cleanup();
-        });
+        const conversationId = channelName.replace('conversation.', '');
+        const url = `/widgets/assistant/api/conversations/${conversationId}/typing`;
+        axios.post(url, {}, { headers: getAuthHeaders() }).catch(() => {});
 
-        channel.listen('.service-request-conversation.ended', () => {
-            status.value = 'ended';
-        });
+        typingThrottleTimer = setTimeout(() => {
+            typingThrottleTimer = null;
+        }, 2500);
     }
 
     function cleanup() {
@@ -154,6 +163,14 @@ export function useServiceRequestConversation(websocketsConfig, authEndpoint) {
             echo = null;
         }
         channelName = null;
+        if (typingTimeout) {
+            clearTimeout(typingTimeout);
+            typingTimeout = null;
+        }
+        if (typingThrottleTimer) {
+            clearTimeout(typingThrottleTimer);
+            typingThrottleTimer = null;
+        }
     }
 
     onUnmounted(() => {
@@ -161,13 +178,15 @@ export function useServiceRequestConversation(websocketsConfig, authEndpoint) {
     });
 
     return {
-        eligible,
-        agentName,
-        status,
-        conversationId,
-        error,
-        checkEligibility,
-        requestConversation,
+        messages,
+        loading,
+        hasMore,
+        sending,
+        typingName,
+        loadMessages,
+        sendMessage,
+        subscribe,
+        broadcastTyping,
         cleanup,
     };
 }

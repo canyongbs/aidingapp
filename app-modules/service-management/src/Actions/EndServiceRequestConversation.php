@@ -34,42 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Http\Resources;
+namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\InAppCommunication\Models\Message;
-use App\Models\User;
-use Filament\Facades\Filament;
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
+use AidingApp\ServiceManagement\Events\ServiceRequestConversationEnded;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 
-/**
- * @mixin Message
- */
-class MessageResource extends JsonResource
+class EndServiceRequestConversation
 {
-    /**
-     * @return array<string, mixed>
-     */
-    public function toArray(Request $request): array
+    public function execute(ServiceRequestConversation $serviceRequestConversation, ServiceRequestConversationFinishedReason $reason): void
     {
-        $author = $this->author;
+        if (! $serviceRequestConversation->accepted_at || $serviceRequestConversation->finished_at) {
+            return;
+        }
 
-        $authorName = match (true) {
-            $author instanceof User => $author->name,
-            $author instanceof Contact => $author->full_name,
-            default => null,
-        };
+        $serviceRequestConversation->update([
+            'finished_at' => now(),
+            'finished_reason' => $reason,
+        ]);
 
-        return [
-            'id' => $this->getKey(),
-            'conversation_id' => $this->conversation_id,
-            'author_type' => $this->author_type,
-            'author_id' => $this->author_id,
-            'author_name' => $authorName,
-            'author_avatar' => $author instanceof User ? Filament::getUserAvatarUrl($author) : null,
-            'content' => $this->content,
-            'created_at' => $this->created_at->toIso8601String(),
-        ];
+        broadcast(new ServiceRequestConversationEnded($serviceRequestConversation));
     }
 }

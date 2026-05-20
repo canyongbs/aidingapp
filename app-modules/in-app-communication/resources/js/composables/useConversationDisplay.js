@@ -58,6 +58,10 @@ export function useConversationDisplay(conversation, currentUserId) {
             return `${count} ${count === 1 ? 'member' : 'members'}`;
         }
 
+        if (conversationValue?.service_request_number) {
+            return conversationValue.service_request_number;
+        }
+
         return 'Direct message';
     });
 

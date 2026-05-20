@@ -38,6 +38,7 @@ namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use Illuminate\Contracts\Broadcasting\Broadcaster;
 use Illuminate\Http\Request;
@@ -65,6 +66,10 @@ class AuthorizeBroadcastController extends Controller
 
         if (Str::startsWith($normalizedName, 'service-request-conversation.')) {
             return $this->authorizeServiceRequestConversation($request, $broadcaster, $normalizedName);
+        }
+
+        if (Str::startsWith($normalizedName, 'conversation.')) {
+            return $this->authorizeConversation($request, $broadcaster, $normalizedName);
         }
 
         if (! Str::startsWith($normalizedName, 'portal-assistant-thread-')) {
@@ -115,5 +120,34 @@ class AuthorizeBroadcastController extends Controller
         }
 
         throw new AccessDeniedHttpException();
+    }
+
+    protected function authorizeConversation(Request $request, Broadcaster $broadcaster, string $normalizedName): mixed
+    {
+        $conversationId = Str::after($normalizedName, 'conversation.');
+        $conversation = Conversation::find($conversationId);
+
+        if (! $conversation) {
+            throw new AccessDeniedHttpException();
+        }
+
+        $user = Auth::guard('contact')->user();
+
+        if (! $user instanceof Contact) {
+            throw new AccessDeniedHttpException();
+        }
+
+        $isParticipant = $conversation->conversationParticipants()
+            ->whereMorphedTo('participant', $user)
+            ->exists();
+
+        if (! $isParticipant) {
+            throw new AccessDeniedHttpException();
+        }
+
+        return $broadcaster->validAuthenticationResponse($request, [
+            'id' => $user->getKey(),
+            'name' => $user->full_name,
+        ]);
     }
 }

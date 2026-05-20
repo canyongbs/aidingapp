@@ -40,6 +40,7 @@
     const props = defineProps({
         items: { type: Array, required: true },
         loading: { type: Boolean, default: false },
+        inline: { type: Boolean, default: false },
     });
 
     const emit = defineEmits(['accepted', 'refresh']);
@@ -94,8 +95,8 @@
 </script>
 
 <template>
-    <div class="flex-1 overflow-y-auto">
-        <template v-if="loading">
+    <div :class="inline ? '' : 'flex-1 overflow-y-auto'">
+        <template v-if="loading && !inline">
             <div class="flex items-center justify-center p-8">
                 <div class="flex items-center space-x-2">
                     <div class="w-2 h-2 bg-primary-400 rounded-full animate-bounce"></div>
@@ -105,14 +106,20 @@
             </div>
         </template>
 
-        <template v-else-if="activeItems.length === 0">
+        <template v-else-if="activeItems.length === 0 && !inline">
             <div class="flex flex-col items-center justify-center p-8 text-center">
                 <ClockIcon class="w-10 h-10 text-gray-300 dark:text-gray-600 mb-2" />
                 <p class="text-sm text-gray-500 dark:text-gray-400">No pending chat requests</p>
             </div>
         </template>
 
-        <template v-else>
+        <template v-else-if="activeItems.length > 0">
+            <div
+                v-if="inline"
+                class="px-4 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50"
+            >
+                Queue
+            </div>
             <div class="divide-y divide-gray-100 dark:divide-gray-800">
                 <div v-for="item in activeItems" :key="item.id" class="px-4 py-3">
                     <div class="flex items-start justify-between gap-2 mb-2">

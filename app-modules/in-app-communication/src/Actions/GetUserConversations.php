@@ -54,6 +54,7 @@ class GetUserConversations
         int $limit = 25,
         ?string $cursor = null,
         bool $excludePinned = false,
+        ?string $participantType = null,
     ): CursorPaginator {
         $userType = $user->getMorphClass();
         $userId = $user->getKey();
@@ -67,8 +68,15 @@ class GetUserConversations
                     ->where('conversation_participants.participant_type', '=', $userType)
                     ->where('conversation_participants.participant_id', '=', $userId);
             })
+            ->whereDoesntHave('serviceRequestConversation', fn (Builder $query) => $query->whereNotNull('finished_at'))
             ->when($excludePinned, function (Builder $query) {
                 $query->where('conversation_participants.is_pinned', false);
+            })
+            ->when($participantType === 'contact', function (Builder $query) {
+                $query->whereHas('conversationParticipants', fn (Builder $query) => $query->where('participant_type', 'contact'));
+            })
+            ->when($participantType === 'user', function (Builder $query) {
+                $query->whereDoesntHave('conversationParticipants', fn (Builder $query) => $query->where('participant_type', 'contact'));
             })
             ->tap(new WithCurrentParticipant($user))
             ->withCount('conversationParticipants as participant_count')
@@ -81,7 +89,7 @@ class GetUserConversations
     /**
      * @return Collection<int, Conversation>
      */
-    public function pinned(User $user): Collection
+    public function pinned(User $user, ?string $participantType = null): Collection
     {
         $userType = $user->getMorphClass();
         $userId = $user->getKey();
@@ -95,7 +103,14 @@ class GetUserConversations
                     ->where('conversation_participants.participant_type', '=', $userType)
                     ->where('conversation_participants.participant_id', '=', $userId);
             })
+            ->whereDoesntHave('serviceRequestConversation', fn (Builder $query) => $query->whereNotNull('finished_at'))
             ->where('conversation_participants.is_pinned', true)
+            ->when($participantType === 'contact', function (Builder $query) {
+                $query->whereHas('conversationParticipants', fn (Builder $query) => $query->where('participant_type', 'contact'));
+            })
+            ->when($participantType === 'user', function (Builder $query) {
+                $query->whereDoesntHave('conversationParticipants', fn (Builder $query) => $query->where('participant_type', 'contact'));
+            })
             ->tap(new WithCurrentParticipant($user))
             ->withCount('conversationParticipants as participant_count')
             ->with(['latestMessage.author'])

@@ -34,42 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Http\Resources;
+namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\InAppCommunication\Models\Message;
-use App\Models\User;
-use Filament\Facades\Filament;
+use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\ServiceManagement\Actions\EndServiceRequestConversation;
+use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response as ResponseCode;
 
-/**
- * @mixin Message
- */
-class MessageResource extends JsonResource
+class EndConversationController extends Controller
 {
-    /**
-     * @return array<string, mixed>
-     */
-    public function toArray(Request $request): array
+    public function __invoke(Request $request, Conversation $conversation): Response
     {
-        $author = $this->author;
+        $contact = auth('contact')->user() ?? $request->user();
 
-        $authorName = match (true) {
-            $author instanceof User => $author->name,
-            $author instanceof Contact => $author->full_name,
-            default => null,
-        };
+        abort_if(! ($contact instanceof Contact), ResponseCode::HTTP_UNAUTHORIZED);
 
-        return [
-            'id' => $this->getKey(),
-            'conversation_id' => $this->conversation_id,
-            'author_type' => $this->author_type,
-            'author_id' => $this->author_id,
-            'author_name' => $authorName,
-            'author_avatar' => $author instanceof User ? Filament::getUserAvatarUrl($author) : null,
-            'content' => $this->content,
-            'created_at' => $this->created_at->toIso8601String(),
-        ];
+        $serviceRequestConversation = ServiceRequestConversation::where('conversation_id', $conversation->getKey())->firstOrFail();
+
+        abort_if($serviceRequestConversation->contact_id !== $contact->getKey(), ResponseCode::HTTP_FORBIDDEN);
+
+        app(EndServiceRequestConversation::class)->execute(
+            $serviceRequestConversation,
+            ServiceRequestConversationFinishedReason::ContactEnded,
+        );
+
+        return response()->noContent();
     }
 }

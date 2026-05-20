@@ -43,6 +43,7 @@ document.addEventListener('DOMContentLoaded', () => {
             userId: chatContainer.dataset.userId,
             userName: chatContainer.dataset.userName,
             userAvatar: chatContainer.dataset.userAvatar || null,
+            serviceManagementEnabled: chatContainer.hasAttribute('data-service-management-enabled'),
         });
         app.use(createPinia());
         app.mount(chatContainer);

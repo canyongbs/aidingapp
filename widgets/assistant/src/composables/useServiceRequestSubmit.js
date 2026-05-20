@@ -48,6 +48,7 @@ export function useServiceRequestSubmit(storeUrlBase, typeId, priorityId) {
     const submitError = ref(null);
     const fieldErrors = ref({});
     const serviceRequestId = ref(null);
+    const serviceRequestNumber = ref(null);
 
     const canSubmit = computed(() => title.value.trim() && description.value.trim() && !isSubmitting.value);
 
@@ -89,6 +90,7 @@ export function useServiceRequestSubmit(storeUrlBase, typeId, priorityId) {
             const response = await axios.post(storeUrl, payload, { headers: getAuthHeaders() });
 
             serviceRequestId.value = response.data?.service_request_id ?? null;
+            serviceRequestNumber.value = response.data?.service_request_number ?? null;
 
             onSuccess?.();
             return { success: true };
@@ -127,6 +129,7 @@ export function useServiceRequestSubmit(storeUrlBase, typeId, priorityId) {
         submitError,
         fieldErrors,
         serviceRequestId,
+        serviceRequestNumber,
         canSubmit,
         submitForm,
     };

@@ -144,13 +144,13 @@
                             />
                         </div>
                     </template>
-                    <template v-else>
+                    <template v-else-if="!conversation.service_request_number">
                         <Avatar :src="avatarUrl" :name="displayName" size="md" ring />
                     </template>
 
-                    <!-- Unread Badge -->
+                    <!-- Unread Badge (positioned on avatar) -->
                     <span
-                        v-if="unreadCount > 0"
+                        v-if="unreadCount > 0 && !conversation.service_request_number"
                         class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary-600 px-1.5 text-xs font-medium text-white shadow-sm"
                     >
                         {{ unreadCount > 99 ? '99+' : unreadCount }}
@@ -160,14 +160,31 @@
                 <!-- Content -->
                 <div class="min-w-0 flex-1">
                     <div class="flex items-center justify-between">
-                        <span
-                            class="truncate font-medium"
-                            :class="[
-                                unreadCount > 0 ? 'text-gray-900 dark:text-white' : 'text-gray-700 dark:text-gray-300',
-                            ]"
-                        >
-                            {{ displayName }}
-                        </span>
+                        <div class="min-w-0 flex-1 flex items-center gap-2">
+                            <span
+                                class="truncate font-medium"
+                                :class="[
+                                    unreadCount > 0
+                                        ? 'text-gray-900 dark:text-white'
+                                        : 'text-gray-700 dark:text-gray-300',
+                                ]"
+                            >
+                                {{ displayName }}
+                            </span>
+                            <!-- Unread Badge (inline for contacts) -->
+                            <span
+                                v-if="unreadCount > 0 && conversation.service_request_number"
+                                class="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary-600 px-1.5 text-xs font-medium text-white shrink-0"
+                            >
+                                {{ unreadCount > 99 ? '99+' : unreadCount }}
+                            </span>
+                            <span
+                                v-if="conversation.service_request_number"
+                                class="text-xs text-gray-400 dark:text-gray-500 truncate"
+                            >
+                                {{ conversation.service_request_number }}
+                            </span>
+                        </div>
                         <div class="ml-2 flex items-center gap-1.5 flex-shrink-0">
                             <!-- Pin Button -->
                             <button

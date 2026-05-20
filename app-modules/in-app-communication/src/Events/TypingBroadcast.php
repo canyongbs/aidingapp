@@ -34,42 +34,52 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Http\Resources;
+namespace AidingApp\InAppCommunication\Events;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\InAppCommunication\Models\Message;
-use App\Models\User;
-use Filament\Facades\Filament;
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use AidingApp\InAppCommunication\Models\Conversation;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Foundation\Events\Dispatchable;
 
-/**
- * @mixin Message
- */
-class MessageResource extends JsonResource
+class TypingBroadcast implements ShouldBroadcastNow
 {
+    use Dispatchable;
+    use InteractsWithSockets;
+
+    public function __construct(
+        public Conversation $conversation,
+        public string $userId,
+        public string $userName,
+    ) {}
+
+    public function broadcastAs(): string
+    {
+        return 'typing.started';
+    }
+
     /**
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function broadcastWith(): array
     {
-        $author = $this->author;
-
-        $authorName = match (true) {
-            $author instanceof User => $author->name,
-            $author instanceof Contact => $author->full_name,
-            default => null,
-        };
-
         return [
-            'id' => $this->getKey(),
-            'conversation_id' => $this->conversation_id,
-            'author_type' => $this->author_type,
-            'author_id' => $this->author_id,
-            'author_name' => $authorName,
-            'author_avatar' => $author instanceof User ? Filament::getUserAvatarUrl($author) : null,
-            'content' => $this->content,
-            'created_at' => $this->created_at->toIso8601String(),
+            'conversation_id' => $this->conversation->getKey(),
+            'user_id' => $this->userId,
+            'user_name' => $this->userName,
         ];
+    }
+
+    /**
+     * @return array<int, PrivateChannel>
+     */
+    public function broadcastOn(): array
+    {
+        return $this->conversation
+            ->conversationParticipants()
+            ->where('participant_id', '!=', $this->userId)
+            ->pluck('participant_id')
+            ->map(fn (string $id) => new PrivateChannel("user.{$id}"))
+            ->all();
     }
 }

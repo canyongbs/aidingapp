@@ -34,42 +34,51 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Http\Resources;
+namespace AidingApp\ServiceManagement\Events;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\InAppCommunication\Models\Message;
-use App\Models\User;
-use Filament\Facades\Filament;
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 
-/**
- * @mixin Message
- */
-class MessageResource extends JsonResource
+class ServiceRequestConversationEnded implements ShouldBroadcastNow
 {
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
+
+    public function __construct(
+        public ServiceRequestConversation $serviceRequestConversation,
+    ) {}
+
+    public function broadcastAs(): string
+    {
+        return 'service-request-conversation.ended';
+    }
+
     /**
      * @return array<string, mixed>
      */
-    public function toArray(Request $request): array
+    public function broadcastWith(): array
     {
-        $author = $this->author;
-
-        $authorName = match (true) {
-            $author instanceof User => $author->name,
-            $author instanceof Contact => $author->full_name,
-            default => null,
-        };
-
         return [
-            'id' => $this->getKey(),
-            'conversation_id' => $this->conversation_id,
-            'author_type' => $this->author_type,
-            'author_id' => $this->author_id,
-            'author_name' => $authorName,
-            'author_avatar' => $author instanceof User ? Filament::getUserAvatarUrl($author) : null,
-            'content' => $this->content,
-            'created_at' => $this->created_at->toIso8601String(),
+            'id' => $this->serviceRequestConversation->getKey(),
+            'conversation_id' => $this->serviceRequestConversation->conversation_id,
+            'finished_reason' => $this->serviceRequestConversation->finished_reason?->value,
+        ];
+    }
+
+    /**
+     * @return array<int, Channel>
+     */
+    public function broadcastOn(): array
+    {
+        return [
+            new PrivateChannel("service-request-conversation.{$this->serviceRequestConversation->getKey()}"),
+            new PrivateChannel("user.{$this->serviceRequestConversation->user_id}"),
         ];
     }
 }
