@@ -48,7 +48,6 @@ use AidingApp\Ai\Support\StreamingChunks\ToolCall;
 use AidingApp\IntegrationOpenAi\Prism\ValueObjects\Messages\DeveloperMessage;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
-use App\Features\AiSupportAssistantDefaultInstructionsFeature;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -90,14 +89,10 @@ class SendMessage implements ShouldQueue
         $message->is_assistant = false;
         $message->save();
 
-        if (AiSupportAssistantDefaultInstructionsFeature::active()) {
-            $supportAssistantSettings = app(AiSupportAssistantSettings::class);
-            $context = filled($supportAssistantSettings->instructions)
-                ? $supportAssistantSettings->instructions
-                : AiSupportAssistantSettings::defaultInstructions();
-        } else {
-            $context = AiSupportAssistantSettings::defaultInstructions();
-        }
+        $supportAssistantSettings = app(AiSupportAssistantSettings::class);
+        $context = filled($supportAssistantSettings->instructions)
+            ? $supportAssistantSettings->instructions
+            : AiSupportAssistantSettings::defaultInstructions();
 
         try {
             $aiService = app(AiIntegratedAssistantSettings::class)->getDefaultModel()->getService();

@@ -104,6 +104,8 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     use HasManyEngagements;
     use HasManyEngagementBatches;
     use Impersonate;
+
+    /** @use InteractsWithMedia<\App\Models\Media> */
     use InteractsWithMedia;
 
     protected $hidden = [

@@ -37,6 +37,7 @@
 namespace AidingApp\Ai\Models;
 
 use AidingApp\Ai\Database\Factories\AiThreadFactory;
+use App\Models\Media;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -60,6 +61,8 @@ class AiThread extends Model implements HasMedia
     use HasUuids;
     use SoftDeletes;
     use Prunable;
+
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
 
     protected $fillable = [
