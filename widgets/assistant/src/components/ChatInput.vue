@@ -32,8 +32,9 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { PaperAirplaneIcon } from '@heroicons/vue/24/outline';
+    import { PaperAirplaneIcon } from '@heroicons/vue/16/solid';
     import { nextTick, ref } from 'vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
 
     const emit = defineEmits(['send', 'addFiles', 'removeFile']);
 
@@ -118,14 +119,14 @@
                 @keydown.enter.exact.prevent="send"
             ></textarea>
 
-            <button
-                class="bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white rounded p-3 font-medium transition-all duration-150 focus:outline-hidden focus:ring-2 focus:ring-primary-500 shadow-xs hover:shadow disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            <BaseButton
+                :icon="PaperAirplaneIcon"
+                icon-only
+                size="xl"
+                :disabled="props.disabled || !localMessage.trim()"
                 aria-label="Send message"
                 @click="send"
-                :disabled="props.disabled || !localMessage.trim()"
-            >
-                <PaperAirplaneIcon class="w-5 h-5" />
-            </button>
+            />
         </div>
     </div>
 </template>
