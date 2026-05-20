@@ -49,7 +49,7 @@ class ServiceMonitoringResource extends Resource
 {
     protected static ?string $model = ServiceMonitoringTarget::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
 
     protected static ?string $pluralModelLabel = 'service monitoring';
 

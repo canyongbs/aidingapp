@@ -35,12 +35,12 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -53,12 +53,12 @@ test('global search is gated with proper feature access control', function () {
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $priority = ServiceRequestPriority::factory()->create([
         'type_id' => $serviceRequestType->id,
@@ -112,12 +112,12 @@ test('global search returns service requests for managers of service request typ
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $priority = ServiceRequestPriority::factory()->create([
         'type_id' => $serviceRequestType->id,
@@ -169,12 +169,12 @@ test('global search returns service requests for auditors of service request typ
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
-    $serviceRequestType->auditorTeams()->attach($team);
+    $serviceRequestType->auditorDepartments()->attach($department);
 
     $priority = ServiceRequestPriority::factory()->create([
         'type_id' => $serviceRequestType->id,
@@ -226,8 +226,8 @@ test('global search does not return service requests for non-managers/auditors',
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -277,7 +277,7 @@ test('global search returns all service requests for super admin', function () {
     expect($results)->toHaveCount(2);
 });
 
-test('global search returns no results for user without team', function () {
+test('global search returns no results for user without department', function () {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -307,12 +307,12 @@ test('global search details are correctly formatted', function () {
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create(['name' => 'Test Type']);
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $priority = ServiceRequestPriority::factory()->create([
         'name' => 'High Priority',
@@ -386,12 +386,12 @@ test('global search URL points to view page', function () {
     $settings->save();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $priority = ServiceRequestPriority::factory()->create([
         'type_id' => $serviceRequestType->id,

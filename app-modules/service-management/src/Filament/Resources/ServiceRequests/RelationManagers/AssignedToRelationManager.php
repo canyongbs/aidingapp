@@ -88,7 +88,7 @@ class AssignedToRelationManager extends RelationManager
                             && is_null($this->getOwnerRecord()->assignedTo)
                             && (
                                 $type->managerUsers->contains('id', $user?->getKey()) ||
-                                $type->managerTeams->contains('id', $user?->team?->getKey())
+                                $type->managerDepartments->contains('id', $user?->department?->getKey())
                             );
                     })
                     ->label('Assign To Me')
@@ -126,7 +126,7 @@ class AssignedToRelationManager extends RelationManager
                                 ->where(new Expression('lower(name)'), 'like', '%' . str($search)->lower() . '%')
                                 ->where(function (Builder $query) {
                                     $typeId = $this->getOwnerRecord()?->priority->type_id ?? null;
-                                    $query->whereHas('team.manageableServiceRequestTypes', function (Builder $query) use ($typeId) {
+                                    $query->whereHas('department.manageableServiceRequestTypes', function (Builder $query) use ($typeId) {
                                         $query->where('service_request_type_id', $typeId);
                                     });
 

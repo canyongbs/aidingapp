@@ -36,7 +36,7 @@
         "canyon-gbs/aiding-app-portal": "*",
         "canyon-gbs/aiding-app-service-management": "*",
         "canyon-gbs/aiding-app-task": "*",
-        "canyon-gbs/aiding-app-team": "*",
+        "canyon-gbs/aiding-app-department": "*",
         "canyon-gbs/aiding-app-theme": "*",
         "canyon-gbs/aiding-app-timeline": "*",
         "canyon-gbs/aiding-app-webhook": "*",
@@ -92,7 +92,7 @@
         "staudenmeir/eloquent-has-many-deep": "^1.19",
         "stechstudio/filament-impersonate": "^4.0",
         "tpetry/laravel-postgresql-enhanced": "^3.5.1",
-        "ysfkaya/filament-phone-input": "^4.1.4"
+        "ysfkaya/filament-phone-input": "^4.1.5"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.5",

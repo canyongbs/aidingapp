@@ -83,12 +83,12 @@ it('searches public channels by name', function () {
     $user = User::factory()->create();
 
     Conversation::factory()->channel()->create([
-        'name' => 'Engineering Team',
+        'name' => 'Engineering Department',
         'is_private' => false,
     ]);
 
     Conversation::factory()->channel()->create([
-        'name' => 'Marketing Team',
+        'name' => 'Marketing Department',
         'is_private' => false,
     ]);
 
@@ -96,14 +96,14 @@ it('searches public channels by name', function () {
         ->getJson(route('in-app-communication.conversations.public', ['search' => 'Engineering']))
         ->assertOk()
         ->assertJsonCount(1, 'data')
-        ->assertJsonPath('data.0.name', 'Engineering Team');
+        ->assertJsonPath('data.0.name', 'Engineering Department');
 });
 
 it('searches public channels case insensitively', function () {
     $user = User::factory()->create();
 
     Conversation::factory()->channel()->create([
-        'name' => 'Engineering Team',
+        'name' => 'Engineering Department',
         'is_private' => false,
     ]);
 
@@ -111,5 +111,5 @@ it('searches public channels case insensitively', function () {
         ->getJson(route('in-app-communication.conversations.public', ['search' => 'engineering']))
         ->assertOk()
         ->assertJsonCount(1, 'data')
-        ->assertJsonPath('data.0.name', 'Engineering Team');
+        ->assertJsonPath('data.0.name', 'Engineering Department');
 });

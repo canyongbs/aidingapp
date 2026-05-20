@@ -59,7 +59,7 @@ class AdvisoryResource extends Resource
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-m-clipboard-document-list';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
 
     protected static ?int $navigationSort = 60;
 

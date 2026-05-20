@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -41,7 +42,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 
 use function Pest\Laravel\travelBack;
@@ -51,18 +51,18 @@ use function Tests\asSuperAdmin;
 test('round robin assigner distributes requests evenly across managers', function () {
     asSuperAdmin();
 
-    $team = Team::factory()
+    $department = Department::factory()
         ->has(User::factory()->count(3), 'users')
         ->create();
 
     $serviceRequestType = ServiceRequestType::factory()
-        ->hasAttached($team, relationship: 'managerTeams')
+        ->hasAttached($department, relationship: 'managerDepartments')
         ->state([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin,
         ])
         ->create();
 
-    $users = $team->users()->orderBy('name')->orderBy('id')->get();
+    $users = $department->users()->orderBy('name')->orderBy('id')->get();
 
     travelTo(now()->subSeconds(count($users)));
 
@@ -92,18 +92,18 @@ test('round robin assigner distributes requests evenly across managers', functio
 test('round robin assigner wraps around after all managers have been assigned', function () {
     asSuperAdmin();
 
-    $team = Team::factory()
+    $department = Department::factory()
         ->has(User::factory()->count(3), 'users')
         ->create();
 
     $serviceRequestType = ServiceRequestType::factory()
-        ->hasAttached($team, relationship: 'managerTeams')
+        ->hasAttached($department, relationship: 'managerDepartments')
         ->state([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin,
         ])
         ->create();
 
-    $users = $team->users()->orderBy('name')->orderBy('id')->get();
+    $users = $department->users()->orderBy('name')->orderBy('id')->get();
     $firstUser = $users->first();
 
     travelTo(now()->subSeconds(count($users) + 1));
