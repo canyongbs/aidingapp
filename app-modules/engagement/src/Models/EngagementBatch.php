@@ -41,6 +41,7 @@ use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
 use AidingApp\Engagement\Observers\EngagementBatchObserver;
 use AidingApp\Notification\Enums\NotificationChannel;
 use App\Models\BaseModel;
+use App\Models\Media;
 use App\Models\User;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
@@ -58,7 +59,10 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class EngagementBatch extends BaseModel implements HasMedia, HasRichContent
 {
     use HasManyEngagements;
+
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
+
     use InteractsWithRichContent;
 
     /** @use HasFactory<EngagementBatchFactory> */

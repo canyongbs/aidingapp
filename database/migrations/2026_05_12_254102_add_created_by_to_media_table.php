@@ -34,33 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ContractManagement\Filament\Resources\Contracts;
+use App\Features\MediaCreatedByFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\CreateContract;
-use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\EditContract;
-use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ListContracts;
-use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ViewContract;
-use AidingApp\ContractManagement\Models\Contract;
-use Filament\Resources\Resource;
-use UnitEnum;
-
-class ContractResource extends Resource
-{
-    protected static ?string $model = Contract::class;
-
-    protected static string | UnitEnum | null $navigationGroup = 'Purchasing';
-
-    protected static ?string $navigationLabel = 'Contract Management';
-
-    protected static ?int $navigationSort = 10;
-
-    public static function getPages(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'index' => ListContracts::route('/'),
-            'create' => CreateContract::route('/create'),
-            'view' => ViewContract::route('/{record}'),
-            'edit' => EditContract::route('/{record}/edit'),
-        ];
+        DB::transaction(function () {
+            Schema::table('media', function (Blueprint $table) {
+                $table->nullableUuidMorphs('created_by');
+            });
+
+            MediaCreatedByFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            MediaCreatedByFeature::deactivate();
+
+            Schema::table('media', function (Blueprint $table) {
+                $table->dropMorphs('created_by');
+            });
+        });
+    }
+};

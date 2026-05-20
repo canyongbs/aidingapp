@@ -34,33 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ContractManagement\Filament\Resources\Contracts;
+namespace App\Observers;
 
-use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\CreateContract;
-use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\EditContract;
-use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ListContracts;
-use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ViewContract;
-use AidingApp\ContractManagement\Models\Contract;
-use Filament\Resources\Resource;
-use UnitEnum;
+use App\Features\MediaCreatedByFeature;
+use App\Models\Media;
+use Illuminate\Support\Facades\Auth;
 
-class ContractResource extends Resource
+class MediaObserver
 {
-    protected static ?string $model = Contract::class;
-
-    protected static string | UnitEnum | null $navigationGroup = 'Purchasing';
-
-    protected static ?string $navigationLabel = 'Contract Management';
-
-    protected static ?int $navigationSort = 10;
-
-    public static function getPages(): array
+    public function creating(Media $media): void
     {
-        return [
-            'index' => ListContracts::route('/'),
-            'create' => CreateContract::route('/create'),
-            'view' => ViewContract::route('/{record}'),
-            'edit' => EditContract::route('/{record}/edit'),
-        ];
+        if (! MediaCreatedByFeature::active() || $media->createdBy) {
+            return;
+        }
+
+        $creator = Auth::user();
+
+        if ($creator) {
+            $media->createdBy()->associate($creator);
+        }
     }
 }

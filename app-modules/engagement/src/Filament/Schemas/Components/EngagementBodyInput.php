@@ -39,6 +39,7 @@ namespace AidingApp\Engagement\Filament\Schemas\Components;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementBatch;
+use App\Models\Media;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
@@ -50,7 +51,6 @@ use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Str;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class EngagementBodyInput
 {

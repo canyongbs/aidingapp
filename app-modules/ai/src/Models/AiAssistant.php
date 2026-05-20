@@ -39,6 +39,7 @@ namespace AidingApp\Ai\Models;
 use AidingApp\Ai\Database\Factories\AiAssistantFactory;
 use AidingApp\Ai\Enums\AiAssistantApplication;
 use AidingApp\Ai\Enums\AiModel;
+use App\Models\Media;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -56,7 +57,10 @@ class AiAssistant extends Model implements HasMedia
     use HasFactory;
 
     use HasUuids;
+
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
+
     use SoftDeletes;
 
     protected $fillable = [

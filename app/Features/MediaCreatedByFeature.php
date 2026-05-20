@@ -34,33 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ContractManagement\Filament\Resources\Contracts;
+namespace App\Features;
 
-use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\CreateContract;
-use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\EditContract;
-use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ListContracts;
-use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ViewContract;
-use AidingApp\ContractManagement\Models\Contract;
-use Filament\Resources\Resource;
-use UnitEnum;
+use App\Support\AbstractFeatureFlag;
 
-class ContractResource extends Resource
+class MediaCreatedByFeature extends AbstractFeatureFlag
 {
-    protected static ?string $model = Contract::class;
-
-    protected static string | UnitEnum | null $navigationGroup = 'Purchasing';
-
-    protected static ?string $navigationLabel = 'Contract Management';
-
-    protected static ?int $navigationSort = 10;
-
-    public static function getPages(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'index' => ListContracts::route('/'),
-            'create' => CreateContract::route('/create'),
-            'view' => ViewContract::route('/{record}'),
-            'edit' => EditContract::route('/{record}/edit'),
-        ];
+        return false;
     }
 }
