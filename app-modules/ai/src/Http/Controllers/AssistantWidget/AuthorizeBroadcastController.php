@@ -38,6 +38,8 @@ namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use Illuminate\Contracts\Broadcasting\Broadcaster;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -61,6 +63,14 @@ class AuthorizeBroadcastController extends Controller
 
         // @phpstan-ignore function.alreadyNarrowedType
         $normalizedName = method_exists($broadcaster, 'normalizeChannelName') ? $broadcaster->normalizeChannelName($channelName) : $channelName;
+
+        if (Str::startsWith($normalizedName, 'service-request-conversation.')) {
+            return $this->authorizeServiceRequestConversation($request, $broadcaster, $normalizedName);
+        }
+
+        if (Str::startsWith($normalizedName, 'conversation.')) {
+            return $this->authorizeConversation($request, $broadcaster, $normalizedName);
+        }
 
         if (! Str::startsWith($normalizedName, 'portal-assistant-thread-')) {
             throw new AccessDeniedHttpException();
@@ -92,5 +102,52 @@ class AuthorizeBroadcastController extends Controller
         }
 
         throw new AccessDeniedHttpException();
+    }
+
+    protected function authorizeServiceRequestConversation(Request $request, Broadcaster $broadcaster, string $normalizedName): mixed
+    {
+        $conversationId = Str::after($normalizedName, 'service-request-conversation.');
+        $conversation = ServiceRequestConversation::find($conversationId);
+
+        if (! $conversation) {
+            throw new AccessDeniedHttpException();
+        }
+
+        $user = Auth::guard('contact')->user();
+
+        if ($user instanceof Contact && $conversation->contact()->is($user)) {
+            return $broadcaster->validAuthenticationResponse($request, true);
+        }
+
+        throw new AccessDeniedHttpException();
+    }
+
+    protected function authorizeConversation(Request $request, Broadcaster $broadcaster, string $normalizedName): mixed
+    {
+        $conversationId = Str::after($normalizedName, 'conversation.');
+        $conversation = Conversation::find($conversationId);
+
+        if (! $conversation) {
+            throw new AccessDeniedHttpException();
+        }
+
+        $user = Auth::guard('contact')->user();
+
+        if (! $user instanceof Contact) {
+            throw new AccessDeniedHttpException();
+        }
+
+        $isParticipant = $conversation->conversationParticipants()
+            ->whereMorphedTo('participant', $user)
+            ->exists();
+
+        if (! $isParticipant) {
+            throw new AccessDeniedHttpException();
+        }
+
+        return $broadcaster->validAuthenticationResponse($request, [
+            'id' => $user->getKey(),
+            'name' => $user->full_name,
+        ]);
     }
 }
