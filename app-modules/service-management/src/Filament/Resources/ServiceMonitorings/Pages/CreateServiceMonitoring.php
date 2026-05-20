@@ -78,9 +78,9 @@ class CreateServiceMonitoring extends CreateRecord
                     ->required(),
                 Section::make('Notification Settings')
                     ->schema([
-                        Select::make('team')
-                            ->relationship('teams', 'name')
-                            ->label('Team')
+                        Select::make('department')
+                            ->relationship('departments', 'name')
+                            ->label('Department')
                             ->multiple()
                             ->preload()
                             ->searchable(),

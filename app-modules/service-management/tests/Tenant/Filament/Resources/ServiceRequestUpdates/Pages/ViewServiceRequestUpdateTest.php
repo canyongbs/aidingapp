@@ -34,9 +34,9 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -71,11 +71,11 @@ test('The correct details are displayed on the ViewServiceRequestUpdate page', f
 test('ViewServiceRequestUpdate is gated with proper access control', function () {
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
 
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
-    $serviceRequestUpdate->serviceRequest->priority->type->managerTeams()->attach($team);
+    $serviceRequestUpdate->serviceRequest->priority->type->managerDepartments()->attach($department);
 
     actingAs($user)
         ->get(
@@ -108,8 +108,8 @@ test('ViewServiceRequestUpdate is gated with proper feature access control', fun
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
@@ -117,7 +117,7 @@ test('ViewServiceRequestUpdate is gated with proper feature access control', fun
     $user->givePermissionTo('service_request_update.*.view');
 
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
-    $serviceRequestUpdate->serviceRequest->priority->type->managerTeams()->attach($team);
+    $serviceRequestUpdate->serviceRequest->priority->type->managerDepartments()->attach($department);
 
     actingAs($user)
         ->get(

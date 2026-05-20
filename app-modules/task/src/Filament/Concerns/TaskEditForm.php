@@ -36,6 +36,7 @@
 
 namespace AidingApp\Task\Filament\Concerns;
 
+use App\Features\TeamRenameFeature;
 use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DateTimePicker;
@@ -67,12 +68,12 @@ trait TaskEditForm
                         ->multiple()
                         ->exists('users', 'id')
                         ->visible(fn (Get $get) => $get('is_confidential')),
-                    Select::make('confidential_task_teams')
-                        ->relationship('confidentialAccessTeams', 'name')
+                    Select::make('confidential_task_departments')
+                        ->relationship('confidentialAccessDepartments', 'name')
                         ->preload()
-                        ->label('Teams')
+                        ->label('Departments')
                         ->multiple()
-                        ->exists('teams', 'id')
+                        ->exists(TeamRenameFeature::active() ? 'departments' : 'teams', 'id')
                         ->visible(fn (Get $get) => $get('is_confidential')),
                 ]),
             TextInput::make('title')

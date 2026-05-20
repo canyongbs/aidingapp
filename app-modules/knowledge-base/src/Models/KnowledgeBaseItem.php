@@ -43,7 +43,6 @@ use AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseItemFactory;
 use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Observers\KnowledgeBaseItemObserver;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
-use App\Features\BrokenLinksFeature;
 use App\Models\BaseModel;
 use App\Models\Concerns\InteractsWithTags;
 use App\Models\Contracts\HasTags;
@@ -286,16 +285,12 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     {
         return Attribute::make(
             get: function (): bool {
-                $healthy = $this->title_filled
+                return $this->title_filled
                     && $this->article_filled
                     && $this->manager_assigned
-                    && $this->no_unresolved_concerns;
-
-                if (! BrokenLinksFeature::active()) {
-                    return $healthy;
-                }
-
-                return $healthy && $this->no_broken_links && $this->no_broken_images;
+                    && $this->no_unresolved_concerns
+                    && $this->no_broken_links
+                    && $this->no_broken_images;
             },
         );
     }

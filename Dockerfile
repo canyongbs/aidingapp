@@ -1,5 +1,5 @@
 ARG BASE_IMAGE="public.ecr.aws/lts/ubuntu:24.04"
-ARG IMAGEMAGICK_VERSION='7.1.2-22'
+ARG IMAGEMAGICK_VERSION='7.1.2-23'
 
 FROM ${BASE_IMAGE} AS setup
 
@@ -325,8 +325,8 @@ FROM web-base AS web-development
 COPY --chmod=755 ./docker/set-id /set-id
 COPY --chmod=755 ./docker/set-file-permissions /set-file-permissions
 
-ARG USER_ID
-ARG GROUP_ID
+ARG USER_ID=33
+ARG GROUP_ID=33
 RUN /set-id www-data ${USER_ID}:${GROUP_ID} && \
     /set-file-permissions --owner ${USER_ID}:${GROUP_ID} --service web && \
     rm /set-id /set-file-permissions
@@ -366,8 +366,8 @@ FROM worker-base AS worker-development
 COPY --chmod=755 ./docker/set-id /set-id
 COPY --chmod=755 ./docker/set-file-permissions /set-file-permissions
 
-ARG USER_ID
-ARG GROUP_ID
+ARG USER_ID=33
+ARG GROUP_ID=33
 RUN /set-id www-data ${USER_ID}:${GROUP_ID} && \
     /set-file-permissions --owner ${USER_ID}:${GROUP_ID} --service worker && \
     rm /set-id /set-file-permissions
@@ -425,8 +425,8 @@ FROM scheduler-base AS scheduler-development
 COPY --chmod=755 ./docker/set-id /set-id
 COPY --chmod=755 ./docker/set-file-permissions /set-file-permissions
 
-ARG USER_ID
-ARG GROUP_ID
+ARG USER_ID=33
+ARG GROUP_ID=33
 RUN /set-id www-data ${USER_ID}:${GROUP_ID} && \
     /set-file-permissions --owner ${USER_ID}:${GROUP_ID} --service scheduler && \
     rm /set-id /set-file-permissions
@@ -473,8 +473,8 @@ FROM base AS cli-local-tooling
 COPY --chmod=755 ./docker/set-id /set-id
 COPY --chmod=755 ./docker/set-file-permissions /set-file-permissions
 
-ARG USER_ID
-ARG GROUP_ID
+ARG USER_ID=33
+ARG GROUP_ID=33
 RUN /set-id www-data ${USER_ID}:${GROUP_ID} && \
     /set-file-permissions --owner ${USER_ID}:${GROUP_ID} --service cli && \
     rm /set-id /set-file-permissions

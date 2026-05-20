@@ -38,12 +38,13 @@ namespace AidingApp\Task\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Department\Models\Department;
 use AidingApp\Project\Models\Project;
 use AidingApp\Task\Database\Factories\TaskFactory;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Scopes\ConfidentialTaskScope;
 use AidingApp\Task\Observers\TaskObserver;
-use AidingApp\Team\Models\Team;
+use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Bvtterfly\ModelStateMachine\HasStateMachine;
@@ -159,12 +160,17 @@ class Task extends BaseModel implements Auditable
     }
 
     /**
-     * @return BelongsToMany<Team, $this, covariant ConfidentialTaskTeam>
+     * @return BelongsToMany<Department, $this, covariant ConfidentialTaskDepartment>
      */
-    public function confidentialAccessTeams(): BelongsToMany
+    public function confidentialAccessDepartments(): BelongsToMany
     {
-        return $this->belongsToMany(Team::class, 'confidential_task_teams')
-            ->using(ConfidentialTaskTeam::class)
+        return $this->belongsToMany(
+            Department::class,
+            TeamRenameFeature::active() ? 'confidential_task_departments' : 'confidential_task_teams',
+            'task_id',
+            TeamRenameFeature::active() ? 'department_id' : 'team_id',
+        )
+            ->using(ConfidentialTaskDepartment::class)
             ->withTimestamps();
     }
 

@@ -76,10 +76,10 @@ class ManageServiceRequestTypeManagers extends EditRecord
                             ->multiple()
                             ->relationship('managerUsers')
                             ->preload(),
-                        Select::make('managerTeams')
-                            ->label('Teams')
+                        Select::make('managerDepartments')
+                            ->label('Departments')
                             ->multiple()
-                            ->relationship('managerTeams', 'name')
+                            ->relationship('managerDepartments', 'name')
                             ->preload(),
                     ])
                     ->columns(2),

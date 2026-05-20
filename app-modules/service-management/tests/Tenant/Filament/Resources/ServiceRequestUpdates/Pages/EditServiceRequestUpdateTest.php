@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\EditServiceRequestUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
@@ -41,7 +42,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestUpdateRequestFactory;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -121,8 +121,8 @@ test('EditServiceRequestUpdate requires valid data', function ($data, $errors) {
 test('EditServiceRequestUpdate is gated with proper access control', function () {
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
 
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -134,7 +134,7 @@ test('EditServiceRequestUpdate is gated with proper access control', function ()
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
-    $serviceRequestUpdate->serviceRequest->priority->type->managerTeams()->attach($team);
+    $serviceRequestUpdate->serviceRequest->priority->type->managerDepartments()->attach($department);
 
     actingAs($user)
         ->get(
@@ -185,8 +185,8 @@ test('EditServiceRequestUpdate is gated with proper feature access control', fun
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
@@ -203,7 +203,7 @@ test('EditServiceRequestUpdate is gated with proper feature access control', fun
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
-    $serviceRequestUpdate->serviceRequest->priority->type->managerTeams()->attach($team);
+    $serviceRequestUpdate->serviceRequest->priority->type->managerDepartments()->attach($department);
 
     actingAs($user)
         ->get(

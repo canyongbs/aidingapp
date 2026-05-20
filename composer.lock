@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "83b855b7e398a1789a6edbdab4653799",
+    "content-hash": "29abc11f482a7127beef125a7336d37d",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -744,6 +744,41 @@
             }
         },
         {
+            "name": "canyon-gbs/aiding-app-department",
+            "version": "1.0",
+            "dist": {
+                "type": "path",
+                "url": "app-modules/department",
+                "reference": "815581f2f3bb9d10d572ca39b112c9f24db8324b"
+            },
+            "require": {
+                "filament/filament": "^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AidingApp\\Department\\Providers\\DepartmentServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AidingApp\\Department\\": "src/",
+                    "AidingApp\\Department\\Tests\\": "tests/",
+                    "AidingApp\\Department\\Database\\Factories\\": "database/factories/",
+                    "AidingApp\\Department\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
             "name": "canyon-gbs/aiding-app-division",
             "version": "1.0",
             "dist": {
@@ -1223,41 +1258,6 @@
                     "AidingApp\\Task\\Tests\\": "tests/",
                     "AidingApp\\Task\\Database\\Factories\\": "database/factories/",
                     "AidingApp\\Task\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/aiding-app-team",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/team",
-                "reference": "5e7aca8f02dfc2199ab0a8e2d449de88b36ec0e7"
-            },
-            "require": {
-                "filament/filament": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AidingApp\\Team\\Providers\\TeamServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AidingApp\\Team\\": "src/",
-                    "AidingApp\\Team\\Tests\\": "tests/",
-                    "AidingApp\\Team\\Database\\Factories\\": "database/factories/",
-                    "AidingApp\\Team\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [
@@ -16709,16 +16709,16 @@
         },
         {
             "name": "ysfkaya/filament-phone-input",
-            "version": "v4.1.4",
+            "version": "v4.1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ysfkaya/filament-phone-input.git",
-                "reference": "8328285557f5cc07f631b2f40f5b075d986cc9cc"
+                "reference": "c6cf24522bf73bba4ef101e2b6c4b97f46f9951e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ysfkaya/filament-phone-input/zipball/8328285557f5cc07f631b2f40f5b075d986cc9cc",
-                "reference": "8328285557f5cc07f631b2f40f5b075d986cc9cc",
+                "url": "https://api.github.com/repos/ysfkaya/filament-phone-input/zipball/c6cf24522bf73bba4ef101e2b6c4b97f46f9951e",
+                "reference": "c6cf24522bf73bba4ef101e2b6c4b97f46f9951e",
                 "shasum": ""
             },
             "require": {
@@ -16767,9 +16767,9 @@
             ],
             "support": {
                 "issues": "https://github.com/ysfkaya/filament-phone-input/issues",
-                "source": "https://github.com/ysfkaya/filament-phone-input/tree/v4.1.4"
+                "source": "https://github.com/ysfkaya/filament-phone-input/tree/v4.1.5"
             },
-            "time": "2026-04-17T10:46:27+00:00"
+            "time": "2026-05-15T05:23:29+00:00"
         }
     ],
     "packages-dev": [

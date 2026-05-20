@@ -84,7 +84,7 @@ test('EditAdvisory is gated with proper access control', function () {
         ->and($advisory->fresh()->description)->toEqual($request->get('description'))
         ->and($advisory->fresh()->severity_id)->toEqual($request->get('severity_id'))
         ->and($advisory->fresh()->status_id)->toEqual($request->get('status_id'))
-        ->and($advisory->fresh()->assigned_team_id)->toEqual($request->get('assigned_team_id'));
+        ->and($advisory->fresh()->assigned_department_id)->toEqual($request->get('assigned_department_id'));
 });
 
 test('EditAdvisory validates the inputs', function ($data, $errors) {
@@ -143,9 +143,9 @@ test('EditAdvisory validates the inputs', function ($data, $errors) {
             AdvisoryRequestFactory::new()->state(['status_id' => fake()->uuid()]),
             ['status_id' => 'in'],
         ],
-        'assigned_team_id does not exist' => [
-            AdvisoryRequestFactory::new()->state(['assigned_team_id' => fake()->uuid()]),
-            ['assigned_team_id' => 'in'],
+        'assigned_department_id does not exist' => [
+            AdvisoryRequestFactory::new()->state(['assigned_department_id' => fake()->uuid()]),
+            ['assigned_department_id' => 'in'],
         ],
     ]
 );
