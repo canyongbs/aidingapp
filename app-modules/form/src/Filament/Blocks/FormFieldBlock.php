@@ -103,6 +103,18 @@ abstract class FormFieldBlock extends RichContentCustomBlock
 
     abstract public static function getFormKitSchema(SubmissibleField $field): array;
 
+    public static function getValidationRules(SubmissibleField $field): array
+    {
+        return [];
+    }
+
+    public static function getSubmissionState(mixed $response): array
+    {
+        return [
+            'response' => $response,
+        ];
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -129,18 +141,6 @@ abstract class FormFieldBlock extends RichContentCustomBlock
                     ],
                 ],
             ],
-        ];
-    }
-
-    public static function getValidationRules(SubmissibleField $field): array
-    {
-        return [];
-    }
-
-    public static function getSubmissionState(mixed $response): array
-    {
-        return [
-            'response' => $response,
         ];
     }
 
