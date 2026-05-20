@@ -37,12 +37,13 @@
 namespace AidingApp\Project\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Department\Models\Department;
 use AidingApp\Project\Database\Factories\ProjectFactory;
 use AidingApp\Project\Models\Scopes\ProjectVisibilityScope;
 use AidingApp\Project\Observers\ProjectObserver;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;
-use AidingApp\Team\Models\Team;
+use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -111,13 +112,18 @@ class Project extends BaseModel implements Auditable
     }
 
     /**
-     * @return BelongsToMany<Team, $this, ProjectManagerTeam>
+     * @return BelongsToMany<Department, $this, ProjectManagerDepartment>
      */
-    public function managerTeams(): BelongsToMany
+    public function managerDepartments(): BelongsToMany
     {
         return $this
-            ->belongsToMany(Team::class, 'project_manager_teams', 'project_id', 'team_id')
-            ->using(ProjectManagerTeam::class)
+            ->belongsToMany(
+                Department::class,
+                TeamRenameFeature::active() ? 'project_manager_departments' : 'project_manager_teams',
+                'project_id',
+                TeamRenameFeature::active() ? 'department_id' : 'team_id',
+            )
+            ->using(ProjectManagerDepartment::class)
             ->withTimestamps();
     }
 
@@ -133,13 +139,18 @@ class Project extends BaseModel implements Auditable
     }
 
     /**
-     * @return BelongsToMany<Team, $this, ProjectAuditorTeam>
+     * @return BelongsToMany<Department, $this, ProjectAuditorDepartment>
      */
-    public function auditorTeams(): BelongsToMany
+    public function auditorDepartments(): BelongsToMany
     {
         return $this
-            ->belongsToMany(Team::class, 'project_auditor_teams', 'project_id', 'team_id')
-            ->using(ProjectAuditorTeam::class)
+            ->belongsToMany(
+                Department::class,
+                TeamRenameFeature::active() ? 'project_auditor_departments' : 'project_auditor_teams',
+                'project_id',
+                TeamRenameFeature::active() ? 'department_id' : 'team_id',
+            )
+            ->using(ProjectAuditorDepartment::class)
             ->withTimestamps();
     }
 

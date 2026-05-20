@@ -264,7 +264,7 @@ class ListKnowledgeBaseItems extends ListRecords
 
                         $replica->save();
                     })
-                    ->excludeAttributes(['views_count', 'upvotes_count', 'my_upvotes_count', 'search_vector'])
+                    ->excludeAttributes(['views_count', 'upvotes_count', 'my_upvotes_count', 'search_vector', 'votes_count', 'helpful_votes_count'])
                     ->successNotificationTitle('Article duplicated successfully!'),
             ])
             ->toolbarActions([

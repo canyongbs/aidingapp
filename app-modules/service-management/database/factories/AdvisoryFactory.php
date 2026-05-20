@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use AidingApp\Team\Models\Team;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -59,7 +59,7 @@ class AdvisoryFactory extends Factory
             'description' => $this->faker->paragraph(),
             'severity_id' => AdvisorySeverity::factory(),
             'status_id' => AdvisoryStatus::factory(),
-            'assigned_team_id' => Team::factory(),
+            'assigned_department_id' => Department::factory(),
         ];
     }
 }

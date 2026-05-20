@@ -37,11 +37,12 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
-use AidingApp\Team\Models\Team;
+use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
@@ -161,15 +162,17 @@ class ServiceRequestType extends BaseModel implements Auditable
     }
 
     /**
-     * @return BelongsToMany<Team, $this, covariant ServiceRequestTypeTeamManager>
+     * @return BelongsToMany<Department, $this, covariant ServiceRequestTypeDepartmentManager>
      */
-    public function managerTeams(): BelongsToMany
+    public function managerDepartments(): BelongsToMany
     {
         return $this->belongsToMany(
-            related: Team::class,
-            table: (new ServiceRequestTypeTeamManager())->getTable(),
+            related: Department::class,
+            table: (new ServiceRequestTypeDepartmentManager())->getTable(),
+            foreignPivotKey: 'service_request_type_id',
+            relatedPivotKey: TeamRenameFeature::active() ? 'department_id' : 'team_id',
         )
-            ->using(ServiceRequestTypeTeamManager::class)
+            ->using(ServiceRequestTypeDepartmentManager::class)
             ->withPivot('id')
             ->withTimestamps();
     }
@@ -189,15 +192,17 @@ class ServiceRequestType extends BaseModel implements Auditable
     }
 
     /**
-     * @return BelongsToMany<Team, $this, covariant ServiceRequestTypeTeamAuditor>
+     * @return BelongsToMany<Department, $this, covariant ServiceRequestTypeDepartmentAuditor>
      */
-    public function auditorTeams(): BelongsToMany
+    public function auditorDepartments(): BelongsToMany
     {
         return $this->belongsToMany(
-            related: Team::class,
-            table: (new ServiceRequestTypeTeamAuditor())->getTable(),
+            related: Department::class,
+            table: (new ServiceRequestTypeDepartmentAuditor())->getTable(),
+            foreignPivotKey: 'service_request_type_id',
+            relatedPivotKey: TeamRenameFeature::active() ? 'department_id' : 'team_id',
         )
-            ->using(ServiceRequestTypeTeamAuditor::class)
+            ->using(ServiceRequestTypeDepartmentAuditor::class)
             ->withPivot('id')
             ->withTimestamps();
     }

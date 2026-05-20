@@ -37,7 +37,7 @@
 namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use AidingApp\Project\Filament\Resources\Projects\RelationManagers\AuditorTeamsRelationManager;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\AuditorDepartmentsRelationManager;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\AuditorUsersRelationManager;
 use Filament\Resources\Pages\ManageRelatedRecords;
 
@@ -56,7 +56,7 @@ class ManageAuditors extends ManageRelatedRecords
     {
         return [
             AuditorUsersRelationManager::class,
-            AuditorTeamsRelationManager::class,
+            AuditorDepartmentsRelationManager::class,
         ];
     }
 

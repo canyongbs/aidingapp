@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypeAuditors;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -80,10 +80,10 @@ it('can attach auditor users to a service request type', function () {
         ->toContain($user->getKey());
 });
 
-it('can attach auditor teams to a service request type', function () {
+it('can attach auditor departments to a service request type', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
     asSuperAdmin();
 
@@ -91,20 +91,20 @@ it('can attach auditor teams to a service request type', function () {
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
-            'auditorTeams' => [$team->getKey()],
+            'auditorDepartments' => [$department->getKey()],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($serviceRequestType->refresh()->auditorTeams->pluck('id'))
-        ->toContain($team->getKey());
+    expect($serviceRequestType->refresh()->auditorDepartments->pluck('id'))
+        ->toContain($department->getKey());
 });
 
-it('can attach both auditor users and auditor teams to a service request type', function () {
+it('can attach both auditor users and auditor departments to a service request type', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
     asSuperAdmin();
 
@@ -113,7 +113,7 @@ it('can attach both auditor users and auditor teams to a service request type', 
     ])
         ->fillForm([
             'auditorUsers' => [$user->getKey()],
-            'auditorTeams' => [$team->getKey()],
+            'auditorDepartments' => [$department->getKey()],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -121,7 +121,7 @@ it('can attach both auditor users and auditor teams to a service request type', 
     $serviceRequestType->refresh();
 
     expect($serviceRequestType->auditorUsers->pluck('id'))->toContain($user->getKey());
-    expect($serviceRequestType->auditorTeams->pluck('id'))->toContain($team->getKey());
+    expect($serviceRequestType->auditorDepartments->pluck('id'))->toContain($department->getKey());
 });
 
 // Permission Tests
@@ -160,7 +160,7 @@ test('ManageServiceRequestTypeAuditors is gated with proper access control', fun
     ])
         ->fillForm([
             'auditorUsers' => [$auditorUser->getKey()],
-            'auditorTeams' => [],
+            'auditorDepartments' => [],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -206,20 +206,20 @@ test('ManageServiceRequestTypeAuditors is gated with proper feature access contr
             ])
         )->assertSuccessful();
 
-    $auditorTeam = Team::factory()->create();
+    $auditorDepartment = Department::factory()->create();
 
     livewire(ManageServiceRequestTypeAuditors::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
             'auditorUsers' => [],
-            'auditorTeams' => [$auditorTeam->getKey()],
+            'auditorDepartments' => [$auditorDepartment->getKey()],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($serviceRequestType->refresh()->auditorTeams->pluck('id'))
-        ->toContain($auditorTeam->getKey());
+    expect($serviceRequestType->refresh()->auditorDepartments->pluck('id'))
+        ->toContain($auditorDepartment->getKey());
 });
 
 // UserSelect (auditorUsers field) admin-filtering tests

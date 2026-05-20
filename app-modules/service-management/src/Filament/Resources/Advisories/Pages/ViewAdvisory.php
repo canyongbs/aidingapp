@@ -67,8 +67,8 @@ class ViewAdvisory extends ViewRecord
                             ->tooltip(fn (Advisory $record) => $record->severity->name),
                         TextEntry::make('status.name')
                             ->label('Status'),
-                        TextEntry::make('assignedTeam.name')
-                            ->label('Assigned Team'),
+                        TextEntry::make('assignedDepartment.name')
+                            ->label('Assigned Department'),
                         TextEntry::make('created_at')
                             ->datetime('Y-m-d H:i:s')
                             ->label('Created'),

@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\ViewServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -84,7 +84,7 @@ test('ViewServiceMonitoring is gated with proper access control', function () {
 
 test('The correct details are displayed on the ViewServiceMonitoring page', function () {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
-        ->hasAttached(Team::factory())
+        ->hasAttached(Department::factory())
         ->hasAttached(User::factory())
         ->create();
 
@@ -105,8 +105,8 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
                 $serviceMonitoringTarget->domain,
                 'Frequency',
                 $serviceMonitoringTarget->frequency->getLabel(),
-                'Teams',
-                ...$serviceMonitoringTarget->teams()->pluck('name')->all(),
+                'Departments',
+                ...$serviceMonitoringTarget->departments()->pluck('name')->all(),
                 'Users',
                 ...$serviceMonitoringTarget->users()->pluck('name')->all(),
             ]

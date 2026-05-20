@@ -52,6 +52,7 @@ class KnowledgeManagementPortalController extends Controller
     public function show(): JsonResponse
     {
         $settings = resolve(PortalSettings::class);
+        $addons = resolve(LicenseSettings::class)->data?->addons;
         $logo = $settings->getSettingsPropertyModel('portal.logo')
             ->getFirstMedia('logo');
         $favicon = $settings->getSettingsPropertyModel('portal.favicon')
@@ -77,9 +78,13 @@ class KnowledgeManagementPortalController extends Controller
                 ->all(),
             'rounding' => $settings->knowledge_management_portal_rounding,
             'requires_authentication' => $settings->knowledge_management_portal_requires_authentication,
-            'service_management_enabled' => $settings->knowledge_management_portal_service_management && resolve(LicenseSettings::class)->data?->addons?->serviceManagement,
-            'has_assets' => auth()->guard('contact')->user()?->assetCheckIns()->exists() || auth()->guard('contact')->user()?->assetCheckOuts()->exists() ?: false,
+            'service_management_enabled' => $settings->knowledge_management_portal_service_management && $addons?->serviceManagement,
+            'service_monitoring_enabled' => $addons?->serviceMonitoring,
+            'advisory_management_enabled' => $addons?->advisoryManagement,
+            'has_assets' => (auth()->guard('contact')->user()?->assetCheckIns()->exists() || auth()->guard('contact')->user()?->assetCheckOuts()->exists()) ?: false,
+            'asset_management_enabled' => $addons?->assetManagement,
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
+            'license_management_enabled' => $addons?->licenseManagement,
             'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,
             'authentication_url' => URL::to(
                 URL::signedRoute(

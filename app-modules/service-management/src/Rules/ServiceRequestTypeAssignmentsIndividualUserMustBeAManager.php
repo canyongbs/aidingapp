@@ -55,10 +55,10 @@ class ServiceRequestTypeAssignmentsIndividualUserMustBeAManager implements Valid
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $isManager = $this->serviceRequestType->managerUsers()->where('users.id', $value)->exists() ||
-            $this->serviceRequestType->managerTeams()->whereRelation('users', 'users.id', $value)->exists();
+            $this->serviceRequestType->managerDepartments()->whereRelation('users', 'users.id', $value)->exists();
 
         if (! $isManager) {
-            $fail('The selected user must be a manager user or belong to a team designated as managers of this Service Request Type.');
+            $fail('The selected user must be a manager user or belong to a department designated as managers of this Service Request Type.');
         }
     }
 }

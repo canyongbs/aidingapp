@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2c2a1faf97ff112b04fc936ce310be73",
+    "content-hash": "29abc11f482a7127beef125a7336d37d",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -744,6 +744,41 @@
             }
         },
         {
+            "name": "canyon-gbs/aiding-app-department",
+            "version": "1.0",
+            "dist": {
+                "type": "path",
+                "url": "app-modules/department",
+                "reference": "815581f2f3bb9d10d572ca39b112c9f24db8324b"
+            },
+            "require": {
+                "filament/filament": "^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AidingApp\\Department\\Providers\\DepartmentServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "AidingApp\\Department\\": "src/",
+                    "AidingApp\\Department\\Tests\\": "tests/",
+                    "AidingApp\\Department\\Database\\Factories\\": "database/factories/",
+                    "AidingApp\\Department\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
+        {
             "name": "canyon-gbs/aiding-app-division",
             "version": "1.0",
             "dist": {
@@ -1223,41 +1258,6 @@
                     "AidingApp\\Task\\Tests\\": "tests/",
                     "AidingApp\\Task\\Database\\Factories\\": "database/factories/",
                     "AidingApp\\Task\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/aiding-app-team",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/team",
-                "reference": "5e7aca8f02dfc2199ab0a8e2d449de88b36ec0e7"
-            },
-            "require": {
-                "filament/filament": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AidingApp\\Team\\Providers\\TeamServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AidingApp\\Team\\": "src/",
-                    "AidingApp\\Team\\Tests\\": "tests/",
-                    "AidingApp\\Team\\Database\\Factories\\": "database/factories/",
-                    "AidingApp\\Team\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [

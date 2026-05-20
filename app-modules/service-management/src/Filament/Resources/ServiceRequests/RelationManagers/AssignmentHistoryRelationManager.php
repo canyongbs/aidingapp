@@ -72,18 +72,18 @@ class AssignmentHistoryRelationManager extends RelationManager
             }
 
             $jobTitle = $user->job_title;
-            $team = $user->team?->name;
+            $department = $user->department?->name;
 
-            if ($jobTitle && $team) {
-                return "{$jobTitle} ({$team})";
+            if ($jobTitle && $department) {
+                return "{$jobTitle} ({$department})";
             }
 
             if ($jobTitle) {
                 return $jobTitle;
             }
 
-            if ($team) {
-                return "({$team})";
+            if ($department) {
+                return "({$department})";
             }
 
             return null;
@@ -91,8 +91,8 @@ class AssignmentHistoryRelationManager extends RelationManager
 
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->with([
-                'user.team',
-                'assignedBy.team',
+                'user.department',
+                'assignedBy.department',
                 'serviceRequestStatus',
             ]))
             ->emptyStateHeading('No assignment history')

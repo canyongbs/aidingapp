@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Department\Models\Department;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
@@ -45,7 +46,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestRequestFactory;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Notification;
@@ -215,15 +215,15 @@ test('EditServiceRequest requires valid data', function ($data, $errors, $setup 
 test('EditServiceRequest is gated with proper access control', function () {
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -381,9 +381,9 @@ test('EditServiceRequest is gated with proper feature access control', function 
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -392,7 +392,7 @@ test('EditServiceRequest is gated with proper feature access control', function 
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -513,9 +513,9 @@ test('send feedback email if service request is closed', function () {
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -526,7 +526,7 @@ test('send feedback email if service request is closed', function () {
         'is_customers_survey_response_email_enabled' => true,
     ]);
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -668,9 +668,9 @@ test('service requests not authorized if user is not manager of the service requ
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -678,7 +678,7 @@ test('service requests not authorized if user is not manager of the service requ
 
     $serviceRequest = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
-            ->hasAttached(Team::factory(), [], 'managerTeams'), 'type'),
+            ->hasAttached(Department::factory(), [], 'managerDepartments'), 'type'),
     ])
         ->create();
 
@@ -726,9 +726,9 @@ test('service requests not authorized if user is auditor of the service request 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.update');
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -736,7 +736,7 @@ test('service requests not authorized if user is auditor of the service request 
 
     $serviceRequest = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->for(ServiceRequestType::factory()
-            ->hasAttached(Team::factory(), [], 'auditorTeams'), 'type'),
+            ->hasAttached(Department::factory(), [], 'auditorDepartments'), 'type'),
     ])
         ->create();
 

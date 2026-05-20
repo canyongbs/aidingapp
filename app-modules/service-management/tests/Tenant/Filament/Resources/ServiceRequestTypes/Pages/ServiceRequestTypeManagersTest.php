@@ -34,10 +34,10 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypeManagers;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -80,10 +80,10 @@ it('can attach manager users to a service request type', function () {
         ->toContain($user->getKey());
 });
 
-it('can attach manager teams to a service request type', function () {
+it('can attach manager departments to a service request type', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
     asSuperAdmin();
 
@@ -91,20 +91,20 @@ it('can attach manager teams to a service request type', function () {
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
-            'managerTeams' => [$team->getKey()],
+            'managerDepartments' => [$department->getKey()],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($serviceRequestType->refresh()->managerTeams->pluck('id'))
-        ->toContain($team->getKey());
+    expect($serviceRequestType->refresh()->managerDepartments->pluck('id'))
+        ->toContain($department->getKey());
 });
 
-it('can attach both manager users and manager teams to a service request type', function () {
+it('can attach both manager users and manager departments to a service request type', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
     asSuperAdmin();
 
@@ -113,7 +113,7 @@ it('can attach both manager users and manager teams to a service request type', 
     ])
         ->fillForm([
             'managerUsers' => [$user->getKey()],
-            'managerTeams' => [$team->getKey()],
+            'managerDepartments' => [$department->getKey()],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -121,7 +121,7 @@ it('can attach both manager users and manager teams to a service request type', 
     $serviceRequestType->refresh();
 
     expect($serviceRequestType->managerUsers->pluck('id'))->toContain($user->getKey());
-    expect($serviceRequestType->managerTeams->pluck('id'))->toContain($team->getKey());
+    expect($serviceRequestType->managerDepartments->pluck('id'))->toContain($department->getKey());
 });
 
 test('ManageServiceRequestTypeManagers is gated with proper access control', function () {
@@ -158,7 +158,7 @@ test('ManageServiceRequestTypeManagers is gated with proper access control', fun
     ])
         ->fillForm([
             'managerUsers' => [$managerUser->getKey()],
-            'managerTeams' => [],
+            'managerDepartments' => [],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -204,20 +204,20 @@ test('ManageServiceRequestTypeManagers is gated with proper feature access contr
             ])
         )->assertSuccessful();
 
-    $managerTeam = Team::factory()->create();
+    $managerDepartment = Department::factory()->create();
 
     livewire(ManageServiceRequestTypeManagers::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
             'managerUsers' => [],
-            'managerTeams' => [$managerTeam->getKey()],
+            'managerDepartments' => [$managerDepartment->getKey()],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($serviceRequestType->refresh()->managerTeams->pluck('id'))
-        ->toContain($managerTeam->getKey());
+    expect($serviceRequestType->refresh()->managerDepartments->pluck('id'))
+        ->toContain($managerDepartment->getKey());
 });
 
 // UserSelect (managerUsers field) admin-filtering tests

@@ -54,7 +54,7 @@ class RoundRobinAssigner implements ServiceRequestTypeAssigner
             if ($lastAssignee) {
                 $user = User::query()
                     ->where(function (Builder $query) use ($serviceRequestType) {
-                        $query->whereRelation('team.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                        $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
                         $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
                     })
                     ->where('name', '>=', $lastAssignee->name)
@@ -67,7 +67,7 @@ class RoundRobinAssigner implements ServiceRequestTypeAssigner
             if ($user === null) {
                 $user = User::query()
                     ->where(function (Builder $query) use ($serviceRequestType) {
-                        $query->whereRelation('team.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                        $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
                         $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
                     })
                     ->orderBy('name')->orderBy('id')->first();
