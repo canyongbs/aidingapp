@@ -76,10 +76,10 @@ class ManageServiceRequestTypeAuditors extends EditRecord
                             ->multiple()
                             ->relationship('auditorUsers')
                             ->preload(),
-                        Select::make('auditorTeams')
-                            ->label('Teams')
+                        Select::make('auditorDepartments')
+                            ->label('Departments')
                             ->multiple()
-                            ->relationship('auditorTeams', 'name')
+                            ->relationship('auditorDepartments', 'name')
                             ->preload(),
                     ])
                     ->columns(2),

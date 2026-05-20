@@ -36,7 +36,7 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
-use App\Features\UserPresence;
+use App\Features\TeamRenameFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use App\Rules\EmailNotInUseOrSoftDeleted;
@@ -81,8 +81,7 @@ class ViewUser extends ViewRecord
                             ->badge()
                             ->color(fn (User $record) => $record->presenceStatus()->getColor())
                             ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
-                            ->formatStateUsing(fn (User $record) => $record->presenceStatus()->getLabel())
-                            ->visible(fn () => UserPresence::active()),
+                            ->formatStateUsing(fn (User $record) => $record->presenceStatus()->getLabel()),
                         TextInput::make('job_title')
                             ->string()
                             ->maxLength(255),
@@ -106,11 +105,11 @@ class ViewUser extends ViewRecord
                             ->disabled(),
                     ])
                     ->disabled(),
-                Section::make('Team')
+                Section::make('Department')
                     ->schema([
-                        Select::make('team_id')
-                            ->label('')
-                            ->relationship('team', 'name')
+                        Select::make(TeamRenameFeature::active() ? 'department_id' : 'team_id')
+                            ->hiddenLabel()
+                            ->relationship('department', 'name')
                             ->disabled(),
                     ])
                     ->hidden(fn (?User $record) => $record?->isAdmin() ?? false),

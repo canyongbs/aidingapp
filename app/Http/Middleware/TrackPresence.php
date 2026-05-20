@@ -36,7 +36,6 @@
 
 namespace App\Http\Middleware;
 
-use App\Features\UserPresence;
 use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
@@ -51,10 +50,6 @@ class TrackPresence
         $user = $request->user();
 
         if (! $user instanceof User) {
-            return $response;
-        }
-
-        if (! UserPresence::active()) {
             return $response;
         }
 

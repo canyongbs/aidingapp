@@ -48,6 +48,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
+use App\Features\TeamRenameFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
@@ -87,7 +88,7 @@ class ServiceRequestsRelationManager extends RelationManager
                     ->visible(fn (): bool => Division::count() > 1)
                     ->saveRelationshipsWhenHidden()
                     ->default(
-                        fn () => Division::count() === 1 ? (auth()->user()->team?->division?->getKey()
+                        fn () => Division::count() === 1 ? (auth()->user()->department?->division?->getKey()
                             ?? Division::query()
                                 ->first()
                                 ?->getKey()) : null
@@ -117,7 +118,7 @@ class ServiceRequestsRelationManager extends RelationManager
                                             ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                                 $query->where(function (Builder $query) {
                                                     $query->whereHas('managerUsers', fn (Builder $query) => $query->where('users.id', auth()->user()->getKey()))
-                                                        ->orWhereHas('managerTeams', fn (Builder $query) => $query->where('teams.id', auth()->user()->team?->getKey()));
+                                                        ->orWhereHas('managerDepartments', fn (Builder $query) => $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), auth()->user()->department?->getKey()));
                                                 });
                                             }),
                                     )
@@ -188,14 +189,14 @@ class ServiceRequestsRelationManager extends RelationManager
             ->modifyQueryUsing(function ($query) {
                 $query->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                     return $query->where(function (Builder $query) {
-                        $query->whereHas('priority.type.managerTeams', function (Builder $query): void {
-                            $query->where('teams.id', auth()->user()->team?->getKey());
+                        $query->whereHas('priority.type.managerDepartments', function (Builder $query): void {
+                            $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), auth()->user()->department?->getKey());
                         })
                             ->orWhereHas('priority.type.managerUsers', function (Builder $query): void {
                                 $query->where('users.id', auth()->user()->getKey());
                             })
-                            ->orWhereHas('priority.type.auditorTeams', function (Builder $query): void {
-                                $query->where('teams.id', auth()->user()->team?->getKey());
+                            ->orWhereHas('priority.type.auditorDepartments', function (Builder $query): void {
+                                $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), auth()->user()->department?->getKey());
                             })
                             ->orWhereHas('priority.type.auditorUsers', function (Builder $query): void {
                                 $query->where('users.id', auth()->user()->getKey());

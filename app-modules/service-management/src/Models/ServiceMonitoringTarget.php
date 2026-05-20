@@ -37,9 +37,10 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetFactory;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\Team\Models\Team;
+use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -90,12 +91,17 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
     }
 
     /**
-     * @return BelongsToMany<Team, $this, covariant ServiceMonitoringTargetTeam>
+     * @return BelongsToMany<Department, $this, covariant ServiceMonitoringTargetDepartment>
      */
-    public function teams(): BelongsToMany
+    public function departments(): BelongsToMany
     {
-        return $this->belongsToMany(Team::class)
-            ->using(ServiceMonitoringTargetTeam::class)
+        return $this->belongsToMany(
+            Department::class,
+            TeamRenameFeature::active() ? 'service_monitoring_target_department' : 'service_monitoring_target_team',
+            'service_monitoring_target_id',
+            TeamRenameFeature::active() ? 'department_id' : 'team_id',
+        )
+            ->using(ServiceMonitoringTargetDepartment::class)
             ->withTimestamps();
     }
 

@@ -70,12 +70,12 @@ class ViewServiceMonitoring extends ViewRecord
                             ->label('Frequency'),
                         Section::make('Notification Settings')
                             ->schema([
-                                TextEntry::make('teams.name')
-                                    ->label('Teams')
+                                TextEntry::make('departments.name')
+                                    ->label('Departments')
                                     ->listWithLineBreaks()
                                     ->limitList(3)
                                     ->expandableLimitedList()
-                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->teams()->count()),
+                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->departments()->count()),
                                 TextEntry::make('users.name')
                                     ->label('Users')
                                     ->listWithLineBreaks()
@@ -89,7 +89,7 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->label('Email Notifications')
                                     ->boolean(),
                             ])
-                            ->visible(fn (ServiceMonitoringTarget $record): bool => $record->teams()->count() || $record->users()->count())
+                            ->visible(fn (ServiceMonitoringTarget $record): bool => $record->departments()->count() || $record->users()->count())
                             ->columns(),
                     ])
                     ->columns(),

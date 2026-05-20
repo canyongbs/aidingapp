@@ -50,6 +50,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
+use App\Features\TeamRenameFeature;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -87,7 +88,7 @@ class CreateServiceRequest extends CreateRecord
                             ->visible(fn (): bool => Division::count() > 1)
                             ->saveRelationshipsWhenHidden()
                             ->default(
-                                fn () => Division::count() === 1 ? (auth()->user()->team?->division?->getKey()
+                                fn () => Division::count() === 1 ? (auth()->user()->department?->division?->getKey()
                                     ?? Division::query()->first()?->getKey()) : null
                             ),
                         Grid::make(6)
@@ -109,8 +110,8 @@ class CreateServiceRequest extends CreateRecord
                                     ->options(ServiceRequestType::query()->withoutArchived()->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                         $query->whereHas('managerUsers', function (Builder $query): void {
                                             $query->where('users.id', auth()->user()->getKey());
-                                        })->orWhereHas('managerTeams', function (Builder $query): void {
-                                            $query->where('teams.id', auth()->user()->team?->getKey());
+                                        })->orWhereHas('managerDepartments', function (Builder $query): void {
+                                            $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), auth()->user()->department?->getKey());
                                         });
                                     })
                                         ->pluck('name', 'id'))
