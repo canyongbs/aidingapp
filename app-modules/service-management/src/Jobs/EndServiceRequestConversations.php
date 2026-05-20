@@ -36,9 +36,12 @@
 
 namespace AidingApp\ServiceManagement\Jobs;
 
+use AidingApp\ServiceManagement\Actions\EndServiceRequestConversation;
 use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
 use AidingApp\ServiceManagement\Events\ServiceRequestConversationExpired;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+use App\Features\ServiceRequestTypeLiveChatSettingsFeature;
+use App\Models\User;
 use App\Settings\PresenceSettings;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -48,7 +51,7 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class ExpireServiceRequestConversations implements ShouldQueue, ShouldBeUnique
+class EndServiceRequestConversations implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -56,6 +59,16 @@ class ExpireServiceRequestConversations implements ShouldQueue, ShouldBeUnique
     use SerializesModels;
 
     public function handle(): void
+    {
+        if (! ServiceRequestTypeLiveChatSettingsFeature::active()) {
+            return;
+        }
+
+        $this->expireQueuedConversations();
+        $this->endInactiveConversations();
+    }
+
+    protected function expireQueuedConversations(): void
     {
         ServiceRequestConversation::query()
             ->whereNotNull('queued_at')
@@ -90,6 +103,34 @@ class ExpireServiceRequestConversations implements ShouldQueue, ShouldBeUnique
                 ]);
 
                 broadcast(new ServiceRequestConversationExpired($record));
+            });
+    }
+
+    protected function endInactiveConversations(): void
+    {
+        ServiceRequestConversation::query()
+            ->whereNotNull('accepted_at')
+            ->whereNull('finished_at')
+            ->whereNotNull('conversation_id')
+            ->eachById(function (ServiceRequestConversation $record) {
+                $lastMessage = $record->conversation?->messages()->latest()->first();
+
+                $lastActivity = $lastMessage->created_at ?? $record->accepted_at;
+
+                if ($lastActivity >= now()->subMinutes(20)) {
+                    return;
+                }
+
+                $reason = ServiceRequestConversationFinishedReason::AgentInactive;
+
+                if ($lastMessage) {
+                    $isAgentLastAuthor = $lastMessage->author_type === (new User())->getMorphClass();
+                    $reason = $isAgentLastAuthor
+                        ? ServiceRequestConversationFinishedReason::ContactInactive
+                        : ServiceRequestConversationFinishedReason::AgentInactive;
+                }
+
+                app(EndServiceRequestConversation::class)->execute($record, $reason);
             });
     }
 }

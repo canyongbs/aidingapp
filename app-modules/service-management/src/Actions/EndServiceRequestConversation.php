@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -32,20 +34,25 @@
 </COPYRIGHT>
 */
 
-import { createPinia } from 'pinia';
-import { createApp } from 'vue';
-import ChatApp from './App.vue';
+namespace AidingApp\ServiceManagement\Actions;
 
-document.addEventListener('DOMContentLoaded', () => {
-    const chatContainer = document.getElementById('user-chat-app');
-    if (chatContainer) {
-        const app = createApp(ChatApp, {
-            userId: chatContainer.dataset.userId,
-            userName: chatContainer.dataset.userName,
-            userAvatar: chatContainer.dataset.userAvatar || null,
-            serviceManagementEnabled: chatContainer.hasAttribute('data-service-management-enabled'),
-        });
-        app.use(createPinia());
-        app.mount(chatContainer);
+use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
+use AidingApp\ServiceManagement\Events\ServiceRequestConversationEnded;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+
+class EndServiceRequestConversation
+{
+    public function execute(ServiceRequestConversation $serviceRequestConversation, ServiceRequestConversationFinishedReason $reason): void
+    {
+        if (! $serviceRequestConversation->accepted_at || $serviceRequestConversation->finished_at) {
+            return;
+        }
+
+        $serviceRequestConversation->update([
+            'finished_at' => now(),
+            'finished_reason' => $reason,
+        ]);
+
+        broadcast(new ServiceRequestConversationEnded($serviceRequestConversation));
     }
-});
+}

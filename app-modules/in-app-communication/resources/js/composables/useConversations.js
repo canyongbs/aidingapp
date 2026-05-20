@@ -161,6 +161,11 @@ export function useConversations() {
         store.removeConversation(conversationId);
     }
 
+    async function endConversation(conversationId) {
+        await api.post(`/conversations/${conversationId}/end`);
+        store.removeConversation(conversationId);
+    }
+
     async function updateSettings(conversationId, settings) {
         const { data } = await api.patch(`/conversations/${conversationId}/settings`, settings);
         store.updateConversation(conversationId, settings);
@@ -223,6 +228,7 @@ export function useConversations() {
         removeParticipant,
         updateParticipant,
         leaveConversation,
+        endConversation,
         updateSettings,
         togglePin,
         markAsRead,

@@ -112,6 +112,12 @@ export function useWebSocket() {
                     }, 4000);
                 }
             })
+            .listen('.service-request-conversation.ended', (event) => {
+                if (event.conversation_id) {
+                    unsubscribeFromConversation(event.conversation_id);
+                    store.removeConversation(event.conversation_id);
+                }
+            })
             .listen('.service-request-conversation.queued', (event) => {
                 if (onQueueItem) {
                     onQueueItem(event);

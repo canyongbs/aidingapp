@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -32,20 +34,35 @@
 </COPYRIGHT>
 */
 
-import { createPinia } from 'pinia';
-import { createApp } from 'vue';
-import ChatApp from './App.vue';
+namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
-document.addEventListener('DOMContentLoaded', () => {
-    const chatContainer = document.getElementById('user-chat-app');
-    if (chatContainer) {
-        const app = createApp(ChatApp, {
-            userId: chatContainer.dataset.userId,
-            userName: chatContainer.dataset.userName,
-            userAvatar: chatContainer.dataset.userAvatar || null,
-            serviceManagementEnabled: chatContainer.hasAttribute('data-service-management-enabled'),
-        });
-        app.use(createPinia());
-        app.mount(chatContainer);
+use AidingApp\Contact\Models\Contact;
+use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\ServiceManagement\Actions\EndServiceRequestConversation;
+use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response as ResponseCode;
+
+class EndConversationController extends Controller
+{
+    public function __invoke(Request $request, Conversation $conversation): Response
+    {
+        $contact = auth('contact')->user() ?? $request->user();
+
+        abort_if(! ($contact instanceof Contact), ResponseCode::HTTP_UNAUTHORIZED);
+
+        $serviceRequestConversation = ServiceRequestConversation::where('conversation_id', $conversation->getKey())->firstOrFail();
+
+        abort_if($serviceRequestConversation->contact_id !== $contact->getKey(), ResponseCode::HTTP_FORBIDDEN);
+
+        app(EndServiceRequestConversation::class)->execute(
+            $serviceRequestConversation,
+            ServiceRequestConversationFinishedReason::ContactEnded,
+        );
+
+        return response()->noContent();
     }
-});
+}

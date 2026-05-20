@@ -51,6 +51,7 @@
         initialTab: { type: String, default: 'users' },
         usersUnreadCount: { type: Number, default: 0 },
         contactsUnreadCount: { type: Number, default: 0 },
+        serviceManagementEnabled: { type: Boolean, default: false },
     });
 
     const emit = defineEmits([
@@ -64,7 +65,7 @@
     ]);
 
     const scrollContainer = ref(null);
-    const activeTab = ref(props.initialTab);
+    const activeTab = ref(props.serviceManagementEnabled ? props.initialTab : 'users');
     const queueItems = ref([]);
     const queueLoading = ref(true);
     const now = ref(Date.now());
@@ -178,7 +179,7 @@
         </div>
 
         <!-- Tabs -->
-        <div class="px-3 pt-2 pb-1 shrink-0">
+        <div v-if="serviceManagementEnabled" class="px-3 pt-2 pb-1 shrink-0">
             <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
                 <button
                     type="button"

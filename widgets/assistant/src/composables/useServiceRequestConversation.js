@@ -139,6 +139,10 @@ export function useServiceRequestConversation(websocketsConfig, authEndpoint) {
             status.value = 'expired';
             cleanup();
         });
+
+        channel.listen('.service-request-conversation.ended', () => {
+            status.value = 'ended';
+        });
     }
 
     function cleanup() {

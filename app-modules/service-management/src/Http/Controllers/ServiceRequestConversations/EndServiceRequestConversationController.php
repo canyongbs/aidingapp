@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -32,20 +34,31 @@
 </COPYRIGHT>
 */
 
-import { createPinia } from 'pinia';
-import { createApp } from 'vue';
-import ChatApp from './App.vue';
+namespace AidingApp\ServiceManagement\Http\Controllers\ServiceRequestConversations;
 
-document.addEventListener('DOMContentLoaded', () => {
-    const chatContainer = document.getElementById('user-chat-app');
-    if (chatContainer) {
-        const app = createApp(ChatApp, {
-            userId: chatContainer.dataset.userId,
-            userName: chatContainer.dataset.userName,
-            userAvatar: chatContainer.dataset.userAvatar || null,
-            serviceManagementEnabled: chatContainer.hasAttribute('data-service-management-enabled'),
-        });
-        app.use(createPinia());
-        app.mount(chatContainer);
+use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\ServiceManagement\Actions\EndServiceRequestConversation;
+use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+class EndServiceRequestConversationController extends Controller
+{
+    public function __invoke(Request $request, Conversation $conversation): JsonResponse
+    {
+        $serviceRequestConversation = ServiceRequestConversation::where('conversation_id', $conversation->getKey())->firstOrFail();
+
+        if ($serviceRequestConversation->user_id !== $request->user()->getKey()) {
+            abort(403);
+        }
+
+        app(EndServiceRequestConversation::class)->execute(
+            $serviceRequestConversation,
+            ServiceRequestConversationFinishedReason::AgentEnded,
+        );
+
+        return response()->json(['status' => 'ended']);
     }
-});
+}

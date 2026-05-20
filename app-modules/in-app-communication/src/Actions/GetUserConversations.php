@@ -68,6 +68,7 @@ class GetUserConversations
                     ->where('conversation_participants.participant_type', '=', $userType)
                     ->where('conversation_participants.participant_id', '=', $userId);
             })
+            ->whereDoesntHave('serviceRequestConversation', fn (Builder $query) => $query->whereNotNull('finished_at'))
             ->when($excludePinned, function (Builder $query) {
                 $query->where('conversation_participants.is_pinned', false);
             })
@@ -102,6 +103,7 @@ class GetUserConversations
                     ->where('conversation_participants.participant_type', '=', $userType)
                     ->where('conversation_participants.participant_id', '=', $userId);
             })
+            ->whereDoesntHave('serviceRequestConversation', fn (Builder $query) => $query->whereNotNull('finished_at'))
             ->where('conversation_participants.is_pinned', true)
             ->when($participantType === 'contact', function (Builder $query) {
                 $query->whereHas('conversationParticipants', fn (Builder $query) => $query->where('participant_type', 'contact'));

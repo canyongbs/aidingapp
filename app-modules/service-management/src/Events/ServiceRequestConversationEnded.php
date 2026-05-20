@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -32,20 +34,51 @@
 </COPYRIGHT>
 */
 
-import { createPinia } from 'pinia';
-import { createApp } from 'vue';
-import ChatApp from './App.vue';
+namespace AidingApp\ServiceManagement\Events;
 
-document.addEventListener('DOMContentLoaded', () => {
-    const chatContainer = document.getElementById('user-chat-app');
-    if (chatContainer) {
-        const app = createApp(ChatApp, {
-            userId: chatContainer.dataset.userId,
-            userName: chatContainer.dataset.userName,
-            userAvatar: chatContainer.dataset.userAvatar || null,
-            serviceManagementEnabled: chatContainer.hasAttribute('data-service-management-enabled'),
-        });
-        app.use(createPinia());
-        app.mount(chatContainer);
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
+
+class ServiceRequestConversationEnded implements ShouldBroadcastNow
+{
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
+
+    public function __construct(
+        public ServiceRequestConversation $serviceRequestConversation,
+    ) {}
+
+    public function broadcastAs(): string
+    {
+        return 'service-request-conversation.ended';
     }
-});
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function broadcastWith(): array
+    {
+        return [
+            'id' => $this->serviceRequestConversation->getKey(),
+            'conversation_id' => $this->serviceRequestConversation->conversation_id,
+            'finished_reason' => $this->serviceRequestConversation->finished_reason?->value,
+        ];
+    }
+
+    /**
+     * @return array<int, Channel>
+     */
+    public function broadcastOn(): array
+    {
+        return [
+            new PrivateChannel("service-request-conversation.{$this->serviceRequestConversation->getKey()}"),
+            new PrivateChannel("user.{$this->serviceRequestConversation->user_id}"),
+        ];
+    }
+}

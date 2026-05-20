@@ -38,6 +38,7 @@ use AidingApp\Ai\Http\Controllers\AssistantWidget\AuthenticateController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\AuthorizeBroadcastController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\BroadcastTypingController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\CheckServiceRequestConversationEligibilityController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\EndConversationController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\EvaluateServiceRequestAiResolutionController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GenerateServiceRequestQuestionController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\GetServiceRequestFormController;
@@ -134,6 +135,10 @@ Route::middleware([
                         Route::post('conversations/{conversation}/typing', BroadcastTypingController::class)
                             ->middleware(['auth:sanctum'])
                             ->name('conversations.typing');
+
+                        Route::post('conversations/{conversation}/end', EndConversationController::class)
+                            ->middleware(['auth:sanctum'])
+                            ->name('conversations.end');
 
                         Route::match(
                             ['GET', 'POST', 'HEAD'],

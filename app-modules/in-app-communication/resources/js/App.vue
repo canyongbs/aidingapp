@@ -53,6 +53,7 @@
         userId: { type: String, required: true },
         userName: { type: String, required: true },
         userAvatar: { type: String, default: null },
+        serviceManagementEnabled: { type: Boolean, default: false },
     });
 
     const store = useChatStore();
@@ -66,6 +67,7 @@
         updateConversation,
         togglePin,
         fetchConversation,
+        endConversation,
     } = useConversations();
 
     const loadingMoreConversations = ref(false);
@@ -315,6 +317,11 @@
         subscribeToConversation(conversationId);
         store.selectConversation(conversationId);
     }
+
+    async function handleEndConversation() {
+        if (!selectedConversationId.value) return;
+        await endConversation(selectedConversationId.value);
+    }
 </script>
 
 <template>
@@ -337,6 +344,7 @@
                 :initial-tab="initialTab"
                 :users-unread-count="usersUnreadCount"
                 :contacts-unread-count="contactsUnreadCount"
+                :service-management-enabled="serviceManagementEnabled"
                 @select="handleSelectConversation"
                 @new-conversation="handleNewConversation"
                 @find-channels="handleFindChannels"
@@ -360,6 +368,7 @@
                     @show-participants="handleToggleParticipants"
                     @update-settings="handleUpdateSettings"
                     @update-conversation="handleUpdateConversation"
+                    @end-conversation="handleEndConversation"
                 >
                     <!-- Mobile back button -->
                     <template #prepend>
