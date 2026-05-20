@@ -44,14 +44,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $is_required
  * @property string $type
  * @property string $label
- * @property array $config
+ * @property array<string, mixed> $config
  * @property-read Submissible $submissible
  * @property-read SubmissibleStep $step
  */
 abstract class SubmissibleField extends BaseModel
 {
+    /**
+     * @return BelongsTo<Submissible, $this>
+     */
     abstract public function submissible(): BelongsTo;
 
+    /**
+     * @return BelongsTo<SubmissibleStep, $this>
+     */
     abstract public function step(): BelongsTo;
 
     /**
