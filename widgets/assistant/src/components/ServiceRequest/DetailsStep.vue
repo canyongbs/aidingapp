@@ -32,8 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
-    import { ArrowRightIcon } from '@heroicons/vue/16/solid';
+    import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/vue/16/solid';
     import { computed, provide, ref, toRaw } from 'vue';
     import BaseButton from '../../../../../resources/js/components/BaseButton.vue';
 
