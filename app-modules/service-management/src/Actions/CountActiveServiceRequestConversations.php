@@ -34,54 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Events;
+namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
-use Illuminate\Foundation\Events\Dispatchable;
-use Illuminate\Queue\SerializesModels;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
-class ServiceRequestConversationQueued implements ShouldBroadcastNow
+class CountActiveServiceRequestConversations
 {
-    use Dispatchable;
-    use InteractsWithSockets;
-    use SerializesModels;
-
-    public function __construct(
-        public ServiceRequestConversation $serviceRequestConversation,
-    ) {}
-
-    public function broadcastAs(): string
+    public function execute(User $agent, ServiceRequestType $type): int
     {
-        return 'service-request-conversation.queued';
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    public function broadcastWith(): array
-    {
-        $this->serviceRequestConversation->loadMissing(['contact', 'serviceRequest']);
-
-        return [
-            'id' => $this->serviceRequestConversation->getKey(),
-            'contact_name' => $this->serviceRequestConversation->contact->full_name,
-            'service_request_number' => $this->serviceRequestConversation->serviceRequest->service_request_number,
-            'service_request_title' => $this->serviceRequestConversation->serviceRequest->title,
-            'queued_at' => $this->serviceRequestConversation->queued_at->toIso8601String(),
-        ];
-    }
-
-    /**
-     * @return array<int, Channel>
-     */
-    public function broadcastOn(): array
-    {
-        return [
-            new PrivateChannel("user.{$this->serviceRequestConversation->user_id}"),
-        ];
+        return ServiceRequestConversation::query()
+            ->whereBelongsTo($agent)
+            ->whereHas('serviceRequest.priority', fn (Builder $query) => $query->whereBelongsTo($type, 'type'))
+            ->where(
+                fn (Builder $query) => $query
+                    ->where(fn (Builder $query) => $query
+                        ->whereNotNull('queued_at')
+                        ->whereNull('accepted_at')
+                        ->whereNull('finished_at'))
+                    ->orWhere(fn (Builder $query) => $query
+                        ->whereNotNull('accepted_at')
+                        ->whereNull('finished_at'))
+            )
+            ->count();
     }
 }

@@ -45,7 +45,6 @@ use App\Enums\Feature;
 use App\Enums\PresenceStatus;
 use App\Features\ServiceRequestTypeLiveChatSettingsFeature;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 
@@ -64,12 +63,12 @@ class QueueServiceRequestConversation
         $this->validateEligibility($serviceRequest, $agent);
         $this->validateCapacity($serviceRequest, $agent);
 
-        $conversation = ServiceRequestConversation::create([
-            'service_request_id' => $serviceRequest->getKey(),
-            'contact_id' => $contact->getKey(),
-            'user_id' => $agent->getKey(),
-            'queued_at' => now(),
-        ]);
+        $conversation = new ServiceRequestConversation();
+        $conversation->serviceRequest()->associate($serviceRequest);
+        $conversation->contact()->associate($contact);
+        $conversation->user()->associate($agent);
+        $conversation->queued_at = now();
+        $conversation->save();
 
         $agent->notify(new ServiceRequestConversationQueuedNotification($conversation));
 
@@ -107,19 +106,7 @@ class QueueServiceRequestConversation
             return;
         }
 
-        $count = ServiceRequestConversation::query()
-            ->whereBelongsTo($agent)
-            ->whereHas('serviceRequest.priority', fn (Builder $query) => $query->whereBelongsTo($type, 'type'))
-            ->where(
-                fn (Builder $query) => $query
-                    ->whereNotNull('queued_at')
-                    ->whereNull('accepted_at')
-                    ->whereNull('finished_at')
-                    ->orWhere(fn (Builder $query) => $query
-                        ->whereNotNull('accepted_at')
-                        ->whereNull('finished_at'))
-            )
-            ->count();
+        $count = app(CountActiveServiceRequestConversations::class)->execute($agent, $type);
 
         if ($count >= $type->max_simultaneous_chats) {
             throw ValidationException::withMessages(['conversation' => 'An agent is not currently available.']);
