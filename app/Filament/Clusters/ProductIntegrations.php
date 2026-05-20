@@ -44,7 +44,7 @@ class ProductIntegrations extends Cluster
 {
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
+    protected static string | UnitEnum | null $navigationGroup = 'Global Admin';
 
     protected static ?int $navigationSort = 50;
 }

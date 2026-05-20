@@ -68,8 +68,8 @@ test('The correct details are displayed on the ViewAdvisory page', function () {
                 $advisory->severity->name,
                 'Status',
                 $advisory->status->name,
-                'Assigned Team',
-                $advisory->assignedTeam->name,
+                'Assigned Department',
+                $advisory->assignedDepartment->name,
             ]
         );
 });

@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Department\Models\Department;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\CreateServiceRequest;
@@ -43,7 +44,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestRequestFactory;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\Select;
@@ -168,15 +168,15 @@ test('CreateServiceRequest is gated with proper access control', function () {
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
     $serviceRequestTypesWithManager = ServiceRequestType::factory()->create();
 
-    $serviceRequestTypesWithManager->managerTeams()->attach($team);
+    $serviceRequestTypesWithManager->managerDepartments()->attach($department);
 
     $serviceRequestTypesWithManager->save();
 
@@ -297,9 +297,9 @@ test('CreateServiceRequest is gated with proper feature access control', functio
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -320,7 +320,7 @@ test('CreateServiceRequest is gated with proper feature access control', functio
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     actingAs($user)
         ->get(
@@ -423,9 +423,9 @@ test('cannot create service requests if user is manager of any service request t
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -451,9 +451,9 @@ test('displays only service request types managed by the current user', function
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -463,7 +463,7 @@ test('displays only service request types managed by the current user', function
     actingAs($user);
 
     $serviceRequestTypesWithManagers = ServiceRequestType::factory()
-        ->hasAttached($team, [], 'managerTeams')
+        ->hasAttached($department, [], 'managerDepartments')
         ->create();
 
     $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->create();
@@ -515,9 +515,9 @@ test('create service requests if user is manager of any service request type', f
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -528,7 +528,7 @@ test('create service requests if user is manager of any service request type', f
 
     $serviceRequestTypesWithManager = ServiceRequestType::factory()->create();
 
-    $serviceRequestTypesWithManager->managerTeams()->attach($team);
+    $serviceRequestTypesWithManager->managerDepartments()->attach($department);
 
     $serviceRequestTypesWithManager->save();
 
@@ -607,9 +607,9 @@ test('validate service requests type if user is manager of any service request t
 
     $user = User::factory()->create();
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -624,8 +624,8 @@ test('validate service requests type if user is manager of any service request t
 
     $serviceRequestTypesWithManagers = ServiceRequestType::factory()->count(2)->create();
 
-    $serviceRequestTypesWithManagers->each(function ($serviceRequest) use ($team) {
-        $serviceRequest->managerTeams()->attach($team);
+    $serviceRequestTypesWithManagers->each(function ($serviceRequest) use ($department) {
+        $serviceRequest->managerDepartments()->attach($department);
     });
 
     $serviceRequestTypes = $serviceRequestTypesWithoutManagers->toBase()->merge($serviceRequestTypesWithManagers);

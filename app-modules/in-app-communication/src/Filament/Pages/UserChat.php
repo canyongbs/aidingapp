@@ -53,7 +53,7 @@ class UserChat extends Page
 
     protected static ?string $slug = 'live-chat';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Engagement';
+    protected static string | UnitEnum | null $navigationGroup = 'Live Chat';
 
     protected static ?int $navigationSort = 10;
 

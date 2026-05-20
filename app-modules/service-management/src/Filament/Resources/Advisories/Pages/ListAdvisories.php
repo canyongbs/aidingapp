@@ -67,8 +67,8 @@ class ListAdvisories extends ListRecords
                     ->label('Status')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('assignedTeam.name')
-                    ->label('Assigned Team')
+                TextColumn::make('assignedDepartment.name')
+                    ->label('Assigned Department')
                     ->searchable()
                     ->sortable(),
             ])

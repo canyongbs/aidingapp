@@ -56,7 +56,7 @@ class WorkloadAssigner implements ServiceRequestTypeAssigner
             if ($lastAssignee) {
                 $lowestServiceRequest = User::query()
                     ->where(function (Builder $query) use ($serviceRequestType) {
-                        $query->whereRelation('team.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                        $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
                         $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
                     })
                     ->withCount([
@@ -69,7 +69,7 @@ class WorkloadAssigner implements ServiceRequestTypeAssigner
 
                 $user = User::query()
                     ->where(function (Builder $query) use ($serviceRequestType) {
-                        $query->whereRelation('team.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                        $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
                         $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
                     })
                     ->where(function (QueryBuilder $query) {
@@ -97,7 +97,7 @@ class WorkloadAssigner implements ServiceRequestTypeAssigner
             if ($user === null) {
                 $user = User::query()
                     ->where(function (Builder $query) use ($serviceRequestType) {
-                        $query->whereRelation('team.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                        $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
                         $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
                     })
                     ->withCount([

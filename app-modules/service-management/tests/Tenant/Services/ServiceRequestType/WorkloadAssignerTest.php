@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -42,7 +43,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\WorkloadAssigner;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 
 use function Pest\Laravel\travelBack;
@@ -52,18 +52,18 @@ use function Tests\asSuperAdmin;
 test('workload assigner assigns to user with fewest active requests', function () {
     asSuperAdmin();
 
-    $team = Team::factory()
+    $department = Department::factory()
         ->has(User::factory()->count(3), 'users')
         ->create();
 
     $serviceRequestType = ServiceRequestType::factory()
-        ->hasAttached($team, relationship: 'managerTeams')
+        ->hasAttached($department, relationship: 'managerDepartments')
         ->state([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::Workload,
         ])
         ->create();
 
-    $users = $team->users()->orderBy('name')->orderBy('id')->get();
+    $users = $department->users()->orderBy('name')->orderBy('id')->get();
 
     // Give the first two users 2 active assignments each
     foreach ($users->take(2) as $user) {
@@ -106,18 +106,18 @@ test('workload assigner assigns to user with fewest active requests', function (
 test('workload assigner distributes evenly when all managers have same workload', function () {
     asSuperAdmin();
 
-    $team = Team::factory()
+    $department = Department::factory()
         ->has(User::factory()->count(3), 'users')
         ->create();
 
     $serviceRequestType = ServiceRequestType::factory()
-        ->hasAttached($team, relationship: 'managerTeams')
+        ->hasAttached($department, relationship: 'managerDepartments')
         ->state([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::Workload,
         ])
         ->create();
 
-    $users = $team->users()->orderBy('name')->orderBy('id')->get();
+    $users = $department->users()->orderBy('name')->orderBy('id')->get();
 
     travelTo(now()->subSeconds(count($users)));
 

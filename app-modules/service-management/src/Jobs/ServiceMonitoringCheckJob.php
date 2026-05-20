@@ -36,12 +36,12 @@
 
 namespace AidingApp\ServiceManagement\Jobs;
 
+use AidingApp\Department\Models\Department;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
-use AidingApp\Team\Models\Team;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -109,8 +109,8 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         if (! $success) {
             $recipients = $this->serviceMonitoringTarget->users()->get();
 
-            $this->serviceMonitoringTarget->teams()->each(function (Team $team) use (&$recipients) {
-                $users = $team->users()->get();
+            $this->serviceMonitoringTarget->departments()->each(function (Department $department) use (&$recipients) {
+                $users = $department->users()->get();
                 $recipients = $recipients->merge($users)->unique('id');
             });
 

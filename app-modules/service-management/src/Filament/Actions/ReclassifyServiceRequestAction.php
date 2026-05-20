@@ -68,7 +68,7 @@ class ReclassifyServiceRequestAction extends Action
             ->modalHeading(fn (ServiceRequest $record): HtmlString => new HtmlString(
                 'Reclassify Service Request<br><span class="text-sm font-normal text-gray-500">' . $record->service_request_number . '</span>'
             ))
-            ->modalDescription('Reclassify this request to a different service request type. The selected type determines the responsible team, assignment rules, and communication templates.')
+            ->modalDescription('Reclassify this request to a different service request type. The selected type determines the responsible department, assignment rules, and communication templates.')
             ->schema([
                 Section::make('Assignment')
                     ->schema([
@@ -134,7 +134,7 @@ class ReclassifyServiceRequestAction extends Action
                                 fn (Get $get): array => User::query()
                                     ->where(fn (Builder $query) => $query
                                         ->whereHas('manageableServiceRequestTypes', fn (Builder $query) => $query->where('service_request_type_id', $get('type_id')))
-                                        ->orWhereHas('team.manageableServiceRequestTypes', fn (Builder $query) => $query->where('service_request_type_id', $get('type_id'))))
+                                        ->orWhereHas('department.manageableServiceRequestTypes', fn (Builder $query) => $query->where('service_request_type_id', $get('type_id'))))
                                     ->orderBy('name')
                                     ->limit(50)
                                     ->pluck('name', 'id')
@@ -143,7 +143,7 @@ class ReclassifyServiceRequestAction extends Action
                             ->getSearchResultsUsing(fn (string $search, Get $get): array => User::query()
                                 ->where(fn (Builder $query) => $query
                                     ->whereHas('manageableServiceRequestTypes', fn (Builder $query) => $query->where('service_request_type_id', $get('type_id')))
-                                    ->orWhereHas('team.manageableServiceRequestTypes', fn (Builder $query) => $query->where('service_request_type_id', $get('type_id'))))
+                                    ->orWhereHas('department.manageableServiceRequestTypes', fn (Builder $query) => $query->where('service_request_type_id', $get('type_id'))))
                                 ->when(filled($search), fn (Builder $query) => $query
                                     ->where(new Expression('lower(name)'), 'like', '%' . Str::lower($search) . '%'))
                                 ->orderBy('name')

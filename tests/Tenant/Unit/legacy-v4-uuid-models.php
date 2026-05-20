@@ -54,6 +54,7 @@ use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\ContractManagement\Models\Contract;
 use AidingApp\ContractManagement\Models\ContractType;
+use AidingApp\Department\Models\Department;
 use AidingApp\Division\Models\Division;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Models\Engagement;
@@ -92,10 +93,10 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectAuditorTeam;
+use AidingApp\Project\Models\ProjectAuditorDepartment;
 use AidingApp\Project\Models\ProjectAuditorUser;
 use AidingApp\Project\Models\ProjectFile;
-use AidingApp\Project\Models\ProjectManagerTeam;
+use AidingApp\Project\Models\ProjectManagerDepartment;
 use AidingApp\Project\Models\ProjectManagerUser;
 use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
@@ -109,7 +110,7 @@ use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetTeam;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetDepartment;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetUser;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
@@ -124,19 +125,18 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeDepartmentAuditor;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeDepartmentManager;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeTeamAuditor;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeTeamManager;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserAuditor;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserManager;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\Sla;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
+use AidingApp\Task\Models\ConfidentialTaskDepartment;
 use AidingApp\Task\Models\ConfidentialTasksProjects;
-use AidingApp\Task\Models\ConfidentialTaskTeam;
 use AidingApp\Task\Models\ConfidentialTaskUser;
 use AidingApp\Task\Models\Task;
-use AidingApp\Team\Models\Team;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Webhook\Models\InboundWebhook;
 use AidingApp\Webhook\Models\LandlordInboundWebhook;
@@ -215,10 +215,10 @@ return [
     PipelineEntry::class,
     PipelineStage::class,
     Project::class,
-    ProjectAuditorTeam::class,
+    ProjectAuditorDepartment::class,
     ProjectAuditorUser::class,
     ProjectFile::class,
-    ProjectManagerTeam::class,
+    ProjectManagerDepartment::class,
     ProjectManagerUser::class,
     ProjectMilestone::class,
     ProjectMilestoneStatus::class,
@@ -232,7 +232,7 @@ return [
     AdvisoryStatus::class,
     AdvisoryUpdate::class,
     ServiceMonitoringTarget::class,
-    ServiceMonitoringTargetTeam::class,
+    ServiceMonitoringTargetDepartment::class,
     ServiceMonitoringTargetUser::class,
     ServiceRequest::class,
     ServiceRequestAssignment::class,
@@ -248,18 +248,18 @@ return [
     ServiceRequestType::class,
     ServiceRequestTypeCategory::class,
     ServiceRequestTypeEmailTemplate::class,
-    ServiceRequestTypeTeamAuditor::class,
-    ServiceRequestTypeTeamManager::class,
+    ServiceRequestTypeDepartmentAuditor::class,
+    ServiceRequestTypeDepartmentManager::class,
     ServiceRequestTypeUserAuditor::class,
     ServiceRequestTypeUserManager::class,
     ServiceRequestUpdate::class,
     Sla::class,
     TenantServiceRequestTypeDomain::class,
-    ConfidentialTaskTeam::class,
+    ConfidentialTaskDepartment::class,
     ConfidentialTaskUser::class,
     ConfidentialTasksProjects::class,
     Task::class,
-    Team::class,
+    Department::class,
     Timeline::class,
     InboundWebhook::class,
     LandlordInboundWebhook::class,
