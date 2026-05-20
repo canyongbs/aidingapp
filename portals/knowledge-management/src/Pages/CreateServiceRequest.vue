@@ -38,11 +38,11 @@
     import { marked } from 'marked';
     import { computed, defineProps, nextTick, onMounted, reactive, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';
     import PageCard from '../Components/PageCard.vue';
-    import BaseButton from '../Components/ui/BaseButton.vue';
     import wizard from '../FormKit/wizard.js';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
@@ -476,12 +476,7 @@
                             <p>Thank you. Your request has been submitted.</p>
                         </template>
 
-                        <BaseButton
-                            as="router-link"
-                            :to="{ name: 'create-service-request' }"
-                            variant="secondary"
-                            size="md"
-                        >
+                        <BaseButton tag="router-link" :to="{ name: 'create-service-request' }" color="gray" size="md">
                             Submit Another Request
                         </BaseButton>
                     </main>
@@ -543,12 +538,10 @@
                             </p>
 
                             <div class="flex gap-3">
-                                <BaseButton variant="success" size="md" @click="handleAiResolutionAccepted">
+                                <BaseButton color="success" size="md" @click="handleAiResolutionAccepted">
                                     Yes (Resolved)
                                 </BaseButton>
-                                <BaseButton variant="neutral" size="md" @click="handleAiResolutionDeclined">
-                                    No
-                                </BaseButton>
+                                <BaseButton color="gray" size="md" @click="handleAiResolutionDeclined"> No </BaseButton>
                             </div>
                         </div>
 
