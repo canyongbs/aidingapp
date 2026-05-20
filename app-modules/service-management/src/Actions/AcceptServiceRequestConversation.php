@@ -83,8 +83,8 @@ class AcceptServiceRequestConversation
         $agentParticipant->save();
 
         $contactParticipant = new ConversationParticipant();
-        $agentParticipant->conversation()->associate($conversation);
-        $agentParticipant->participant()->associate($contact);
+        $contactParticipant->conversation()->associate($conversation);
+        $contactParticipant->participant()->associate($contact);
         $contactParticipant->last_activity_at = now();
         $contactParticipant->save();
 
