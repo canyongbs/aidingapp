@@ -55,6 +55,8 @@ class SignatureFormFieldBlock extends FormFieldBlock
             'label' => $field->label,
             'name' => $field->getKey(),
             ...($field->is_required ? ['validation' => 'required'] : []),
+
+            ...self::getDescriptionSectionsSchema($field),
         ];
     }
 

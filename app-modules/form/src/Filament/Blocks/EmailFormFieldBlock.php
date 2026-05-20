@@ -60,6 +60,8 @@ class EmailFormFieldBlock extends FormFieldBlock
             'label' => $field->label,
             'name' => $field->getKey(),
             'validation' => $field->is_required ? 'required|email' : 'email',
+
+            ...self::getDescriptionSectionsSchema($field),
         ];
     }
 
