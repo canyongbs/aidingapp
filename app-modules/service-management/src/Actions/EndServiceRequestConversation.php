@@ -53,8 +53,6 @@ class EndServiceRequestConversation
             'finished_reason' => $reason,
         ]);
 
-        $serviceRequestConversation->conversation?->delete();
-
         broadcast(new ServiceRequestConversationEnded($serviceRequestConversation));
     }
 }
