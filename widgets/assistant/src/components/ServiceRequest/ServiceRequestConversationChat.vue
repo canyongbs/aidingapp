@@ -32,9 +32,11 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { PaperAirplaneIcon, UserIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+    import { PaperAirplaneIcon } from '@heroicons/vue/16/solid';
+    import { UserIcon, XMarkIcon } from '@heroicons/vue/24/outline';
     import axios from 'axios';
     import { nextTick, onMounted, ref, watch } from 'vue';
+    import BaseButton from '../../../../../resources/js/components/BaseButton.vue';
     import { useConversationMessages } from '../../composables/useConversationMessages.js';
     import { getAuthHeaders } from '../../utils/token.js';
 
@@ -182,14 +184,15 @@
                 >
                     Cancel
                 </button>
-                <button
-                    type="button"
-                    class="px-3 py-1 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded transition-colors"
-                    :disabled="isEnding"
+                <BaseButton
+                    color="danger"
+                    size="xs"
+                    :loading="isEnding"
+                    loading-text="Ending…"
                     @click="endConversation"
                 >
-                    {{ isEnding ? 'Ending...' : 'End chat' }}
-                </button>
+                    End chat
+                </BaseButton>
             </div>
         </div>
 
@@ -298,14 +301,13 @@
                     :disabled="sending"
                     @keydown.enter.exact.prevent="handleSend"
                 />
-                <button
-                    type="button"
-                    class="bg-brand-600 hover:bg-brand-700 active:bg-brand-800 text-white rounded p-3 font-medium transition-all duration-150 focus:outline-hidden focus:ring-2 focus:ring-primary-500 shadow-xs hover:shadow disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                <BaseButton
+                    :icon="PaperAirplaneIcon"
+                    :icon-only="true"
+                    size="lg"
                     :disabled="!messageInput.trim() || sending"
                     @click="handleSend"
-                >
-                    <PaperAirplaneIcon class="w-5 h-5" />
-                </button>
+                />
             </div>
         </div>
     </div>

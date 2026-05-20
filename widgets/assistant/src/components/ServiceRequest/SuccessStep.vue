@@ -34,6 +34,7 @@
 <script setup>
     import { ArrowLeftIcon, ChatBubbleLeftRightIcon } from '@heroicons/vue/16/solid';
     import { onMounted, ref, watch } from 'vue';
+    import BaseButton from '../../../../../resources/js/components/BaseButton.vue';
     import { useServiceRequestConversation } from '../../composables/useServiceRequestConversation.js';
     import ServiceRequestConversationChat from './ServiceRequestConversationChat.vue';
 
@@ -158,13 +159,7 @@
         <template v-if="!aiResolved && eligible && status === 'idle'">
             <div class="w-full border-t border-gray-100 pt-4">
                 <p class="text-sm text-gray-500 mb-3">An agent may be available to chat with you now.</p>
-                <button
-                    @click="startConversation"
-                    class="flex items-center justify-center gap-2 mx-auto px-5 py-2.5 rounded bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium transition-all shadow-sm"
-                >
-                    <ChatBubbleLeftRightIcon class="w-4 h-4" />
-                    Request Live Chat
-                </button>
+                <BaseButton @click="startConversation" :icon="ChatBubbleLeftRightIcon"> Request Live Chat </BaseButton>
             </div>
         </template>
 
@@ -229,13 +224,13 @@
             </div>
         </template>
 
-        <button
+        <BaseButton
             v-if="status !== 'accepted' && status !== 'ended'"
             @click="$emit('back')"
-            class="mt-2 flex items-center gap-2 px-5 py-2.5 rounded bg-brand-500 hover:bg-brand-600 text-white text-sm font-medium transition-all shadow-sm"
+            :icon="ArrowLeftIcon"
+            class="mt-2"
         >
-            <ArrowLeftIcon class="w-4 h-4" />
             Back to Assistant Chat
-        </button>
+        </BaseButton>
     </div>
 </template>
