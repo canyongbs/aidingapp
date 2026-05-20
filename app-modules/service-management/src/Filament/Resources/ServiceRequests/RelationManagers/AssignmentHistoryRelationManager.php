@@ -43,7 +43,6 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\On;
 
 class AssignmentHistoryRelationManager extends RelationManager
@@ -51,11 +50,6 @@ class AssignmentHistoryRelationManager extends RelationManager
     protected static string $relationship = 'assignments';
 
     protected static ?string $title = 'History';
-
-    public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
-    {
-        return parent::canViewForRecord($ownerRecord, $pageClass);
-    }
 
     #[On('assignment-history-refresh')]
     public function onAssignmentHistoryRefresh(): void {}
