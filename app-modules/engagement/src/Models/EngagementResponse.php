@@ -47,6 +47,7 @@ use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\EngagementResponseTimeline;
 use App\Models\BaseModel;
+use App\Models\Media;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -70,6 +71,8 @@ class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeli
 {
     use AuditableTrait;
     use SoftDeletes;
+
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
 
     /** @use HasFactory<EngagementResponseFactory> */

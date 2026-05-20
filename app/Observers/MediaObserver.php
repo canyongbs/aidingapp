@@ -34,22 +34,24 @@
 </COPYRIGHT>
 */
 
-declare(strict_types = 1);
+namespace App\Observers;
 
-use App\Rector\AddInteractsWithMediaUseTagRector;
-use Rector\Config\RectorConfig;
+use App\Features\MediaCreatedByFeature;
+use App\Models\Media;
+use Illuminate\Support\Facades\Auth;
 
-require_once __DIR__ . '/rector-rules/AddInteractsWithMediaUseTagRector.php';
+class MediaObserver
+{
+    public function creating(Media $media): void
+    {
+        if (! MediaCreatedByFeature::active() || $media->createdBy) {
+            return;
+        }
 
-return static function (RectorConfig $rectorConfig): void {
-    $rectorConfig->paths([
-        __DIR__ . '/app',
-        __DIR__ . '/app-modules',
-    ]);
+        $creator = Auth::user();
 
-    $rectorConfig->skip([
-        __DIR__ . '/app-modules/*/vendor',
-    ]);
-
-    $rectorConfig->rule(AddInteractsWithMediaUseTagRector::class);
-};
+        if ($creator) {
+            $media->createdBy()->associate($creator);
+        }
+    }
+}

@@ -34,22 +34,32 @@
 </COPYRIGHT>
 */
 
-declare(strict_types = 1);
+use App\Features\MediaCreatedByFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-use App\Rector\AddInteractsWithMediaUseTagRector;
-use Rector\Config\RectorConfig;
+return new class () extends Migration {
+    public function up(): void
+    {
+        DB::transaction(function () {
+            Schema::table('media', function (Blueprint $table) {
+                $table->nullableUuidMorphs('created_by');
+            });
 
-require_once __DIR__ . '/rector-rules/AddInteractsWithMediaUseTagRector.php';
+            MediaCreatedByFeature::activate();
+        });
+    }
 
-return static function (RectorConfig $rectorConfig): void {
-    $rectorConfig->paths([
-        __DIR__ . '/app',
-        __DIR__ . '/app-modules',
-    ]);
+    public function down(): void
+    {
+        DB::transaction(function () {
+            MediaCreatedByFeature::deactivate();
 
-    $rectorConfig->skip([
-        __DIR__ . '/app-modules/*/vendor',
-    ]);
-
-    $rectorConfig->rule(AddInteractsWithMediaUseTagRector::class);
+            Schema::table('media', function (Blueprint $table) {
+                $table->dropMorphs('created_by');
+            });
+        });
+    }
 };

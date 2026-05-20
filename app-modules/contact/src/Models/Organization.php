@@ -39,6 +39,7 @@ namespace AidingApp\Contact\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\OrganizationFactory;
 use App\Models\BaseModel;
+use App\Models\Media;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -58,7 +59,10 @@ class Organization extends BaseModel implements HasMedia, Auditable
 
     use HasUuids;
     use SoftDeletes;
+
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
+
     use AuditableTrait;
 
     protected $fillable = [

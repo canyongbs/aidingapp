@@ -45,7 +45,6 @@ use AidingApp\Engagement\Exceptions\SesS3InboundServiceRequestTypeNotFound;
 use AidingApp\Engagement\Exceptions\SesS3InboundSpamOrVirusDetected;
 use AidingApp\Engagement\Exceptions\UnableToDetectTenantFromSesS3EmailPayload;
 use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload;
-use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
 use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
@@ -53,6 +52,7 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
+use App\Features\MediaCreatedByFeature;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV3;
 use Aws\Kms\KmsClient;
@@ -270,7 +270,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             }
 
             $contacts->each(function (Contact $contact) use ($parser, $content) {
-                /** @var EngagementResponse $engagementResponse */
                 $engagementResponse = $contact->engagementResponses()
                     ->create([
                         'subject' => $parser->getHeader('subject'),
@@ -280,12 +279,17 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                         'raw' => $content,
                     ]);
 
-                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse) {
+                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse, $contact) {
                     try {
-                        $engagementResponse->addMediaFromStream($attachment->getStream())
+                        $media = $engagementResponse->addMediaFromStream($attachment->getStream())
                             ->setName($attachment->getFilename())
                             ->setFileName($attachment->getFilename())
                             ->toMediaCollection('attachments');
+
+                        if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
+                            $media->createdBy()->associate($contact);
+                            $media->saveQuietly();
+                        }
                     } catch (Throwable $throw) {
                         report($throw);
                     }
@@ -337,10 +341,17 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             foreach ($parser->getAttachments(false) as $attachment) {
                 try {
-                    $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
+                    $media = $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
                         ->setName($attachment->getFilename())
                         ->setFileName($attachment->getFilename())
                         ->toMediaCollection('uploads');
+
+                    $respondent = $serviceRequest->respondent;
+
+                    if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
+                        $media->createdBy()->associate($respondent);
+                        $media->saveQuietly();
+                    }
                 } catch (Throwable $throw) {
                     report($throw);
                 }
@@ -516,10 +527,15 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                 foreach ($parser->getAttachments(false) as $attachment) {
                     try {
-                        $serviceRequest->addMediaFromStream($attachment->getStream())
+                        $media = $serviceRequest->addMediaFromStream($attachment->getStream())
                             ->setName($attachment->getFilename())
                             ->setFileName($attachment->getFilename())
                             ->toMediaCollection('uploads');
+
+                        if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
+                            $media->createdBy()->associate($contact);
+                            $media->saveQuietly();
+                        }
                     } catch (Throwable $throw) {
                         report($throw);
                     }

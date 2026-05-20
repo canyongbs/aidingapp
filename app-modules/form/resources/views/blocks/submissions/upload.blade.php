@@ -31,7 +31,7 @@
     
     </COPYRIGHT>
 --}}
-@use('Spatie\MediaLibrary\MediaCollections\Models\Media')
+@use('App\Models\Media')
 
 <x-form::blocks.field-wrapper class="py-3" :$label :$isRequired>
     @php
