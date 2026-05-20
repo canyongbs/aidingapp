@@ -39,6 +39,7 @@ namespace AidingApp\Ai\Models;
 use AidingApp\Ai\Database\Factories\AiAssistantFileFactory;
 use AidingApp\Ai\Models\Contracts\AiFile;
 use AidingApp\IntegrationOpenAi\Models\OpenAiVectorStore;
+use App\Models\Media;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -58,6 +59,8 @@ class AiAssistantFile extends Model implements AiFile, HasMedia
 
     use HasUuids;
     use SoftDeletes;
+
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
 
     protected $fillable = [

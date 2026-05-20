@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement;
 
+use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 
@@ -51,7 +52,10 @@ class ServiceManagementPlugin implements Plugin
         $panel->discoverResources(
             in: __DIR__ . '/Filament/Resources',
             for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
-        );
+        )
+            ->livewireComponents([
+                ServiceRequestMediaTable::class,
+            ]);
     }
 
     public function boot(Panel $panel): void {}

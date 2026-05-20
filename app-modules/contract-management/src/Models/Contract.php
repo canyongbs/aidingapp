@@ -41,6 +41,7 @@ use AidingApp\ContractManagement\Database\Factories\ContractFactory;
 use AidingApp\ContractManagement\Enums\ContractStatus;
 use App\Casts\CurrencyCast;
 use App\Models\BaseModel;
+use App\Models\Media;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -54,7 +55,9 @@ use Spatie\MediaLibrary\InteractsWithMedia;
  */
 class Contract extends BaseModel implements HasMedia, Auditable
 {
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
+
     use AuditableTrait;
     use SoftDeletes;
 

@@ -34,14 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace App\Observers;
 
-use App\Support\AbstractFeatureFlag;
+use App\Features\MediaCreatedByFeature;
+use App\Models\Media;
+use Illuminate\Support\Facades\Auth;
 
-class AiSupportAssistantDefaultInstructionsFeature extends AbstractFeatureFlag
+class MediaObserver
 {
-    public function resolve(mixed $scope): mixed
+    public function creating(Media $media): void
     {
-        return false;
+        if (! MediaCreatedByFeature::active() || $media->createdBy) {
+            return;
+        }
+
+        $creator = Auth::user();
+
+        if ($creator) {
+            $media->createdBy()->associate($creator);
+        }
     }
 }

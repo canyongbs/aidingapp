@@ -34,32 +34,32 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Ai\Settings\AiSupportAssistantSettings;
+use App\Features\MediaCreatedByFeature;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
-            $settings = app(AiSupportAssistantSettings::class);
+            Schema::table('media', function (Blueprint $table) {
+                $table->nullableUuidMorphs('created_by');
+            });
 
-            if (blank($settings->instructions)) {
-                $settings->instructions = AiSupportAssistantSettings::defaultInstructions();
-                $settings->save();
-            }
+            MediaCreatedByFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            $settings = app(AiSupportAssistantSettings::class);
+            MediaCreatedByFeature::deactivate();
 
-            if ($settings->instructions === AiSupportAssistantSettings::defaultInstructions()) {
-                $settings->instructions = '';
-                $settings->save();
-            }
+            Schema::table('media', function (Blueprint $table) {
+                $table->dropMorphs('created_by');
+            });
         });
     }
 };
