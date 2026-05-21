@@ -62,6 +62,8 @@ class UploadFormFieldBlock extends FormFieldBlock
             'limit' => $field->config['limit'] ?? null,
             'size' => $field->config['size'] ?? null,
             'uploadUrl' => route('api.portal.service-request.request-upload-url'),
+
+            ...self::getDescriptionSectionsSchema($field),
         ];
     }
 

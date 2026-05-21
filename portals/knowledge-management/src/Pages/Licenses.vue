@@ -32,14 +32,14 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline';
+    import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/16/solid';
     import { Card } from 'primevue';
     import { onMounted, ref } from 'vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
     import PageCard from '../Components/PageCard.vue';
-    import BaseButton from '../Components/ui/BaseButton.vue';
     import { consumer } from '../Services/Consumer';
 
     const productLicenses = ref({});
@@ -158,10 +158,10 @@
                                         {{ activeLicense.license }}
                                     </span>
                                     <BaseButton
-                                        variant="ghost"
+                                        color="gray"
                                         size="sm"
                                         icon-only
-                                        :icon-left="showLicenseKeys[activeLicense.id] ? EyeIcon : EyeSlashIcon"
+                                        :icon="showLicenseKeys[activeLicense.id] ? EyeIcon : EyeSlashIcon"
                                         :aria-label="
                                             showLicenseKeys[activeLicense.id] ? 'Hide license key' : 'Show license key'
                                         "
@@ -205,10 +205,10 @@
                                         {{ expiredLicense.license }}
                                     </span>
                                     <BaseButton
-                                        variant="ghost"
+                                        color="gray"
                                         size="sm"
                                         icon-only
-                                        :icon-left="showLicenseKeys[expiredLicense.id] ? EyeIcon : EyeSlashIcon"
+                                        :icon="showLicenseKeys[expiredLicense.id] ? EyeIcon : EyeSlashIcon"
                                         :aria-label="
                                             showLicenseKeys[expiredLicense.id] ? 'Hide license key' : 'Show license key'
                                         "
@@ -225,9 +225,7 @@
         <EmptyState v-if="!loading && !productLicenses.activeLicense.length && !productLicenses.expiredLicense.length">
             <template #heading>There are no licenses to display.</template>
             <template #actions>
-                <BaseButton as="router-link" :to="{ name: 'home' }" variant="neutral" size="md">
-                    Return Home
-                </BaseButton>
+                <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md"> Return Home </BaseButton>
             </template>
         </EmptyState>
     </Page>

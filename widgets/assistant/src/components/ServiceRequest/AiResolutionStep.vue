@@ -35,6 +35,7 @@
     import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
     import axios from 'axios';
     import { onMounted, ref } from 'vue';
+    import BaseButton from '../../../../../resources/js/components/BaseButton.vue';
     import { useMarkdown } from '../../composables/useMarkdown.js';
     import { getAuthHeaders } from '../../utils/token.js';
 
@@ -162,48 +163,28 @@
 
         <!-- Action footer -->
         <div v-if="!isLoading && proposedAnswer" class="shrink-0 px-4 pb-4 pt-3 border-t border-gray-100 space-y-2">
-            <button
+            <BaseButton
                 @click="onAccept"
-                :disabled="isSubmitting"
-                :class="[
-                    'w-full flex items-center justify-center gap-2 py-2.5 rounded text-sm font-medium transition-all',
-                    isSubmitting
-                        ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                        : 'bg-green-500 hover:bg-green-600 text-white shadow-sm',
-                ]"
+                :loading="isSubmitting && submittingAction === 'accepted'"
+                :disabled="isSubmitting && submittingAction !== 'accepted'"
+                color="success"
+                size="lg"
+                loading-text="Submitting…"
+                class="w-full"
             >
-                <svg
-                    v-if="isSubmitting && submittingAction === 'accepted'"
-                    class="w-4 h-4 animate-spin"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                >
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                {{ isSubmitting && submittingAction === 'accepted' ? 'Submitting…' : 'Yes, this resolved my issue' }}
-            </button>
-            <button
+                Yes, this resolved my issue
+            </BaseButton>
+            <BaseButton
                 @click="onDecline"
-                :disabled="isSubmitting"
-                :class="[
-                    'w-full flex items-center justify-center gap-2 py-2.5 rounded text-sm font-medium transition-all',
-                    isSubmitting
-                        ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                        : 'bg-gray-100 hover:bg-gray-200 text-gray-700',
-                ]"
+                :loading="isSubmitting && submittingAction === 'declined'"
+                :disabled="isSubmitting && submittingAction !== 'declined'"
+                color="gray"
+                size="lg"
+                loading-text="Submitting…"
+                class="w-full"
             >
-                <svg
-                    v-if="isSubmitting && submittingAction === 'declined'"
-                    class="w-4 h-4 animate-spin"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                >
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                {{ isSubmitting && submittingAction === 'declined' ? 'Submitting…' : 'No, submit my request' }}
-            </button>
+                No, submit my request
+            </BaseButton>
         </div>
     </div>
 </template>

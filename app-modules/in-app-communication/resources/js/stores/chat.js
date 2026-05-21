@@ -218,15 +218,15 @@ export const useChatStore = defineStore('chat', () => {
         }
     }
 
-    function setTyping(conversationId, userId, isTyping) {
+    function setTyping(conversationId, userId, isTyping, userName = null) {
         if (!typingUsers.value[conversationId]) {
             typingUsers.value[conversationId] = [];
         }
 
-        const userIndex = typingUsers.value[conversationId].indexOf(userId);
+        const userIndex = typingUsers.value[conversationId].findIndex((entry) => entry.id === userId);
 
         if (isTyping && userIndex === -1) {
-            typingUsers.value[conversationId].push(userId);
+            typingUsers.value[conversationId].push({ id: userId, name: userName });
         } else if (!isTyping && userIndex !== -1) {
             typingUsers.value[conversationId].splice(userIndex, 1);
         }
