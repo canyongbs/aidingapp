@@ -32,8 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps } from 'vue';
-    import Badge from './Badge.vue';
+    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
 
     defineProps({
         tags: {
@@ -53,7 +52,7 @@
 
 <template>
     <div class="flex flex-wrap gap-2">
-        <Badge v-if="featured" value="Featured" :variant="variant" />
-        <Badge v-for="tag in tags" :key="tag.id" :value="tag.name" :variant="variant" />
+        <BaseBadge v-if="featured" :color="variant === 'hero' ? 'hero' : 'gray'">Featured</BaseBadge>
+        <BaseBadge v-for="tag in tags" :key="tag.id" :color="variant === 'hero' ? 'hero' : 'gray'">{{ tag.name }}</BaseBadge>
     </div>
 </template>

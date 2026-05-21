@@ -34,6 +34,7 @@
 <script setup>
     import { TicketIcon } from '@heroicons/vue/16/solid';
     import { ArrowLeftIcon, ChatBubbleLeftRightIcon, XMarkIcon } from '@heroicons/vue/24/outline';
+    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
 
     const props = defineProps({
         serviceRequestEnabled: { type: Boolean, default: false },
@@ -74,14 +75,18 @@
 
                 <p v-if="activeServiceRequestNumber" class="text-xs text-white/70 leading-tight">Live Chat</p>
 
-                <button
+                <BaseBadge
                     v-if="currentView === 'chat' && serviceRequestEnabled"
+                    tag="button"
+                    color="hero"
+                    size="sm"
+                    :icon="TicketIcon"
+                    icon-position="before"
+                    class="self-start leading-none"
                     @click="$emit('open-service-request')"
-                    class="self-start flex items-center gap-1 px-2 py-0.5 rounded-md bg-white/15 hover:bg-white/25 text-white/90 hover:text-white text-xs font-medium transition-all leading-none border border-white/20"
                 >
-                    <TicketIcon class="w-3 h-3 shrink-0" />
                     Open Service Request
-                </button>
+                </BaseBadge>
             </div>
         </div>
 

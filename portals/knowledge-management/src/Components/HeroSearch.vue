@@ -34,6 +34,7 @@
 <script setup>
     import { MagnifyingGlassIcon, TagIcon } from '@heroicons/vue/20/solid';
     import { ref } from 'vue';
+    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
 
     defineProps({
         modelValue: {
@@ -102,32 +103,28 @@
             </button>
 
             <template v-if="tagsMode === 'selected'">
-                <button
+                <BaseBadge
                     v-for="tag in tags.filter((t) => selectedTags.includes(t.id))"
                     :key="tag.id"
-                    type="button"
+                    tag="button"
+                    color="hero"
                     @click="emit('toggle-tag', tag.id)"
-                    class="inline-flex min-w-6 items-center justify-center gap-x-1 rounded-md bg-white/25 px-2 py-1 text-xs font-medium text-white ring-1 ring-inset ring-white/40 transition duration-75 hover:bg-white/20"
                 >
                     {{ tag.name }}
-                </button>
+                </BaseBadge>
             </template>
 
             <template v-else>
-                <button
+                <BaseBadge
                     v-for="tag in tags"
                     :key="tag.id"
-                    type="button"
+                    tag="button"
+                    color="hero"
+                    :class="selectedTags.includes(tag.id) ? '' : 'opacity-60 hover:opacity-90'"
                     @click="emit('toggle-tag', tag.id)"
-                    class="inline-flex min-w-6 items-center justify-center gap-x-1 rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset transition duration-75"
-                    :class="
-                        selectedTags.includes(tag.id)
-                            ? 'bg-white/25 text-white ring-white/40 hover:bg-white/20'
-                            : 'bg-white/5 text-white/60 ring-white/15 hover:bg-white/10 hover:text-white/80'
-                    "
                 >
                     {{ tag.name }}
-                </button>
+                </BaseBadge>
             </template>
         </div>
     </div>

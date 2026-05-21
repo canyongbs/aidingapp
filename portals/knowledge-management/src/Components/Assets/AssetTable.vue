@@ -33,7 +33,7 @@
 -->
 <script setup>
     import Pagination from '../Pagination.vue';
-    import BaseBadge from '../ui/BaseBadge.vue';
+    import BaseBadge from '../../../../../resources/js/components/BaseBadge.vue';
     import BaseTable from '../ui/BaseTable.vue';
     import BaseTableBody from '../ui/BaseTableBody.vue';
     import BaseTableCell from '../ui/BaseTableCell.vue';
@@ -150,8 +150,8 @@
                         </BaseTableCell>
 
                         <BaseTableCell>
-                            <BaseBadge v-if="item.status === 'returned'" tone="success">Returned</BaseBadge>
-                            <BaseBadge v-else tone="warning">Checked Out</BaseBadge>
+                            <BaseBadge v-if="item.status === 'returned'" color="success">Returned</BaseBadge>
+                            <BaseBadge v-else color="warning">Checked Out</BaseBadge>
                         </BaseTableCell>
 
                         <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
