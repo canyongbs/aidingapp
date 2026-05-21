@@ -41,6 +41,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * @property string $id
  * @property bool $is_required
  * @property string $type
  * @property string $label

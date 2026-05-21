@@ -86,7 +86,7 @@ class RadioFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'radio',
             'label' => $field->label,
-            'name' => (string) $field->getKey(),
+            'name' => $field->id,
             ...($field->is_required ? ['validation' => 'required'] : []),
             'options' => $field->config['options'],
             ...self::getDescriptionSectionsSchema($field, 'legend'),

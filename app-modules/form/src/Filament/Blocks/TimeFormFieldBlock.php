@@ -53,7 +53,7 @@ class TimeFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'time',
             'label' => $field->label,
-            'name' => (string) $field->getKey(),
+            'name' => $field->id,
             ...($field->is_required ? ['validation' => 'required'] : []),
 
             ...self::getDescriptionSectionsSchema($field),
