@@ -55,7 +55,7 @@ class UploadFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'upload',
             'label' => $field->label,
-            'name' => $field->getKey(),
+            'name' => $field->id,
             ...($field->is_required ? ['validation' => 'required'] : []),
             'multiple' => $field->config['multiple'] ?? false,
             'accept' => $field->config['accept'] ?? '',

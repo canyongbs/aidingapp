@@ -38,16 +38,36 @@ namespace AidingApp\Notification\Models\Contracts;
 
 interface CanBeNotified
 {
+    /**
+     * @param mixed $instance
+     *
+     * @return mixed
+     */
     public function notify($instance);
 
+    /**
+     * @param mixed $instance
+     * @param array<int, string>|null $channels
+     *
+     * @return mixed
+     */
     public function notifyNow($instance, ?array $channels = null);
 
+    /**
+     * @param string $driver
+     * @param mixed $notification
+     *
+     * @return mixed
+     */
     public function routeNotificationFor($driver, $notification = null);
 
+    /** @return mixed */
     public function notifications();
 
+    /** @return mixed */
     public function readNotifications();
 
+    /** @return mixed */
     public function unreadNotifications();
 
     public function canRecieveSms(): bool;

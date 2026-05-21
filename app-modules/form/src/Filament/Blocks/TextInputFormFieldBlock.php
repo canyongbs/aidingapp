@@ -53,7 +53,7 @@ class TextInputFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'text',
             'label' => $field->label,
-            'name' => $field->getKey(),
+            'name' => $field->id,
             ...($field->is_required ? ['validation' => 'required'] : []),
 
             ...self::getDescriptionSectionsSchema($field),

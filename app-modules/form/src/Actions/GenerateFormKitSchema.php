@@ -37,9 +37,16 @@
 namespace AidingApp\Form\Actions;
 
 use AidingApp\Form\Models\Submissible;
+use AidingApp\Form\Models\SubmissibleField;
 use AidingApp\Form\Models\SubmissibleStep;
 use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * @phpstan-type FormKitNode array<string, mixed>
+ * @phpstan-type FormKitChild FormKitNode|string
+ * @phpstan-type FormKitChildren array<int, FormKitChild>
+ * @phpstan-type FormKitBlocks array<string, class-string>
+ */
 class GenerateFormKitSchema
 {
     /**
@@ -60,6 +67,13 @@ class GenerateFormKitSchema
         ];
     }
 
+    /**
+     * @param FormKitBlocks $blocks
+     * @param FormKitChildren $content
+     * @param Collection<string, SubmissibleField>|null $fields
+     *
+     * @return FormKitChildren
+     */
     public function content(array $blocks, array $content, ?Collection $fields = null): array
     {
         return array_map(
@@ -81,6 +95,13 @@ class GenerateFormKitSchema
         );
     }
 
+    /**
+     * @param FormKitBlocks $blocks
+     * @param FormKitNode $component
+     * @param Collection<string, SubmissibleField>|null $fields
+     *
+     * @return FormKitNode
+     */
     public function grid(array $blocks, array $component, ?Collection $fields): array
     {
         $dataCols = $component['attrs']['data-cols'] ?? '2';
@@ -118,6 +139,11 @@ class GenerateFormKitSchema
         ];
     }
 
+    /**
+     * @param FormKitNode $component
+     *
+     * @return FormKitChild
+     */
     public function text(array $component): array | string
     {
         if (filled($component['marks'] ?? [])) {
@@ -153,6 +179,11 @@ class GenerateFormKitSchema
         return $component['text'];
     }
 
+    /**
+     * @param FormKitBlocks $blocks
+     *
+     * @return FormKitChildren
+     */
     public function wizardContent(array $blocks, Submissible $submissible): array
     {
         return [
@@ -212,7 +243,11 @@ class GenerateFormKitSchema
                                 '$formkit' => 'group',
                                 'id' => $step->label,
                                 'name' => $step->label,
-                                'children' => $this->content($blocks, $step->content['content'] ?? [], $step->fields->keyBy('id')),
+                                'children' => $this->content(
+                                    $blocks,
+                                    is_array($step->content) ? ($step->content['content'] ?? []) : [],
+                                    $step->fields->keyBy('id'),
+                                ),
                             ],
                         ],
                     ]),
@@ -274,6 +309,9 @@ class GenerateFormKitSchema
         ];
     }
 
+    /**
+     * @return FormKitChildren
+     */
     protected function generateContent(Submissible $submissible): array
     {
         $blocks = app(ResolveBlockRegistry::class)($submissible, true);
@@ -292,7 +330,11 @@ class GenerateFormKitSchema
             ]);
 
             $content = [
-                ...$this->content($blocks, $submissible->content['content'] ?? [], $submissible->fields->keyBy('id')),
+                ...$this->content(
+                    $blocks,
+                    is_array($submissible->content) ? ($submissible->content['content'] ?? []) : [],
+                    $submissible->fields->keyBy('id'),
+                ),
                 [
                     '$formkit' => 'submit',
                     'label' => 'Submit',
