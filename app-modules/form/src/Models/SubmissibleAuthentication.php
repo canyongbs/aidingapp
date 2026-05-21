@@ -40,7 +40,9 @@ use App\Models\Attributes\NoPermissions;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassPrunable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Carbon;
 
 /**
@@ -52,6 +54,9 @@ abstract class SubmissibleAuthentication extends BaseModel
 {
     use MassPrunable;
 
+    /**
+     * @return BelongsTo<Submissible, $this>
+     */
     abstract public function submissible(): BelongsTo;
 
     public function isExpired(): bool
@@ -59,13 +64,19 @@ abstract class SubmissibleAuthentication extends BaseModel
         return $this->created_at->addDay()->isPast();
     }
 
+    /**
+     * @return Builder<static>
+     */
     public function prunable(): Builder
     {
         return static::query()
             ->where('created_at', '<', now()->subMonth());
     }
 
-    public function author(): BelongsTo
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function author(): MorphTo
     {
         return $this->morphTo();
     }
