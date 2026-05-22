@@ -36,6 +36,7 @@
 
 namespace AidingApp\Ai\Jobs\PortalAssistant;
 
+use AidingApp\Ai\Enums\AiReasoningEffort;
 use AidingApp\Ai\Events\PortalAssistant\PortalAssistantMessageChunk;
 use AidingApp\Ai\Models\PortalAssistantMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
@@ -110,6 +111,7 @@ class SendMessage implements ShouldQueue
                     files: KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id'])->all(),
                     options: $nextRequestOptions,
                     messages: $messages,
+                    reasoningEffort: AiReasoningEffort::Minimal,
                 );
 
                 $response = new PortalAssistantMessage();
@@ -153,7 +155,7 @@ class SendMessage implements ShouldQueue
                         $chunkBuffer[] = $chunk->content;
                         $chunkCount++;
 
-                        if ($chunkCount >= 30) {
+                        if ($chunkCount >= 10) {
                             event(new PortalAssistantMessageChunk(
                                 $this->thread,
                                 content: implode('', $chunkBuffer),

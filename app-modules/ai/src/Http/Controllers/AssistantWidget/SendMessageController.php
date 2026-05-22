@@ -108,7 +108,7 @@ class SendMessageController extends Controller
                 ),
                 'ip' => request()->ip(),
             ],
-        ));
+        ))->onConnection('background');
 
         return response()->json([
             'message' => 'Message dispatched for processing via websockets.',
