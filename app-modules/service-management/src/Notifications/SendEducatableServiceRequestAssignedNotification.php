@@ -62,7 +62,9 @@ class SendEducatableServiceRequestAssignedNotification extends Notification impl
     public function __construct(
         protected ServiceRequest $serviceRequest,
         protected ?ServiceRequestTypeEmailTemplate $emailTemplate,
-    ) {}
+    ) {
+        $this->afterCommit = true;
+    }
 
     /**
      * @return array<int, string>

@@ -71,7 +71,7 @@ class SelectFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'select',
             'label' => $field->label,
-            'name' => $field->getKey(),
+            'name' => $field->id,
             ...($field->is_required ? ['validation' => 'required'] : []),
             'placeholder' => $field->config['placeholder'] ?? null,
             'options' => $field->config['options'],

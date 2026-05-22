@@ -46,15 +46,22 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property string $label
- * @property ?array $content
+ * @property ?array<string, mixed> $content
+ * @property int|null $sort
  * @property-read Submissible $submissible
  * @property-read Collection<int, SubmissibleField> $fields
  */
 #[NoPermissions]
 abstract class SubmissibleStep extends BaseModel
 {
+    /**
+     * @return BelongsTo<Submissible, $this>
+     */
     abstract public function submissible(): BelongsTo;
 
+    /**
+     * @return HasMany<SubmissibleField, $this>
+     */
     abstract public function fields(): HasMany;
 
     /**
@@ -66,7 +73,7 @@ abstract class SubmissibleStep extends BaseModel
     }
 
     /**
-     * @return Attribute<string, never>
+     * @return Attribute<?array<string, mixed>, never>
      */
     protected function content(): Attribute
     {

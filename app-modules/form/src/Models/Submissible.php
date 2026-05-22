@@ -48,10 +48,10 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @property string $name
- * @property ?array $content
+ * @property ?array<string, mixed> $content
  * @property bool $embed_enabled
  * @property bool $is_wizard
- * @property ?array $allowed_domains
+ * @property ?array<int, string> $allowed_domains
  * @property bool $recaptcha_enabled
  * @property-read Collection<int, SubmissibleStep> $steps
  * @property-read Collection<int, SubmissibleField> $fields
@@ -63,10 +63,19 @@ abstract class Submissible extends Model
     use SoftDeletes;
     use UsesTenantConnection;
 
+    /**
+     * @return HasMany<SubmissibleField, $this>
+     */
     abstract public function fields(): HasMany;
 
+    /**
+     * @return HasMany<SubmissibleStep, $this>
+     */
     abstract public function steps(): HasMany;
 
+    /**
+     * @return HasMany<Submission, $this>
+     */
     abstract public function submissions(): HasMany;
 
     /**
@@ -78,7 +87,7 @@ abstract class Submissible extends Model
     }
 
     /**
-     * @return Attribute<string, never>
+     * @return Attribute<?array<string, mixed>, never>
      */
     protected function content(): Attribute
     {
@@ -86,7 +95,7 @@ abstract class Submissible extends Model
     }
 
     /**
-     * @return Attribute<string, never>
+     * @return Attribute<bool, never>
      */
     protected function embedEnabled(): Attribute
     {
@@ -94,7 +103,7 @@ abstract class Submissible extends Model
     }
 
     /**
-     * @return Attribute<string, never>
+     * @return Attribute<?array<int, string>, never>
      */
     protected function allowedDomains(): Attribute
     {
@@ -102,7 +111,7 @@ abstract class Submissible extends Model
     }
 
     /**
-     * @return Attribute<string, never>
+     * @return Attribute<bool, never>
      */
     protected function isWizard(): Attribute
     {

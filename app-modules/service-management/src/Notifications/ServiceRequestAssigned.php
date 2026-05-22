@@ -60,7 +60,9 @@ class ServiceRequestAssigned extends BaseNotification implements ShouldQueue
         public ServiceRequest $serviceRequest,
         public ?ServiceRequestTypeEmailTemplate $emailTemplate,
         public string $channel,
-    ) {}
+    ) {
+        $this->afterCommit = true;
+    }
 
     /**
      * @return array<int, string>
