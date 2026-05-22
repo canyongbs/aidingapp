@@ -66,7 +66,7 @@ class ProductLicensePolicy
     public function view(Authenticatable $authenticatable, ProductLicense $productLicense): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_license.{$productLicense->getKey()}.view"],
+            abilities: ['product_license.*.view'],
             denyResponse: 'You do not have permission to view this product license.'
         );
     }
@@ -82,7 +82,7 @@ class ProductLicensePolicy
     public function update(Authenticatable $authenticatable, ProductLicense $productLicense): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_license.{$productLicense->getKey()}.update"],
+            abilities: ['product_license.*.update'],
             denyResponse: 'You do not have permission to update this product license.'
         );
     }
@@ -90,7 +90,7 @@ class ProductLicensePolicy
     public function delete(Authenticatable $authenticatable, ProductLicense $productLicense): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_license.{$productLicense->getKey()}.delete"],
+            abilities: ['product_license.*.delete'],
             denyResponse: 'You do not have permission to delete this product license.'
         );
     }
@@ -98,7 +98,7 @@ class ProductLicensePolicy
     public function restore(Authenticatable $authenticatable, ProductLicense $productLicense): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_license.{$productLicense->getKey()}.restore"],
+            abilities: ['product_license.*.restore'],
             denyResponse: 'You do not have permission to restore this product license.'
         );
     }
@@ -106,7 +106,7 @@ class ProductLicensePolicy
     public function forceDelete(Authenticatable $authenticatable, ProductLicense $productLicense): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product_license.{$productLicense->getKey()}.force-delete"],
+            abilities: ['product_license.*.force-delete'],
             denyResponse: 'You do not have permission to force delete this product license.'
         );
     }

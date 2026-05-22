@@ -66,7 +66,7 @@ class ChangeRequestPolicy
     public function view(Authenticatable $authenticatable, ChangeRequest $changeRequest): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['change_request.*.view', "change_request.{$changeRequest->id}.view"],
+            abilities: ['change_request.*.view'],
             denyResponse: 'You do not have permission to view this change request.'
         );
     }
@@ -82,7 +82,7 @@ class ChangeRequestPolicy
     public function update(Authenticatable $authenticatable, ChangeRequest $changeRequest): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['change_request.*.update', "change_request.{$changeRequest->id}.update"],
+            abilities: ['change_request.*.update'],
             denyResponse: 'You do not have permission to update this change request.'
         );
     }
@@ -90,7 +90,7 @@ class ChangeRequestPolicy
     public function delete(Authenticatable $authenticatable, ChangeRequest $changeRequest): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['change_request.*.delete', "change_request.{$changeRequest->id}.delete"],
+            abilities: ['change_request.*.delete'],
             denyResponse: 'You do not have permission to delete this change request.'
         );
     }
@@ -98,7 +98,7 @@ class ChangeRequestPolicy
     public function restore(Authenticatable $authenticatable, ChangeRequest $changeRequest): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['change_request.*.restore', "change_request.{$changeRequest->id}.restore"],
+            abilities: ['change_request.*.restore'],
             denyResponse: 'You do not have permission to restore this change request.'
         );
     }
@@ -106,7 +106,7 @@ class ChangeRequestPolicy
     public function forceDelete(Authenticatable $authenticatable, ChangeRequest $changeRequest): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['change_request.*.force-delete', "change_request.{$changeRequest->id}.force-delete"],
+            abilities: ['change_request.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this change request.'
         );
     }

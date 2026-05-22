@@ -53,7 +53,7 @@ class TeamPolicy
     public function view(Authenticatable $authenticatable, Team $team): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['team.*.view', "team.{$team->id}.view"],
+            abilities: ['team.*.view'],
             denyResponse: 'You do not have permission to view this team.'
         );
     }
@@ -77,7 +77,7 @@ class TeamPolicy
     public function delete(Authenticatable $authenticatable, Team $team): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['team.*.delete', "team.{$team->id}.delete"],
+            abilities: ['team.*.delete'],
             denyResponse: 'You do not have permission to delete this team.'
         );
     }
@@ -85,7 +85,7 @@ class TeamPolicy
     public function restore(Authenticatable $authenticatable, Team $team): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['team.*.restore', "team.{$team->id}.restore"],
+            abilities: ['team.*.restore'],
             denyResponse: 'You do not have permission to restore this team.'
         );
     }
@@ -93,7 +93,7 @@ class TeamPolicy
     public function forceDelete(Authenticatable $authenticatable, Team $team): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['team.*.force-delete', "team.{$team->id}.force-delete"],
+            abilities: ['team.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this team.'
         );
     }

@@ -53,7 +53,7 @@ class TaskPolicy
     public function view(Authenticatable $authenticatable, Task $task): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['task.*.view', "task.{$task->id}.view"],
+            abilities: ['task.*.view'],
             denyResponse: 'You do not have permission to view this task.'
         );
     }
@@ -81,7 +81,7 @@ class TaskPolicy
     public function delete(Authenticatable $authenticatable, Task $task): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['task.*.delete', "task.{$task->id}.delete"],
+            abilities: ['task.*.delete'],
             denyResponse: 'You do not have permission to delete this task.'
         );
     }
@@ -89,7 +89,7 @@ class TaskPolicy
     public function restore(Authenticatable $authenticatable, Task $task): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['task.*.restore', "task.{$task->id}.restore"],
+            abilities: ['task.*.restore'],
             denyResponse: 'You do not have permission to restore this task.'
         );
     }
@@ -97,7 +97,7 @@ class TaskPolicy
     public function forceDelete(Authenticatable $authenticatable, Task $task): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['task.*.force-delete', "task.{$task->id}.force-delete"],
+            abilities: ['task.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this task.'
         );
     }
