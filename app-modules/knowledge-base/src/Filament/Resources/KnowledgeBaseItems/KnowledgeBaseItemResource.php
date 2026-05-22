@@ -41,7 +41,6 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\EditKnow
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ListKnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ViewKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use BackedEnum;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
@@ -52,15 +51,13 @@ class KnowledgeBaseItemResource extends Resource
 {
     protected static ?string $model = KnowledgeBaseItem::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
 
     protected static ?int $navigationSort = 20;
 
     protected static ?string $breadcrumb = 'Knowledge Base';
 
     protected static ?string $modelLabel = 'knowledge base article';
-
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-book-open';
 
     protected static ?string $navigationLabel = 'Knowledge Base';
 

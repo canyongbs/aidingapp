@@ -48,7 +48,7 @@ class SystemUserResource extends Resource
 {
     protected static ?string $model = SystemUser::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'User Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Users';
 
     protected static ?string $navigationLabel = 'Programmatic Users';
 

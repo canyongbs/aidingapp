@@ -39,6 +39,10 @@ export const useFeatureStore = defineStore('feature', () => {
     const hasAssets = ref(false);
     const hasLicense = ref(false);
     const hasTasks = ref(false);
+    const isStatusEnabled = ref(false);
+    const isAdvisoryEnabled = ref(false);
+    const isAssetEnabled = ref(false);
+    const isLicenseEnabled = ref(false);
 
     async function setHasServiceManagement(value) {
         hasServiceManagement.value = value;
@@ -72,6 +76,38 @@ export const useFeatureStore = defineStore('feature', () => {
         return hasTasks.value;
     }
 
+    async function setIsStatusEnabled(value) {
+        isStatusEnabled.value = value;
+    }
+
+    async function getIsStatusEnabled() {
+        return isStatusEnabled.value;
+    }
+
+    async function setIsAdvisoryEnabled(value) {
+        isAdvisoryEnabled.value = value;
+    }
+
+    async function getIsAdvisoryEnabled() {
+        return isAdvisoryEnabled.value;
+    }
+
+    async function setIsAssetEnabled(value) {
+        isAssetEnabled.value = value;
+    }
+
+    async function getIsAssetEnabled() {
+        return isAssetEnabled.value;
+    }
+
+    async function setIsLicenseEnabled(value) {
+        isLicenseEnabled.value = value;
+    }
+
+    async function getIsLicenseEnabled() {
+        return isLicenseEnabled.value;
+    }
+
     return {
         hasServiceManagement,
         getHasServiceManagement,
@@ -85,5 +121,17 @@ export const useFeatureStore = defineStore('feature', () => {
         hasTasks,
         getHasTasks,
         setHasTasks,
+        isStatusEnabled,
+        getIsStatusEnabled,
+        setIsStatusEnabled,
+        isAdvisoryEnabled,
+        getIsAdvisoryEnabled,
+        setIsAdvisoryEnabled,
+        isAssetEnabled,
+        getIsAssetEnabled,
+        setIsAssetEnabled,
+        isLicenseEnabled,
+        getIsLicenseEnabled,
+        setIsLicenseEnabled,
     };
 });

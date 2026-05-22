@@ -43,7 +43,7 @@ use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use AidingApp\InAppCommunication\Models\Message;
 use AidingApp\InAppCommunication\Services\ConversationPresence;
-use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
 class SendMessage
@@ -57,7 +57,7 @@ class SendMessage
      */
     public function __invoke(
         Conversation $conversation,
-        User $author,
+        Model $author,
         array $content,
     ): Message {
         $presentUserIds = $this->presence->getPresentUserIds($conversation->getKey());
@@ -65,16 +65,14 @@ class SendMessage
         return DB::transaction(function () use ($conversation, $author, $content, $presentUserIds) {
             $message = new Message();
             $message->conversation_id = $conversation->getKey();
-            $message->author_type = app(User::class)->getMorphClass();
+            $message->author_type = $author->getMorphClass();
             $message->author_id = $author->getKey();
             $message->content = $content;
             $message->save();
 
-            $userType = app(User::class)->getMorphClass();
-
             ConversationParticipant::query()
                 ->where('conversation_id', $conversation->getKey())
-                ->where('participant_type', $userType)
+                ->where('participant_type', $author->getMorphClass())
                 ->where('participant_id', $author->getKey())
                 ->update([
                     'last_read_at' => now(),

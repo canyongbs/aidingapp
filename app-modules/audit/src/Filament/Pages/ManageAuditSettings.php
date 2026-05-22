@@ -39,7 +39,6 @@ namespace AidingApp\Audit\Filament\Pages;
 use AidingApp\Audit\Actions\Finders\AuditableModels;
 use AidingApp\Audit\Settings\AuditSettings;
 use App\Models\User;
-use BackedEnum;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\SettingsPage;
@@ -48,8 +47,6 @@ use UnitEnum;
 
 class ManageAuditSettings extends SettingsPage
 {
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-cog-6-tooth';
-
     protected static ?string $navigationLabel = 'Auditing';
 
     protected static ?int $navigationSort = 20;
@@ -58,7 +55,7 @@ class ManageAuditSettings extends SettingsPage
 
     protected static ?string $title = 'Auditing';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
+    protected static string | UnitEnum | null $navigationGroup = 'Global Admin';
 
     public static function canAccess(): bool
     {

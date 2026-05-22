@@ -36,6 +36,7 @@
 
 namespace AidingApp\InAppCommunication\Livewire;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Filament\Pages\UserChat;
 use AidingApp\InAppCommunication\Models\Conversation;
@@ -118,6 +119,7 @@ class ChatNotifications extends Component
      *     display_name: string,
      *     unread_count: int,
      *     avatar_url: ?string,
+     *     is_contact_conversation: bool,
      *     message_preview: ?string,
      *     author_name: ?string,
      *     created_at: ?string,
@@ -127,6 +129,7 @@ class ChatNotifications extends Component
     {
         $otherParticipant = null;
         $avatarUrl = null;
+        $isContactConversation = false;
 
         if ($conversation->type === ConversationType::Channel) {
             $displayName = $conversation->name ?? 'Unnamed Channel';
@@ -134,8 +137,15 @@ class ChatNotifications extends Component
             $otherParticipant = $conversation->conversationParticipants
                 ->first(fn (ConversationParticipant $participant) => $participant->participant_id !== $currentUser->getKey());
             $otherUser = $otherParticipant?->participant;
-            $displayName = $otherUser instanceof User ? $otherUser->name : 'Unknown User';
+
+            $displayName = match (true) {
+                $otherUser instanceof User => $otherUser->name,
+                $otherUser instanceof Contact => $otherUser->full_name,
+                default => 'Unknown User',
+            };
+
             $avatarUrl = $otherUser instanceof User ? Filament::getUserAvatarUrl($otherUser) : null;
+            $isContactConversation = $otherUser instanceof Contact;
         }
 
         $latestMessage = $conversation->latestMessage;
@@ -159,11 +169,12 @@ class ChatNotifications extends Component
 
         return [
             'id' => $conversation->getKey(),
-            'url' => UserChat::getUrl(['conversation' => $conversation]),
+            'url' => UserChat::getUrl(['conversation' => $conversation, 'tab' => $isContactConversation ? 'contacts' : null]),
             'type' => $conversation->type,
             'display_name' => $displayName,
             'unread_count' => $unreadCount,
             'avatar_url' => $avatarUrl,
+            'is_contact_conversation' => $isContactConversation,
             'message_preview' => $messagePreview,
             'author_name' => $latestMessage?->author instanceof User ? $latestMessage->author->name : null,
             'created_at' => $latestMessage?->created_at?->diffForHumans(),

@@ -38,7 +38,6 @@ namespace AidingApp\Theme\Filament\Pages;
 
 use AidingApp\Theme\Settings\ThemeSettings;
 use App\Models\User;
-use BackedEnum;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Toggle;
 use Filament\Pages\SettingsPage;
@@ -50,8 +49,6 @@ use UnitEnum;
 
 class ManageBrandConfigurationSettings extends SettingsPage
 {
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-paint-brush';
-
     protected static ?string $navigationLabel = 'Branding';
 
     protected static ?int $navigationSort = 30;
@@ -60,7 +57,7 @@ class ManageBrandConfigurationSettings extends SettingsPage
 
     protected static ?string $title = 'Branding';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
+    protected static string | UnitEnum | null $navigationGroup = 'Global Admin';
 
     public static function canAccess(): bool
     {

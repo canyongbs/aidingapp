@@ -55,13 +55,15 @@ class UploadFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'upload',
             'label' => $field->label,
-            'name' => $field->getKey(),
+            'name' => $field->id,
             ...($field->is_required ? ['validation' => 'required'] : []),
             'multiple' => $field->config['multiple'] ?? false,
             'accept' => $field->config['accept'] ?? '',
             'limit' => $field->config['limit'] ?? null,
             'size' => $field->config['size'] ?? null,
             'uploadUrl' => route('api.portal.service-request.request-upload-url'),
+
+            ...self::getDescriptionSectionsSchema($field),
         ];
     }
 

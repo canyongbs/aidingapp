@@ -38,22 +38,19 @@ namespace AidingApp\InAppCommunication\Filament\Pages;
 
 use App\Enums\Feature;
 use App\Models\User;
-use BackedEnum;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 class UserChat extends Page
 {
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-chat-bubble-oval-left-ellipsis';
-
     protected static ?string $navigationLabel = 'Live Chat';
 
     protected static ?string $title = 'Live Chat';
 
     protected static ?string $slug = 'live-chat';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Engagement';
+    protected static string | UnitEnum | null $navigationGroup = 'Live Chat';
 
     protected static ?int $navigationSort = 10;
 

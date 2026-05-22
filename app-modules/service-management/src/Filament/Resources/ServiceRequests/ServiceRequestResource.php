@@ -47,8 +47,8 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\Service
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
+use App\Features\TeamRenameFeature;
 use App\Models\User;
-use BackedEnum;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
@@ -60,9 +60,7 @@ class ServiceRequestResource extends Resource
 {
     protected static ?string $model = ServiceRequest::class;
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-briefcase';
-
-    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
 
     protected static ?int $navigationSort = 10;
 
@@ -88,20 +86,20 @@ class ServiceRequestResource extends Resource
         return parent::getGlobalSearchEloquentQuery()
             ->with(['status', 'priority.type', 'respondent'])
             ->when(! $user->isSuperAdmin(), function (Builder $query) use ($user) {
-                $userTeamId = $user->team?->getKey();
+                $userDepartmentId = $user->department?->getKey();
 
-                return $query->where(function (Builder $query) use ($userTeamId, $user) {
+                return $query->where(function (Builder $query) use ($userDepartmentId, $user) {
                     $query->whereHas('priority.type.managerUsers', function (Builder $query) use ($user) {
                         $query->where('users.id', $user->getKey());
                     })->orWhereHas('priority.type.auditorUsers', function (Builder $query) use ($user) {
                         $query->where('users.id', $user->getKey());
                     });
 
-                    if ($userTeamId) {
-                        $query->orWhereHas('priority.type.managerTeams', function (Builder $query) use ($userTeamId) {
-                            $query->where('teams.id', $userTeamId);
-                        })->orWhereHas('priority.type.auditorTeams', function (Builder $query) use ($userTeamId) {
-                            $query->where('teams.id', $userTeamId);
+                    if ($userDepartmentId) {
+                        $query->orWhereHas('priority.type.managerDepartments', function (Builder $query) use ($userDepartmentId) {
+                            $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), $userDepartmentId);
+                        })->orWhereHas('priority.type.auditorDepartments', function (Builder $query) use ($userDepartmentId) {
+                            $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), $userDepartmentId);
                         });
                     }
                 });

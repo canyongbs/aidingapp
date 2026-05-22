@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -42,21 +43,20 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 
 use function Tests\asSuperAdmin;
 
-test('individual assigner assigns to configured user via team manager', function () {
+test('individual assigner assigns to configured user via department manager', function () {
     asSuperAdmin();
 
     $user = User::factory()->create();
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()
-        ->hasAttached($team, relationship: 'managerTeams')
+        ->hasAttached($department, relationship: 'managerDepartments')
         ->state([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
             'assignment_type_individual_id' => $user->getKey(),

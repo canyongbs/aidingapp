@@ -37,14 +37,12 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Features\ServiceRequestAssignmentHistoryFeature;
 use App\Models\User;
 use App\Settings\DisplaySettings;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Livewire\Attributes\On;
 
 class AssignmentHistoryRelationManager extends RelationManager
@@ -52,12 +50,6 @@ class AssignmentHistoryRelationManager extends RelationManager
     protected static string $relationship = 'assignments';
 
     protected static ?string $title = 'History';
-
-    public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
-    {
-        return ServiceRequestAssignmentHistoryFeature::active()
-            && parent::canViewForRecord($ownerRecord, $pageClass);
-    }
 
     #[On('assignment-history-refresh')]
     public function onAssignmentHistoryRefresh(): void {}
@@ -72,18 +64,18 @@ class AssignmentHistoryRelationManager extends RelationManager
             }
 
             $jobTitle = $user->job_title;
-            $team = $user->team?->name;
+            $department = $user->department?->name;
 
-            if ($jobTitle && $team) {
-                return "{$jobTitle} ({$team})";
+            if ($jobTitle && $department) {
+                return "{$jobTitle} ({$department})";
             }
 
             if ($jobTitle) {
                 return $jobTitle;
             }
 
-            if ($team) {
-                return "({$team})";
+            if ($department) {
+                return "({$department})";
             }
 
             return null;
@@ -91,8 +83,8 @@ class AssignmentHistoryRelationManager extends RelationManager
 
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->with([
-                'user.team',
-                'assignedBy.team',
+                'user.department',
+                'assignedBy.department',
                 'serviceRequestStatus',
             ]))
             ->emptyStateHeading('No assignment history')

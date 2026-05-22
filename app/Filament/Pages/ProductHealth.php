@@ -44,6 +44,11 @@ use Spatie\Health\ResultStores\ResultStore;
 
 class ProductHealth extends HealthCheckResults
 {
+    public static function getNavigationIcon(): string
+    {
+        return '';
+    }
+
     public static function getNavigationLabel(): string
     {
         return 'Product Health';
@@ -56,7 +61,7 @@ class ProductHealth extends HealthCheckResults
 
     public static function getNavigationGroup(): ?string
     {
-        return 'Global Administration';
+        return 'Global Admin';
     }
 
     public static function getNavigationSort(): ?int

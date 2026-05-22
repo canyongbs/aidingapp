@@ -38,6 +38,7 @@ namespace AidingApp\Project\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Project\Database\Factories\ProjectFileFactory;
+use App\Models\Media;
 use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
@@ -59,7 +60,10 @@ class ProjectFile extends Model implements HasMedia, Auditable
 
     use HasUuids;
     use HasUserSaveTracking;
+
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
+
     use AuditableTrait;
     use Prunable;
 

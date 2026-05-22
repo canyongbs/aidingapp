@@ -34,11 +34,11 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -61,18 +61,18 @@ test('it can bulk delete service requests as super admin', function () {
     }
 });
 
-test('it can bulk delete service requests as a team manager', function () {
+test('it can bulk delete service requests as a department manager', function () {
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.delete');
 
-    $team = Team::factory()->create();
-    $user->team()->associate($team)->save();
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
     $user->refresh();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequestPriority = ServiceRequestPriority::factory()
         ->for($serviceRequestType, 'type')

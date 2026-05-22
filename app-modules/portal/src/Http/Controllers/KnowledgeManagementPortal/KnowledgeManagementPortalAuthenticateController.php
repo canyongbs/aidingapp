@@ -43,6 +43,7 @@ use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Http\Controllers\Controller;
+use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -71,6 +72,7 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
         Auth::guard('contact')->login($contact);
 
         $settings = resolve(PortalSettings::class);
+        $addons = resolve(LicenseSettings::class)->data?->addons;
 
         $token = $contact->createToken('knowledge-management-portal-access-token');
 
@@ -84,7 +86,11 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
             'success' => true,
             'token' => $token->plainTextToken,
             'user' => auth('contact')->user(),
-            'service_management_enabled' => $settings->knowledge_management_portal_service_management,
+            'service_management_enabled' => $settings->knowledge_management_portal_service_management && $addons?->serviceManagement,
+            'service_monitoring_enabled' => $addons?->serviceMonitoring,
+            'advisory_management_enabled' => $addons?->advisoryManagement,
+            'asset_management_enabled' => $addons?->assetManagement,
+            'license_management_enabled' => $addons?->licenseManagement,
             'has_assets' => auth()->guard('contact')->user()?->assetCheckIns()->exists() || auth()->guard('contact')->user()?->assetCheckOuts()->exists() ?: false,
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
             'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,

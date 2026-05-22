@@ -39,7 +39,6 @@ namespace App\Filament\Pages;
 use App\DataTransferObjects\LicenseManagement\LicenseData;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use BackedEnum;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -50,15 +49,13 @@ use UnitEnum;
 
 class ManageLicenseSettings extends SettingsPage
 {
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-key';
-
     protected static ?string $navigationLabel = 'Subscription';
 
     protected static ?int $navigationSort = 10;
 
     protected static string $settings = LicenseSettings::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Global Administration';
+    protected static string | UnitEnum | null $navigationGroup = 'Global Admin';
 
     public static function canAccess(): bool
     {

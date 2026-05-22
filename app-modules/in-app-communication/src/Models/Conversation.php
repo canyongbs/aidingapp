@@ -39,6 +39,7 @@ namespace AidingApp\InAppCommunication\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\InAppCommunication\Database\Factories\ConversationFactory;
 use AidingApp\InAppCommunication\Enums\ConversationType;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -104,5 +105,13 @@ class Conversation extends BaseModel implements Auditable
     public function latestMessage(): HasOne
     {
         return $this->hasOne(Message::class)->latestOfMany();
+    }
+
+    /**
+     * @return HasOne<ServiceRequestConversation, $this>
+     */
+    public function serviceRequestConversation(): HasOne
+    {
+        return $this->hasOne(ServiceRequestConversation::class);
     }
 }

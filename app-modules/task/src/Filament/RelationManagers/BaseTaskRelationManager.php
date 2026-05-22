@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Filament\Resources\TaskResource\Components\TaskViewAction;
 use AidingApp\Task\Models\Task;
+use App\Features\TeamRenameFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
@@ -88,12 +89,12 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
                             ->multiple()
                             ->exists('users', 'id')
                             ->visible(fn (Get $get) => $get('is_confidential')),
-                        Select::make('confidential_task_teams')
-                            ->relationship('confidentialAccessTeams', 'name')
+                        Select::make('confidential_task_departments')
+                            ->relationship('confidentialAccessDepartments', 'name')
                             ->preload()
-                            ->label('Teams')
+                            ->label('Departments')
                             ->multiple()
-                            ->exists('teams', 'id')
+                            ->exists(TeamRenameFeature::active() ? 'departments' : 'teams', 'id')
                             ->visible(fn (Get $get) => $get('is_confidential')),
                     ]),
                 TextInput::make('title')

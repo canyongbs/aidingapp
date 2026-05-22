@@ -73,6 +73,10 @@ abstract class FormFieldBlock extends RichContentCustomBlock
                 ->maxLength(255),
             Checkbox::make('isRequired')
                 ->label('Required'),
+            TextInput::make('description')
+                ->label('Field Description')
+                ->string()
+                ->maxLength(255),
             ...static::fields(),
         ]);
     }
@@ -92,22 +96,63 @@ abstract class FormFieldBlock extends RichContentCustomBlock
         return view(static::renderedView(), $config)->render();
     }
 
+    /**
+     * @return array<int, mixed>
+     */
     public static function fields(): array
     {
         return [];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     abstract public static function getFormKitSchema(SubmissibleField $field): array;
 
+    /**
+     * @return array<int, string>
+     */
     public static function getValidationRules(SubmissibleField $field): array
     {
         return [];
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public static function getSubmissionState(mixed $response): array
     {
         return [
             'response' => $response,
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected static function getDescriptionSectionsSchema(
+        SubmissibleField $field,
+        string $sectionKey = 'label'
+    ): array {
+        if (empty($field->config['description'])) {
+            return [];
+        }
+
+        return [
+            'sectionsSchema' => [
+                $sectionKey => [
+                    'children' => [
+                        '$label',
+                        [
+                            '$el' => 'div',
+                            'attrs' => [
+                                'class' => 'text-xs text-gray-500 mt-1 font-normal',
+                            ],
+                            'children' => $field->config['description'],
+                        ],
+                    ],
+                ],
+            ],
         ];
     }
 

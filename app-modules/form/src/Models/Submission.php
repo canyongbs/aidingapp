@@ -39,8 +39,10 @@ namespace AidingApp\Form\Models;
 use AidingApp\Contact\Models\Contact;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -52,13 +54,21 @@ abstract class Submission extends BaseModel
 {
     use SoftDeletes;
 
+    /**
+     * @return BelongsTo<Submissible, $this>
+     */
     abstract public function submissible(): BelongsTo;
 
+    /**
+     * @return BelongsToMany<SubmissibleField, $this>
+     */
     abstract public function fields(): BelongsToMany;
 
-    public function author(): BelongsTo
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function author(): MorphTo
     {
-        return $this
-            ->morphTo('author');
+        return $this->morphTo('author');
     }
 }

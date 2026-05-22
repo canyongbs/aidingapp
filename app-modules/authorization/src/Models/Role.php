@@ -42,7 +42,7 @@ use App\Models\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 use Spatie\Permission\Models\Role as SpatieRole;
@@ -60,10 +60,16 @@ class Role extends SpatieRole implements Auditable
     use AuditableTrait;
     use UsesTenantConnection;
 
-    public function users(): BelongsToMany
+    /**
+     * @return MorphToMany<Authenticatable, $this>
+     */
+    public function users(): MorphToMany
     {
+        /** @var class-string<Authenticatable> $userModel */
+        $userModel = getModelForGuard($this->attributes['guard_name'] ?? config('auth.defaults.guard'));
+
         return $this->morphedByMany(
-            getModelForGuard($this->attributes['guard_name'] ?? config('auth.defaults.guard')),
+            $userModel,
             'model',
             config('permission.table_names.model_has_roles'),
             app(PermissionRegistrar::class)->pivotRole,
@@ -71,16 +77,25 @@ class Role extends SpatieRole implements Auditable
         );
     }
 
+    /**
+     * @param Builder<self> $query
+     */
     public function scopeApi(Builder $query): void
     {
         $query->where('guard_name', 'api');
     }
 
+    /**
+     * @param Builder<self> $query
+     */
     public function scopeWeb(Builder $query): void
     {
         $query->where('guard_name', 'web');
     }
 
+    /**
+     * @param Builder<self> $query
+     */
     public function scopeSuperAdmin(Builder $query): void
     {
         $query

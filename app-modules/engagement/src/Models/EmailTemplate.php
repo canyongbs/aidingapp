@@ -39,6 +39,7 @@ namespace AidingApp\Engagement\Models;
 use AidingApp\Engagement\Database\Factories\EmailTemplateFactory;
 use AidingApp\Engagement\Observers\EmailTemplateObserver;
 use App\Models\BaseModel;
+use App\Models\Media;
 use App\Models\User;
 use Filament\Forms\Components\RichEditor\FileAttachmentProviders\SpatieMediaLibraryFileAttachmentProvider;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
@@ -56,7 +57,9 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 #[ObservedBy([EmailTemplateObserver::class])]
 class EmailTemplate extends BaseModel implements HasMedia, HasRichContent
 {
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
+
     use InteractsWithRichContent;
     use SoftDeletes;
 

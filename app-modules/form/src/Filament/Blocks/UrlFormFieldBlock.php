@@ -58,8 +58,10 @@ class UrlFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'url',
             'label' => $field->label,
-            'name' => $field->getKey(),
+            'name' => $field->id,
             ...($field->is_required ? ['validation' => 'required'] : []),
+
+            ...self::getDescriptionSectionsSchema($field),
         ];
     }
 

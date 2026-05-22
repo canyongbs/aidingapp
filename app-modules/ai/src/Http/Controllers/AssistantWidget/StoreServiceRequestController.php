@@ -42,7 +42,7 @@ use AidingApp\Form\Filament\Blocks\UploadFormFieldBlock;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
-use AidingApp\ServiceManagement\Actions\AssignServiceRequestToTeam;
+use AidingApp\ServiceManagement\Actions\AssignServiceRequestToDepartment;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -148,7 +148,7 @@ class StoreServiceRequestController extends Controller
 
             $this->handleAiResolution($data, $serviceRequest, $contact, $type, $updateUuids);
 
-            app(AssignServiceRequestToTeam::class)->execute($serviceRequest);
+            app(AssignServiceRequestToDepartment::class)->execute($serviceRequest);
 
             Bus::batch(
                 array_map(
@@ -182,6 +182,8 @@ class StoreServiceRequestController extends Controller
 
         return response()->json([
             'message' => 'Service request submitted successfully.',
+            'service_request_id' => $serviceRequest->getKey(),
+            'service_request_number' => $serviceRequest->service_request_number,
         ]);
     }
 

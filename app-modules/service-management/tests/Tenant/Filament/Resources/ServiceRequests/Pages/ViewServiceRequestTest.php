@@ -35,17 +35,18 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Department\Models\Department;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageAssignments;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageServiceRequestUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\Team\Models\Team;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -186,9 +187,9 @@ test('view service request page visible if the user is an auditor of the service
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -196,7 +197,7 @@ test('view service request page visible if the user is an auditor of the service
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->auditorTeams()->attach($team);
+    $serviceRequestType->auditorDepartments()->attach($department);
 
     $serviceRequestsWithAuditor = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
@@ -254,9 +255,9 @@ test('view service request page visible if the user is a manager of the service 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
 
-    $team = Team::factory()->create();
+    $department = Department::factory()->create();
 
-    $user->team()->associate($team)->save();
+    $user->department()->associate($department)->save();
 
     $user->refresh();
 
@@ -264,7 +265,7 @@ test('view service request page visible if the user is a manager of the service 
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerTeams()->attach($team);
+    $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
@@ -308,4 +309,13 @@ test('view service request page visible if the user is a direct managerUser of t
         'record' => $serviceRequestsWithManager->getRouteKey(),
     ])
         ->assertSuccessful();
+});
+
+test('ViewServiceRequest page displays the uploaded files section', function () {
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    asSuperAdmin()
+        ->get(ServiceRequestResource::getUrl('view', ['record' => $serviceRequest]))
+        ->assertSuccessful()
+        ->assertSeeLivewire(ServiceRequestMediaTable::class);
 });

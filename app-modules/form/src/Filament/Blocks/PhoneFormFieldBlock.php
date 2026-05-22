@@ -58,8 +58,10 @@ class PhoneFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'tel',
             'label' => $field->label,
-            'name' => $field->getKey(),
+            'name' => $field->id,
             ...($field->is_required ? ['validation' => 'required'] : []),
+
+            ...self::getDescriptionSectionsSchema($field),
         ];
     }
 

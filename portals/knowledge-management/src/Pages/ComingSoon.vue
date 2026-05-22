@@ -32,9 +32,9 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { HomeIcon } from '@heroicons/vue/24/outline';
+    import { HomeIcon } from '@heroicons/vue/16/solid';
     import { useRouter } from 'vue-router';
-    import BaseButton from '../Components/ui/BaseButton.vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     const router = useRouter();
     const goHome = () => {
         router.push({ name: 'home' });
@@ -50,7 +50,7 @@
                     <p class="text-lg text-gray-600">
                         This feature is currently under development and will be available soon.
                     </p>
-                    <BaseButton variant="neutral" size="md" :icon-left="HomeIcon" class="mt-4" @click="goHome">
+                    <BaseButton color="gray" size="md" :icon="HomeIcon" class="mt-4" @click="goHome">
                         Return to Home
                     </BaseButton>
                 </div>

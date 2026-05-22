@@ -45,7 +45,6 @@ use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Models\AssetLocation;
 use AidingApp\InventoryManagement\Models\AssetStatus;
 use AidingApp\InventoryManagement\Models\AssetType;
-use BackedEnum;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -63,9 +62,7 @@ class AssetResource extends Resource
 
     protected static ?string $navigationLabel = 'Asset Management';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-archive-box';
-
-    protected static string | UnitEnum | null $navigationGroup = 'Service Management';
+    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
 
     protected static ?int $navigationSort = 30;
 

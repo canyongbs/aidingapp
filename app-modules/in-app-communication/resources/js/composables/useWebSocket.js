@@ -46,7 +46,7 @@ export function useWebSocket() {
         return window.Echo;
     }
 
-    function subscribeToUserChannel(userId, { onNewConversation, onUnknownConversation } = {}) {
+    function subscribeToUserChannel(userId, { onNewConversation, onUnknownConversation, onQueueItem } = {}) {
         const echo = getEcho();
         if (!echo || userChannelSubscribed.value) {
             return;
@@ -95,6 +95,32 @@ export function useWebSocket() {
                 if (event.participant_id === userId && event.conversation) {
                     store.addConversation(event.conversation);
                     subscribeToConversation(event.conversation.id);
+                }
+            })
+            .listen('.typing.started', (event) => {
+                if (event.user_id !== store.currentUser.id) {
+                    store.setTyping(event.conversation_id, event.user_id, true, event.user_name);
+
+                    const timeoutKey = `${event.conversation_id}:${event.user_id}`;
+                    if (typingTimeouts.value[timeoutKey]) {
+                        clearTimeout(typingTimeouts.value[timeoutKey]);
+                    }
+
+                    typingTimeouts.value[timeoutKey] = setTimeout(() => {
+                        store.clearTyping(event.conversation_id, event.user_id);
+                        delete typingTimeouts.value[timeoutKey];
+                    }, 4000);
+                }
+            })
+            .listen('.service-request-conversation.ended', (event) => {
+                if (event.conversation_id) {
+                    unsubscribeFromConversation(event.conversation_id);
+                    store.removeConversation(event.conversation_id);
+                }
+            })
+            .listen('.service-request-conversation.queued', (event) => {
+                if (onQueueItem) {
+                    onQueueItem(event);
                 }
             });
 
@@ -154,7 +180,7 @@ export function useWebSocket() {
         if (conversationId) {
             echo.join(`conversation.${conversationId}`).listenForWhisper('typing', (event) => {
                 if (event.user_id !== store.currentUser.id) {
-                    store.setTyping(conversationId, event.user_id, true);
+                    store.setTyping(conversationId, event.user_id, true, event.user_name);
 
                     // Clear any existing timeout for this user
                     const timeoutKey = `${conversationId}:${event.user_id}`;

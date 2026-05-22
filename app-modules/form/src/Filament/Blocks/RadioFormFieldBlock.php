@@ -79,16 +79,17 @@ class RadioFormFieldBlock extends FormFieldBlock
     }
 
     /**
-     * @return array<string, string>
+     * @return array<string, mixed>
      */
     public static function getFormKitSchema(SubmissibleField $field): array
     {
         return [
             '$formkit' => 'radio',
             'label' => $field->label,
-            'name' => $field->getKey(),
+            'name' => $field->id,
             ...($field->is_required ? ['validation' => 'required'] : []),
             'options' => $field->config['options'],
+            ...self::getDescriptionSectionsSchema($field, 'legend'),
         ];
     }
 

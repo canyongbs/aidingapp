@@ -39,6 +39,7 @@ namespace AidingApp\Engagement\Filament\Schemas\Components;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementBatch;
+use App\Models\Media;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
@@ -50,7 +51,6 @@ use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Str;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class EngagementBodyInput
 {
@@ -94,8 +94,8 @@ class EngagementBodyInput
                                     fn (Builder $query) => $query->whereBelongsTo(auth()->user())
                                 )
                                 ->when(
-                                    $get('onlyMyTeamTemplates'),
-                                    fn (Builder $query) => $query->whereIn('user_id', auth()->user()->team->users->pluck('id'))
+                                    $get('onlyMyDepartmentTemplates'),
+                                    fn (Builder $query) => $query->whereIn('user_id', auth()->user()->department->users->pluck('id'))
                                 )
                                 ->where(new Expression('lower(name)'), 'like', "%{$search}%")
                                 ->orderBy('name')
@@ -108,8 +108,8 @@ class EngagementBodyInput
                         ->label('Only show my templates')
                         ->live()
                         ->afterStateUpdated(fn (Set $set) => $set('emailTemplate', null)),
-                    Checkbox::make('onlyMyTeamTemplates')
-                        ->label("Only show my team's templates")
+                    Checkbox::make('onlyMyDepartmentTemplates')
+                        ->label("Only show my department's templates")
                         ->live()
                         ->afterStateUpdated(fn (Set $set) => $set('emailTemplate', null)),
                 ])

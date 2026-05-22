@@ -33,13 +33,13 @@
 -->
 <script setup>
     import { computed, onMounted, ref } from 'vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
     import PageCard from '../Components/PageCard.vue';
     import Pagination from '../Components/Pagination.vue';
     import ServiceMonitorCard from '../Components/ServiceMonitorCard.vue';
-    import BaseButton from '../Components/ui/BaseButton.vue';
     import { consumer } from '../Services/Consumer.js';
 
     const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage', 'change-filter']);
@@ -173,7 +173,7 @@
             <EmptyState v-else>
                 <template #heading>There are no service monitors to display.</template>
                 <template #actions>
-                    <BaseButton as="router-link" :to="{ name: 'home' }" variant="neutral" size="md">
+                    <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md">
                         Return Home
                     </BaseButton>
                 </template>

@@ -107,6 +107,10 @@
     const userIsAuthenticated = ref(false);
     const requiresAuthentication = ref(false);
     const hasServiceManagement = ref(false);
+    const isStatusEnabled = ref(false);
+    const isAdvisoryEnabled = ref(false);
+    const isAssetEnabled = ref(false);
+    const isLicenseEnabled = ref(false);
     const hasAssets = ref(false);
     const hasLicense = ref(false);
     const hasTasks = ref(false);
@@ -278,7 +282,16 @@
 
                 const { setRequiresAuthentication } = useAuthStore();
 
-                const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
+                const {
+                    setHasServiceManagement,
+                    setHasAssets,
+                    setHasLicense,
+                    setHasTasks,
+                    setIsStatusEnabled,
+                    setIsAdvisoryEnabled,
+                    setIsAssetEnabled,
+                    setIsLicenseEnabled,
+                } = useFeatureStore();
 
                 portalPrimaryColor.value = response.data.primary_color;
 
@@ -313,6 +326,22 @@
 
                 setHasTasks(response.data.has_tasks).then(() => {
                     hasTasks.value = response.data.has_tasks;
+                });
+
+                setIsStatusEnabled(response.data.service_monitoring_enabled).then(() => {
+                    isStatusEnabled.value = response.data.service_monitoring_enabled;
+                });
+
+                setIsAdvisoryEnabled(response.data.advisory_management_enabled).then(() => {
+                    isAdvisoryEnabled.value = response.data.advisory_management_enabled;
+                });
+
+                setIsAssetEnabled(response.data.asset_management_enabled).then(() => {
+                    isAssetEnabled.value = response.data.asset_management_enabled;
+                });
+
+                setIsLicenseEnabled(response.data.license_management_enabled).then(() => {
+                    isLicenseEnabled.value = response.data.license_management_enabled;
                 });
 
                 authentication.value.requestUrl = response.data.authentication_url ?? null;
@@ -431,7 +460,16 @@
         const { setToken } = useTokenStore();
         const { setUser } = useAuthStore();
 
-        const { setHasServiceManagement, setHasAssets, setHasLicense, setHasTasks } = useFeatureStore();
+        const {
+            setHasServiceManagement,
+            setHasAssets,
+            setHasLicense,
+            setHasTasks,
+            setIsStatusEnabled,
+            setIsAdvisoryEnabled,
+            setIsAssetEnabled,
+            setIsLicenseEnabled,
+        } = useFeatureStore();
 
         if (authentication.value.isRequested) {
             let data = {
@@ -489,6 +527,22 @@
 
                         setHasTasks(response.data.has_tasks).then(() => {
                             hasTasks.value = response.data.has_tasks;
+                        });
+
+                        setIsStatusEnabled(response.data.service_monitoring_enabled).then(() => {
+                            isStatusEnabled.value = response.data.service_monitoring_enabled;
+                        });
+
+                        setIsAdvisoryEnabled(response.data.advisory_management_enabled).then(() => {
+                            isAdvisoryEnabled.value = response.data.advisory_management_enabled;
+                        });
+
+                        setIsAssetEnabled(response.data.asset_management_enabled).then(() => {
+                            isAssetEnabled.value = response.data.asset_management_enabled;
+                        });
+
+                        setIsLicenseEnabled(response.data.license_management_enabled).then(() => {
+                            isLicenseEnabled.value = response.data.license_management_enabled;
                         });
 
                         if (response.data.assistant_widget_loader_url && response.data.assistant_widget_config_url) {

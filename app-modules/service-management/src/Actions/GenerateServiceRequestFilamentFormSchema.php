@@ -176,53 +176,68 @@ class GenerateServiceRequestFilamentFormSchema
      */
     protected function getFilamentComponentFromBlock(string $blockClass, $field): Component
     {
+        $description = $field->config['description'] ?? null;
+
         // Map form field types to Filament components
         $component = match ($blockClass::type()) {
             'text_input' => TextInput::make($field->getKey())
                 ->label($field->label)
-                ->required($field->is_required),
+                ->required($field->is_required)
+                ->helperText($description),
             'textarea' => Textarea::make($field->getKey())
                 ->label($field->label)
-                ->required($field->is_required),
+                ->required($field->is_required)
+                ->helperText($description),
             'email', 'educatable_email' => TextInput::make($field->getKey())
                 ->label($field->label)
                 ->email()
-                ->required($field->is_required),
+                ->required($field->is_required)
+                ->helperText($description),
             'tel' => PhoneInput::make($field->getKey())
                 ->label($field->label)
-                ->required($field->is_required),
+                ->required($field->is_required)
+                ->helperText($description),
             'number' => TextInput::make($field->getKey())
                 ->label($field->label)
                 ->numeric()
-                ->required($field->is_required),
+                ->required($field->is_required)
+                ->helperText($description),
             'select' => Select::make($field->getKey())
                 ->label($field->label)
                 ->options($field->config['options'] ?? [])
                 ->placeholder($field->config['placeholder'] ?? null)
-                ->required($field->is_required),
+                ->required($field->is_required)
+                ->helperText($description),
             'radio' => Radio::make($field->getKey())
                 ->label($field->label)
                 ->options($field->config['options'] ?? [])
-                ->required($field->is_required),
+                ->required($field->is_required)
+                ->helperText($description),
             'checkbox' => Checkbox::make($field->getKey())
                 ->label($field->label)
-                ->required($field->is_required),
+                ->required($field->is_required)
+                ->helperText($description),
             'date' => DatePicker::make($field->getKey())
                 ->label($field->label)
-                ->required($field->is_required),
+                ->required($field->is_required)
+                ->helperText($description),
             'time' => TimePicker::make($field->getKey())
                 ->label($field->label)
-                ->required($field->is_required),
+                ->required($field->is_required)
+                ->helperText($description),
             'url' => TextInput::make($field->getKey())
                 ->label($field->label)
                 ->url()
-                ->required($field->is_required),
+                ->required($field->is_required)
+                ->helperText($description),
             'signature' => TextInput::make($field->getKey())
                 ->label($field->label)
-                ->required($field->is_required),
+                ->required($field->is_required)
+                ->helperText($description),
             default => TextInput::make($field->getKey())
                 ->label($field->label)
-                ->required($field->is_required),
+                ->required($field->is_required)
+                ->helperText($description),
         };
 
         return $component;

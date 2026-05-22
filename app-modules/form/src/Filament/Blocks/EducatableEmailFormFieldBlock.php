@@ -67,6 +67,10 @@ class EducatableEmailFormFieldBlock extends FormFieldBlock
             Checkbox::make('isRequired')
                 ->label('Required')
                 ->default(true),
+            FilamentTextInput::make('description')
+                ->label('Field Description')
+                ->string()
+                ->maxLength(255),
         ]);
     }
 
@@ -78,8 +82,9 @@ class EducatableEmailFormFieldBlock extends FormFieldBlock
         return [
             '$formkit' => 'email',
             'label' => $field->label,
-            'name' => $field->getKey(),
+            'name' => $field->id,
             'validation' => $field->is_required ? 'required|email' : 'email',
+            ...self::getDescriptionSectionsSchema($field),
         ];
     }
 
