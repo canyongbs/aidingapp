@@ -34,11 +34,11 @@
 <script setup>
     import { defineProps, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
+    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
     import AppLoading from '../Components/AppLoading.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import Page from '../Components/Page.vue';
     import Pagination from '../Components/Pagination.vue';
-    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
     import BaseDetailSection from '../Components/ui/BaseDetailSection.vue';
     import BaseInputError from '../Components/ui/BaseInputError.vue';
     import BaseList from '../Components/ui/BaseList.vue';
@@ -200,7 +200,7 @@
             if (fileInput.value) {
                 fileInput.value.value = null;
             }
-            
+
             updateFormKey.value++;
         } catch (error) {
             if (error.response && error.response.status === 422) {
@@ -311,12 +311,7 @@
 
         <!-- New update form -->
         <BaseDetailSection label="New Service Request Update">
-            <FormKit
-                :key="updateFormKey"
-                type="form"
-                :actions="false"
-                @submit="submitUpdate"
-            >
+            <FormKit :key="updateFormKey" type="form" :actions="false" @submit="submitUpdate">
                 <FormKit
                     type="textarea"
                     name="description"
@@ -381,11 +376,7 @@
                                         stroke="currentColor"
                                         stroke-width="2.5"
                                     >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M6 6l12 12M6 18L18 6"
-                                        />
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 6l12 12M6 18L18 6" />
                                     </svg>
                                 </button>
                             </li>
@@ -399,12 +390,7 @@
                         </p>
                     </div>
                 </div>
-                <FormKit
-                    type="submit"
-                    label="Submit Update"
-                    :disabled="isSubmitting"
-                    :classes="{ input: 'mt-2' }"
-                />
+                <FormKit type="submit" label="Submit Update" :disabled="isSubmitting" :classes="{ input: 'mt-2' }" />
             </FormKit>
         </BaseDetailSection>
 
