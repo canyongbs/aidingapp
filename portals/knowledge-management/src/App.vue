@@ -645,19 +645,21 @@
                     :app-name="appName"
                 />
 
-                <div v-if="errorLoading" class="text-center w-full">
-                    <h1 class="text-3xl font-bold text-red-500">Error Loading the Help Center</h1>
-                    <p class="text-lg text-red-500">Please try again later</p>
-                </div>
+                <main class="flex-1">
+                    <div v-if="errorLoading" class="text-center w-full">
+                        <h1 class="text-3xl font-bold text-red-500">Error Loading the Help Center</h1>
+                        <p class="text-lg text-red-500">Please try again later</p>
+                    </div>
 
-                <RouterView
-                    :search-url="searchUrl"
-                    :api-url="apiUrl"
-                    :categories="categories"
-                    :service-requests="serviceRequests"
-                    :tags="tags"
-                    v-else
-                />
+                    <RouterView
+                        :search-url="searchUrl"
+                        :api-url="apiUrl"
+                        :categories="categories"
+                        :service-requests="serviceRequests"
+                        :tags="tags"
+                        v-else
+                    />
+                </main>
 
                 <Footer :logo="footerLogo"></Footer>
             </div>
