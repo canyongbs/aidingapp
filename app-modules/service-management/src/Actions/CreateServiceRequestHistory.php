@@ -70,7 +70,9 @@ class CreateServiceRequestHistory implements ShouldQueue
         public array $original,
         public ?string $actorType = null,
         public ?string $actorId = null,
-    ) {}
+    ) {
+        $this->afterCommit = true;
+    }
 
     public function handle(): void
     {

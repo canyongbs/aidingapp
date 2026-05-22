@@ -44,6 +44,9 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @mixin IdeHelperServiceRequestConversation
+ */
 class ServiceRequestConversation extends BaseModel
 {
     use HasUuids;
