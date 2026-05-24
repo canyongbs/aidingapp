@@ -50,12 +50,13 @@ use AidingApp\Project\Models\Project;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class ProjectResource extends Resource
 {
     protected static ?string $model = Project::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Projects';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Projects;
 
     protected static ?int $navigationSort = 10;
 

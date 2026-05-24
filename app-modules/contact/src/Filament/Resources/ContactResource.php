@@ -52,12 +52,13 @@ use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class ContactResource extends Resource
 {
     protected static ?string $model = Contact::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Clients';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Clients;
 
     protected static ?int $navigationSort = 20;
 

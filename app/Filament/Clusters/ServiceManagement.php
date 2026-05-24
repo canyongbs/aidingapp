@@ -38,10 +38,11 @@ namespace App\Filament\Clusters;
 
 use Filament\Clusters\Cluster;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class ServiceManagement extends Cluster
 {
-    protected static string | UnitEnum | null $navigationGroup = 'Premium Features';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::PremiumFeatures;
 
     protected static ?int $navigationSort = 30;
 }

@@ -44,12 +44,13 @@ use AidingApp\Division\Filament\Resources\Divisions\RelationManagers\Departments
 use AidingApp\Division\Models\Division;
 use Filament\Resources\Resource;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class DivisionResource extends Resource
 {
     protected static ?string $model = Division::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Users';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
 
     protected static ?int $navigationSort = 50;
 

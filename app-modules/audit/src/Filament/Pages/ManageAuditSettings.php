@@ -44,6 +44,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Schema;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class ManageAuditSettings extends SettingsPage
 {
@@ -55,7 +56,7 @@ class ManageAuditSettings extends SettingsPage
 
     protected static ?string $title = 'Auditing';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Global Admin';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::GlobalAdmin;
 
     public static function canAccess(): bool
     {

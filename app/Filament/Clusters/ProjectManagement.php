@@ -38,10 +38,11 @@ namespace App\Filament\Clusters;
 
 use Filament\Clusters\Cluster;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class ProjectManagement extends Cluster
 {
-    protected static string | UnitEnum | null $navigationGroup = 'Settings';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Settings;
 
     protected static ?int $navigationSort = 100;
 }

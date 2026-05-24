@@ -54,6 +54,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class ServiceRequests extends Dashboard
 {
@@ -61,7 +62,7 @@ class ServiceRequests extends Dashboard
 
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::ServiceDesk;
 
     protected static ?string $navigationLabel = 'Service Requests';
 

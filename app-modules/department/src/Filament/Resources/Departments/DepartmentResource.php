@@ -44,12 +44,13 @@ use AidingApp\Department\Filament\Resources\Departments\RelationManagers\UsersRe
 use AidingApp\Department\Models\Department;
 use Filament\Resources\Resource;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class DepartmentResource extends Resource
 {
     protected static ?string $model = Department::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Users';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
 
     protected static ?int $navigationSort = 20;
 

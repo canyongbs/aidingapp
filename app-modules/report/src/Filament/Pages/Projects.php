@@ -42,12 +42,13 @@ use App\Models\User;
 use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class Projects extends Dashboard
 {
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Projects';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Projects;
 
     protected static ?string $navigationLabel = 'Projects';
 

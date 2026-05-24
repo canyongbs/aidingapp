@@ -43,12 +43,13 @@ use App\Filament\Resources\SystemUsers\RelationManagers\PermissionsRelationManag
 use App\Models\SystemUser;
 use Filament\Resources\Resource;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class SystemUserResource extends Resource
 {
     protected static ?string $model = SystemUser::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Users';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
 
     protected static ?string $navigationLabel = 'Programmatic Users';
 

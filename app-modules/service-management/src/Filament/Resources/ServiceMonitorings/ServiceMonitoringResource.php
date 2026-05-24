@@ -44,12 +44,13 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\Se
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use Filament\Resources\Resource;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class ServiceMonitoringResource extends Resource
 {
     protected static ?string $model = ServiceMonitoringTarget::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::ServiceDesk;
 
     protected static ?string $pluralModelLabel = 'service monitoring';
 

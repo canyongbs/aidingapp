@@ -41,12 +41,13 @@ use AidingApp\Alert\Models\Alert;
 use BackedEnum;
 use Filament\Resources\Resource;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class AlertResource extends Resource
 {
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-text';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Engagement Features';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::EngagementFeatures;
 
     protected static ?int $navigationSort = 5;
 

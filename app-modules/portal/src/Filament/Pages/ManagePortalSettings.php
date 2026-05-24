@@ -65,6 +65,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class ManagePortalSettings extends SettingsPage
 {
@@ -76,7 +77,7 @@ class ManagePortalSettings extends SettingsPage
 
     protected static ?string $title = 'Client Portal';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Settings';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Settings;
 
     public static function canAccess(): bool
     {

@@ -42,6 +42,7 @@ use AidingApp\Webhook\Models\InboundWebhook;
 use App\Models\User;
 use Filament\Resources\Resource;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class InboundWebhookResource extends Resource
 {
@@ -49,7 +50,7 @@ class InboundWebhookResource extends Resource
 
     protected static ?int $navigationSort = 40;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Global Admin';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::GlobalAdmin;
 
     public static function canAccess(): bool
     {

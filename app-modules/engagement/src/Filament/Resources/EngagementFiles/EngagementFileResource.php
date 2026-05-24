@@ -48,6 +48,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class EngagementFileResource extends Resource
 {
@@ -55,7 +56,7 @@ class EngagementFileResource extends Resource
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-duplicate';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Engagement Features';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::EngagementFeatures;
 
     protected static ?int $navigationSort = 7;
 

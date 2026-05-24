@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\Pages\ViewChan
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use Filament\Resources\Resource;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class ChangeRequestResource extends Resource
 {
@@ -50,7 +51,7 @@ class ChangeRequestResource extends Resource
 
     protected static ?string $navigationLabel = 'Change Management';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::ServiceDesk;
 
     protected static ?int $navigationSort = 70;
 

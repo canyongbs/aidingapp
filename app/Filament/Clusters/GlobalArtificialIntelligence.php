@@ -38,10 +38,11 @@ namespace App\Filament\Clusters;
 
 use Filament\Clusters\Cluster;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class GlobalArtificialIntelligence extends Cluster
 {
-    protected static string | UnitEnum | null $navigationGroup = 'Global Admin';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::GlobalAdmin;
 
     protected static ?string $title = 'Artificial Intelligence';
 

@@ -46,12 +46,13 @@ use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class KnowledgeBaseItemResource extends Resource
 {
     protected static ?string $model = KnowledgeBaseItem::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::ServiceDesk;
 
     protected static ?int $navigationSort = 20;
 

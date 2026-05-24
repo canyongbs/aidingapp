@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Models\Advisory;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class AdvisoryResource extends Resource
 {
@@ -56,7 +57,7 @@ class AdvisoryResource extends Resource
 
     protected static ?string $slug = 'advisories';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::ServiceDesk;
 
     protected static ?int $navigationSort = 60;
 

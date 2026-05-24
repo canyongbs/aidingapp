@@ -46,6 +46,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class ManageBrandConfigurationSettings extends SettingsPage
 {
@@ -57,7 +58,7 @@ class ManageBrandConfigurationSettings extends SettingsPage
 
     protected static ?string $title = 'Branding';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Global Admin';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::GlobalAdmin;
 
     public static function canAccess(): bool
     {

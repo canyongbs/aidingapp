@@ -41,6 +41,7 @@ use App\Models\User;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class UserChat extends Page
 {
@@ -50,7 +51,7 @@ class UserChat extends Page
 
     protected static ?string $slug = 'live-chat';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Live Chat';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::LiveChat;
 
     protected static ?int $navigationSort = 10;
 

@@ -47,12 +47,13 @@ use App\Models\User;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Users';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
 
     protected static ?int $navigationSort = 10;
 

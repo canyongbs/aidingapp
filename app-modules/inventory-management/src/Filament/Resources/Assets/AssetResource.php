@@ -54,6 +54,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Carbon;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 // TODO: Can delete this and all underlying pages once we fork
 class AssetResource extends Resource
@@ -62,7 +63,7 @@ class AssetResource extends Resource
 
     protected static ?string $navigationLabel = 'Asset Management';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::ServiceDesk;
 
     protected static ?int $navigationSort = 30;
 

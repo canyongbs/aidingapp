@@ -45,12 +45,13 @@ use App\Enums\Feature;
 use App\Filament\Clusters\ReportLibrary;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
+use App\Enums\NavigationGroup;
 
 class TaskManagement extends EngagementReport
 {
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Projects';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Projects;
 
     protected static ?string $navigationLabel = 'Tasks (Overview)';
 
