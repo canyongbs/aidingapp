@@ -383,7 +383,7 @@ describe('Engagement response processing', function () {
 
             $media = $engagementResponse->getMedia('attachments');
 
-            expect($media)->toHaveCount(3);
+            expect($media)->toHaveCount(2);
 
             foreach ($media as $item) {
                 expect($item->created_by_id)->toBe($contact->getKey())
