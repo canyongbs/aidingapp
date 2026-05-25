@@ -43,6 +43,7 @@ use App\Models\User;
 use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
+use BackedEnum;
 
 class ChangeManagement extends Dashboard
 {
@@ -60,6 +61,8 @@ class ChangeManagement extends Dashboard
 
     protected static ?int $navigationSort = 60;
 
+    protected static string | BackedEnum | null $navigationIcon = '';
+    
     public static function canAccess(): bool
     {
         if (! Gate::check(Feature::ChangeManagement->getGateName())) {

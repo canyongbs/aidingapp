@@ -46,6 +46,7 @@ use App\Enums\NavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
+use BackedEnum;
 
 class TaskManagement extends EngagementReport
 {
@@ -60,6 +61,8 @@ class TaskManagement extends EngagementReport
     protected static string $routePath = 'tasks';
 
     protected static ?int $navigationSort = 100;
+
+    protected static string | BackedEnum | null $navigationIcon = '';
 
     protected string $cacheTag = 'report-tasks';
 

@@ -53,6 +53,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
+use BackedEnum;
 
 class ServiceRequestFeedback extends Dashboard
 {
@@ -69,6 +70,8 @@ class ServiceRequestFeedback extends Dashboard
     protected static string $routePath = 'csat-nps';
 
     protected static ?int $navigationSort = 20;
+
+    protected static string | BackedEnum | null $navigationIcon = '';
 
     protected string $cacheTag = 'report-service-request-feedback';
 

@@ -46,6 +46,7 @@ use App\Models\User;
 use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
+use BackedEnum;
 
 class AssetManagement extends Dashboard
 {
@@ -60,6 +61,8 @@ class AssetManagement extends Dashboard
     protected static string $routePath = 'asset-management';
 
     protected static ?int $navigationSort = 40;
+
+    protected static string | BackedEnum | null $navigationIcon = '';
 
     protected string $cacheTag = 'report-asset-management';
 

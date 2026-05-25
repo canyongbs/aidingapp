@@ -43,6 +43,7 @@ use App\Models\User;
 use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
+use BackedEnum;
 
 class KnowledgeBase extends Dashboard
 {
@@ -60,6 +61,8 @@ class KnowledgeBase extends Dashboard
 
     protected static ?int $navigationSort = 30;
 
+    protected static string | BackedEnum | null $navigationIcon = '';
+    
     public static function canAccess(): bool
     {
         if (! Gate::check(Feature::KnowledgeManagement->getGateName())) {

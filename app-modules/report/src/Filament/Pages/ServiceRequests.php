@@ -55,6 +55,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
+use BackedEnum;
 
 class ServiceRequests extends Dashboard
 {
@@ -71,6 +72,8 @@ class ServiceRequests extends Dashboard
     protected static string $routePath = 'service-requests';
 
     protected static ?int $navigationSort = 10;
+
+    protected static string | BackedEnum | null $navigationIcon = '';
 
     protected string $cacheTag = 'report-service-requests';
 
