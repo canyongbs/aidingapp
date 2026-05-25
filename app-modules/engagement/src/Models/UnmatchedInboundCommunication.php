@@ -39,6 +39,7 @@ namespace AidingApp\Engagement\Models;
 use AidingApp\Engagement\Database\Factories\UnmatchedInboundCommunicationFactory;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use App\Models\BaseModel;
+use App\Models\Media;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -50,6 +51,8 @@ class UnmatchedInboundCommunication extends BaseModel implements HasMedia
 {
     /** @use HasFactory<UnmatchedInboundCommunicationFactory> */
     use HasFactory;
+
+    /** @use InteractsWithMedia<Media> */
     use InteractsWithMedia;
 
     protected $fillable = [
