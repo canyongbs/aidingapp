@@ -44,9 +44,9 @@ use AidingApp\Report\Filament\Widgets\TaskStats;
 use App\Enums\Feature;
 use App\Enums\NavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
+use BackedEnum;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
-use BackedEnum;
 
 class TaskManagement extends EngagementReport
 {

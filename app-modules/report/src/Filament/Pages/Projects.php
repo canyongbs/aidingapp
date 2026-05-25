@@ -40,10 +40,10 @@ use App\Enums\Feature;
 use App\Enums\NavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
+use BackedEnum;
 use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
-use BackedEnum;
 
 class Projects extends Dashboard
 {
@@ -62,7 +62,7 @@ class Projects extends Dashboard
     protected static ?int $navigationSort = 90;
 
     protected static string | BackedEnum | null $navigationIcon = '';
-    
+
     public static function canAccess(): bool
     {
         if (! Gate::check(Feature::ProjectManagement->getGateName())) {
