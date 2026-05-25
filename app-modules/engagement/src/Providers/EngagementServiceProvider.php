@@ -42,6 +42,7 @@ use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementBatch;
 use AidingApp\Engagement\Models\EngagementFile;
 use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
@@ -61,6 +62,7 @@ class EngagementServiceProvider extends ServiceProvider
             'engagement_file' => EngagementFile::class,
             'engagement_response' => EngagementResponse::class,
             'engagement' => Engagement::class,
+            'unmatched_inbound_communication' => UnmatchedInboundCommunication::class,
         ]);
     }
 }

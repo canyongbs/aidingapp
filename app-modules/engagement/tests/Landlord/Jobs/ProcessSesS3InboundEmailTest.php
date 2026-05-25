@@ -313,7 +313,11 @@ describe('Engagement response processing', function () {
 
             assert($engagementResponse instanceof EngagementResponse);
 
-            expect($engagementResponse->getMedia('attachments'))->toHaveCount(3)
+            $inlineAttachments = $engagementResponse->getMedia('inline_attachments');
+
+            expect($engagementResponse->getMedia('attachments'))->toHaveCount(2)
+                ->and($inlineAttachments)->toHaveCount(1)
+                ->and($inlineAttachments->first()->getCustomProperty('cid'))->toBe('image001.png@01DBEF93.EE8A3EB0')
                 ->and($engagementResponse->subject)->toBe('This is a test')
                 ->and($engagementResponse->sender_id)->toBe($contact->getKey())
                 ->and($engagementResponse->sender_type)->toBe($contact->getMorphClass())
@@ -1084,6 +1088,11 @@ describe('Service Request Type Service Request creation from inbound email', fun
             ->and($serviceRequest->priority->type->is($serviceRequestType))->toBeTrue()
             ->and($serviceRequest->getMedia('uploads'))->toHaveCount(2);
 
+        $inlineAttachments = $serviceRequest->getMedia('inline_attachments');
+
+        expect($inlineAttachments)->toHaveCount(1)
+            ->and($inlineAttachments->first()->getCustomProperty('cid'))->toBe('image001.png@01DBEF93.EE8A3EB0');
+
         $filesystem->assertMissing('s3_email');
     });
 
@@ -1375,6 +1384,11 @@ describe('Service request reply threading', function () {
             expect($media->first()->extension)->toBe('jpg');
             expect($media->last()->file_name)->toBe('SampleJPGImage_50kbmb.jpg');
             expect($media->last()->extension)->toBe('jpg');
+
+            $inlineAttachments = $serviceRequestUpdate->getMedia('inline_attachments');
+
+            expect($inlineAttachments)->toHaveCount(1)
+                ->and($inlineAttachments->first()->getCustomProperty('cid'))->toBe('image001.png@01DBEF93.EE8A3EB0');
         });
 
         $filesystem->assertMissing('s3_email');
@@ -1881,5 +1895,328 @@ describe('Service request reply threading', function () {
         ]);
 
         $filesystem->assertMissing('s3_email');
+    });
+});
+
+describe('Inline attachment processing', function () {
+    it('stores inline images in inline_attachments collection for EngagementResponse', function () {
+        $fakeStorage = Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        Event::listen(
+            MadeTenantCurrentEvent::class,
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+                Storage::set('s3', $fakeStorage);
+            }
+        );
+
+        assert($filesystem instanceof FilesystemAdapter);
+
+        $tenant = Tenant::query()->firstOrFail();
+
+        assert($tenant instanceof Tenant);
+
+        $contact = null;
+
+        $tenant->execute(function () use (&$contact) {
+            $contact = Contact::factory()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+            ]);
+        });
+
+        assert($contact instanceof Contact);
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email'));
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        /** @var ProcessSesS3InboundEmail $mock */
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        invade($mock)->emailFilePath = 's3_email';
+
+        $mock->handle();
+
+        $tenant->execute(function () {
+            $engagementResponse = EngagementResponse::first();
+
+            assert($engagementResponse instanceof EngagementResponse);
+
+            $inlineAttachments = $engagementResponse->getMedia('inline_attachments');
+
+            expect($engagementResponse->content)->not->toContain('cid:')
+                ->and($engagementResponse->getMedia('attachments'))->toHaveCount(0)
+                ->and($inlineAttachments)->toHaveCount(1)
+                ->and($inlineAttachments->first()->getCustomProperty('cid'))->toBe('3b6f9726-978c-4746-98b5-d49b79a34ba9')
+                ->and($inlineAttachments->first()->file_name)->toBe('Outlook-xx50f3o5.png');
+        });
+    });
+
+    it('stores inline images as media on UnmatchedInboundCommunication when no contact is found', function () {
+        $fakeStorage = Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        Event::listen(
+            MadeTenantCurrentEvent::class,
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+                Storage::set('s3', $fakeStorage);
+            }
+        );
+
+        assert($filesystem instanceof FilesystemAdapter);
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email'));
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        /** @var ProcessSesS3InboundEmail $mock */
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        invade($mock)->emailFilePath = 's3_email';
+
+        $mock->handle();
+
+        $tenant = Tenant::query()->firstOrFail();
+
+        $tenant->execute(function () {
+            $unmatchedCommunication = UnmatchedInboundCommunication::first();
+
+            assert($unmatchedCommunication instanceof UnmatchedInboundCommunication);
+
+            $inlineAttachments = $unmatchedCommunication->getMedia('inline_attachments');
+
+            expect($unmatchedCommunication->body)->not->toContain('cid:')
+                ->and($inlineAttachments)->toHaveCount(1)
+                ->and($inlineAttachments->first()->getCustomProperty('cid'))->toBe('3b6f9726-978c-4746-98b5-d49b79a34ba9')
+                ->and($inlineAttachments->first()->file_name)->toBe('Outlook-xx50f3o5.png');
+        });
+    });
+
+    it('stores inline images as media on UnmatchedInboundCommunication for legacy address emails', function () {
+        $fakeStorage = Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        Event::listen(
+            MadeTenantCurrentEvent::class,
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+                Storage::set('s3', $fakeStorage);
+            }
+        );
+
+        assert($filesystem instanceof FilesystemAdapter);
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_legacy'));
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        /** @var ProcessSesS3InboundEmail $mock */
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        invade($mock)->emailFilePath = 's3_email';
+
+        $mock->handle();
+
+        $tenant = Tenant::query()->firstOrFail();
+
+        $tenant->execute(function () {
+            $unmatchedCommunication = UnmatchedInboundCommunication::first();
+
+            assert($unmatchedCommunication instanceof UnmatchedInboundCommunication);
+
+            $inlineAttachments = $unmatchedCommunication->getMedia('inline_attachments');
+
+            expect($unmatchedCommunication->body)->not->toContain('cid:')
+                ->and($inlineAttachments)->toHaveCount(1)
+                ->and($inlineAttachments->first()->getCustomProperty('cid'))->toBe('3b6f9726-978c-4746-98b5-d49b79a34ba9')
+                ->and($inlineAttachments->first()->file_name)->toBe('Outlook-xx50f3o5.png');
+        });
+    });
+
+    it('stores inline images as media in inline_attachments on ServiceRequestUpdate', function () {
+        $fakeStorage = Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        $tenant = Tenant::query()->firstOrFail();
+
+        assert($tenant instanceof Tenant);
+
+        Event::listen(
+            MadeTenantCurrentEvent::class,
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+                Storage::set('s3', $fakeStorage);
+            }
+        );
+
+        assert($filesystem instanceof FilesystemAdapter);
+
+        [$contact, $serviceRequest] = $tenant->execute(function () {
+            $contact = Contact::factory()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+            ]);
+
+            $serviceRequest = ServiceRequest::factory()->create([
+                'respondent_id' => $contact->getKey(),
+            ]);
+
+            $serviceRequest->outboundEmailMessageIds()->create([
+                'message_id' => "{$serviceRequest->service_request_number}.1.1740000000000",
+            ]);
+
+            return [$contact, $serviceRequest];
+        });
+
+        $messageId = "{$serviceRequest->service_request_number}.1.1740000000000@mail.aiding.app";
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_sr_reply'));
+
+        $content = str_replace(
+            'SR-TEST123456.1.1740000000000@mail.aiding.app',
+            $messageId,
+            $content,
+        );
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        /** @var ProcessSesS3InboundEmail $mock */
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        invade($mock)->emailFilePath = 's3_email';
+
+        $mock->handle();
+
+        $tenant->execute(function () {
+            $serviceRequestUpdate = ServiceRequestUpdate::first();
+
+            assert($serviceRequestUpdate instanceof ServiceRequestUpdate);
+
+            $inlineAttachments = $serviceRequestUpdate->getMedia('inline_attachments');
+
+            expect($serviceRequestUpdate->getMedia('uploads'))->toHaveCount(0)
+                ->and($inlineAttachments)->toHaveCount(1)
+                ->and($inlineAttachments->first()->getCustomProperty('cid'))->toBe('3b6f9726-978c-4746-98b5-d49b79a34ba9')
+                ->and($inlineAttachments->first()->file_name)->toBe('Outlook-xx50f3o5.png');
+        });
+    });
+
+    it('stores inline images as media in inline_attachments on ServiceRequest created from email', function () {
+        $tenant = Tenant::query()->firstOrFail();
+
+        assert($tenant instanceof Tenant);
+
+        [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+            $contact = Contact::factory()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+            ]);
+
+            $serviceRequestType = ServiceRequestType::factory()
+                ->has(
+                    TenantServiceRequestTypeDomain::factory()->state([
+                        'domain' => 'help',
+                    ]),
+                    'domain'
+                )
+                ->has(
+                    ServiceRequestPriority::factory()->count(3),
+                    'priorities'
+                )
+                ->create([
+                    'is_email_automatic_creation_enabled' => true,
+                    'is_email_automatic_creation_contact_create_enabled' => false,
+                ]);
+
+            $assignedPriority = $serviceRequestType->priorities->first();
+
+            $serviceRequestType->update([
+                'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
+            ]);
+
+            return [$contact, $serviceRequestType, $assignedPriority];
+        });
+
+        $fakeStorage = Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        Event::listen(
+            MadeTenantCurrentEvent::class,
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+                Storage::set('s3', $fakeStorage);
+            }
+        );
+
+        assert($filesystem instanceof FilesystemAdapter);
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        /** @var ProcessSesS3InboundEmail $mock */
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        invade($mock)->emailFilePath = 's3_email';
+
+        $mock->handle();
+
+        $tenant->execute(function () {
+            $serviceRequest = ServiceRequest::first();
+
+            assert($serviceRequest instanceof ServiceRequest);
+
+            $inlineAttachments = $serviceRequest->getMedia('inline_attachments');
+
+            expect($serviceRequest->getMedia('uploads'))->toHaveCount(0)
+                ->and($inlineAttachments)->toHaveCount(1)
+                ->and($inlineAttachments->first()->getCustomProperty('cid'))->toBe('3b6f9726-978c-4746-98b5-d49b79a34ba9')
+                ->and($inlineAttachments->first()->file_name)->toBe('Outlook-xx50f3o5.png');
+        });
     });
 });

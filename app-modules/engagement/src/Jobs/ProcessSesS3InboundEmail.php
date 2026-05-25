@@ -258,13 +258,30 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 ->get();
 
             if ($contacts->isEmpty()) {
-                UnmatchedInboundCommunication::create([
+                $unmatchedCommunication = UnmatchedInboundCommunication::create([
                     'type' => EngagementResponseType::Email,
                     'subject' => $parser->getHeader('subject'),
                     'body' => $parser->getMessageBody('htmlEmbedded'),
                     'occurred_at' => $parser->getHeader('date'),
                     'sender' => $sender,
                 ]);
+
+                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($unmatchedCommunication) {
+                    try {
+                        if (
+                            ($attachment->getContentDisposition() === 'inline')
+                            && filled(trim($contentId = $attachment->getContentID(), '<>'))
+                        ) {
+                            $unmatchedCommunication->addMediaFromStream($attachment->getStream())
+                                ->withCustomProperties(['cid' => trim($contentId, '<>')])
+                                ->setName($attachment->getFilename())
+                                ->setFileName($attachment->getFilename())
+                                ->toMediaCollection('inline_attachments');
+                        }
+                    } catch (Throwable $throw) {
+                        report($throw);
+                    }
+                });
 
                 return;
             }
@@ -281,6 +298,19 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                 collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse, $contact) {
                     try {
+                        if (
+                            ($attachment->getContentDisposition() === 'inline')
+                            && filled(trim($contentId = $attachment->getContentID(), '<>'))
+                        ) {
+                            $engagementResponse->addMediaFromStream($attachment->getStream())
+                                ->withCustomProperties(['cid' => trim($contentId, '<>')])
+                                ->setName($attachment->getFilename())
+                                ->setFileName($attachment->getFilename())
+                                ->toMediaCollection('inline_attachments');
+
+                            return;
+                        }
+
                         $media = $engagementResponse->addMediaFromStream($attachment->getStream())
                             ->setName($attachment->getFilename())
                             ->setFileName($attachment->getFilename())
@@ -339,8 +369,21 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 'created_by_type' => $serviceRequest->respondent->getMorphClass(),
             ]);
 
-            foreach ($parser->getAttachments(false) as $attachment) {
+            foreach ($parser->getAttachments() as $attachment) {
                 try {
+                    if (
+                        ($attachment->getContentDisposition() === 'inline')
+                        && filled(trim($contentId = $attachment->getContentID(), '<>'))
+                    ) {
+                        $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
+                            ->withCustomProperties(['cid' => trim($contentId, '<>')])
+                            ->setName($attachment->getFilename())
+                            ->setFileName($attachment->getFilename())
+                            ->toMediaCollection('inline_attachments');
+
+                        continue;
+                    }
+
                     $media = $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
                         ->setName($attachment->getFilename())
                         ->setFileName($attachment->getFilename())
@@ -525,8 +568,21 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                 $serviceRequest->saveOrFail();
 
-                foreach ($parser->getAttachments(false) as $attachment) {
+                foreach ($parser->getAttachments() as $attachment) {
                     try {
+                        if (
+                            ($attachment->getContentDisposition() === 'inline')
+                            && filled(trim($contentId = $attachment->getContentID(), '<>'))
+                        ) {
+                            $serviceRequest->addMediaFromStream($attachment->getStream())
+                                ->withCustomProperties(['cid' => trim($contentId, '<>')])
+                                ->setName($attachment->getFilename())
+                                ->setFileName($attachment->getFilename())
+                                ->toMediaCollection('inline_attachments');
+
+                            continue;
+                        }
+
                         $media = $serviceRequest->addMediaFromStream($attachment->getStream())
                             ->setName($attachment->getFilename())
                             ->setFileName($attachment->getFilename())
@@ -547,13 +603,30 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
     protected function handleLegacyAddress(Tenant $tenant, Parser $parser, string $sender): void
     {
         $tenant->execute(function () use ($parser, $sender) {
-            UnmatchedInboundCommunication::create([
+            $unmatchedCommunication = UnmatchedInboundCommunication::create([
                 'type' => EngagementResponseType::Email,
                 'subject' => $parser->getHeader('subject'),
                 'body' => $parser->getMessageBody('htmlEmbedded'),
                 'occurred_at' => $parser->getHeader('date'),
                 'sender' => $sender,
             ]);
+
+            collect($parser->getAttachments())->each(function (Attachment $attachment) use ($unmatchedCommunication) {
+                try {
+                    if (
+                        ($attachment->getContentDisposition() === 'inline')
+                        && filled(trim($contentId = $attachment->getContentID(), '<>'))
+                    ) {
+                        $unmatchedCommunication->addMediaFromStream($attachment->getStream())
+                            ->withCustomProperties(['cid' => trim($contentId, '<>')])
+                            ->setName($attachment->getFilename())
+                            ->setFileName($attachment->getFilename())
+                            ->toMediaCollection('inline_attachments');
+                    }
+                } catch (Throwable $throw) {
+                    report($throw);
+                }
+            });
         });
     }
 

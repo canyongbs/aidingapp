@@ -96,6 +96,7 @@ class EngagementResponse extends BaseModel implements Auditable, ProvidesATimeli
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('attachments');
+        $this->addMediaCollection('inline_attachments');
     }
 
     /**
