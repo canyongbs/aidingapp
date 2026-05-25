@@ -271,12 +271,7 @@
                     :accept="acceptedMimeTypes"
                     :classes="{ outer: 'mb-4' }"
                 />
-                <FormKit
-                    type="submit"
-                    label="Submit Update"
-                    :disabled="isSubmitting"
-                    :classes="{ input: 'mt-2' }"
-                />
+                <FormKit type="submit" label="Submit Update" :disabled="isSubmitting" :classes="{ input: 'mt-2' }" />
             </FormKit>
         </BaseDetailSection>
 
@@ -308,7 +303,7 @@
                                     stroke="currentColor"
                                     stroke-width="2"
                                     viewBox="0 0 24 24"
-                               >
+                                >
                                     <path d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14" />
                                 </svg>
                                 <span class="truncate text-gray-900">{{ mediaItem.name }}</span>
@@ -333,4 +328,3 @@
         </BaseList>
     </Page>
 </template>
- 
