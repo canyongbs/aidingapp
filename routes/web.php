@@ -33,3 +33,8 @@
 
 </COPYRIGHT>
 */
+
+use Illuminate\Support\Facades\Route;
+
+Route::redirect('/docs/api', '/docs/api/v1')
+    ->name('docs.api');
