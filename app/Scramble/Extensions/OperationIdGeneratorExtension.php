@@ -50,6 +50,10 @@ class OperationIdGeneratorExtension extends OperationExtension
 
         $routeName = $routeInfo->route->getName();
 
+        if ($routeName === null) {
+            return;
+        }
+
         // Remove `api.v1.` or `api.v2.` prefix from the route name
         if (preg_match('/^api\.v\d+\./', $routeName)) {
             $routeName = preg_replace('/^api\.v\d+\./', '', $routeName);
