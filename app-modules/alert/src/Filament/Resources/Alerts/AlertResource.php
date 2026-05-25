@@ -38,10 +38,10 @@ namespace AidingApp\Alert\Filament\Resources\Alerts;
 
 use AidingApp\Alert\Filament\Resources\Alerts\Pages\ListAlerts;
 use AidingApp\Alert\Models\Alert;
+use App\Enums\NavigationGroup;
 use BackedEnum;
 use Filament\Resources\Resource;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class AlertResource extends Resource
 {

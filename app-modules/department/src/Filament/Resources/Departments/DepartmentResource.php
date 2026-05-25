@@ -42,9 +42,9 @@ use AidingApp\Department\Filament\Resources\Departments\Pages\ListDepartments;
 use AidingApp\Department\Filament\Resources\Departments\Pages\ViewDepartment;
 use AidingApp\Department\Filament\Resources\Departments\RelationManagers\UsersRelationManager;
 use AidingApp\Department\Models\Department;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class DepartmentResource extends Resource
 {

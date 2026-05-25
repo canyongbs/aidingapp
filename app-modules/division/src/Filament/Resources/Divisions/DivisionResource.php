@@ -42,9 +42,9 @@ use AidingApp\Division\Filament\Resources\Divisions\Pages\ListDivisions;
 use AidingApp\Division\Filament\Resources\Divisions\Pages\ViewDivision;
 use AidingApp\Division\Filament\Resources\Divisions\RelationManagers\DepartmentsRelationManager;
 use AidingApp\Division\Models\Division;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class DivisionResource extends Resource
 {

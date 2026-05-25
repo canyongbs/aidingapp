@@ -42,10 +42,10 @@ use AidingApp\Report\Filament\Widgets\RefreshWidget;
 use AidingApp\Report\Filament\Widgets\TaskCumulativeCountLineChart;
 use AidingApp\Report\Filament\Widgets\TaskStats;
 use App\Enums\Feature;
+use App\Enums\NavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class TaskManagement extends EngagementReport
 {

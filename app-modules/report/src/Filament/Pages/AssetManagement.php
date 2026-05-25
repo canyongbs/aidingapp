@@ -40,12 +40,12 @@ use AidingApp\Report\Filament\Widgets\AssetsTable;
 use AidingApp\Report\Filament\Widgets\AssetStats;
 use AidingApp\Report\Filament\Widgets\RefreshWidget;
 use App\Enums\Feature;
+use App\Enums\NavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class AssetManagement extends Dashboard
 {

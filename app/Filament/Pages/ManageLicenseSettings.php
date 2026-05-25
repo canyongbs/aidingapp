@@ -37,6 +37,7 @@
 namespace App\Filament\Pages;
 
 use App\DataTransferObjects\LicenseManagement\LicenseData;
+use App\Enums\NavigationGroup;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\DatePicker;
@@ -46,7 +47,6 @@ use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class ManageLicenseSettings extends SettingsPage
 {

@@ -38,12 +38,12 @@ namespace AidingApp\Report\Filament\Pages;
 
 use AidingApp\Report\Filament\Widgets\ServiceMonitorTable;
 use App\Enums\Feature;
+use App\Enums\NavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class ServiceMonitoring extends Dashboard
 {

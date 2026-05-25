@@ -42,10 +42,10 @@ use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ListAdvisori
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ManageAdvisoryUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ViewAdvisory;
 use AidingApp\ServiceManagement\Models\Advisory;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class AdvisoryResource extends Resource
 {

@@ -36,11 +36,9 @@
 
 namespace App\Enums;
 
-use BackedEnum;
 use Filament\Support\Contracts\Collapsible;
 use Filament\Support\Contracts\HasIcon;
 use Filament\Support\Contracts\HasLabel;
-use Illuminate\Contracts\Support\Htmlable;
 
 enum NavigationGroup implements HasLabel, HasIcon, Collapsible
 {
@@ -66,7 +64,7 @@ enum NavigationGroup implements HasLabel, HasIcon, Collapsible
 
     case GlobalAdmin;
 
-    public function getLabel(): string | Htmlable | null
+    public function getLabel(): string
     {
         return match ($this) {
             self::LiveChat => 'Live Chat',
@@ -83,7 +81,7 @@ enum NavigationGroup implements HasLabel, HasIcon, Collapsible
         };
     }
 
-    public function getIcon(): string | BackedEnum | Htmlable | null
+    public function getIcon(): string
     {
         return match ($this) {
             self::LiveChat => 'heroicon-o-chat-bubble-left-right',

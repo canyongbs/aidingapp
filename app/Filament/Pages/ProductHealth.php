@@ -93,6 +93,18 @@ class ProductHealth extends Page
         return $user->isSuperAdmin() && parent::canAccess();
     }
 
+    public function refresh(): void
+    {
+        Artisan::call(RunHealthChecksCommand::class);
+
+        $this->dispatch('refresh-component');
+
+        Notification::make()
+            ->title(__('filament-spatie-health::health.pages.health_check_results.notifications.results_refreshed'))
+            ->success()
+            ->send();
+    }
+
     protected function getActions(): array
     {
         return [
@@ -110,17 +122,5 @@ class ProductHealth extends Page
             'lastRanAt' => new Carbon($checkResults?->finishedAt),
             'checkResults' => $checkResults,
         ];
-    }
-
-    public function refresh(): void
-    {
-        Artisan::call(RunHealthChecksCommand::class);
-
-        $this->dispatch('refresh-component');
-
-        Notification::make()
-            ->title(__('filament-spatie-health::health.pages.health_check_results.notifications.results_refreshed'))
-            ->success()
-            ->send();
     }
 }

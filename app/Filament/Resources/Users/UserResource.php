@@ -36,6 +36,7 @@
 
 namespace App\Filament\Resources\Users;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\Pages\ListUsers;
@@ -47,7 +48,6 @@ use App\Models\User;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class UserResource extends Resource
 {

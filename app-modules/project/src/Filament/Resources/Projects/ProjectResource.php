@@ -47,10 +47,10 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ManagePipelines;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageTasks;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Models\Project;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class ProjectResource extends Resource
 {

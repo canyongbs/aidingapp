@@ -42,10 +42,10 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganiza
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ManageContacts;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ViewOrganization;
 use AidingApp\Contact\Models\Organization;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class OrganizationResource extends Resource
 {

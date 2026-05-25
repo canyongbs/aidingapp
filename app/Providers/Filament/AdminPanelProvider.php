@@ -51,7 +51,6 @@ use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
 use Filament\Forms\Components\Field;
 use Filament\Http\Middleware\Authenticate;
-use App\Enums\NavigationGroup;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Infolists\Components\Entry;

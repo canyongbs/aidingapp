@@ -42,9 +42,9 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\List
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\ViewServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class ServiceMonitoringResource extends Resource
 {

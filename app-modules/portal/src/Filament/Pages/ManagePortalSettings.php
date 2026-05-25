@@ -45,6 +45,7 @@ use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
+use App\Enums\NavigationGroup;
 use App\Models\User;
 use App\Rules\ValidUrl;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
@@ -65,7 +66,6 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class ManagePortalSettings extends SettingsPage
 {

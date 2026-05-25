@@ -48,11 +48,11 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactFile
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactTasks;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Models\Contact;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class ContactResource extends Resource
 {

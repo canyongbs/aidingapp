@@ -38,13 +38,13 @@ namespace AidingApp\Audit\Filament\Pages;
 
 use AidingApp\Audit\Actions\Finders\AuditableModels;
 use AidingApp\Audit\Settings\AuditSettings;
+use App\Enums\NavigationGroup;
 use App\Models\User;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Schema;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class ManageAuditSettings extends SettingsPage
 {

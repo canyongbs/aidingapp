@@ -37,6 +37,7 @@
 namespace AidingApp\Theme\Filament\Pages;
 
 use AidingApp\Theme\Settings\ThemeSettings;
+use App\Enums\NavigationGroup;
 use App\Models\User;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Toggle;
@@ -46,7 +47,6 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class ManageBrandConfigurationSettings extends SettingsPage
 {

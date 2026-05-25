@@ -41,9 +41,9 @@ use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\EditContract
 use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ListContracts;
 use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ViewContract;
 use AidingApp\ContractManagement\Models\Contract;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class ContractResource extends Resource
 {

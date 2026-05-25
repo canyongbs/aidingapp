@@ -41,12 +41,12 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\EditKnow
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ListKnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ViewKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class KnowledgeBaseItemResource extends Resource
 {

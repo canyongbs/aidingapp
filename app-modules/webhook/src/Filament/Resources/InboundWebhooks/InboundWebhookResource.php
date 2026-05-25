@@ -39,10 +39,10 @@ namespace AidingApp\Webhook\Filament\Resources\InboundWebhooks;
 use AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages\ListInboundWebhooks;
 use AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages\ViewInboundWebhook;
 use AidingApp\Webhook\Models\InboundWebhook;
+use App\Enums\NavigationGroup;
 use App\Models\User;
 use Filament\Resources\Resource;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class InboundWebhookResource extends Resource
 {

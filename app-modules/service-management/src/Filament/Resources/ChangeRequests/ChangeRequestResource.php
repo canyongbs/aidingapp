@@ -41,9 +41,9 @@ use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\Pages\EditChan
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\Pages\ListChangeRequests;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\Pages\ViewChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class ChangeRequestResource extends Resource
 {

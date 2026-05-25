@@ -45,6 +45,7 @@ use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Models\AssetLocation;
 use AidingApp\InventoryManagement\Models\AssetStatus;
 use AidingApp\InventoryManagement\Models\AssetType;
+use App\Enums\NavigationGroup;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -54,7 +55,6 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Carbon;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 // TODO: Can delete this and all underlying pages once we fork
 class AssetResource extends Resource

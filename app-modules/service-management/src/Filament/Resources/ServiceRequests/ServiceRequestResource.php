@@ -47,6 +47,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\Service
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
+use App\Enums\NavigationGroup;
 use App\Features\TeamRenameFeature;
 use App\Models\User;
 use Filament\Resources\Pages\Page;
@@ -55,7 +56,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class ServiceRequestResource extends Resource
 {

@@ -36,6 +36,7 @@
 
 namespace App\Filament\Resources\SystemUsers;
 
+use App\Enums\NavigationGroup;
 use App\Filament\Resources\SystemUsers\Pages\CreateSystemUser;
 use App\Filament\Resources\SystemUsers\Pages\EditSystemUser;
 use App\Filament\Resources\SystemUsers\Pages\ListSystemUsers;
@@ -43,7 +44,6 @@ use App\Filament\Resources\SystemUsers\RelationManagers\PermissionsRelationManag
 use App\Models\SystemUser;
 use Filament\Resources\Resource;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class SystemUserResource extends Resource
 {

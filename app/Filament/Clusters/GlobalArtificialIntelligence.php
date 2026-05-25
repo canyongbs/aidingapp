@@ -36,9 +36,9 @@
 
 namespace App\Filament\Clusters;
 
+use App\Enums\NavigationGroup;
 use Filament\Clusters\Cluster;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class GlobalArtificialIntelligence extends Cluster
 {

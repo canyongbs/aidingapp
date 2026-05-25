@@ -41,11 +41,11 @@ use AidingApp\Authorization\Filament\Resources\Roles\Pages\EditRole;
 use AidingApp\Authorization\Filament\Resources\Roles\Pages\ListRoles;
 use AidingApp\Authorization\Filament\Resources\Roles\Pages\ViewRole;
 use AidingApp\Authorization\Models\Role;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class RoleResource extends Resource
 {

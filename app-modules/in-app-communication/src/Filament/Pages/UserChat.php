@@ -37,11 +37,11 @@
 namespace AidingApp\InAppCommunication\Filament\Pages;
 
 use App\Enums\Feature;
+use App\Enums\NavigationGroup;
 use App\Models\User;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
-use App\Enums\NavigationGroup;
 
 class UserChat extends Page
 {
