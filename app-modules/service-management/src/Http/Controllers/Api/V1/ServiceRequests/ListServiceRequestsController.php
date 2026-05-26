@@ -35,8 +35,8 @@ class ListServiceRequestsController
         return QueryBuilder::for(ServiceRequest::class)
             ->allowedFilters(
                 AllowedFilter::exact('status', 'status_id'),
-                AllowedFilter::exact('assignee', 'assignedTo.user_id'),
-                AllowedFilter::exact('requestor', 'respondent.id'),
+                AllowedFilter::belongsTo('assignee', 'assignedTo.user'),
+                AllowedFilter::belongsTo('requestor', 'respondent'),
                 AllowedFilter::partial('title'),
             )
             ->allowedIncludes(
