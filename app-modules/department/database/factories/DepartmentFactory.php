@@ -37,7 +37,6 @@
 namespace AidingApp\Department\Database\Factories;
 
 use AidingApp\Department\Models\Department;
-use AidingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -51,12 +50,5 @@ class DepartmentFactory extends Factory
             'name' => $this->faker->unique()->sentence(),
             'description' => $this->faker->sentence(),
         ];
-    }
-
-    public function configure(): DepartmentFactory|Factory
-    {
-        return $this->afterMaking(function (Department $department) {
-            $department->division()->associate($this->faker->randomElement([Division::factory()->create(), null]));
-        });
     }
 }
