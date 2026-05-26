@@ -56,18 +56,18 @@ class ServiceRequestResource extends JsonResource
             'id' => $this->resource->id,
             'service_request_number' => $this->resource->service_request_number,
             'title' => $this->resource->title,
-            'status' => $this->whenLoaded('status', fn () => $this->resource->status ? [
+            'status' => [
                 'id' => $this->resource->status_id,
                 'name' => $this->resource->status?->name,
-            ] : null),
-            'priority' => $this->whenLoaded('priority', fn () => $this->resource->priority ? [
+            ],
+            'priority' => [
                 'id' => $this->resource->priority_id,
                 'name' => $this->resource->priority?->name,
-            ] : null),
-            'assignee' => $this->whenLoaded('assignedTo', fn () => $this->resource->assignedTo ? [
+            ],
+            'assignee' => $this->resource->assignedTo && $this->resource->assignedTo?->user ? [
                 'id' => $this->resource->assignedTo?->user_id,
                 'name' => $this->resource->assignedTo?->user?->name,
-            ] : null),
+            ] : null,
             'created_at' => $this->resource->created_at,
             'updated_at' => $this->resource->updated_at,
         ];

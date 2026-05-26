@@ -71,7 +71,6 @@ class ListServiceRequestsController
         Gate::authorize('viewAny', ServiceRequest::class);
 
         return QueryBuilder::for(ServiceRequest::class)
-            ->with(['status', 'priority', 'assignedTo.user', 'respondent'])
             ->allowedFilters(
                 AllowedFilter::belongsTo('status', 'status'),
                 AllowedFilter::belongsTo('assignee', 'assignedTo.user'),
