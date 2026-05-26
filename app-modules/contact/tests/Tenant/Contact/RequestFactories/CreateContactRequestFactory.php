@@ -48,7 +48,7 @@ class CreateContactRequestFactory extends RequestFactory
         $lastName = $this->faker->lastName();
 
         return [
-            'type_id' => ContactType::inRandomOrder()->first() ?? ContactType::factory()->create()->id,
+            'type_id' => ContactType::factory()->create()->id,
             'first_name' => $firstName,
             'last_name' => $lastName,
             'full_name' => "{$firstName} {$lastName}",

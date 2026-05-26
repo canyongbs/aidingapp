@@ -46,7 +46,7 @@ class EditServiceRequestRequestFactory extends RequestFactory
     public function definition(): array
     {
         return [
-            'division_id' => Division::inRandomOrder()->first()?->id ?? Division::factory()->create()->id,
+            'division_id' => Division::factory()->create()->id,
             'status_id' => ServiceRequestStatus::factory()->create()->id,
             'close_details' => $this->faker->sentence,
             'category' => fake()->randomElement(ServiceRequestCategory::cases()),
