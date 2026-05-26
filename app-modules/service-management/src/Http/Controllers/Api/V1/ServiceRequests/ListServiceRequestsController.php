@@ -41,7 +41,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Dedoc\Scramble\Attributes\Example;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
-use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedInclude;
@@ -50,6 +51,9 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class ListServiceRequestsController
 {
+    /**
+     * @response AnonymousResourceCollection<LengthAwarePaginator<ServiceRequestResource>>
+     */
     #[Group('Service Requests')]
     #[QueryParameter('filter[status]', description: 'Filter the results where the status ID matches the provided value.', type: 'string')]
     #[QueryParameter('filter[assignee]', description: 'Filter the results where the assignee ID matches the provided value.', type: 'string')]
@@ -62,7 +66,7 @@ class ListServiceRequestsController
         'service_request_number' => new Example('service_request_number'),
         'created_at' => new Example('created_at'),
     ])]
-    public function __invoke(Request $request)
+    public function __invoke(): AnonymousResourceCollection
     {
         Gate::authorize('viewAny', ServiceRequest::class);
 
