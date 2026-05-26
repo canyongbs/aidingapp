@@ -17,9 +17,9 @@ use Spatie\QueryBuilder\QueryBuilder;
 class ListServiceRequestsController
 {
     #[Group('Service Requests')]
-    #[QueryParameter('filter[status_id]', description: 'Filter the results where the status ID matches the provided value.', type: 'string')]
-    #[QueryParameter('filter[assignee_id]', description: 'Filter the results where the assignee ID matches the provided value.', type: 'string')]
-    #[QueryParameter('filter[respondent_id]', description: 'Filter the results where the respondent (contact) ID matches the provided value.', type: 'string')]
+    #[QueryParameter('filter[status]', description: 'Filter the results where the status ID matches the provided value.', type: 'string')]
+    #[QueryParameter('filter[assignee]', description: 'Filter the results where the assignee ID matches the provided value.', type: 'string')]
+    #[QueryParameter('filter[requestor]', description: 'Filter the results where the respondent (contact) ID matches the provided value.', type: 'string')]
     #[QueryParameter('filter[title]', description: 'Filter the results where the title matches the provided value.', type: 'string')]
     #[QueryParameter('page[number]', description: 'Control which page of service requests is returned in the response.', type: 'int', default: 1)]
     #[QueryParameter('page[size]', description: 'Control how many service requests are returned in the response.', type: 'int', default: 30)]
@@ -34,16 +34,16 @@ class ListServiceRequestsController
 
         return QueryBuilder::for(ServiceRequest::class)
             ->allowedFilters(
-                AllowedFilter::exact('status_id'),
-                AllowedFilter::exact('assignee_id', 'assignedTo.user_id'),
-                AllowedFilter::exact('respondent_id', 'respondent.user_id'),
+                AllowedFilter::exact('status', 'status_id'),
+                AllowedFilter::exact('assignee', 'assignedTo.user_id'),
+                AllowedFilter::exact('requestor', 'respondent.id'),
                 AllowedFilter::partial('title'),
             )
             ->allowedIncludes(
-                AllowedInclude::relationship('assignee_id', 'assignedTo.user'),
-                AllowedInclude::relationship('status_id', 'status'),
-                AllowedInclude::relationship('priority_id', 'priority'),
-                AllowedInclude::relationship('respondent_id', 'respondent'),
+                AllowedInclude::relationship('assignee', 'assignedTo.user'),
+                AllowedInclude::relationship('status', 'status'),
+                AllowedInclude::relationship('priority', 'priority'),
+                AllowedInclude::relationship('requestor', 'respondent'),
             )
             ->allowedSorts(
                 AllowedSort::field('title'),
