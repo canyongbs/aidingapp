@@ -36,6 +36,7 @@
 
 namespace AidingApp\Ai\Services;
 
+use AidingApp\Ai\Enums\AiReasoningEffort;
 use AidingApp\Ai\Models\AiMessage;
 use AidingApp\Ai\Models\Contracts\AiFile;
 use AidingApp\Ai\Services\Contracts\AiService;
@@ -61,7 +62,7 @@ class TestAiService implements AiService
      * @param array<AiFile> $files
      * @param array<string, mixed> $options
      */
-    public function stream(string $prompt, string $content, array $files = [], array $options = []): Closure
+    public function stream(string $prompt, string $content, array $files = [], array $options = [], ?AiReasoningEffort $reasoningEffort = null): Closure
     {
         throw new Exception('Plain text streaming is not supported by this service.');
     }
@@ -72,7 +73,7 @@ class TestAiService implements AiService
      * @param array<Tool> $tools
      * @param ?array<Message> $messages
      */
-    public function streamRaw(string $prompt, ?string $content = null, array $files = [], array $options = [], array $tools = [], ?array $messages = null): Closure
+    public function streamRaw(string $prompt, ?string $content = null, array $files = [], array $options = [], array $tools = [], ?array $messages = null, bool $hasImageGeneration = false, ?AiReasoningEffort $reasoningEffort = null): Closure
     {
         throw new Exception('Plain text streaming is not supported by this service.');
     }

@@ -34,38 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\IntegrationOpenAi\Services;
+namespace App\Queue;
 
-use AidingApp\Ai\Enums\AiReasoningEffort;
+use App\Models\Tenant;
+use Illuminate\Queue\BackgroundQueue;
+use Illuminate\Support\Facades\Concurrency;
+use Illuminate\Support\Facades\Queue;
 
-class OpenAiGpt5Service extends BaseOpenAiService
+class TenantAwareBackgroundQueue extends BackgroundQueue
 {
-    public function getApiKey(): string
+    /**
+     * @param string|object $job
+     * @param mixed $data
+     * @param string|null $queue
+     */
+    public function push($job, $data = '', $queue = null): void
     {
-        return $this->settings->open_ai_gpt_5_api_key ?? config('integration-open-ai.gpt_5_api_key');
-    }
+        $tenantId = Tenant::current()?->getKey();
+        $serializedJob = serialize($job);
 
-    public function getModel(): string
-    {
-        return $this->settings->open_ai_gpt_5_model ?? config('integration-open-ai.gpt_5_model');
-    }
+        Concurrency::driver('process')->defer(
+            function () use ($tenantId, $serializedJob, $data, $queue) {
+                if ($tenantId) {
+                    Tenant::find($tenantId)->makeCurrent();
+                }
 
-    public function getDeployment(): ?string
-    {
-        return $this->settings->open_ai_gpt_5_base_uri ?? config('integration-open-ai.gpt_5_base_uri');
-    }
+                $job = unserialize($serializedJob);
 
-    public function getImageGenerationDeployment(): ?string
-    {
-        return $this->settings->open_ai_gpt_5_image_generation_deployment;
-    }
-
-    protected function resolveReasoningEffortValue(AiReasoningEffort $effort): string
-    {
-        if ($effort === AiReasoningEffort::Minimal) {
-            return 'minimal';
-        }
-
-        return parent::resolveReasoningEffortValue($effort);
+                Queue::connection('sync')->push($job, $data, $queue);
+            }
+        );
     }
 }
