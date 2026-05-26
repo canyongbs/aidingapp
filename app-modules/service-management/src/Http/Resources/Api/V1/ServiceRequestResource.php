@@ -64,7 +64,7 @@ class ServiceRequestResource extends JsonResource
                 'id' => $this->resource->priority_id,
                 'name' => $this->resource->priority->name,
             ],
-            'assignee' => $this->resource->assignedTo && $this->resource->assignedTo->user ? [
+            'assignee' => $this->resource->assignedTo ? [
                 'id' => $this->resource->assignedTo->user_id,
                 'name' => $this->resource->assignedTo->user->name,
             ] : null,
