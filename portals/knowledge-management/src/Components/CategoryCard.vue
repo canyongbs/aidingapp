@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -32,34 +32,49 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import CategoryCard from './CategoryCard.vue';
-    import Subheading from './Subheading.vue';
+    import { ChevronRightIcon } from '@heroicons/vue/20/solid';
 
     defineProps({
-        categories: {
-            type: Object,
+        to: {
+            type: [Object, String],
             required: true,
         },
-        serviceRequests: {
-            type: Object,
+        icon: {
+            type: String,
+            default: null,
+        },
+        name: {
+            type: String,
             required: true,
+        },
+        description: {
+            type: String,
+            default: null,
         },
     });
 </script>
 
 <template>
-    <div class="flex flex-col gap-4">
-        <Subheading title="Article Categories" />
+    <router-link
+        :to="to"
+        class="group flex w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5 transition duration-75 hover:bg-gray-50"
+    >
+        <div
+            v-if="icon"
+            v-html="icon"
+            class="shrink-0 text-gray-400 [&>svg]:size-6 transition duration-75 group-hover:text-brand-500"
+            aria-hidden="true"
+        ></div>
 
-        <div class="grid gap-3 md:grid-cols-2">
-            <CategoryCard
-                v-for="category in categories"
-                :key="category.slug"
-                :to="{ name: 'view-category', params: { categorySlug: category.slug } }"
-                :icon="category.icon"
-                :name="category.name"
-                :description="category.description"
-            />
+        <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
+            <span class="text-sm font-medium text-gray-950">{{ name }}</span>
+            <p class="overflow-hidden text-sm text-pretty break-words text-gray-500">
+                {{ description }}
+            </p>
         </div>
-    </div>
+
+        <ChevronRightIcon
+            class="shrink-0 size-5 self-center text-gray-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
+        />
+    </router-link>
 </template>
