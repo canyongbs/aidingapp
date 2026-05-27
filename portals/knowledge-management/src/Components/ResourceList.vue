@@ -32,11 +32,62 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import LoadingSpinner from './LoadingSpinner.vue';
+    import Pagination from './Pagination.vue';
+
+    defineProps({
+        heading: {
+            type: String,
+            default: null,
+        },
+        currentPage: {
+            type: Number,
+            default: null,
+        },
+        lastPage: {
+            type: Number,
+            default: null,
+        },
+        fromItem: {
+            type: Number,
+            default: null,
+        },
+        toItem: {
+            type: Number,
+            default: null,
+        },
+        totalItems: {
+            type: Number,
+            default: null,
+        },
+    });
+
+    defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage']);
 </script>
 
 <template>
-    <div class="h-screen flex items-center justify-center">
-        <LoadingSpinner label="Loading feedback form..." />
+    <div class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
+        <div v-if="heading" class="border-b border-gray-200 px-6 py-3">
+            <h3 class="text-sm font-semibold text-gray-950">{{ heading }}</h3>
+        </div>
+
+        <ul role="list" class="divide-y">
+            <slot />
+        </ul>
+
+        <Pagination
+            v-if="lastPage !== null && totalItems !== null"
+            :currentPage="currentPage"
+            :lastPage="lastPage"
+            :fromArticle="fromItem"
+            :toArticle="toItem"
+            :totalArticles="totalItems"
+            @fetchNextPage="$emit('fetchNextPage')"
+            @fetchPreviousPage="$emit('fetchPreviousPage')"
+            @fetchPage="(page) => $emit('fetchPage', page)"
+        />
+
+        <div v-if="$slots.footer">
+            <slot name="footer" />
+        </div>
     </div>
 </template>

@@ -32,11 +32,12 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ChevronRightIcon } from '@heroicons/vue/20/solid';
     import { DocumentTextIcon, FolderIcon } from '@heroicons/vue/24/outline';
     import { defineProps } from 'vue';
     import Article from './Article.vue';
     import Pagination from './Pagination.vue';
+    import ResourceList from './ResourceList.vue';
+    import ResourceListItem from './ResourceListItem.vue';
     import SearchLoading from './SearchLoading.vue';
     import Subheading from './Subheading.vue';
     import Tabs from './Tabs.vue';
@@ -154,29 +155,18 @@
             </section>
         </div>
 
-        <div
+        <ResourceList
             v-if="searchResults.data.categories.length > 0"
-            class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5"
+            heading="Categories"
         >
-            <div class="px-6 py-3 border-b border-gray-200">
-                <h3 class="text-sm font-semibold text-gray-950">Categories</h3>
-            </div>
-
-            <ul role="list" class="divide-y">
-                <li v-for="category in searchResults.data.categories" :key="category.slug">
-                    <router-link
-                        :to="{ name: 'view-category', params: { categorySlug: category.slug } }"
-                        class="group flex items-center px-6 py-3 text-sm font-medium text-gray-700 transition duration-75 hover:bg-gray-50"
-                    >
-                        <span class="flex-1">{{ category.name }}</span>
-
-                        <ChevronRightIcon
-                            class="size-5 text-gray-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
-                        />
-                    </router-link>
-                </li>
-            </ul>
-        </div>
+            <ResourceListItem
+                v-for="category in searchResults.data.categories"
+                :key="category.slug"
+                :to="{ name: 'view-category', params: { categorySlug: category.slug } }"
+            >
+                <template #primary>{{ category.name }}</template>
+            </ResourceListItem>
+        </ResourceList>
 
         <section v-else class="rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5 px-6 py-4 flex items-start gap-x-4">
             <div class="flex size-12 items-center justify-center rounded-full bg-gray-100">

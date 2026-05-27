@@ -32,11 +32,40 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import LoadingSpinner from './LoadingSpinner.vue';
+    import { ChevronRightIcon } from '@heroicons/vue/20/solid';
+
+    defineProps({
+        to: {
+            type: [Object, String],
+            default: null,
+        },
+    });
 </script>
 
 <template>
-    <div class="h-screen flex items-center justify-center">
-        <LoadingSpinner label="Loading feedback form..." />
-    </div>
+    <li>
+        <component
+            :is="to ? 'router-link' : 'div'"
+            :to="to || undefined"
+            class="flex items-start px-6 py-3 text-sm text-gray-700 transition duration-75"
+            :class="to ? 'group hover:bg-gray-50' : ''"
+        >
+            <div class="flex-1 min-w-0">
+                <div class="flex items-baseline gap-2 flex-wrap">
+                    <span class="font-medium text-gray-950"><slot name="primary" /></span>
+                    <span v-if="$slots.secondary" class="text-gray-500 text-sm"><slot name="secondary" /></span>
+                </div>
+                <p v-if="$slots.description" class="mt-0.5 text-sm text-gray-500">
+                    <slot name="description" />
+                </p>
+            </div>
+            <div v-if="$slots.badge" class="ml-3 shrink-0 self-start pt-0.5">
+                <slot name="badge" />
+            </div>
+            <ChevronRightIcon
+                v-if="to"
+                class="ml-2 shrink-0 size-5 self-center text-gray-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
+            />
+        </component>
+    </li>
 </template>
