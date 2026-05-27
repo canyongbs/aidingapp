@@ -277,7 +277,14 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                                 ->setName($attachment->getFilename())
                                 ->setFileName($attachment->getFilename())
                                 ->toMediaCollection('inline_attachments');
+
+                            return;
                         }
+
+                        $unmatchedCommunication->addMediaFromStream($attachment->getStream())
+                            ->setName($attachment->getFilename())
+                            ->setFileName($attachment->getFilename())
+                            ->toMediaCollection('attachments');
                     } catch (Throwable $throw) {
                         report($throw);
                     }
@@ -622,7 +629,14 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                             ->setName($attachment->getFilename())
                             ->setFileName($attachment->getFilename())
                             ->toMediaCollection('inline_attachments');
+
+                        return;
                     }
+
+                    $unmatchedCommunication->addMediaFromStream($attachment->getStream())
+                        ->setName($attachment->getFilename())
+                        ->setFileName($attachment->getFilename())
+                        ->toMediaCollection('attachments');
                 } catch (Throwable $throw) {
                     report($throw);
                 }

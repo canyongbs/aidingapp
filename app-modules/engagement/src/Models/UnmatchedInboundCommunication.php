@@ -70,6 +70,7 @@ class UnmatchedInboundCommunication extends BaseModel implements HasMedia
 
     public function registerMediaCollections(): void
     {
+        $this->addMediaCollection('attachments');
         $this->addMediaCollection('inline_attachments');
     }
 }
