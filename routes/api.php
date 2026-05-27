@@ -42,8 +42,6 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
 
-Route::group(['prefix' => 'v1', 'as' => 'api.', 'middleware' => ['auth:sanctum']], function () {});
-
 Route::middleware([
     EnsureFrontendRequestsAreStateful::class,
     CheckOlympusKey::class,

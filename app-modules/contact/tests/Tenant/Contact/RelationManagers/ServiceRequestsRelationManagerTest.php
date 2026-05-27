@@ -144,6 +144,7 @@ test('Only service request types managed by user department are available in typ
     $user = User::factory()->create();
     $department = Department::factory()->create();
     $user->department()->associate($department)->save();
+    $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
 
     $managedType = ServiceRequestType::factory()->create();
@@ -179,6 +180,7 @@ test('Only service request types where user is a direct manager are available in
     $settings->save();
 
     $user = User::factory()->create();
+    $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
 
     $managedType = ServiceRequestType::factory()->create();
