@@ -62,24 +62,24 @@
         </template>
 
         <ResourceList v-if="serviceRequests?.length > 0" heading="Service Requests">
-                <ResourceListItem
-                    v-for="serviceRequest in serviceRequests"
-                    :key="serviceRequest.id"
-                    :to="{ name: 'view-service-request', params: { serviceRequestId: serviceRequest.id } }"
-                >
-                    <template #primary>{{ serviceRequest.title }}</template>
-                    <template #secondary>{{ serviceRequest.number }}</template>
-                    <template #description>Last Updated: {{ serviceRequest.updated_at }}</template>
-                    <template #badge>
-                        <span
-                            class="inline-flex items-center rounded px-2 py-0.5 text-xs font-bold text-white"
-                            :style="'background-color: rgb(' + serviceRequest.status_color + ')'"
-                        >
-                            {{ serviceRequest.status_name }}
-                        </span>
-                    </template>
-                </ResourceListItem>
-            </ResourceList>
+            <ResourceListItem
+                v-for="serviceRequest in serviceRequests"
+                :key="serviceRequest.id"
+                :to="{ name: 'view-service-request', params: { serviceRequestId: serviceRequest.id } }"
+            >
+                <template #primary>{{ serviceRequest.title }}</template>
+                <template #secondary>{{ serviceRequest.number }}</template>
+                <template #description>Last Updated: {{ serviceRequest.updated_at }}</template>
+                <template #badge>
+                    <span
+                        class="inline-flex items-center rounded px-2 py-0.5 text-xs font-bold text-white"
+                        :style="'background-color: rgb(' + serviceRequest.status_color + ')'"
+                    >
+                        {{ serviceRequest.status_name }}
+                    </span>
+                </template>
+            </ResourceListItem>
+        </ResourceList>
 
         <EmptyState v-else>
             <template #heading>There are no service requests to display.</template>
