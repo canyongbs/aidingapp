@@ -58,9 +58,9 @@ class ServiceRequestFactory extends Factory
             'service_request_number' => app(ServiceRequestNumberGenerator::class)->generate(),
             'title' => str($this->faker->words(asText: true))->headline()->toString(),
             'close_details' => $this->faker->sentence(),
-            'division_id' => Division::factory(),
-            'status_id' => ServiceRequestStatus::factory(),
-            'priority_id' => ServiceRequestPriority::factory(),
+            'division_id' => Division::inRandomOrder()->first()->id ?? Division::factory(),
+            'status_id' => ServiceRequestStatus::inRandomOrder()->first() ?? ServiceRequestStatus::factory(),
+            'priority_id' => ServiceRequestPriority::inRandomOrder()->first() ?? ServiceRequestPriority::factory(),
             'category' => $this->faker->randomElement(ServiceRequestCategory::cases()),
             'created_by_id' => User::factory(),
         ];

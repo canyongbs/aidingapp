@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListSer
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 
@@ -52,10 +51,7 @@ use function Tests\asSuperAdmin;
 test('it can add updates to multiple service requests as super admin', function () {
     asSuperAdmin();
 
-    $openStatus = ServiceRequestStatus::factory()->open()->create();
-
     $serviceRequests = ServiceRequest::factory()
-        ->state(['status_id' => $openStatus->getKey()])
         ->count(10)
         ->create();
 
@@ -87,8 +83,6 @@ test('it can add updates to multiple service requests for user directly assigned
 
     $serviceRequestType->managerUsers()->attach($user);
 
-    $openStatus = ServiceRequestStatus::factory()->open()->create();
-
     $serviceRequests = ServiceRequest::factory()
         ->has(
             factory: ServiceRequestAssignment::factory()
@@ -98,7 +92,6 @@ test('it can add updates to multiple service requests for user directly assigned
             relationship: 'assignments'
         )
         ->state([
-            'status_id' => $openStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -142,8 +135,6 @@ test('it can add updates to multiple service requests for user belonging to a ma
 
     $serviceRequestType->managerDepartments()->attach($department);
 
-    $openStatus = ServiceRequestStatus::factory()->open()->create();
-
     $serviceRequests = ServiceRequest::factory()
         ->has(
             factory: ServiceRequestAssignment::factory()
@@ -153,7 +144,6 @@ test('it can add updates to multiple service requests for user belonging to a ma
             relationship: 'assignments'
         )
         ->state([
-            'status_id' => $openStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),

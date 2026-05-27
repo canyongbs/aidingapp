@@ -54,8 +54,8 @@ class KnowledgeBaseItemFactory extends Factory
             'title' => $this->faker->sentence(),
             'article_details' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->paragraph()]]]]],
             'notes' => $this->faker->paragraph(),
-            'status_id' => KnowledgeBaseStatus::factory(),
-            'category_id' => KnowledgeBaseCategory::factory(),
+            'status_id' => KnowledgeBaseStatus::inRandomOrder()->first() ?? KnowledgeBaseStatus::factory(),
+            'category_id' => KnowledgeBaseCategory::inRandomOrder()->first() ?? KnowledgeBaseCategory::factory(),
         ];
     }
 

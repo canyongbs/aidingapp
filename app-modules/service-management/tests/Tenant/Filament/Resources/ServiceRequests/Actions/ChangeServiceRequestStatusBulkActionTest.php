@@ -50,11 +50,9 @@ use function Tests\asSuperAdmin;
 test('it can change status of multiple service requests as super admin', function () {
     asSuperAdmin();
 
-    $initialStatus = ServiceRequestStatus::factory()->open()->create();
     $newStatus = ServiceRequestStatus::factory()->open()->create();
 
     $serviceRequests = ServiceRequest::factory()
-        ->state(['status_id' => $initialStatus->getKey()])
         ->count(3)
         ->create();
 
@@ -79,12 +77,10 @@ test('it can change status of multiple service requests for user directly assign
 
     $serviceRequestType->managerUsers()->attach($user);
 
-    $initialStatus = ServiceRequestStatus::factory()->open()->create();
     $newStatus = ServiceRequestStatus::factory()->open()->create();
 
     $serviceRequests = ServiceRequest::factory()
         ->state([
-            'status_id' => $initialStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -122,12 +118,10 @@ test('it can change status of multiple service requests for user belonging to a 
 
     $serviceRequestType->managerDepartments()->attach($department);
 
-    $initialStatus = ServiceRequestStatus::factory()->open()->create();
     $newStatus = ServiceRequestStatus::factory()->open()->create();
 
     $serviceRequests = ServiceRequest::factory()
         ->state([
-            'status_id' => $initialStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
