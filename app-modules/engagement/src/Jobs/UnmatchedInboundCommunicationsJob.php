@@ -68,13 +68,21 @@ class UnmatchedInboundCommunicationsJob implements ShouldQueue
 
         if ($contacts->isNotEmpty()) {
             $contacts->each(function (Contact $contact) use ($communication) {
-                $contact->engagementResponses()
+                $engagementResponse = $contact->engagementResponses()
                     ->create([
                         'subject' => $communication->subject,
                         'content' => $communication->body,
                         'sent_at' => $communication->occurred_at,
                         'type' => EngagementResponseType::Email,
                     ]);
+
+                foreach ($communication->getMedia('inline_attachments') as $media) {
+                    $media->copy($engagementResponse, 'inline_attachments');
+                }
+
+                foreach ($communication->getMedia('attachments') as $media) {
+                    $media->copy($engagementResponse, 'attachments');
+                }
             });
             $communication->delete();
 
