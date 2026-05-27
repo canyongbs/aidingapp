@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Http\Resources\Api\V1\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
 
 class ViewServiceRequestController
@@ -48,7 +49,7 @@ class ViewServiceRequestController
      * @response ServiceRequestResource
      */
     #[Group('Service Requests')]
-    public function __invoke(Request $request, ServiceRequest $serviceRequest): ServiceRequestResource
+    public function __invoke(Request $request, ServiceRequest $serviceRequest): JsonResource
     {
         Gate::authorize('viewAny', ServiceRequest::class);
         Gate::authorize('view', $serviceRequest);
