@@ -32,7 +32,6 @@
 </COPYRIGHT>
 */
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
-@import '../../../../vendor/canyongbs/filament-tiptap-editor/resources/css/plugin.css';
 @import 'tippy.js/dist/tippy.css';
 
 @config '../../../../tailwind.config.js';
