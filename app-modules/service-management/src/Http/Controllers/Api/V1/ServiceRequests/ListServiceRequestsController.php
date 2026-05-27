@@ -77,12 +77,6 @@ class ListServiceRequestsController
                 AllowedFilter::belongsTo('requestor', 'respondent'),
                 AllowedFilter::partial('title'),
             )
-            ->allowedIncludes(
-                AllowedInclude::relationship('assignee', 'assignedTo.user'),
-                AllowedInclude::relationship('status', 'status'),
-                AllowedInclude::relationship('priority', 'priority'),
-                AllowedInclude::relationship('requestor', 'respondent'),
-            )
             ->allowedSorts(
                 AllowedSort::field('title'),
                 AllowedSort::field('service_request_number'),
