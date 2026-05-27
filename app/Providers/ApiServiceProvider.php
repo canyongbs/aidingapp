@@ -89,7 +89,7 @@ class ApiServiceProvider extends ServiceProvider
             ->withDocumentTransformers(function (OpenApi $openApi) {
                 $openApi->secure(
                     SecurityScheme::http('bearer')
-                        ->setDescription('You can issue a bearer token by visiting the "User Management > Programmatic Users" section of the app, and creating a new programmatic user. Once created, you will be able to see a generated API key for the user.'),
+                        ->setDescription('You can issue a bearer token by visiting the "Users > Programmatic Users" section of the app, and creating a new programmatic user. Once created, you will be able to see a generated API key for the user.'),
                 );
             });
     }
