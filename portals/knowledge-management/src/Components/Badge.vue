@@ -32,17 +32,10 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps } from 'vue';
-    import Badge from './Badge.vue';
-
     defineProps({
-        tags: {
-            type: Array,
+        value: {
+            type: String,
             required: true,
-        },
-        featured: {
-            type: Boolean,
-            default: false,
         },
         variant: {
             type: String,
@@ -52,8 +45,12 @@
 </script>
 
 <template>
-    <div class="flex flex-wrap gap-2">
-        <Badge v-if="featured" value="Featured" :variant="variant" />
-        <Badge v-for="tag in tags" :key="tag.id" :value="tag.name" :variant="variant" />
-    </div>
+    <span
+        class="inline-flex min-w-6 items-center justify-center gap-x-1 truncate rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset"
+        :class="
+            variant === 'hero' ? 'bg-white/15 text-white/90 ring-white/30' : 'bg-gray-50 text-gray-600 ring-gray-600/10'
+        "
+    >
+        {{ value }}
+    </span>
 </template>
