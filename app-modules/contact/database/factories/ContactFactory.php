@@ -53,7 +53,7 @@ class ContactFactory extends Factory
         $address3 = $this->faker->optional()->words(asText: true);
 
         return [
-          'type_id' => ContactType::inRandomOrder()->first() ?? ContactType::factory(),
+            'type_id' => ContactType::inRandomOrder()->first() ?? ContactType::factory(),
             'first_name' => $firstName,
             'last_name' => $lastName,
             'full_name' => "{$firstName} {$lastName}",
