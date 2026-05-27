@@ -67,7 +67,7 @@ class AssetStatusPolicy
     public function view(Authenticatable $authenticatable, AssetStatus $assetStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_status.*.view', "asset_status.{$assetStatus->id}.view"],
+            abilities: ['asset_status.*.view'],
             denyResponse: 'You do not have permission to view this asset status.'
         );
     }
@@ -83,7 +83,7 @@ class AssetStatusPolicy
     public function update(Authenticatable $authenticatable, AssetStatus $assetStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_status.*.update', "asset_status.{$assetStatus->id}.update"],
+            abilities: ['asset_status.*.update'],
             denyResponse: 'You do not have permission to update this asset status.'
         );
     }
@@ -91,7 +91,7 @@ class AssetStatusPolicy
     public function delete(Authenticatable $authenticatable, AssetStatus $assetStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_status.*.delete', "asset_status.{$assetStatus->id}.delete"],
+            abilities: ['asset_status.*.delete'],
             denyResponse: 'You do not have permission to delete this asset status.'
         );
     }
@@ -99,7 +99,7 @@ class AssetStatusPolicy
     public function restore(Authenticatable $authenticatable, AssetStatus $assetStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_status.*.restore', "asset_status.{$assetStatus->id}.restore"],
+            abilities: ['asset_status.*.restore'],
             denyResponse: 'You do not have permission to restore this asset status.'
         );
     }
@@ -107,7 +107,7 @@ class AssetStatusPolicy
     public function forceDelete(Authenticatable $authenticatable, AssetStatus $assetStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_status.*.force-delete', "asset_status.{$assetStatus->id}.force-delete"],
+            abilities: ['asset_status.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this asset status.'
         );
     }

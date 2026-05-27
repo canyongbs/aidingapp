@@ -53,7 +53,7 @@ class AlertPolicy
     public function view(Authenticatable $authenticatable, Alert $alert): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['alert.*.view', "alert.{$alert->id}.view"],
+            abilities: ['alert.*.view'],
             denyResponse: 'You do not have permission to view this alert.'
         );
     }
@@ -69,7 +69,7 @@ class AlertPolicy
     public function update(Authenticatable $authenticatable, Alert $alert): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['alert.*.update', "alert.{$alert->id}.update"],
+            abilities: ['alert.*.update'],
             denyResponse: 'You do not have permission to update this alert.'
         );
     }
@@ -77,7 +77,7 @@ class AlertPolicy
     public function delete(Authenticatable $authenticatable, Alert $alert): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['alert.*.delete', "alert.{$alert->id}.delete"],
+            abilities: ['alert.*.delete'],
             denyResponse: 'You do not have permission to delete this alert.'
         );
     }
@@ -85,7 +85,7 @@ class AlertPolicy
     public function restore(Authenticatable $authenticatable, Alert $alert): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['alert.*.restore', "alert.{$alert->id}.restore"],
+            abilities: ['alert.*.restore'],
             denyResponse: 'You do not have permission to restore this alert.'
         );
     }
@@ -93,7 +93,7 @@ class AlertPolicy
     public function forceDelete(Authenticatable $authenticatable, Alert $alert): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['alert.*.force-delete', "alert.{$alert->id}.force-delete"],
+            abilities: ['alert.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this alert.'
         );
     }

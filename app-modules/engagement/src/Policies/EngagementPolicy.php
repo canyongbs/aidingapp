@@ -53,7 +53,7 @@ class EngagementPolicy
     public function view(Authenticatable $authenticatable, Engagement $engagement): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['engagement.*.view', "engagement.{$engagement->id}.view"],
+            abilities: ['engagement.*.view'],
             denyResponse: 'You do not have permission to view this engagement.'
         );
     }
@@ -73,7 +73,7 @@ class EngagementPolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ['engagement.*.update', "engagement.{$engagement->id}.update"],
+            abilities: ['engagement.*.update'],
             denyResponse: 'You do not have permission to update this engagement.'
         );
     }
@@ -85,7 +85,7 @@ class EngagementPolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ['engagement.*.delete', "engagement.{$engagement->id}.delete"],
+            abilities: ['engagement.*.delete'],
             denyResponse: 'You do not have permission to delete this engagement.'
         );
     }
@@ -93,7 +93,7 @@ class EngagementPolicy
     public function restore(Authenticatable $authenticatable, Engagement $engagement): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['engagement.*.restore', "engagement.{$engagement->id}.restore"],
+            abilities: ['engagement.*.restore'],
             denyResponse: 'You do not have permission to restore this engagement.'
         );
     }
@@ -105,7 +105,7 @@ class EngagementPolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ['engagement.*.force-delete', "engagement.{$engagement->id}.force-delete"],
+            abilities: ['engagement.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this engagement.'
         );
     }

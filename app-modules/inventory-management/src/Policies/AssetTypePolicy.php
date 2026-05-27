@@ -67,7 +67,7 @@ class AssetTypePolicy
     public function view(Authenticatable $authenticatable, AssetType $assetType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_type.*.view', "asset_type.{$assetType->id}.view"],
+            abilities: ['asset_type.*.view'],
             denyResponse: 'You do not have permission to view this asset type.'
         );
     }
@@ -83,7 +83,7 @@ class AssetTypePolicy
     public function update(Authenticatable $authenticatable, AssetType $assetType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_type.*.update', "asset_type.{$assetType->id}.update"],
+            abilities: ['asset_type.*.update'],
             denyResponse: 'You do not have permission to update this asset type.'
         );
     }
@@ -91,7 +91,7 @@ class AssetTypePolicy
     public function delete(Authenticatable $authenticatable, AssetType $assetType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_type.*.delete', "asset_type.{$assetType->id}.delete"],
+            abilities: ['asset_type.*.delete'],
             denyResponse: 'You do not have permission to delete this asset type.'
         );
     }
@@ -99,7 +99,7 @@ class AssetTypePolicy
     public function restore(Authenticatable $authenticatable, AssetType $assetType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_type.*.restore', "asset_type.{$assetType->id}.restore"],
+            abilities: ['asset_type.*.restore'],
             denyResponse: 'You do not have permission to restore this asset type.'
         );
     }
@@ -107,7 +107,7 @@ class AssetTypePolicy
     public function forceDelete(Authenticatable $authenticatable, AssetType $assetType): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_type.*.force-delete', "asset_type.{$assetType->id}.force-delete"],
+            abilities: ['asset_type.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this asset type.'
         );
     }

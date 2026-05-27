@@ -66,7 +66,7 @@ class KnowledgeBaseItemPolicy
     public function view(Authenticatable $authenticatable, KnowledgeBaseItem $knowledgeBaseItem): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_item.*.view', "knowledge_base_item.{$knowledgeBaseItem->id}.view"],
+            abilities: ['knowledge_base_item.*.view'],
             denyResponse: 'You do not have permissions to view this knowledge base item.'
         );
     }
@@ -82,7 +82,7 @@ class KnowledgeBaseItemPolicy
     public function update(Authenticatable $authenticatable, KnowledgeBaseItem $knowledgeBaseItem): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_item.*.update', "knowledge_base_item.{$knowledgeBaseItem->id}.update"],
+            abilities: ['knowledge_base_item.*.update'],
             denyResponse: 'You do not have permissions to update this knowledge base item.'
         );
     }
@@ -90,7 +90,7 @@ class KnowledgeBaseItemPolicy
     public function delete(Authenticatable $authenticatable, KnowledgeBaseItem $knowledgeBaseItem): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_item.*.delete', "knowledge_base_item.{$knowledgeBaseItem->id}.delete"],
+            abilities: ['knowledge_base_item.*.delete'],
             denyResponse: 'You do not have permissions to delete this knowledge base item.'
         );
     }
@@ -98,7 +98,7 @@ class KnowledgeBaseItemPolicy
     public function restore(Authenticatable $authenticatable, KnowledgeBaseItem $knowledgeBaseItem): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_item.*.restore', "knowledge_base_item.{$knowledgeBaseItem->id}.restore"],
+            abilities: ['knowledge_base_item.*.restore'],
             denyResponse: 'You do not have permissions to restore this knowledge base item.'
         );
     }
@@ -106,7 +106,7 @@ class KnowledgeBaseItemPolicy
     public function forceDelete(Authenticatable $authenticatable, KnowledgeBaseItem $knowledgeBaseItem): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['knowledge_base_item.*.force-delete', "knowledge_base_item.{$knowledgeBaseItem->id}.force-delete"],
+            abilities: ['knowledge_base_item.*.force-delete'],
             denyResponse: 'You do not have permissions to force delete this knowledge base item.'
         );
     }

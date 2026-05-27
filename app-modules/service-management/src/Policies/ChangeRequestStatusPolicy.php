@@ -66,7 +66,7 @@ class ChangeRequestStatusPolicy
     public function view(Authenticatable $authenticatable, ChangeRequestStatus $changeRequestStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['change_request_status.*.view', "change_request_status.{$changeRequestStatus->id}.view"],
+            abilities: ['change_request_status.*.view'],
             denyResponse: 'You do not have permission to view this change request status.'
         );
     }
@@ -82,7 +82,7 @@ class ChangeRequestStatusPolicy
     public function update(Authenticatable $authenticatable, ChangeRequestStatus $changeRequestStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['change_request_status.*.update', "change_request_status.{$changeRequestStatus->id}.update"],
+            abilities: ['change_request_status.*.update'],
             denyResponse: 'You do not have permission to update this change request status.'
         );
     }
@@ -90,7 +90,7 @@ class ChangeRequestStatusPolicy
     public function delete(Authenticatable $authenticatable, ChangeRequestStatus $changeRequestStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['change_request_status.*.delete', "change_request_status.{$changeRequestStatus->id}.delete"],
+            abilities: ['change_request_status.*.delete'],
             denyResponse: 'You do not have permission to delete this change request status.'
         );
     }
@@ -98,7 +98,7 @@ class ChangeRequestStatusPolicy
     public function restore(Authenticatable $authenticatable, ChangeRequestStatus $changeRequestStatus): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['change_request_status.*.restore', "change_request_status.{$changeRequestStatus->id}.restore"],
+            abilities: ['change_request_status.*.restore'],
             denyResponse: 'You do not have permission to restore this change request status.'
         );
     }
@@ -110,7 +110,7 @@ class ChangeRequestStatusPolicy
         }
 
         return $authenticatable->canOrElse(
-            abilities: ['change_request_status.*.force-delete', "change_request_status.{$changeRequestStatus->id}.force-delete"],
+            abilities: ['change_request_status.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this change request status.'
         );
     }
