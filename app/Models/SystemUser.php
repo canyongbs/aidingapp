@@ -49,12 +49,13 @@ use OwenIt\Auditing\Contracts\Auditable;
  */
 class SystemUser extends Authenticatable implements Auditable
 {
-    /**@use HasFactory<SystemUserFactory> */
-    use HasFactory;
     use SoftDeletes;
     use HasUuids;
     use AuditableTrait;
     use HasApiTokens;
+
+    /** @use HasFactory<SystemUserFactory> */
+    use HasFactory;
 
     protected $fillable = [
         'name',
