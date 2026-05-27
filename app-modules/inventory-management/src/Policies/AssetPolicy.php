@@ -67,7 +67,7 @@ class AssetPolicy
     public function view(Authenticatable $authenticatable, Asset $asset): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset.*.view', "asset.{$asset->id}.view"],
+            abilities: ['asset.*.view'],
             denyResponse: 'You do not have permission to view this asset.'
         );
     }
@@ -83,7 +83,7 @@ class AssetPolicy
     public function update(Authenticatable $authenticatable, Asset $asset): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset.*.update', "asset.{$asset->id}.update"],
+            abilities: ['asset.*.update'],
             denyResponse: 'You do not have permission to update this asset.'
         );
     }
@@ -91,7 +91,7 @@ class AssetPolicy
     public function delete(Authenticatable $authenticatable, Asset $asset): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset.*.delete', "asset.{$asset->id}.delete"],
+            abilities: ['asset.*.delete'],
             denyResponse: 'You do not have permission to delete this asset.'
         );
     }
@@ -99,7 +99,7 @@ class AssetPolicy
     public function restore(Authenticatable $authenticatable, Asset $asset): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset.*.restore', "asset.{$asset->id}.restore"],
+            abilities: ['asset.*.restore'],
             denyResponse: 'You do not have permission to restore this asset.'
         );
     }
@@ -107,7 +107,7 @@ class AssetPolicy
     public function forceDelete(Authenticatable $authenticatable, Asset $asset): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset.*.force-delete', "asset.{$asset->id}.force-delete"],
+            abilities: ['asset.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this asset.'
         );
     }

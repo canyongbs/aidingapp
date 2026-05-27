@@ -113,6 +113,8 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
     public function registerMediaCollections(): void
     {
+        $this->addMediaCollection('inline_attachments');
+
         $this->mediaCollections[] = UploadsMediaCollection::create()
             ->maxFileSizeInMB(10)
             ->maxNumberOfFiles(6)

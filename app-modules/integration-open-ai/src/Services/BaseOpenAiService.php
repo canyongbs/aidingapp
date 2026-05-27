@@ -111,6 +111,9 @@ abstract class BaseOpenAiService implements AiService
                 ])
                 ->withProviderOptions([
                     'truncation' => 'auto',
+                    'reasoning' => [
+                        'effort' => $this->resolveReasoningEffortValue(AiReasoningEffort::Minimal),
+                    ],
                     ...(filled($vectorStoreId) ? [
                         'tools' => [[
                             'type' => 'file_search',
@@ -144,9 +147,13 @@ abstract class BaseOpenAiService implements AiService
      * @param array<AiFile> $files
      * @param array<string, mixed> $options
      */
-    public function stream(string $prompt, string $content, array $files = [], array $options = []): Closure
+    public function stream(string $prompt, string $content, array $files = [], array $options = [], ?AiReasoningEffort $reasoningEffort = null): Closure
     {
         $aiSettings = app(AiSettings::class);
+
+        if ($reasoningEffort) {
+            $options['reasoning']['effort'] = $this->resolveReasoningEffortValue($reasoningEffort);
+        }
 
         try {
             $vectorStoreId = $this->getReadyVectorStoreId($files);
@@ -240,9 +247,13 @@ abstract class BaseOpenAiService implements AiService
      * @param array<Tool> $tools
      * @param ?array<Message> $messages
      */
-    public function streamRaw(?string $prompt = null, ?string $content = null, array $files = [], array $options = [], array $tools = [], ?array $messages = null, bool $hasImageGeneration = false): Closure
+    public function streamRaw(?string $prompt = null, ?string $content = null, array $files = [], array $options = [], array $tools = [], ?array $messages = null, bool $hasImageGeneration = false, ?AiReasoningEffort $reasoningEffort = null): Closure
     {
         $aiSettings = app(AiSettings::class);
+
+        if ($reasoningEffort) {
+            $options['reasoning']['effort'] = $this->resolveReasoningEffortValue($reasoningEffort);
+        }
 
         try {
             $vectorStoreId = $this->getReadyVectorStoreId($files);
@@ -686,7 +697,7 @@ abstract class BaseOpenAiService implements AiService
                     'previous_response_id' => $previousResponseId,
                     ...($this->hasReasoning() ? [
                         'reasoning' => [
-                            'effort' => $aiSettings->reasoning_effort->value,
+                            'effort' => $this->resolveReasoningEffortValue($aiSettings->reasoning_effort),
                         ],
                     ] : []),
                     ...((filled($vectorStoreIds) || $hasImageGeneration) ? [
@@ -809,5 +820,14 @@ abstract class BaseOpenAiService implements AiService
         }
 
         return "{$assistantInstructions}.\n\n{$formattingInstructions}";
+    }
+
+    protected function resolveReasoningEffortValue(AiReasoningEffort $effort): string
+    {
+        if ($effort === AiReasoningEffort::Minimal) {
+            return 'none';
+        }
+
+        return $effort->value;
     }
 }

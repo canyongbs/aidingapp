@@ -36,6 +36,7 @@
 
 namespace AidingApp\Ai\Services\Contracts;
 
+use AidingApp\Ai\Enums\AiReasoningEffort;
 use AidingApp\Ai\Models\AiMessage;
 use AidingApp\Ai\Models\Contracts\AiFile;
 use Closure;
@@ -57,7 +58,7 @@ interface AiService
      * @param array<AiFile> $files
      * @param array<string, mixed> $options
      */
-    public function stream(string $prompt, string $content, array $files = [], array $options = []): Closure;
+    public function stream(string $prompt, string $content, array $files = [], array $options = [], ?AiReasoningEffort $reasoningEffort = null): Closure;
 
     /**
      * This method is passed a prompt and message and should return a stream of plain text chunks.
@@ -67,7 +68,7 @@ interface AiService
      * @param array<Tool> $tools
      * @param ?array<Message> $messages
      */
-    public function streamRaw(string $prompt, ?string $content = null, array $files = [], array $options = [], array $tools = [], ?array $messages = null): Closure;
+    public function streamRaw(string $prompt, ?string $content = null, array $files = [], array $options = [], array $tools = [], ?array $messages = null, bool $hasImageGeneration = false, ?AiReasoningEffort $reasoningEffort = null): Closure;
 
     /**
      * This method is passed an unsaved `AiMessage` model and should send the

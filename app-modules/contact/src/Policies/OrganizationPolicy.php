@@ -53,7 +53,7 @@ class OrganizationPolicy
     public function view(Authenticatable $authenticatable, Organization $organization): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization.*.view', "organization.{$organization->id}.view"],
+            abilities: ['organization.*.view'],
             denyResponse: 'You do not have permission to view this organizations.'
         );
     }
@@ -69,7 +69,7 @@ class OrganizationPolicy
     public function update(Authenticatable $authenticatable, Organization $organization): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization.*.update', "organization.{$organization->id}.update"],
+            abilities: ['organization.*.update'],
             denyResponse: 'You do not have permission to update this organization.'
         );
     }
@@ -77,7 +77,7 @@ class OrganizationPolicy
     public function delete(Authenticatable $authenticatable, Organization $organization): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization.*.delete', "organization.{$organization->id}.delete"],
+            abilities: ['organization.*.delete'],
             denyResponse: 'You do not have permission to delete this organization.'
         );
     }
@@ -85,7 +85,7 @@ class OrganizationPolicy
     public function restore(Authenticatable $authenticatable, Organization $organization): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization.*.restore', "organization.{$organization->id}.restore"],
+            abilities: ['organization.*.restore'],
             denyResponse: 'You do not have permission to restore this organization.'
         );
     }
@@ -93,7 +93,7 @@ class OrganizationPolicy
     public function forceDelete(Authenticatable $authenticatable, Organization $organization): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['organization.*.force-delete', "organization.{$organization->id}.force-delete"],
+            abilities: ['organization.*.force-delete'],
             denyResponse: 'You do not have permission to force delete this organization.'
         );
     }

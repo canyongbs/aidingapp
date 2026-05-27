@@ -34,35 +34,63 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Providers;
+namespace App\Providers;
 
-use AidingApp\Engagement\EngagementPlugin;
-use AidingApp\Engagement\Models\EmailTemplate;
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Engagement\Models\EngagementBatch;
-use AidingApp\Engagement\Models\EngagementFile;
-use AidingApp\Engagement\Models\EngagementResponse;
-use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use Closure;
+use Dedoc\Scramble\Scramble;
+use Dedoc\Scramble\Support\Generator\OpenApi;
+use Dedoc\Scramble\Support\Generator\SecurityScheme;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
-class EngagementServiceProvider extends ServiceProvider
+class ApiServiceProvider extends ServiceProvider
 {
+    /**
+     * Register services.
+     */
     public function register(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new EngagementPlugin()));
+        Route::macro('api', function (int $majorVersion, Closure $routes) {
+            Route::middleware([
+                'api',
+                'auth:sanctum',
+                'abilities:api',
+            ])
+                ->prefix("api/v{$majorVersion}")
+                ->name("api.v{$majorVersion}.")
+                ->scopeBindings()
+                ->group($routes);
+        });
     }
 
+    /**
+     * Bootstrap services.
+     */
     public function boot(): void
     {
-        Relation::morphMap([
-            'email_template' => EmailTemplate::class,
-            'engagement_batch' => EngagementBatch::class,
-            'engagement_file' => EngagementFile::class,
-            'engagement_response' => EngagementResponse::class,
-            'engagement' => Engagement::class,
-            'unmatched_inbound_communication' => UnmatchedInboundCommunication::class,
-        ]);
+        $this->registerApi(majorVersion: 1);
+
+        Scramble::configure()
+            ->expose(ui: false, document: false);
+    }
+
+    protected function registerApi(int $majorVersion): void
+    {
+        Scramble::registerApi("v{$majorVersion}", [
+            'api_path' => "api/v{$majorVersion}",
+            'info' => [
+                'version' => "{$majorVersion}.0.0",
+            ],
+        ])
+            ->expose(
+                ui: "/docs/api/v{$majorVersion}",
+                document: "/docs/api/v{$majorVersion}.json",
+            )
+            ->withDocumentTransformers(function (OpenApi $openApi) {
+                $openApi->secure(
+                    SecurityScheme::http('bearer')
+                        ->setDescription('You can issue a bearer token by visiting the "Users > Programmatic Users" section of the app, and creating a new programmatic user. Once created, you will be able to see a generated API key for the user.'),
+                );
+            });
     }
 }

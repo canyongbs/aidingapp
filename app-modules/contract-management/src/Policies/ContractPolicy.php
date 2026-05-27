@@ -66,7 +66,7 @@ class ContractPolicy
     public function view(Authenticatable $authenticatable, Contract $contract): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["contract.{$contract->getKey()}.view"],
+            abilities: ['contract.*.view'],
             denyResponse: 'You do not have permission to view this contract.'
         );
     }
@@ -82,7 +82,7 @@ class ContractPolicy
     public function update(Authenticatable $authenticatable, Contract $contract): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["contract.{$contract->getKey()}.update"],
+            abilities: ['contract.*.update'],
             denyResponse: 'You do not have permission to update this contract.'
         );
     }
@@ -90,7 +90,7 @@ class ContractPolicy
     public function delete(Authenticatable $authenticatable, Contract $contract): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["contract.{$contract->getKey()}.delete"],
+            abilities: ['contract.*.delete'],
             denyResponse: 'You do not have permission to delete this contract.'
         );
     }
@@ -98,7 +98,7 @@ class ContractPolicy
     public function restore(Authenticatable $authenticatable, Contract $contract): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["contract.{$contract->getKey()}.restore"],
+            abilities: ['contract.*.restore'],
             denyResponse: 'You do not have permission to restore this contract.'
         );
     }
@@ -106,7 +106,7 @@ class ContractPolicy
     public function forceDelete(Authenticatable $authenticatable, Contract $contract): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["contract.{$contract->getKey()}.force-delete"],
+            abilities: ['contract.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this contract.'
         );
     }

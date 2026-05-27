@@ -34,7 +34,18 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\Route;
+namespace App\Queue\Connectors;
 
-Route::redirect('/docs/api', '/docs/api/v1')
-    ->name('docs.api');
+use App\Queue\TenantAwareBackgroundQueue;
+use Illuminate\Queue\Connectors\ConnectorInterface;
+
+class TenantAwareBackgroundConnector implements ConnectorInterface
+{
+    /**
+     * @param array<mixed> $config
+     */
+    public function connect(array $config): TenantAwareBackgroundQueue
+    {
+        return new TenantAwareBackgroundQueue($config['after_commit'] ?? null);
+    }
+}

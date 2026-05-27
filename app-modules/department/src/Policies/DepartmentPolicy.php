@@ -58,7 +58,7 @@ class DepartmentPolicy
         $prefix = $this->permissionPrefix();
 
         return $authenticatable->canOrElse(
-            abilities: ["{$prefix}.*.view", "{$prefix}.{$department->id}.view"],
+            abilities: "{$prefix}.*.view",
             denyResponse: 'You do not have permission to view this department.'
         );
     }
@@ -88,7 +88,7 @@ class DepartmentPolicy
         $prefix = $this->permissionPrefix();
 
         return $authenticatable->canOrElse(
-            abilities: ["{$prefix}.*.delete", "{$prefix}.{$department->id}.delete"],
+            abilities: "{$prefix}.*.delete",
             denyResponse: 'You do not have permission to delete this department.'
         );
     }
@@ -98,7 +98,7 @@ class DepartmentPolicy
         $prefix = $this->permissionPrefix();
 
         return $authenticatable->canOrElse(
-            abilities: ["{$prefix}.*.restore", "{$prefix}.{$department->id}.restore"],
+            abilities: "{$prefix}.*.restore",
             denyResponse: 'You do not have permission to restore this department.'
         );
     }
@@ -108,7 +108,7 @@ class DepartmentPolicy
         $prefix = $this->permissionPrefix();
 
         return $authenticatable->canOrElse(
-            abilities: ["{$prefix}.*.force-delete", "{$prefix}.{$department->id}.force-delete"],
+            abilities: "{$prefix}.*.force-delete",
             denyResponse: 'You do not have permission to permanently delete this department.'
         );
     }
