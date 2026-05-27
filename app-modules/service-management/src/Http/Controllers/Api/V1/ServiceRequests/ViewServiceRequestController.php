@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,15 +34,28 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ListServiceRequestsController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ViewServiceRequestController;
-use Illuminate\Support\Facades\Route;
+namespace AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests;
 
-Route::api(majorVersion: 1, routes: function () {
-    Route::name('service-requests.')
-        ->prefix('service-requests')
-        ->group(function () {
-            Route::get('/', ListServiceRequestsController::class)->name('index');
-            Route::get('/{serviceRequest}', ViewServiceRequestController::class)->name('show');
-        });
-});
+use AidingApp\ServiceManagement\Http\Resources\Api\V1\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Support\Facades\Gate;
+use Illuminate\Http\Request;
+
+class ViewServiceRequestController
+{
+    /**
+     * @response ServiceRequestResource
+     */
+    #[Group('Service Requests')]
+    public function __invoke(Request $request, ServiceRequest $serviceRequest): ServiceRequestResource
+    {
+        Gate::authorize('viewAny', ServiceRequest::class);
+        Gate::authorize('view', $serviceRequest);
+
+        $serviceRequest->loadMissing(['status', 'priority', 'assignedTo.user', 'respondent']);
+
+        return $serviceRequest
+            ->toResource(ServiceRequestResource::class);
+    }
+}
