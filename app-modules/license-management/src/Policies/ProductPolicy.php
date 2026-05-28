@@ -66,7 +66,7 @@ class ProductPolicy
     public function view(Authenticatable $authenticatable, Product $product): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product.{$product->getKey()}.view"],
+            abilities: ['product.*.view'],
             denyResponse: 'You do not have permission to view this product.'
         );
     }
@@ -82,7 +82,7 @@ class ProductPolicy
     public function update(Authenticatable $authenticatable, Product $product): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product.{$product->getKey()}.update"],
+            abilities: ['product.*.update'],
             denyResponse: 'You do not have permission to update this product.'
         );
     }
@@ -90,7 +90,7 @@ class ProductPolicy
     public function delete(Authenticatable $authenticatable, Product $product): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product.{$product->getKey()}.delete"],
+            abilities: ['product.*.delete'],
             denyResponse: 'You do not have permission to delete this product.'
         );
     }
@@ -98,7 +98,7 @@ class ProductPolicy
     public function restore(Authenticatable $authenticatable, Product $product): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product.{$product->getKey()}.restore"],
+            abilities: ['product.*.restore'],
             denyResponse: 'You do not have permission to restore this product.'
         );
     }
@@ -106,7 +106,7 @@ class ProductPolicy
     public function forceDelete(Authenticatable $authenticatable, Product $product): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ["product.{$product->getKey()}.force-delete"],
+            abilities: ['product.*.force-delete'],
             denyResponse: 'You do not have permission to force delete this product.'
         );
     }

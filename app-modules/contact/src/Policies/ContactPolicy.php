@@ -53,7 +53,7 @@ class ContactPolicy
     public function view(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact.*.view', "contact.{$contact->id}.view"],
+            abilities: ['contact.*.view'],
             denyResponse: 'You do not have permission to view this contact.'
         );
     }
@@ -77,7 +77,7 @@ class ContactPolicy
     public function update(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact.*.update', "contact.{$contact->id}.update"],
+            abilities: ['contact.*.update'],
             denyResponse: 'You do not have permission to update this contact.'
         );
     }
@@ -85,7 +85,7 @@ class ContactPolicy
     public function delete(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact.*.delete', "contact.{$contact->id}.delete"],
+            abilities: ['contact.*.delete'],
             denyResponse: 'You do not have permission to delete this contact.'
         );
     }
@@ -93,7 +93,7 @@ class ContactPolicy
     public function restore(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact.*.restore', "contact.{$contact->id}.restore"],
+            abilities: ['contact.*.restore'],
             denyResponse: 'You do not have permission to restore this contact.'
         );
     }
@@ -101,7 +101,7 @@ class ContactPolicy
     public function forceDelete(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['contact.*.force-delete', "contact.{$contact->id}.force-delete"],
+            abilities: ['contact.*.force-delete'],
             denyResponse: 'You do not have permission to force delete this contact.'
         );
     }
