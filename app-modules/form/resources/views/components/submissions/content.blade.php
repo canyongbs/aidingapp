@@ -57,6 +57,6 @@
     };
 @endphp
 
-<div class="prose max-w-none dark:prose-invert">
+<div class="fi-prose">
     {!! $sanitizeSubmissionHtml( RichContentRenderer::make($content)->customBlocks(array_values($blocks))->toUnsafeHtml(),) !!}
 </div>

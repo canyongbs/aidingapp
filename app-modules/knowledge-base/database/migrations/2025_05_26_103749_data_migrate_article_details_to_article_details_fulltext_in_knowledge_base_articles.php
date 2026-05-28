@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -46,7 +47,7 @@ return new class () extends Migration {
             foreach ($articles as $article) {
                 if (! blank($article->article_details)) {
                     try {
-                        $articleDetails = strip_tags(tiptap_converter()->asHTML($article->article_details));
+                        $articleDetails = RichContentRenderer::make($article->article_details)->toText();
 
                         DB::table('knowledge_base_articles')
                             ->where('id', $article->id)
