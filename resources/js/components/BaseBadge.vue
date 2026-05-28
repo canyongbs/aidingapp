@@ -15,7 +15,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -219,10 +219,11 @@
         'inline-flex items-center justify-center gap-x-1 rounded-md font-medium truncate',
         SIZE_CLASSES[props.size],
         colorClasses.value,
-        isInteractive.value && !isDisabled.value && [
-            palette.value.hover,
-            'transition duration-75 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-current/50',
-        ],
+        isInteractive.value &&
+            !isDisabled.value && [
+                palette.value.hover,
+                'transition duration-75 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-current/50',
+            ],
         isDisabled.value && 'cursor-default opacity-70 pointer-events-none',
     ]);
 
@@ -266,28 +267,13 @@
 </script>
 
 <template>
-    <component
-        :is="componentTag"
-        v-bind="componentAttrs"
-        :class="badgeClasses"
-        @click="handleClick"
-    >
-        <component
-            v-if="icon && iconPosition === 'before'"
-            :is="icon"
-            :class="iconClasses"
-            aria-hidden="true"
-        />
+    <component :is="componentTag" v-bind="componentAttrs" :class="badgeClasses" @click="handleClick">
+        <component v-if="icon && iconPosition === 'before'" :is="icon" :class="iconClasses" aria-hidden="true" />
 
         <span class="min-w-0 truncate">
             <slot />
         </span>
 
-        <component
-            v-if="icon && iconPosition === 'after'"
-            :is="icon"
-            :class="iconClasses"
-            aria-hidden="true"
-        />
+        <component v-if="icon && iconPosition === 'after'" :is="icon" :class="iconClasses" aria-hidden="true" />
     </component>
 </template>

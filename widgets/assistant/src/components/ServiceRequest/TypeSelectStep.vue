@@ -37,9 +37,9 @@
     import { ref } from 'vue';
     import { useServiceRequestTypes } from '../../composables/useServiceRequestTypes.js';
     import { getAuthHeaders } from '../../utils/token.js';
-    import LoadingSpinner from '../LoadingSpinner.vue';
     import BaseTab from '../BaseTab.vue';
     import BaseTabs from '../BaseTabs.vue';
+    import LoadingSpinner from '../LoadingSpinner.vue';
     import ServiceRequestCategoryTree from '../ServiceRequestCategoryTree.vue';
     import TypeSelectFooter from './TypeSelectFooter.vue';
 

@@ -155,10 +155,7 @@
             </section>
         </div>
 
-        <ResourceList
-            v-if="searchResults.data.categories.length > 0"
-            heading="Categories"
-        >
+        <ResourceList v-if="searchResults.data.categories.length > 0" heading="Categories">
             <ResourceListItem
                 v-for="category in searchResults.data.categories"
                 :key="category.slug"

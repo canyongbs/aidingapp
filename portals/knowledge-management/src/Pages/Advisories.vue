@@ -150,16 +150,15 @@
         </div>
 
         <ResourceList v-else-if="advisories.length > 0">
-            <ResourceListItem
-                v-for="(advisory, index) in advisories"
-                :key="advisory.id || index"
-            >
+            <ResourceListItem v-for="(advisory, index) in advisories" :key="advisory.id || index">
                 <template #primary>
                     <span :class="severityTextColor(advisory.severity)">{{ advisory.title }}</span>
                 </template>
                 <template #description>{{ formatDate(advisory.created_at) }}</template>
                 <template v-if="advisory.status" #badge>
-                    <span class="inline-flex items-center rounded-sm bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
+                    <span
+                        class="inline-flex items-center rounded-sm bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800"
+                    >
                         {{ advisory.status.name }}
                     </span>
                 </template>
