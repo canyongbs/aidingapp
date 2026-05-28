@@ -73,7 +73,7 @@
                     <template #badge>
                         <span
                             class="inline-flex items-center rounded px-2 py-0.5 text-xs font-bold text-white"
-                            :style="'background-color: rgb(' + serviceRequest.status_color + ')'"
+                            :style="serviceRequest.status_color ? { backgroundColor: serviceRequest.status_color } : {}"
                         >
                             {{ serviceRequest.status_name }}
                         </span>
