@@ -41,6 +41,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseItems\RequestFactories\DuplicateKnowledgeBaseItemRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -663,4 +664,61 @@ test('Health column shows false when broken images are detected', function () {
 
     livewire(ListKnowledgeBaseItems::class)
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
+});
+
+test('an authorised user can duplicate a knowledge base article', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->knowledgeManagement = true;
+    $settings->save();
+
+    asSuperAdmin();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('knowledge_base_item.view-any');
+    $user->givePermissionTo('knowledge_base_item.create');
+
+    actingAs($user);
+
+    $request = DuplicateKnowledgeBaseItemRequestFactory::new()->create();
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->callTableAction('replicate', $knowledgeBaseItem->getKey(), data: $request)
+        ->assertHasNoTableActionErrors();
+
+    expect(KnowledgeBaseItem::count())->toBe(2);
+});
+
+test('duplicating a knowledge base article is gated by the knowledge_base_item.create ability', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->knowledgeManagement = true;
+    $settings->save();
+
+    asSuperAdmin();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('knowledge_base_item.view-any');
+
+    actingAs($user);
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableActionHidden('replicate', $knowledgeBaseItem->getKey());
+});
+
+test('duplicating a knowledge base article is gated with proper feature access control', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->knowledgeManagement = false;
+    $settings->save();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('knowledge_base_item.view-any');
+    $user->givePermissionTo('knowledge_base_item.create');
+
+    actingAs($user);
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertForbidden();
 });
