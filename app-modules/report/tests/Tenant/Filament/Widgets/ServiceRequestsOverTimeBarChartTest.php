@@ -44,7 +44,7 @@ use CanyonGBS\Common\Enums\Color;
 
 it('returns correct service request data within the given date range', function () {
     $startDate = now()->subMonthsNoOverflow(3)->startOfMonth();
-    $endDate = now()->subMonths(1)->endOfMonth();
+    $endDate = now()->subMonthsNoOverflow(1)->endOfMonth();
 
     $type = ServiceRequestType::factory()->create();
 
