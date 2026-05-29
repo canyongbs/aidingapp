@@ -48,15 +48,12 @@
     });
 </script>
 <template>
-    <div class="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-lg shadow-sm">
-        <div class="flex items-center">
+    <div class="group flex w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5 transition duration-75 hover:bg-gray-50">
+        <div class="shrink-0 size-6" aria-hidden="true">
             <svg
                 v-if="status === true"
-                class="w-[28px] h-[28px] text-green-700"
-                aria-hidden="true"
+                class="size-6 text-green-700"
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
                 fill="currentColor"
                 viewBox="0 0 24 24"
             >
@@ -68,11 +65,8 @@
             </svg>
             <svg
                 v-if="status === false"
-                class="w-[28px] h-[28px] text-red-600"
-                aria-hidden="true"
+                class="size-6 text-red-600"
                 xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
                 fill="currentColor"
                 viewBox="0 0 24 24"
             >
@@ -82,18 +76,17 @@
                     clip-rule="evenodd"
                 />
             </svg>
-            <div class="ml-4">
-                <h5 class="text-lg font-semibold text-gray-900">{{ name }}</h5>
-                <p class="text-sm text-gray-500">{{ message }}</p>
-            </div>
+        </div>
+
+        <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
+            <span class="text-sm font-medium text-gray-950">{{ name }}</span>
+            <p class="overflow-hidden text-sm text-pretty break-words text-gray-500">{{ message }}</p>
         </div>
 
         <svg
-            class="w-[22px] h-[22px] text-gray-400"
+            class="shrink-0 size-5 self-center text-gray-400"
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
             fill="none"
             viewBox="0 0 24 24"
         >
