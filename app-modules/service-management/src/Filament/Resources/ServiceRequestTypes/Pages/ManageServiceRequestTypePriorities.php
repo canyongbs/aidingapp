@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,9 +34,10 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\RelationManagers;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\SLAs\SlaResource;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
@@ -44,18 +45,23 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Validation\Rules\Unique;
 
-class ServiceRequestPrioritiesRelationManager extends RelationManager
+class ManageServiceRequestTypePriorities extends ManageRelatedRecords
 {
+    protected static string $resource = ServiceRequestTypeResource::class;
+
+    // TODO: Obsolete when there is no table, remove from Filament
     protected static string $relationship = 'priorities';
 
-    protected static ?string $recordTitleAttribute = 'name';
+    protected static ?string $navigationLabel = 'Priorities';
+
+    protected static ?string $breadcrumb = 'Priorities';
 
     public function form(Schema $schema): Schema
     {
@@ -69,7 +75,7 @@ class ServiceRequestPrioritiesRelationManager extends RelationManager
                         table: 'service_request_priorities',
                         column: 'name',
                         ignorable: fn (?Model $record): ?Model => $record,
-                        modifyRuleUsing: fn (Unique $rule, RelationManager $livewire) => $rule->where('type_id', $livewire->getOwnerRecord()->getKey())->withoutTrashed(),
+                        modifyRuleUsing: fn (Unique $rule) => $rule->where('type_id', $this->getOwnerRecord()->getKey())->withoutTrashed(),
                     ),
                 TextInput::make('order')
                     ->label('Priority Order')
