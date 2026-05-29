@@ -84,11 +84,24 @@ it('returns a service request resource', function () {
     $response->assertJsonStructure([
         'data',
     ]);
-
-    expect($response['data']['id'])
-        ->toBe($serviceRequest->id);
-    expect($response['data']['title'])
-        ->toBe($serviceRequest->title);
-    expect($response['data']['service_request_number'])
-        ->toBe($serviceRequest->service_request_number);
 });
+
+it('returns correct service request fields', function (string $responseKey, Closure $getExpected) {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+
+    $response = getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false));
+    $response->assertOk();
+
+    expect($response['data'][$responseKey])->toBe($getExpected($serviceRequest));
+})->with([
+    // responseKey, getExpected
+    '`id`' => ['id', fn (ServiceRequest $sr) => $sr->id],
+    '`service_request_number`' => ['service_request_number', fn (ServiceRequest $sr) => $sr->service_request_number],
+    '`title`' => ['title', fn (ServiceRequest $sr) => $sr->title],
+    '`close_details`' => ['close_details', fn (ServiceRequest $sr) => $sr->close_details],
+    '`category`' => ['category', fn (ServiceRequest $sr) => $sr->category->value],
+]);
