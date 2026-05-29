@@ -52,8 +52,8 @@
 
 <template>
     <div class="flex flex-wrap gap-2">
-        <BaseBadge v-if="featured" :color="variant === 'hero' ? 'hero' : 'gray'">Featured</BaseBadge>
-        <BaseBadge v-for="tag in tags" :key="tag.id" :color="variant === 'hero' ? 'hero' : 'gray'">{{
+        <BaseBadge v-if="featured" :color="variant === 'hero' ? 'transparent-white' : 'gray'">Featured</BaseBadge>
+        <BaseBadge v-for="tag in tags" :key="tag.id" :color="variant === 'hero' ? 'transparent-white' : 'gray'">{{
             tag.name
         }}</BaseBadge>
     </div>

@@ -78,7 +78,7 @@
                 <BaseBadge
                     v-if="currentView === 'chat' && serviceRequestEnabled"
                     tag="button"
-                    color="hero"
+                    color="transparent-white"
                     size="sm"
                     :icon="TicketIcon"
                     icon-position="before"

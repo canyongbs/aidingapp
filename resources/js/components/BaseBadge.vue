@@ -38,8 +38,8 @@
 
     const PALETTE = {
         primary: {
-            base: 'bg-primary-50 text-primary-700 ring-1 ring-inset ring-primary-600/10',
-            hover: 'hover:bg-primary-100 hover:text-primary-800',
+            base: 'bg-brand-50 text-brand-700 ring-1 ring-inset ring-brand-600/10',
+            hover: 'hover:bg-brand-100 hover:text-brand-800',
         },
         danger: {
             base: 'bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/10',
@@ -61,7 +61,7 @@
             base: 'bg-gray-50 text-gray-600 ring-1 ring-inset ring-gray-600/10',
             hover: 'hover:bg-gray-100 hover:text-gray-700',
         },
-        hero: {
+        'transparent-white': {
             base: 'bg-white/15 text-white/90 ring-1 ring-inset ring-white/25',
             hover: 'hover:bg-white/25 hover:text-white hover:ring-white/40',
         },
@@ -135,8 +135,6 @@
         },
     };
 
-    const MONO_CLASSES = 'border border-gray-200 bg-gray-50 text-gray-600 font-mono font-normal';
-
     const SIZE_CLASSES = {
         xs: 'min-w-4 px-0.5 py-0 text-xs tracking-tighter',
         sm: 'min-w-5 px-1.5 py-0.5 text-xs tracking-tight',
@@ -193,10 +191,6 @@
             type: Boolean,
             default: false,
         },
-        mono: {
-            type: Boolean,
-            default: false,
-        },
     });
 
     const emit = defineEmits(['click']);
@@ -210,15 +204,10 @@
 
     const palette = computed(() => PALETTE[props.color] ?? PALETTE.gray);
 
-    const colorClasses = computed(() => {
-        if (props.mono) return MONO_CLASSES;
-        return palette.value.base;
-    });
-
     const badgeClasses = computed(() => [
         'inline-flex items-center justify-center gap-x-1 rounded-md font-medium truncate',
         SIZE_CLASSES[props.size],
-        colorClasses.value,
+        palette.value.base,
         isInteractive.value &&
             !isDisabled.value && [
                 palette.value.hover,
