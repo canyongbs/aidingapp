@@ -81,22 +81,26 @@ it('returns a paginated list of service requests', function () {
         ->toHaveCount(3);
 });
 
-it('can filter service requests by title', function () {
+it('can filter service requests by all attributes', function (string $requestKey, mixed $requestValue, array $includedAttributes, array $excludedAttributes, string $responseKey, mixed $responseValue) {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
     Sanctum::actingAs($user, ['api']);
 
-    ServiceRequest::factory()->create(['title' => 'Specific Request Title']);
-    ServiceRequest::factory()->count(2)->create(['title' => 'Other Title']);
+    ServiceRequest::factory()->create($includedAttributes);
+    ServiceRequest::factory()->create($excludedAttributes);
+    ServiceRequest::factory()->create($excludedAttributes);
 
-    $response = getJson(route('api.v1.service-requests.index', ['filter' => ['title' => 'Specific Request']], false));
+    $response = getJson(route('api.v1.service-requests.index', ['filter' => [$requestKey => $requestValue]], false));
     $response->assertOk();
 
-    expect($response['data'][0]['title'])
-        ->toBe('Specific Request Title');
+    expect($response['data'][0][$responseKey])
+        ->toBe($responseValue);
     expect($response['meta']['total'])
         ->toBe(1);
-});
+})->with([
+    // requestKey, requestValue, includedAttributes, excludedAttributes, responseKey, responseValue
+    '`title`' => ['title', 'Specific Request Title', ['title' => 'Specific Request Title'], ['title' => 'Other Title'], 'title', 'Specific Request Title'],
+]);
 
 it('can filter service requests by status', function () {
     $user = SystemUser::factory()->create();
@@ -159,6 +163,7 @@ dataset('sorts', [
     // requestKey, firstAttributes, secondAttributes, responseKey, responseFirstValue, responseSecondValue
     '`title`' => ['title', ['title' => 'Alpha'], ['title' => 'Zulu'], 'title', 'Alpha', 'Zulu'],
     '`service_request_number`' => ['service_request_number', ['service_request_number' => 'SR-0001'], ['service_request_number' => 'SR-9999'], 'service_request_number', 'SR-0001', 'SR-9999'],
+    '`created_at`' => ['created_at', ['created_at' => '2024-01-01 00:00:00'], ['created_at' => '2025-01-01 00:00:00'], 'created_at', '2024-01-01T00:00:00.000000Z', '2025-01-01T00:00:00.000000Z'],
 ]);
 
 it('can sort service requests by all attributes ascending', function (string $requestKey, array $firstAttributes, array $secondAttributes, string $responseKey, mixed $responseFirstValue, mixed $responseSecondValue) {
@@ -194,39 +199,3 @@ it('can sort service requests by all attributes descending', function (string $r
     expect($response['data'][1][$responseKey])
         ->toBe($responseFirstValue);
 })->with('sorts');
-
-it('can sort service requests by created_at ascending', function () {
-    $user = SystemUser::factory()->create();
-    $user->givePermissionTo('service_request.view-any');
-    Sanctum::actingAs($user, ['api']);
-
-    $first = ServiceRequest::factory()->create();
-    $first->update(['created_at' => now()->subDay()]);
-    $second = ServiceRequest::factory()->create();
-    $second->update(['created_at' => now()]);
-
-    $response = getJson(route('api.v1.service-requests.index', ['sort' => 'created_at'], false));
-    $response->assertOk();
-
-    expect($response['data'][0]['id'])
-        ->toBe($first->id);
-    expect($response['data'][1]['id'])
-        ->toBe($second->id);
-});
-
-it('can sort service requests by created_at descending', function () {
-    $user = SystemUser::factory()->create();
-    $user->givePermissionTo('service_request.view-any');
-    Sanctum::actingAs($user, ['api']);
-
-    $first = ServiceRequest::factory()->create(['created_at' => now()->subDay()]);
-    $second = ServiceRequest::factory()->create(['created_at' => now()]);
-
-    $response = getJson(route('api.v1.service-requests.index', ['sort' => '-created_at'], false));
-    $response->assertOk();
-
-    expect($response['data'][0]['id'])
-        ->toBe($second->id);
-    expect($response['data'][1]['id'])
-        ->toBe($first->id);
-});
