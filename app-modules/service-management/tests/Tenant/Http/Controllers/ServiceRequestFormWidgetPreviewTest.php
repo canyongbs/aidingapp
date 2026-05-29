@@ -100,25 +100,6 @@ it('always returns is_authenticated as false in preview mode regardless of the f
     $response->assertJsonMissingPath('authentication_url');
 });
 
-it('always returns recaptcha_enabled as false in preview mode regardless of the form setting', function () {
-    $user = User::factory()->create();
-
-    $type = ServiceRequestType::factory()->create();
-
-    // Form explicitly has reCAPTCHA enabled
-    $form = new ServiceRequestForm([
-        'name' => 'Recaptcha Form',
-        'recaptcha_enabled' => true,
-    ]);
-    $form->type()->associate($type);
-    $form->save();
-
-    actingAs($user)
-        ->getJson(route('service-request-forms.preview-entry', ['serviceRequestForm' => $form]))
-        ->assertSuccessful()
-        ->assertJsonPath('recaptcha_enabled', false);
-});
-
 it('does not include a submission_url in the preview-entry response', function () {
     $user = User::factory()->create();
 

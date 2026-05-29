@@ -36,8 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\Form\Enums\Rounding;
 use AidingApp\Form\Models\Submissible;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFormFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -46,27 +47,21 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class ServiceRequestForm extends Submissible
 {
+    /** @use HasFactory<ServiceRequestFormFactory> */
+    use HasFactory;
+
     protected $fillable = [
         'name',
         'description',
-        'embed_enabled',
-        'allowed_domains',
         'is_authenticated',
         'is_wizard',
-        'recaptcha_enabled',
-        'primary_color',
-        'rounding',
         'content',
     ];
 
     protected $casts = [
         'content' => 'array',
-        'embed_enabled' => 'boolean',
-        'allowed_domains' => 'array',
         'is_authenticated' => 'boolean',
         'is_wizard' => 'boolean',
-        'recaptcha_enabled' => 'boolean',
-        'rounding' => Rounding::class,
     ];
 
     /**

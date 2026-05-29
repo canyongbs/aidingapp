@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\ServiceRequestFormResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
@@ -75,7 +74,7 @@ class ViewServiceRequestType extends ViewRecord
                         TextEntry::make('form.name')
                             ->label('Form')
                             ->hidden(fn (ServiceRequestType $record) => ! $record->form)
-                            ->url(fn (ServiceRequestType $record) => $record->form ? ServiceRequestFormResource::getUrl('edit', ['record' => $record->form]) : null)
+                            ->url(fn (ServiceRequestType $record) => ManageServiceRequestTypeCustomForm::getUrl(['record' => $record]))
                             ->color('primary'),
                         Group::make()
                             ->schema([

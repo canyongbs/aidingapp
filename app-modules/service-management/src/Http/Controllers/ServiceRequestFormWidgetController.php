@@ -36,49 +36,18 @@
 
 namespace AidingApp\ServiceManagement\Http\Controllers;
 
-use AidingApp\Form\Actions\GenerateSubmissibleValidation;
-use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
-use AidingApp\Form\Filament\Blocks\EducatableEmailFormFieldBlock;
-use AidingApp\Form\Notifications\AuthenticateFormNotification;
-use AidingApp\IntegrationGoogleRecaptcha\Settings\GoogleRecaptchaSettings;
+use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFormKitSchema;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use AidingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
-use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use App\Http\Controllers\Controller;
-use Closure;
 use Filament\Support\Colors\Color;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ServiceRequestFormWidgetController extends Controller
 {
-    public function assets(Request $request, ServiceRequestForm $serviceRequestForm): JsonResponse
-    {
-        // Read the Vite manifest to determine the correct asset paths
-        $manifestPath = public_path('storage/widgets/service-requests/forms/.vite/manifest.json');
-        /** @var array<string, array{file: string, name: string, src: string, isEntry: bool}> $manifest */
-        $manifest = json_decode(File::get($manifestPath), true, 512, JSON_THROW_ON_ERROR);
-
-        $widgetEntry = $manifest['src/widget.js'];
-
-        return response()->json([
-            'asset_url' => route('widgets.service-requests.forms.asset'),
-            'entry' => route('widgets.service-requests.forms.api.entry', ['serviceRequestForm' => $serviceRequestForm]),
-            'js' => route('widgets.service-requests.forms.asset', ['file' => $widgetEntry['file']]),
-        ]);
-    }
-
     public function asset(Request $request, string $file): StreamedResponse
     {
         $path = "widgets/service-requests/forms/{$file}";
@@ -103,249 +72,22 @@ class ServiceRequestFormWidgetController extends Controller
         );
     }
 
-    public function view(GenerateServiceRequestFormKitSchema $generateSchema, ServiceRequestForm $serviceRequestForm): JsonResponse
-    {
-        return response()->json(
-            [
-                'name' => $serviceRequestForm->name,
-                'description' => $serviceRequestForm->description,
-                'is_authenticated' => $serviceRequestForm->is_authenticated,
-                ...($serviceRequestForm->is_authenticated ? [
-                    'authentication_url' => URL::signedRoute(
-                        name: 'widgets.service-requests.forms.api.request-authentication',
-                        parameters: ['serviceRequestForm' => $serviceRequestForm],
-                    ),
-                ] : [
-                    'submission_url' => URL::signedRoute(
-                        name: 'widgets.service-requests.forms.api.submit',
-                        parameters: ['serviceRequestForm' => $serviceRequestForm],
-                    ),
-                ]),
-                'recaptcha_enabled' => $serviceRequestForm->recaptcha_enabled,
-                ...($serviceRequestForm->recaptcha_enabled ? [
-                    'recaptcha_site_key' => app(GoogleRecaptchaSettings::class)->site_key,
-                ] : []),
-                'schema' => $generateSchema($serviceRequestForm),
-                'primary_color' => collect(Color::all()[$serviceRequestForm->primary_color ?? 'blue'])
-                    ->map(Color::convertToRgb(...))
-                    ->map(fn (string $value): string => (string) str($value)->after('rgb(')->before(')'))
-                    ->all(),
-                'rounding' => $serviceRequestForm->rounding,
-            ],
-        );
-    }
-
     public function preview(GenerateServiceRequestFormKitSchema $generateSchema, ServiceRequestForm $serviceRequestForm): JsonResponse
     {
+        $portalSettings = app(PortalSettings::class);
+
         return response()->json(
             [
                 'name' => $serviceRequestForm->name,
                 'description' => $serviceRequestForm->description,
                 'is_authenticated' => false,
-                'recaptcha_enabled' => false,
                 'schema' => $generateSchema($serviceRequestForm),
-                'primary_color' => collect(Color::all()[$serviceRequestForm->primary_color ?? 'blue'])
+                'primary_color' => collect(Color::all()[$portalSettings->knowledge_management_portal_primary_color->value ?? 'blue'])
                     ->map(Color::convertToRgb(...))
                     ->map(fn (string $value): string => (string) str($value)->after('rgb(')->before(')'))
                     ->all(),
-                'rounding' => $serviceRequestForm->rounding,
+                'rounding' => $portalSettings->knowledge_management_portal_rounding,
             ],
-        );
-    }
-
-    public function requestAuthentication(Request $request, ResolveSubmissionAuthorFromEmail $resolveSubmissionAuthorFromEmail, ServiceRequestForm $serviceRequestForm): JsonResponse
-    {
-        $data = $request->validate([
-            'email' => ['required', 'email'],
-        ]);
-
-        $author = $resolveSubmissionAuthorFromEmail($data['email']);
-
-        if (! $author) {
-            throw ValidationException::withMessages([
-                'email' => 'A contact with that email address could not be found. Please contact your system administrator.',
-            ]);
-        }
-
-        $code = random_int(100000, 999999);
-
-        $authentication = new ServiceRequestFormAuthentication();
-        $authentication->author()->associate($author);
-        $authentication->submissible()->associate($serviceRequestForm);
-        $authentication->code = Hash::make((string) $code);
-        $authentication->save();
-
-        Notification::route('mail', [
-            $data['email'] => $author->getAttributeValue($author::displayNameKey()),
-        ])->notify(new AuthenticateFormNotification($authentication, $code));
-
-        return response()->json([
-            'message' => "We've sent an authentication code to {$data['email']}.",
-            'authentication_url' => URL::signedRoute(
-                name: 'widgets.service-requests.forms.api.authenticate',
-                parameters: [
-                    'serviceRequestForm' => $serviceRequestForm,
-                    'authentication' => $authentication,
-                ],
-            ),
-        ]);
-    }
-
-    public function authenticate(Request $request, ServiceRequestForm $serviceRequestForm, ServiceRequestFormAuthentication $authentication): JsonResponse
-    {
-        if ($authentication->isExpired()) {
-            return response()->json([
-                'is_expired' => true,
-            ]);
-        }
-
-        $request->validate([
-            'code' => ['required', 'integer', 'digits:6', function (string $attribute, int $value, Closure $fail) use ($authentication) {
-                if (Hash::check((string) $value, $authentication->code)) {
-                    return;
-                }
-
-                $fail('The provided code is invalid.');
-            }],
-        ]);
-
-        return response()->json([
-            'submission_url' => URL::signedRoute(
-                name: 'widgets.service-requests.forms.api.submit',
-                parameters: [
-                    'authentication' => $authentication,
-                    'serviceRequestForm' => $authentication->submissible,
-                ],
-            ),
-        ]);
-    }
-
-    public function store(
-        Request $request,
-        GenerateSubmissibleValidation $generateValidation,
-        ResolveSubmissionAuthorFromEmail $resolveSubmissionAuthorFromEmail,
-        ServiceRequestForm $serviceRequestForm,
-    ): JsonResponse {
-        $authentication = $request->query('authentication');
-
-        if (filled($authentication)) {
-            $authentication = ServiceRequestFormAuthentication::findOrFail($authentication);
-        }
-
-        if (
-            $serviceRequestForm->is_authenticated &&
-            ($authentication?->isExpired() ?? true)
-        ) {
-            abort(Response::HTTP_UNAUTHORIZED);
-        }
-
-        $validator = Validator::make(
-            $request->all(),
-            $generateValidation($serviceRequestForm)
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                [
-                    'errors' => (object) $validator->errors(),
-                ],
-                Response::HTTP_UNPROCESSABLE_ENTITY
-            );
-        }
-
-        /** @var ?ServiceRequestFormSubmission $submission */
-        $submission = $authentication ? $serviceRequestForm->submissions()
-            ->requested()
-            ->whereMorphedTo('author', $authentication->author)
-            ->first() : null;
-
-        $submission ??= $serviceRequestForm->submissions()->make();
-
-        $submission
-            ->priority()
-            ->associate(
-                $serviceRequestForm
-                    ->type
-                    ->priorities()
-                    ->findOrFail(
-                        $request->input('priority')
-                    )
-            );
-
-        if ($authentication) {
-            $submission->author()->associate($authentication->author);
-
-            $authentication->delete();
-        }
-
-        $submission->submitted_at = now()->toImmutable();
-
-        $submission->save();
-
-        $data = $validator->validated();
-
-        unset($data['recaptcha-token']);
-
-        if ($serviceRequestForm->is_wizard) {
-            foreach ($serviceRequestForm->steps as $step) {
-                $stepFields = $step->fields()->pluck('type', 'id')->all();
-
-                foreach ($data[$step->label] as $fieldId => $response) {
-                    $submission->fields()->attach(
-                        $fieldId,
-                        ['id' => Str::orderedUuid(), 'response' => $response],
-                    );
-
-                    if ($submission->author) {
-                        continue;
-                    }
-
-                    if ($stepFields[$fieldId] !== EducatableEmailFormFieldBlock::type()) {
-                        continue;
-                    }
-
-                    $author = $resolveSubmissionAuthorFromEmail($response);
-
-                    if (! $author) {
-                        continue;
-                    }
-
-                    $submission->author()->associate($author);
-                }
-            }
-        } else {
-            $formFields = $serviceRequestForm->fields()->pluck('type', 'id')->all();
-
-            foreach ($data as $fieldId => $response) {
-                $submission->fields()->attach(
-                    $fieldId,
-                    ['id' => Str::orderedUuid(), 'response' => $response],
-                );
-
-                if ($submission->author) {
-                    continue;
-                }
-
-                if ($formFields[$fieldId] !== EducatableEmailFormFieldBlock::type()) {
-                    continue;
-                }
-
-                $author = $resolveSubmissionAuthorFromEmail($response);
-
-                if (! $author) {
-                    continue;
-                }
-
-                $submission->author()->associate($author);
-            }
-        }
-
-        $submission->save();
-
-        return response()->json(
-            [
-                'message' => 'Service Request Form submitted successfully.',
-            ]
         );
     }
 }

@@ -41,16 +41,12 @@ use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIs
 use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestTypeFeedbackIsOn;
 use AidingApp\ServiceManagement\Livewire\RenderServiceRequestFeedbackForm;
-use AidingApp\ServiceManagement\Livewire\RenderServiceRequestForm;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('web')
     ->prefix('service-request-forms')
     ->name('service-request-forms.')
     ->group(function () {
-        Route::get('/{serviceRequestForm}/respond', RenderServiceRequestForm::class)
-            ->name('show');
-
         Route::middleware(['auth', EnsureServiceManagementFeatureIsActive::class])
             ->group(function () {
                 Route::get('/{serviceRequestForm}/preview', ServiceRequestFormPreviewController::class)

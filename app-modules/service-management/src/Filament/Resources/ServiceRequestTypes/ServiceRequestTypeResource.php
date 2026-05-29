@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\Edi
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\EditServiceRequestTypeNotifications;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ListServiceRequestTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypeAuditors;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypeCustomForm;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypeManagers;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypePriorities;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ServiceRequestTypeEmailTemplatePage;
@@ -99,6 +100,7 @@ class ServiceRequestTypeResource extends Resource
                 EditServiceRequestTypeAssignments::class,
                 EditServiceRequestTypeNotifications::class,
                 EditServiceRequestTypeAutomaticEmailCreation::class,
+                ManageServiceRequestTypeCustomForm::class,
             ]),
             ...(array_map(
                 fn (ServiceRequestEmailTemplateType $type): NavigationItem => Arr::first(ServiceRequestTypeEmailTemplatePage::getNavigationItems(['record' => $page->record, 'type' => $type]))
@@ -122,6 +124,7 @@ class ServiceRequestTypeResource extends Resource
             'service-request-type-assignments' => EditServiceRequestTypeAssignments::route('/{record}/assignments'),
             'service-request-type-notifications' => EditServiceRequestTypeNotifications::route('/{record}/notifications'),
             'edit-automatic-email-creation' => EditServiceRequestTypeAutomaticEmailCreation::route('/{record}/automatic-email-creation'),
+            'service-request-type-custom-form' => ManageServiceRequestTypeCustomForm::route('/{record}/custom-form'),
             'service-request-type-email-template' => ServiceRequestTypeEmailTemplatePage::route('/{record}/email-template/{type}'),
         ];
     }
