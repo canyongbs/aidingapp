@@ -8,12 +8,22 @@
     "requireConfig": "ignored",
     "platform": "github",
     "repositories": ["canyongbs/aidingapp"],
-    "enabledManagers": ["custom.regex"],
+    "enabledManagers": ["custom.regex", "docker-compose"],
     "reviewers": ["orrison"],
     "vulnerabilityAlerts": {
         "enabled": false
     },
     "customManagers": [
+        {
+            "customType": "regex",
+            "description": "Docker images in GitHub Actions workflows",
+            "managerFilePatterns": ["/^\\.github/workflows/.+\\.yml$/"],
+            "matchStrings": [
+                "image:\\s*(?<depName>[^:\\s]+):(?<currentValue>[^@\\s]+)@(?<currentDigest>sha256:[a-f0-9]+)"
+            ],
+            "datasourceTemplate": "docker",
+            "versioningTemplate": "docker"
+        },
         {
             "customType": "regex",
             "description": "ImageMagick Version Updates",
@@ -58,6 +68,29 @@
         }
     ],
     "packageRules": [
+        {
+            "description": "7-day cooldown for non-security Docker image updates",
+            "matchDatasources": ["docker"],
+            "matchUpdateTypes": ["major", "minor", "patch", "digest"],
+            "minimumReleaseAge": "7 days"
+        },
+        {
+            "description": "No cooldown for security-related Docker updates",
+            "matchDatasources": ["docker"],
+            "matchUpdateTypes": ["patch"],
+            "isVulnerabilityAlert": true,
+            "minimumReleaseAge": "0 days"
+        },
+        {
+            "description": "Constrain PostgreSQL to 16.x",
+            "matchDepNames": ["postgres"],
+            "allowedVersions": "/^16\\./"
+        },
+        {
+            "description": "Constrain Redis to 7.4.x",
+            "matchDepNames": ["redis"],
+            "allowedVersions": "/^7\\.4/"
+        },
         {
             "matchDepNames": ["nvm-sh/nvm", "node", "npm"],
             "matchUpdateTypes": ["major"],
