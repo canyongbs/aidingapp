@@ -34,39 +34,27 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Http\Controllers\GenerateOtpLoginCodeController;
-use App\Http\Controllers\Api\V1\Users\ViewUserController;
-use App\Http\Controllers\SetAzureSsoSettingController;
-use App\Http\Controllers\UtilizationMetricsApiController;
-use App\Multitenancy\Http\Middleware\CheckOlympusKey;
-use Illuminate\Support\Facades\Route;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
+namespace App\Http\Controllers\Api\V1\Users;
 
-Route::middleware([
-    EnsureFrontendRequestsAreStateful::class,
-    CheckOlympusKey::class,
-])->group(function () {
-    Route::post('/azure-sso/update', SetAzureSsoSettingController::class)
-        ->name('azure-sso.update');
+use App\Http\Resources\Api\V1\UserResource;
+use App\Models\User;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\Request;
 
-    Route::get('/health', HealthCheckJsonResultsController::class)
-        ->name('health');
+class ViewUserController
+{
+    /**
+     * @response UserResource
+     */
+    #[Group('Users')]
+    public function __invoke(Request $request, User $user): UserResource
+    {
+        if ($user->isAdmin()) {
+            abort(404);
+        }
 
-    Route::get('/utilization-metrics', UtilizationMetricsApiController::class)
-        ->name('utilization-metrics');
+        $user->loadMissing(['roles', 'department', 'permissionsFromRoles']);
 
-    Route::post('/otp-code', GenerateOtpLoginCodeController::class)->name('otp-code.generate');
-});
-
-Route::middleware(['auth:sanctum', 'abilities:api'])
-    ->prefix('v1')
-    ->name('api.v1.')
-    ->scopeBindings()
-    ->group(function () {
-        Route::name('users.')
-            ->prefix('users')
-            ->group(function () {
-                Route::get('/{user}', ViewUserController::class)->name('show');
-            });
-    });
+        return new UserResource($user);
+    }
+}

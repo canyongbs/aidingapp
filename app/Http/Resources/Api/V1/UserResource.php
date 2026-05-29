@@ -34,39 +34,32 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Http\Controllers\GenerateOtpLoginCodeController;
-use App\Http\Controllers\Api\V1\Users\ViewUserController;
-use App\Http\Controllers\SetAzureSsoSettingController;
-use App\Http\Controllers\UtilizationMetricsApiController;
-use App\Multitenancy\Http\Middleware\CheckOlympusKey;
-use Illuminate\Support\Facades\Route;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
+namespace App\Http\Resources\Api\V1;
 
-Route::middleware([
-    EnsureFrontendRequestsAreStateful::class,
-    CheckOlympusKey::class,
-])->group(function () {
-    Route::post('/azure-sso/update', SetAzureSsoSettingController::class)
-        ->name('azure-sso.update');
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-    Route::get('/health', HealthCheckJsonResultsController::class)
-        ->name('health');
-
-    Route::get('/utilization-metrics', UtilizationMetricsApiController::class)
-        ->name('utilization-metrics');
-
-    Route::post('/otp-code', GenerateOtpLoginCodeController::class)->name('otp-code.generate');
-});
-
-Route::middleware(['auth:sanctum', 'abilities:api'])
-    ->prefix('v1')
-    ->name('api.v1.')
-    ->scopeBindings()
-    ->group(function () {
-        Route::name('users.')
-            ->prefix('users')
-            ->group(function () {
-                Route::get('/{user}', ViewUserController::class)->name('show');
-            });
-    });
+/**
+ * @property User $resource
+ */
+class UserResource extends JsonResource
+{
+    /**
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->resource->id,
+            'name' => $this->resource->name,
+            'email' => $this->resource->email,
+            'roles' => $this->resource->roles->pluck('name'),
+            'department' => $this->resource->relationLoaded('department') && $this->resource->department ? [
+                'id' => $this->resource->department->getKey(),
+                'name' => $this->resource->department->getAttribute('name'),
+            ] : null,
+            'permissions' => $this->resource->permissionsFromRoles->pluck('name'),
+        ];
+    }
+}
