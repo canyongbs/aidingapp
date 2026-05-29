@@ -64,6 +64,7 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 
 class ListKnowledgeBaseItems extends ListRecords
 {
@@ -174,7 +175,9 @@ class ListKnowledgeBaseItems extends ListRecords
             ], layout: FiltersLayout::BeforeContent)
             ->recordActions([
                 ReplicateAction::make()
+                    ->authorize(fn (): bool => auth()->user()->can('knowledge_base_item.create'))
                     ->slideOver()
+                    ->mutateRecordDataUsing(fn (array $data): array => Arr::only($data, ['title', 'public', 'notes', 'status_id', 'category_id']))
                     ->schema([
                         Section::make()
                             ->schema([
@@ -224,24 +227,10 @@ class ListKnowledgeBaseItems extends ListRecords
                                     ->exists((new Division())->getTable(), (new Division())->getKeyName()),
                             ]),
                     ])
-                    ->before(function (array $data, KnowledgeBaseItem $record) {
-                        $record->title = $data['title'];
-                        $record->public = $data['public'];
-                        $record->notes = $data['notes'];
-                    })
-                    ->after(function (KnowledgeBaseItem $replica, KnowledgeBaseItem $record): void {
-                        $record->load('division');
+                    ->after(function (array $data, KnowledgeBaseItem $replica, KnowledgeBaseItem $record): void {
+                        $replica->division()->attach($data['division'] ?? []);
 
-                        foreach ($record->division as $divison) {
-                            $replica->division()->attach($divison->id);
-                        }
-
-                        foreach ($record->tags as $tag) {
-                            $replica->tags()->attach($tag->id, [
-                                // Include any pivot data if necessary
-                                'taggable_type' => $tag->pivot->taggable_type,
-                            ]);
-                        }
+                        $replica->tags()->attach($data['tags'] ?? []);
 
                         $media = $record->getMedia('article_details');
                         $uuidMap = [];
