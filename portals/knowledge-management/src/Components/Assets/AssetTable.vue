@@ -146,7 +146,7 @@
                         </BaseTableCell>
 
                         <BaseTableCell>
-                            <BaseBadge :mono="true">{{ serialDisplay(item.asset) }}</BaseBadge>
+                            <BaseBadge color="gray" class="font-mono">{{ serialDisplay(item.asset) }}</BaseBadge>
                         </BaseTableCell>
 
                         <BaseTableCell>

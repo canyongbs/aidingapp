@@ -107,7 +107,7 @@
                     v-for="tag in tags.filter((t) => selectedTags.includes(t.id))"
                     :key="tag.id"
                     tag="button"
-                    color="hero"
+                    color="transparent-white"
                     @click="emit('toggle-tag', tag.id)"
                 >
                     {{ tag.name }}
@@ -119,7 +119,7 @@
                     v-for="tag in tags"
                     :key="tag.id"
                     tag="button"
-                    color="hero"
+                    color="transparent-white"
                     :class="selectedTags.includes(tag.id) ? '' : 'opacity-60 hover:opacity-90'"
                     @click="emit('toggle-tag', tag.id)"
                 >
