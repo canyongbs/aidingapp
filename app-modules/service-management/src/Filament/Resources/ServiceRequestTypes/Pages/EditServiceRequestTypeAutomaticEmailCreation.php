@@ -46,6 +46,7 @@ use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
@@ -112,12 +113,12 @@ class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
                             ->label('Auto create contact')
                             ->live()
                             ->visible(fn (Get $get): bool => $get('is_email_automatic_creation_enabled')),
-                        Select::make('email_automatic_creation_contact_create_condition')
+                        ToggleButtons::make('email_automatic_creation_contact_create_condition')
                             ->label('Condition')
                             ->options(EmailAutomaticCreationContactCreateCondition::class)
-                            ->default(EmailAutomaticCreationContactCreateCondition::IfEligible)
-                            ->required()
-                            ->visible(fn (Get $get): bool => EmailAutomaticCreationFeature::active() && $get('is_email_automatic_creation_enabled') && $get('is_email_automatic_creation_contact_create_enabled')),
+                            ->inline()
+                            ->visible(fn (Get $get): bool => EmailAutomaticCreationFeature::active() && $get('is_email_automatic_creation_enabled') && $get('is_email_automatic_creation_contact_create_enabled'))
+                            ->required(),
                         Section::make('Ineligible Contacts')
                             ->schema([
                                 TextInput::make('email_automatic_creation_bcc')
