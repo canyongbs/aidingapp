@@ -132,3 +132,18 @@ it('returns the form name and schema in the preview-entry response', function ()
         ->assertJsonPath('name', 'My Preview Form')
         ->assertJsonStructure(['schema', 'primary_color']);
 });
+
+it('strips the internal version suffix from the name in the preview-entry response', function () {
+    $user = User::factory()->create();
+
+    $type = ServiceRequestType::factory()->create();
+
+    $form = new ServiceRequestForm(['name' => 'Password Reset Form (3)']);
+    $form->type()->associate($type);
+    $form->save();
+
+    actingAs($user)
+        ->getJson(route('service-request-forms.preview-entry', ['serviceRequestForm' => $form]))
+        ->assertSuccessful()
+        ->assertJsonPath('name', 'Password Reset Form');
+});

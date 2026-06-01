@@ -36,11 +36,12 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends Factory<\AidingApp\ServiceManagement\Models\ServiceRequestForm>
+ * @extends Factory<ServiceRequestForm>
  */
 class ServiceRequestFormFactory extends Factory
 {

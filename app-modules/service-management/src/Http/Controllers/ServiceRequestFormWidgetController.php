@@ -78,7 +78,9 @@ class ServiceRequestFormWidgetController extends Controller
 
         return response()->json(
             [
-                'name' => $serviceRequestForm->name,
+                // Strip the internal version suffix (e.g. " (2)") so the preview heading
+                // stays clean across archived versions.
+                'name' => (string) preg_replace('/\s*\(\d+\)$/', '', (string) $serviceRequestForm->name),
                 'description' => $serviceRequestForm->description,
                 'is_authenticated' => false,
                 'schema' => $generateSchema($serviceRequestForm),

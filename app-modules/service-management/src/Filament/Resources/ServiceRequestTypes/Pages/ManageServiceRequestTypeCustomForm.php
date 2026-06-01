@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
@@ -57,6 +58,8 @@ use Illuminate\Support\Facades\Gate;
 
 class ManageServiceRequestTypeCustomForm extends EditRecord
 {
+    use EditPageRedirection;
+
     protected static string $resource = ServiceRequestTypeResource::class;
 
     protected static ?string $title = 'Custom Form';
@@ -132,16 +135,20 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
             $form->type()->associate($type);
         }
 
-        $form->name = "{$type->name} Form";
-        $form->is_wizard = $isWizard;
-        $form->save();
+        // Only new forms (a brand new type form, or a new version replacing an archived
+        // one) need a name. An in-place edit keeps the existing form's name. Each new form
+        // gets a distinct name so it never collides with a prior (archived) version.
+        if (! $form->exists) {
+            $form->fill(['name' => $this->resolveFormName($type)]);
+        }
+
+        $form->fill(['is_wizard' => $isWizard])->save();
 
         $form->fields()->delete();
         $form->steps()->delete();
 
         if ($isWizard) {
-            $form->content = null;
-            $form->save();
+            $form->fill(['content' => null])->save();
 
             $sort = 0;
 
@@ -155,15 +162,13 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
                 $content = $this->normalizeContent($stepState['content'] ?? null);
                 $content['content'] = $this->persistFields($form, $content['content'] ?? [], $step);
 
-                $step->content = $content;
-                $step->save();
+                $step->fill(['content' => $content])->save();
             }
         } else {
             $content = $this->normalizeContent($state['content'] ?? null);
             $content['content'] = $this->persistFields($form, $content['content'] ?? [], null);
 
-            $form->content = $content;
-            $form->save();
+            $form->fill(['content' => $content])->save();
         }
 
         $this->getServiceRequestType()->unsetRelation('form');
@@ -225,6 +230,26 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
     }
 
     /**
+     * Build a unique form name derived from the type, suffixing it when an existing
+     * (including archived or soft deleted) form already holds the base name. This keeps
+     * names readable while guaranteeing each archived version retains a distinct name.
+     */
+    protected function resolveFormName(ServiceRequestType $type): string
+    {
+        $base = "{$type->name} Form";
+
+        $name = $base;
+        $suffix = 1;
+
+        while (ServiceRequestForm::withTrashed()->where('name', $name)->exists()) {
+            $suffix++;
+            $name = "{$base} ({$suffix})";
+        }
+
+        return $name;
+    }
+
+    /**
      * @param array<int, array<string, mixed>> $components
      *
      * @return array<int, array<string, mixed>>
@@ -253,10 +278,12 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
             $field = new ServiceRequestFormField();
             $field->submissible()->associate($form);
             $field->step()->associate($step);
-            $field->label = $label;
-            $field->is_required = $isRequired;
-            $field->type = $blockType;
-            $field->config = $fieldConfig;
+            $field->fill([
+                'label' => $label,
+                'is_required' => $isRequired,
+                'type' => $blockType,
+                'config' => $fieldConfig,
+            ]);
             $field->save();
 
             $components[$key]['attrs']['config']['fieldId'] = $field->id;
