@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeFactory;
+use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
@@ -125,6 +126,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_ai_resolution_enabled',
         'is_live_chat_enabled',
         'max_simultaneous_chats',
+        'email_automatic_creation_contact_create_condition',
     ];
 
     public function serviceRequests(): HasManyThrough
@@ -308,6 +310,7 @@ class ServiceRequestType extends BaseModel implements Auditable
             'is_ai_resolution_enabled' => 'boolean',
             'is_live_chat_enabled' => 'boolean',
             'max_simultaneous_chats' => 'integer',
+            'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::class,
         ];
     }
 

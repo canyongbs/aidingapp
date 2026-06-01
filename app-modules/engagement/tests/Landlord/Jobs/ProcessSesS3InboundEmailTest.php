@@ -46,6 +46,7 @@ use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
 use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
+use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -1181,6 +1182,291 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->assertMissing('s3_email');
     });
+
+    describe('email_automatic_creation_contact_create_condition', function () {
+        it('None condition creates a new contact and service request when no contact exists, without requiring an organization', function () {
+            $tenant = Tenant::query()->firstOrFail();
+
+            assert($tenant instanceof Tenant);
+
+            [$serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+                seed(ContactTypeSeeder::class);
+
+                $serviceRequestType = ServiceRequestType::factory()
+                    ->has(
+                        TenantServiceRequestTypeDomain::factory()->state([
+                            'domain' => 'help',
+                        ]),
+                        'domain'
+                    )
+                    ->has(
+                        ServiceRequestPriority::factory()->count(3),
+                        'priorities'
+                    )
+                    ->create([
+                        'is_email_automatic_creation_enabled' => true,
+                        'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::None,
+                    ]);
+
+                $assignedPriority = $serviceRequestType->priorities->first();
+
+                $serviceRequestType->update([
+                    'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
+                ]);
+
+                return [$serviceRequestType, $assignedPriority];
+            });
+
+            Storage::fake('s3');
+            $filesystem = Storage::fake('s3-inbound-email');
+
+            assert($filesystem instanceof FilesystemAdapter);
+
+            $modulePath = resolve(ModulePath::class);
+
+            $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+            $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+            $filesystem->putFileAs('', $file, 's3_email');
+
+            /** @var ProcessSesS3InboundEmail $mock */
+            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+                $mock
+                    ->shouldAllowMockingProtectedMethods()
+                    ->shouldReceive('getContent')
+                    ->once()
+                    ->andReturn($content);
+            });
+
+            invade($mock)->emailFilePath = 's3_email';
+
+            $filesystem->assertExists('s3_email');
+
+            assertDatabaseEmpty(Contact::class);
+
+            $mock->handle();
+
+            $tenant->makeCurrent();
+
+            assertDatabaseEmpty(EngagementResponse::class);
+
+            $contacts = Contact::all();
+
+            expect($contacts)->toHaveCount(1);
+
+            $contact = $contacts->first();
+
+            assert($contact instanceof Contact);
+
+            expect($contact->email)->toBe('kevin.ullyott@canyongbs.com')
+                ->and($contact->first_name)->toBe('Kevin')
+                ->and($contact->last_name)->toBe('Ullyott')
+                ->and($contact->full_name)->toBe('Kevin Ullyott')
+                ->and($contact->organization_id)->toBeNull();
+
+            $serviceRequests = ServiceRequest::all();
+
+            expect($serviceRequests)->toHaveCount(1);
+
+            $serviceRequest = $serviceRequests->first();
+
+            assert($serviceRequest instanceof ServiceRequest);
+
+            expect($serviceRequest->title)->toBe('This is a test')
+                ->and($serviceRequest->close_details)->toContain('Hello there! This should be put in S3!')
+                ->and($serviceRequest->respondent->is($contact))->toBeTrue()
+                ->and($serviceRequest->priority->is($assignedPriority))->toBeTrue()
+                ->and($serviceRequest->priority->type->is($serviceRequestType))->toBeTrue();
+
+            $filesystem->assertMissing('s3_email');
+        });
+
+        it('None condition creates a new contact and service request even when a contact with that email already exists', function () {
+            $tenant = Tenant::query()->firstOrFail();
+
+            assert($tenant instanceof Tenant);
+
+            [$existingContact, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+                seed(ContactTypeSeeder::class);
+
+                $existingContact = Contact::factory()->create([
+                    'email' => 'kevin.ullyott@canyongbs.com',
+                ]);
+
+                $serviceRequestType = ServiceRequestType::factory()
+                    ->has(
+                        TenantServiceRequestTypeDomain::factory()->state([
+                            'domain' => 'help',
+                        ]),
+                        'domain'
+                    )
+                    ->has(
+                        ServiceRequestPriority::factory()->count(3),
+                        'priorities'
+                    )
+                    ->create([
+                        'is_email_automatic_creation_enabled' => true,
+                        'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::None,
+                    ]);
+
+                $assignedPriority = $serviceRequestType->priorities->first();
+
+                $serviceRequestType->update([
+                    'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
+                ]);
+
+                return [$existingContact, $serviceRequestType, $assignedPriority];
+            });
+
+            Storage::fake('s3');
+            $filesystem = Storage::fake('s3-inbound-email');
+
+            assert($filesystem instanceof FilesystemAdapter);
+
+            $modulePath = resolve(ModulePath::class);
+
+            $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+            $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+            $filesystem->putFileAs('', $file, 's3_email');
+
+            /** @var ProcessSesS3InboundEmail $mock */
+            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+                $mock
+                    ->shouldAllowMockingProtectedMethods()
+                    ->shouldReceive('getContent')
+                    ->once()
+                    ->andReturn($content);
+            });
+
+            invade($mock)->emailFilePath = 's3_email';
+
+            $filesystem->assertExists('s3_email');
+
+            $mock->handle();
+
+            $tenant->makeCurrent();
+
+            assertDatabaseEmpty(EngagementResponse::class);
+
+            // One pre-existing + one newly created contact
+            $contacts = Contact::all();
+
+            expect($contacts)->toHaveCount(2);
+
+            $newContact = $contacts->first(fn (Contact $c) => ! $c->is($existingContact));
+
+            assert($newContact instanceof Contact);
+
+            expect($newContact->email)->toBe('kevin.ullyott@canyongbs.com')
+                ->and($newContact->first_name)->toBe('Kevin')
+                ->and($newContact->last_name)->toBe('Ullyott')
+                ->and($newContact->full_name)->toBe('Kevin Ullyott');
+
+            // A service request is created for each contact in the resolved collection
+            $serviceRequests = ServiceRequest::all();
+
+            expect($serviceRequests)->toHaveCount(2);
+
+            $respondentIds = $serviceRequests->pluck('respondent_id')->sort()->values();
+            $expectedIds = collect([$existingContact->getKey(), $newContact->getKey()])->sort()->values();
+
+            expect($respondentIds)->toEqual($expectedIds);
+
+            $filesystem->assertMissing('s3_email');
+        });
+
+        it('IfEligible condition uses an existing contact without creating a new one', function () {
+            $tenant = Tenant::query()->firstOrFail();
+
+            assert($tenant instanceof Tenant);
+
+            [$existingContact, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+                $existingContact = Contact::factory()->create([
+                    'email' => 'kevin.ullyott@canyongbs.com',
+                ]);
+
+                $serviceRequestType = ServiceRequestType::factory()
+                    ->has(
+                        TenantServiceRequestTypeDomain::factory()->state([
+                            'domain' => 'help',
+                        ]),
+                        'domain'
+                    )
+                    ->has(
+                        ServiceRequestPriority::factory()->count(3),
+                        'priorities'
+                    )
+                    ->create([
+                        'is_email_automatic_creation_enabled' => true,
+                        'is_email_automatic_creation_contact_create_enabled' => true,
+                        'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::IfEligible,
+                    ]);
+
+                $assignedPriority = $serviceRequestType->priorities->first();
+
+                $serviceRequestType->update([
+                    'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
+                ]);
+
+                return [$existingContact, $serviceRequestType, $assignedPriority];
+            });
+
+            Storage::fake('s3');
+            $filesystem = Storage::fake('s3-inbound-email');
+
+            assert($filesystem instanceof FilesystemAdapter);
+
+            $modulePath = resolve(ModulePath::class);
+
+            $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+            $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+            $filesystem->putFileAs('', $file, 's3_email');
+
+            /** @var ProcessSesS3InboundEmail $mock */
+            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+                $mock
+                    ->shouldAllowMockingProtectedMethods()
+                    ->shouldReceive('getContent')
+                    ->once()
+                    ->andReturn($content);
+            });
+
+            invade($mock)->emailFilePath = 's3_email';
+
+            $filesystem->assertExists('s3_email');
+
+            $mock->handle();
+
+            $tenant->makeCurrent();
+
+            assertDatabaseEmpty(EngagementResponse::class);
+
+            // No new contact should have been created — existing contact is reused
+            $contacts = Contact::all();
+
+            expect($contacts)->toHaveCount(1)
+                ->and($contacts->first()->is($existingContact))->toBeTrue();
+
+            $serviceRequests = ServiceRequest::all();
+
+            expect($serviceRequests)->toHaveCount(1);
+
+            $serviceRequest = $serviceRequests->first();
+
+            assert($serviceRequest instanceof ServiceRequest);
+
+            expect($serviceRequest->respondent->is($existingContact))->toBeTrue()
+                ->and($serviceRequest->priority->is($assignedPriority))->toBeTrue()
+                ->and($serviceRequest->priority->type->is($serviceRequestType))->toBeTrue();
+
+            $filesystem->assertMissing('s3_email');
+        });
+    })->only();
 });
 
 describe('Legacy inbound email handling', function () {
