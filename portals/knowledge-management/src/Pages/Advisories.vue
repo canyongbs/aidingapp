@@ -33,6 +33,7 @@
 -->
 <script setup>
     import { onMounted, ref } from 'vue';
+    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
@@ -155,11 +156,9 @@
                 <p class="text-sm text-gray-500">
                     {{ advisory.description }}
                 </p>
-                <span
-                    class="bg-blue-100 text-blue-800 text-xs font-medium me-2 px-2.5 py-0.5 rounded-sm mb-5"
-                    v-if="advisory.status"
-                    >{{ advisory.status.name }}</span
-                >
+                <BaseBadge v-if="advisory.status" color="info" class="mb-5">
+                    {{ advisory.status.name }}
+                </BaseBadge>
                 <hr class="my-4" v-if="advisory.advisory_updates?.length" />
                 <ol class="relative border-s border-gray-200" v-if="advisory.advisory_updates?.length">
                     <li class="mb-8 ms-4" v-for="updateData in advisory.advisory_updates" :key="updateData.id">
