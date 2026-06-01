@@ -65,7 +65,8 @@ class StoreServiceRequestUpdateRequest extends FormRequest
             'description' => ['required', 'string', 'max:65535'],
             'serviceRequestId' => ['required', 'exists:service_requests,id'],
             'files' => ['nullable', 'array'],
-            'files.*' => ['file'],
+            'files.*.path' => ['required_with:files'],
+            'files.*.originalFileName' => ['required_with:files', 'string'],
         ];
     }
 }

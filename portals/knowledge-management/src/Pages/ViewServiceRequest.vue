@@ -111,7 +111,7 @@
         get(props.apiUrl + '/service-request/' + route.params.serviceRequestId, { page: page }).then((response) => {
             serviceRequest.value = response.data.serviceRequestDetails;
             serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
-            acceptedMimeTypes.value = (response.data.acceptedMimeTypes || []).join(',');
+            acceptedMimeTypes.value = response.data.acceptedMimeTypes || [];
             if (!fromPagination) {
                 loadingResults.value = false;
             }
@@ -123,20 +123,19 @@
         try {
             isSubmitting.value = true;
             const { post } = consumer();
-            const formData = new FormData();
 
-            formData.append('description', formValues.description);
-            formData.append('serviceRequestId', route.params.serviceRequestId);
+            let data = {
+                description: formValues.description,
+                serviceRequestId: route.params.serviceRequestId,
+            };
 
             if (formValues.files && formValues.files.length) {
-                formValues.files.forEach(({ file }, index) => {
-                    formData.append(`files[${index}]`, file);
-                });
+                data.files = formValues.files;
             }
 
-            const response = await post(props.apiUrl + '/service-request-update/store', formData, {
+            const response = await post(props.apiUrl + '/service-request-update/store', data, {
                 headers: {
-                    'Content-Type': 'multipart/form-data',
+                    'Content-Type': 'application/json',
                 },
             });
 
@@ -264,12 +263,14 @@
                     :classes="{ outer: 'mb-4', inner: 'max-w-full!', input: 'w-full h-32' }"
                 />
                 <FormKit
-                    type="file"
+                    type="upload"
                     name="files"
                     label="Upload files"
-                    multiple="true"
+                    :multiple="true"
                     :accept="acceptedMimeTypes"
                     :classes="{ outer: 'mb-4' }"
+                    :size="10"
+                    :upload-url="props.apiUrl + '/service-request/request-upload-url'"
                 />
                 <FormKit type="submit" label="Submit Update" :disabled="isSubmitting" :classes="{ input: 'mt-2' }" />
             </FormKit>

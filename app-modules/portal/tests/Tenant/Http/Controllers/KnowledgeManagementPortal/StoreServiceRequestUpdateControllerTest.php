@@ -38,8 +38,9 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Settings\LicenseSettings;
-use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\post;
@@ -65,11 +66,15 @@ it('validates the inputs', function (array $data, array $error) {
 
     actingAs($contact, 'contact');
 
+    $uuid = Str::uuid();
+    $tmpPath = "tmp/{$uuid}.pdf";
+    Storage::put($tmpPath, 'fake content');
+
     $formData = [
         'description' => 'This is a sample description.',
         'serviceRequestId' => $serviceRequestId,
         'files' => [
-            UploadedFile::fake()->create('testFile', 1000, 'text/plain'),
+            ['path' => $tmpPath, 'originalFileName' => 'document.pdf'],
         ],
     ];
 
@@ -91,8 +96,62 @@ it('validates the inputs', function (array $data, array $error) {
             ['files' => 10],
             ['files'],
         ],
-        'each item within files must be a file' => [
-            ['files' => [10]],
-            ['files.0'],
+        'each item within files must have path and originalFileName' => [
+            ['files' => [['invalid' => 'data']]],
+            ['files.0.path', 'files.0.originalFileName'],
         ],
     ]);
+
+it('stores a new service request update', function () {
+    Queue::fake();
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->knowledge_management_portal_service_management = true;
+    $portalSettings->save();
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    Storage::fake('s3');
+    asSuperAdmin();
+
+    $contact = Contact::factory()->create();
+
+    $serviceRequestId = ServiceRequest::factory(['respondent_id' => $contact->getKey()])->create()->getKey();
+
+    $contact->createToken('knowledge-management-portal-access-token');
+
+    actingAs($contact, 'contact');
+
+    $uuid = Str::uuid();
+    $tmpPath = "tmp/{$uuid}.pdf";
+    Storage::put($tmpPath, 'fake content');
+
+    $formData = [
+        'description' => 'This is a sample description.',
+        'serviceRequestId' => $serviceRequestId,
+        'files' => [
+            ['path' => $tmpPath, 'originalFileName' => 'document.pdf'],
+        ],
+    ];
+
+    post(route('api.portal.service-request-update.storeServiceRequestUpdate', ['serviceRequest' => $serviceRequestId]), $formData)
+        ->assertStatus(201)
+        ->assertJsonStructure([
+            'serviceRequestUpdates' => [
+                'data' => [
+                    '*' => [
+                        'id',
+                        'update',
+                        'created_by_type',
+                        'created_at',
+                        'media',
+                    ],
+                ],
+                'current_page',
+                'last_page',
+                'total',
+                'links',
+            ],
+        ]);
+});

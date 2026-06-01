@@ -37,10 +37,14 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Portal\Http\Requests\StoreServiceRequestUpdateRequest;
+use AidingApp\Portal\Jobs\PersistServiceRequestUpdateUpload;
+use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Bus;
 
 class StoreServiceRequestUpdateController extends Controller
 {
@@ -55,14 +59,9 @@ class StoreServiceRequestUpdateController extends Controller
 
         $serviceRequestUpdate->save();
 
-        if ($request->hasFile('files')) {
-            foreach ($request->file('files') as $file) {
-                $serviceRequestUpdate
-                    ->addMedia($file)
-                    ->toMediaCollection('uploads');
-            }
+        if (! empty($request->input('files'))) {
+            $this->dispatchFileUploads(collect($request->all()), $serviceRequestUpdate, new UploadsMediaCollection('uploads'));
         }
-
         $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
 
         $serviceRequestUpdates = $serviceRequest
@@ -81,5 +80,35 @@ class StoreServiceRequestUpdateController extends Controller
             });
 
         return response()->json(['serviceRequestUpdates' => $serviceRequestUpdates], 201);
+    }
+
+    /**
+     * @param Collection<string, mixed> $data
+     */
+    protected function dispatchFileUploads(
+        Collection $data,
+        ServiceRequestUpdate $serviceRequestUpdate,
+        UploadsMediaCollection $uploadsMediaCollection
+    ): void {
+        /** @var array<int, array{path: string, originalFileName: string}> $filesData */
+        $filesData = $data->pull('files', []);
+        $files = collect($filesData);
+
+        if (empty($files)) {
+            return;
+        }
+
+        Bus::batch([
+            ...$files->map(function (array $file) use ($uploadsMediaCollection, $serviceRequestUpdate) {
+                return new PersistServiceRequestUpdateUpload(
+                    $serviceRequestUpdate,
+                    $file['path'],
+                    $file['originalFileName'],
+                    $uploadsMediaCollection->getName(),
+                );
+            }),
+        ])
+            ->name("persist-service-request-uploads-{$serviceRequestUpdate->getKey()}")
+            ->dispatchAfterResponse();
     }
 }
