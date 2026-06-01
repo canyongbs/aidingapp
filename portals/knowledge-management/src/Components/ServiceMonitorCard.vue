@@ -48,7 +48,9 @@
     });
 </script>
 <template>
-    <div class="group flex w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5 transition duration-75 hover:bg-gray-50">
+    <div
+        class="group flex w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5 transition duration-75 hover:bg-gray-50"
+    >
         <div class="shrink-0 size-6" aria-hidden="true">
             <svg
                 v-if="status === true"
