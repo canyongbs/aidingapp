@@ -94,10 +94,6 @@ class StoreServiceRequestUpdateController extends Controller
         $filesData = $data->pull('files', []);
         $files = collect($filesData);
 
-        if (empty($files)) {
-            return;
-        }
-
         Bus::batch([
             ...$files->map(function (array $file) use ($uploadsMediaCollection, $serviceRequestUpdate) {
                 return new PersistServiceRequestUpdateUpload(
