@@ -30,7 +30,7 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->https://github.com/canyongbs/aidingapp/pull/1139
+-->
 <script setup>
     import { defineProps } from 'vue';
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';
