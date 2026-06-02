@@ -20,4 +20,4 @@ created: 2026-06-02
 - `app-modules/department/database/migrations/2026_06_02_143001_add_citext_unique_to_departments_name.php`
 - `app-modules/authorization/database/migrations/2026_06_02_143002_add_citext_unique_to_roles_name.php`
 - `database/migrations/2026_06_02_143003_add_citext_unique_to_users_email.php`
-For each: remove the `fixDuplicates()` call (in `up()`) and the `revertDuplicates()` call (in `down()`), plus the `$chunkSize` / `$usesSoftDeletes` / `$groupByColumns` / `$ignoreNullValues` helper properties. Do NOT remove the citext column conversion, the unique index, or the `user.import` permission — those are permanent.
+  For each: remove the `fixDuplicates()` call (in `up()`) and the `revertDuplicates()` call (in `down()`), plus the `$chunkSize` / `$usesSoftDeletes` / `$groupByColumns` / `$ignoreNullValues` helper properties. Do NOT remove the citext column conversion, the unique index, or the `user.import` permission — those are permanent.
