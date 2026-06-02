@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
 
+use AidingApp\Form\Enums\Rounding;
 use AidingApp\Form\Filament\Blocks\FormFieldBlockRegistry;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
@@ -44,10 +45,13 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
+use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\EditRecord;
@@ -87,6 +91,9 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
     {
         return $schema
             ->components([
+                Textarea::make('description')
+                    ->string()
+                    ->columnSpanFull(),
                 Toggle::make('is_wizard')
                     ->label('Multi-step service request form')
                     ->live(),
@@ -111,6 +118,13 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
                     ->visible(fn (Get $get): bool => (bool) $get('is_wizard'))
                     ->reorderable()
                     ->columnSpanFull(),
+                Section::make('Appearance')
+                    ->schema([
+                        ColorSelect::make('primary_color'),
+                        Select::make('rounding')
+                            ->options(Rounding::class),
+                    ])
+                    ->columns(),
             ]);
     }
 
@@ -142,7 +156,12 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
             $form->fill(['name' => $this->resolveFormName($type)]);
         }
 
-        $form->fill(['is_wizard' => $isWizard])->save();
+        $form->fill([
+            'description' => $state['description'] ?? null,
+            'is_wizard' => $isWizard,
+            'primary_color' => $state['primary_color'] ?? null,
+            'rounding' => $state['rounding'] ?? null,
+        ])->save();
 
         $form->fields()->delete();
         $form->steps()->delete();
@@ -214,7 +233,10 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
         $form = $this->getServiceRequestType()->form;
 
         $this->form->fill([
+            'description' => $form?->description,
             'is_wizard' => (bool) $form?->is_wizard,
+            'primary_color' => $form?->getAttribute('primary_color'),
+            'rounding' => $form?->rounding?->value,
             'content' => $form?->content,
             'steps' => $form
                 ? $form->steps()

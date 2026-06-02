@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Http\Controllers;
 
-use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFormKitSchema;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Http\Controllers\Controller;
@@ -74,8 +73,6 @@ class ServiceRequestFormWidgetController extends Controller
 
     public function preview(GenerateServiceRequestFormKitSchema $generateSchema, ServiceRequestForm $serviceRequestForm): JsonResponse
     {
-        $portalSettings = app(PortalSettings::class);
-
         return response()->json(
             [
                 // Strip the internal version suffix (e.g. " (2)") so the preview heading
@@ -84,11 +81,11 @@ class ServiceRequestFormWidgetController extends Controller
                 'description' => $serviceRequestForm->description,
                 'is_authenticated' => false,
                 'schema' => $generateSchema($serviceRequestForm),
-                'primary_color' => collect(Color::all()[$portalSettings->knowledge_management_portal_primary_color->value ?? 'blue'])
+                'primary_color' => collect(Color::all()[$serviceRequestForm->primary_color ?? 'blue'])
                     ->map(Color::convertToRgb(...))
                     ->map(fn (string $value): string => (string) str($value)->after('rgb(')->before(')'))
                     ->all(),
-                'rounding' => $portalSettings->knowledge_management_portal_rounding,
+                'rounding' => $serviceRequestForm->rounding,
             ],
         );
     }
