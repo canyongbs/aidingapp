@@ -42,6 +42,8 @@ enum ServiceRequestTypeEmailTemplateRole: string implements HasLabel
 {
     case Manager = 'manager';
 
+    case AssignedManager = 'assigned_manager';
+
     case Auditor = 'auditor';
 
     case Customer = 'customer';
@@ -50,6 +52,7 @@ enum ServiceRequestTypeEmailTemplateRole: string implements HasLabel
     {
         return match ($this) {
             self::Manager => 'All Manager',
+            self::AssignedManager => 'Assigned Manager',
             self::Auditor => 'Auditor',
             self::Customer => 'Customer',
         };

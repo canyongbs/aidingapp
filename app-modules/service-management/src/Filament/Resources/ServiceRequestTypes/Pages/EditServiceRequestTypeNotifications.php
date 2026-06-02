@@ -229,19 +229,15 @@ class EditServiceRequestTypeNotifications extends EditRecord
     {
         $attributes = [];
 
-        foreach (['managers', 'auditors', 'customers'] as $role) {
-            foreach (
-                [
-                    'service_request_created',
-                    'service_request_assigned',
-                    'service_request_update',
-                    'service_request_status_change',
-                    'service_request_closed',
-                    'survey_response',
-                ] as $event
-            ) {
-                $attributes[] = "is_{$role}_{$event}_email_enabled";
-                $attributes[] = "is_{$role}_{$event}_notification_enabled";
+        foreach (ServiceRequestTypeEmailTemplateRole::cases() as $templateRole) {
+            $roleSlug = $templateRole->value . 's';
+
+            foreach (ServiceRequestEmailTemplateType::cases() as $templateType) {
+                $eventSlug = $this->getEventSlug($templateType);
+
+                foreach (ServiceRequestNotificationChannel::cases() as $channel) {
+                    $attributes[] = "is_{$roleSlug}_{$eventSlug}_{$channel->value}_enabled";
+                }
             }
         }
 

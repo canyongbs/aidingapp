@@ -39,14 +39,22 @@
 
     $isDisabled = $isDisabled();
     $statePath = $getStatePath();
+    $roleCount = count(ServiceRequestTypeEmailTemplateRole::cases());
+    $channelCount = count(ServiceRequestNotificationChannel::cases());
 @endphp
 
 <div class="divide-gray-950/5 grid xl:divide-y dark:divide-white/10">
+    <style>
+        @media (min-width: 1280px) {
+            .matrix-xl-roles { grid-template-columns: repeat({{ $roleCount }}, minmax(0, 1fr)); }
+        }
+    </style>
     {{-- Role group column headers --}}
     <div class="divide-gray-950/5 hidden xl:flex xl:divide-x xl:divide-y-0 dark:divide-white/10">
         <div class="flex-1"></div>
 
-        <div class="divide-gray-950/5 grid grid-cols-3 gap-0 divide-x text-xs dark:divide-white/10">
+        <div class="divide-gray-950/5 grid gap-0 divide-x text-xs dark:divide-white/10"
+             style="grid-template-columns: repeat({{ $roleCount }}, minmax(0, 1fr))">
             @foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role)
                 <div class="flex w-32 items-center justify-center p-2 text-gray-950 dark:text-white">
                     {{ $role->getLabel() }}s
@@ -59,7 +67,8 @@
     <div class="divide-gray-950/5 hidden xl:flex xl:divide-x xl:divide-y-0 dark:divide-white/10">
         <div class="flex-1"></div>
 
-        <div class="divide-gray-950/5 grid grid-cols-6 divide-x text-xs dark:divide-white/10">
+        <div class="divide-gray-950/5 grid divide-x text-xs dark:divide-white/10"
+             style="grid-template-columns: repeat({{ $roleCount * $channelCount }}, minmax(0, 1fr))">
             @foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role)
                 @foreach (ServiceRequestNotificationChannel::cases() as $channel)
                     <div class="flex w-16 items-center justify-center p-2 text-center text-gray-950 dark:text-white">
@@ -90,7 +99,7 @@
                 </div>
 
                 <div
-                    class="divide-gray-950/5 grid grid-cols-1 gap-3 px-3 py-2 text-sm xl:grid-cols-3 xl:gap-0 xl:divide-x xl:px-0 xl:py-0 dark:divide-white/10"
+                    class="matrix-xl-roles divide-gray-950/5 grid grid-cols-1 gap-3 px-3 py-2 text-sm xl:gap-0 xl:divide-x xl:px-0 xl:py-0 dark:divide-white/10"
                 >
                     @foreach (ServiceRequestTypeEmailTemplateRole::cases() as $templateRole)
                         @php
@@ -107,8 +116,7 @@
                                     @php
                                         $shouldShow = ! (
                                             $templateType === ServiceRequestEmailTemplateType::SurveyResponse &&
-                                            ($templateRole !== ServiceRequestTypeEmailTemplateRole::Customer ||
-                                                $channel === ServiceRequestNotificationChannel::Notification)
+                                            $channel === ServiceRequestNotificationChannel::Notification
                                         );
                                     @endphp
 
