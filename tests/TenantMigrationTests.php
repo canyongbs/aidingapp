@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Console\Command\Command;
 
-function columnUdtName(string $table, string $column): ?string
+function columnNativeType(string $table, string $column): ?string
 {
     return DB::selectOne(
         'SELECT udt_name FROM information_schema.columns WHERE table_name = ? AND column_name = ?',
@@ -112,7 +112,7 @@ describe('2026_06_02_143001_add_citext_unique_to_departments_name', function () 
 
                 $names = DB::table('departments')->pluck('name');
 
-                expect(columnUdtName('departments', 'name'))->toBe('citext')
+                expect(columnNativeType('departments', 'name'))->toBe('citext')
                     ->and($names)->toContain('Sales')
                     ->and($names)->toContain('sales-2');
             }
@@ -138,7 +138,7 @@ describe('2026_06_02_143002_add_citext_unique_to_roles_name', function () {
                 $webNames = DB::table('roles')->where('guard_name', 'web')->pluck('name');
                 $apiNames = DB::table('roles')->where('guard_name', 'api')->pluck('name');
 
-                expect(columnUdtName('roles', 'name'))->toBe('citext')
+                expect(columnNativeType('roles', 'name'))->toBe('citext')
                     ->and($webNames)->toContain('Editor')
                     ->and($webNames)->toContain('editor-2')
                     ->and($apiNames)->toContain('editor');
@@ -164,7 +164,7 @@ describe('2026_06_02_143003_add_citext_unique_to_users_email', function () {
 
                 $emails = DB::table('users')->pluck('email');
 
-                expect(columnUdtName('users', 'email'))->toBe('citext')
+                expect(columnNativeType('users', 'email'))->toBe('citext')
                     ->and($emails)->toContain('dup@example.com')
                     ->and($emails)->toContain('DUP@EXAMPLE.COM-2')
                     ->and(DB::table('users')->whereNull('email')->count())->toBe(2);
