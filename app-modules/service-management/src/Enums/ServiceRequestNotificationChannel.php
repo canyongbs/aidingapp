@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -37,55 +37,18 @@
 namespace AidingApp\ServiceManagement\Enums;
 
 use Filament\Support\Contracts\HasLabel;
-use Illuminate\Support\Str;
 
-enum ServiceRequestEmailTemplateType: string implements HasLabel
+enum ServiceRequestNotificationChannel: string implements HasLabel
 {
-    case Created = 'created';
+    case Email = 'email';
 
-    case Assigned = 'assigned';
-
-    case Update = 'update';
-
-    case StatusChange = 'status_change';
-
-    case Closed = 'closed';
-
-    case SurveyResponse = 'survey_response';
+    case Notification = 'notification';
 
     public function getLabel(): string
     {
-        return Str::headline($this->value);
-    }
-
-    /**
-     * Returns the slug used in settings keys and legacy boolean column names
-     * (e.g. "service_request_created", "survey_response").
-     */
-    public function getEventSlug(): string
-    {
         return match ($this) {
-            self::Created => 'service_request_created',
-            self::Assigned => 'service_request_assigned',
-            self::Update => 'service_request_update',
-            self::StatusChange => 'service_request_status_change',
-            self::Closed => 'service_request_closed',
-            self::SurveyResponse => 'survey_response',
-        };
-    }
-
-    /**
-     * Returns the human-readable label used in the notifications matrix UI.
-     */
-    public function getViewLabel(): string
-    {
-        return match ($this) {
-            self::Created => 'Service Request Created',
-            self::Assigned => 'Service Request Assigned',
-            self::Update => 'Service Request Update',
-            self::StatusChange => 'Service Request Status Change',
-            self::Closed => 'Service Request Closed',
-            self::SurveyResponse => 'Survey Response',
+            self::Email => 'Email',
+            self::Notification => 'App',
         };
     }
 }
