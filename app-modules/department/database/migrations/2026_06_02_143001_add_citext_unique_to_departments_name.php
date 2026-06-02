@@ -56,7 +56,7 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             /*
-             * TODO: Citext name-uniqueness cleanup — once this migration has run in all environments:
+             * TODO: UserImportExportFeature cleanup — once this migration has run in all environments:
              * - Remove the $this->fixDuplicates() call below
              * - Remove the $this->revertDuplicates() call in down()
              * - Remove the $chunkSize property
