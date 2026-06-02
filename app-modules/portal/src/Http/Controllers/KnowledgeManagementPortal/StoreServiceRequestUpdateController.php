@@ -38,7 +38,6 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Portal\Http\Requests\StoreServiceRequestUpdateRequest;
 use AidingApp\Portal\Jobs\PersistServiceRequestUpdateUpload;
-use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Http\Controllers\Controller;
@@ -60,7 +59,7 @@ class StoreServiceRequestUpdateController extends Controller
         $serviceRequestUpdate->save();
 
         if (! empty($request->input('files'))) {
-            $this->dispatchFileUploads(collect($request->all()), $serviceRequestUpdate, new UploadsMediaCollection('uploads'));
+            $this->dispatchFileUploads(collect($request->all()), $serviceRequestUpdate);
         }
 
         $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
@@ -89,19 +88,18 @@ class StoreServiceRequestUpdateController extends Controller
     protected function dispatchFileUploads(
         Collection $data,
         ServiceRequestUpdate $serviceRequestUpdate,
-        UploadsMediaCollection $uploadsMediaCollection
     ): void {
         /** @var array<int, array{path: string, originalFileName: string}> $filesData */
         $filesData = $data->pull('files', []);
         $files = collect($filesData);
 
         Bus::batch([
-            ...$files->map(function (array $file) use ($uploadsMediaCollection, $serviceRequestUpdate) {
+            ...$files->map(function (array $file) use ($serviceRequestUpdate) {
                 return new PersistServiceRequestUpdateUpload(
                     $serviceRequestUpdate,
                     $file['path'],
                     $file['originalFileName'],
-                    $uploadsMediaCollection->getName(),
+                    'uploads',
                 );
             }),
         ])
