@@ -35,7 +35,9 @@
 */
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Models\SystemUser;
+use App\Models\User;
 use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\getJson;
@@ -105,3 +107,88 @@ it('returns correct service request fields', function (string $responseKey, Clos
     '`close_details`' => ['close_details', fn (ServiceRequest $sr) => $sr->close_details],
     '`category`' => ['category', fn (ServiceRequest $sr) => $sr->category->value],
 ]);
+
+it('returns correct status relationship structure', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+
+    $response = getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false));
+    $response->assertOk();
+
+    expect($response['data']['status'])->toBe([
+        'id' => $serviceRequest->status_id,
+        'name' => $serviceRequest->status->name,
+    ]);
+});
+
+it('returns correct priority relationship structure', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+
+    $response = getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false));
+    $response->assertOk();
+
+    expect($response['data']['priority'])->toBe([
+        'id' => $serviceRequest->priority_id,
+        'name' => $serviceRequest->priority->name,
+    ]);
+});
+
+it('returns correct respondent relationship structure', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+
+    $response = getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false));
+    $response->assertOk();
+
+    expect($response['data']['respondent'])->toBe([
+        'id' => $serviceRequest->respondent->id,
+        'name' => $serviceRequest->respondent->full_name,
+    ]);
+});
+
+it('returns correct assignee relationship structure', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
+
+    $assigneeUser = User::factory()->create();
+    $serviceRequest = ServiceRequest::factory()->create();
+    $serviceRequest->priority->type->managerUsers()->attach($assigneeUser);
+
+    ServiceRequestAssignment::factory()->create([
+        'service_request_id' => $serviceRequest->id,
+        'user_id' => $assigneeUser->id,
+    ]);
+
+    Sanctum::actingAs($user, ['api']);
+
+    $response = getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false));
+    $response->assertOk();
+
+    expect($response['data']['assignee'])->toBe([
+        'id' => $assigneeUser->id,
+        'name' => $assigneeUser->name,
+    ]);
+});
+
+it('returns null assignee when no assignment exists', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+
+    $response = getJson(route('api.v1.service-requests.show', ['serviceRequest' => $serviceRequest], false));
+    $response->assertOk();
+
+    expect($response['data']['assignee'])->toBeNull();
+});

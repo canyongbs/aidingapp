@@ -66,14 +66,14 @@ class ServiceRequestResource extends JsonResource
             ],
             'assignee' => $this->resource->assignedTo ? [
                 'id' => $this->resource->assignedTo->user_id,
-                'name' => $this->resource->assignedTo->user->name,
+                'name' => $this->resource->assignedTo->user?->name,
             ] : null,
-            'requestor/respondent' => [
+            'respondent' => $this->resource->respondent ? [
                 'id' => $this->resource->respondent->id,
                 'name' => $this->resource->respondent->full_name,
-            ],
+            ] : null,
             'close_details' => $this->resource->close_details,
-            'category' => $this->resource->category->value,
+            'category' => $this->resource->category?->value,
             'created_at' => $this->resource->created_at,
             'updated_at' => $this->resource->updated_at,
         ];
