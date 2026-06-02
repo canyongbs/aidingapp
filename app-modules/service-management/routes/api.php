@@ -35,8 +35,8 @@
 */
 
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ListServiceRequestsController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ViewServiceRequestController;
 use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\UpdateServiceRequestsController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ViewServiceRequestController;
 use Illuminate\Support\Facades\Route;
 
 Route::api(majorVersion: 1, routes: function () {
