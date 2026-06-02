@@ -45,7 +45,6 @@ return new class () extends Migration {
      */
     private array $permissions = [
         'user.import' => 'User',
-        'user.export' => 'User',
     ];
 
     /**

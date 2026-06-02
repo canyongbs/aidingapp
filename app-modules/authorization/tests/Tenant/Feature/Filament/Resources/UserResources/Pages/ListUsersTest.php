@@ -177,3 +177,25 @@ it('can filter users by departments', function () {
         ->assertCanSeeTableRecords($userWithDepartment1->merge($userWithDepartment2))
         ->assertCanNotSeeTableRecords($userWithoutDepartment);
 });
+
+it('shows the import and export header actions to a user with the user.import permission', function () {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('user.view-any', 'user.*.view', 'user.import');
+    actingAs($user);
+
+    livewire(ListUsers::class)
+        ->assertActionVisible('import')
+        ->assertActionVisible('export');
+});
+
+it('hides the import and export header actions from a user without the user.import permission', function () {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('user.view-any', 'user.*.view');
+    actingAs($user);
+
+    livewire(ListUsers::class)
+        ->assertActionHidden('import')
+        ->assertActionHidden('export');
+});

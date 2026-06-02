@@ -134,7 +134,7 @@ class ListUsers extends ListRecords
                 ->authorize('import', User::class),
             ExportAction::make()
                 ->exporter(UserExporter::class)
-                ->authorize('export', User::class),
+                ->authorize('import', User::class),
             CreateAction::make(),
         ];
     }
