@@ -111,7 +111,7 @@ services:
             - aidingapp-pgsql
 
     aidingapp-redis:
-        image: 'redis:alpine'
+        image: 'redis:7.4-alpine@sha256:6ab0b6e7381779332f97b8ca76193e45b0756f38d4c0dcda72dbb3c32061ab99'
         ports:
             - '${FORWARD_REDIS_PORT:-63793}:6379'
         volumes:
@@ -136,7 +136,7 @@ services:
             - 'traefik.http.services.aidingapp-mailpit.loadbalancer.server.scheme=http'
 
     aidingapp-pgsql:
-        image: 'postgres:16.8'
+        image: 'postgres:16.8@sha256:301bcb60b8a3ee4ab7e147932723e3abd1cef53516ce5210b39fd9fe5e3602ae'
         command: postgres -c max_locks_per_transaction=256
         ports:
             - '${FORWARD_DB_PORT:-5434}:5432'
