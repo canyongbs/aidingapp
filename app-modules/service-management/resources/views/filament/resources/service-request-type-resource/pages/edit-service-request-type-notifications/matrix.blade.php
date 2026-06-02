@@ -73,7 +73,10 @@
     {{-- Event rows --}}
     <div class="divide-gray-950/5 grid divide-y dark:divide-white/10">
         @foreach (ServiceRequestEmailTemplateType::cases() as $templateType)
-            @php $eventSlug = $templateType->getEventSlug(); @endphp
+            @php
+                $eventSlug = $templateType->getEventSlug();
+            @endphp
+
             <div
                 class="divide-gray-950/5 flex flex-col divide-y xl:flex-row xl:divide-x xl:divide-y-0 dark:divide-white/10"
             >
@@ -90,11 +93,12 @@
                     class="divide-gray-950/5 grid grid-cols-1 gap-3 px-3 py-2 text-sm xl:grid-cols-3 xl:gap-0 xl:divide-x xl:px-0 xl:py-0 dark:divide-white/10"
                 >
                     @foreach (ServiceRequestTypeEmailTemplateRole::cases() as $templateRole)
-                        @php $roleSlug = $templateRole->value . 's'; @endphp
+                        @php
+                            $roleSlug = $templateRole->value . "s";
+                        @endphp
+
                         <div class="flex flex-col gap-1 xl:w-32">
-                            <div class="xl:hidden">
-                                {{ $templateRole->getLabel() }}s
-                            </div>
+                            <div class="xl:hidden">{{ $templateRole->getLabel() }}s</div>
 
                             <div
                                 class="divide-gray-950/5 grid h-full grid-cols-2 gap-1 xl:gap-0 xl:divide-x dark:divide-white/10"
@@ -102,11 +106,9 @@
                                 @foreach (ServiceRequestNotificationChannel::cases() as $channel)
                                     @php
                                         $shouldShow = ! (
-                                            $templateType === ServiceRequestEmailTemplateType::SurveyResponse
-                                            && (
-                                                $templateRole !== ServiceRequestTypeEmailTemplateRole::Customer
-                                                || $channel === ServiceRequestNotificationChannel::Notification
-                                            )
+                                            $templateType === ServiceRequestEmailTemplateType::SurveyResponse &&
+                                            ($templateRole !== ServiceRequestTypeEmailTemplateRole::Customer ||
+                                                $channel === ServiceRequestNotificationChannel::Notification)
                                         );
                                     @endphp
 
