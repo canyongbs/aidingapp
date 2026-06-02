@@ -59,6 +59,14 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
+            /*
+             * TODO: Citext name-uniqueness cleanup — once this migration has run in all environments:
+             * - Remove the $this->fixDuplicates() call below
+             * - Remove the $this->revertDuplicates() call in down()
+             * - Remove the $chunkSize property
+             * - Remove the $usesSoftDeletes property
+             * - Remove the $groupByColumns property
+             */
             $this->fixDuplicates();
 
             DB::statement('ALTER TABLE roles DROP CONSTRAINT IF EXISTS roles_name_guard_name_unique');

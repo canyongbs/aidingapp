@@ -49,11 +49,11 @@ function exportUserRow(User $user): array
         'name' => 'Name',
         'email' => 'Email address',
         'job_title' => 'Job title',
+        'is_external' => 'External User',
         'work_number' => 'Work Number',
         'work_extension' => 'Work Extension',
         'mobile' => 'Mobile number',
         'department.name' => 'Department',
-        'is_external' => 'External User',
         'roles' => 'Assigned Role',
     ];
 
@@ -90,11 +90,11 @@ it('exports all user fields, the department name, and roles joined with a pipe',
     expect($row[0])->toBe('Jonathan Smith')
         ->and($row[1])->toBe('jonathan@example.com')
         ->and($row[2])->toBe('Advisor')
-        ->and($row[3])->toBe('+1 555 123 4567')
-        ->and((string) $row[4])->toBe('123')
-        ->and($row[5])->toBe('+1 555 987 6543')
-        ->and($row[6])->toBe('Engineering')
-        ->and($row[7])->toBe('false');
+        ->and($row[3])->toBe('false')
+        ->and($row[4])->toBe('+1 555 123 4567')
+        ->and((string) $row[5])->toBe('123')
+        ->and($row[6])->toBe('+1 555 987 6543')
+        ->and($row[7])->toBe('Engineering');
 
     expect(explode('|', $row[8]))
         ->toContain('Manager')
@@ -104,7 +104,7 @@ it('exports all user fields, the department name, and roles joined with a pipe',
 it('exports is_external as true for external users', function () {
     $user = User::factory()->create(['is_external' => true]);
 
-    expect(exportUserRow($user)[7])->toBe('true');
+    expect(exportUserRow($user)[3])->toBe('true');
 });
 
 it('exports a blank roles value when the user has no web-guard roles', function () {

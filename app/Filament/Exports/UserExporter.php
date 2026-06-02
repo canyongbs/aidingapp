@@ -54,6 +54,9 @@ class UserExporter extends Exporter
                 ->label('Email address'),
             ExportColumn::make('job_title')
                 ->label('Job title'),
+            ExportColumn::make('is_external')
+                ->label('External User')
+                ->state(fn (User $record): string => $record->is_external ? 'true' : 'false'),
             ExportColumn::make('work_number')
                 ->label('Work Number'),
             ExportColumn::make('work_extension')
@@ -62,9 +65,6 @@ class UserExporter extends Exporter
                 ->label('Mobile number'),
             ExportColumn::make('department.name')
                 ->label('Department'),
-            ExportColumn::make('is_external')
-                ->label('External User')
-                ->state(fn (User $record): string => $record->is_external ? 'true' : 'false'),
             ExportColumn::make('roles')
                 ->label('Assigned Role')
                 ->state(fn (User $record): string => $record->roles->where('guard_name', 'web')->pluck('name')->implode('|')),

@@ -36,6 +36,7 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Features\UserImportExportFeature;
 use App\Filament\Exports\UserExporter;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\Actions\AssignDepartmentBulkAction;
@@ -133,7 +134,9 @@ class ListUsers extends ListRecords
                 ->importer(UserImporter::class)
                 ->authorize('import', User::class),
             ExportAction::make()
+                ->label('Export')
                 ->exporter(UserExporter::class)
+                ->visible(fn (): bool => UserImportExportFeature::active())
                 ->authorize('import', User::class),
             CreateAction::make(),
         ];
