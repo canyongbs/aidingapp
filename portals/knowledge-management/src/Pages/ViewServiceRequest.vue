@@ -78,7 +78,7 @@
     const fromRecord = ref(0);
     const toRecord = ref(0);
     const isSubmitting = ref(false);
-    const acceptedMimeTypes = ref('');
+    const acceptedMimeTypes = ref([]);
     const updateFormKey = ref(0);
 
     const setPagination = (pagination) => {

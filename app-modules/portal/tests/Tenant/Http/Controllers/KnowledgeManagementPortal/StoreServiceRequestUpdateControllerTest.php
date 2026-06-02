@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\post;
+use function Pest\Laravel\postJson;
 use function Tests\asSuperAdmin;
 
 it('validates the inputs', function (array $data, array $error) {
@@ -80,8 +80,8 @@ it('validates the inputs', function (array $data, array $error) {
 
     $formData = array_merge($formData, $data);
 
-    post(route('api.portal.service-request-update.storeServiceRequestUpdate', ['serviceRequest' => $serviceRequestId]), $formData)
-        ->assertSessionHasErrors($error);
+    postJson(route('api.portal.service-request-update.storeServiceRequestUpdate', ['serviceRequest' => $serviceRequestId]), $formData)
+        ->assertJsonValidationErrors($error);
 })
     ->with([
         'description is required' => [
@@ -135,7 +135,7 @@ it('stores a new service request update', function () {
         ],
     ];
 
-    post(route('api.portal.service-request-update.storeServiceRequestUpdate', ['serviceRequest' => $serviceRequestId]), $formData)
+    postJson(route('api.portal.service-request-update.storeServiceRequestUpdate', ['serviceRequest' => $serviceRequestId]), $formData)
         ->assertStatus(201)
         ->assertJsonStructure([
             'serviceRequestUpdates' => [

@@ -62,6 +62,7 @@ class StoreServiceRequestUpdateController extends Controller
         if (! empty($request->input('files'))) {
             $this->dispatchFileUploads(collect($request->all()), $serviceRequestUpdate, new UploadsMediaCollection('uploads'));
         }
+
         $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
 
         $serviceRequestUpdates = $serviceRequest
