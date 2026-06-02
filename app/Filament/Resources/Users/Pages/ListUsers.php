@@ -36,6 +36,7 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use App\Filament\Exports\UserExporter;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\Actions\AssignDepartmentBulkAction;
 use App\Filament\Resources\Users\Actions\AssignRolesBulkAction;
@@ -46,6 +47,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
@@ -130,6 +132,9 @@ class ListUsers extends ListRecords
             ImportAction::make()
                 ->importer(UserImporter::class)
                 ->authorize('import', User::class),
+            ExportAction::make()
+                ->exporter(UserExporter::class)
+                ->authorize('export', User::class),
             CreateAction::make(),
         ];
     }

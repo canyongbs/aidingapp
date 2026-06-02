@@ -66,6 +66,22 @@ class UserPolicy
         );
     }
 
+    public function import(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'user.import',
+            denyResponse: 'You do not have permission to import users.',
+        );
+    }
+
+    public function export(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'user.export',
+            denyResponse: 'You do not have permission to export users.',
+        );
+    }
+
     public function update(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
