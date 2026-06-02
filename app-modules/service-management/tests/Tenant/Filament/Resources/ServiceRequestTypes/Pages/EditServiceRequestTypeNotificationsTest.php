@@ -52,21 +52,33 @@ use function Tests\asSuperAdmin;
 
 /**
  * Returns the complete settings array mirroring every checkbox the matrix view
- * renders. SurveyResponse + Notification combinations are intentionally absent
- * because the view's $shouldShow logic prevents those checkboxes from existing.
+ * renders. For SurveyResponse, only the Customer × Email checkbox is visible;
+ * all other SurveyResponse combinations are hidden by the blade $shouldShow logic.
  */
 function allNotificationSettings(bool $enabled = false): array
 {
     $settings = [];
 
+    // Role slugs that are fully hidden for SurveyResponse (all channels hidden).
+    $surveyHiddenRoleSlugs = ['managers', 'auditors', 'assigned_managers'];
+
     foreach (ServiceRequestEmailTemplateType::cases() as $templateType) {
         foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role) {
             $roleSlug = $role->value . 's';
             $eventSlug = $templateType->getEventSlug();
+            $isSurveyResponse = $templateType === ServiceRequestEmailTemplateType::SurveyResponse;
 
             foreach (ServiceRequestNotificationChannel::cases() as $channel) {
+                // Mirror blade $shouldShow exclusion logic exactly:
+                // SurveyResponse hides all channels for non-Customer roles.
+                if ($isSurveyResponse && in_array($roleSlug, $surveyHiddenRoleSlugs)) {
+                    continue;
+                }
+
+                // SurveyResponse hides Notification even for Customer.
                 if (
-                    $templateType === ServiceRequestEmailTemplateType::SurveyResponse
+                    $isSurveyResponse
+                    && $role === ServiceRequestTypeEmailTemplateRole::Customer
                     && $channel === ServiceRequestNotificationChannel::Notification
                 ) {
                     continue;
@@ -81,19 +93,23 @@ function allNotificationSettings(bool $enabled = false): array
 }
 
 /**
- * Counts how many preference rows should exist when all visible checkboxes are saved:
- * (roles × events × channels) minus (roles × SurveyResponse × Notification).
+ * Counts how many preference rows should exist when all visible checkboxes are saved.
+ * SurveyResponse contributes exactly 1 row (Customer × Email); all other SurveyResponse
+ * combinations are excluded by the blade $shouldShow logic.
  */
 function expectedTotalPreferenceCount(): int
 {
     $roles = count(ServiceRequestTypeEmailTemplateRole::cases());
-    $events = count(ServiceRequestEmailTemplateType::cases());
+    $nonSurveyEvents = count(ServiceRequestEmailTemplateType::cases()) - 1;
     $channels = count(ServiceRequestNotificationChannel::cases());
 
-    // SurveyResponse × Notification is hidden for every role
-    $excluded = $roles * 1 * 1;
+    // Non-SurveyResponse: all roles × all non-survey events × all channels
+    $nonSurveyTotal = $roles * $nonSurveyEvents * $channels;
 
-    return ($roles * $events * $channels) - $excluded;
+    // SurveyResponse: only Customer × Email is visible
+    $surveyTotal = 1;
+
+    return $nonSurveyTotal + $surveyTotal;
 }
 
 // ---------------------------------------------------------------------------
@@ -212,11 +228,21 @@ test('saving upserts all visible matrix combinations into the pivot table', func
 
     assertDatabaseCount('service_request_type_email_preference', expectedTotalPreferenceCount());
 
+    $surveyHiddenRoleSlugs = ['managers', 'auditors', 'assigned_managers'];
+
     foreach (ServiceRequestEmailTemplateType::cases() as $templateType) {
         foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role) {
+            $roleSlug = $role->value . 's';
+            $isSurveyResponse = $templateType === ServiceRequestEmailTemplateType::SurveyResponse;
+
             foreach (ServiceRequestNotificationChannel::cases() as $channel) {
+                if ($isSurveyResponse && in_array($roleSlug, $surveyHiddenRoleSlugs)) {
+                    continue;
+                }
+
                 if (
-                    $templateType === ServiceRequestEmailTemplateType::SurveyResponse
+                    $isSurveyResponse
+                    && $role === ServiceRequestTypeEmailTemplateRole::Customer
                     && $channel === ServiceRequestNotificationChannel::Notification
                 ) {
                     continue;
@@ -304,42 +330,50 @@ test('saving updates an existing disabled preference to enabled', function () {
 // SurveyResponse edge cases
 // ---------------------------------------------------------------------------
 
-test('survey response email preferences are stored for all roles including assigned manager', function () {
+test('survey response email preference is only stored for the customer role', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
-
-    $surveyEmailSettings = [];
-
-    foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role) {
-        $surveyEmailSettings["is_{$role->value}s_survey_response_email_enabled"] = true;
-    }
 
     asSuperAdmin();
 
     livewire(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
-        ->fillForm(['settings' => $surveyEmailSettings])
+        ->fillForm(['settings' => allNotificationSettings(enabled: true)])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role) {
-        assertDatabaseHas(ServiceRequestTypeEmailPreference::class, [
-            'service_request_type_id' => $serviceRequestType->getKey(),
-            'service_request_email_template_type' => ServiceRequestEmailTemplateType::SurveyResponse->value,
-            'service_request_email_template_role' => $role->value,
-            'notification_channel' => ServiceRequestNotificationChannel::Email->value,
-            'is_enabled' => true,
-        ]);
+    // Only Customer × Email must exist for SurveyResponse.
+    assertDatabaseHas(ServiceRequestTypeEmailPreference::class, [
+        'service_request_type_id' => $serviceRequestType->getKey(),
+        'service_request_email_template_type' => ServiceRequestEmailTemplateType::SurveyResponse->value,
+        'service_request_email_template_role' => ServiceRequestTypeEmailTemplateRole::Customer->value,
+        'notification_channel' => ServiceRequestNotificationChannel::Email->value,
+        'is_enabled' => true,
+    ]);
+
+    // All other roles must have no SurveyResponse row at all.
+    $hiddenRoles = [
+        ServiceRequestTypeEmailTemplateRole::Manager,
+        ServiceRequestTypeEmailTemplateRole::AssignedManager,
+        ServiceRequestTypeEmailTemplateRole::Auditor,
+    ];
+
+    foreach ($hiddenRoles as $role) {
+        foreach (ServiceRequestNotificationChannel::cases() as $channel) {
+            assertDatabaseMissing(ServiceRequestTypeEmailPreference::class, [
+                'service_request_type_id' => $serviceRequestType->getKey(),
+                'service_request_email_template_type' => ServiceRequestEmailTemplateType::SurveyResponse->value,
+                'service_request_email_template_role' => $role->value,
+            ]);
+        }
     }
 });
 
-test('survey response notification combinations are never written to the pivot table', function () {
+test('survey response notification channel is never written to the pivot table for any role', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin();
 
-    // Submit all visible settings — SurveyResponse+Notification keys are absent from the
-    // allNotificationSettings() array, so mutateFormDataBeforeSave skips them entirely.
     livewire(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])

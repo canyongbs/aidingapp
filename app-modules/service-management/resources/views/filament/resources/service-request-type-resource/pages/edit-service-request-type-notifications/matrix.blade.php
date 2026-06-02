@@ -120,9 +120,11 @@
                             >
                                 @foreach (ServiceRequestNotificationChannel::cases() as $channel)
                                     @php
+                                        $isSurveyResponse = $templateType === ServiceRequestEmailTemplateType::SurveyResponse;
+                                        $typeSlug = $channel->value;
                                         $shouldShow = ! (
-                                            $templateType === ServiceRequestEmailTemplateType::SurveyResponse &&
-                                            $channel === ServiceRequestNotificationChannel::Notification
+                                            ($isSurveyResponse && in_array($roleSlug, ['managers', 'auditors', 'assigned_managers'])) ||
+                                            ($isSurveyResponse && $roleSlug === 'customers' && $typeSlug === 'notification')
                                         );
                                     @endphp
 
