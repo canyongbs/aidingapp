@@ -44,7 +44,7 @@ use Illuminate\Support\Str;
 
 return new class () extends Migration {
     /**
-     * 
+     *
      * @var array<string, array{0: string, 1: string, 2: string}>
      */
     private array $columnMap = [
