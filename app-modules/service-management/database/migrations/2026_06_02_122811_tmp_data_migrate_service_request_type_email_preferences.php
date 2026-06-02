@@ -44,11 +44,7 @@ use Illuminate\Support\Str;
 
 return new class () extends Migration {
     /**
-     * Maps each legacy boolean column on service_request_types to its
-     * corresponding (role, type, channel) tuple in the pivot table.
-     *
-     * Tuple: [ServiceRequestTypeEmailTemplateRole value, ServiceRequestEmailTemplateType value, ServiceRequestNotificationChannel value]
-     *
+     * 
      * @var array<string, array{0: string, 1: string, 2: string}>
      */
     private array $columnMap = [
