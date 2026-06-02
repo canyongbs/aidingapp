@@ -32,11 +32,11 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import LoadingSpinner from './LoadingSpinner.vue';
+    import LoadingSpinner from '../../../../resources/js/components/LoadingSpinner.vue';
 </script>
 
 <template>
-    <div class="app-loading">
+    <div class="h-screen flex items-center justify-center">
         <LoadingSpinner label="Loading help center..." />
     </div>
 </template>

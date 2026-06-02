@@ -33,22 +33,3 @@
 */
 
 @reference './portal.css';
-
-.app-loading {
-    @apply h-screen flex items-center justify-center gap-2;
-}
-
-.app-loading-icon {
-    @apply h-5 w-5 shrink-0;
-    animation: spin 1s linear infinite;
-}
-
-.app-loading-label {
-    @apply font-medium;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}

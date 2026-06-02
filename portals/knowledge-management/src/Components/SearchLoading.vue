@@ -32,11 +32,9 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import LoadingSpinner from './LoadingSpinner.vue';
+    import LoadingSpinner from '../../../../resources/js/components/LoadingSpinner.vue';
 </script>
 
 <template>
-    <div class="flex items-center justify-center gap-2">
-        <LoadingSpinner label="Searching help center..." />
-    </div>
+    <LoadingSpinner label="Searching help center..." />
 </template>

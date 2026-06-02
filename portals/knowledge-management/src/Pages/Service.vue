@@ -33,6 +33,7 @@
 -->
 <script setup>
     import { defineProps } from 'vue';
+    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import ResourceList from '../Components/ResourceList.vue';
     import ResourceListItem from '../Components/ResourceListItem.vue';
@@ -71,12 +72,9 @@
                 <template #secondary>{{ serviceRequest.number }}</template>
                 <template #description>Last Updated: {{ serviceRequest.updated_at }}</template>
                 <template #badge>
-                    <span
-                        class="inline-flex items-center rounded px-2 py-0.5 text-xs font-bold text-white"
-                        :style="serviceRequest.status_color ? { backgroundColor: serviceRequest.status_color } : {}"
-                    >
+                    <BaseBadge v-if="serviceRequest.status_name" :color="serviceRequest.status_color?.toLowerCase()">
                         {{ serviceRequest.status_name }}
-                    </span>
+                    </BaseBadge>
                 </template>
             </ResourceListItem>
         </ResourceList>

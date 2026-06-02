@@ -35,11 +35,11 @@
     import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/vue/16/solid';
     import axios from 'axios';
     import { ref } from 'vue';
+    import LoadingSpinner from '../../../../../resources/js/components/LoadingSpinner.vue';
     import { useServiceRequestTypes } from '../../composables/useServiceRequestTypes.js';
     import { getAuthHeaders } from '../../utils/token.js';
     import BaseTab from '../BaseTab.vue';
     import BaseTabs from '../BaseTabs.vue';
-    import LoadingSpinner from '../LoadingSpinner.vue';
     import ServiceRequestCategoryTree from '../ServiceRequestCategoryTree.vue';
     import TypeSelectFooter from './TypeSelectFooter.vue';
 

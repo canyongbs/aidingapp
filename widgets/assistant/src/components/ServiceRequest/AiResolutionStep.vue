@@ -36,6 +36,7 @@
     import axios from 'axios';
     import { onMounted, ref } from 'vue';
     import BaseButton from '../../../../../resources/js/components/BaseButton.vue';
+    import LoadingSpinner from '../../../../../resources/js/components/LoadingSpinner.vue';
     import { useMarkdown } from '../../composables/useMarkdown.js';
     import { getAuthHeaders } from '../../utils/token.js';
 
@@ -133,15 +134,12 @@
             <!-- Loading state -->
             <div
                 v-if="isLoading || (!proposedAnswer && isSubmitting)"
-                class="flex-1 flex flex-col items-center justify-center gap-3 text-gray-400"
+                class="flex-1 flex items-center justify-center text-gray-400"
             >
-                <svg class="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                <span class="text-sm">{{
-                    isSubmitting ? 'Submitting your request…' : 'Evaluating your request…'
-                }}</span>
+                <LoadingSpinner
+                    :label="isSubmitting ? 'Submitting your request…' : 'Evaluating your request…'"
+                    size="lg"
+                />
             </div>
 
             <!-- Resolution available -->

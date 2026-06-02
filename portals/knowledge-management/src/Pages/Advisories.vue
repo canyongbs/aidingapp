@@ -33,13 +33,13 @@
 -->
 <script setup>
     import { onMounted, ref } from 'vue';
+    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';
+    import LoadingSpinner from '../../../../resources/js/components/LoadingSpinner.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
-    import LoadingSpinner from '../Components/LoadingSpinner.vue';
     import Page from '../Components/Page.vue';
     import ResourceList from '../Components/ResourceList.vue';
-    import ResourceListItem from '../Components/ResourceListItem.vue';
     import { consumer } from '../Services/Consumer';
 
     const advisories = ref([]);
@@ -150,19 +150,37 @@
         </div>
 
         <ResourceList v-else-if="advisories.length > 0">
-            <ResourceListItem v-for="(advisory, index) in advisories" :key="advisory.id || index">
-                <template #primary>
-                    <span :class="severityTextColor(advisory.severity)">{{ advisory.title }}</span>
-                </template>
-                <template #description>{{ formatDate(advisory.created_at) }}</template>
-                <template v-if="advisory.status" #badge>
-                    <span
-                        class="inline-flex items-center rounded-sm bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800"
-                    >
+            <li v-for="(advisory, index) in advisories" :key="advisory.id || index" class="px-6 py-4">
+                <div class="flex items-start justify-between gap-4">
+                    <div class="min-w-0 flex-1">
+                        <h3 class="text-sm font-semibold" :class="severityTextColor(advisory.severity)">
+                            {{ advisory.title }}
+                        </h3>
+                        <p v-if="advisory.description" class="mt-1 text-sm text-gray-500">
+                            {{ advisory.description }}
+                        </p>
+                        <time class="mt-1 block text-xs text-gray-400">{{ formatDate(advisory.created_at) }}</time>
+                    </div>
+                    <BaseBadge v-if="advisory.status" color="blue" class="shrink-0">
                         {{ advisory.status.name }}
-                    </span>
+                    </BaseBadge>
+                </div>
+
+                <template v-if="advisory.advisory_updates?.length">
+                    <hr class="mt-4" />
+                    <ol class="relative mt-4 border-s border-gray-200">
+                        <li v-for="updateData in advisory.advisory_updates" :key="updateData.id" class="mb-8 ms-4">
+                            <div
+                                class="absolute w-3 h-3 bg-gray-200 rounded-lg mt-1.5 -inset-s-1.5 border border-white"
+                            ></div>
+                            <time class="mb-1 block text-sm font-normal leading-none text-gray-400">{{
+                                formatDate(updateData.created_at)
+                            }}</time>
+                            <p class="mt-1 text-sm text-gray-700">{{ updateData.update }}</p>
+                        </li>
+                    </ol>
                 </template>
-            </ResourceListItem>
+            </li>
 
             <template #footer>
                 <div v-if="loading" class="flex justify-center py-4">
