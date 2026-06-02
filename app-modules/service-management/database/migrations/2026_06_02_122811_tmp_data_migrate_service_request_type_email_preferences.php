@@ -52,7 +52,6 @@ return new class () extends Migration {
      * @var array<string, array{0: string, 1: string, 2: string}>
      */
     private array $columnMap = [
-        // --- Email channel ---
 
         // Managers — email
         'is_managers_service_request_created_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Created->value,      ServiceRequestNotificationChannel::Email->value],
@@ -68,16 +67,13 @@ return new class () extends Migration {
         'is_auditors_service_request_status_change_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::StatusChange->value, ServiceRequestNotificationChannel::Email->value],
         'is_auditors_service_request_closed_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Closed->value,       ServiceRequestNotificationChannel::Email->value],
 
-        // Customers — email (survey_response is email-only; managers/auditors have no survey_response email column)
+        // Customers — email 
         'is_customers_service_request_created_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Created->value,       ServiceRequestNotificationChannel::Email->value],
         'is_customers_service_request_assigned_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Assigned->value,      ServiceRequestNotificationChannel::Email->value],
         'is_customers_service_request_update_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Update->value,        ServiceRequestNotificationChannel::Email->value],
         'is_customers_service_request_status_change_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::StatusChange->value,  ServiceRequestNotificationChannel::Email->value],
         'is_customers_service_request_closed_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Closed->value,        ServiceRequestNotificationChannel::Email->value],
         'is_customers_survey_response_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::SurveyResponse->value, ServiceRequestNotificationChannel::Email->value],
-
-        // --- Notification (in-app) channel ---
-        // survey_response has no notification column for any role.
 
         // Managers — notification
         'is_managers_service_request_created_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Created->value,      ServiceRequestNotificationChannel::Notification->value],
@@ -107,8 +103,6 @@ return new class () extends Migration {
             $now = now();
             $selectColumns = array_merge(['id'], array_keys($this->columnMap));
 
-            // lazyById streams rows in chunks of 100, avoiding memory issues on large datasets.
-            // DB::table() queries the raw table, so soft-deleted records are included automatically.
             DB::table('service_request_types')
                 ->select($selectColumns)
                 ->lazyById(100)
@@ -140,8 +134,7 @@ return new class () extends Migration {
     {
         DB::transaction(function (): void {
             ServiceRequestTypeEmailPreferenceFeature::deactivate();
-            // Remove all preference rows whose service_request_type_id still exists
-            // (covers both active and soft-deleted service request types).
+            
             DB::table('service_request_type_email_preference')
                 ->whereIn(
                     'service_request_type_id',

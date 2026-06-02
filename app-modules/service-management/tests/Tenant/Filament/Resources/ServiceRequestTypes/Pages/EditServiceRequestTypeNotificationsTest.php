@@ -6,7 +6,7 @@
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
     Aiding App® is licensed under the Elastic License 2.0. For more details,
-    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+    see <https:
 
     Notice:
 
@@ -29,7 +29,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+    <https:
 
 </COPYRIGHT>
 */
@@ -50,16 +50,10 @@ use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-/**
- * Returns the complete settings array mirroring every checkbox the matrix view
- * renders. For SurveyResponse, only the Customer × Email checkbox is visible;
- * all other SurveyResponse combinations are hidden by the blade $shouldShow logic.
- */
 function allNotificationSettings(bool $enabled = false): array
 {
     $settings = [];
 
-    // Role slugs that are fully hidden for SurveyResponse (all channels hidden).
     $surveyHiddenRoleSlugs = ['managers', 'auditors', 'assigned_managers'];
 
     foreach (ServiceRequestEmailTemplateType::cases() as $templateType) {
@@ -69,13 +63,10 @@ function allNotificationSettings(bool $enabled = false): array
             $isSurveyResponse = $templateType === ServiceRequestEmailTemplateType::SurveyResponse;
 
             foreach (ServiceRequestNotificationChannel::cases() as $channel) {
-                // Mirror blade $shouldShow exclusion logic exactly:
-                // SurveyResponse hides all channels for non-Customer roles.
                 if ($isSurveyResponse && in_array($roleSlug, $surveyHiddenRoleSlugs)) {
                     continue;
                 }
-
-                // SurveyResponse hides Notification even for Customer.
+                
                 if (
                     $isSurveyResponse
                     && $role === ServiceRequestTypeEmailTemplateRole::Customer
@@ -102,19 +93,11 @@ function expectedTotalPreferenceCount(): int
     $roles = count(ServiceRequestTypeEmailTemplateRole::cases());
     $nonSurveyEvents = count(ServiceRequestEmailTemplateType::cases()) - 1;
     $channels = count(ServiceRequestNotificationChannel::cases());
-
-    // Non-SurveyResponse: all roles × all non-survey events × all channels
     $nonSurveyTotal = $roles * $nonSurveyEvents * $channels;
-
-    // SurveyResponse: only Customer × Email is visible
     $surveyTotal = 1;
 
     return $nonSurveyTotal + $surveyTotal;
 }
-
-// ---------------------------------------------------------------------------
-// Rendering
-// ---------------------------------------------------------------------------
 
 test('A successful action on the EditServiceRequestTypeNotifications page', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -133,10 +116,6 @@ test('A successful action on the EditServiceRequestTypeNotifications page', func
         ->call('save')
         ->assertHasNoFormErrors();
 });
-
-// ---------------------------------------------------------------------------
-// Fill (mutateFormDataBeforeFill)
-// ---------------------------------------------------------------------------
 
 test('form is pre-filled with enabled preferences loaded from the pivot table', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -184,10 +163,6 @@ test('form is pre-filled with assigned manager preferences loaded from the pivot
     ])
         ->assertSet('data.settings.is_assigned_managers_service_request_assigned_email_enabled', true);
 });
-
-// ---------------------------------------------------------------------------
-// Save (mutateFormDataBeforeSave + afterSave)
-// ---------------------------------------------------------------------------
 
 test('saving creates a new preference row for a single combination', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -326,10 +301,6 @@ test('saving updates an existing disabled preference to enabled', function () {
     ]);
 });
 
-// ---------------------------------------------------------------------------
-// SurveyResponse edge cases
-// ---------------------------------------------------------------------------
-
 test('survey response email preference is only stored for the customer role', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
@@ -342,7 +313,7 @@ test('survey response email preference is only stored for the customer role', fu
         ->call('save')
         ->assertHasNoFormErrors();
 
-    // Only Customer × Email must exist for SurveyResponse.
+    
     assertDatabaseHas(ServiceRequestTypeEmailPreference::class, [
         'service_request_type_id' => $serviceRequestType->getKey(),
         'service_request_email_template_type' => ServiceRequestEmailTemplateType::SurveyResponse->value,
@@ -350,8 +321,7 @@ test('survey response email preference is only stored for the customer role', fu
         'notification_channel' => ServiceRequestNotificationChannel::Email->value,
         'is_enabled' => true,
     ]);
-
-    // All other roles must have no SurveyResponse row at all.
+    
     $hiddenRoles = [
         ServiceRequestTypeEmailTemplateRole::Manager,
         ServiceRequestTypeEmailTemplateRole::AssignedManager,
@@ -390,10 +360,6 @@ test('survey response notification channel is never written to the pivot table f
         ]);
     }
 });
-
-// ---------------------------------------------------------------------------
-// Access control
-// ---------------------------------------------------------------------------
 
 test('EditServiceRequestTypeNotifications is gated with proper access control', function () {
     $user = User::factory()->create();

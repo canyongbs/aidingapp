@@ -51,7 +51,6 @@
             }
         }
     </style>
-    {{-- Role group column headers --}}
     <div class="divide-gray-950/5 hidden xl:flex xl:divide-x xl:divide-y-0 dark:divide-white/10">
         <div class="flex-1"></div>
 
@@ -67,7 +66,6 @@
         </div>
     </div>
 
-    {{-- Channel column sub-headers --}}
     <div class="divide-gray-950/5 hidden xl:flex xl:divide-x xl:divide-y-0 dark:divide-white/10">
         <div class="flex-1"></div>
 
@@ -85,7 +83,6 @@
         </div>
     </div>
 
-    {{-- Event rows --}}
     <div class="divide-gray-950/5 grid divide-y dark:divide-white/10">
         @foreach (ServiceRequestEmailTemplateType::cases() as $templateType)
             @php

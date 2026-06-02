@@ -95,14 +95,12 @@ class EditServiceRequestTypeNotifications extends EditRecord
         $record = $this->getRecord();
         assert($record instanceof ServiceRequestType);
 
-        // TODO: Remove this block when ServiceRequestTypeEmailPreferenceFeature is removed.
         if (! ServiceRequestTypeEmailPreferenceFeature::active()) {
             $data['settings'] = $record->only($this->generateLegacySettingsAttributeList());
 
             return $data;
         }
 
-        // Eagerly load all preferences (both channels) for this service request type.
         $preferences = $record->emailPreferences()->get();
 
         $settings = [];
@@ -119,9 +117,6 @@ class EditServiceRequestTypeNotifications extends EditRecord
                             && $preference->notification_channel === $channel,
                     );
 
-                    // Only set the key when a pivot row actually exists for this combination.
-                    // Missing combinations (e.g. survey_response + notification) are simply
-                    // absent from the settings array so the blade view can skip them naturally.
                     if ($preference !== null) {
                         $settings["is_{$roleSlug}_{$eventSlug}_{$channel->value}_enabled"] = $preference->is_enabled;
                     }
@@ -141,7 +136,6 @@ class EditServiceRequestTypeNotifications extends EditRecord
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        // TODO: Remove this block when ServiceRequestTypeEmailPreferenceFeature is removed.
         if (! ServiceRequestTypeEmailPreferenceFeature::active()) {
             $data = [
                 ...$data,
@@ -170,8 +164,6 @@ class EditServiceRequestTypeNotifications extends EditRecord
                 foreach (ServiceRequestNotificationChannel::cases() as $channel) {
                     $key = "is_{$roleSlug}_{$eventSlug}_{$channel->value}_enabled";
 
-                    // Skip combinations that have no checkbox in the matrix
-                    // (e.g. survey_response + notification for any role).
                     if (! array_key_exists($key, $settings)) {
                         continue;
                     }
@@ -187,8 +179,6 @@ class EditServiceRequestTypeNotifications extends EditRecord
             }
         }
 
-        // Nothing from the notification/email checkboxes is written to the model anymore;
-        // all preferences live in the pivot table.
         unset($data['settings']);
 
         return $data;
@@ -196,7 +186,6 @@ class EditServiceRequestTypeNotifications extends EditRecord
 
     protected function afterSave(): void
     {
-        // TODO: Remove this guard when ServiceRequestTypeEmailPreferenceFeature is removed.
         if (! ServiceRequestTypeEmailPreferenceFeature::active()) {
             return;
         }
@@ -208,21 +197,12 @@ class EditServiceRequestTypeNotifications extends EditRecord
         );
     }
 
-    /**
-     * Returns the event slug for the given template type.
-     * Delegates to the enum method to avoid duplication.
-     */
     private function getEventSlug(ServiceRequestEmailTemplateType $type): string
     {
         return $type->getEventSlug();
     }
 
-    /**
-     * Returns the combined list of all email + notification boolean attribute names
-     * that are stored directly on the service_request_types table (legacy behaviour).
-     *
-     * TODO: Remove this method when ServiceRequestTypeEmailPreferenceFeature is removed.
-     *
+     /*
      * @return array<int, string>
      */
     private function generateLegacySettingsAttributeList(): array

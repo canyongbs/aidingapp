@@ -251,17 +251,6 @@ class ServiceRequestType extends BaseModel implements Auditable
         return $this->hasMany(ServiceRequestTypeEmailPreference::class, 'service_request_type_id');
     }
 
-    /**
-     * Checks whether a notification/email should be dispatched for the given
-     * combination of event type, role and channel.
-     *
-     * When ServiceRequestTypeEmailPreferenceFeature is active the pivot table is
-     * consulted; otherwise the legacy boolean columns on this model are read.
-     * The emailPreferences relationship is lazy-loaded once and cached on the
-     * model instance, so repeated calls within the same request are cheap.
-     *
-     * TODO: Remove the feature-flag guard when ServiceRequestTypeEmailPreferenceFeature is removed.
-     */
     public function isPreferenceEnabled(
         ServiceRequestEmailTemplateType $templateType,
         ServiceRequestTypeEmailTemplateRole $role,

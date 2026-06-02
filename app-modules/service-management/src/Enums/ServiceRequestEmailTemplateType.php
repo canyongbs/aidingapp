@@ -58,10 +58,6 @@ enum ServiceRequestEmailTemplateType: string implements HasLabel
         return Str::headline($this->value);
     }
 
-    /**
-     * Returns the slug used in settings keys and legacy boolean column names
-     * (e.g. "service_request_created", "survey_response").
-     */
     public function getEventSlug(): string
     {
         return match ($this) {
@@ -73,10 +69,7 @@ enum ServiceRequestEmailTemplateType: string implements HasLabel
             self::SurveyResponse => 'survey_response',
         };
     }
-
-    /**
-     * Returns the human-readable label used in the notifications matrix UI.
-     */
+    
     public function getViewLabel(): string
     {
         return match ($this) {
