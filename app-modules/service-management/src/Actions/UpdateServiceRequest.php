@@ -34,17 +34,29 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ListServiceRequestsController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ViewServiceRequestController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\UpdateServiceRequestsController;
-use Illuminate\Support\Facades\Route;
+namespace AidingApp\ServiceManagement\Actions;
 
-Route::api(majorVersion: 1, routes: function () {
-    Route::name('service-requests.')
-        ->prefix('service-requests')
-        ->group(function () {
-            Route::get('/', ListServiceRequestsController::class)->name('index');
-            Route::get('/{serviceRequest}', ViewServiceRequestController::class)->name('show');
-            Route::patch('/{serviceRequest}', UpdateServiceRequestsController::class)->name('update');
-        });
-});
+use AidingApp\ServiceManagement\DataTransferObjects\UpdateServiceRequestData;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Illuminate\Support\Arr;
+
+class UpdateServiceRequest
+{
+    public function execute(ServiceRequest $serviceRequest, UpdateServiceRequestData $data): ServiceRequest
+    {
+        $dataArray = $data->toArray();
+        $newData = Arr::except($dataArray, ['assigned_to_id']);
+        $serviceRequest->fill($newData)->save();
+
+        if ($dataArray['assigned_to_id'] ?? null) {
+            $serviceRequest->assignments()->create([
+                'user_id' => $dataArray['assigned_to_id'],
+                'assigned_at' => now(),
+                'status' => ServiceRequestAssignmentStatus::Active,
+            ]);
+        }
+
+        return $serviceRequest;
+    }
+}

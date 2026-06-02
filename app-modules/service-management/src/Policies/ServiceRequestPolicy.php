@@ -112,7 +112,7 @@ class ServiceRequestPolicy
         }
         $user = auth()->user();
 
-        if (! $user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin() && ! $user instanceof SystemUser) {
             $department = $user->department;
 
             if (! ($serviceRequest->priority?->type?->managerDepartments?->contains('id', $department?->getKey()) || $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey()))) {

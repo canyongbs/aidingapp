@@ -34,17 +34,34 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ListServiceRequestsController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ViewServiceRequestController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\UpdateServiceRequestsController;
-use Illuminate\Support\Facades\Route;
+namespace AidingApp\ServiceManagement\DataTransferObjects;
 
-Route::api(majorVersion: 1, routes: function () {
-    Route::name('service-requests.')
-        ->prefix('service-requests')
-        ->group(function () {
-            Route::get('/', ListServiceRequestsController::class)->name('index');
-            Route::get('/{serviceRequest}', ViewServiceRequestController::class)->name('show');
-            Route::patch('/{serviceRequest}', UpdateServiceRequestsController::class)->name('update');
-        });
-});
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Optional;
+
+class UpdateServiceRequestData extends Data
+{
+    public function __construct(
+        public string | Optional $status_id,
+        public string | Optional $priority_id,
+        public string | Optional $close_details,
+        public string | Optional $assigned_to_id,
+        public ServiceRequestCategory | Optional $category, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
+    ) {}
+
+    public static function fromData(array $data): static
+    {
+        return new self(
+            status_id: $data['status_id'] ?? Optional::create(),
+            priority_id: $data['priority_id'] ?? Optional::create(),
+            close_details: $data['close_details'] ?? Optional::create(),
+            assigned_to_id: $data['assigned_to_id'] ?? Optional::create(),
+            category: isset($data['category'])
+            ? ($data['category'] instanceof ServiceRequestCategory
+              ? $data['category']
+              : ServiceRequestCategory::from($data['category']))
+            : Optional::create(),
+        );
+    }
+}
