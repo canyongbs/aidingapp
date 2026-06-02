@@ -41,6 +41,16 @@ use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
+    /**
+     * TODO: Cleanup KnowledgeBaseCategorySortFeature:
+     *
+     * 1. Remove the data backfill blocks (parent categories + sub categories loops)
+     *    -> Delete everything between the first Schema::table() and the second Schema::table()
+     * 2. Remove the second Schema::table() call that changes sort to non-nullable
+     *    -> Delete: Schema::table('knowledge_base_categories', function (Blueprint $table) { $table->integer('sort')->default(0)->nullable(false)->change(); });
+     * 3. Change the first Schema::table() to add sort as non-nullable with default(0)
+     *    -> Change to: $table->integer('sort')->default(0);
+     */
     public function up(): void
     {
         DB::transaction(function () {
@@ -49,44 +59,38 @@ return new class () extends Migration {
                 $table->index('sort');
             });
 
-            // TODO: Cleanup - Remove this backfill block and change the column above to non-nullable with default 0
-            // Backfill sort for parent categories (those without a parent_id)
-            $parentCategories = DB::table('knowledge_base_categories')
+            $sortIndex = 0;
+            DB::table('knowledge_base_categories')
                 ->whereNull('parent_id')
-                ->whereNull('deleted_at')
                 ->orderBy('name')
-                ->get();
+                ->each(function (object $category) use (&$sortIndex) {
+                    $sortIndex++;
 
-            foreach ($parentCategories as $index => $category) {
-                DB::table('knowledge_base_categories')
-                    ->where('id', $category->id)
-                    ->update(['sort' => $index + 1]);
-            }
-
-            // TODO: Cleanup - Remove this backfill block
-            // Backfill sort for sub categories (grouped by parent_id)
-            $parentIds = DB::table('knowledge_base_categories')
-                ->whereNotNull('parent_id')
-                ->whereNull('deleted_at')
-                ->distinct()
-                ->pluck('parent_id');
-
-            foreach ($parentIds as $parentId) {
-                $subCategories = DB::table('knowledge_base_categories')
-                    ->where('parent_id', $parentId)
-                    ->whereNull('deleted_at')
-                    ->orderBy('name')
-                    ->get();
-
-                foreach ($subCategories as $index => $category) {
                     DB::table('knowledge_base_categories')
                         ->where('id', $category->id)
-                        ->update(['sort' => $index + 1]);
-                }
-            }
+                        ->update(['sort' => $sortIndex]);
+                });
 
-            // TODO: Cleanup - Remove this schema change (column should be non-nullable from the start)
-            // Now make the column non-nullable
+            DB::table('knowledge_base_categories')
+                ->whereNotNull('parent_id')
+                ->distinct()
+                ->select('parent_id')
+                ->orderBy('parent_id')
+                ->each(function (object $row) {
+                    $subSortIndex = 0;
+
+                    DB::table('knowledge_base_categories')
+                        ->where('parent_id', $row->parent_id)
+                        ->orderBy('name')
+                        ->each(function (object $category) use (&$subSortIndex) {
+                            $subSortIndex++;
+
+                            DB::table('knowledge_base_categories')
+                                ->where('id', $category->id)
+                                ->update(['sort' => $subSortIndex]);
+                        });
+                });
+
             Schema::table('knowledge_base_categories', function (Blueprint $table) {
                 $table->integer('sort')->default(0)->nullable(false)->change();
             });
