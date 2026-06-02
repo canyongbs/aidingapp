@@ -61,7 +61,7 @@
         >
             @foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role)
                 <div class="flex w-32 items-center justify-center p-2 text-gray-950 dark:text-white">
-                    {{ $role->getLabel() }}s
+                    {{ $role->getLabel() }}
                 </div>
             @endforeach
         </div>

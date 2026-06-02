@@ -51,10 +51,10 @@ enum ServiceRequestTypeEmailTemplateRole: string implements HasLabel
     public function getLabel(): string
     {
         return match ($this) {
-            self::Manager => 'All Manager',
+            self::Manager => 'All Managers',
             self::AssignedManager => 'Assigned Manager',
-            self::Auditor => 'Auditor',
-            self::Customer => 'Customer',
+            self::Auditor => 'Auditors',
+            self::Customer => 'Customers',
         };
     }
 }
