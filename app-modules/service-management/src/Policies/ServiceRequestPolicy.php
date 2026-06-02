@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
 use App\Models\Authenticatable;
+use App\Models\SystemUser;
 use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
@@ -69,7 +70,7 @@ class ServiceRequestPolicy
     {
         $user = auth()->user();
 
-        if (! $user->isSuperAdmin()) {
+        if (! $user->isSuperAdmin() && ! ($user instanceof SystemUser)) {
             $department = $user->department;
 
             if (! ($serviceRequest->priority?->type?->managerDepartments?->contains('id', $department?->getKey()) ||

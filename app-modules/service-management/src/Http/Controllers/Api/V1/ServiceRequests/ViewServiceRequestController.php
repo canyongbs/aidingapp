@@ -34,48 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Http\Resources\Api\V1;
+namespace AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests;
 
+use AidingApp\ServiceManagement\Http\Resources\Api\V1\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use Illuminate\Http\Request;
+use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Gate;
 
-/**
- * @property ServiceRequest $resource
- */
-class ServiceRequestResource extends JsonResource
+class ViewServiceRequestController
 {
     /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
+     * @response ServiceRequestResource
      */
-    public function toArray(Request $request): array
+    #[Group('Service Requests')]
+    public function __invoke(ServiceRequest $serviceRequest): JsonResource
     {
-        return [
-            'id' => $this->resource->id,
-            'service_request_number' => $this->resource->service_request_number,
-            'title' => $this->resource->title,
-            'status' => [
-                'id' => $this->resource->status_id,
-                'name' => $this->resource->status?->name,
-            ],
-            'priority' => [
-                'id' => $this->resource->priority_id,
-                'name' => $this->resource->priority?->name,
-            ],
-            'assignee' => $this->resource->assignedTo ? [
-                'id' => $this->resource->assignedTo->user_id,
-                'name' => $this->resource->assignedTo->user?->name,
-            ] : null,
-            'respondent' => $this->resource->respondent ? [
-                'id' => $this->resource->respondent->id,
-                'name' => $this->resource->respondent->full_name,
-            ] : null,
-            'close_details' => $this->resource->close_details,
-            'category' => $this->resource->category?->value,
-            'created_at' => $this->resource->created_at,
-            'updated_at' => $this->resource->updated_at,
-        ];
+        Gate::authorize('viewAny', ServiceRequest::class);
+        Gate::authorize('view', $serviceRequest);
+
+        $serviceRequest->loadMissing(['status', 'priority', 'assignedTo.user', 'respondent']);
+
+        return $serviceRequest
+            ->toResource(ServiceRequestResource::class);
     }
 }
