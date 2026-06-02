@@ -34,35 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use Database\Factories\SystemUserFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Sanctum\HasApiTokens;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\ServiceManagement\Http\Resources\Api\V1\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Gate;
 
-/**
- * @mixin IdeHelperSystemUser
- */
-class SystemUser extends Authenticatable implements Auditable
+class ViewServiceRequestController
 {
-    use SoftDeletes;
-    use HasUuids;
-    use AuditableTrait;
-    use HasApiTokens;
-
-    /** @use HasFactory<SystemUserFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-    ];
-
-    public function isSuperAdmin(): bool
+    /**
+     * @response ServiceRequestResource
+     */
+    #[Group('Service Requests')]
+    public function __invoke(ServiceRequest $serviceRequest): JsonResource
     {
-        return false;
+        Gate::authorize('viewAny', ServiceRequest::class);
+        Gate::authorize('view', $serviceRequest);
+
+        $serviceRequest->loadMissing(['status', 'priority', 'assignedTo.user', 'respondent']);
+
+        return $serviceRequest
+            ->toResource(ServiceRequestResource::class);
     }
 }
