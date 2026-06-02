@@ -10,14 +10,14 @@ created: 2026-06-01
 ## Additional Cleanup
 
 - In `app-modules/knowledge-base/database/migrations/2026_05_29_251423_add_sort_column_to_knowledge_base_categories_table.php`:
-  1. Remove the data backfill blocks (parent categories + sub categories loops)
-     -> Delete everything between the first `Schema::table()` and the second `Schema::table()`
-  2. Remove the second `Schema::table()` call that changes sort to non-nullable
-     -> Delete: `Schema::table('knowledge_base_categories', function (Blueprint $table) { $table->integer('sort')->default(0)->nullable(false)->change(); });`
-  3. Change the first `Schema::table()` to add sort as non-nullable with `default(0)`
-     -> Change to: `$table->integer('sort')->default(0);`
-  4. Remove the `KnowledgeBaseCategorySortFeature::activate()` and `KnowledgeBaseCategorySortFeature::deactivate()` calls
-  5. Remove the `use App\Features\KnowledgeBaseCategorySortFeature;` import
+    1. Remove the data backfill blocks (parent categories + sub categories loops)
+       -> Delete everything between the first `Schema::table()` and the second `Schema::table()`
+    2. Remove the second `Schema::table()` call that changes sort to non-nullable
+       -> Delete: `Schema::table('knowledge_base_categories', function (Blueprint $table) { $table->integer('sort')->default(0)->nullable(false)->change(); });`
+    3. Change the first `Schema::table()` to add sort as non-nullable with `default(0)`
+       -> Change to: `$table->integer('sort')->default(0);`
+    4. Remove the `KnowledgeBaseCategorySortFeature::activate()` and `KnowledgeBaseCategorySortFeature::deactivate()` calls
+    5. Remove the `use App\Features\KnowledgeBaseCategorySortFeature;` import
 
 - In `app-modules/knowledge-base/src/Observers/KnowledgeBaseCategoryObserver.php`: remove the `if (! KnowledgeBaseCategorySortFeature::active())` early return guard — the observer should always assign sort. Remove the `use App\Features\KnowledgeBaseCategorySortFeature;` import.
 
