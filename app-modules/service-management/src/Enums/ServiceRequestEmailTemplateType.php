@@ -69,7 +69,7 @@ enum ServiceRequestEmailTemplateType: string implements HasLabel
             self::SurveyResponse => 'survey_response',
         };
     }
-    
+
     public function getViewLabel(): string
     {
         return match ($this) {

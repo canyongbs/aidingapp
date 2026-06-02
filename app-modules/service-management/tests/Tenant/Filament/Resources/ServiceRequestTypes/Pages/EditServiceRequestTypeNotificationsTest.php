@@ -6,7 +6,7 @@
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
 
     Aiding App® is licensed under the Elastic License 2.0. For more details,
-    see <https:
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
 
     Notice:
 
@@ -29,7 +29,7 @@
       in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
-    <https:
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
@@ -66,7 +66,7 @@ function allNotificationSettings(bool $enabled = false): array
                 if ($isSurveyResponse && in_array($roleSlug, $surveyHiddenRoleSlugs)) {
                     continue;
                 }
-                
+
                 if (
                     $isSurveyResponse
                     && $role === ServiceRequestTypeEmailTemplateRole::Customer
@@ -313,7 +313,6 @@ test('survey response email preference is only stored for the customer role', fu
         ->call('save')
         ->assertHasNoFormErrors();
 
-    
     assertDatabaseHas(ServiceRequestTypeEmailPreference::class, [
         'service_request_type_id' => $serviceRequestType->getKey(),
         'service_request_email_template_type' => ServiceRequestEmailTemplateType::SurveyResponse->value,
@@ -321,7 +320,7 @@ test('survey response email preference is only stored for the customer role', fu
         'notification_channel' => ServiceRequestNotificationChannel::Email->value,
         'is_enabled' => true,
     ]);
-    
+
     $hiddenRoles = [
         ServiceRequestTypeEmailTemplateRole::Manager,
         ServiceRequestTypeEmailTemplateRole::AssignedManager,

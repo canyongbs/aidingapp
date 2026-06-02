@@ -52,7 +52,6 @@ return new class () extends Migration {
      * @var array<string, array{0: string, 1: string, 2: string}>
      */
     private array $columnMap = [
-
         // Managers — email
         'is_managers_service_request_created_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Created->value,      ServiceRequestNotificationChannel::Email->value],
         'is_managers_service_request_assigned_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Assigned->value,     ServiceRequestNotificationChannel::Email->value],
@@ -67,7 +66,7 @@ return new class () extends Migration {
         'is_auditors_service_request_status_change_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::StatusChange->value, ServiceRequestNotificationChannel::Email->value],
         'is_auditors_service_request_closed_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Closed->value,       ServiceRequestNotificationChannel::Email->value],
 
-        // Customers — email 
+        // Customers — email
         'is_customers_service_request_created_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Created->value,       ServiceRequestNotificationChannel::Email->value],
         'is_customers_service_request_assigned_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Assigned->value,      ServiceRequestNotificationChannel::Email->value],
         'is_customers_service_request_update_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Update->value,        ServiceRequestNotificationChannel::Email->value],
@@ -134,7 +133,7 @@ return new class () extends Migration {
     {
         DB::transaction(function (): void {
             ServiceRequestTypeEmailPreferenceFeature::deactivate();
-            
+
             DB::table('service_request_type_email_preference')
                 ->whereIn(
                     'service_request_type_id',
