@@ -997,7 +997,7 @@ it('builds type tree options with uncategorized types at root level', function (
         'parent_id' => null,
     ]);
 
-    $categorizedType = ServiceRequestType::factory()->create([
+    ServiceRequestType::factory()->create([
         'name' => 'Categorized Type',
         'sort' => 1,
         'category_id' => $category->getKey(),
@@ -1013,14 +1013,14 @@ it('builds type tree options with uncategorized types at root level', function (
 
     expect($tree)->toHaveCount(2);
 
-    // Categorized area first
-    expect($tree[0]['name'])->toBe('Categorized Area');
-    expect($tree[0]['disabled'])->toBeTrue();
-    expect($tree[0]['children'])->toHaveCount(1);
-    expect($tree[0]['children'][0]['name'])->toBe('Categorized Type');
+    // Uncategorized type at root level first
+    expect($tree[0]['name'])->toBe('Uncategorized Type');
+    expect($tree[0]['value'])->toBe($uncategorizedType->getKey());
+    expect($tree[0]['disabled'])->toBeFalse();
 
-    // Uncategorized type at root level
-    expect($tree[1]['name'])->toBe('Uncategorized Type');
-    expect($tree[1]['value'])->toBe($uncategorizedType->getKey());
-    expect($tree[1]['disabled'])->toBeFalse();
+    // Categorized area after uncategorized types
+    expect($tree[1]['name'])->toBe('Categorized Area');
+    expect($tree[1]['disabled'])->toBeTrue();
+    expect($tree[1]['children'])->toHaveCount(1);
+    expect($tree[1]['children'][0]['name'])->toBe('Categorized Type');
 });

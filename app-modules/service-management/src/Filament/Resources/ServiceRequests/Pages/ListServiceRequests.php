@@ -153,14 +153,14 @@ class ListServiceRequests extends ListRecords
                     ->preload(),
                 Filter::make('type')
                     ->label('Type')
-                    ->form([
+                    ->schema([
                         SelectTree::make('types')
                             ->label('Type')
                             ->getTreeUsing(fn () => static::buildTypeTreeOptions())
                             ->multiple()
                             ->placeholder('All')
                             ->independent(true)
-                            ->expandSelected(false),
+                            ->expandSelected(true),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query->when(
                         ! empty($data['types']),
@@ -307,7 +307,7 @@ class ListServiceRequests extends ListRecords
             ])
             ->all();
 
-        return array_merge($tree, $uncategorizedTypes);
+        return array_merge($uncategorizedTypes, $tree);
     }
 
     protected function getHeaderActions(): array
