@@ -37,73 +37,100 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Portal\Http\Requests\StoreServiceRequestUpdateRequest;
-use AidingApp\Portal\Jobs\PersistServiceRequestUpdateUpload;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 
 class StoreServiceRequestUpdateController extends Controller
 {
     public function __invoke(StoreServiceRequestUpdateRequest $request): JsonResponse
     {
-        $serviceRequestUpdate = new ServiceRequestUpdate();
-        $serviceRequestUpdate->service_request_id = $request->serviceRequestId;
-        $serviceRequestUpdate->update = $request->description;
-        $serviceRequestUpdate->internal = false;
+        return DB::transaction(function () use ($request) {
+            $serviceRequestUpdate = new ServiceRequestUpdate();
+            $serviceRequestUpdate->service_request_id = $request->serviceRequestId;
+            $serviceRequestUpdate->update = $request->description;
+            $serviceRequestUpdate->internal = false;
 
-        $serviceRequestUpdate->createdBy()->associate($request->user(guard: 'contact'));
+            $serviceRequestUpdate->createdBy()->associate($request->user(guard: 'contact'));
 
-        $serviceRequestUpdate->save();
+            $serviceRequestUpdate->save();
 
-        if (! empty($request->input('files'))) {
-            $this->dispatchFileUploads(collect($request->all()), $serviceRequestUpdate);
-        }
+            if (! empty($request->input('files'))) {
+                $this->processFileUploads($request->input('files'), $serviceRequestUpdate);
+            }
 
-        $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
+            $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
 
-        $serviceRequestUpdates = $serviceRequest
-            ->serviceRequestUpdates()
-            ->latest('created_at')
-            ->where('internal', false)
-            ->paginate(5)
-            ->through(function (ServiceRequestUpdate $update) {
-                return [
-                    'id' => $update->getKey(),
-                    'update' => $update->update,
-                    'created_by_type' => $update->created_by_type,
-                    'created_at' => $update->created_at->format('m-d-Y g:i A'),
-                    'media' => $update->getUploadedMedia(),
-                ];
-            });
+            $serviceRequestUpdates = $serviceRequest
+                ->serviceRequestUpdates()
+                ->latest('created_at')
+                ->where('internal', false)
+                ->paginate(5)
+                ->through(function (ServiceRequestUpdate $update) {
+                    return [
+                        'id' => $update->getKey(),
+                        'update' => $update->update,
+                        'created_by_type' => $update->created_by_type,
+                        'created_at' => $update->created_at->format('m-d-Y g:i A'),
+                        'media' => $update->getUploadedMedia(),
+                    ];
+                });
 
-        return response()->json(['serviceRequestUpdates' => $serviceRequestUpdates], 201);
+            return response()->json(['serviceRequestUpdates' => $serviceRequestUpdates], 201);
+        });
     }
 
     /**
-     * @param Collection<string, mixed> $data
+     * @param array<int, array{path: string, originalFileName: string}> $files
      */
-    protected function dispatchFileUploads(
-        Collection $data,
+    protected function processFileUploads(
+        array $files,
         ServiceRequestUpdate $serviceRequestUpdate,
     ): void {
-        /** @var array<int, array{path: string, originalFileName: string}> $filesData */
-        $filesData = $data->pull('files', []);
-        $files = collect($filesData);
+        foreach ($files as $file) {
+            $path = $file['path'];
+            $originalFileName = $file['originalFileName'];
 
-        Bus::batch([
-            ...$files->map(function (array $file) use ($serviceRequestUpdate) {
-                return new PersistServiceRequestUpdateUpload(
-                    $serviceRequestUpdate,
-                    $file['path'],
-                    $file['originalFileName'],
-                    'uploads',
-                );
-            }),
-        ])
-            ->name("persist-service-request-uploads-{$serviceRequestUpdate->getKey()}")
-            ->dispatchAfterResponse();
+            $this->validatePath($path);
+
+            if (! Storage::exists($path)) {
+                continue;
+            }
+
+            try {
+                $media = $serviceRequestUpdate
+                    ->addMediaFromDisk($path)
+                    ->usingName(pathinfo($originalFileName, PATHINFO_FILENAME))
+                    ->toMediaCollection('uploads');
+
+                $respondent = $serviceRequestUpdate->createdBy;
+
+                if (is_null($media->created_by_id)) {
+                    $media->createdBy()->associate($respondent);
+                    $media->saveQuietly();
+                }
+            } finally {
+                Storage::delete($path);
+            }
+        }
+    }
+
+    protected function validatePath(string $path): void
+    {
+        if (str_contains($path, '..') || str_contains($path, '//')) {
+            throw new InvalidArgumentException('Invalid path: path traversal not allowed');
+        }
+
+        if (! str_starts_with($path, 'tmp/')) {
+            throw new InvalidArgumentException('Invalid path: must be within tmp/ directory');
+        }
+
+        if (! preg_match('/^tmp\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-zA-Z0-9]+$/i', $path)) {
+            throw new InvalidArgumentException('Invalid path: does not match expected format');
+        }
     }
 }
