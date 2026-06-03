@@ -99,6 +99,7 @@ test('The correct details are displayed on the ListServiceRequests page', functi
 
     $component
         ->assertTableColumnExists('service_request_number')
+        ->assertTableColumnExists('priority.type.name')
         ->assertTableColumnExists('related_to')
         ->assertTableColumnExists('division.name')
         ->assertTableColumnExists('sla')
@@ -171,6 +172,7 @@ test('The correct details are displayed on the ListServiceRequests page via dire
 
     $component
         ->assertTableColumnExists('service_request_number')
+        ->assertTableColumnExists('priority.type.name')
         ->assertTableColumnExists('related_to')
         ->assertTableColumnExists('division.name')
         ->assertTableColumnExists('sla')
@@ -240,6 +242,42 @@ test('can filter service request by category', function () {
         ->filterTable('category', ServiceRequestCategory::Incident->value)
         ->assertCanSeeTableRecords($incidentServiceRequests)
         ->assertCanNotSeeTableRecords($requestServiceRequests);
+});
+
+test('can sort service requests by type', function () {
+    asSuperAdmin();
+
+    $firstType = ServiceRequestType::factory()->create(['name' => 'Alpha Type']);
+    $secondType = ServiceRequestType::factory()->create(['name' => 'Beta Type']);
+
+    $firstPriority = ServiceRequestPriority::factory()->create(['type_id' => $firstType->getKey()]);
+    $secondPriority = ServiceRequestPriority::factory()->create(['type_id' => $secondType->getKey()]);
+
+    $firstServiceRequest = ServiceRequest::factory()->create(['priority_id' => $firstPriority->getKey()]);
+    $secondServiceRequest = ServiceRequest::factory()->create(['priority_id' => $secondPriority->getKey()]);
+
+    livewire(ListServiceRequests::class)
+        ->sortTable('priority.type.name', 'asc')
+        ->assertCanSeeTableRecords([$firstServiceRequest, $secondServiceRequest], inOrder: true)
+        ->sortTable('priority.type.name', 'desc')
+        ->assertCanSeeTableRecords([$secondServiceRequest, $firstServiceRequest], inOrder: true);
+});
+
+test('type column displays the correct service request type name', function () {
+    asSuperAdmin();
+
+    $serviceRequestType = ServiceRequestType::factory()->create(['name' => 'Test Type']);
+
+    $priority = ServiceRequestPriority::factory()->create(['type_id' => $serviceRequestType->getKey()]);
+
+    $serviceRequest = ServiceRequest::factory()->create(['priority_id' => $priority->getKey()]);
+
+    livewire(ListServiceRequests::class)
+        ->assertTableColumnStateSet(
+            'priority.type.name',
+            'Test Type',
+            $serviceRequest
+        );
 });
 
 // TODO: Sorting and Searching tests

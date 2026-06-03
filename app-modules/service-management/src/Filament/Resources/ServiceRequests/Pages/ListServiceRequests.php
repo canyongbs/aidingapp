@@ -104,6 +104,16 @@ class ListServiceRequests extends ListRecords
                     ->view('filament.tables.columns.service-request.number')
                     ->searchable(['service_request_number', 'title'])
                     ->sortable(),
+                TextColumn::make('priority.type.name')
+                    ->label('Type')
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query
+                            ->join('service_request_priorities', 'service_requests.priority_id', '=', 'service_request_priorities.id')
+                            ->join('service_request_types', 'service_request_priorities.type_id', '=', 'service_request_types.id')
+                            ->select('service_requests.*')
+                            ->orderBy('service_request_types.name', $direction);
+                    })
+                    ->toggleable(),
                 TextColumn::make('division.name')
                     ->label('Division')
                     ->searchable()
