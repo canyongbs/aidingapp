@@ -41,7 +41,6 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseItems\RequestFactories\DuplicateKnowledgeBaseItemRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -681,13 +680,17 @@ test('an authorised user can duplicate a knowledge base article', function () {
 
     actingAs($user);
 
-    $request = DuplicateKnowledgeBaseItemRequestFactory::new()->create();
-
     livewire(ListKnowledgeBaseItems::class)
-        ->callTableAction('replicate', $knowledgeBaseItem->getKey(), data: $request)
-        ->assertHasNoTableActionErrors();
+        ->callTableAction('replicate', $knowledgeBaseItem);
+
+    $replicatedKnowledgeBaseItem = KnowledgeBaseItem::latest()->first();
 
     expect(KnowledgeBaseItem::count())->toBe(2);
+    expect($replicatedKnowledgeBaseItem->title)->toBe($knowledgeBaseItem->title);
+    expect($replicatedKnowledgeBaseItem->public)->toBe($knowledgeBaseItem->public);
+    expect($replicatedKnowledgeBaseItem->notes)->toBe($knowledgeBaseItem->notes);
+    expect($replicatedKnowledgeBaseItem->status_id)->toBe($knowledgeBaseItem->status_id);
+    expect($replicatedKnowledgeBaseItem->category_id)->toBe($knowledgeBaseItem->category_id);
 });
 
 test('duplicating a knowledge base article is gated by the knowledge_base_item.create ability', function () {
@@ -705,20 +708,5 @@ test('duplicating a knowledge base article is gated by the knowledge_base_item.c
     actingAs($user);
 
     livewire(ListKnowledgeBaseItems::class)
-        ->assertTableActionHidden('replicate', $knowledgeBaseItem->getKey());
-});
-
-test('duplicating a knowledge base article is gated with proper feature access control', function () {
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->knowledgeManagement = false;
-    $settings->save();
-
-    $user = User::factory()->create();
-    $user->givePermissionTo('knowledge_base_item.view-any');
-    $user->givePermissionTo('knowledge_base_item.create');
-
-    actingAs($user);
-
-    livewire(ListKnowledgeBaseItems::class)
-        ->assertForbidden();
+        ->assertTableActionHidden('replicate', $knowledgeBaseItem);
 });

@@ -175,7 +175,7 @@ class ListKnowledgeBaseItems extends ListRecords
             ], layout: FiltersLayout::BeforeContent)
             ->recordActions([
                 ReplicateAction::make()
-                    ->authorize(fn (): bool => auth()->user()->can('knowledge_base_item.create'))
+                    ->authorize('create', KnowledgeBaseItem::class)
                     ->slideOver()
                     ->mutateRecordDataUsing(fn (array $data): array => Arr::only($data, ['title', 'public', 'notes', 'status_id', 'category_id']))
                     ->schema([
