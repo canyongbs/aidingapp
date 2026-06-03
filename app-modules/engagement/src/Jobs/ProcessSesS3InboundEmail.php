@@ -511,7 +511,9 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             if (EmailAutomaticCreationFeature::active()) {
                 if ($serviceRequestType->email_automatic_creation_contact_create_condition === EmailAutomaticCreationContactCreateCondition::None) {
-                    $contacts = $contacts->add($this->buildContactFromSender($sender, $parser));
+                    if ($serviceRequestType->is_email_automatic_creation_contact_create_enabled) {
+                        $contacts = $contacts->add($this->buildContactFromSender($sender, $parser));
+                    }
                 } elseif ($serviceRequestType->email_automatic_creation_contact_create_condition === EmailAutomaticCreationContactCreateCondition::IfEligible) {
                     if ($contacts->isEmpty()) {
                         // If no contacts are found, we will try to find an organization with the same domain
@@ -553,12 +555,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                         return;
                     }
-
-                    $senderName = $parser->getAddresses('from')[0]['display'];
-
-                    $firstName = Str::before($senderName, ' ') ?: 'Unknown';
-                    $lastName = Str::after($senderName, ' ') ?: 'Unknown';
-                    $fullName = $firstName . ' ' . $lastName;
 
                     // If an organization domain is found, we will create a new contact with the email address
                     $contacts = $contacts->add($this->buildContactFromSender($sender, $parser, $organization));

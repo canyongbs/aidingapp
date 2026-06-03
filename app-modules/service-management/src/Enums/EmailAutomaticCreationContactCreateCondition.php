@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
-// TODO This might belong in a more generalized space so we can re-use this across modules
 enum EmailAutomaticCreationContactCreateCondition: string implements HasLabel
 {
     case IfEligible = 'if_eligible';
