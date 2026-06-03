@@ -38,6 +38,7 @@ namespace App\Providers;
 
 use AidingApp\Engagement\Jobs\CreateBatchedEngagement;
 use AidingApp\Notification\Enums\NotificationChannel;
+use App\Models\Media;
 use App\Models\SystemUser;
 use App\Models\Tenant;
 use App\Overrides\Filament\Actions\Imports\Jobs\ImportCsvOverride;
@@ -49,6 +50,7 @@ use Filament\Actions\Exports\Jobs\PrepareCsvExport;
 use Filament\Actions\Imports\Jobs\ImportCsv;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Support\Facades\Process;
@@ -63,6 +65,7 @@ use Laravel\Pennant\Feature;
 use function Sentry\configureScope;
 
 use Sentry\State\Scope;
+use Spatie\MediaLibrary\MediaCollections\FileAdder;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerConfig;
 
 class AppServiceProvider extends ServiceProvider
@@ -144,6 +147,15 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Feature::discover();
+
+        FileAdder::macro('createdBy', function (Model $creator): FileAdder {
+            $relation = (new Media())->createdBy();
+
+            return $this->withProperties([
+                $relation->getMorphType() => $creator->getMorphClass(),
+                $relation->getForeignKeyName() => $creator->getKey(),
+            ]);
+        });
 
         RateLimiter::for('notifications', function (object $job) {
             $channels = match (true) {
