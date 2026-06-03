@@ -53,6 +53,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
+use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -103,6 +104,7 @@ class ServiceManagementServiceProvider extends ServiceProvider
             'advisory_status' => AdvisoryStatus::class,
             'advisory_update' => AdvisoryUpdate::class,
             'service_monitoring_target' => ServiceMonitoringTarget::class,
+            'service_request_notification_automation_email_template' => ServiceRequestNotificationAutomationEmailTemplate::class,
         ]);
 
         $this->loadRoutesFrom(__DIR__ . '/../../routes/widgets.php');

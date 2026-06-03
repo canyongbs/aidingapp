@@ -34,33 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement;
+namespace AidingApp\ServiceManagement\Database\Seeders;
 
-use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
+use Illuminate\Database\Seeder;
 
-class ServiceManagementPlugin implements Plugin
+class ServiceRequestNotificationAutomationSettingsSeeder extends Seeder
 {
-    public function getId(): string
+    public function run(): void
     {
-        return 'service-request';
+        $settings = app(ServiceRequestNotificationAutomationSettings::class);
+        $settings->ai_prompt = ServiceRequestNotificationAutomationSettings::defaultAiPrompt();
+        $settings->save();
     }
-
-    public function register(Panel $panel): void
-    {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
-        )
-            ->discoverPages(
-                in: __DIR__ . '/Filament/Pages',
-                for: 'AidingApp\\ServiceManagement\\Filament\\Pages'
-            )
-            ->livewireComponents([
-                ServiceRequestMediaTable::class,
-            ]);
-    }
-
-    public function boot(Panel $panel): void {}
 }

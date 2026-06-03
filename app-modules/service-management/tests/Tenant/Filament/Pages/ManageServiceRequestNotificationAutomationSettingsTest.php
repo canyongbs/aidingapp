@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,33 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement;
+use AidingApp\ServiceManagement\Filament\Pages\ManageServiceRequestNotificationAutomationSettings;
+use App\Models\User;
 
-use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+use function Tests\asSuperAdmin;
 
-class ServiceManagementPlugin implements Plugin
-{
-    public function getId(): string
-    {
-        return 'service-request';
-    }
+test('it prevents access when the user does not have permission', function () {
+    actingAs(User::factory()->create());
 
-    public function register(Panel $panel): void
-    {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
-        )
-            ->discoverPages(
-                in: __DIR__ . '/Filament/Pages',
-                for: 'AidingApp\\ServiceManagement\\Filament\\Pages'
-            )
-            ->livewireComponents([
-                ServiceRequestMediaTable::class,
-            ]);
-    }
+    get(ManageServiceRequestNotificationAutomationSettings::getUrl())
+        ->assertForbidden();
+});
 
-    public function boot(Panel $panel): void {}
-}
+test('it allows access for super admins', function () {
+    asSuperAdmin();
+
+    get(ManageServiceRequestNotificationAutomationSettings::getUrl())
+        ->assertSuccessful();
+});
