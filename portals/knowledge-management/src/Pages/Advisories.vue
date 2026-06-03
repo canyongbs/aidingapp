@@ -32,14 +32,13 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { CheckCircleIcon, InformationCircleIcon, XCircleIcon } from '@heroicons/vue/20/solid';
     import { onMounted, ref } from 'vue';
-    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import LoadingSpinner from '../../../../resources/js/components/LoadingSpinner.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
-    import ResourceList from '../Components/ResourceList.vue';
     import { consumer } from '../Services/Consumer';
 
     const advisories = ref([]);
@@ -149,48 +148,73 @@
             <LoadingSpinner label="Loading advisories..." />
         </div>
 
-        <ResourceList v-else-if="advisories.length > 0">
-            <li v-for="(advisory, index) in advisories" :key="advisory.id || index" class="px-6 py-4">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="min-w-0 flex-1">
-                        <h3 class="text-sm font-semibold" :class="severityTextColor(advisory.severity)">
-                            {{ advisory.title }}
-                        </h3>
-                        <p v-if="advisory.description" class="mt-1 text-sm text-gray-500">
+        <div v-else-if="advisories.length > 0" class="flex flex-col gap-3">
+            <div
+                v-for="(advisory, index) in advisories"
+                :key="advisory.id || index"
+                class="overflow-hidden rounded-xl bg-white ring-1 ring-gray-950/5"
+            >
+                <div class="flex gap-3 px-6 py-4">
+                    <InformationCircleIcon
+                        class="size-5 shrink-0"
+                        :class="severityTextColor(advisory.severity)"
+                        aria-hidden="true"
+                    />
+
+                    <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
+                        <div class="flex items-start justify-between gap-4">
+                            <h3 class="text-sm font-semibold" :class="severityTextColor(advisory.severity)">
+                                {{ advisory.title }}
+                            </h3>
+                            <CheckCircleIcon
+                                v-if="advisory.status?.classification === 'resolved'"
+                                class="size-5 shrink-0 text-green-500"
+                                :title="advisory.status.name"
+                            />
+                            <XCircleIcon
+                                v-else-if="advisory.status"
+                                class="size-5 shrink-0 text-red-400"
+                                :title="advisory.status.name"
+                            />
+                        </div>
+                        <p
+                            v-if="advisory.description"
+                            class="overflow-hidden text-sm text-pretty break-words text-gray-500 pr-4"
+                        >
                             {{ advisory.description }}
                         </p>
-                        <time class="mt-1 block text-xs text-gray-400">{{ formatDate(advisory.created_at) }}</time>
+                        <time class="text-xs text-gray-400">{{ formatDate(advisory.created_at) }}</time>
                     </div>
-                    <BaseBadge v-if="advisory.status" color="blue" class="shrink-0">
-                        {{ advisory.status.name }}
-                    </BaseBadge>
                 </div>
 
                 <template v-if="advisory.advisory_updates?.length">
-                    <hr class="mt-4" />
-                    <ol class="relative mt-4 border-s border-gray-200">
-                        <li v-for="updateData in advisory.advisory_updates" :key="updateData.id" class="mb-8 ms-4">
+                    <hr class="border-gray-200" />
+                    <ol class="relative ms-6 border-s border-gray-200">
+                        <li
+                            v-for="(updateData, i) in advisory.advisory_updates"
+                            :key="updateData.id"
+                            class="ms-4 pt-4"
+                            :class="i < advisory.advisory_updates.length - 1 ? 'mb-4' : 'pb-4'"
+                        >
                             <div
-                                class="absolute w-3 h-3 bg-gray-200 rounded-lg mt-1.5 -inset-s-1.5 border border-white"
+                                class="absolute w-3 h-3 rounded-full bg-gray-300 border-2 border-white mt-4 -inset-s-1.5"
                             ></div>
-                            <time class="mb-1 block text-sm font-normal leading-none text-gray-400">{{
+                            <time class="block text-sm font-normal leading-none text-gray-400">{{
                                 formatDate(updateData.created_at)
                             }}</time>
                             <p class="mt-1 text-sm text-gray-700">{{ updateData.update }}</p>
                         </li>
                     </ol>
                 </template>
-            </li>
+            </div>
 
-            <template #footer>
-                <div v-if="loading" class="flex justify-center py-4">
-                    <LoadingSpinner size="sm" />
-                </div>
-                <div v-if="hasMore && !loading" class="flex justify-center py-4">
-                    <BaseButton color="gray" size="md" @click="loadMore"> Load More </BaseButton>
-                </div>
-            </template>
-        </ResourceList>
+            <div v-if="loading" class="flex justify-center py-4">
+                <LoadingSpinner size="sm" />
+            </div>
+            <div v-if="hasMore && !loading" class="flex justify-center py-4">
+                <BaseButton color="gray" size="md" @click="loadMore"> Load More </BaseButton>
+            </div>
+        </div>
 
         <EmptyState v-if="!loading && advisories.length === 0">
             <template #heading>There are no advisories to display.</template>
