@@ -40,6 +40,7 @@ use AidingApp\Portal\Http\Requests\StoreServiceRequestUpdateRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Http\Controllers\Controller;
+use App\Models\Media;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -102,15 +103,17 @@ class StoreServiceRequestUpdateController extends Controller
             }
 
             try {
-                $media = $serviceRequestUpdate
+                $respondent = $serviceRequestUpdate->createdBy;
+                $relation = (new Media())->createdBy();
+
+                $serviceRequestUpdate
                     ->addMediaFromDisk($path)
                     ->usingName(pathinfo($originalFileName, PATHINFO_FILENAME))
+                    ->withProperties([
+                        $relation->getMorphType() => $respondent->getMorphClass(),
+                        $relation->getForeignKeyName() => $respondent->getKey(),
+                    ])
                     ->toMediaCollection('uploads');
-
-                if (is_null($media->createdBy)) {
-                    $media->createdBy()->associate($serviceRequestUpdate->createdBy);
-                    $media->save();
-                }
             } finally {
                 Storage::delete($path);
             }
