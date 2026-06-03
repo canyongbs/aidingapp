@@ -41,45 +41,90 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 
 class StoreServiceRequestUpdateController extends Controller
 {
     public function __invoke(StoreServiceRequestUpdateRequest $request): JsonResponse
     {
-        $serviceRequestUpdate = new ServiceRequestUpdate();
-        $serviceRequestUpdate->service_request_id = $request->serviceRequestId;
-        $serviceRequestUpdate->update = $request->description;
-        $serviceRequestUpdate->internal = false;
+        return DB::transaction(function () use ($request) {
+            $serviceRequestUpdate = new ServiceRequestUpdate();
+            $serviceRequestUpdate->service_request_id = $request->serviceRequestId;
+            $serviceRequestUpdate->update = $request->description;
+            $serviceRequestUpdate->internal = false;
 
-        $serviceRequestUpdate->createdBy()->associate($request->user(guard: 'contact'));
+            $serviceRequestUpdate->createdBy()->associate($request->user(guard: 'contact'));
 
-        $serviceRequestUpdate->save();
+            $serviceRequestUpdate->save();
 
-        if ($request->hasFile('files')) {
-            foreach ($request->file('files') as $file) {
+            if (! empty($request->input('files'))) {
+                $this->processFileUploads($request->input('files'), $serviceRequestUpdate);
+            }
+
+            $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
+
+            $serviceRequestUpdates = $serviceRequest
+                ->serviceRequestUpdates()
+                ->latest('created_at')
+                ->where('internal', false)
+                ->paginate(5)
+                ->through(function (ServiceRequestUpdate $update) {
+                    return [
+                        'id' => $update->getKey(),
+                        'update' => $update->update,
+                        'created_by_type' => $update->created_by_type,
+                        'created_at' => $update->created_at->format('m-d-Y g:i A'),
+                        'media' => $update->getUploadedMedia(),
+                    ];
+                });
+
+            return response()->json(['serviceRequestUpdates' => $serviceRequestUpdates], 201);
+        });
+    }
+
+    /**
+     * @param array<int, array{path: string, originalFileName: string}> $files
+     */
+    protected function processFileUploads(
+        array $files,
+        ServiceRequestUpdate $serviceRequestUpdate,
+    ): void {
+        foreach ($files as $file) {
+            $path = $file['path'];
+            $originalFileName = $file['originalFileName'];
+
+            $this->validatePath($path);
+
+            if (! Storage::exists($path)) {
+                continue;
+            }
+
+            try {
                 $serviceRequestUpdate
-                    ->addMedia($file)
+                    ->addMediaFromDisk($path)
+                    ->usingName(pathinfo($originalFileName, PATHINFO_FILENAME))
+                    ->createdBy($serviceRequestUpdate->createdBy)
                     ->toMediaCollection('uploads');
+            } finally {
+                Storage::delete($path);
             }
         }
+    }
 
-        $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
+    protected function validatePath(string $path): void
+    {
+        if (str_contains($path, '..') || str_contains($path, '//')) {
+            throw new InvalidArgumentException('Invalid path: path traversal not allowed');
+        }
 
-        $serviceRequestUpdates = $serviceRequest
-            ->serviceRequestUpdates()
-            ->latest('created_at')
-            ->where('internal', false)
-            ->paginate(5)
-            ->through(function (ServiceRequestUpdate $update) {
-                return [
-                    'id' => $update->getKey(),
-                    'update' => $update->update,
-                    'created_by_type' => $update->created_by_type,
-                    'created_at' => $update->created_at->format('m-d-Y g:i A'),
-                    'media' => $update->getUploadedMedia(),
-                ];
-            });
+        if (! str_starts_with($path, 'tmp/')) {
+            throw new InvalidArgumentException('Invalid path: must be within tmp/ directory');
+        }
 
-        return response()->json(['serviceRequestUpdates' => $serviceRequestUpdates], 201);
+        if (! preg_match('/^tmp\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-zA-Z0-9]+$/i', $path)) {
+            throw new InvalidArgumentException('Invalid path: does not match expected format');
+        }
     }
 }
