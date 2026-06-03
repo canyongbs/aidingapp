@@ -202,9 +202,9 @@ class EditServiceRequestTypeNotifications extends EditRecord
         return $type->getEventSlug();
     }
 
-    /*
-    * @return array<int, string>
-    */
+    /**
+     * @return array<int, string>
+     */
     private function generateLegacySettingsAttributeList(): array
     {
         $attributes = [];
