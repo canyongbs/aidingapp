@@ -107,11 +107,9 @@ class StoreServiceRequestUpdateController extends Controller
                     ->usingName(pathinfo($originalFileName, PATHINFO_FILENAME))
                     ->toMediaCollection('uploads');
 
-                $respondent = $serviceRequestUpdate->createdBy;
-
-                if (is_null($media->created_by_id)) {
-                    $media->createdBy()->associate($respondent);
-                    $media->saveQuietly();
+                if (is_null($media->createdBy)) {
+                    $media->createdBy()->associate($serviceRequestUpdate->createdBy);
+                    $media->save();
                 }
             } finally {
                 Storage::delete($path);

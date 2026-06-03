@@ -154,4 +154,19 @@ it('stores a new service request update', function () {
                 'links',
             ],
         ]);
+
+    $serviceRequest = ServiceRequest::findOrFail($serviceRequestId);
+
+    $storedUpdate = $serviceRequest
+        ->serviceRequestUpdates()
+        ->where('update', 'This is a sample description.')
+        ->first();
+
+    expect($storedUpdate)->not->toBeNull();
+
+    $media = $storedUpdate->getFirstMedia('uploads');
+
+    expect($media)->not->toBeNull();
+    expect($media->createdBy?->is($contact))->toBeTrue();
+    Storage::assertExists($media->getPathRelativeToRoot());
 });
