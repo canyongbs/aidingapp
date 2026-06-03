@@ -44,6 +44,7 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
@@ -99,6 +100,76 @@ it('can edit a service request priority', function () {
         ->assertHasNoTableActionErrors();
 
     expect($priority->refresh()->name)->toBe($editRequest['name']);
+});
+
+it('can delete a service request priority', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $priority = ServiceRequestPriority::factory()
+        ->for($serviceRequestType, 'type')
+        ->create();
+
+    asSuperAdmin();
+
+    livewire(ManageServiceRequestTypePriorities::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->callTableAction('delete', record: $priority->getKey())
+        ->assertHasNoTableActionErrors();
+
+    assertSoftDeleted(ServiceRequestPriority::class, ['id' => $priority->getKey()]);
+});
+
+it('validates required fields when creating a service request priority', function (array $data, array $errors) {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    asSuperAdmin();
+
+    livewire(ManageServiceRequestTypePriorities::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->callTableAction('create', data: $data)
+        ->assertHasTableActionErrors($errors);
+})->with([
+    'name missing' => [['name' => null, 'order' => 1], ['name' => 'required']],
+    'name not a string' => [['name' => 123, 'order' => 1], ['name' => 'string']],
+    'order missing' => [['name' => 'Test Priority', 'order' => null], ['order' => 'required']],
+    'order not an integer' => [['name' => 'Test Priority', 'order' => 'abc'], ['order' => 'integer']],
+]);
+
+it('validates unique name scoped to type when creating a service request priority', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $existingPriority = ServiceRequestPriority::factory()
+        ->for($serviceRequestType, 'type')
+        ->create();
+
+    asSuperAdmin();
+
+    livewire(ManageServiceRequestTypePriorities::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->callTableAction('create', data: [
+            'name' => $existingPriority->name,
+            'order' => $existingPriority->order + 1,
+        ])
+        ->assertHasTableActionErrors(['name' => 'unique']);
+});
+
+it('validates required fields when editing a service request priority', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $priority = ServiceRequestPriority::factory()
+        ->for($serviceRequestType, 'type')
+        ->create();
+
+    asSuperAdmin();
+
+    livewire(ManageServiceRequestTypePriorities::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->callTableAction('edit', record: $priority, data: ['name' => null])
+        ->assertHasTableActionErrors(['name' => 'required']);
 });
 
 test('ManageServiceRequestTypePriorities is gated with proper access control', function () {
