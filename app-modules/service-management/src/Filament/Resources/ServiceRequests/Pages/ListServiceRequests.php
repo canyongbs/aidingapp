@@ -169,7 +169,8 @@ class ListServiceRequests extends ListRecords
                             fn (Builder $query) => $query->whereIn('type_id', $data['types'])
                         )
                     ))
-                    ->indicateUsing(fn (array $data): ?string => empty($data['types'])
+                    ->indicateUsing(
+                        fn (array $data): ?string => empty($data['types'])
                         ? null
                         : 'Types: ' . ServiceRequestType::whereIn('id', $data['types'])->pluck('name')->implode(', ')
                     ),
@@ -278,13 +279,6 @@ class ListServiceRequests extends ListRecords
             ->poll('60s');
     }
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make(),
-        ];
-    }
-
     /**
      * @return array<int, array{name: string, value: string, disabled: bool, children: array<int, mixed>}>
      */
@@ -316,9 +310,17 @@ class ListServiceRequests extends ListRecords
         return array_merge($tree, $uncategorizedTypes);
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            CreateAction::make(),
+        ];
+    }
+
     /**
      * @param  Collection<(int|string), mixed>  $categoriesByParent
      * @param  Collection<(int|string), mixed>  $typesByCategory
+     *
      * @return array{name: string, value: string, disabled: bool, children: array<int, mixed>}
      */
     protected static function buildCategoryNode(
