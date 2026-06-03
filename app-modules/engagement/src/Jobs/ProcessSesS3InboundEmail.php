@@ -54,7 +54,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
 use App\Features\EmailAutomaticCreationFeature;
-use App\Features\MediaCreatedByFeature;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV3;
 use Aws\Kms\KmsClient;
@@ -320,15 +319,11 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                             return;
                         }
 
-                        $media = $engagementResponse->addMediaFromStream($attachment->getStream())
+                        $engagementResponse->addMediaFromStream($attachment->getStream())
                             ->setName($attachment->getFilename())
                             ->setFileName($attachment->getFilename())
+                            ->createdBy($contact)
                             ->toMediaCollection('attachments');
-
-                        if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
-                            $media->createdBy()->associate($contact);
-                            $media->saveQuietly();
-                        }
                     } catch (Throwable $throw) {
                         report($throw);
                     }
@@ -393,17 +388,11 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                         continue;
                     }
 
-                    $media = $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
+                    $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
                         ->setName($attachment->getFilename())
                         ->setFileName($attachment->getFilename())
+                        ->createdBy($serviceRequest->respondent)
                         ->toMediaCollection('uploads');
-
-                    $respondent = $serviceRequest->respondent;
-
-                    if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
-                        $media->createdBy()->associate($respondent);
-                        $media->saveQuietly();
-                    }
                 } catch (Throwable $throw) {
                     report($throw);
                 }
@@ -596,15 +585,11 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                             continue;
                         }
 
-                        $media = $serviceRequest->addMediaFromStream($attachment->getStream())
+                        $serviceRequest->addMediaFromStream($attachment->getStream())
                             ->setName($attachment->getFilename())
                             ->setFileName($attachment->getFilename())
+                            ->createdBy($contact)
                             ->toMediaCollection('uploads');
-
-                        if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
-                            $media->createdBy()->associate($contact);
-                            $media->saveQuietly();
-                        }
                     } catch (Throwable $throw) {
                         report($throw);
                     }
