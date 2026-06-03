@@ -44,15 +44,16 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::table('service_request_forms', function (Blueprint $table) {
+                $table->dropUnique('service_request_forms_name_unique');
+
                 $table->dropColumn([
                     'embed_enabled',
                     'allowed_domains',
                     'recaptcha_enabled',
                     'primary_color',
                     'rounding',
+                    'name',
                 ]);
-
-                $table->dropUnique('service_request_forms_name_unique');
             });
         });
     }
@@ -61,6 +62,7 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::table('service_request_forms', function (Blueprint $table) {
+                $table->string('name')->nullable();
                 $table->boolean('embed_enabled')->default(false);
                 $table->json('allowed_domains')->nullable();
                 $table->boolean('recaptcha_enabled')->default(false);

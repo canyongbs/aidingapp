@@ -197,41 +197,6 @@ it('only ever has one active form per type after repeated edits with submissions
     )->toBe(1);
 });
 
-it('gives each new version a distinct name so it does not collide with the archived one', function () {
-    asSuperAdmin();
-
-    $type = ServiceRequestType::factory()->create(['name' => 'Password Reset']);
-
-    // First save creates the form through the page, so its name is derived from the type.
-    livewire(ManageServiceRequestTypeCustomForm::class, [
-        'record' => $type->getKey(),
-    ])
-        ->set('data.is_wizard', false)
-        ->set('data.content', customFormContent('Email'))
-        ->call('save')
-        ->assertHasNoFormErrors();
-
-    $type->unsetRelation('form');
-    $firstName = $type->form->name;
-
-    // A submission forces the next save to create a new version (which keeps the same type).
-    $type->form->submissions()->create(['submitted_at' => now()]);
-
-    livewire(ManageServiceRequestTypeCustomForm::class, [
-        'record' => $type->getKey(),
-    ])
-        ->set('data.is_wizard', false)
-        ->set('data.content', customFormContent('Phone'))
-        ->call('save')
-        ->assertHasNoFormErrors();
-
-    $type->unsetRelation('form');
-
-    expect($firstName)->toBe('Password Reset Form')
-        ->and($type->form->name)->not->toBe($firstName)
-        ->and($type->form->name)->toBe('Password Reset Form (2)');
-});
-
 it('keeps prior submissions rendering against their archived form version', function () {
     asSuperAdmin();
 

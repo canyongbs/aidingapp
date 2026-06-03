@@ -139,13 +139,6 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
             $form->type()->associate($type);
         }
 
-        // Only new forms (a brand new type form, or a new version replacing an archived
-        // one) need a name. An in-place edit keeps the existing form's name. Each new form
-        // gets a distinct name so it never collides with a prior (archived) version.
-        if (! $form->exists) {
-            $form->fill(['name' => $this->resolveFormName($type)]);
-        }
-
         $form->fill([
             'description' => $state['description'] ?? null,
             'is_wizard' => $isWizard,
@@ -235,26 +228,6 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
                     ->all()
                 : [],
         ]);
-    }
-
-    /**
-     * Build a unique form name derived from the type, suffixing it when an existing
-     * (including archived or soft deleted) form already holds the base name. This keeps
-     * names readable while guaranteeing each archived version retains a distinct name.
-     */
-    protected function resolveFormName(ServiceRequestType $type): string
-    {
-        $base = "{$type->name} Form";
-
-        $name = $base;
-        $suffix = 1;
-
-        while (ServiceRequestForm::withTrashed()->where('name', $name)->exists()) {
-            $suffix++;
-            $name = "{$base} ({$suffix})";
-        }
-
-        return $name;
     }
 
     /**

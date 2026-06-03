@@ -48,7 +48,6 @@ class ServiceRequestFormFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => str($this->faker->unique()->words(3, true))->title()->toString(),
             'description' => $this->faker->optional()->sentence(),
             'service_request_type_id' => ServiceRequestType::factory(),
             'is_wizard' => false,

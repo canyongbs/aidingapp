@@ -53,7 +53,7 @@ beforeEach(function () {
 it('redirects unauthenticated users to the login page when accessing the preview-entry endpoint', function () {
     $type = ServiceRequestType::factory()->create();
 
-    $form = new ServiceRequestForm(['name' => 'Test Form']);
+    $form = new ServiceRequestForm();
     $form->type()->associate($type);
     $form->save();
 
@@ -70,7 +70,7 @@ it('is forbidden when service management is not enabled on the preview-entry end
 
     $type = ServiceRequestType::factory()->create();
 
-    $form = new ServiceRequestForm(['name' => 'Test Form']);
+    $form = new ServiceRequestForm();
     $form->type()->associate($type);
     $form->save();
 
@@ -86,7 +86,6 @@ it('always returns is_authenticated as false in preview mode regardless of the f
 
     // Form explicitly requires authentication
     $form = new ServiceRequestForm([
-        'name' => 'Auth Required Form',
         'is_authenticated' => true,
     ]);
     $form->type()->associate($type);
@@ -107,7 +106,7 @@ it('does not include a submission_url in the preview-entry response', function (
 
     $type = ServiceRequestType::factory()->create();
 
-    $form = new ServiceRequestForm(['name' => 'Test Form']);
+    $form = new ServiceRequestForm();
     $form->type()->associate($type);
     $form->save();
 
@@ -124,7 +123,7 @@ it('inherits the rounding from the portal settings in the preview', function () 
 
     $type = ServiceRequestType::factory()->create();
 
-    $form = new ServiceRequestForm(['name' => 'Test Form']);
+    $form = new ServiceRequestForm();
     $form->type()->associate($type);
     $form->save();
 
@@ -143,7 +142,7 @@ it('falls back to a default rounding when the portal setting is not configured',
 
     $type = ServiceRequestType::factory()->create();
 
-    $form = new ServiceRequestForm(['name' => 'Test Form']);
+    $form = new ServiceRequestForm();
     $form->type()->associate($type);
     $form->save();
 
@@ -162,7 +161,7 @@ it('returns the schema in the preview-entry response and does not display the fo
 
     $type = ServiceRequestType::factory()->create();
 
-    $form = new ServiceRequestForm(['name' => 'My Preview Form']);
+    $form = new ServiceRequestForm();
     $form->type()->associate($type);
     $form->save();
 

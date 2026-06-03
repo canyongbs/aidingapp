@@ -51,7 +51,6 @@ class ServiceRequestForm extends Submissible
     use HasFactory;
 
     protected $fillable = [
-        'name',
         'description',
         'is_authenticated',
         'is_wizard',
