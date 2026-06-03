@@ -34,35 +34,50 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace App\Rules;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use Database\Factories\SystemUserFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Sanctum\HasApiTokens;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\Authorization\Models\Role;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
 
 /**
- * @mixin IdeHelperSystemUser
+ * Fails when any of the provided role names does not match an existing web-guard role.
+ *
+ * The value is expected to be an array of role names (the import column splits on "|"). Matching is
+ * case-insensitive because the role name column is citext. The import must never create roles, so an
+ * unknown name is rejected rather than silently created.
  */
-class SystemUser extends Authenticatable implements Auditable
+class RolesExist implements ValidationRule
 {
-    use SoftDeletes;
-    use HasUuids;
-    use AuditableTrait;
-    use HasApiTokens;
-
-    /** @use HasFactory<SystemUserFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-    ];
-
-    public function isSuperAdmin(): bool
+    /**
+     * @param  Closure(string): PotentiallyTranslatedString  $fail
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        return false;
+        $names = collect(is_array($value) ? $value : [$value])
+            ->map(fn (mixed $name): string => trim((string) $name))
+            ->filter()
+            ->unique()
+            ->values();
+
+        if ($names->isEmpty()) {
+            return;
+        }
+
+        $existing = Role::query()
+            ->where('guard_name', 'web')
+            ->whereIn('name', $names->all())
+            ->pluck('name')
+            ->map(fn (string $name): string => mb_strtolower($name))
+            ->all();
+
+        $missing = $names
+            ->reject(fn (string $name): bool => in_array(mb_strtolower($name), $existing, true))
+            ->values();
+
+        if ($missing->isNotEmpty()) {
+            $fail('The following role(s) do not exist: ' . $missing->implode(', ') . '.');
+        }
     }
 }

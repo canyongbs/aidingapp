@@ -34,35 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace App\Rules;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use Database\Factories\SystemUserFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Sanctum\HasApiTokens;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Models\User;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
 
 /**
- * @mixin IdeHelperSystemUser
+ * Allows an email belonging to an active user (so the import can match and update that user),
+ * but rejects an email belonging to a soft-deleted/archived user.
  */
-class SystemUser extends Authenticatable implements Auditable
+class EmailNotArchived implements ValidationRule
 {
-    use SoftDeletes;
-    use HasUuids;
-    use AuditableTrait;
-    use HasApiTokens;
-
-    /** @use HasFactory<SystemUserFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-    ];
-
-    public function isSuperAdmin(): bool
+    /**
+     * @param  Closure(string): PotentiallyTranslatedString  $fail
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        return false;
+        $isArchived = User::onlyTrashed()
+            ->where('email', $value)
+            ->exists();
+
+        if ($isArchived) {
+            $fail('An archived user with this email address already exists. Please contact an administrator to restore this user or use a different email address.');
+        }
     }
 }

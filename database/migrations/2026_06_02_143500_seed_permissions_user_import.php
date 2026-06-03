@@ -34,35 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use Database\Factories\SystemUserFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Sanctum\HasApiTokens;
-use OwenIt\Auditing\Contracts\Auditable;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-/**
- * @mixin IdeHelperSystemUser
- */
-class SystemUser extends Authenticatable implements Auditable
-{
-    use SoftDeletes;
-    use HasUuids;
-    use AuditableTrait;
-    use HasApiTokens;
-
-    /** @use HasFactory<SystemUserFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
+    /**
+     * @var array<string, string>
+     */
+    private array $permissions = [
+        'user.import' => 'User',
     ];
 
-    public function isSuperAdmin(): bool
+    /**
+     * @var array<string>
+     */
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
+    public function up(): void
     {
-        return false;
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $this->createPermissions($this->permissions, $guard);
+            });
     }
-}
+
+    public function down(): void
+    {
+        collect($this->guards)
+            ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
+    }
+};

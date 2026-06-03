@@ -34,35 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+use App\Features\UserImportExportFeature;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use Database\Factories\SystemUserFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Sanctum\HasApiTokens;
-use OwenIt\Auditing\Contracts\Auditable;
-
-/**
- * @mixin IdeHelperSystemUser
- */
-class SystemUser extends Authenticatable implements Auditable
-{
-    use SoftDeletes;
-    use HasUuids;
-    use AuditableTrait;
-    use HasApiTokens;
-
-    /** @use HasFactory<SystemUserFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-    ];
-
-    public function isSuperAdmin(): bool
+return new class () extends Migration {
+    public function up(): void
     {
-        return false;
+        UserImportExportFeature::activate();
     }
-}
+
+    public function down(): void
+    {
+        UserImportExportFeature::deactivate();
+    }
+};

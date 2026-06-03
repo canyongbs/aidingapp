@@ -34,35 +34,48 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace AidingApp\ServiceManagement\Http\Resources\Api\V1;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use Database\Factories\SystemUserFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Sanctum\HasApiTokens;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin IdeHelperSystemUser
+ * @property ServiceRequest $resource
  */
-class SystemUser extends Authenticatable implements Auditable
+class ServiceRequestResource extends JsonResource
 {
-    use SoftDeletes;
-    use HasUuids;
-    use AuditableTrait;
-    use HasApiTokens;
-
-    /** @use HasFactory<SystemUserFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-    ];
-
-    public function isSuperAdmin(): bool
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
     {
-        return false;
+        return [
+            'id' => $this->resource->id,
+            'service_request_number' => $this->resource->service_request_number,
+            'title' => $this->resource->title,
+            'status' => [
+                'id' => $this->resource->status_id,
+                'name' => $this->resource->status?->name,
+            ],
+            'priority' => [
+                'id' => $this->resource->priority_id,
+                'name' => $this->resource->priority?->name,
+            ],
+            'assignee' => $this->resource->assignedTo ? [
+                'id' => $this->resource->assignedTo->user_id,
+                'name' => $this->resource->assignedTo->user->name,
+            ] : null,
+            'respondent' => [
+                'id' => $this->resource->respondent->id,
+                'name' => $this->resource->respondent->full_name,
+            ],
+            'close_details' => $this->resource->close_details,
+            'category' => $this->resource->category->value,
+            'created_at' => $this->resource->created_at,
+            'updated_at' => $this->resource->updated_at,
+        ];
     }
 }

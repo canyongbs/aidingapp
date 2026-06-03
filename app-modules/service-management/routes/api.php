@@ -34,35 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ListServiceRequestsController;
+use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ViewServiceRequestController;
+use Illuminate\Support\Facades\Route;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use Database\Factories\SystemUserFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Sanctum\HasApiTokens;
-use OwenIt\Auditing\Contracts\Auditable;
-
-/**
- * @mixin IdeHelperSystemUser
- */
-class SystemUser extends Authenticatable implements Auditable
-{
-    use SoftDeletes;
-    use HasUuids;
-    use AuditableTrait;
-    use HasApiTokens;
-
-    /** @use HasFactory<SystemUserFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-    ];
-
-    public function isSuperAdmin(): bool
-    {
-        return false;
-    }
-}
+Route::api(majorVersion: 1, routes: function () {
+    Route::name('service-requests.')
+        ->prefix('service-requests')
+        ->group(function () {
+            Route::get('/', ListServiceRequestsController::class)->name('index');
+            Route::get('/{serviceRequest}', ViewServiceRequestController::class)->name('show');
+        });
+});

@@ -34,35 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace App\Rules;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use Database\Factories\SystemUserFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Sanctum\HasApiTokens;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\Department\Models\Department;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Translation\PotentiallyTranslatedString;
 
 /**
- * @mixin IdeHelperSystemUser
+ * Fails when a non-empty department name does not match an existing department.
+ *
+ * Matching is case-insensitive because the department name column is citext. The import must never
+ * create departments, so an unknown name is rejected rather than silently created.
  */
-class SystemUser extends Authenticatable implements Auditable
+class DepartmentExists implements ValidationRule
 {
-    use SoftDeletes;
-    use HasUuids;
-    use AuditableTrait;
-    use HasApiTokens;
-
-    /** @use HasFactory<SystemUserFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-    ];
-
-    public function isSuperAdmin(): bool
+    /**
+     * @param  Closure(string): PotentiallyTranslatedString  $fail
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        return false;
+        if (blank($value)) {
+            return;
+        }
+
+        $exists = Department::query()
+            ->where('name', $value)
+            ->exists();
+
+        if (! $exists) {
+            $fail("The department \"{$value}\" does not exist.");
+        }
     }
 }

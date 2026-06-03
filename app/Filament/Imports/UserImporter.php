@@ -36,9 +36,14 @@
 
 namespace App\Filament\Imports;
 
+use AidingApp\Authorization\Models\Role;
+use AidingApp\Department\Models\Department;
+use App\Features\UserImportExportFeature;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
-use App\Rules\EmailNotInUseOrSoftDeleted;
+use App\Rules\DepartmentExists;
+use App\Rules\EmailNotArchived;
+use App\Rules\RolesExist;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
@@ -51,22 +56,74 @@ class UserImporter extends Importer
     {
         return [
             ImportColumn::make('name')
+                ->label('Name')
+                ->exampleHeader('Name')
                 ->rules(['required', 'max:255'])
                 ->requiredMapping()
                 ->example('Jonathan Smith'),
             ImportColumn::make('email')
-                ->rules(['required', 'email', new EmailNotInUseOrSoftDeleted(), 'max:255'])
+                ->label('Email address')
+                ->exampleHeader('Email address')
+                ->rules(['required', 'email', new EmailNotArchived(), 'max:255'])
                 ->requiredMapping()
                 ->example('johnsmith@gmail.com'),
             ImportColumn::make('job_title')
+                ->label('Job title')
+                ->exampleHeader('Job title')
                 ->rules(['required', 'string', 'max:255'])
                 ->requiredMapping()
                 ->example('Advisor'),
             ImportColumn::make('is_external')
                 ->label('External User')
+                ->exampleHeader('External User')
                 ->boolean()
                 ->rules(['boolean'])
                 ->example('true'),
+            ...(UserImportExportFeature::active() ? [
+                ImportColumn::make('work_number')
+                    ->label('Work Number')
+                    ->exampleHeader('Work Number')
+                    ->rules(['nullable', 'string', 'max:255'])
+                    ->example('+1 555 123 4567'),
+                ImportColumn::make('work_extension')
+                    ->label('Work Extension')
+                    ->exampleHeader('Work Extension')
+                    ->integer()
+                    ->rules(['nullable', 'integer', 'min:0'])
+                    ->example('123'),
+                ImportColumn::make('mobile')
+                    ->label('Mobile number')
+                    ->exampleHeader('Mobile number')
+                    ->rules(['nullable', 'string', 'max:255'])
+                    ->example('+1 555 987 6543'),
+                ImportColumn::make('department')
+                    ->label('Department')
+                    ->exampleHeader('Department')
+                    ->fillRecordUsing(function (User $record, ?string $state): void {
+                        if (blank($state)) {
+                            return;
+                        }
+
+                        $department = Department::query()
+                            ->where('name', $state)
+                            ->first();
+
+                        if ($department) {
+                            $record->department()->associate($department);
+                        }
+                    })
+                    ->rules([new DepartmentExists()])
+                    ->example(fn (): ?string => Department::query()->value('name')),
+                ImportColumn::make('roles')
+                    ->label('Assigned Role')
+                    ->exampleHeader('Assigned Role')
+                    ->array('|')
+                    // Roles are a many-to-many relationship synced in afterSave(); this column must not
+                    // attempt to write a "roles" attribute onto the user record.
+                    ->fillRecordUsing(function (): void {})
+                    ->rules([new RolesExist()])
+                    ->example('Authorization Admin|Super Admin'),
+            ] : []),
         ];
     }
 
@@ -95,6 +152,29 @@ class UserImporter extends Importer
         /** @var User $record */
         $record = $this->record;
         $record->is_external ??= true;
+    }
+
+    protected function afterSave(): void
+    {
+        $roleNames = collect((array) ($this->data['roles'] ?? []))
+            ->map(fn (mixed $name): string => trim((string) $name))
+            ->filter()
+            ->values();
+
+        // A blank "Assigned Role" column leaves the user's existing roles untouched.
+        if ($roleNames->isEmpty()) {
+            return;
+        }
+
+        /** @var User $user */
+        $user = $this->getRecord();
+
+        $roles = Role::query()
+            ->where('guard_name', 'web')
+            ->whereIn('name', $roleNames->all())
+            ->get();
+
+        $user->syncRoles($roles);
     }
 
     protected function afterCreate(): void
