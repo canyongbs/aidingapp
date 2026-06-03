@@ -49,6 +49,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -779,4 +780,247 @@ it('default non closed service request will not display', function () {
         ->assertCanNotSeeTableRecords($closedServiceRequests)
         ->removeTableFilter('status')
         ->assertCanSeeTableRecords($nonClosedServiceRequests->merge($closedServiceRequests));
+});
+
+it('can filter service requests by type', function () {
+    asSuperAdmin();
+
+    $typeA = ServiceRequestType::factory()->create();
+    $typeB = ServiceRequestType::factory()->create();
+
+    $priorityA = ServiceRequestPriority::factory()->create([
+        'type_id' => $typeA->getKey(),
+    ]);
+
+    $priorityB = ServiceRequestPriority::factory()->create([
+        'type_id' => $typeB->getKey(),
+    ]);
+
+    $serviceRequestsTypeA = ServiceRequest::factory()
+        ->count(2)
+        ->create(['priority_id' => $priorityA->getKey()]);
+
+    $serviceRequestsTypeB = ServiceRequest::factory()
+        ->count(2)
+        ->create(['priority_id' => $priorityB->getKey()]);
+
+    livewire(ListServiceRequests::class)
+        ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB))
+        ->filterTable('type', ['types' => [$typeA->getKey()]])
+        ->assertCanSeeTableRecords($serviceRequestsTypeA)
+        ->assertCanNotSeeTableRecords($serviceRequestsTypeB);
+});
+
+it('can filter service requests by multiple types', function () {
+    asSuperAdmin();
+
+    $typeA = ServiceRequestType::factory()->create();
+    $typeB = ServiceRequestType::factory()->create();
+    $typeC = ServiceRequestType::factory()->create();
+
+    $priorityA = ServiceRequestPriority::factory()->create([
+        'type_id' => $typeA->getKey(),
+    ]);
+
+    $priorityB = ServiceRequestPriority::factory()->create([
+        'type_id' => $typeB->getKey(),
+    ]);
+
+    $priorityC = ServiceRequestPriority::factory()->create([
+        'type_id' => $typeC->getKey(),
+    ]);
+
+    $serviceRequestsTypeA = ServiceRequest::factory()
+        ->count(2)
+        ->create(['priority_id' => $priorityA->getKey()]);
+
+    $serviceRequestsTypeB = ServiceRequest::factory()
+        ->count(2)
+        ->create(['priority_id' => $priorityB->getKey()]);
+
+    $serviceRequestsTypeC = ServiceRequest::factory()
+        ->count(2)
+        ->create(['priority_id' => $priorityC->getKey()]);
+
+    livewire(ListServiceRequests::class)
+        ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB)->merge($serviceRequestsTypeC))
+        ->filterTable('type', ['types' => [$typeA->getKey(), $typeB->getKey()]])
+        ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB))
+        ->assertCanNotSeeTableRecords($serviceRequestsTypeC);
+});
+
+it('shows all service requests when no type filter is selected', function () {
+    asSuperAdmin();
+
+    $typeA = ServiceRequestType::factory()->create();
+    $typeB = ServiceRequestType::factory()->create();
+
+    $priorityA = ServiceRequestPriority::factory()->create([
+        'type_id' => $typeA->getKey(),
+    ]);
+
+    $priorityB = ServiceRequestPriority::factory()->create([
+        'type_id' => $typeB->getKey(),
+    ]);
+
+    $serviceRequestsTypeA = ServiceRequest::factory()
+        ->count(2)
+        ->create(['priority_id' => $priorityA->getKey()]);
+
+    $serviceRequestsTypeB = ServiceRequest::factory()
+        ->count(2)
+        ->create(['priority_id' => $priorityB->getKey()]);
+
+    livewire(ListServiceRequests::class)
+        ->filterTable('type', ['types' => []])
+        ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB));
+});
+
+it('builds type tree options with categories as disabled groups and types as selectable items', function () {
+    ServiceRequestType::query()->delete();
+    ServiceRequestTypeCategory::query()->delete();
+
+    $categoryA = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Area A',
+        'sort' => 1,
+        'parent_id' => null,
+    ]);
+
+    $categoryB = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Area B',
+        'sort' => 2,
+        'parent_id' => null,
+    ]);
+
+    $typeA1 = ServiceRequestType::factory()->create([
+        'name' => 'Type A1',
+        'sort' => 1,
+        'category_id' => $categoryA->getKey(),
+    ]);
+
+    $typeA2 = ServiceRequestType::factory()->create([
+        'name' => 'Type A2',
+        'sort' => 2,
+        'category_id' => $categoryA->getKey(),
+    ]);
+
+    $typeB1 = ServiceRequestType::factory()->create([
+        'name' => 'Type B1',
+        'sort' => 1,
+        'category_id' => $categoryB->getKey(),
+    ]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    expect($tree)->toHaveCount(2);
+
+    // Area A
+    expect($tree[0]['name'])->toBe('Area A');
+    expect($tree[0]['disabled'])->toBeTrue();
+    expect($tree[0]['value'])->toBe('category_' . $categoryA->getKey());
+    expect($tree[0]['children'])->toHaveCount(2);
+    expect($tree[0]['children'][0]['name'])->toBe('Type A1');
+    expect($tree[0]['children'][0]['value'])->toBe($typeA1->getKey());
+    expect($tree[0]['children'][0]['disabled'])->toBeFalse();
+    expect($tree[0]['children'][1]['name'])->toBe('Type A2');
+    expect($tree[0]['children'][1]['value'])->toBe($typeA2->getKey());
+    expect($tree[0]['children'][1]['disabled'])->toBeFalse();
+
+    // Area B
+    expect($tree[1]['name'])->toBe('Area B');
+    expect($tree[1]['disabled'])->toBeTrue();
+    expect($tree[1]['value'])->toBe('category_' . $categoryB->getKey());
+    expect($tree[1]['children'])->toHaveCount(1);
+    expect($tree[1]['children'][0]['name'])->toBe('Type B1');
+    expect($tree[1]['children'][0]['value'])->toBe($typeB1->getKey());
+    expect($tree[1]['children'][0]['disabled'])->toBeFalse();
+});
+
+it('builds type tree options with nested categories maintaining sort order', function () {
+    ServiceRequestType::query()->delete();
+    ServiceRequestTypeCategory::query()->delete();
+
+    $parentCategory = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Parent Area',
+        'sort' => 1,
+        'parent_id' => null,
+    ]);
+
+    $childCategory = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Child Area',
+        'sort' => 1,
+        'parent_id' => $parentCategory->getKey(),
+    ]);
+
+    $parentType = ServiceRequestType::factory()->create([
+        'name' => 'Parent Type',
+        'sort' => 2,
+        'category_id' => $parentCategory->getKey(),
+    ]);
+
+    $childType = ServiceRequestType::factory()->create([
+        'name' => 'Child Type',
+        'sort' => 1,
+        'category_id' => $childCategory->getKey(),
+    ]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    expect($tree)->toHaveCount(1);
+
+    // Parent Area
+    expect($tree[0]['name'])->toBe('Parent Area');
+    expect($tree[0]['disabled'])->toBeTrue();
+    expect($tree[0]['children'])->toHaveCount(2);
+
+    // Child Area (nested category, comes first by sort order)
+    expect($tree[0]['children'][0]['name'])->toBe('Child Area');
+    expect($tree[0]['children'][0]['disabled'])->toBeTrue();
+    expect($tree[0]['children'][0]['children'])->toHaveCount(1);
+    expect($tree[0]['children'][0]['children'][0]['name'])->toBe('Child Type');
+    expect($tree[0]['children'][0]['children'][0]['value'])->toBe($childType->getKey());
+    expect($tree[0]['children'][0]['children'][0]['disabled'])->toBeFalse();
+
+    // Parent Type (type in parent category)
+    expect($tree[0]['children'][1]['name'])->toBe('Parent Type');
+    expect($tree[0]['children'][1]['value'])->toBe($parentType->getKey());
+    expect($tree[0]['children'][1]['disabled'])->toBeFalse();
+});
+
+it('builds type tree options with uncategorized types at root level', function () {
+    ServiceRequestType::query()->delete();
+    ServiceRequestTypeCategory::query()->delete();
+
+    $category = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Categorized Area',
+        'sort' => 1,
+        'parent_id' => null,
+    ]);
+
+    $categorizedType = ServiceRequestType::factory()->create([
+        'name' => 'Categorized Type',
+        'sort' => 1,
+        'category_id' => $category->getKey(),
+    ]);
+
+    $uncategorizedType = ServiceRequestType::factory()->create([
+        'name' => 'Uncategorized Type',
+        'sort' => 1,
+        'category_id' => null,
+    ]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    expect($tree)->toHaveCount(2);
+
+    // Categorized area first
+    expect($tree[0]['name'])->toBe('Categorized Area');
+    expect($tree[0]['disabled'])->toBeTrue();
+    expect($tree[0]['children'])->toHaveCount(1);
+    expect($tree[0]['children'][0]['name'])->toBe('Categorized Type');
+
+    // Uncategorized type at root level
+    expect($tree[1]['name'])->toBe('Uncategorized Type');
+    expect($tree[1]['value'])->toBe($uncategorizedType->getKey());
+    expect($tree[1]['disabled'])->toBeFalse();
 });
