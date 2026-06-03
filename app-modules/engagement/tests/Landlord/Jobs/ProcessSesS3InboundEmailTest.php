@@ -1185,6 +1185,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
     describe('email_automatic_creation_contact_create_condition', function () {
         it('None condition creates a new contact and service request when no contact exists, without requiring an organization', function () {
+           
             $tenant = Tenant::query()->firstOrFail();
 
             assert($tenant instanceof Tenant);
@@ -1205,6 +1206,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
                     )
                     ->create([
                         'is_email_automatic_creation_enabled' => true,
+                        'is_email_automatic_creation_contact_create_enabled' => true,
                         'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::None,
                     ]);
 
@@ -1283,6 +1285,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
         });
 
         it('None condition creates a new contact and service request even when a contact with that email already exists', function () {
+           
             $tenant = Tenant::query()->firstOrFail();
 
             assert($tenant instanceof Tenant);
@@ -1307,6 +1310,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
                     )
                     ->create([
                         'is_email_automatic_creation_enabled' => true,
+                        'is_email_automatic_creation_contact_create_enabled' => true,
                         'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::None,
                     ]);
 
@@ -1374,6 +1378,78 @@ describe('Service Request Type Service Request creation from inbound email', fun
             $expectedIds = collect([$existingContact->getKey(), $newContact->getKey()])->sort()->values();
 
             expect($respondentIds)->toEqual($expectedIds);
+
+            $filesystem->assertMissing('s3_email');
+        });
+
+        it('None condition does not create a new contact or service request when is_email_automatic_creation_contact_create_enabled is disabled', function () {
+            
+            $tenant = Tenant::query()->firstOrFail();
+
+            assert($tenant instanceof Tenant);
+
+            $tenant->execute(function () {
+                seed(ContactTypeSeeder::class);
+
+                $serviceRequestType = ServiceRequestType::factory()
+                    ->has(
+                        TenantServiceRequestTypeDomain::factory()->state([
+                            'domain' => 'help',
+                        ]),
+                        'domain'
+                    )
+                    ->has(
+                        ServiceRequestPriority::factory()->count(3),
+                        'priorities'
+                    )
+                    ->create([
+                        'is_email_automatic_creation_enabled' => true,
+                        'is_email_automatic_creation_contact_create_enabled' => false,
+                        'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::None,
+                    ]);
+
+                $assignedPriority = $serviceRequestType->priorities->first();
+
+                $serviceRequestType->update([
+                    'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
+                ]);
+            });
+
+            Storage::fake('s3');
+            $filesystem = Storage::fake('s3-inbound-email');
+
+            assert($filesystem instanceof FilesystemAdapter);
+
+            $modulePath = resolve(ModulePath::class);
+
+            $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+            $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+            $filesystem->putFileAs('', $file, 's3_email');
+
+            /** @var ProcessSesS3InboundEmail $mock */
+            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+                $mock
+                    ->shouldAllowMockingProtectedMethods()
+                    ->shouldReceive('getContent')
+                    ->once()
+                    ->andReturn($content);
+            });
+
+            invade($mock)->emailFilePath = 's3_email';
+
+            $filesystem->assertExists('s3_email');
+
+            assertDatabaseEmpty(Contact::class);
+
+            $mock->handle();
+
+            $tenant->makeCurrent();
+
+            assertDatabaseEmpty(Contact::class);
+            assertDatabaseEmpty(ServiceRequest::class);
+            assertDatabaseEmpty(EngagementResponse::class);
 
             $filesystem->assertMissing('s3_email');
         });
