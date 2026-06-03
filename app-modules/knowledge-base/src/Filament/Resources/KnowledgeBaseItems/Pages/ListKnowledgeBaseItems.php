@@ -44,6 +44,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\TagsForClass;
+use App\Models\Tag;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -64,7 +65,6 @@ use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Arr;
 
 class ListKnowledgeBaseItems extends ListRecords
 {
@@ -177,7 +177,12 @@ class ListKnowledgeBaseItems extends ListRecords
                 ReplicateAction::make()
                     ->authorize('create', KnowledgeBaseItem::class)
                     ->slideOver()
-                    ->mutateRecordDataUsing(fn (array $data): array => Arr::only($data, ['title', 'public', 'notes', 'status_id', 'category_id']))
+                    ->mutateRecordDataUsing(function (array $data, KnowledgeBaseItem $record): array {
+                        $data['tags'] = $record->tags()->pluck('id')->toArray();
+                        $data['division'] = $record->division()->pluck('id')->toArray();
+
+                        return $data;
+                    })
                     ->schema([
                         Section::make()
                             ->schema([
@@ -194,12 +199,15 @@ class ListKnowledgeBaseItems extends ListRecords
                                     ->label('Notes')
                                     ->string(),
                                 Select::make('tags')
-                                    ->relationship(
-                                        'tags',
-                                        'name',
-                                        fn (Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
+                                    ->options(
+                                        fn () => Tag::query()->tap(new TagsForClass(new KnowledgeBaseItem()))->limit(50)->pluck('name', 'id')
                                     )
                                     ->searchable()
+                                    ->getOptionLabelUsing(fn ($value): ?string => filled($value)
+                                        ? Tag::query()
+                                            ->whereKey($value)
+                                            ->value('name')
+                                        : null)
                                     ->preload()
                                     ->multiple()
                                     ->columnSpanFull(),
@@ -221,15 +229,18 @@ class ListKnowledgeBaseItems extends ListRecords
                                 Select::make('division')
                                     ->label('Division')
                                     ->multiple()
-                                    ->relationship('division', 'name')
-                                    ->searchable(['name', 'code'])
-                                    ->preload()
-                                    ->exists((new Division())->getTable(), (new Division())->getKeyName()),
+                                    ->options(fn () => Division::query()->limit(50)->pluck('name', 'id'))
+                                    ->searchable()
+                                    ->getOptionLabelUsing(fn ($value): ?string => filled($value)
+                                        ? Division::query()
+                                            ->whereKey($value)
+                                            ->value('name')
+                                        : null)
+                                    ->preload(),
                             ]),
                     ])
                     ->after(function (array $data, KnowledgeBaseItem $replica, KnowledgeBaseItem $record): void {
                         $replica->division()->attach($data['division'] ?? []);
-
                         $replica->tags()->attach($data['tags'] ?? []);
 
                         $media = $record->getMedia('article_details');

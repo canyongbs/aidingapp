@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ListKnowledgeBaseItems;
@@ -41,6 +42,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use App\Models\Tag;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -673,6 +675,12 @@ test('an authorised user can duplicate a knowledge base article', function () {
     asSuperAdmin();
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
+    $tags = Tag::factory()->count(3)->forClass(new KnowledgeBaseItem())->create();
+    $knowledgeBaseItem->tags()->attach($tags);
+    $divisions = Division::factory()->count(3)->create();
+    $knowledgeBaseItem->division()->attach($divisions);
+
+    $knowledgeBaseItem->load(['tags', 'division']);
 
     $user = User::factory()->create();
     $user->givePermissionTo('knowledge_base_item.view-any');
@@ -681,7 +689,16 @@ test('an authorised user can duplicate a knowledge base article', function () {
     actingAs($user);
 
     livewire(ListKnowledgeBaseItems::class)
-        ->callTableAction('replicate', $knowledgeBaseItem);
+        ->callTableAction('replicate', $knowledgeBaseItem, data: [
+            'title' => $knowledgeBaseItem->title,
+            'public' => $knowledgeBaseItem->public,
+            'notes' => $knowledgeBaseItem->notes,
+            'status_id' => $knowledgeBaseItem->status_id,
+            'category_id' => $knowledgeBaseItem->category_id,
+            'tags' => $knowledgeBaseItem->tags->pluck('id')->toArray(),
+            'division' => $knowledgeBaseItem->division->pluck('id')->toArray(),
+        ])
+        ->assertHasNoTableActionErrors();
 
     $replicatedKnowledgeBaseItem = KnowledgeBaseItem::latest()->first();
 
@@ -691,6 +708,8 @@ test('an authorised user can duplicate a knowledge base article', function () {
     expect($replicatedKnowledgeBaseItem->notes)->toBe($knowledgeBaseItem->notes);
     expect($replicatedKnowledgeBaseItem->status_id)->toBe($knowledgeBaseItem->status_id);
     expect($replicatedKnowledgeBaseItem->category_id)->toBe($knowledgeBaseItem->category_id);
+    expect($replicatedKnowledgeBaseItem->tags->pluck('id'))->toEqual($knowledgeBaseItem->tags->pluck('id'));
+    expect($replicatedKnowledgeBaseItem->division->pluck('id'))->toEqual($knowledgeBaseItem->division->pluck('id'));
 });
 
 test('duplicating a knowledge base article is gated by the knowledge_base_item.create ability', function () {
