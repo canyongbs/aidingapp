@@ -47,6 +47,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceReques
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\TeamRenameFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
@@ -107,11 +108,27 @@ class ListServiceRequests extends ListRecords
                 TextColumn::make('priority.type.name')
                     ->label('Type')
                     ->sortable(query: function (Builder $query, string $direction): Builder {
+                        $serviceRequest = new ServiceRequest();
+                        $priority = new ServiceRequestPriority();
+                        $type = new ServiceRequestType();
+
                         return $query
-                            ->join('service_request_priorities', 'service_requests.priority_id', '=', 'service_request_priorities.id')
-                            ->join('service_request_types', 'service_request_priorities.type_id', '=', 'service_request_types.id')
-                            ->select('service_requests.*')
-                            ->orderBy('service_request_types.name', $direction);
+                            ->orderBy(
+                                $type->newQuery()
+                                    ->select($type->qualifyColumn('name'))
+                                    ->join(
+                                        $priority->getTable(),
+                                        $priority->qualifyColumn($priority->type()->getForeignKeyName()),
+                                        '=',
+                                        $type->qualifyColumn($type->getKeyName())
+                                    )
+                                    ->whereColumn(
+                                        $priority->qualifyColumn($priority->getKeyName()),
+                                        $serviceRequest->qualifyColumn($serviceRequest->priority()->getForeignKeyName())
+                                    )
+                                    ->limit(1),
+                                $direction
+                            );
                     })
                     ->toggleable(),
                 TextColumn::make('division.name')
