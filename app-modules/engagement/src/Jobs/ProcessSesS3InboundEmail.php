@@ -499,41 +499,29 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 ->get();
 
             if ($contacts->isEmpty()) {
-                if (EmailAutomaticCreationFeature::active()) {
-                    if ($serviceRequestType->email_automatic_creation_contact_create_condition === EmailAutomaticCreationContactCreateCondition::None) {
-                        if ($serviceRequestType->is_email_automatic_creation_contact_create_enabled) {
-                            $contacts = $contacts->add($this->buildContactFromSender($sender, $parser));
-                        }
-                    } elseif ($serviceRequestType->email_automatic_creation_contact_create_condition === EmailAutomaticCreationContactCreateCondition::IfEligible) {
-                        // If no contacts are found, we will try to find an organization with the same domain
-                        $domain = Str::afterLast($sender, '@');
+                if (! $serviceRequestType->is_email_automatic_creation_contact_create_enabled) {
+                    Notification::route('mail', $sender)
+                        ->notifyNow(new IneligibleContactSesS3InboundEmailServiceRequestNotification(
+                            $serviceRequestTypeDomain,
+                            $parser->getMessageBody('htmlEmbedded')
+                        ));
 
-                        $organization = Organization::query()
-                            ->whereRaw('LOWER(?) = ANY (SELECT LOWER(value) FROM jsonb_array_elements_text(domains))', [mb_strtolower($domain)])
-                            ->first();
+                    return;
+                }
 
-                        if (! $organization || ! $serviceRequestType->is_email_automatic_creation_contact_create_enabled) {
-                            Notification::route('mail', $sender)
-                                ->notifyNow(new IneligibleContactSesS3InboundEmailServiceRequestNotification(
-                                    $serviceRequestTypeDomain,
-                                    $parser->getMessageBody('htmlEmbedded')
-                                ));
+                $organization = null;
 
-                            return;
-                        }
-
-                        // If an organization domain is found, we will create a new contact with the email address
-                        $contacts = $contacts->add($this->buildContactFromSender($sender, $parser, $organization));
-                    }
-                } else {
-                    // If no contacts are found, we will try to find an organization with the same domain
+                if (
+                    ! EmailAutomaticCreationFeature::active()
+                    || $serviceRequestType->email_automatic_creation_contact_create_condition === EmailAutomaticCreationContactCreateCondition::IfEligible
+                ) {
                     $domain = Str::afterLast($sender, '@');
 
                     $organization = Organization::query()
                         ->whereRaw('LOWER(?) = ANY (SELECT LOWER(value) FROM jsonb_array_elements_text(domains))', [mb_strtolower($domain)])
                         ->first();
 
-                    if (! $organization || $serviceRequestType->is_email_automatic_creation_contact_create_enabled === false) {
+                    if (! $organization) {
                         Notification::route('mail', $sender)
                             ->notifyNow(new IneligibleContactSesS3InboundEmailServiceRequestNotification(
                                 $serviceRequestTypeDomain,
@@ -542,10 +530,9 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                         return;
                     }
-
-                    // If an organization domain is found, we will create a new contact with the email address
-                    $contacts = $contacts->add($this->buildContactFromSender($sender, $parser, $organization));
                 }
+
+                $contacts = $contacts->add($this->buildContactFromSender($sender, $parser, $organization));
             }
 
             $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser) {

@@ -1284,6 +1284,15 @@ describe('Service Request Type Service Request creation from inbound email', fun
         });
 
         it('None condition does not create a new contact or service request when is_email_automatic_creation_contact_create_enabled is disabled', function () {
+            $notificationFake = Notification::fake();
+
+            Event::listen(
+                MadeTenantCurrentEvent::class,
+                function (MadeTenantCurrentEvent $event) use ($notificationFake) {
+                    Notification::swap($notificationFake);
+                }
+            );
+
             $tenant = Tenant::query()->firstOrFail();
 
             assert($tenant instanceof Tenant);
@@ -1352,6 +1361,13 @@ describe('Service Request Type Service Request creation from inbound email', fun
             assertDatabaseEmpty(EngagementResponse::class);
 
             $filesystem->assertMissing('s3_email');
+
+            $notificationFake->assertSentOnDemand(
+                IneligibleContactSesS3InboundEmailServiceRequestNotification::class,
+                function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable) {
+                    return $notifiable->routes['mail'] === 'kevin.ullyott@canyongbs.com';
+                }
+            );
         });
 
         it('None condition creates a service request for an existing contact when contact is not empty', function () {
