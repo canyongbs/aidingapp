@@ -155,7 +155,7 @@ class ListServiceRequests extends ListRecords
                     ->label('Type')
                     ->form([
                         SelectTree::make('types')
-                            ->label('Types')
+                            ->label('Type')
                             ->getTreeUsing(fn () => static::buildTypeTreeOptions())
                             ->multiple()
                             ->placeholder('All')
@@ -171,7 +171,7 @@ class ListServiceRequests extends ListRecords
                     ))
                     ->indicateUsing(fn (array $data): ?string => empty($data['types'])
                         ? null
-                        : 'Types: ' . ServiceRequestType::whereIn('id', $data['types'])->pluck('name')->implode(', ')
+                        : 'Type: ' . ServiceRequestType::whereIn('id', $data['types'])->pluck('name')->implode(', ')
                     ),
                 SelectFilter::make('status')
                     ->relationship('status', 'name')
