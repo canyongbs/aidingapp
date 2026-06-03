@@ -1184,7 +1184,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
     });
 
     describe('email_automatic_creation_contact_create_condition', function () {
-
         it('None condition creates a new contact and service request when no contact exists and contact creation is enabled', function () {
             $tenant = Tenant::query()->firstOrFail();
 
