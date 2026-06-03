@@ -32,6 +32,9 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { InformationCircleIcon } from '@heroicons/vue/20/solid';
+    import { CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/solid';
+
     const props = defineProps({
         name: {
             type: String,
@@ -48,36 +51,10 @@
     });
 </script>
 <template>
-    <div
-        class="group flex w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5 transition duration-75 hover:bg-gray-50"
-    >
+    <div class="flex w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5">
         <div class="shrink-0 size-6" aria-hidden="true">
-            <svg
-                v-if="status === true"
-                class="size-6 text-green-700"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    fill-rule="evenodd"
-                    d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm13.707-1.293a1 1 0 0 0-1.414-1.414L11 12.586l-1.793-1.793a1 1 0 0 0-1.414 1.414l2.5 2.5a1 1 0 0 0 1.414 0l4-4Z"
-                    clip-rule="evenodd"
-                />
-            </svg>
-            <svg
-                v-if="status === false"
-                class="size-6 text-red-600"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-            >
-                <path
-                    fill-rule="evenodd"
-                    d="M2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12Zm7.707-3.707a1 1 0 0 0-1.414 1.414L10.586 12l-2.293 2.293a1 1 0 1 0 1.414 1.414L12 13.414l2.293 2.293a1 1 0 0 0 1.414-1.414L13.414 12l2.293-2.293a1 1 0 0 0-1.414-1.414L12 10.586 9.707 8.293Z"
-                    clip-rule="evenodd"
-                />
-            </svg>
+            <CheckCircleIcon v-if="status === true" class="size-6 text-green-700" />
+            <XCircleIcon v-if="status === false" class="size-6 text-red-600" />
         </div>
 
         <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
@@ -85,20 +62,6 @@
             <p class="overflow-hidden text-sm text-pretty break-words text-gray-500">{{ message }}</p>
         </div>
 
-        <svg
-            class="shrink-0 size-5 self-center text-gray-400"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-        >
-            <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M10 11h2v5m-2 0h4m-2.592-8.5h.01M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-            />
-        </svg>
+        <InformationCircleIcon class="shrink-0 size-5 self-center text-gray-400" aria-hidden="true" />
     </div>
 </template>
