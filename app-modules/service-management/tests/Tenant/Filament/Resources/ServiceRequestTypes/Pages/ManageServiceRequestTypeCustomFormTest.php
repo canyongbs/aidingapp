@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Form\Enums\Rounding;
 use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypeCustomForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
@@ -302,7 +301,7 @@ it('preserves the field responses of a prior submission after a version bump', f
         ->and($submission->fields()->first()->pivot->response)->toBe('Jane Doe');
 });
 
-it('saves the description and appearance color and rounding settings', function () {
+it('saves the description', function () {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -313,16 +312,12 @@ it('saves the description and appearance color and rounding settings', function 
         ->set('data.description', 'How to request access.')
         ->set('data.is_wizard', false)
         ->set('data.content', customFormContent())
-        ->set('data.primary_color', 'rose')
-        ->set('data.rounding', Rounding::Full->value)
         ->call('save')
         ->assertHasNoFormErrors();
 
     $type->unsetRelation('form');
 
-    expect($type->form->description)->toBe('How to request access.')
-        ->and($type->form->primary_color)->toBe('rose')
-        ->and($type->form->rounding)->toBe(Rounding::Full);
+    expect($type->form->description)->toBe('How to request access.');
 });
 
 it('stores steps and clears top-level content for a multi-step form', function () {

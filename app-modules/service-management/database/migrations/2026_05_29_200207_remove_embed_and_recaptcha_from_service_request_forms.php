@@ -48,6 +48,8 @@ return new class () extends Migration {
                     'embed_enabled',
                     'allowed_domains',
                     'recaptcha_enabled',
+                    'primary_color',
+                    'rounding',
                 ]);
 
                 $table->dropUnique('service_request_forms_name_unique');
@@ -62,6 +64,8 @@ return new class () extends Migration {
                 $table->boolean('embed_enabled')->default(false);
                 $table->json('allowed_domains')->nullable();
                 $table->boolean('recaptcha_enabled')->default(false);
+                $table->string('primary_color')->nullable();
+                $table->string('rounding')->nullable();
 
                 $table->unique('name');
             });

@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\Form\Enums\Rounding;
 use AidingApp\Form\Models\Submissible;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFormFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -56,8 +55,6 @@ class ServiceRequestForm extends Submissible
         'description',
         'is_authenticated',
         'is_wizard',
-        'primary_color',
-        'rounding',
         'content',
     ];
 
@@ -65,7 +62,6 @@ class ServiceRequestForm extends Submissible
         'content' => 'array',
         'is_authenticated' => 'boolean',
         'is_wizard' => 'boolean',
-        'rounding' => Rounding::class,
     ];
 
     /**

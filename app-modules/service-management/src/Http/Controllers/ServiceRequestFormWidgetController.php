@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Http\Controllers;
 
+use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFormKitSchema;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Http\Controllers\Controller;
@@ -73,19 +74,26 @@ class ServiceRequestFormWidgetController extends Controller
 
     public function preview(GenerateServiceRequestFormKitSchema $generateSchema, ServiceRequestForm $serviceRequestForm): JsonResponse
     {
+        $portalSettings = app(PortalSettings::class);
+
+        // Appearance is inherited from the portal settings. Those settings are nullable until
+        // an admin configures them, so fall back to sensible defaults when unset. (PHPStan's
+        // settings model treats them as non-null, hence the nullsafe ignores.)
+        $primaryColor = $portalSettings->knowledge_management_portal_primary_color?->value ?? 'blue'; // @phpstan-ignore nullsafe.neverNull
+        $rounding = $portalSettings->knowledge_management_portal_rounding?->value ?? 'md'; // @phpstan-ignore nullsafe.neverNull
+
         return response()->json(
             [
-                // Strip the internal version suffix (e.g. " (2)") so the preview heading
-                // stays clean across archived versions.
-                'name' => (string) preg_replace('/\s*\(\d+\)$/', '', (string) $serviceRequestForm->name),
+                // Service request forms belong to a type and no longer carry a meaningful
+                // name, so it is not included in the preview.
                 'description' => $serviceRequestForm->description,
                 'is_authenticated' => false,
                 'schema' => $generateSchema($serviceRequestForm),
-                'primary_color' => collect(Color::all()[$serviceRequestForm->primary_color ?? 'blue'])
+                'primary_color' => collect(Color::all()[$primaryColor])
                     ->map(Color::convertToRgb(...))
                     ->map(fn (string $value): string => (string) str($value)->after('rgb(')->before(')'))
                     ->all(),
-                'rounding' => $serviceRequestForm->rounding,
+                'rounding' => $rounding,
             ],
         );
     }

@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Form\Enums\Rounding;
+use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
@@ -117,7 +119,45 @@ it('does not include a submission_url in the preview-entry response', function (
         ->assertJsonMissingPath('submission_url');
 });
 
-it('returns the form name and schema in the preview-entry response', function () {
+it('inherits the rounding from the portal settings in the preview', function () {
+    $user = User::factory()->create();
+
+    $type = ServiceRequestType::factory()->create();
+
+    $form = new ServiceRequestForm(['name' => 'Test Form']);
+    $form->type()->associate($type);
+    $form->save();
+
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_rounding = Rounding::Full;
+    $portalSettings->save();
+
+    actingAs($user)
+        ->getJson(route('service-request-forms.preview-entry', ['serviceRequestForm' => $form]))
+        ->assertSuccessful()
+        ->assertJsonPath('rounding', Rounding::Full->value);
+});
+
+it('falls back to a default rounding when the portal setting is not configured', function () {
+    $user = User::factory()->create();
+
+    $type = ServiceRequestType::factory()->create();
+
+    $form = new ServiceRequestForm(['name' => 'Test Form']);
+    $form->type()->associate($type);
+    $form->save();
+
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_rounding = null;
+    $portalSettings->save();
+
+    actingAs($user)
+        ->getJson(route('service-request-forms.preview-entry', ['serviceRequestForm' => $form]))
+        ->assertSuccessful()
+        ->assertJsonPath('rounding', 'md');
+});
+
+it('returns the schema in the preview-entry response and does not display the form name', function () {
     $user = User::factory()->create();
 
     $type = ServiceRequestType::factory()->create();
@@ -126,24 +166,11 @@ it('returns the form name and schema in the preview-entry response', function ()
     $form->type()->associate($type);
     $form->save();
 
+    // The form belongs to a type and no longer carries a meaningful name, so the preview
+    // does not include one at all.
     actingAs($user)
         ->getJson(route('service-request-forms.preview-entry', ['serviceRequestForm' => $form]))
         ->assertSuccessful()
-        ->assertJsonPath('name', 'My Preview Form')
+        ->assertJsonMissingPath('name')
         ->assertJsonStructure(['schema', 'primary_color']);
-});
-
-it('strips the internal version suffix from the name in the preview-entry response', function () {
-    $user = User::factory()->create();
-
-    $type = ServiceRequestType::factory()->create();
-
-    $form = new ServiceRequestForm(['name' => 'Password Reset Form (3)']);
-    $form->type()->associate($type);
-    $form->save();
-
-    actingAs($user)
-        ->getJson(route('service-request-forms.preview-entry', ['serviceRequestForm' => $form]))
-        ->assertSuccessful()
-        ->assertJsonPath('name', 'Password Reset Form');
 });
