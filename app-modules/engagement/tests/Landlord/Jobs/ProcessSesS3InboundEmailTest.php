@@ -1466,6 +1466,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
             $filesystem->assertMissing('s3_email');
         });
+    });
 });
 
 describe('Legacy inbound email handling', function () {
