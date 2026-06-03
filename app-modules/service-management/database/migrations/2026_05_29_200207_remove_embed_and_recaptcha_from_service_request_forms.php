@@ -34,38 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Form\Actions;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Form\Models\Submissible;
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use Exception;
-use Illuminate\Support\Facades\Storage;
-
-class GenerateSubmissibleEmbedCode
-{
-    public function handle(Submissible $submissible): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return match ($submissible::class) {
-            ServiceRequestForm::class => (function () use ($submissible) {
-                $manifestPath = Storage::disk('public')->get('widgets/service-requests/forms/.vite/manifest.json');
+        DB::transaction(function () {
+            Schema::table('service_request_forms', function (Blueprint $table) {
+                $table->dropUnique('service_request_forms_name_unique');
 
-                if (is_null($manifestPath)) {
-                    throw new Exception('Vite manifest file not found.');
-                }
-
-                /** @var array<string, array{file: string, name: string, src: string, isEntry: bool}> $manifest */
-                $manifest = json_decode($manifestPath, true, 512, JSON_THROW_ON_ERROR);
-
-                $loaderScriptUrl = url("widgets/service-requests/forms/{$manifest['src/loader.js']['file']}");
-
-                $assetsUrl = route(name: 'widgets.service-requests.forms.api.assets', parameters: ['serviceRequestForm' => $submissible]);
-
-                return <<<EOD
-                <service-request-form-embed url="{$assetsUrl}"></service-request-form-embed>
-                <script src="{$loaderScriptUrl}"></script>
-                EOD;
-            })(),
-            default => throw new Exception('Unsupported submissible type.'),
-        };
+                $table->dropColumn([
+                    'embed_enabled',
+                    'allowed_domains',
+                    'recaptcha_enabled',
+                    'primary_color',
+                    'rounding',
+                    'name',
+                ]);
+            });
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            Schema::table('service_request_forms', function (Blueprint $table) {
+                $table->string('name')->nullable();
+                $table->boolean('embed_enabled')->default(false);
+                $table->json('allowed_domains')->nullable();
+                $table->boolean('recaptcha_enabled')->default(false);
+                $table->string('primary_color')->nullable();
+                $table->string('rounding')->nullable();
+
+                $table->unique('name');
+            });
+        });
+    }
+};

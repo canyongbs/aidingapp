@@ -34,48 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\ServiceRequestFormResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ListServiceRequestForms extends ListRecords
+/**
+ * @extends Factory<ServiceRequestForm>
+ */
+class ServiceRequestFormFactory extends Factory
 {
-    protected static string $resource = ServiceRequestFormResource::class;
-
-    public function table(Table $table): Table
-    {
-        return $table
-            ->modifyQueryUsing(function (Builder $query) {
-                /** @var Builder<ServiceRequestForm> $query */
-                return $query->withoutArchived()->whereHas('type', fn (Builder $query) => $query->withoutArchived());
-            })
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name'),
-            ])
-            ->recordActions([
-                Action::make('Respond')
-                    ->url(fn (ServiceRequestForm $form) => route('service-request-forms.show', ['serviceRequestForm' => $form]))
-                    ->icon('heroicon-m-arrow-top-right-on-square')
-                    ->openUrlInNewTab()
-                    ->color('gray'),
-                EditAction::make(),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
+    public function definition(): array
     {
         return [
-            CreateAction::make(),
+            'description' => $this->faker->optional()->sentence(),
+            'service_request_type_id' => ServiceRequestType::factory(),
+            'is_wizard' => false,
         ];
+    }
+
+    public function wizard(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_wizard' => true,
+            'content' => null,
+        ]);
     }
 }
