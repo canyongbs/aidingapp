@@ -45,9 +45,9 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\Edi
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ListServiceRequestTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypeAuditors;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypeManagers;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypePriorities;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ServiceRequestTypeEmailTemplatePage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ViewServiceRequestType;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\RelationManagers\ServiceRequestPrioritiesRelationManager;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use Filament\Navigation\NavigationItem;
@@ -84,9 +84,7 @@ class ServiceRequestTypeResource extends Resource
 
     public static function getRelations(): array
     {
-        return [
-            ServiceRequestPrioritiesRelationManager::class,
-        ];
+        return [];
     }
 
     public static function getRecordSubNavigation(Page $page): array
@@ -95,6 +93,7 @@ class ServiceRequestTypeResource extends Resource
             ...$page->generateNavigationItems([
                 ViewServiceRequestType::class,
                 EditServiceRequestType::class,
+                ManageServiceRequestTypePriorities::class,
                 ManageServiceRequestTypeManagers::class,
                 ManageServiceRequestTypeAuditors::class,
                 EditServiceRequestTypeAssignments::class,
@@ -117,6 +116,7 @@ class ServiceRequestTypeResource extends Resource
             'create' => CreateServiceRequestType::route('/create'),
             'view' => ViewServiceRequestType::route('/{record}'),
             'edit' => EditServiceRequestType::route('/{record}/edit'),
+            'service-request-type-priorities' => ManageServiceRequestTypePriorities::route('/{record}/priorities'),
             'service-request-type-managers' => ManageServiceRequestTypeManagers::route('/{record}/managers'),
             'service-request-type-auditors' => ManageServiceRequestTypeAuditors::route('/{record}/auditors'),
             'service-request-type-assignments' => EditServiceRequestTypeAssignments::route('/{record}/assignments'),
