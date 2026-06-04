@@ -123,6 +123,22 @@ class ServiceRequestUpdateObserver
             false,
             $serviceRequestUpdate->serviceRequest->priority?->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Update, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Notification) ?? false,
         );
+
+        $assignedManagerUpdateEmailTemplate = $this->fetchTemplate(
+            $serviceRequestUpdate->serviceRequest->priority->type,
+            ServiceRequestEmailTemplateType::Update,
+            ServiceRequestTypeEmailTemplateRole::AssignedManager
+        );
+
+        if ($assignedUser = $serviceRequestUpdate->serviceRequest->assignedTo?->user) {
+            if ($serviceRequestUpdate->serviceRequest->priority?->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Update, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email) ?? false) {
+                $assignedUser->notify(new ServiceRequestUpdated($serviceRequestUpdate, $assignedManagerUpdateEmailTemplate, MailChannel::class));
+            }
+
+            if ($serviceRequestUpdate->serviceRequest->priority?->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Update, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification) ?? false) {
+                $assignedUser->notify(new ServiceRequestUpdated($serviceRequestUpdate, $assignedManagerUpdateEmailTemplate, DatabaseChannel::class));
+            }
+        }
     }
 
     public function deleted(ServiceRequestUpdate $serviceRequestUpdate): void

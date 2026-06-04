@@ -262,6 +262,22 @@ class ServiceRequestObserver
                     false,
                     $serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Notification),
                 );
+
+                $assignedManagerClosedEmailTemplate = $this->fetchTemplate(
+                    $serviceRequest->priority->type,
+                    ServiceRequestEmailTemplateType::Closed,
+                    ServiceRequestTypeEmailTemplateRole::AssignedManager
+                );
+
+                if ($assignedUser = $serviceRequest->assignedTo?->user) {
+                    if ($serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email)) {
+                        $assignedUser->notify(new ServiceRequestClosed($serviceRequest, $assignedManagerClosedEmailTemplate, MailChannel::class));
+                    }
+
+                    if ($serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification)) {
+                        $assignedUser->notify(new ServiceRequestClosed($serviceRequest, $assignedManagerClosedEmailTemplate, DatabaseChannel::class));
+                    }
+                }
             } elseif ($serviceRequest->status) {
                 $customerEmailTemplate = $this->fetchTemplate(
                     $serviceRequest->priority->type,
@@ -312,6 +328,22 @@ class ServiceRequestObserver
                     false,
                     $serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Notification),
                 );
+
+                $assignedManagerStatusChangeEmailTemplate = $this->fetchTemplate(
+                    $serviceRequest->priority->type,
+                    ServiceRequestEmailTemplateType::StatusChange,
+                    ServiceRequestTypeEmailTemplateRole::AssignedManager
+                );
+
+                if ($assignedUser = $serviceRequest->assignedTo?->user) {
+                    if ($serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email)) {
+                        $assignedUser->notify(new ServiceRequestStatusChanged($serviceRequest, $assignedManagerStatusChangeEmailTemplate, MailChannel::class));
+                    }
+
+                    if ($serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification)) {
+                        $assignedUser->notify(new ServiceRequestStatusChanged($serviceRequest, $assignedManagerStatusChangeEmailTemplate, DatabaseChannel::class));
+                    }
+                }
             }
         }
     }
