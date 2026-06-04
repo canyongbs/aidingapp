@@ -50,7 +50,10 @@ class UpdateServiceRequestData extends Data
         public ServiceRequestCategory | Optional $category, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
     ) {}
 
-    public static function fromData(array $data): static
+    /**
+     * @param array<string, mixed> $data
+     */
+    public static function fromData(array $data): self
     {
         return new self(
             status_id: $data['status_id'] ?? Optional::create(),
