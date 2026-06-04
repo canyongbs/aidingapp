@@ -37,6 +37,8 @@
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Department\Models\Department;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -168,6 +170,45 @@ describe('2026_06_02_143003_add_citext_unique_to_users_email', function () {
                     ->and($emails)->toContain('dup@example.com')
                     ->and($emails)->toContain('DUP@EXAMPLE.COM-2')
                     ->and(DB::table('users')->whereNull('email')->count())->toBe(2);
+            }
+        );
+    });
+});
+
+describe('2026_06_04_203158_add_citext_unique_to_knowledge_base_statuses_name', function () {
+    it('merges case-insensitive duplicates keeping the latest, reassigns its articles, soft deletes the rest and converts the name column to citext', function () {
+        isolatedMigration(
+            '2026_06_04_203158_add_citext_unique_to_knowledge_base_statuses_name',
+            function () {
+                $oldest = KnowledgeBaseStatus::factory()->create(['name' => 'Published', 'created_at' => now()->subMinutes(3)]);
+                $middle = KnowledgeBaseStatus::factory()->create(['name' => 'published', 'created_at' => now()->subMinutes(2)]);
+                $latest = KnowledgeBaseStatus::factory()->create(['name' => 'PUBLISHED', 'created_at' => now()->subMinute()]);
+                $unrelated = KnowledgeBaseStatus::factory()->create(['name' => 'Draft', 'created_at' => now()]);
+
+                $articleOnOldest = KnowledgeBaseItem::factory()->create(['status_id' => $oldest->id]);
+                $articleOnMiddle = KnowledgeBaseItem::factory()->create(['status_id' => $middle->id]);
+                $articleOnLatest = KnowledgeBaseItem::factory()->create(['status_id' => $latest->id]);
+                $articleOnUnrelated = KnowledgeBaseItem::factory()->create(['status_id' => $unrelated->id]);
+
+                $migrate = Artisan::call('migrate', [
+                    '--path' => 'app-modules/knowledge-base/database/migrations/2026_06_04_203158_add_citext_unique_to_knowledge_base_statuses_name.php',
+                ]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                // The latest duplicate is kept live; the two earlier ones are soft deleted.
+                expect(columnNativeType('knowledge_base_statuses', 'name'))->toBe('citext')
+                    ->and(KnowledgeBaseStatus::withTrashed()->find($latest->id)->deleted_at)->toBeNull()
+                    ->and(KnowledgeBaseStatus::withTrashed()->find($oldest->id)->deleted_at)->not->toBeNull()
+                    ->and(KnowledgeBaseStatus::withTrashed()->find($middle->id)->deleted_at)->not->toBeNull()
+                    ->and(KnowledgeBaseStatus::withTrashed()->find($unrelated->id)->deleted_at)->toBeNull()
+                    ->and(KnowledgeBaseStatus::query()->whereRaw('LOWER(name) = ?', ['published'])->count())->toBe(1);
+
+                // Articles from the merged statuses are reassigned to the kept status; the unrelated one is left alone.
+                expect(DB::table('knowledge_base_articles')->where('id', $articleOnOldest->id)->value('status_id'))->toBe($latest->id)
+                    ->and(DB::table('knowledge_base_articles')->where('id', $articleOnMiddle->id)->value('status_id'))->toBe($latest->id)
+                    ->and(DB::table('knowledge_base_articles')->where('id', $articleOnLatest->id)->value('status_id'))->toBe($latest->id)
+                    ->and(DB::table('knowledge_base_articles')->where('id', $articleOnUnrelated->id)->value('status_id'))->toBe($unrelated->id);
             }
         );
     });

@@ -38,8 +38,10 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBa
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages\CreateKnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseStatuses\RequestFactories\CreateKnowledgeBaseStatusRequestFactory;
+use App\Features\KnowledgeBaseStatusNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Illuminate\Database\QueryException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -123,4 +125,59 @@ test('CreateKnowledgeBaseStatus is gated with proper feature access control', fu
     assertCount(1, KnowledgeBaseStatus::all());
 
     assertDatabaseHas(KnowledgeBaseStatus::class, $request->toArray());
+});
+
+test('CreateKnowledgeBaseStatus prevents creating a case-insensitive duplicate name', function () {
+    KnowledgeBaseStatusNameUniquenessFeature::activate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.create');
+
+    KnowledgeBaseStatus::factory()->create(['name' => 'Published']);
+
+    actingAs($user);
+
+    livewire(CreateKnowledgeBaseStatus::class)
+        ->fillForm(['name' => 'published'])
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    assertCount(1, KnowledgeBaseStatus::all());
+});
+
+test('CreateKnowledgeBaseStatus allows reusing the name of a soft deleted status', function () {
+    KnowledgeBaseStatusNameUniquenessFeature::activate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.create');
+
+    KnowledgeBaseStatus::factory()->create(['name' => 'Published'])->delete();
+
+    actingAs($user);
+
+    livewire(CreateKnowledgeBaseStatus::class)
+        ->fillForm(['name' => 'Published'])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(KnowledgeBaseStatus::query()->where('name', 'Published')->count())->toBe(1);
+});
+
+test('CreateKnowledgeBaseStatus does not apply the unique form rule when the feature is disabled', function () {
+    KnowledgeBaseStatusNameUniquenessFeature::deactivate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.create');
+
+    KnowledgeBaseStatus::factory()->create(['name' => 'Published']);
+
+    actingAs($user);
+
+    expect(fn () => livewire(CreateKnowledgeBaseStatus::class)
+        ->fillForm(['name' => 'published'])
+        ->call('create'))
+        ->toThrow(QueryException::class);
 });

@@ -38,6 +38,7 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBa
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages\EditKnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseStatuses\RequestFactories\EditKnowledgeBaseStatusRequestFactory;
+use App\Features\KnowledgeBaseStatusNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -138,4 +139,45 @@ test('EditKnowledgeBaseStatus is gated with proper feature access control', func
         ->assertHasNoFormErrors();
 
     assertEquals($request['name'], $knowledgeBaseStatus->fresh()->name);
+});
+
+test('EditKnowledgeBaseStatus prevents renaming to a case-insensitive duplicate name', function () {
+    KnowledgeBaseStatusNameUniquenessFeature::activate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.update');
+
+    KnowledgeBaseStatus::factory()->create(['name' => 'Published']);
+    $knowledgeBaseStatus = KnowledgeBaseStatus::factory()->create(['name' => 'Draft']);
+
+    actingAs($user);
+
+    livewire(EditKnowledgeBaseStatus::class, [
+        'record' => $knowledgeBaseStatus->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'published'])
+        ->call('save')
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    expect($knowledgeBaseStatus->fresh()->name)->toBe('Draft');
+});
+
+test('EditKnowledgeBaseStatus allows saving a status without changing its name', function () {
+    KnowledgeBaseStatusNameUniquenessFeature::activate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.update');
+
+    $knowledgeBaseStatus = KnowledgeBaseStatus::factory()->create(['name' => 'Published']);
+
+    actingAs($user);
+
+    livewire(EditKnowledgeBaseStatus::class, [
+        'record' => $knowledgeBaseStatus->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'Published'])
+        ->call('save')
+        ->assertHasNoFormErrors();
 });
