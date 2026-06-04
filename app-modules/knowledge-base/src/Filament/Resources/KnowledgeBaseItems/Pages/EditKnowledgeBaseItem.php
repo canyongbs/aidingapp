@@ -131,16 +131,48 @@ class EditKnowledgeBaseItem extends EditRecord
                                             }),
                                     )
                                     ->columnSpanFull(),
-                                Toggle::make('has_table_of_contents')
-                                    ->label('Table of Contents')
-                                    ->default(false)
-                                    ->onColor('success')
-                                    ->offColor('gray'),
-                                Textarea::make('notes')
-                                    ->label('Notes')
-                                    ->columnSpanFull()
-                                    ->extraInputAttributes(['style' => 'min-height: 12rem;']),
-                                Grid::make(2)
+                                Grid::make(Division::count() > 1 ? 4 : 3)
+                                    ->schema([
+                                        Select::make('status_id')
+                                            ->label('Status')
+                                            ->relationship('status', 'name')
+                                            ->searchable()
+                                            ->preload()
+                                            ->exists((new KnowledgeBaseStatus())->getTable(), (new KnowledgeBaseStatus())->getKeyName()),
+                                        SelectTree::make('category_id')
+                                            ->label('Category')
+                                            ->required()
+                                            ->relationship(
+                                                'category',
+                                                'name',
+                                                'parent_id',
+                                                modifyQueryUsing: fn (Builder $query) => $query->orderBy('name'),
+                                                modifyChildQueryUsing: fn (Builder $query) => $query->orderBy('name'),
+                                            )
+                                            ->enableBranchNode()
+                                            ->searchable()
+                                            ->exists((new KnowledgeBaseCategory())->getTable(), (new KnowledgeBaseCategory())->getKeyName()),
+                                        Select::make('division')
+                                            ->label('Division')
+                                            ->multiple()
+                                            ->relationship('division', 'name')
+                                            ->searchable(['name', 'code'])
+                                            ->preload()
+                                            ->afterStateHydrated(function (array $state, Set $set) {
+                                                if (empty($state)) {
+                                                    $set('division', [Division::count() === 1 ? Division::query()->first()?->getKey() : null]);
+                                                }
+                                            })
+                                            ->visible(fn (): bool => Division::count() > 1)
+                                            ->saveRelationshipsWhenHidden()
+                                            ->exists((new Division())->getTable(), (new Division())->getKeyName()),
+                                        UserSelect::make('manager_ids')
+                                            ->label('Managers')
+                                            ->relationship('managers')
+                                            ->multiple()
+                                            ->exists('users', 'id'),
+                                    ]),
+                                Grid::make(3)
                                     ->schema([
                                         Toggle::make('public')
                                             ->label('Public')
@@ -152,7 +184,16 @@ class EditKnowledgeBaseItem extends EditRecord
                                             ->default(false)
                                             ->onColor('success')
                                             ->offColor('gray'),
+                                        Toggle::make('has_table_of_contents')
+                                            ->label('Table of Contents')
+                                            ->default(false)
+                                            ->onColor('success')
+                                            ->offColor('gray'),
                                     ]),
+                                Textarea::make('notes')
+                                    ->label('Notes')
+                                    ->columnSpanFull()
+                                    ->extraInputAttributes(['style' => 'min-height: 12rem;']),
                                 Select::make('tags')
                                     ->relationship(
                                         'tags',
@@ -165,47 +206,6 @@ class EditKnowledgeBaseItem extends EditRecord
                                     ->columnSpanFull(),
                             ])
                             ->columns(2),
-                        Tab::make('Metadata')
-                            ->schema([
-                                Select::make('status_id')
-                                    ->label('Status')
-                                    ->relationship('status', 'name')
-                                    ->searchable()
-                                    ->preload()
-                                    ->exists((new KnowledgeBaseStatus())->getTable(), (new KnowledgeBaseStatus())->getKeyName()),
-                                SelectTree::make('category_id')
-                                    ->label('Category')
-                                    ->required()
-                                    ->relationship(
-                                        'category',
-                                        'name',
-                                        'parent_id',
-                                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('name'),
-                                        modifyChildQueryUsing: fn (Builder $query) => $query->orderBy('name'),
-                                    )
-                                    ->enableBranchNode()
-                                    ->searchable()
-                                    ->exists((new KnowledgeBaseCategory())->getTable(), (new KnowledgeBaseCategory())->getKeyName()),
-                                Select::make('division')
-                                    ->label('Division')
-                                    ->multiple()
-                                    ->relationship('division', 'name')
-                                    ->searchable(['name', 'code'])
-                                    ->preload()
-                                    ->afterStateHydrated(function (array $state, Set $set) {
-                                        if (empty($state)) {
-                                            $set('division', [Division::count() === 1 ? Division::query()->first()?->getKey() : null]);
-                                        }
-                                    })
-                                    ->visible(fn (): bool => Division::count() > 1)
-                                    ->saveRelationshipsWhenHidden()
-                                    ->exists((new Division())->getTable(), (new Division())->getKeyName()),
-                                UserSelect::make('manager_ids')
-                                    ->label('Managers')
-                                    ->relationship('managers')
-                                    ->multiple()
-                                    ->exists('users', 'id'),
-                            ]),
                     ])
                     ->columnSpanFull(),
             ]);
