@@ -58,6 +58,10 @@ trait FixesDuplicateNames
             $query->whereNull('deleted_at');
         }
 
+        if ($this->ignoreNullValues ?? false) { // @phpstan-ignore property.notFound
+            $query->whereNotNull($this->column);
+        }
+
         $duplicates = $query
             ->groupBy([
                 ...$groupByColumns,

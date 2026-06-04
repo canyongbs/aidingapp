@@ -67,7 +67,7 @@ class AssetLocationPolicy
     public function view(Authenticatable $authenticatable, AssetLocation $assetLocation): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_location.*.view', "asset_location.{$assetLocation->id}.view"],
+            abilities: ['asset_location.*.view'],
             denyResponse: 'You do not have permission to view this asset location.'
         );
     }
@@ -83,7 +83,7 @@ class AssetLocationPolicy
     public function update(Authenticatable $authenticatable, AssetLocation $assetLocation): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_location.*.update', "asset_location.{$assetLocation->id}.update"],
+            abilities: ['asset_location.*.update'],
             denyResponse: 'You do not have permission to update this asset location.'
         );
     }
@@ -91,7 +91,7 @@ class AssetLocationPolicy
     public function delete(Authenticatable $authenticatable, AssetLocation $assetLocation): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_location.*.delete', "asset_location.{$assetLocation->id}.delete"],
+            abilities: ['asset_location.*.delete'],
             denyResponse: 'You do not have permission to delete this asset location.'
         );
     }
@@ -99,7 +99,7 @@ class AssetLocationPolicy
     public function restore(Authenticatable $authenticatable, AssetLocation $assetLocation): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_location.*.restore', "asset_location.{$assetLocation->id}.restore"],
+            abilities: ['asset_location.*.restore'],
             denyResponse: 'You do not have permission to restore this asset location.'
         );
     }
@@ -107,7 +107,7 @@ class AssetLocationPolicy
     public function forceDelete(Authenticatable $authenticatable, AssetLocation $assetLocation): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_location.*.force-delete', "asset_location.{$assetLocation->id}.force-delete"],
+            abilities: ['asset_location.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this asset location.'
         );
     }

@@ -67,7 +67,7 @@ class AssetCheckOutPolicy
     public function view(Authenticatable $authenticatable, AssetCheckOut $assetCheckOut): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_check_out.*.view', "asset_check_out.{$assetCheckOut->id}.view"],
+            abilities: ['asset_check_out.*.view'],
             denyResponse: 'You do not have permission to view this asset check out.'
         );
     }
@@ -83,7 +83,7 @@ class AssetCheckOutPolicy
     public function update(Authenticatable $authenticatable, AssetCheckOut $assetCheckOut): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_check_out.*.update', "asset_check_out.{$assetCheckOut->id}.update"],
+            abilities: ['asset_check_out.*.update'],
             denyResponse: 'You do not have permission to update this asset check out.'
         );
     }
@@ -91,7 +91,7 @@ class AssetCheckOutPolicy
     public function delete(Authenticatable $authenticatable, AssetCheckOut $assetCheckOut): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_check_out.*.delete', "asset_check_out.{$assetCheckOut->id}.delete"],
+            abilities: ['asset_check_out.*.delete'],
             denyResponse: 'You do not have permission to delete this asset check out.'
         );
     }
@@ -99,7 +99,7 @@ class AssetCheckOutPolicy
     public function restore(Authenticatable $authenticatable, AssetCheckOut $assetCheckOut): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_check_out.*.restore', "asset_check_out.{$assetCheckOut->id}.restore"],
+            abilities: ['asset_check_out.*.restore'],
             denyResponse: 'You do not have permission to restore this asset check out.'
         );
     }
@@ -107,7 +107,7 @@ class AssetCheckOutPolicy
     public function forceDelete(Authenticatable $authenticatable, AssetCheckOut $assetCheckOut): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['asset_check_out.*.force-delete', "asset_check_out.{$assetCheckOut->id}.force-delete"],
+            abilities: ['asset_check_out.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this asset check out.'
         );
     }

@@ -37,6 +37,7 @@
 namespace AidingApp\Division\Database\Factories;
 
 use AidingApp\Division\Models\Division;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -54,6 +55,8 @@ class DivisionFactory extends Factory
             'code' => $this->faker->unique()->word(),
             'description' => $this->faker->optional()->sentences(asText: true),
             'is_default' => false,
+            'created_by_id' => User::factory(),
+            'last_updated_by_id' => User::factory(),
         ];
     }
 

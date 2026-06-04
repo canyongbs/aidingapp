@@ -258,6 +258,11 @@ abstract class BaseOpenAiService implements AiService
         try {
             $vectorStoreId = $this->getReadyVectorStoreId($files);
 
+            // file_search tool cannot be used with 'minimal' reasoning effort on models < 5.1
+            if (filled($vectorStoreId) && isset($options['reasoning']['effort']) && $options['reasoning']['effort'] === 'minimal') {
+                $options['reasoning']['effort'] = $this->resolveReasoningEffortValue(AiReasoningEffort::Low);
+            }
+
             $request = Prism::text()
                 ->using('azure_open_ai', $this->getModel())
                 ->withClientOptions([

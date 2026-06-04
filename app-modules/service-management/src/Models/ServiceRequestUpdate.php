@@ -90,6 +90,8 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
 
     public function registerMediaCollections(): void
     {
+        $this->addMediaCollection('inline_attachments');
+
         $this
             ->addMediaCollection('uploads')
             ->useDisk('s3')

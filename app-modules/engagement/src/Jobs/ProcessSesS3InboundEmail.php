@@ -48,11 +48,12 @@ use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
 use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
+use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
-use App\Features\MediaCreatedByFeature;
+use App\Features\EmailAutomaticCreationFeature;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV3;
 use Aws\Kms\KmsClient;
@@ -258,13 +259,37 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 ->get();
 
             if ($contacts->isEmpty()) {
-                UnmatchedInboundCommunication::create([
+                $unmatchedCommunication = UnmatchedInboundCommunication::create([
                     'type' => EngagementResponseType::Email,
                     'subject' => $parser->getHeader('subject'),
                     'body' => $parser->getMessageBody('htmlEmbedded'),
                     'occurred_at' => $parser->getHeader('date'),
                     'sender' => $sender,
                 ]);
+
+                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($unmatchedCommunication) {
+                    try {
+                        if (
+                            ($attachment->getContentDisposition() === 'inline')
+                            && filled(trim($contentId = $attachment->getContentID(), '<>'))
+                        ) {
+                            $unmatchedCommunication->addMediaFromStream($attachment->getStream())
+                                ->withCustomProperties(['cid' => trim($contentId, '<>')])
+                                ->setName($attachment->getFilename())
+                                ->setFileName($attachment->getFilename())
+                                ->toMediaCollection('inline_attachments');
+
+                            return;
+                        }
+
+                        $unmatchedCommunication->addMediaFromStream($attachment->getStream())
+                            ->setName($attachment->getFilename())
+                            ->setFileName($attachment->getFilename())
+                            ->toMediaCollection('attachments');
+                    } catch (Throwable $throw) {
+                        report($throw);
+                    }
+                });
 
                 return;
             }
@@ -281,15 +306,24 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                 collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse, $contact) {
                     try {
-                        $media = $engagementResponse->addMediaFromStream($attachment->getStream())
+                        if (
+                            ($attachment->getContentDisposition() === 'inline')
+                            && filled(trim($contentId = $attachment->getContentID(), '<>'))
+                        ) {
+                            $engagementResponse->addMediaFromStream($attachment->getStream())
+                                ->withCustomProperties(['cid' => trim($contentId, '<>')])
+                                ->setName($attachment->getFilename())
+                                ->setFileName($attachment->getFilename())
+                                ->toMediaCollection('inline_attachments');
+
+                            return;
+                        }
+
+                        $engagementResponse->addMediaFromStream($attachment->getStream())
                             ->setName($attachment->getFilename())
                             ->setFileName($attachment->getFilename())
+                            ->createdBy($contact)
                             ->toMediaCollection('attachments');
-
-                        if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
-                            $media->createdBy()->associate($contact);
-                            $media->saveQuietly();
-                        }
                     } catch (Throwable $throw) {
                         report($throw);
                     }
@@ -339,19 +373,26 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 'created_by_type' => $serviceRequest->respondent->getMorphClass(),
             ]);
 
-            foreach ($parser->getAttachments(false) as $attachment) {
+            foreach ($parser->getAttachments() as $attachment) {
                 try {
-                    $media = $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
+                    if (
+                        ($attachment->getContentDisposition() === 'inline')
+                        && filled(trim($contentId = $attachment->getContentID(), '<>'))
+                    ) {
+                        $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
+                            ->withCustomProperties(['cid' => trim($contentId, '<>')])
+                            ->setName($attachment->getFilename())
+                            ->setFileName($attachment->getFilename())
+                            ->toMediaCollection('inline_attachments');
+
+                        continue;
+                    }
+
+                    $serviceRequestUpdate->addMediaFromStream($attachment->getStream())
                         ->setName($attachment->getFilename())
                         ->setFileName($attachment->getFilename())
+                        ->createdBy($serviceRequest->respondent)
                         ->toMediaCollection('uploads');
-
-                    $respondent = $serviceRequest->respondent;
-
-                    if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
-                        $media->createdBy()->associate($respondent);
-                        $media->saveQuietly();
-                    }
                 } catch (Throwable $throw) {
                     report($throw);
                 }
@@ -458,14 +499,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 ->get();
 
             if ($contacts->isEmpty()) {
-                // If no contacts are found, we will try to find an organization with the same domain
-                $domain = Str::afterLast($sender, '@');
-
-                $organization = Organization::query()
-                    ->whereRaw('LOWER(?) = ANY (SELECT LOWER(value) FROM jsonb_array_elements_text(domains))', [mb_strtolower($domain)])
-                    ->first();
-
-                if (! $organization || $serviceRequestType->is_email_automatic_creation_contact_create_enabled === false) {
+                if (! $serviceRequestType->is_email_automatic_creation_contact_create_enabled) {
                     Notification::route('mail', $sender)
                         ->notifyNow(new IneligibleContactSesS3InboundEmailServiceRequestNotification(
                             $serviceRequestTypeDomain,
@@ -475,32 +509,30 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     return;
                 }
 
-                $senderName = $parser->getAddresses('from')[0]['display'];
+                $organization = null;
 
-                $firstName = Str::before($senderName, ' ') ?: 'Unknown';
-                $lastName = Str::after($senderName, ' ') ?: 'Unknown';
-                $fullName = $firstName . ' ' . $lastName;
+                if (
+                    ! EmailAutomaticCreationFeature::active()
+                    || $serviceRequestType->email_automatic_creation_contact_create_condition === EmailAutomaticCreationContactCreateCondition::IfEligible
+                ) {
+                    $domain = Str::afterLast($sender, '@');
 
-                // If an organization domain is found, we will create a new contact with the email address
-                $contact = Contact::query()
-                    ->make([
-                        'email' => $sender,
-                        'first_name' => $firstName,
-                        'last_name' => $lastName,
-                        'full_name' => $fullName,
-                    ]);
+                    $organization = Organization::query()
+                        ->whereRaw('LOWER(?) = ANY (SELECT LOWER(value) FROM jsonb_array_elements_text(domains))', [mb_strtolower($domain)])
+                        ->first();
 
-                $type = ContactType::query()
-                    ->where('classification', SystemContactClassification::New)
-                    ->firstOrFail();
+                    if (! $organization) {
+                        Notification::route('mail', $sender)
+                            ->notifyNow(new IneligibleContactSesS3InboundEmailServiceRequestNotification(
+                                $serviceRequestTypeDomain,
+                                $parser->getMessageBody('htmlEmbedded')
+                            ));
 
-                $contact->type()->associate($type);
+                        return;
+                    }
+                }
 
-                $contact->organization()->associate($organization);
-
-                $contact->save();
-
-                $contacts = $contacts->add($contact);
+                $contacts = $contacts->add($this->buildContactFromSender($sender, $parser, $organization));
             }
 
             $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser) {
@@ -525,17 +557,26 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
                 $serviceRequest->saveOrFail();
 
-                foreach ($parser->getAttachments(false) as $attachment) {
+                foreach ($parser->getAttachments() as $attachment) {
                     try {
-                        $media = $serviceRequest->addMediaFromStream($attachment->getStream())
+                        if (
+                            ($attachment->getContentDisposition() === 'inline')
+                            && filled(trim($contentId = $attachment->getContentID(), '<>'))
+                        ) {
+                            $serviceRequest->addMediaFromStream($attachment->getStream())
+                                ->withCustomProperties(['cid' => trim($contentId, '<>')])
+                                ->setName($attachment->getFilename())
+                                ->setFileName($attachment->getFilename())
+                                ->toMediaCollection('inline_attachments');
+
+                            continue;
+                        }
+
+                        $serviceRequest->addMediaFromStream($attachment->getStream())
                             ->setName($attachment->getFilename())
                             ->setFileName($attachment->getFilename())
+                            ->createdBy($contact)
                             ->toMediaCollection('uploads');
-
-                        if (MediaCreatedByFeature::active() && is_null($media->created_by_id)) {
-                            $media->createdBy()->associate($contact);
-                            $media->saveQuietly();
-                        }
                     } catch (Throwable $throw) {
                         report($throw);
                     }
@@ -544,16 +585,69 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         });
     }
 
+    protected function buildContactFromSender(string $sender, Parser $parser, ?Organization $organization = null): Contact
+    {
+        $senderName = $parser->getAddresses('from')[0]['display'];
+
+        $firstName = Str::before($senderName, ' ') ?: 'Unknown';
+        $lastName = Str::after($senderName, ' ') ?: 'Unknown';
+
+        $contact = Contact::query()->make([
+            'email' => $sender,
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'full_name' => $firstName . ' ' . $lastName,
+        ]);
+
+        $type = ContactType::query()
+            ->where('classification', SystemContactClassification::New)
+            ->firstOrFail();
+
+        $contact->type()->associate($type);
+
+        if ($organization !== null) {
+            $contact->organization()->associate($organization);
+        }
+
+        $contact->save();
+
+        return $contact;
+    }
+
     protected function handleLegacyAddress(Tenant $tenant, Parser $parser, string $sender): void
     {
         $tenant->execute(function () use ($parser, $sender) {
-            UnmatchedInboundCommunication::create([
+            $unmatchedCommunication = UnmatchedInboundCommunication::create([
                 'type' => EngagementResponseType::Email,
                 'subject' => $parser->getHeader('subject'),
                 'body' => $parser->getMessageBody('htmlEmbedded'),
                 'occurred_at' => $parser->getHeader('date'),
                 'sender' => $sender,
             ]);
+
+            collect($parser->getAttachments())->each(function (Attachment $attachment) use ($unmatchedCommunication) {
+                try {
+                    if (
+                        ($attachment->getContentDisposition() === 'inline')
+                        && filled(trim($contentId = $attachment->getContentID(), '<>'))
+                    ) {
+                        $unmatchedCommunication->addMediaFromStream($attachment->getStream())
+                            ->withCustomProperties(['cid' => trim($contentId, '<>')])
+                            ->setName($attachment->getFilename())
+                            ->setFileName($attachment->getFilename())
+                            ->toMediaCollection('inline_attachments');
+
+                        return;
+                    }
+
+                    $unmatchedCommunication->addMediaFromStream($attachment->getStream())
+                        ->setName($attachment->getFilename())
+                        ->setFileName($attachment->getFilename())
+                        ->toMediaCollection('attachments');
+                } catch (Throwable $throw) {
+                    report($throw);
+                }
+            });
         });
     }
 

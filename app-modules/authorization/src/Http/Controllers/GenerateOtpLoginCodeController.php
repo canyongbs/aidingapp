@@ -59,33 +59,14 @@ class GenerateOtpLoginCodeController
             $data = $request->validated();
 
             $user = User::query()
-                ->withTrashed()
-                ->firstOrCreate(
-                    attributes: [
-                        'email' => $data['email'],
-                    ],
-                    values: [
-                        'name' => $data['name'],
-                        'email_verified_at' => now(),
-                        'is_external' => true,
-                    ]
-                );
+                ->where('email', $data['email'])
+                ->first();
 
-            assert($user instanceof User); // @phpstan-ignore-line
-
-            $user->fill([
-                'name' => $data['name'],
-                'is_external' => true,
-            ]);
-
-            $user->email_verified_at ??= now();
-            $user->deleted_at = null;
-
-            if ($user->isDirty()) {
-                $user->saveOrFail();
+            if (! $user) {
+                return response()->json([
+                    'error' => 'User not found.',
+                ], 422);
             }
-
-            $user->syncRoles($data['type']);
 
             // Remove any existing OTPs for this user
             OtpLoginCode::query()

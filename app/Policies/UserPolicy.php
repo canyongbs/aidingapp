@@ -53,7 +53,7 @@ class UserPolicy
     public function view(Authenticatable $authenticatable, User $model): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['user.*.view', "user.{$model->id}.view"],
+            abilities: ['user.*.view'],
             denyResponse: 'You do not have permission to view this user.'
         );
     }
@@ -63,6 +63,14 @@ class UserPolicy
         return $authenticatable->canOrElse(
             abilities: 'user.create',
             denyResponse: 'You do not have permission to create users.'
+        );
+    }
+
+    public function import(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'user.import',
+            denyResponse: 'You do not have permission to import users.',
         );
     }
 
@@ -77,7 +85,7 @@ class UserPolicy
     public function delete(Authenticatable $authenticatable, User $model): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['user.*.delete', "user.{$model->id}.delete"],
+            abilities: ['user.*.delete'],
             denyResponse: 'You do not have permission to delete this user.'
         );
     }
@@ -85,7 +93,7 @@ class UserPolicy
     public function restore(Authenticatable $authenticatable, User $model): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['user.*.restore', "user.{$model->id}.restore"],
+            abilities: ['user.*.restore'],
             denyResponse: 'You do not have permission to restore this user.'
         );
     }
@@ -93,7 +101,7 @@ class UserPolicy
     public function forceDelete(Authenticatable $authenticatable, User $model): Response
     {
         return $authenticatable->canOrElse(
-            abilities: ['user.*.force-delete', "user.{$model->id}.force-delete"],
+            abilities: ['user.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this user.'
         );
     }
