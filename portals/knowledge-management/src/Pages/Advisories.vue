@@ -197,7 +197,7 @@
                             :class="i < advisory.advisory_updates.length - 1 ? 'mb-4' : 'pb-4'"
                         >
                             <div
-                                class="absolute w-3 h-3 rounded-full bg-gray-300 border-2 border-white mt-4 -inset-s-1.5"
+                                class="absolute w-3 h-3 rounded-full bg-gray-300 border-2 border-white -inset-s-1.5"
                             ></div>
                             <time class="block text-sm font-normal leading-none text-gray-400">{{
                                 formatDate(updateData.created_at)
