@@ -52,7 +52,7 @@ beforeEach(function () {
 it('redirects unauthenticated users to the login page', function () {
     $type = ServiceRequestType::factory()->create();
 
-    $form = new ServiceRequestForm(['name' => 'Test Form']);
+    $form = new ServiceRequestForm();
     $form->type()->associate($type);
     $form->save();
 
@@ -69,7 +69,7 @@ it('is forbidden when service management is not enabled', function () {
 
     $type = ServiceRequestType::factory()->create();
 
-    $form = new ServiceRequestForm(['name' => 'Test Form']);
+    $form = new ServiceRequestForm();
     $form->type()->associate($type);
     $form->save();
 
@@ -83,7 +83,7 @@ it('renders the preview page for an authenticated user', function () {
 
     $type = ServiceRequestType::factory()->create();
 
-    $form = new ServiceRequestForm(['name' => 'Test Form']);
+    $form = new ServiceRequestForm();
     $form->type()->associate($type);
     $form->save();
 

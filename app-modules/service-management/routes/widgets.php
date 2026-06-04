@@ -34,14 +34,11 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Form\Http\Middleware\EnsureSubmissibleIsEmbeddableAndAuthorized;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFeedbackFormWidgetController;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetController;
 use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
 use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
-use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestFormWidgetCors;
 use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestTypeFeedbackIsOn;
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use App\Http\Middleware\EncryptCookies;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
@@ -56,40 +53,9 @@ Route::middleware([
     ->group(function () {
         Route::prefix('forms')
             ->name('forms.')
-            ->middleware([
-                ServiceRequestFormWidgetCors::class,
-            ])
             ->group(function () {
-                Route::prefix('api/{serviceRequestForm}')
-                    ->name('api.')
-                    ->middleware([
-                        EnsureSubmissibleIsEmbeddableAndAuthorized::class . ':serviceRequestForm',
-                    ])
-                    ->group(function () {
-                        Route::get('', [ServiceRequestFormWidgetController::class, 'assets'])
-                            ->name('assets');
-
-                        Route::get('entry', [ServiceRequestFormWidgetController::class, 'view'])
-                            ->name('entry');
-                        Route::post('authenticate/request', [ServiceRequestFormWidgetController::class, 'requestAuthentication'])
-                            ->middleware(['signed'])
-                            ->name('request-authentication');
-                        Route::post('authenticate/{authentication}', [ServiceRequestFormWidgetController::class, 'authenticate'])
-                            ->middleware(['signed'])
-                            ->name('authenticate');
-                        Route::post('submit', [ServiceRequestFormWidgetController::class, 'store'])
-                            ->middleware(['signed'])
-                            ->name('submit');
-
-                        // Handle preflight CORS requests for all routes in this group
-                        // MUST remain the last route in this group
-                        Route::options('/{any}', function (Request $request, ServiceRequestForm $serviceRequestForm) {
-                            return response()->noContent();
-                        })
-                            ->where('any', '.*')
-                            ->name('preflight');
-                    });
-
+                // Service request forms are no longer embeddable; this route only serves the
+                // widget assets used to render the admin preview of a form.
                 // This route MUST remain at /widgets/... in order to catch requests to asset files and return the correct headers
                 // NGINX has been configured to route all requests for assets under /widgets to the application
                 Route::get('{file?}', [ServiceRequestFormWidgetController::class, 'asset'])

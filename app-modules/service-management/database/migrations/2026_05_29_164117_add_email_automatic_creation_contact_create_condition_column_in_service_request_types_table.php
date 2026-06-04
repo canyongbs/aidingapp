@@ -34,48 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages;
+use App\Features\EmailAutomaticCreationFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\ServiceRequestFormResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-
-class ListServiceRequestForms extends ListRecords
-{
-    protected static string $resource = ServiceRequestFormResource::class;
-
-    public function table(Table $table): Table
+return new class () extends Migration {
+    public function up(): void
     {
-        return $table
-            ->modifyQueryUsing(function (Builder $query) {
-                /** @var Builder<ServiceRequestForm> $query */
-                return $query->withoutArchived()->whereHas('type', fn (Builder $query) => $query->withoutArchived());
-            })
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name'),
-            ])
-            ->recordActions([
-                Action::make('Respond')
-                    ->url(fn (ServiceRequestForm $form) => route('service-request-forms.show', ['serviceRequestForm' => $form]))
-                    ->icon('heroicon-m-arrow-top-right-on-square')
-                    ->openUrlInNewTab()
-                    ->color('gray'),
-                EditAction::make(),
-            ]);
+        DB::transaction(function () {
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->string('email_automatic_creation_contact_create_condition')->default('if_eligible');
+            });
+
+            EmailAutomaticCreationFeature::activate();
+        });
     }
 
-    protected function getHeaderActions(): array
+    public function down(): void
     {
-        return [
-            CreateAction::make(),
-        ];
+        DB::transaction(function () {
+            EmailAutomaticCreationFeature::deactivate();
+
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->dropColumn('email_automatic_creation_contact_create_condition');
+            });
+        });
     }
-}
+};

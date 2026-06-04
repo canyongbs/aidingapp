@@ -34,30 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Livewire;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Illuminate\Contracts\View\View;
-use Livewire\Component;
-
-class RenderServiceRequestForm extends Component implements HasForms, HasActions
-{
-    use InteractsWithActions;
-    use InteractsWithForms;
-
-    public bool $show = true;
-
-    public ServiceRequestForm $serviceRequestForm;
-
-    public ?array $data = [];
-
-    public function render(): View
+return new class () extends Migration {
+    public function up(): void
     {
-        return view('service-management::livewire.render-service-request-form')
-            ->title($this->serviceRequestForm->name);
+        DB::transaction(function () {
+            Schema::table('service_request_forms', function (Blueprint $table) {
+                $table->dropUnique('service_request_forms_name_unique');
+
+                $table->dropColumn([
+                    'embed_enabled',
+                    'allowed_domains',
+                    'recaptcha_enabled',
+                    'primary_color',
+                    'rounding',
+                    'name',
+                ]);
+            });
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            Schema::table('service_request_forms', function (Blueprint $table) {
+                $table->string('name')->nullable();
+                $table->boolean('embed_enabled')->default(false);
+                $table->json('allowed_domains')->nullable();
+                $table->boolean('recaptcha_enabled')->default(false);
+                $table->string('primary_color')->nullable();
+                $table->string('rounding')->nullable();
+
+                $table->unique('name');
+            });
+        });
+    }
+};
