@@ -495,12 +495,14 @@ test('reclassify with override assignment creates manual assignment to selected 
     $assignment = ServiceRequestAssignment::where('service_request_id', $serviceRequest->getKey())
         ->where('user_id', $eligibleAgent->getKey())
         ->where('assigned_by_id', $actor->getKey())
+        ->where('assigned_by_type', (new User())->getMorphClass())
         ->where('status', ServiceRequestAssignmentStatus::Active)
         ->first();
 
     expect($assignment)->not->toBeNull();
     expect($assignment->user_id)->toBe($eligibleAgent->getKey());
     expect($assignment->assigned_by_id)->toBe($actor->getKey());
+    expect($assignment->assigned_by_type)->toBe((new User())->getMorphClass());
 });
 
 test('reclassify deletes existing active assignment', function () {
@@ -533,6 +535,7 @@ test('reclassify deletes existing active assignment', function () {
     $serviceRequest->assignments()->create([
         'user_id' => $previousAssignee->getKey(),
         'assigned_by_id' => null,
+        'assigned_by_type' => null,
         'assigned_at' => now(),
         'status' => ServiceRequestAssignmentStatus::Active,
     ]);

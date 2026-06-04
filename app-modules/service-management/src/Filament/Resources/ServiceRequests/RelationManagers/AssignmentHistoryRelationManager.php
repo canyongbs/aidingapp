@@ -37,12 +37,14 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use App\Features\ServiceRequestAssignmentByTypeFeature;
 use App\Models\User;
 use App\Settings\DisplaySettings;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Livewire\Attributes\On;
 
 class AssignmentHistoryRelationManager extends RelationManager
@@ -84,8 +86,20 @@ class AssignmentHistoryRelationManager extends RelationManager
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->with([
                 'user.department',
-                'assignedBy.department',
                 'serviceRequestStatus',
+                ...(
+                    ServiceRequestAssignmentByTypeFeature::active()
+                    ? [
+                        'assignedBy' => function (MorphTo $morphTo) {
+                            $morphTo->morphWith([
+                                User::class => ['department'],
+                            ]);
+                        },
+                    ]
+                    : [
+                        'assignedBy.department',
+                    ]
+                ),
             ]))
             ->emptyStateHeading('No assignment history')
             ->defaultSort('assigned_at', 'desc')

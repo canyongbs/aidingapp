@@ -42,12 +42,14 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Observers\ServiceRequestAssignmentObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Timelines\ServiceRequestAssignmentTimeline;
+use App\Features\ServiceRequestAssignmentByTypeFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -72,6 +74,7 @@ class ServiceRequestAssignment extends BaseModel implements Auditable, ProvidesA
     protected $fillable = [
         'user_id',
         'assigned_by_id',
+        'assigned_by_type',
         'assigned_at',
         'status',
         'service_request_status_id',
@@ -86,10 +89,14 @@ class ServiceRequestAssignment extends BaseModel implements Auditable, ProvidesA
     }
 
     /**
-     * @return BelongsTo<User, $this>
+     * @return BelongsTo<User, $this>|MorphTo<Model, $this>
      */
-    public function assignedBy(): BelongsTo
+    public function assignedBy(): BelongsTo|MorphTo
     {
+        if (ServiceRequestAssignmentByTypeFeature::active()) {
+            return $this->morphTo();
+        }
+
         return $this->belongsTo(User::class, 'assigned_by_id');
     }
 

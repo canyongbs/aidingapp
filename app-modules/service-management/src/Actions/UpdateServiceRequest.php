@@ -27,7 +27,7 @@
       Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
-
+null
     For more information or inquiries please visit our website at
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
@@ -52,6 +52,8 @@ class UpdateServiceRequest
         if ($dataArray['assigned_to_id'] ?? null) {
             $serviceRequest->assignments()->create([
                 'user_id' => $dataArray['assigned_to_id'],
+                'assigned_by_id' => auth()->id(),
+                'assigned_by_type' => auth()->user() ? auth()->user()->getMorphClass() : null,
                 'assigned_at' => now(),
                 'status' => ServiceRequestAssignmentStatus::Active,
             ]);

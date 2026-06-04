@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ServiceRequestAssignmentByTypeFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -76,12 +77,19 @@ class RoundRobinAssigner implements ServiceRequestTypeAssigner
             if ($user !== null) {
                 $serviceRequestType->last_assigned_id = $user->getKey();
                 $serviceRequestType->save();
-                $serviceRequest->assignments()->create([
+
+                $data = [
                     'user_id' => $user->getKey(),
                     'assigned_by_id' => null,
                     'assigned_at' => now(),
                     'status' => ServiceRequestAssignmentStatus::Active,
-                ]);
+                ];
+
+                if (ServiceRequestAssignmentByTypeFeature::active()) {
+                    $data['assigned_by_type'] = null;
+                }
+
+                $serviceRequest->assignments()->create($data);
             }
         }
     }

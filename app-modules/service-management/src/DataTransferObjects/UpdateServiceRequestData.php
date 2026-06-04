@@ -43,10 +43,10 @@ use Spatie\LaravelData\Optional;
 class UpdateServiceRequestData extends Data
 {
     public function __construct(
-        public string | Optional $status_id,
-        public string | Optional $priority_id,
-        public string | Optional $close_details,
-        public string | Optional $assigned_to_id,
+        public string | Optional $status_id, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
+        public string | Optional $priority_id, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
+        public string | Optional $close_details, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
+        public string | Optional $assigned_to_id, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
         public ServiceRequestCategory | Optional $category, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
     ) {}
 

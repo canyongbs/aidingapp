@@ -79,6 +79,7 @@ test('individual assigner assigns to configured user via department manager', fu
     expect($assignment)->not->toBeNull();
     expect($assignment->user_id)->toBe($user->getKey());
     expect($assignment->assigned_by_id)->toBeNull();
+    expect($assignment->assigned_by_type)->toBeNull();
 });
 
 test('individual assigner assigns to configured user via direct manager', function () {
@@ -109,6 +110,8 @@ test('individual assigner assigns to configured user via direct manager', functi
 
     expect($assignment)->not->toBeNull();
     expect($assignment->user_id)->toBe($user->getKey());
+    expect($assignment->assigned_by_id)->toBeNull();
+    expect($assignment->assigned_by_type)->toBeNull();
 });
 
 test('individual assigner does not assign when no individual is configured', function () {
