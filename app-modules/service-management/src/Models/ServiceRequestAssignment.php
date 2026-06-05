@@ -90,6 +90,7 @@ class ServiceRequestAssignment extends BaseModel implements Auditable, ProvidesA
 
     /**
      * @return BelongsTo<User, $this>|MorphTo<Model, $this>
+     * TODO: ServiceRequestAssignmentByTypeFeature clean up: remove belongsto relationship and make this relation morphTo only.
      */
     public function assignedBy(): BelongsTo|MorphTo
     {

@@ -68,12 +68,10 @@ class UpdateServiceRequestController
             'category' => ['nullable', 'string', 'max:255', Rule::in(ServiceRequestCategory::cases())],
             'close_details' => ['nullable', 'string'],
         ]);
-
         $serviceRequest = $updateServiceRequest->execute($serviceRequest, UpdateServiceRequestData::fromData($data));
 
-        $serviceRequest->loadMissing(['status', 'priority', 'assignedTo.user', 'respondent']);
-
         return $serviceRequest
+            ->fresh(['status', 'priority', 'assignedTo.user', 'respondent'])
             ->toResource(ServiceRequestResource::class);
     }
 }

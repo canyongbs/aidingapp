@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,36 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Actions;
+namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
-use AidingApp\ServiceManagement\DataTransferObjects\UpdateServiceRequestData;
-use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\ServiceRequestAssignmentByTypeFeature;
-use Illuminate\Support\Arr;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use Worksome\RequestFactories\RequestFactory;
 
-class UpdateServiceRequest
+class UpdateServiceRequestRequestFactory extends RequestFactory
 {
-    public function execute(ServiceRequest $serviceRequest, UpdateServiceRequestData $data): ServiceRequest
+    public function definition(): array
     {
-        $dataArray = $data->toArray();
-        $newData = Arr::except($dataArray, ['assigned_to_id']);
-        $serviceRequest->fill($newData)->save();
-
-        if ($dataArray['assigned_to_id'] ?? null) {
-            $assigmentData = [
-                'user_id' => $dataArray['assigned_to_id'],
-                'assigned_by_id' => auth()->id(),
-                'assigned_at' => now(),
-                'status' => ServiceRequestAssignmentStatus::Active,
-            ];
-
-            if (ServiceRequestAssignmentByTypeFeature::active()) {
-                $assigmentData['assigned_by_type'] = auth()->user() ? auth()->user()->getMorphClass() : null;
-            }
-            $serviceRequest->assignments()->create($assigmentData);
-        }
-
-        return $serviceRequest;
+        return [
+            'status_id' => ServiceRequestStatus::factory()->open()->create()->id,
+            'priority_id' => ServiceRequestPriority::factory()->create()->id,
+            'category' => fake()->randomElement(ServiceRequestCategory::cases()),
+            'close_details' => $this->faker->sentence,
+        ];
     }
 }
