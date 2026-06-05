@@ -34,31 +34,21 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages\ListServiceRequestForms;
-use App\Models\User;
-use App\Settings\LicenseSettings;
+namespace AidingApp\ServiceManagement\Enums;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
+use Filament\Support\Contracts\HasLabel;
 
-it('is gated with proper access control', function () {
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->serviceManagement = false;
-    $settings->save();
+enum ServiceRequestNotificationChannel: string implements HasLabel
+{
+    case Email = 'email';
 
-    $user = User::factory()->create();
+    case Notification = 'notification';
 
-    actingAs($user);
-
-    livewire(ListServiceRequestForms::class)->assertForbidden();
-
-    $user->givePermissionTo('settings.view-any');
-    $user->refresh();
-
-    livewire(ListServiceRequestForms::class)->assertForbidden();
-
-    $settings->data->addons->serviceManagement = true;
-    $settings->save();
-
-    livewire(ListServiceRequestForms::class)->assertOk();
-});
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::Email => 'Email',
+            self::Notification => 'App',
+        };
+    }
+}

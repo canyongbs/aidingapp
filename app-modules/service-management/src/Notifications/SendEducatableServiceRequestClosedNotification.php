@@ -62,7 +62,7 @@ class SendEducatableServiceRequestClosedNotification extends Notification implem
 
     public function __construct(
         protected ServiceRequest $serviceRequest,
-        protected ?ServiceRequestTypeEmailTemplate $emailTemplate,
+        public ?ServiceRequestTypeEmailTemplate $emailTemplate,
     ) {}
 
     /**

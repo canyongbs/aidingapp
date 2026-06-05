@@ -45,6 +45,7 @@ use AidingApp\Portal\Enums\GdprBannerButtonLabel;
 use AidingApp\Portal\Enums\GdprDeclineOptions;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Enums\Feature;
+use App\Enums\NavigationGroup;
 use App\Models\User;
 use App\Rules\ValidUrl;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
@@ -76,7 +77,7 @@ class ManagePortalSettings extends SettingsPage
 
     protected static ?string $title = 'Client Portal';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Settings';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Settings;
 
     public static function canAccess(): bool
     {

@@ -57,4 +57,28 @@ enum ServiceRequestEmailTemplateType: string implements HasLabel
     {
         return Str::headline($this->value);
     }
+
+    public function getEventSlug(): string
+    {
+        return match ($this) {
+            self::Created => 'service_request_created',
+            self::Assigned => 'service_request_assigned',
+            self::Update => 'service_request_update',
+            self::StatusChange => 'service_request_status_change',
+            self::Closed => 'service_request_closed',
+            self::SurveyResponse => 'survey_response',
+        };
+    }
+
+    public function getViewLabel(): string
+    {
+        return match ($this) {
+            self::Created => 'Service Request Created',
+            self::Assigned => 'Service Request Assigned',
+            self::Update => 'Service Request Update',
+            self::StatusChange => 'Service Request Status Change',
+            self::Closed => 'Service Request Closed',
+            self::SurveyResponse => 'Survey Response',
+        };
+    }
 }

@@ -37,6 +37,7 @@
 namespace AidingApp\Theme\Filament\Pages;
 
 use AidingApp\Theme\Settings\ThemeSettings;
+use App\Enums\NavigationGroup;
 use App\Models\User;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Toggle;
@@ -57,7 +58,7 @@ class ManageBrandConfigurationSettings extends SettingsPage
 
     protected static ?string $title = 'Branding';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Global Admin';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::GlobalAdmin;
 
     public static function canAccess(): bool
     {

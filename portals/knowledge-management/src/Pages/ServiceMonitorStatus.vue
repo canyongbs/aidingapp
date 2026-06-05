@@ -37,7 +37,6 @@
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
-    import PageCard from '../Components/PageCard.vue';
     import Pagination from '../Components/Pagination.vue';
     import ServiceMonitorCard from '../Components/ServiceMonitorCard.vue';
     import { consumer } from '../Services/Consumer.js';
@@ -143,32 +142,32 @@
         </template>
 
         <template v-if="!loading">
-            <PageCard v-if="result.length > 0">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div v-for="(serviceMonitor, index) in result" :key="index">
-                        <ServiceMonitorCard
-                            :name="serviceMonitor.name"
-                            :status="serviceMonitor.latest_history?.succeeded ?? true"
-                            :message="
-                                serviceMonitor.latest_history?.status_message ??
-                                'No known issues (monitoring not yet started).'
-                            "
-                        />
-                    </div>
+            <template v-if="result.length > 0">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <ServiceMonitorCard
+                        v-for="(serviceMonitor, index) in result"
+                        :key="index"
+                        :name="serviceMonitor.name"
+                        :status="serviceMonitor.latest_history?.succeeded ?? true"
+                        :message="
+                            serviceMonitor.latest_history?.status_message ??
+                            'No known issues (monitoring not yet started).'
+                        "
+                    />
                 </div>
 
                 <Pagination
                     v-if="lastPage > 1"
                     :currentPage="currentPage"
                     :lastPage="lastPage"
-                    :fromArticle="fromArticle"
-                    :toArticle="toArticle"
-                    :totalArticles="totalArticles"
+                    :fromItem="fromArticle"
+                    :toItem="toArticle"
+                    :totalItems="totalArticles"
                     @fetchNextPage="fetchNextPage"
                     @fetchPreviousPage="fetchPreviousPage"
                     @fetchPage="fetchPage"
                 />
-            </PageCard>
+            </template>
 
             <EmptyState v-else>
                 <template #heading>There are no service monitors to display.</template>
@@ -180,25 +179,21 @@
             </EmptyState>
         </template>
 
-        <PageCard v-else>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-3">
-                <div
-                    v-for="n in 15"
-                    :key="`service-monitor-skeleton-${n}`"
-                    class="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-lg shadow-xs animate-pulse"
-                >
-                    <div class="flex items-center">
-                        <div class="h-7 w-7 bg-gray-300 rounded-full"></div>
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div
+                v-for="n in 15"
+                :key="`service-monitor-skeleton-${n}`"
+                class="flex items-center gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5 animate-pulse"
+            >
+                <div class="size-6 bg-gray-300 rounded-full shrink-0"></div>
 
-                        <div class="ml-4">
-                            <div class="h-4 bg-gray-300 rounded w-24 mb-2"></div>
-                            <div class="h-3 bg-gray-200 rounded w-32"></div>
-                        </div>
-                    </div>
-
-                    <div class="h-5 w-5 bg-gray-300 rounded-full"></div>
+                <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
+                    <div class="h-4 bg-gray-300 rounded w-24"></div>
+                    <div class="h-3 bg-gray-200 rounded w-32"></div>
                 </div>
+
+                <div class="size-5 bg-gray-300 rounded-full shrink-0 self-center"></div>
             </div>
-        </PageCard>
+        </div>
     </Page>
 </template>

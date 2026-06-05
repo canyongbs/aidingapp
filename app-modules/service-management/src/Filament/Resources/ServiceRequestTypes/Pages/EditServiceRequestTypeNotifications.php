@@ -36,8 +36,14 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
 
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use App\Concerns\EditPageRedirection;
+use App\Features\ServiceRequestTypeEmailPreferenceFeature;
 use Filament\Forms\Components\ViewField;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
@@ -54,6 +60,9 @@ class EditServiceRequestTypeNotifications extends EditRecord
     protected static ?string $breadcrumb = 'Notifications';
 
     protected static ?string $navigationLabel = 'Notifications';
+
+    /** @var list<array<string, mixed>> */
+    private array $preferencesToUpsert = [];
 
     public function getRelationManagers(): array
     {
@@ -77,32 +86,6 @@ class EditServiceRequestTypeNotifications extends EditRecord
     }
 
     /**
-     * @return array<string>
-     */
-    protected function generateSettingsAttributeList(): array
-    {
-        $attributes = [];
-
-        foreach (['managers', 'auditors', 'customers'] as $role) {
-            foreach (
-                [
-                    'service_request_created',
-                    'service_request_assigned',
-                    'service_request_update',
-                    'service_request_status_change',
-                    'service_request_closed',
-                    'survey_response',
-                ] as $event
-            ) {
-                $attributes[] = "is_{$role}_{$event}_email_enabled";
-                $attributes[] = "is_{$role}_{$event}_notification_enabled";
-            }
-        }
-
-        return $attributes;
-    }
-
-    /**
      * @param  array<string, mixed>  $data
      *
      * @return array<string, mixed>
@@ -110,8 +93,38 @@ class EditServiceRequestTypeNotifications extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $record = $this->getRecord();
+        assert($record instanceof ServiceRequestType);
 
-        $data['settings'] = $record->only($this->generateSettingsAttributeList());
+        if (! ServiceRequestTypeEmailPreferenceFeature::active()) {
+            $data['settings'] = $record->only($this->generateLegacySettingsAttributeList());
+
+            return $data;
+        }
+
+        $preferences = $record->emailPreferences()->get();
+
+        $settings = [];
+
+        foreach (ServiceRequestEmailTemplateType::cases() as $templateType) {
+            foreach (ServiceRequestTypeEmailTemplateRole::cases() as $templateRole) {
+                $eventSlug = $templateType->getEventSlug();
+                $roleSlug = $templateRole->value . 's';
+
+                foreach (ServiceRequestNotificationChannel::cases() as $channel) {
+                    $preference = $preferences->first(
+                        fn (ServiceRequestTypeEmailPreference $preference): bool => $preference->service_request_email_template_type === $templateType
+                            && $preference->service_request_email_template_role === $templateRole
+                            && $preference->notification_channel === $channel,
+                    );
+
+                    if ($preference !== null) {
+                        $settings["is_{$roleSlug}_{$eventSlug}_{$channel->value}_enabled"] = $preference->is_enabled;
+                    }
+                }
+            }
+        }
+
+        $data['settings'] = $settings;
 
         return $data;
     }
@@ -123,16 +136,86 @@ class EditServiceRequestTypeNotifications extends EditRecord
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $data = [
-            ...$data,
-            ...collect($data['settings'])
-                ->only($this->generateSettingsAttributeList())
-                ->filter(fn (mixed $value): bool => is_bool($value))
-                ->all(),
-        ];
+        if (! ServiceRequestTypeEmailPreferenceFeature::active()) {
+            $data = [
+                ...$data,
+                ...collect($data['settings'])
+                    ->only($this->generateLegacySettingsAttributeList())
+                    ->filter(fn (mixed $value): bool => is_bool($value))
+                    ->all(),
+            ];
+
+            unset($data['settings']);
+
+            return $data;
+        }
+
+        $settings = $data['settings'] ?? [];
+        $record = $this->getRecord();
+        assert($record instanceof ServiceRequestType);
+
+        $this->preferencesToUpsert = [];
+
+        foreach (ServiceRequestEmailTemplateType::cases() as $templateType) {
+            foreach (ServiceRequestTypeEmailTemplateRole::cases() as $templateRole) {
+                $eventSlug = $templateType->getEventSlug();
+                $roleSlug = $templateRole->value . 's';
+
+                foreach (ServiceRequestNotificationChannel::cases() as $channel) {
+                    $key = "is_{$roleSlug}_{$eventSlug}_{$channel->value}_enabled";
+
+                    if (! array_key_exists($key, $settings)) {
+                        continue;
+                    }
+
+                    $this->preferencesToUpsert[] = [
+                        'service_request_type_id' => $record->id,
+                        'service_request_email_template_type' => $templateType->value,
+                        'service_request_email_template_role' => $templateRole->value,
+                        'notification_channel' => $channel->value,
+                        'is_enabled' => (bool) ($settings[$key] ?? false),
+                    ];
+                }
+            }
+        }
 
         unset($data['settings']);
 
         return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        if (! ServiceRequestTypeEmailPreferenceFeature::active()) {
+            return;
+        }
+
+        ServiceRequestTypeEmailPreference::upsert(
+            $this->preferencesToUpsert,
+            uniqueBy: ['service_request_type_id', 'service_request_email_template_type', 'service_request_email_template_role', 'notification_channel'],
+            update: ['is_enabled'],
+        );
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    private function generateLegacySettingsAttributeList(): array
+    {
+        $attributes = [];
+
+        foreach (ServiceRequestTypeEmailTemplateRole::cases() as $templateRole) {
+            $roleSlug = $templateRole->value . 's';
+
+            foreach (ServiceRequestEmailTemplateType::cases() as $templateType) {
+                $eventSlug = $templateType->getEventSlug();
+
+                foreach (ServiceRequestNotificationChannel::cases() as $channel) {
+                    $attributes[] = "is_{$roleSlug}_{$eventSlug}_{$channel->value}_enabled";
+                }
+            }
+        }
+
+        return $attributes;
     }
 }

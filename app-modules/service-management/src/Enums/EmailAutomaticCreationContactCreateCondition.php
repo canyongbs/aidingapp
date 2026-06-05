@@ -34,30 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Livewire;
+namespace AidingApp\ServiceManagement\Enums;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Illuminate\Contracts\View\View;
-use Livewire\Component;
+use Filament\Support\Contracts\HasLabel;
 
-class RenderServiceRequestForm extends Component implements HasForms, HasActions
+enum EmailAutomaticCreationContactCreateCondition: string implements HasLabel
 {
-    use InteractsWithActions;
-    use InteractsWithForms;
+    case IfEligible = 'if_eligible';
 
-    public bool $show = true;
+    case None = 'none';
 
-    public ServiceRequestForm $serviceRequestForm;
-
-    public ?array $data = [];
-
-    public function render(): View
+    public function getLabel(): string
     {
-        return view('service-management::livewire.render-service-request-form')
-            ->title($this->serviceRequestForm->name);
+        return match ($this) {
+            self::IfEligible => 'If Eligible',
+            self::None => 'None',
+        };
     }
 }

@@ -61,7 +61,7 @@ class SendEducatableServiceRequestUpdatedNotification extends Notification imple
 
     public function __construct(
         protected ServiceRequest $serviceRequest,
-        protected ?ServiceRequestTypeEmailTemplate $emailTemplate,
+        public ?ServiceRequestTypeEmailTemplate $emailTemplate,
     ) {}
 
     /**

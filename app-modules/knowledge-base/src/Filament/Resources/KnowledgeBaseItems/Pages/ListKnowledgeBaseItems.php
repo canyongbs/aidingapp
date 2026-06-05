@@ -44,6 +44,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\TagsForClass;
+use App\Models\Tag;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -174,7 +175,14 @@ class ListKnowledgeBaseItems extends ListRecords
             ], layout: FiltersLayout::BeforeContent)
             ->recordActions([
                 ReplicateAction::make()
+                    ->authorize('create', KnowledgeBaseItem::class)
                     ->slideOver()
+                    ->mutateRecordDataUsing(function (array $data, KnowledgeBaseItem $record): array {
+                        $data['tags'] = $record->tags()->pluck('id')->toArray();
+                        $data['division'] = $record->division()->pluck('id')->toArray();
+
+                        return $data;
+                    })
                     ->schema([
                         Section::make()
                             ->schema([
@@ -191,12 +199,15 @@ class ListKnowledgeBaseItems extends ListRecords
                                     ->label('Notes')
                                     ->string(),
                                 Select::make('tags')
-                                    ->relationship(
-                                        'tags',
-                                        'name',
-                                        fn (Builder $query) => $query->tap(new TagsForClass(new KnowledgeBaseItem()))
+                                    ->options(
+                                        fn () => Tag::query()->tap(new TagsForClass(new KnowledgeBaseItem()))->limit(50)->pluck('name', 'id')
                                     )
                                     ->searchable()
+                                    ->getOptionLabelUsing(fn ($value): ?string => filled($value)
+                                        ? Tag::query()
+                                            ->whereKey($value)
+                                            ->value('name')
+                                        : null)
                                     ->preload()
                                     ->multiple()
                                     ->columnSpanFull(),
@@ -218,30 +229,19 @@ class ListKnowledgeBaseItems extends ListRecords
                                 Select::make('division')
                                     ->label('Division')
                                     ->multiple()
-                                    ->relationship('division', 'name')
-                                    ->searchable(['name', 'code'])
-                                    ->preload()
-                                    ->exists((new Division())->getTable(), (new Division())->getKeyName()),
+                                    ->options(fn () => Division::query()->limit(50)->pluck('name', 'id'))
+                                    ->searchable()
+                                    ->getOptionLabelUsing(fn ($value): ?string => filled($value)
+                                        ? Division::query()
+                                            ->whereKey($value)
+                                            ->value('name')
+                                        : null)
+                                    ->preload(),
                             ]),
                     ])
-                    ->before(function (array $data, KnowledgeBaseItem $record) {
-                        $record->title = $data['title'];
-                        $record->public = $data['public'];
-                        $record->notes = $data['notes'];
-                    })
-                    ->after(function (KnowledgeBaseItem $replica, KnowledgeBaseItem $record): void {
-                        $record->load('division');
-
-                        foreach ($record->division as $divison) {
-                            $replica->division()->attach($divison->id);
-                        }
-
-                        foreach ($record->tags as $tag) {
-                            $replica->tags()->attach($tag->id, [
-                                // Include any pivot data if necessary
-                                'taggable_type' => $tag->pivot->taggable_type,
-                            ]);
-                        }
+                    ->after(function (array $data, KnowledgeBaseItem $replica, KnowledgeBaseItem $record): void {
+                        $replica->division()->attach($data['division'] ?? []);
+                        $replica->tags()->attach($data['tags'] ?? []);
 
                         $media = $record->getMedia('article_details');
                         $uuidMap = [];

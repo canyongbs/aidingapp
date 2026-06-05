@@ -34,22 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages;
+use App\Features\EmailAutomaticCreationFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages\Concerns\HasSharedFormConfiguration;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\ServiceRequestFormResource;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Schema;
-
-class CreateServiceRequestForm extends CreateRecord
-{
-    use HasSharedFormConfiguration;
-
-    protected static string $resource = ServiceRequestFormResource::class;
-
-    public function form(Schema $schema): Schema
+return new class () extends Migration {
+    public function up(): void
     {
-        return $schema
-            ->components($this->fields());
+        DB::transaction(function () {
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->string('email_automatic_creation_contact_create_condition')->default('if_eligible');
+            });
+
+            EmailAutomaticCreationFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            EmailAutomaticCreationFeature::deactivate();
+
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->dropColumn('email_automatic_creation_contact_create_condition');
+            });
+        });
+    }
+};

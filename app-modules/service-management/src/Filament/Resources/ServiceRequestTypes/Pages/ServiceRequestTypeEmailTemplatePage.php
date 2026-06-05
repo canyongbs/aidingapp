@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRe
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Concerns\EditPageRedirection;
+use App\Enums\ServiceManagementAdministrationNavigationGroup;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Resources\Pages\EditRecord;
@@ -66,7 +67,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     #[Locked]
     public ServiceRequestEmailTemplateType $type;
 
-    public static string | UnitEnum | null $navigationGroup = 'Email Templates';
+    public static string | UnitEnum | null $navigationGroup = ServiceManagementAdministrationNavigationGroup::EmailTemplates;
 
     protected ?bool $hasUnsavedDataChangesAlert = true;
 

@@ -39,9 +39,14 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeFactory;
+use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
+use App\Features\ServiceRequestTypeEmailPreferenceFeature;
 use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
@@ -125,6 +130,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_ai_resolution_enabled',
         'is_live_chat_enabled',
         'max_simultaneous_chats',
+        'email_automatic_creation_contact_create_condition',
     ];
 
     public function serviceRequests(): HasManyThrough
@@ -238,6 +244,33 @@ class ServiceRequestType extends BaseModel implements Auditable
     }
 
     /**
+     * @return HasMany<ServiceRequestTypeEmailPreference, $this>
+     */
+    public function emailPreferences(): HasMany
+    {
+        return $this->hasMany(ServiceRequestTypeEmailPreference::class, 'service_request_type_id');
+    }
+
+    public function isPreferenceEnabled(
+        ServiceRequestEmailTemplateType $templateType,
+        ServiceRequestTypeEmailTemplateRole $role,
+        ServiceRequestNotificationChannel $channel,
+    ): bool {
+        if (! ServiceRequestTypeEmailPreferenceFeature::active()) {
+            $attribute = 'is_' . $role->value . 's_' . $templateType->getEventSlug() . '_' . $channel->value . '_enabled';
+
+            return (bool) ($this->{$attribute} ?? false);
+        }
+
+        return $this->emailPreferences
+            ->first(
+                fn (ServiceRequestTypeEmailPreference $preference): bool => $preference->service_request_email_template_type === $templateType
+                    && $preference->service_request_email_template_role === $role
+                    && $preference->notification_channel === $channel,
+            )->is_enabled ?? false;
+    }
+
+    /**
      * @return HasOne<TenantServiceRequestTypeDomain, $this>
      */
     public function domain(): HasOne
@@ -308,6 +341,7 @@ class ServiceRequestType extends BaseModel implements Auditable
             'is_ai_resolution_enabled' => 'boolean',
             'is_live_chat_enabled' => 'boolean',
             'max_simultaneous_chats' => 'integer',
+            'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::class,
         ];
     }
 

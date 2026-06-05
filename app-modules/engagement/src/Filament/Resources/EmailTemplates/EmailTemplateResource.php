@@ -40,6 +40,7 @@ use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\CreateEmailTemp
 use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\EditEmailTemplate;
 use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\ListEmailTemplates;
 use AidingApp\Engagement\Models\EmailTemplate;
+use App\Enums\CommunicationNavigationGroup;
 use App\Filament\Clusters\Communication;
 use Filament\Resources\Resource;
 use UnitEnum;
@@ -48,7 +49,7 @@ class EmailTemplateResource extends Resource
 {
     protected static ?string $model = EmailTemplate::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Communication';
+    protected static string | UnitEnum | null $navigationGroup = CommunicationNavigationGroup::Communication;
 
     protected static ?int $navigationSort = 120;
 

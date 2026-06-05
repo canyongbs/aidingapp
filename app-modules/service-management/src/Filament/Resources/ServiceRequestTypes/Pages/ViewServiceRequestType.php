@@ -36,11 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\ServiceRequestFormResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
 use Filament\Actions\EditAction;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Group;
@@ -72,11 +72,11 @@ class ViewServiceRequestType extends ViewRecord
                             ->placeholder('None'),
                         TextEntry::make('default_category')
                             ->label('Default Category'),
-                        TextEntry::make('form.name')
+                        IconEntry::make('form')
                             ->label('Form')
-                            ->hidden(fn (ServiceRequestType $record) => ! $record->form)
-                            ->url(fn (ServiceRequestType $record) => $record->form ? ServiceRequestFormResource::getUrl('edit', ['record' => $record->form]) : null)
-                            ->color('primary'),
+                            ->state(fn (ServiceRequestType $record): bool => (bool) $record->form)
+                            ->boolean()
+                            ->url(fn (ServiceRequestType $record) => ManageServiceRequestTypeCustomForm::getUrl(['record' => $record])),
                         Group::make()
                             ->schema([
                                 TextEntry::make('has_enabled_feedback_collection')

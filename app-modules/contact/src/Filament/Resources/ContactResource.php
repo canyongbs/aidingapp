@@ -48,6 +48,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactFile
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactTasks;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Models\Contact;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
@@ -57,7 +58,7 @@ class ContactResource extends Resource
 {
     protected static ?string $model = Contact::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Clients';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Clients;
 
     protected static ?int $navigationSort = 20;
 

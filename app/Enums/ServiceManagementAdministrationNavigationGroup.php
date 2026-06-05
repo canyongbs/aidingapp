@@ -34,48 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages;
+namespace App\Enums;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\ServiceRequestFormResource;
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\Action;
-use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Support\Contracts\HasLabel;
 
-class ListServiceRequestForms extends ListRecords
+enum ServiceManagementAdministrationNavigationGroup implements HasLabel
 {
-    protected static string $resource = ServiceRequestFormResource::class;
+    case ServiceRequests;
 
-    public function table(Table $table): Table
-    {
-        return $table
-            ->modifyQueryUsing(function (Builder $query) {
-                /** @var Builder<ServiceRequestForm> $query */
-                return $query->withoutArchived()->whereHas('type', fn (Builder $query) => $query->withoutArchived());
-            })
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name'),
-            ])
-            ->recordActions([
-                Action::make('Respond')
-                    ->url(fn (ServiceRequestForm $form) => route('service-request-forms.show', ['serviceRequestForm' => $form]))
-                    ->icon('heroicon-m-arrow-top-right-on-square')
-                    ->openUrlInNewTab()
-                    ->color('gray'),
-                EditAction::make(),
-            ]);
-    }
+    case ChangeRequests;
 
-    protected function getHeaderActions(): array
+    case ServiceLevels;
+
+    case EmailTemplates;
+
+    public function getLabel(): string
     {
-        return [
-            CreateAction::make(),
-        ];
+        return match ($this) {
+            self::ServiceRequests => 'Service Requests',
+            self::ChangeRequests => 'Change Requests',
+            self::ServiceLevels => 'Service Levels',
+            self::EmailTemplates => 'Email Templates',
+        };
     }
 }

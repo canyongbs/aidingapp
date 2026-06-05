@@ -35,11 +35,10 @@
     import { onMounted, ref } from 'vue';
     import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';
+    import LoadingSpinner from '../../../../resources/js/components/LoadingSpinner.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
     import EmptyState from '../Components/EmptyState.vue';
-    import Loader from '../Components/Loader.vue';
     import Page from '../Components/Page.vue';
-    import PageCard from '../Components/PageCard.vue';
     import { consumer } from '../Services/Consumer';
 
     const advisories = ref([]);
@@ -145,39 +144,66 @@
             <Breadcrumbs :currentCrumb="'Advisories'" />
         </template>
 
-        <PageCard v-if="advisories.length > 0 || loading">
-            <div class="mb-6 bg-white shadow-xs rounded-lg p-4" v-for="(advisory, index) in advisories" :key="index">
-                <time class="mb-1 text-lg font-semibold leading-none text-black">{{
-                    formatDate(advisory.created_at)
-                }}</time>
-                <h3 class="text-lg font-semibold" :class="severityTextColor(advisory.severity)">
-                    {{ advisory.title }}
-                </h3>
-                <p class="text-sm text-gray-500">
-                    {{ advisory.description }}
-                </p>
-                <BaseBadge v-if="advisory.status" color="info" class="mb-5">
-                    {{ advisory.status.name }}
-                </BaseBadge>
-                <hr class="my-4" v-if="advisory.advisory_updates?.length" />
-                <ol class="relative border-s border-gray-200" v-if="advisory.advisory_updates?.length">
-                    <li class="mb-8 ms-4" v-for="updateData in advisory.advisory_updates" :key="updateData.id">
-                        <div
-                            class="absolute w-3 h-3 bg-gray-200 rounded-lg mt-1.5 -inset-s-1.5 border border-white"
-                        ></div>
+        <div v-if="loading && advisories.length === 0" class="flex justify-center py-12">
+            <LoadingSpinner label="Loading advisories..." />
+        </div>
 
-                        <time class="mb-1 text-sm font-normal leading-none text-gray-400">{{
-                            formatDate(updateData.created_at)
-                        }}</time>
-                        <p class="text-sm text-gray-700 mt-1">{{ updateData.update }}</p>
-                    </li>
-                </ol>
+        <div v-else-if="advisories.length > 0" class="flex flex-col gap-3">
+            <div
+                v-for="(advisory, index) in advisories"
+                :key="advisory.id || index"
+                class="overflow-hidden rounded-xl bg-white ring-1 ring-gray-950/5"
+            >
+                <div class="mt-0.5 grid flex-1 gap-1 min-w-0 px-6 py-4">
+                    <div class="flex items-start justify-between gap-4">
+                        <h3 class="text-sm font-semibold" :class="severityTextColor(advisory.severity)">
+                            {{ advisory.title }}
+                        </h3>
+                        <BaseBadge
+                            v-if="advisory.status"
+                            :color="advisory.status.classification === 'resolved' ? 'success' : 'danger'"
+                            class="shrink-0"
+                        >
+                            {{ advisory.status.name }}
+                        </BaseBadge>
+                    </div>
+                    <p
+                        v-if="advisory.description"
+                        class="overflow-hidden text-sm text-pretty break-words text-gray-500 pr-4"
+                    >
+                        {{ advisory.description }}
+                    </p>
+                    <time class="text-xs text-gray-400">{{ formatDate(advisory.created_at) }}</time>
+                </div>
+
+                <template v-if="advisory.advisory_updates?.length">
+                    <hr class="border-gray-200" />
+                    <ol class="relative ms-6 border-s border-gray-200">
+                        <li
+                            v-for="(updateData, i) in advisory.advisory_updates"
+                            :key="updateData.id"
+                            class="ms-4 pt-4"
+                            :class="i < advisory.advisory_updates.length - 1 ? 'mb-4' : 'pb-4'"
+                        >
+                            <div
+                                class="absolute w-3 h-3 rounded-full bg-gray-300 border-2 border-white -inset-s-1.5"
+                            ></div>
+                            <time class="block text-sm font-normal leading-none text-gray-400">{{
+                                formatDate(updateData.created_at)
+                            }}</time>
+                            <p class="mt-1 text-sm text-gray-700">{{ updateData.update }}</p>
+                        </li>
+                    </ol>
+                </template>
             </div>
-            <Loader :loading="loading" />
-            <div class="flex justify-center mt-6" v-if="hasMore && !loading">
+
+            <div v-if="loading" class="flex justify-center py-4">
+                <LoadingSpinner size="sm" />
+            </div>
+            <div v-if="hasMore && !loading" class="flex justify-center py-4">
                 <BaseButton color="gray" size="md" @click="loadMore"> Load More </BaseButton>
             </div>
-        </PageCard>
+        </div>
 
         <EmptyState v-if="!loading && advisories.length === 0">
             <template #heading>There are no advisories to display.</template>
