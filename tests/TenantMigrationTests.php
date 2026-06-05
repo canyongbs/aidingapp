@@ -220,16 +220,16 @@ describe('2026_06_02_122811_tmp_data_migrate_service_request_type_email_preferen
                     'is_customers_service_request_closed_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Closed->value, ServiceRequestNotificationChannel::Notification->value],
                 ];
 
-                $typeAValues = [];
-                $typeBValues = [];
+                $valuesForTypeA = [];
+                $valuesForTypeB = [];
 
                 foreach (array_keys($columnMap) as $index => $column) {
-                    $typeAValues[$column] = $index % 2 === 0;
-                    $typeBValues[$column] = $index % 3 === 0;
+                    $valuesForTypeA[$column] = $index % 2 === 0;
+                    $valuesForTypeB[$column] = $index % 3 === 0;
                 }
 
-                DB::table('service_request_types')->where('id', $typeA->id)->update($typeAValues);
-                DB::table('service_request_types')->where('id', $typeB->id)->update($typeBValues);
+                DB::table('service_request_types')->where('id', $typeA->id)->update($valuesForTypeA);
+                DB::table('service_request_types')->where('id', $typeB->id)->update($valuesForTypeB);
 
                 $migrate = Artisan::call('migrate', [
                     '--path' => 'app-modules/service-management/database/migrations/2026_06_02_122811_tmp_data_migrate_service_request_type_email_preferences.php',
