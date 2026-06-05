@@ -253,7 +253,7 @@ describe('2026_06_02_122811_tmp_data_migrate_service_request_type_email_preferen
                         ->first();
 
                     expect($prefA)->not->toBeNull()
-                        ->and((bool) $prefA->is_enabled)->toBe($typeAValues[$column]);
+                        ->and((bool) $prefA->is_enabled)->toBe($valuesForTypeA[$column]);
 
                     $prefB = DB::table('service_request_type_email_preference')
                         ->where('service_request_type_id', $typeB->id)
@@ -263,7 +263,7 @@ describe('2026_06_02_122811_tmp_data_migrate_service_request_type_email_preferen
                         ->first();
 
                     expect($prefB)->not->toBeNull()
-                        ->and((bool) $prefB->is_enabled)->toBe($typeBValues[$column]);
+                        ->and((bool) $prefB->is_enabled)->toBe($valuesForTypeB[$column]);
                 }
 
                 expect(ServiceRequestTypeEmailPreferenceFeature::active())->toBeTrue();
