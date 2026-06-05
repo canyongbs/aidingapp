@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use App\Features\ServiceRequestAssignmentByTypeFeature;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
@@ -54,24 +55,24 @@ return new class () extends Migration {
 
             Schema::table('service_request_assignments', function (Blueprint $table) {
                 $table->dropForeign(['assigned_by_id']);
-            });
-
-            Schema::table('service_request_assignments', function (Blueprint $table) {
                 $table->index(['assigned_by_type', 'assigned_by_id']);
             });
+
+            ServiceRequestAssignmentByTypeFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
+            ServiceRequestAssignmentByTypeFeature::deactivate();
             Schema::table('service_request_assignments', function (Blueprint $table) {
                 $table->dropIndex(['assigned_by_type', 'assigned_by_id']);
             });
 
             DB::table('service_request_assignments')
                 ->whereNotNull('assigned_by_type')
-                ->where('assigned_by_type', '!=', 'user')
+                ->where('assigned_by_type', '!=', (new User())->getMorphClass())
                 ->update(['assigned_by_id' => null]);
 
             Schema::table('service_request_assignments', function (Blueprint $table) {
