@@ -543,4 +543,3 @@ describe('Deduplication', function () {
         Notification::assertSentToTimes($assignedManager, ServiceRequestCreated::class, 1);
     });
 });
-
