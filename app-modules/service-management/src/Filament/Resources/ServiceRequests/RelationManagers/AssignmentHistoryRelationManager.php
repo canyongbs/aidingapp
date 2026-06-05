@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Relatio
 
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Features\ServiceRequestAssignmentByTypeFeature;
+use App\Models\SystemUser;
 use App\Models\User;
 use App\Settings\DisplaySettings;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -109,10 +110,16 @@ class AssignmentHistoryRelationManager extends RelationManager
                     ->description(fn (ServiceRequestAssignment $record): ?string => $userLine($record->user)),
                 TextColumn::make('assignedBy.name')
                     ->label('By')
-                    ->state(fn (ServiceRequestAssignment $record): string => $record->assignedBy
-                        ? $record->assignedBy->name
-                        : 'Auto-Assignment')
-                    ->description(fn (ServiceRequestAssignment $record): ?string => $userLine($record->assignedBy)),
+                    ->state(function(ServiceRequestAssignment $record) {
+                        /** @var User|SystemUser|null $assignBy */
+                        $assignBy = $record->assignedBy;
+                        if ($assignBy) {
+                            return $assignBy->name;
+                        }
+
+                        return 'Auto-Assignment';
+                    })
+                    ->description(fn (ServiceRequestAssignment $record): ?string => $record->assignedBy instanceof User ? $userLine($record->assignedBy) : null),
                 TextColumn::make('serviceRequestStatus.name')
                     ->label('Status')
                     ->badge()
