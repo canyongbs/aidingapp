@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { CheckCircleIcon, InformationCircleIcon, XCircleIcon } from '@heroicons/vue/20/solid';
+    import { CheckCircleIcon, XCircleIcon } from '@heroicons/vue/20/solid';
     import { onMounted, ref } from 'vue';
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import LoadingSpinner from '../../../../resources/js/components/LoadingSpinner.vue';
@@ -154,37 +154,29 @@
                 :key="advisory.id || index"
                 class="overflow-hidden rounded-xl bg-white ring-1 ring-gray-950/5"
             >
-                <div class="flex gap-3 px-6 py-4">
-                    <InformationCircleIcon
-                        class="size-5 shrink-0"
-                        :class="severityTextColor(advisory.severity)"
-                        aria-hidden="true"
-                    />
-
-                    <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
-                        <div class="flex items-start justify-between gap-4">
-                            <h3 class="text-sm font-semibold" :class="severityTextColor(advisory.severity)">
-                                {{ advisory.title }}
-                            </h3>
-                            <CheckCircleIcon
-                                v-if="advisory.status?.classification === 'resolved'"
-                                class="size-5 shrink-0 text-green-500"
-                                :title="advisory.status.name"
-                            />
-                            <XCircleIcon
-                                v-else-if="advisory.status"
-                                class="size-5 shrink-0 text-red-400"
-                                :title="advisory.status.name"
-                            />
-                        </div>
-                        <p
-                            v-if="advisory.description"
-                            class="overflow-hidden text-sm text-pretty break-words text-gray-500 pr-4"
-                        >
-                            {{ advisory.description }}
-                        </p>
-                        <time class="text-xs text-gray-400">{{ formatDate(advisory.created_at) }}</time>
+                <div class="mt-0.5 grid flex-1 gap-1 min-w-0 px-6 py-4">
+                    <div class="flex items-start justify-between gap-4">
+                        <h3 class="text-sm font-semibold" :class="severityTextColor(advisory.severity)">
+                            {{ advisory.title }}
+                        </h3>
+                        <CheckCircleIcon
+                            v-if="advisory.status?.classification === 'resolved'"
+                            class="size-5 shrink-0 text-green-500"
+                            :title="advisory.status.name"
+                        />
+                        <XCircleIcon
+                            v-else-if="advisory.status"
+                            class="size-5 shrink-0 text-red-400"
+                            :title="advisory.status.name"
+                        />
                     </div>
+                    <p
+                        v-if="advisory.description"
+                        class="overflow-hidden text-sm text-pretty break-words text-gray-500 pr-4"
+                    >
+                        {{ advisory.description }}
+                    </p>
+                    <time class="text-xs text-gray-400">{{ formatDate(advisory.created_at) }}</time>
                 </div>
 
                 <template v-if="advisory.advisory_updates?.length">

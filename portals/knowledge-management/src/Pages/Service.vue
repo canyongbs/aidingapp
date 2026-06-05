@@ -62,7 +62,7 @@
             <Breadcrumbs :currentCrumb="'Service'" />
         </template>
 
-        <ResourceList v-if="serviceRequests?.length > 0" heading="Service Requests">
+        <ResourceList v-if="serviceRequests?.length > 0">
             <ResourceListItem
                 v-for="serviceRequest in serviceRequests"
                 :key="serviceRequest.id"

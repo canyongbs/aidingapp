@@ -57,7 +57,7 @@
 <template>
     <router-link
         :to="to"
-        class="group flex w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5 transition duration-75 hover:bg-gray-50"
+        class="group flex items-start w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5 transition duration-75 hover:bg-gray-50"
     >
         <div
             v-if="icon"
