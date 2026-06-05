@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
@@ -93,6 +95,52 @@ describe('Customer', function () {
         Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestAssignedNotification::class);
     });
 
+    it('sends customer assigned notification with template when template exists', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Assigned,
+            'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+        ]);
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $manager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestAssignedNotification::class);
+    });
+
+    it('sends customer assigned notification without template when no template exists', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $manager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestAssignedNotification::class);
+    });
+
     it('does not send customer assigned notification when preference is disabled', function () {
         Notification::fake();
 
@@ -116,7 +164,7 @@ describe('Customer', function () {
 });
 
 describe('Manager', function () {
-    it('sends manager assigned notification when preference is enabled', function () {
+    it('sends manager assigned email with template when template exists', function () {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -129,6 +177,18 @@ describe('Manager', function () {
         $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
 
         enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email);
+        $template = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Assigned,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Assigned,
+            'role' => ServiceRequestTypeEmailTemplateRole::Auditor,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Created,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
 
         $serviceRequest->assignments()->create([
             'user_id' => $assignedManager->getKey(),
@@ -136,10 +196,41 @@ describe('Manager', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($otherManager, ServiceRequestAssigned::class);
+        Notification::assertSentTo($otherManager, ServiceRequestAssigned::class, function ($notification) use ($template) {
+            return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
+        });
     });
 
-    it('does not send manager assigned notification when preference is disabled', function () {
+    it('sends manager assigned email without template when no template exists', function () {
+        Notification::fake();
+
+        $assignedManager = User::factory()->create();
+        $otherManager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($assignedManager);
+        $type->managerUsers()->attach($otherManager);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Created,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $assignedManager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        Notification::assertSentTo($otherManager, ServiceRequestAssigned::class, function ($notification) {
+            return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
+        });
+    });
+
+    it('does not send manager assigned email when preference is disabled', function () {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -161,10 +252,97 @@ describe('Manager', function () {
 
         Notification::assertNotSentTo($otherManager, ServiceRequestAssigned::class);
     });
+
+    it('sends manager assigned database notification when preference is enabled', function () {
+        Notification::fake();
+
+        $assignedManager = User::factory()->create();
+        $otherManager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($assignedManager);
+        $type->managerUsers()->attach($otherManager);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification);
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $assignedManager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        Notification::assertSentTo($otherManager, ServiceRequestAssigned::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
+
+    it('does not send manager assigned database notification when preference is disabled', function () {
+        Notification::fake();
+
+        $assignedManager = User::factory()->create();
+        $otherManager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($assignedManager);
+        $type->managerUsers()->attach($otherManager);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification, false);
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $assignedManager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        Notification::assertNotSentTo($otherManager, ServiceRequestAssigned::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
 });
 
 describe('Auditor', function () {
-    it('sends auditor assigned notification when preference is enabled', function () {
+    it('sends auditor assigned email with template when template exists', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $auditor = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+        $type->auditorUsers()->attach($auditor);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Email);
+        $template = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Assigned,
+            'role' => ServiceRequestTypeEmailTemplateRole::Auditor,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Assigned,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Update,
+            'role' => ServiceRequestTypeEmailTemplateRole::Auditor,
+        ]);
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $manager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        Notification::assertSentTo($auditor, ServiceRequestAssigned::class, function ($notification) use ($template) {
+            return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
+        });
+    });
+
+    it('sends auditor assigned email without template when no template exists', function () {
         Notification::fake();
 
         $manager = User::factory()->create();
@@ -184,10 +362,12 @@ describe('Auditor', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($auditor, ServiceRequestAssigned::class);
+        Notification::assertSentTo($auditor, ServiceRequestAssigned::class, function ($notification) {
+            return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
+        });
     });
 
-    it('does not send auditor assigned notification when preference is disabled', function () {
+    it('does not send auditor assigned email when preference is disabled', function () {
         Notification::fake();
 
         $manager = User::factory()->create();
@@ -209,10 +389,60 @@ describe('Auditor', function () {
 
         Notification::assertNotSentTo($auditor, ServiceRequestAssigned::class);
     });
+
+    it('sends auditor assigned database notification when preference is enabled', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $auditor = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+        $type->auditorUsers()->attach($auditor);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Notification);
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $manager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        Notification::assertSentTo($auditor, ServiceRequestAssigned::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
+
+    it('does not send auditor assigned database notification when preference is disabled', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $auditor = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+        $type->auditorUsers()->attach($auditor);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Notification, false);
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $manager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        Notification::assertNotSentTo($auditor, ServiceRequestAssigned::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
 });
 
 describe('AssignedManager', function () {
-    it('sends assigned manager assigned notification when preference is enabled', function () {
+    it('sends assigned manager assigned email with template when template exists', function () {
         Notification::fake();
 
         $manager = User::factory()->create();
@@ -223,9 +453,13 @@ describe('AssignedManager', function () {
         $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
 
         enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email);
-        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+        $template = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
             'type' => ServiceRequestEmailTemplateType::Assigned,
             'role' => ServiceRequestTypeEmailTemplateRole::AssignedManager,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Assigned,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
         ]);
 
         $serviceRequest->assignments()->create([
@@ -234,10 +468,35 @@ describe('AssignedManager', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($manager, ServiceRequestAssigned::class);
+        Notification::assertSentTo($manager, ServiceRequestAssigned::class, function ($notification) use ($template) {
+            return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
+        });
     });
 
-    it('does not send assigned manager assigned notification when preference is disabled', function () {
+    it('sends assigned manager assigned email without template when no template exists', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email);
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $manager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        Notification::assertSentTo($manager, ServiceRequestAssigned::class, function ($notification) {
+            return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
+        });
+    });
+
+    it('does not send assigned manager assigned email when preference is disabled', function () {
         Notification::fake();
 
         $manager = User::factory()->create();
@@ -255,12 +514,60 @@ describe('AssignedManager', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertNotSentTo($manager, ServiceRequestAssigned::class);
+        Notification::assertNotSentTo($manager, ServiceRequestAssigned::class, function ($notification) {
+            return $notification->channel === MailChannel::class;
+        });
+    });
+
+    it('sends assigned manager assigned database notification when preference is enabled', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification);
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $manager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        Notification::assertSentTo($manager, ServiceRequestAssigned::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
+
+    it('does not send assigned manager assigned database notification when preference is disabled', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification, false);
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $manager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        Notification::assertNotSentTo($manager, ServiceRequestAssigned::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
     });
 });
 
 describe('Deduplication', function () {
-    it('assigned manager only receives one assigned notification when both manager and assigned manager preferences are enabled', function () {
+    it('assigned manager only receives one assigned email when both manager and assigned manager email preferences are enabled', function () {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -274,7 +581,11 @@ describe('Deduplication', function () {
 
         enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email);
         enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email);
-        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+        $managerTemplate = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Assigned,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
+        $assignedManagerTemplate = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
             'type' => ServiceRequestEmailTemplateType::Assigned,
             'role' => ServiceRequestTypeEmailTemplateRole::AssignedManager,
         ]);
@@ -285,8 +596,42 @@ describe('Deduplication', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentToTimes($assignedManager, ServiceRequestAssigned::class, 1);
-        Notification::assertSentToTimes($otherManager, ServiceRequestAssigned::class, 1);
+        $assignedManagerEmails = Notification::sent($assignedManager, ServiceRequestAssigned::class)
+            ->filter(fn ($notification) => $notification->channel === MailChannel::class);
+
+        expect($assignedManagerEmails)->toHaveCount(1);
+        expect($assignedManagerEmails->first()->emailTemplate?->is($assignedManagerTemplate))->toBeTrue();
+
+        Notification::assertSentTo($otherManager, ServiceRequestAssigned::class, function ($notification) use ($managerTemplate) {
+            return $notification->channel === MailChannel::class && $notification->emailTemplate?->is($managerTemplate);
+        });
+    });
+
+    it('assigned manager only receives one assigned database notification when both manager and assigned manager notification preferences are enabled', function () {
+        Notification::fake();
+
+        $assignedManager = User::factory()->create();
+        $otherManager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($assignedManager);
+        $type->managerUsers()->attach($otherManager);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification);
+        enablePreference($type, ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification);
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $assignedManager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        $assignedManagerDbNotifications = Notification::sent($assignedManager, ServiceRequestAssigned::class)
+            ->filter(fn ($notification) => $notification->channel === DatabaseChannel::class);
+
+        expect($assignedManagerDbNotifications)->toHaveCount(1);
     });
 
     it('assigned manager receives the manager broadcast when assigned manager preference is disabled', function () {
@@ -308,6 +653,9 @@ describe('Deduplication', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentToTimes($assignedManager, ServiceRequestAssigned::class, 1);
+        $assignedManagerEmails = Notification::sent($assignedManager, ServiceRequestAssigned::class)
+            ->filter(fn ($notification) => $notification->channel === MailChannel::class);
+
+        expect($assignedManagerEmails)->toHaveCount(1);
     });
 });

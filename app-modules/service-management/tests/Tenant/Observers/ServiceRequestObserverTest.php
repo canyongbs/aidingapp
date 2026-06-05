@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
@@ -75,7 +77,32 @@ if (! function_exists('enablePreference')) {
 }
 
 describe('Closed → Customer', function () {
-    it('sends customer closed notification when preference is enabled and status becomes Closed', function () {
+    it('sends customer closed notification when preference is enabled and template exists', function () {
+        Notification::fake();
+
+        $type = ServiceRequestType::factory()->create();
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Closed,
+            'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+        ]);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestClosedNotification::class);
+    });
+
+    it('sends customer closed notification when preference is enabled and no template exists', function () {
         Notification::fake();
 
         $type = ServiceRequestType::factory()->create();
@@ -119,13 +146,25 @@ describe('Closed → Customer', function () {
 });
 
 describe('Closed → Manager', function () {
-    it('sends manager closed notification when preference is enabled', function () {
+    it('sends manager closed email with template when template exists', function () {
         Notification::fake();
 
         $manager = User::factory()->create();
         $type = ServiceRequestType::factory()->create();
         $type->managerUsers()->attach($manager);
         enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email);
+        $template = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Closed,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Closed,
+            'role' => ServiceRequestTypeEmailTemplateRole::Auditor,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::StatusChange,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
 
         $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
         $openStatus = ServiceRequestStatus::factory()->open()->create();
@@ -139,10 +178,41 @@ describe('Closed → Manager', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($manager, ServiceRequestClosed::class);
+        Notification::assertSentTo($manager, ServiceRequestClosed::class, function ($notification) use ($template) {
+            return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
+        });
     });
 
-    it('does not send manager closed notification when preference is disabled', function () {
+    it('sends manager closed email without template when no template exists', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::StatusChange,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($manager, ServiceRequestClosed::class, function ($notification) {
+            return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
+        });
+    });
+
+    it('does not send manager closed email when preference is disabled', function () {
         Notification::fake();
 
         $manager = User::factory()->create();
@@ -165,10 +235,98 @@ describe('Closed → Manager', function () {
 
         Notification::assertNotSentTo($manager, ServiceRequestClosed::class);
     });
+
+    it('sends manager closed database notification when preference is enabled', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($manager, ServiceRequestClosed::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
+
+    it('does not send manager closed database notification when preference is disabled', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification, false);
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertNotSentTo($manager, ServiceRequestClosed::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
 });
 
 describe('Closed → Auditor', function () {
-    it('sends auditor closed notification when preference is enabled', function () {
+    it('sends auditor closed email with template when template exists', function () {
+        Notification::fake();
+
+        $auditor = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->auditorUsers()->attach($auditor);
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Email);
+        $template = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Closed,
+            'role' => ServiceRequestTypeEmailTemplateRole::Auditor,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Closed,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::StatusChange,
+            'role' => ServiceRequestTypeEmailTemplateRole::Auditor,
+        ]);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($auditor, ServiceRequestClosed::class, function ($notification) use ($template) {
+            return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
+        });
+    });
+
+    it('sends auditor closed email without template when no template exists', function () {
         Notification::fake();
 
         $auditor = User::factory()->create();
@@ -188,10 +346,12 @@ describe('Closed → Auditor', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($auditor, ServiceRequestClosed::class);
+        Notification::assertSentTo($auditor, ServiceRequestClosed::class, function ($notification) {
+            return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
+        });
     });
 
-    it('does not send auditor closed notification when preference is disabled', function () {
+    it('does not send auditor closed email when preference is disabled', function () {
         Notification::fake();
 
         $auditor = User::factory()->create();
@@ -214,19 +374,74 @@ describe('Closed → Auditor', function () {
 
         Notification::assertNotSentTo($auditor, ServiceRequestClosed::class);
     });
+
+    it('sends auditor closed database notification when preference is enabled', function () {
+        Notification::fake();
+
+        $auditor = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->auditorUsers()->attach($auditor);
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Notification);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($auditor, ServiceRequestClosed::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
+
+    it('does not send auditor closed database notification when preference is disabled', function () {
+        Notification::fake();
+
+        $auditor = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->auditorUsers()->attach($auditor);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Notification, false);
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertNotSentTo($auditor, ServiceRequestClosed::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
 });
 
 describe('Closed → AssignedManager', function () {
-    it('sends assigned manager closed notification when preference is enabled', function () {
+    it('sends assigned manager closed email with template when template exists', function () {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
         $type = ServiceRequestType::factory()->create();
         $type->managerUsers()->attach($assignedManager);
         enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email);
-        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+        $template = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
             'type' => ServiceRequestEmailTemplateType::Closed,
             'role' => ServiceRequestTypeEmailTemplateRole::AssignedManager,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Closed,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
         ]);
 
         $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
@@ -247,10 +462,43 @@ describe('Closed → AssignedManager', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($assignedManager, ServiceRequestClosed::class);
+        Notification::assertSentTo($assignedManager, ServiceRequestClosed::class, function ($notification) use ($template) {
+            return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
+        });
     });
 
-    it('does not send assigned manager closed notification when preference is disabled', function () {
+    it('sends assigned manager closed email without template when no template exists', function () {
+        Notification::fake();
+
+        $assignedManager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($assignedManager);
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $assignedManager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($assignedManager, ServiceRequestClosed::class, function ($notification) {
+            return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
+        });
+    });
+
+    it('does not send assigned manager closed email when preference is disabled', function () {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -280,10 +528,74 @@ describe('Closed → AssignedManager', function () {
 
         Notification::assertNotSentTo($assignedManager, ServiceRequestClosed::class);
     });
+
+    it('sends assigned manager closed database notification when preference is enabled', function () {
+        Notification::fake();
+
+        $assignedManager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($assignedManager);
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $assignedManager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($assignedManager, ServiceRequestClosed::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
+
+    it('does not send assigned manager closed database notification when preference is disabled', function () {
+        Notification::fake();
+
+        $assignedManager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($assignedManager);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $assignedManager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification, false);
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification, false);
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertNotSentTo($assignedManager, ServiceRequestClosed::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
 });
 
 describe('Closed → Deduplication', function () {
-    it('assigned manager only receives one closed notification when both manager and assigned manager preferences are enabled', function () {
+    it('assigned manager only receives one closed email when both manager and assigned manager email preferences are enabled', function () {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -293,7 +605,11 @@ describe('Closed → Deduplication', function () {
         $type->managerUsers()->attach($otherManager);
         enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email);
         enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email);
-        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+        $managerTemplate = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Closed,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
+        $assignedManagerTemplate = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
             'type' => ServiceRequestEmailTemplateType::Closed,
             'role' => ServiceRequestTypeEmailTemplateRole::AssignedManager,
         ]);
@@ -316,13 +632,110 @@ describe('Closed → Deduplication', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
+        $assignedManagerEmails = Notification::sent($assignedManager, ServiceRequestClosed::class)
+            ->filter(fn ($notification) => $notification->channel === MailChannel::class);
+
+        expect($assignedManagerEmails)->toHaveCount(1);
+        expect($assignedManagerEmails->first()->emailTemplate?->is($assignedManagerTemplate))->toBeTrue();
+
+        Notification::assertSentTo($otherManager, ServiceRequestClosed::class, function ($notification) use ($managerTemplate) {
+            return $notification->channel === MailChannel::class && $notification->emailTemplate?->is($managerTemplate);
+        });
+    });
+
+    it('assigned manager only receives one closed database notification when both manager and assigned manager notification preferences are enabled', function () {
+        Notification::fake();
+
+        $assignedManager = User::factory()->create();
+        $otherManager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($assignedManager);
+        $type->managerUsers()->attach($otherManager);
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification);
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $assignedManager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        $assignedManagerNotifications = Notification::sent($assignedManager, ServiceRequestClosed::class)
+            ->filter(fn ($notification) => $notification->channel === DatabaseChannel::class);
+
+        expect($assignedManagerNotifications)->toHaveCount(1);
+    });
+
+    it('assigned manager receives the manager broadcast when assigned manager preference is disabled', function () {
+        Notification::fake();
+
+        $assignedManager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($assignedManager);
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email);
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email, false);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $assignedManager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
         Notification::assertSentToTimes($assignedManager, ServiceRequestClosed::class, 1);
-        Notification::assertSentToTimes($otherManager, ServiceRequestClosed::class, 1);
     });
 });
 
 describe('StatusChange → Customer', function () {
-    it('sends customer status change notification when preference is enabled', function () {
+    it('sends customer status change notification when preference is enabled and template exists', function () {
+        Notification::fake();
+
+        $type = ServiceRequestType::factory()->create();
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::StatusChange,
+            'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+        ]);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $inProgressStatus = ServiceRequestStatus::factory()->inProgress()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($inProgressStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestStatusChangeNotification::class);
+    });
+
+    it('sends customer status change notification when preference is enabled and no template exists', function () {
         Notification::fake();
 
         $type = ServiceRequestType::factory()->create();
@@ -366,7 +779,44 @@ describe('StatusChange → Customer', function () {
 });
 
 describe('StatusChange → Manager', function () {
-    it('sends manager status change notification when preference is enabled', function () {
+    it('sends manager status change email with template when template exists', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email);
+        $template = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::StatusChange,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::StatusChange,
+            'role' => ServiceRequestTypeEmailTemplateRole::Auditor,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Closed,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $inProgressStatus = ServiceRequestStatus::factory()->inProgress()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($inProgressStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($manager, ServiceRequestStatusChanged::class, function ($notification) use ($template) {
+            return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
+        });
+    });
+
+    it('sends manager status change email without template when no template exists', function () {
         Notification::fake();
 
         $manager = User::factory()->create();
@@ -386,10 +836,12 @@ describe('StatusChange → Manager', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($manager, ServiceRequestStatusChanged::class);
+        Notification::assertSentTo($manager, ServiceRequestStatusChanged::class, function ($notification) {
+            return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
+        });
     });
 
-    it('does not send manager status change notification when preference is disabled', function () {
+    it('does not send manager status change email when preference is disabled', function () {
         Notification::fake();
 
         $manager = User::factory()->create();
@@ -412,10 +864,98 @@ describe('StatusChange → Manager', function () {
 
         Notification::assertNotSentTo($manager, ServiceRequestStatusChanged::class);
     });
+
+    it('sends manager status change database notification when preference is enabled', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $inProgressStatus = ServiceRequestStatus::factory()->inProgress()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($inProgressStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($manager, ServiceRequestStatusChanged::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
+
+    it('does not send manager status change database notification when preference is disabled', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $inProgressStatus = ServiceRequestStatus::factory()->inProgress()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification, false);
+
+        $serviceRequest->status()->associate($inProgressStatus);
+        $serviceRequest->save();
+
+        Notification::assertNotSentTo($manager, ServiceRequestStatusChanged::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
 });
 
 describe('StatusChange → Auditor', function () {
-    it('sends auditor status change notification when preference is enabled', function () {
+    it('sends auditor status change email with template when template exists', function () {
+        Notification::fake();
+
+        $auditor = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->auditorUsers()->attach($auditor);
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Email);
+        $template = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::StatusChange,
+            'role' => ServiceRequestTypeEmailTemplateRole::Auditor,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::StatusChange,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Closed,
+            'role' => ServiceRequestTypeEmailTemplateRole::Auditor,
+        ]);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $inProgressStatus = ServiceRequestStatus::factory()->inProgress()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($inProgressStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($auditor, ServiceRequestStatusChanged::class, function ($notification) use ($template) {
+            return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
+        });
+    });
+
+    it('sends auditor status change email without template when no template exists', function () {
         Notification::fake();
 
         $auditor = User::factory()->create();
@@ -435,10 +975,12 @@ describe('StatusChange → Auditor', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($auditor, ServiceRequestStatusChanged::class);
+        Notification::assertSentTo($auditor, ServiceRequestStatusChanged::class, function ($notification) {
+            return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
+        });
     });
 
-    it('does not send auditor status change notification when preference is disabled', function () {
+    it('does not send auditor status change email when preference is disabled', function () {
         Notification::fake();
 
         $auditor = User::factory()->create();
@@ -461,19 +1003,74 @@ describe('StatusChange → Auditor', function () {
 
         Notification::assertNotSentTo($auditor, ServiceRequestStatusChanged::class);
     });
+
+    it('sends auditor status change database notification when preference is enabled', function () {
+        Notification::fake();
+
+        $auditor = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->auditorUsers()->attach($auditor);
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Notification);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $inProgressStatus = ServiceRequestStatus::factory()->inProgress()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($inProgressStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($auditor, ServiceRequestStatusChanged::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
+
+    it('does not send auditor status change database notification when preference is disabled', function () {
+        Notification::fake();
+
+        $auditor = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->auditorUsers()->attach($auditor);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $inProgressStatus = ServiceRequestStatus::factory()->inProgress()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Notification, false);
+
+        $serviceRequest->status()->associate($inProgressStatus);
+        $serviceRequest->save();
+
+        Notification::assertNotSentTo($auditor, ServiceRequestStatusChanged::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
 });
 
 describe('StatusChange → AssignedManager', function () {
-    it('sends assigned manager status change notification when preference is enabled', function () {
+    it('sends assigned manager status change email with template when template exists', function () {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
         $type = ServiceRequestType::factory()->create();
         $type->managerUsers()->attach($assignedManager);
         enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email);
-        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+        $template = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
             'type' => ServiceRequestEmailTemplateType::StatusChange,
             'role' => ServiceRequestTypeEmailTemplateRole::AssignedManager,
+        ]);
+        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::StatusChange,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
         ]);
 
         $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
@@ -494,10 +1091,43 @@ describe('StatusChange → AssignedManager', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($assignedManager, ServiceRequestStatusChanged::class);
+        Notification::assertSentTo($assignedManager, ServiceRequestStatusChanged::class, function ($notification) use ($template) {
+            return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
+        });
     });
 
-    it('does not send assigned manager status change notification when preference is disabled', function () {
+    it('sends assigned manager status change email without template when no template exists', function () {
+        Notification::fake();
+
+        $assignedManager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($assignedManager);
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $inProgressStatus = ServiceRequestStatus::factory()->inProgress()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $assignedManager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        $serviceRequest->status()->associate($inProgressStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($assignedManager, ServiceRequestStatusChanged::class, function ($notification) {
+            return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
+        });
+    });
+
+    it('does not send assigned manager status change email when preference is disabled', function () {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -527,10 +1157,74 @@ describe('StatusChange → AssignedManager', function () {
 
         Notification::assertNotSentTo($assignedManager, ServiceRequestStatusChanged::class);
     });
+
+    it('sends assigned manager status change database notification when preference is enabled', function () {
+        Notification::fake();
+
+        $assignedManager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($assignedManager);
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $inProgressStatus = ServiceRequestStatus::factory()->inProgress()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $assignedManager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        $serviceRequest->status()->associate($inProgressStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($assignedManager, ServiceRequestStatusChanged::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
+
+    it('does not send assigned manager status change database notification when preference is disabled', function () {
+        Notification::fake();
+
+        $assignedManager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($assignedManager);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $inProgressStatus = ServiceRequestStatus::factory()->inProgress()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $assignedManager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification, false);
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification, false);
+
+        $serviceRequest->status()->associate($inProgressStatus);
+        $serviceRequest->save();
+
+        Notification::assertNotSentTo($assignedManager, ServiceRequestStatusChanged::class, function ($notification) {
+            return $notification->channel === DatabaseChannel::class;
+        });
+    });
 });
 
 describe('StatusChange → Deduplication', function () {
-    it('assigned manager only receives one status change notification when both manager and assigned manager preferences are enabled', function () {
+    it('assigned manager only receives one status change email when both manager and assigned manager email preferences are enabled', function () {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -540,7 +1234,11 @@ describe('StatusChange → Deduplication', function () {
         $type->managerUsers()->attach($otherManager);
         enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email);
         enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email);
-        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+        $managerTemplate = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::StatusChange,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
+        $assignedManagerTemplate = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
             'type' => ServiceRequestEmailTemplateType::StatusChange,
             'role' => ServiceRequestTypeEmailTemplateRole::AssignedManager,
         ]);
@@ -563,7 +1261,79 @@ describe('StatusChange → Deduplication', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
+        $assignedManagerEmails = Notification::sent($assignedManager, ServiceRequestStatusChanged::class)
+            ->filter(fn ($notification) => $notification->channel === MailChannel::class);
+
+        expect($assignedManagerEmails)->toHaveCount(1);
+        expect($assignedManagerEmails->first()->emailTemplate?->is($assignedManagerTemplate))->toBeTrue();
+
+        Notification::assertSentTo($otherManager, ServiceRequestStatusChanged::class, function ($notification) use ($managerTemplate) {
+            return $notification->channel === MailChannel::class && $notification->emailTemplate?->is($managerTemplate);
+        });
+    });
+
+    it('assigned manager only receives one status change database notification when both manager and assigned manager notification preferences are enabled', function () {
+        Notification::fake();
+
+        $assignedManager = User::factory()->create();
+        $otherManager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($assignedManager);
+        $type->managerUsers()->attach($otherManager);
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification);
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $inProgressStatus = ServiceRequestStatus::factory()->inProgress()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $assignedManager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        $serviceRequest->status()->associate($inProgressStatus);
+        $serviceRequest->save();
+
+        $assignedManagerNotifications = Notification::sent($assignedManager, ServiceRequestStatusChanged::class)
+            ->filter(fn ($notification) => $notification->channel === DatabaseChannel::class);
+
+        expect($assignedManagerNotifications)->toHaveCount(1);
+    });
+
+    it('assigned manager receives the manager broadcast when assigned manager preference is disabled', function () {
+        Notification::fake();
+
+        $assignedManager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($assignedManager);
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email);
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email, false);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $inProgressStatus = ServiceRequestStatus::factory()->inProgress()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $assignedManager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        $serviceRequest->status()->associate($inProgressStatus);
+        $serviceRequest->save();
+
         Notification::assertSentToTimes($assignedManager, ServiceRequestStatusChanged::class, 1);
-        Notification::assertSentToTimes($otherManager, ServiceRequestStatusChanged::class, 1);
     });
 });
