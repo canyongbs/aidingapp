@@ -51,7 +51,7 @@ class UpdateServiceRequest
         $serviceRequest->fill($newData)->save();
 
         if ($dataArray['assigned_to_id'] ?? null) {
-            $assigmentData = [
+            $assignmentData = [
                 'user_id' => $dataArray['assigned_to_id'],
                 'assigned_by_id' => auth()->id(),
                 'assigned_at' => now(),
@@ -59,9 +59,9 @@ class UpdateServiceRequest
             ];
 
             if (ServiceRequestAssignmentByTypeFeature::active()) {
-                $assigmentData['assigned_by_type'] = auth()->user() ? auth()->user()->getMorphClass() : null;
+                $assignmentData['assigned_by_type'] = auth()->user() ? auth()->user()->getMorphClass() : null;
             }
-            $serviceRequest->assignments()->create($assigmentData);
+            $serviceRequest->assignments()->create($assignmentData);
         }
 
         return $serviceRequest;

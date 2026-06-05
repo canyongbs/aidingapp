@@ -206,9 +206,24 @@ it('returns correct service request fields after update', function (string $resp
     '`id`' => ['id', fn (ServiceRequest $sr) => $sr->id],
     '`service_request_number`' => ['service_request_number', fn (ServiceRequest $sr) => $sr->service_request_number],
     '`title`' => ['title', fn (ServiceRequest $sr) => $sr->title],
-    '`close_details`' => ['close_details', fn (ServiceRequest $sr) => $sr->close_details],
     '`category`' => ['category', fn (ServiceRequest $sr) => $sr->category->value],
 ]);
+
+it('updates close_details', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
+    Sanctum::actingAs($user, ['api']);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    $newCloseDetails = fake()->sentence();
+
+    $response = patchJson(route('api.v1.service-requests.update', ['serviceRequest' => $serviceRequest], false), [
+        'close_details' => $newCloseDetails,
+    ]);
+    $response->assertOk();
+
+    expect($response['data']['close_details'])->toBe($newCloseDetails);
+});
 
 it('returns correct status relationship structure after update', function () {
     $user = SystemUser::factory()->create();

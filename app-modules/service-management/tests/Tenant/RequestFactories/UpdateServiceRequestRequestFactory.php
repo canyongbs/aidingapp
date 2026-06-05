@@ -48,7 +48,7 @@ class UpdateServiceRequestRequestFactory extends RequestFactory
         return [
             'status_id' => ServiceRequestStatus::factory()->open()->create()->id,
             'priority_id' => ServiceRequestPriority::factory()->create()->id,
-            'category' => fake()->randomElement(ServiceRequestCategory::cases()),
+            'category' => fake()->randomElement(ServiceRequestCategory::cases())->value,
             'close_details' => $this->faker->sentence,
         ];
     }
