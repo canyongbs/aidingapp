@@ -43,6 +43,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Concerns\EditPageRedirection;
+use App\Features\KnowledgeBaseCategorySortFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
 use App\Models\Scopes\TagsForClass;
@@ -147,8 +148,8 @@ class EditKnowledgeBaseItem extends EditRecord
                                                 'category',
                                                 'name',
                                                 'parent_id',
-                                                modifyQueryUsing: fn (Builder $query) => $query->orderBy('name'),
-                                                modifyChildQueryUsing: fn (Builder $query) => $query->orderBy('name'),
+                                                modifyQueryUsing: fn (Builder $query) => $query->orderBy(KnowledgeBaseCategorySortFeature::active() ? 'sort' : 'name'),
+                                                modifyChildQueryUsing: fn (Builder $query) => $query->orderBy(KnowledgeBaseCategorySortFeature::active() ? 'sort' : 'name'),
                                             )
                                             ->enableBranchNode()
                                             ->searchable()

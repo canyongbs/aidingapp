@@ -42,7 +42,9 @@ use AidingApp\Report\Filament\Widgets\RefreshWidget;
 use AidingApp\Report\Filament\Widgets\TaskCumulativeCountLineChart;
 use AidingApp\Report\Filament\Widgets\TaskStats;
 use App\Enums\Feature;
+use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
+use BackedEnum;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
@@ -50,7 +52,7 @@ class TaskManagement extends EngagementReport
 {
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Projects';
+    protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::Projects;
 
     protected static ?string $navigationLabel = 'Tasks (Overview)';
 
@@ -59,6 +61,8 @@ class TaskManagement extends EngagementReport
     protected static string $routePath = 'tasks';
 
     protected static ?int $navigationSort = 100;
+
+    protected static string | BackedEnum | null $navigationIcon = '';
 
     protected string $cacheTag = 'report-tasks';
 

@@ -42,6 +42,7 @@ use AidingApp\Department\Filament\Resources\Departments\Pages\ListDepartments;
 use AidingApp\Department\Filament\Resources\Departments\Pages\ViewDepartment;
 use AidingApp\Department\Filament\Resources\Departments\RelationManagers\UsersRelationManager;
 use AidingApp\Department\Models\Department;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
 use UnitEnum;
 
@@ -49,7 +50,7 @@ class DepartmentResource extends Resource
 {
     protected static ?string $model = Department::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Users';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
 
     protected static ?int $navigationSort = 20;
 

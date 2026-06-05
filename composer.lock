@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ab6dad099b5c657ec2e831cf8e2c5c31",
+    "content-hash": "6a38a1bfd463ec9844166b99b88b8d41",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -11547,16 +11547,16 @@
         },
         {
             "name": "shuvroroy/filament-spatie-laravel-health",
-            "version": "v3.2.0",
+            "version": "v3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/shuvroroy/filament-spatie-laravel-health.git",
-                "reference": "77e80a542411313da9e78d89171a12b9a107667e"
+                "reference": "d2b220970d7405826e21a04352d3284272ccb386"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/shuvroroy/filament-spatie-laravel-health/zipball/77e80a542411313da9e78d89171a12b9a107667e",
-                "reference": "77e80a542411313da9e78d89171a12b9a107667e",
+                "url": "https://api.github.com/repos/shuvroroy/filament-spatie-laravel-health/zipball/d2b220970d7405826e21a04352d3284272ccb386",
+                "reference": "d2b220970d7405826e21a04352d3284272ccb386",
                 "shasum": ""
             },
             "require": {
@@ -11568,11 +11568,11 @@
             "require-dev": {
                 "larastan/larastan": "^3.0",
                 "laravel/pint": "^1.0",
-                "nunomaduro/collision": "^7.0||^8.0",
-                "orchestra/testbench": "^9.0||^10.0",
-                "pestphp/pest": "^2.0||^3.0",
-                "pestphp/pest-plugin-arch": "^2.0||^3.0",
-                "pestphp/pest-plugin-laravel": "^2.0||^3.0",
+                "nunomaduro/collision": "^7.0||^8.0||^9.0",
+                "orchestra/testbench": "^9.0||^10.0||^11.0",
+                "pestphp/pest": "^2.0||^3.0||^4.0",
+                "pestphp/pest-plugin-arch": "^2.0||^3.0||^4.0",
+                "pestphp/pest-plugin-laravel": "^2.0||^3.0||^4.0",
                 "phpstan/extension-installer": "^1.4",
                 "phpstan/phpstan": "^2.1",
                 "phpstan/phpstan-deprecation-rules": "^2.0",
@@ -11611,7 +11611,7 @@
             ],
             "support": {
                 "issues": "https://github.com/shuvroroy/filament-spatie-laravel-health/issues",
-                "source": "https://github.com/shuvroroy/filament-spatie-laravel-health/tree/v3.2.0"
+                "source": "https://github.com/shuvroroy/filament-spatie-laravel-health/tree/v3.3.0"
             },
             "funding": [
                 {
@@ -11619,7 +11619,7 @@
                     "type": "buy_me_a_coffee"
                 }
             ],
-            "time": "2026-01-17T12:24:55+00:00"
+            "time": "2026-04-21T04:49:39+00:00"
         },
         {
             "name": "socialiteproviders/google",

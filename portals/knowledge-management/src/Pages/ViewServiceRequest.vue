@@ -318,9 +318,9 @@
                 <Pagination
                     :currentPage="currentPage"
                     :lastPage="lastPage"
-                    :fromArticle="fromRecord"
-                    :toArticle="toRecord"
-                    :totalArticles="totalRecords"
+                    :fromItem="fromRecord"
+                    :toItem="toRecord"
+                    :totalItems="totalRecords"
                     @fetchNextPage="fetchNextPage"
                     @fetchPreviousPage="fetchPreviousPage"
                     @fetchPage="fetchPage"

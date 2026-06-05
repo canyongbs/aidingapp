@@ -42,8 +42,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Http\Controllers\Controller;
 use App\Settings\LicenseSettings;
-use Filament\Support\Colors\Color;
-use Filament\Support\Colors\ColorManager;
 use Illuminate\Http\JsonResponse;
 
 class GetServiceRequestsController extends Controller
@@ -62,26 +60,21 @@ class GetServiceRequestsController extends Controller
             return response()->json();
         }
 
-        $colors = [
-            ...app(ColorManager::class)->getColors(),
-            ...Color::all(),
-        ];
-
         return response()->json(
             ServiceRequestData::collect(
                 $contact->serviceRequests()
                     ->with('serviceRequestFormSubmission')
                     ->latest()
                     ->get()
-                    ->map(function (ServiceRequest $serviceRequest) use ($colors) {
+                    ->map(function (ServiceRequest $serviceRequest) {
                         return ServiceRequestData::from([
                             'id' => $serviceRequest->getKey(),
                             'number' => $serviceRequest->service_request_number,
                             'title' => $serviceRequest->serviceRequestFormSubmission->description ?? $serviceRequest->title,
                             'statusName' => $serviceRequest->status?->name,
-                            'statusColor' => $serviceRequest->status ? $colors[$serviceRequest->status->color->value][600] : null,
+                            'statusColor' => $serviceRequest->status?->color->value,
                             'icon' => $serviceRequest->priority->type->icon ? svg($serviceRequest->priority->type->icon, 'h-6 w-6')->toHtml() : null,
-                            'updatedAt' => count($serviceRequest->serviceRequestUpdates) > 0 ? $serviceRequest->serviceRequestUpdates()->latest('updated_at')->first()->updated_at->format('n-j-y g:i A') : $serviceRequest->created_at->format('n-j-y g:i A'),
+                            'updatedAt' => count($serviceRequest->serviceRequestUpdates) > 0 ? $serviceRequest->serviceRequestUpdates()->latest('updated_at')->first()->updated_at->format('F j, Y, g:i A') : $serviceRequest->created_at->format('F j, Y, g:i A'),
                         ]);
                     })
                     ->toArray()
@@ -112,8 +105,8 @@ class GetServiceRequestsController extends Controller
                 'statusName' => $serviceRequest->status?->name,
                 'statusColor' => $serviceRequest->status?->color->value,
                 'typeName' => $serviceRequest->priority?->type?->name,
-                'dateOpened' => $serviceRequest->created_at->format('m-d-Y g:i A'),
-                'lastUpdated' => $serviceRequest->updated_at->format('m-d-Y g:i A'),
+                'dateOpened' => $serviceRequest->created_at->format('F j, Y, g:i A'),
+                'lastUpdated' => $serviceRequest->updated_at->format('F j, Y, g:i A'),
             ],
             'acceptedMimeTypes' => (new ServiceRequestUpdate())->getMediaCollection('uploads')->acceptsMimeTypes,
             'serviceRequestUpdates' => $serviceRequest
@@ -126,7 +119,7 @@ class GetServiceRequestsController extends Controller
                         'id' => $serviceRequestUpdate->getKey(),
                         'update' => $serviceRequestUpdate->update,
                         'created_by_type' => $serviceRequestUpdate->created_by_type,
-                        'created_at' => $serviceRequestUpdate->created_at->format('m-d-Y g:i A'),
+                        'created_at' => $serviceRequestUpdate->created_at->format('F j, Y, g:i A'),
                         'media' => $serviceRequestUpdate->getUploadedMedia(),
                     ];
                 })
