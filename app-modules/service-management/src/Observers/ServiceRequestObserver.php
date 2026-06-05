@@ -96,7 +96,6 @@ class ServiceRequestObserver
                 new SendEducatableServiceRequestOpenedNotification($serviceRequest, $customerEmailTemplate)
             );
         }
-
     }
 
     public function saving(ServiceRequest $serviceRequest): void

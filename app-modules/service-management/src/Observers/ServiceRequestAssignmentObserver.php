@@ -151,7 +151,6 @@ class ServiceRequestAssignmentObserver
                 new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, $assignedManagerEmailTemplate, DatabaseChannel::class)
             );
         }
-
     }
 
     public function deleted(ServiceRequestAssignment $serviceRequestAssignment): void
