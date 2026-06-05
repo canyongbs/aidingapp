@@ -110,7 +110,9 @@ describe('Customer', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class);
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function ($notification) {
+            return is_null($notification->emailTemplate);
+        });
     });
 
     it('sends customer update notification with template when template exists', function () {
@@ -121,14 +123,16 @@ describe('Customer', function () {
         $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
 
         enablePreference($type, ServiceRequestEmailTemplateType::Update, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
-        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+        $template = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
             'type' => ServiceRequestEmailTemplateType::Update,
             'role' => ServiceRequestTypeEmailTemplateRole::Customer,
         ]);
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class);
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function ($notification) use ($template) {
+            return $notification->emailTemplate?->is($template);
+        });
     });
 
     it('sends customer update notification without template when no template exists', function () {
@@ -142,7 +146,9 @@ describe('Customer', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class);
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function ($notification) {
+            return is_null($notification->emailTemplate);
+        });
     });
 
     it('does not send customer update notification when preference is disabled', function () {
@@ -563,6 +569,10 @@ describe('Deduplication', function () {
 
         enablePreference($type, ServiceRequestEmailTemplateType::Update, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email);
         enablePreference($type, ServiceRequestEmailTemplateType::Update, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email, false);
+        $managerTemplate = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Update,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
@@ -570,5 +580,6 @@ describe('Deduplication', function () {
             ->filter(fn ($notification) => $notification->channel === MailChannel::class);
 
         expect($assignedManagerEmails)->toHaveCount(1);
+        expect($assignedManagerEmails->first()->emailTemplate?->is($managerTemplate))->toBeTrue();
     });
 });

@@ -108,7 +108,9 @@ describe('Customer', function () {
 
         $serviceRequest = createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class);
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class, function ($notification) {
+            return is_null($notification->emailTemplate);
+        });
     });
 
     it('sends customer created notification with template when template exists', function () {
@@ -116,14 +118,16 @@ describe('Customer', function () {
 
         $type = ServiceRequestType::factory()->create();
         enablePreference($type, ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
-        ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+        $template = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
             'type' => ServiceRequestEmailTemplateType::Created,
             'role' => ServiceRequestTypeEmailTemplateRole::Customer,
         ]);
 
         $serviceRequest = createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class);
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class, function ($notification) use ($template) {
+            return $notification->emailTemplate?->is($template);
+        });
     });
 
     it('sends customer created notification without template when no template exists', function () {
@@ -134,7 +138,9 @@ describe('Customer', function () {
 
         $serviceRequest = createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class);
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class, function ($notification) {
+            return is_null($notification->emailTemplate);
+        });
     });
 
     it('does not send customer created notification when preference is disabled', function () {
@@ -537,10 +543,18 @@ describe('Deduplication', function () {
 
         enablePreference($type, ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email);
         enablePreference($type, ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email, false);
+        $managerTemplate = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Created,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ]);
 
         createServiceRequestViaAction($type);
 
-        Notification::assertSentToTimes($assignedManager, ServiceRequestCreated::class, 1);
+        $assignedManagerEmails = Notification::sent($assignedManager, ServiceRequestCreated::class)
+            ->filter(fn ($notification) => $notification->channel === MailChannel::class);
+
+        expect($assignedManagerEmails)->toHaveCount(1);
+        expect($assignedManagerEmails->first()->emailTemplate?->is($managerTemplate))->toBeTrue();
     });
 });
 
