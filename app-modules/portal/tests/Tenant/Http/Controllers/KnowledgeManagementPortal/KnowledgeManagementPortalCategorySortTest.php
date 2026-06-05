@@ -44,7 +44,6 @@ beforeEach(function () {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
-
 });
 
 it('returns parent categories ordered by sort on the portal', function () {
