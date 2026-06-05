@@ -110,9 +110,10 @@ class AssignmentHistoryRelationManager extends RelationManager
                     ->description(fn (ServiceRequestAssignment $record): ?string => $userLine($record->user)),
                 TextColumn::make('assignedBy.name')
                     ->label('By')
-                    ->state(function(ServiceRequestAssignment $record) {
+                    ->state(function (ServiceRequestAssignment $record) {
                         /** @var User|SystemUser|null $assignBy */
                         $assignBy = $record->assignedBy;
+
                         if ($assignBy) {
                             return $assignBy->name;
                         }
