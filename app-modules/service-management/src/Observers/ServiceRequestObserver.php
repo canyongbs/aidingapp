@@ -52,7 +52,6 @@ use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosed
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpenedNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestStatusChangeNotification;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestClosed;
-use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
@@ -98,45 +97,6 @@ class ServiceRequestObserver
             );
         }
 
-        $managerEmailTemplate = $this->fetchTemplate(
-            $serviceRequest->priority->type,
-            ServiceRequestEmailTemplateType::Created,
-            ServiceRequestTypeEmailTemplateRole::Manager
-        );
-
-        $auditorEmailTemplate = $this->fetchTemplate(
-            $serviceRequest->priority->type,
-            ServiceRequestEmailTemplateType::Created,
-            ServiceRequestTypeEmailTemplateRole::Auditor
-        );
-
-        app(NotifyServiceRequestUsers::class)->execute(
-            $serviceRequest,
-            new ServiceRequestCreated($serviceRequest, $managerEmailTemplate, MailChannel::class),
-            $serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email),
-            false,
-        );
-
-        app(NotifyServiceRequestUsers::class)->execute(
-            $serviceRequest,
-            new ServiceRequestCreated($serviceRequest, $auditorEmailTemplate, MailChannel::class),
-            false,
-            $serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Email),
-        );
-
-        app(NotifyServiceRequestUsers::class)->execute(
-            $serviceRequest,
-            new ServiceRequestCreated($serviceRequest, $managerEmailTemplate, DatabaseChannel::class),
-            $serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification),
-            false,
-        );
-
-        app(NotifyServiceRequestUsers::class)->execute(
-            $serviceRequest,
-            new ServiceRequestCreated($serviceRequest, $auditorEmailTemplate, DatabaseChannel::class),
-            false,
-            $serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Notification),
-        );
     }
 
     public function saving(ServiceRequest $serviceRequest): void

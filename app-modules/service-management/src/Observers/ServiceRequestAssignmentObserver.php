@@ -48,7 +48,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Notifications\Concerns\FetchServiceRequestTemplate;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestAssignedNotification;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestAssigned;
-use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
 
@@ -153,23 +152,6 @@ class ServiceRequestAssignmentObserver
             );
         }
 
-        $assignedManagerCreatedEmailTemplate = $this->fetchTemplate(
-            $serviceRequestAssignment->serviceRequest->priority->type,
-            ServiceRequestEmailTemplateType::Created,
-            ServiceRequestTypeEmailTemplateRole::AssignedManager
-        );
-
-        if ($serviceRequestAssignment->serviceRequest->priority?->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email) ?? false) {
-            $serviceRequestAssignment->user->notify(
-                new ServiceRequestCreated($serviceRequestAssignment->serviceRequest, $assignedManagerCreatedEmailTemplate, MailChannel::class)
-            );
-        }
-
-        if ($serviceRequestAssignment->serviceRequest->priority?->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification) ?? false) {
-            $serviceRequestAssignment->user->notify(
-                new ServiceRequestCreated($serviceRequestAssignment->serviceRequest, $assignedManagerCreatedEmailTemplate, DatabaseChannel::class)
-            );
-        }
     }
 
     public function deleted(ServiceRequestAssignment $serviceRequestAssignment): void

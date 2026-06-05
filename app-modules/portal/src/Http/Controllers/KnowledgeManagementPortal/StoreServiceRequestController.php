@@ -41,8 +41,9 @@ use AidingApp\Form\Actions\GenerateSubmissibleValidation;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
-use AidingApp\ServiceManagement\Actions\AssignServiceRequestToDepartment;
+use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
@@ -54,7 +55,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use App\Http\Controllers\Controller;
 use Carbon\CarbonImmutable;
-use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -108,8 +108,6 @@ class StoreServiceRequestController extends Controller
             $this->storeClarifyingQuestions($request, $serviceRequest, $contact, $type, $updateUuids);
 
             $this->handleAiResolution($request, $serviceRequest, $contact, $type, $updateUuids);
-
-            $this->assignServiceRequest($serviceRequest);
 
             $this->dispatchFileUploads($data, $serviceRequest, $uploadsMediaCollection);
 
@@ -183,27 +181,16 @@ class StoreServiceRequestController extends Controller
             ->where('is_system_protected', true)
             ->firstOrFail();
 
-        $serviceRequest = new ServiceRequest([
-            'title' => $data->pull('Main.title'),
-            'close_details' => $data->pull('Main.description'),
-            'status_id' => $serviceRequestStatus->getKey(),
-            'status_updated_at' => CarbonImmutable::now(),
-        ]);
-
-        $serviceRequest->respondent()->associate($contact);
-        $serviceRequest->priority()->associate($priority);
-
-        $saved = $serviceRequest->save();
-
-        if (! $saved) {
-            report(new Exception('Failed to save Service Request: ' . json_encode($serviceRequest->attributesToArray())));
-
-            return null;
-        }
-
-        $serviceRequest->refresh();
-
-        return $serviceRequest;
+        return app(CreateServiceRequestAction::class)->execute(
+            ServiceRequestDataObject::fromData([
+                'type_id' => $priority->type->getKey(),
+                'priority_id' => $priority->getKey(),
+                'status_id' => $serviceRequestStatus->getKey(),
+                'respondent_id' => $contact->getKey(),
+                'title' => $data->pull('Main.title'),
+                'close_details' => $data->pull('Main.description'),
+            ])
+        );
     }
 
     /**
@@ -417,11 +404,6 @@ class StoreServiceRequestController extends Controller
             'created_by_id' => $serviceRequest->getKey(),
             'created_by_type' => $serviceRequest->getMorphClass(),
         ]);
-    }
-
-    protected function assignServiceRequest(ServiceRequest $serviceRequest): void
-    {
-        app(AssignServiceRequestToDepartment::class)->execute($serviceRequest);
     }
 
     /**
