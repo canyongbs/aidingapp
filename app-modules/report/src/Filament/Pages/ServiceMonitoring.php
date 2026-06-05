@@ -38,8 +38,10 @@ namespace AidingApp\Report\Filament\Pages;
 
 use AidingApp\Report\Filament\Widgets\ServiceMonitorTable;
 use App\Enums\Feature;
+use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
+use BackedEnum;
 use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
@@ -48,7 +50,7 @@ class ServiceMonitoring extends Dashboard
 {
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
+    protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::ServiceDesk;
 
     protected static ?string $navigationLabel = 'Service Monitoring';
 
@@ -57,6 +59,8 @@ class ServiceMonitoring extends Dashboard
     protected static string $routePath = 'service-monitoring';
 
     protected static ?int $navigationSort = 70;
+
+    protected static string | BackedEnum | null $navigationIcon = '';
 
     public static function canAccess(): bool
     {

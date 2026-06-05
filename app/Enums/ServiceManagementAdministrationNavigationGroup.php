@@ -34,17 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace App\Enums;
 
-use App\Enums\NavigationGroup;
-use Filament\Clusters\Cluster;
-use UnitEnum;
+use Filament\Support\Contracts\HasLabel;
 
-class Communication extends Cluster
+enum ServiceManagementAdministrationNavigationGroup implements HasLabel
 {
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Settings;
+    case ServiceRequests;
 
-    protected static ?string $navigationLabel = 'Communication Settings';
+    case ChangeRequests;
 
-    protected static ?int $navigationSort = 80;
+    case ServiceLevels;
+
+    case EmailTemplates;
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::ServiceRequests => 'Service Requests',
+            self::ChangeRequests => 'Change Requests',
+            self::ServiceLevels => 'Service Levels',
+            self::EmailTemplates => 'Email Templates',
+        };
+    }
 }

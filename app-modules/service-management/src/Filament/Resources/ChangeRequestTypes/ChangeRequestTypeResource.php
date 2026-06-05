@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\Edit
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\ListChangeRequestTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\ViewChangeRequestType;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use App\Enums\ServiceManagementAdministrationNavigationGroup;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -57,7 +58,7 @@ class ChangeRequestTypeResource extends Resource
 
     protected static ?int $navigationSort = 40;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Change Requests';
+    protected static string | UnitEnum | null $navigationGroup = ServiceManagementAdministrationNavigationGroup::ChangeRequests;
 
     protected static ?string $navigationLabel = 'Types';
 

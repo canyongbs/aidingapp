@@ -40,8 +40,10 @@ use AidingApp\Report\Filament\Widgets\AssetsTable;
 use AidingApp\Report\Filament\Widgets\AssetStats;
 use AidingApp\Report\Filament\Widgets\RefreshWidget;
 use App\Enums\Feature;
+use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
+use BackedEnum;
 use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
@@ -50,7 +52,7 @@ class AssetManagement extends Dashboard
 {
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
+    protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::ServiceDesk;
 
     protected static ?string $navigationLabel = 'Asset Management';
 
@@ -59,6 +61,8 @@ class AssetManagement extends Dashboard
     protected static string $routePath = 'asset-management';
 
     protected static ?int $navigationSort = 40;
+
+    protected static string | BackedEnum | null $navigationIcon = '';
 
     protected string $cacheTag = 'report-asset-management';
 

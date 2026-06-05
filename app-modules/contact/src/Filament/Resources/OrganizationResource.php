@@ -42,6 +42,7 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganiza
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ManageContacts;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ViewOrganization;
 use AidingApp\Contact\Models\Organization;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use UnitEnum;
@@ -50,7 +51,7 @@ class OrganizationResource extends Resource
 {
     protected static ?string $model = Organization::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Clients';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Clients;
 
     protected static ?int $navigationSort = 10;
 

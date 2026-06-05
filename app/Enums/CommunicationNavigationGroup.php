@@ -34,17 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters;
+namespace App\Enums;
 
-use App\Enums\NavigationGroup;
-use Filament\Clusters\Cluster;
-use UnitEnum;
+use Filament\Support\Contracts\HasLabel;
 
-class Communication extends Cluster
+enum CommunicationNavigationGroup implements HasLabel
 {
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Settings;
+    case Communication;
 
-    protected static ?string $navigationLabel = 'Communication Settings';
-
-    protected static ?int $navigationSort = 80;
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::Communication => 'Communication',
+        };
+    }
 }

@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\List
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\ViewServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
 use UnitEnum;
 
@@ -49,7 +50,7 @@ class ServiceMonitoringResource extends Resource
 {
     protected static ?string $model = ServiceMonitoringTarget::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::ServiceDesk;
 
     protected static ?string $pluralModelLabel = 'service monitoring';
 
