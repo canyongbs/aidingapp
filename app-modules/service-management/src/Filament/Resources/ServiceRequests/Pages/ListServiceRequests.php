@@ -304,7 +304,7 @@ class ListServiceRequests extends ListRecords
     }
 
     /**
-     * @return array<int, array{name: string, value: string, disabled: bool, children: array<int, mixed>}>
+     * @return array<int, array{name: string, value: string, children: array<int, mixed>}>
      */
     public static function buildTypeTreeOptions(): array
     {
@@ -326,7 +326,6 @@ class ListServiceRequests extends ListRecords
             ->map(fn (ServiceRequestType $type) => [
                 'name' => $type->name,
                 'value' => $type->getKey(),
-                'disabled' => false,
                 'children' => [],
             ])
             ->all();
@@ -360,7 +359,6 @@ class ListServiceRequests extends ListRecords
             ->map(fn (ServiceRequestType $type) => [
                 'name' => $type->name,
                 'value' => $type->getKey(),
-                'disabled' => false,
                 'children' => [],
             ])
             ->all();
