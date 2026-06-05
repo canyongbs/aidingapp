@@ -107,7 +107,7 @@ class EditServiceRequestTypeNotifications extends EditRecord
 
         foreach (ServiceRequestEmailTemplateType::cases() as $templateType) {
             foreach (ServiceRequestTypeEmailTemplateRole::cases() as $templateRole) {
-                $eventSlug = $this->getEventSlug($templateType);
+                $eventSlug = $templateType->getEventSlug();
                 $roleSlug = $templateRole->value . 's';
 
                 foreach (ServiceRequestNotificationChannel::cases() as $channel) {
@@ -158,7 +158,7 @@ class EditServiceRequestTypeNotifications extends EditRecord
 
         foreach (ServiceRequestEmailTemplateType::cases() as $templateType) {
             foreach (ServiceRequestTypeEmailTemplateRole::cases() as $templateRole) {
-                $eventSlug = $this->getEventSlug($templateType);
+                $eventSlug = $templateType->getEventSlug();
                 $roleSlug = $templateRole->value . 's';
 
                 foreach (ServiceRequestNotificationChannel::cases() as $channel) {
@@ -197,11 +197,6 @@ class EditServiceRequestTypeNotifications extends EditRecord
         );
     }
 
-    private function getEventSlug(ServiceRequestEmailTemplateType $type): string
-    {
-        return $type->getEventSlug();
-    }
-
     /**
      * @return array<int, string>
      */
@@ -213,7 +208,7 @@ class EditServiceRequestTypeNotifications extends EditRecord
             $roleSlug = $templateRole->value . 's';
 
             foreach (ServiceRequestEmailTemplateType::cases() as $templateType) {
-                $eventSlug = $this->getEventSlug($templateType);
+                $eventSlug = $templateType->getEventSlug();
 
                 foreach (ServiceRequestNotificationChannel::cases() as $channel) {
                     $attributes[] = "is_{$roleSlug}_{$eventSlug}_{$channel->value}_enabled";
