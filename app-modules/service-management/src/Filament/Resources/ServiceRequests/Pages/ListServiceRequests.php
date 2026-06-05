@@ -184,9 +184,7 @@ class ListServiceRequests extends ListRecords
                             ->label('Type')
                             ->getTreeUsing(fn () => static::buildTypeTreeOptions())
                             ->multiple()
-                            ->placeholder('All')
-                            ->independent(true)
-                            ->expandSelected(true),
+                            ->placeholder('All'),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query->when(
                         ! empty($data['types']),
@@ -370,7 +368,6 @@ class ListServiceRequests extends ListRecords
         return [
             'name' => $category->name,
             'value' => 'category_' . $category->getKey(),
-            'disabled' => true,
             'children' => array_merge($childCategories, $childTypes),
         ];
     }
