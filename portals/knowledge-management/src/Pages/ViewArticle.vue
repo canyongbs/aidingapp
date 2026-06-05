@@ -33,6 +33,7 @@
 -->
 <script setup>
     import { ClockIcon, EyeIcon } from '@heroicons/vue/20/solid';
+    import { PaperClipIcon } from '@heroicons/vue/20/solid';
     import { HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/vue/24/solid';
     import DOMPurify from 'dompurify';
     import truncate from 'lodash/truncate';
@@ -205,6 +206,29 @@
         <template #breadcrumbs>
             <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="currentCrumb" />
         </template>
+
+        <PageCard v-if="article.attachments && article.attachments.length > 0">
+            <div class="max-w-5xl w-full mx-auto">
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Article Resources</h3>
+                <div class="divide-y divide-gray-200">
+                    <div
+                        v-for="(attachment, index) in article.attachments"
+                        :key="index"
+                        class="flex items-center gap-x-3 py-3"
+                    >
+                        <PaperClipIcon class="size-5 shrink-0 text-gray-400" aria-hidden="true" />
+                        <a
+                            :href="attachment.url"
+                            class="text-sm font-medium text-brand-600 hover:text-brand-500 underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {{ attachment.name }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </PageCard>
 
         <PageCard>
             <div

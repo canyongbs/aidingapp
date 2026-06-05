@@ -140,6 +140,8 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('article_details');
+
+        $this->addMediaCollection('article_attachments');
     }
 
     public function setUpRichContent(): void

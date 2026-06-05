@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,24 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\KnowledgeBase\Http\Requests;
 
-use Spatie\LaravelData\Data;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use Illuminate\Foundation\Http\FormRequest;
 
-class KnowledgeBaseArticleData extends Data
+class KnowledgeBaseArticleMediaDownloadRequest extends FormRequest
 {
+    public function authorize(): bool
+    {
+        $media = $this->route('media');
+
+        if ($media->model_type !== (new KnowledgeBaseItem())->getMorphClass()) {
+            return false;
+        }
+
+        if ($media->collection_name !== 'article_attachments') {
+            return false;
+        }
+
+        $article = KnowledgeBaseItem::find($media->model_id);
+
+        if (! $article) {
+            return false;
+        }
+
+        if (! $article->public) {
+            return false;
+        }
+
+        return true;
+    }
+
     /**
-     * @param  array<int, array{name: string, url: string}>|null  $attachments
+     * @return array<string, array<string>>
      */
-    public function __construct(
-        public string $id,
-        public string $categorySlug,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-        public ?array $vote,
-        public bool $featured,
-        public ?array $attachments = null,
-    ) {}
+    public function rules(): array
+    {
+        return [];
+    }
 }
