@@ -37,11 +37,16 @@
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Department\Models\Department;
+use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Symfony\Component\Console\Command\Command;
 
 function columnNativeType(string $table, string $column): ?string
@@ -209,6 +214,94 @@ describe('2026_06_04_203158_add_citext_unique_to_knowledge_base_statuses_name', 
                     ->and(DB::table('knowledge_base_articles')->where('id', $articleOnMiddle->id)->value('status_id'))->toBe($latest->id)
                     ->and(DB::table('knowledge_base_articles')->where('id', $articleOnLatest->id)->value('status_id'))->toBe($latest->id)
                     ->and(DB::table('knowledge_base_articles')->where('id', $articleOnUnrelated->id)->value('status_id'))->toBe($unrelated->id);
+            }
+        );
+    });
+});
+
+describe('2026_06_05_193725_add_citext_unique_to_service_request_statuses_name', function () {
+    it('merges same-classification duplicates, suffix-renames cross-classification duplicates, reassigns relations and converts the name column to citext', function () {
+        isolatedMigration(
+            '2026_06_05_193725_add_citext_unique_to_service_request_statuses_name',
+            function () {
+                $division = Division::factory()->create();
+
+                // Same name + same classification: should merge, keeping the latest (system protected) row.
+                $olderTriage = ServiceRequestStatus::factory()->systemProtected()->create([
+                    'name' => 'Triage',
+                    'classification' => SystemServiceRequestClassification::Open,
+                    'created_at' => now()->subMinutes(5),
+                ]);
+                $newerTriage = ServiceRequestStatus::factory()->systemProtected()->create([
+                    'name' => 'triage',
+                    'classification' => SystemServiceRequestClassification::Open,
+                    'created_at' => now()->subMinute(),
+                ]);
+
+                $serviceRequest = ServiceRequest::factory()->create([
+                    'status_id' => $olderTriage->id,
+                    'division_id' => $division->id,
+                ]);
+                // Insert the assignment directly to bypass the manager-validation observer; the
+                // migration reassigns this FK at the database level regardless.
+                $assignmentId = Str::orderedUuid()->toString();
+                DB::table('service_request_assignments')->insert([
+                    'id' => $assignmentId,
+                    'service_request_id' => $serviceRequest->id,
+                    'user_id' => User::factory()->create()->id,
+                    'assigned_at' => now(),
+                    'service_request_status_id' => $olderTriage->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // History records the loser status id inside both JSON value columns.
+                $historyId = Str::orderedUuid()->toString();
+                DB::table('service_request_histories')->insert([
+                    'id' => $historyId,
+                    'service_request_id' => $serviceRequest->id,
+                    'original_values' => json_encode(['status_id' => $olderTriage->id]),
+                    'new_values' => json_encode(['status_id' => $olderTriage->id]),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // Same name + different classification: should be suffix-renamed, not merged.
+                $openBacklog = ServiceRequestStatus::factory()->create([
+                    'name' => 'Backlog',
+                    'classification' => SystemServiceRequestClassification::Open,
+                    'created_at' => now()->subMinutes(2),
+                ]);
+                $closedBacklog = ServiceRequestStatus::factory()->create([
+                    'name' => 'Backlog',
+                    'classification' => SystemServiceRequestClassification::Closed,
+                    'created_at' => now()->subMinute(),
+                ]);
+
+                $migrate = Artisan::call('migrate', [
+                    '--path' => 'app-modules/service-management/database/migrations/2026_06_05_193725_add_citext_unique_to_service_request_statuses_name.php',
+                ]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                // Same-classification duplicates merged: latest kept, older soft deleted, relations reassigned.
+                expect(columnNativeType('service_request_statuses', 'name'))->toBe('citext')
+                    ->and(ServiceRequestStatus::withTrashed()->find($newerTriage->id)->deleted_at)->toBeNull()
+                    ->and(ServiceRequestStatus::withTrashed()->find($olderTriage->id)->deleted_at)->not->toBeNull()
+                    ->and($serviceRequest->fresh()->status_id)->toBe($newerTriage->id)
+                    ->and(DB::table('service_request_assignments')->where('id', $assignmentId)->value('service_request_status_id'))->toBe($newerTriage->id)
+                    ->and(ServiceRequestStatus::query()->whereRaw('LOWER(name) = ?', ['triage'])->count())->toBe(1);
+
+                // History JSON status_id references are repointed from the loser to the kept status.
+                $history = DB::table('service_request_histories')->where('id', $historyId)->first();
+                expect(json_decode($history->original_values, true)['status_id'])->toBe($newerTriage->id)
+                    ->and(json_decode($history->new_values, true)['status_id'])->toBe($newerTriage->id);
+
+                // Cross-classification duplicates preserved, but disambiguated by suffix.
+                expect($closedBacklog->fresh()->name)->toBe('Backlog')
+                    ->and($openBacklog->fresh()->name)->toBe('Backlog-2')
+                    ->and($closedBacklog->fresh()->deleted_at)->toBeNull()
+                    ->and($openBacklog->fresh()->deleted_at)->toBeNull();
             }
         );
     });

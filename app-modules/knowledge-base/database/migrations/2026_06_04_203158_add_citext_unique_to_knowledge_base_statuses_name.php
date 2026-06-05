@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\KnowledgeBaseStatusNameUniquenessFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -50,9 +49,8 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             /*
-             * TODO: KnowledgeBaseStatusNameUniquenessFeature cleanup — once this migration has run in all environments:
+             * TODO: KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature cleanup — once this migration has run in all environments:
              * - Remove the $this->mergeDuplicates() call below and the mergeDuplicates() helper method
-             * - Inline (or otherwise resolve) the KnowledgeBaseStatusNameUniquenessFeature::activate() call when the flag class is deleted
              * - Keep the citext column conversion and the unique index — those are permanent
              */
             $this->mergeDuplicates();
@@ -63,15 +61,11 @@ return new class () extends Migration {
                 $table->uniqueIndex($this->column, 'knowledge_base_statuses_name_unique')
                     ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
-
-            KnowledgeBaseStatusNameUniquenessFeature::activate();
         });
     }
 
     public function down(): void
     {
-        KnowledgeBaseStatusNameUniquenessFeature::deactivate();
-
         DB::statement('DROP INDEX IF EXISTS knowledge_base_statuses_name_unique');
 
         DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");

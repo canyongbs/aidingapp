@@ -38,7 +38,7 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBa
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages\EditKnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseStatuses\RequestFactories\EditKnowledgeBaseStatusRequestFactory;
-use App\Features\KnowledgeBaseStatusNameUniquenessFeature;
+use App\Features\KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -142,7 +142,7 @@ test('EditKnowledgeBaseStatus is gated with proper feature access control', func
 });
 
 test('EditKnowledgeBaseStatus prevents renaming to a case-insensitive duplicate name', function () {
-    KnowledgeBaseStatusNameUniquenessFeature::activate();
+    KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::activate();
 
     $user = User::factory()->create();
     $user->givePermissionTo('settings.view-any');
@@ -164,7 +164,7 @@ test('EditKnowledgeBaseStatus prevents renaming to a case-insensitive duplicate 
 });
 
 test('EditKnowledgeBaseStatus allows saving a status without changing its name', function () {
-    KnowledgeBaseStatusNameUniquenessFeature::activate();
+    KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::activate();
 
     $user = User::factory()->create();
     $user->givePermissionTo('settings.view-any');

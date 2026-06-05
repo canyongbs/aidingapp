@@ -38,7 +38,7 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBa
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages\CreateKnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseStatuses\RequestFactories\CreateKnowledgeBaseStatusRequestFactory;
-use App\Features\KnowledgeBaseStatusNameUniquenessFeature;
+use App\Features\KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Database\QueryException;
@@ -128,7 +128,7 @@ test('CreateKnowledgeBaseStatus is gated with proper feature access control', fu
 });
 
 test('CreateKnowledgeBaseStatus prevents creating a case-insensitive duplicate name', function () {
-    KnowledgeBaseStatusNameUniquenessFeature::activate();
+    KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::activate();
 
     $user = User::factory()->create();
     $user->givePermissionTo('settings.view-any');
@@ -147,7 +147,7 @@ test('CreateKnowledgeBaseStatus prevents creating a case-insensitive duplicate n
 });
 
 test('CreateKnowledgeBaseStatus allows reusing the name of a soft deleted status', function () {
-    KnowledgeBaseStatusNameUniquenessFeature::activate();
+    KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::activate();
 
     $user = User::factory()->create();
     $user->givePermissionTo('settings.view-any');
@@ -166,7 +166,7 @@ test('CreateKnowledgeBaseStatus allows reusing the name of a soft deleted status
 });
 
 test('CreateKnowledgeBaseStatus does not apply the unique form rule when the feature is disabled', function () {
-    KnowledgeBaseStatusNameUniquenessFeature::deactivate();
+    KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::deactivate();
 
     $user = User::factory()->create();
     $user->givePermissionTo('settings.view-any');
