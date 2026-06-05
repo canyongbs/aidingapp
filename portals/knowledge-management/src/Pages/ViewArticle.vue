@@ -32,8 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ClockIcon, EyeIcon } from '@heroicons/vue/20/solid';
-    import { PaperClipIcon } from '@heroicons/vue/20/solid';
+    import { ClockIcon, EyeIcon, PaperClipIcon } from '@heroicons/vue/20/solid';
     import { HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/vue/24/solid';
     import DOMPurify from 'dompurify';
     import truncate from 'lodash/truncate';
