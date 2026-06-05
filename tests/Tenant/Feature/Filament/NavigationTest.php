@@ -198,6 +198,6 @@ test('Dashboard subclasses inside clusters must explicitly declare $navigationIc
         . "When \$navigationIcon is null on a Dashboard subclass, the parent's getNavigationIcon() falls back to a home icon, "
         . 'which leaks into the cluster sub-nav. '
         . "Either suppress it (`protected static string | BackedEnum | null \$navigationIcon = '';`) "
-        . "or set a deliberate icon."
+        . 'or set a deliberate icon.'
     );
 });
