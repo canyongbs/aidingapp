@@ -61,7 +61,11 @@
         },
     });
 
-    defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage']);
+    defineEmits({
+        fetchNextPage: () => true,
+        fetchPreviousPage: () => true,
+        fetchPage: (page) => typeof page === 'number',
+    });
 </script>
 
 <template>
@@ -78,16 +82,14 @@
             v-if="lastPage !== null && totalItems !== null"
             :currentPage="currentPage"
             :lastPage="lastPage"
-            :fromArticle="fromItem"
-            :toArticle="toItem"
-            :totalArticles="totalItems"
+            :fromItem="fromItem"
+            :toItem="toItem"
+            :totalItems="totalItems"
             @fetchNextPage="$emit('fetchNextPage')"
             @fetchPreviousPage="$emit('fetchPreviousPage')"
             @fetchPage="(page) => $emit('fetchPage', page)"
         />
 
-        <div v-if="$slots.footer">
-            <slot name="footer" />
-        </div>
+        <slot name="footer" />
     </div>
 </template>

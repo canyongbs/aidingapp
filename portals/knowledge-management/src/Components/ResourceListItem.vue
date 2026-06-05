@@ -37,20 +37,18 @@
     defineProps({
         to: {
             type: [Object, String],
-            default: null,
+            required: true,
         },
     });
 </script>
 
 <template>
     <li>
-        <component
-            :is="to ? 'router-link' : 'div'"
-            :to="to || undefined"
-            class="flex items-start px-6 py-3 text-sm text-gray-700 transition duration-75"
-            :class="to ? 'group hover:bg-gray-50' : ''"
+        <router-link
+            :to="to"
+            class="group flex items-center px-6 py-3 text-sm text-gray-700 transition duration-75 hover:bg-gray-50"
         >
-            <div v-if="$slots.icon" class="mr-3 shrink-0 self-center">
+            <div v-if="$slots.icon" class="mr-3 shrink-0">
                 <slot name="icon" />
             </div>
             <div class="flex-1 min-w-0">
@@ -62,13 +60,12 @@
                     <slot name="description" />
                 </p>
             </div>
-            <div v-if="$slots.badge" class="ml-3 shrink-0 self-start pt-0.5">
+            <div v-if="$slots.badge" class="ml-3 shrink-0">
                 <slot name="badge" />
             </div>
             <ChevronRightIcon
-                v-if="to"
-                class="ml-2 shrink-0 size-5 self-center text-gray-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
+                class="ml-2 shrink-0 size-5 text-gray-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
             />
-        </component>
+        </router-link>
     </li>
 </template>

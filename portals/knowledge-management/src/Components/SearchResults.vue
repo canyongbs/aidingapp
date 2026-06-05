@@ -69,15 +69,15 @@
             type: Number,
             required: true,
         },
-        fromArticle: {
+        fromItem: {
             type: Number,
             required: true,
         },
-        toArticle: {
+        toItem: {
             type: Number,
             required: true,
         },
-        totalArticles: {
+        totalItems: {
             type: Number,
             required: true,
         },
@@ -133,9 +133,9 @@
                 <Pagination
                     :currentPage="currentPage"
                     :lastPage="lastPage"
-                    :fromArticle="fromArticle"
-                    :toArticle="toArticle"
-                    :totalArticles="totalArticles"
+                    :fromItem="fromItem"
+                    :toItem="toItem"
+                    :totalItems="totalItems"
                     @fetchNextPage="fetchNextPage"
                     @fetchPreviousPage="fetchPreviousPage"
                     @fetchPage="fetchPage"
