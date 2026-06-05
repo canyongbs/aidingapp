@@ -102,11 +102,15 @@ class ServiceRequestAssignmentObserver
             ServiceRequestTypeEmailTemplateRole::Auditor
         );
 
+        $shouldExcludeAssignedUserFromEmail = $serviceRequestAssignment->serviceRequest->priority?->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email) ?? false;
+        $shouldExcludeAssignedUserFromNotification = $serviceRequestAssignment->serviceRequest->priority?->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification) ?? false;
+
         app(NotifyServiceRequestUsers::class)->execute(
             $serviceRequestAssignment->serviceRequest,
             new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, $managerEmailTemplate, MailChannel::class),
             $serviceRequestAssignment->serviceRequest->priority?->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email) ?? false,
             false,
+            $shouldExcludeAssignedUserFromEmail ? $serviceRequestAssignment->user : null,
         );
 
         app(NotifyServiceRequestUsers::class)->execute(
@@ -114,6 +118,7 @@ class ServiceRequestAssignmentObserver
             new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, $managerEmailTemplate, DatabaseChannel::class),
             $serviceRequestAssignment->serviceRequest->priority?->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification) ?? false,
             false,
+            $shouldExcludeAssignedUserFromNotification ? $serviceRequestAssignment->user : null,
         );
 
         app(NotifyServiceRequestUsers::class)->execute(

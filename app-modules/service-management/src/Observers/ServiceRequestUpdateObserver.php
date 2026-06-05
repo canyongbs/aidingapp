@@ -96,11 +96,17 @@ class ServiceRequestUpdateObserver
             ServiceRequestTypeEmailTemplateRole::Auditor
         );
 
+        $assignedUser = $serviceRequestUpdate->serviceRequest->assignedTo?->user;
+
+        $shouldExcludeAssignedUserFromEmail = $assignedUser && ($serviceRequestUpdate->serviceRequest->priority?->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Update, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email) ?? false);
+        $shouldExcludeAssignedUserFromNotification = $assignedUser && ($serviceRequestUpdate->serviceRequest->priority?->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Update, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification) ?? false);
+
         app(NotifyServiceRequestUsers::class)->execute(
             $serviceRequestUpdate->serviceRequest,
             new ServiceRequestUpdated($serviceRequestUpdate, $managerEmailTemplate, MailChannel::class),
             $serviceRequestUpdate->serviceRequest->priority?->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Update, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email) ?? false,
             false,
+            $shouldExcludeAssignedUserFromEmail ? $assignedUser : null,
         );
 
         app(NotifyServiceRequestUsers::class)->execute(
@@ -115,6 +121,7 @@ class ServiceRequestUpdateObserver
             new ServiceRequestUpdated($serviceRequestUpdate, $managerEmailTemplate, DatabaseChannel::class),
             $serviceRequestUpdate->serviceRequest->priority?->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Update, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification) ?? false,
             false,
+            $shouldExcludeAssignedUserFromNotification ? $assignedUser : null,
         );
 
         app(NotifyServiceRequestUsers::class)->execute(
@@ -130,7 +137,7 @@ class ServiceRequestUpdateObserver
             ServiceRequestTypeEmailTemplateRole::AssignedManager
         );
 
-        if ($assignedUser = $serviceRequestUpdate->serviceRequest->assignedTo?->user) {
+        if ($assignedUser) {
             if ($serviceRequestUpdate->serviceRequest->priority?->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Update, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email) ?? false) {
                 $assignedUser->notify(new ServiceRequestUpdated($serviceRequestUpdate, $assignedManagerUpdateEmailTemplate, MailChannel::class));
             }
