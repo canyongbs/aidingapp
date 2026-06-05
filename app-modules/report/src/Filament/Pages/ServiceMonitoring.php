@@ -38,7 +38,7 @@ namespace AidingApp\Report\Filament\Pages;
 
 use AidingApp\Report\Filament\Widgets\ServiceMonitorTable;
 use App\Enums\Feature;
-use App\Enums\NavigationGroup;
+use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use BackedEnum;
@@ -50,7 +50,7 @@ class ServiceMonitoring extends Dashboard
 {
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::ServiceDesk;
+    protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::ServiceDesk;
 
     protected static ?string $navigationLabel = 'Service Monitoring';
 

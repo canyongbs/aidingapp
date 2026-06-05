@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Filament\Resources\SLAs\Pages\EditSla;
 use AidingApp\ServiceManagement\Filament\Resources\SLAs\Pages\ListSlas;
 use AidingApp\ServiceManagement\Filament\Resources\SLAs\RelationManagers\ServiceRequestPrioritiesRelationManager;
 use AidingApp\ServiceManagement\Models\Sla;
+use App\Enums\ServiceManagementAdministrationNavigationGroup;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use App\Filament\Forms\Components\SecondsDurationInput;
 use Filament\Forms\Components\Textarea;
@@ -59,7 +60,7 @@ class SlaResource extends Resource
 
     protected static ?string $pluralModelLabel = 'SLAs';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Levels';
+    protected static string | UnitEnum | null $navigationGroup = ServiceManagementAdministrationNavigationGroup::ServiceLevels;
 
     protected static ?string $navigationLabel = 'SLAs';
 

@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\ListServiceRequestStatuses;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\ViewServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Enums\ServiceManagementAdministrationNavigationGroup;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
@@ -54,7 +55,7 @@ class ServiceRequestStatusResource extends Resource
 
     protected static ?int $navigationSort = 20;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Requests';
+    protected static string | UnitEnum | null $navigationGroup = ServiceManagementAdministrationNavigationGroup::ServiceRequests;
 
     protected static ?string $navigationLabel = 'Statuses';
 

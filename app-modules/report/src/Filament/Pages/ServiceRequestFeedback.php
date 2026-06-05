@@ -41,7 +41,7 @@ use AidingApp\Report\Filament\Widgets\ServiceRequestFeedbackStats;
 use AidingApp\Report\Filament\Widgets\ServiceRequestFeedbackTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
-use App\Enums\NavigationGroup;
+use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use BackedEnum;
@@ -61,7 +61,7 @@ class ServiceRequestFeedback extends Dashboard
 
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::ServiceDesk;
+    protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::ServiceDesk;
 
     protected static ?string $navigationLabel = 'CSAT/NPS';
 

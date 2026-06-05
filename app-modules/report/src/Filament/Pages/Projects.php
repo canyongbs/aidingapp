@@ -37,7 +37,7 @@
 namespace AidingApp\Report\Filament\Pages;
 
 use App\Enums\Feature;
-use App\Enums\NavigationGroup;
+use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use BackedEnum;
@@ -49,7 +49,7 @@ class Projects extends Dashboard
 {
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Projects;
+    protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::Projects;
 
     protected static ?string $navigationLabel = 'Projects';
 

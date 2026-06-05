@@ -38,6 +38,8 @@ use AidingApp\Authorization\Models\Role;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Facades\Filament;
+use Filament\Pages\Dashboard;
+use Filament\Support\Contracts\HasIcon;
 use Illuminate\Support\Arr;
 
 use function Pest\Laravel\actingAs;
@@ -104,4 +106,98 @@ test('navigation items in labeled groups must not have an icon, while items in t
             }
         }
     }
+});
+
+test('cluster sub-navigation groups must be defined via a dedicated enum, never a string literal', function () {
+    $clusters = Filament::getCurrentOrDefaultPanel()->getClusters();
+
+    expect($clusters)->not()->toBeEmpty();
+
+    $offenders = [];
+
+    foreach ($clusters as $clusterClass) {
+        foreach ($clusterClass::getClusteredComponents() as $component) {
+            $group = $component::getNavigationGroup();
+
+            if ($group === null) {
+                continue;
+            }
+
+            if (is_string($group)) {
+                $offenders[] = "  - {$component} (in {$clusterClass}) uses string '{$group}'";
+            }
+        }
+    }
+
+    expect($offenders)->toBeEmpty(
+        "The following clustered components use a string literal for \$navigationGroup:\n"
+        . implode("\n", $offenders) . "\n\n"
+        . 'Cluster sub-group names must be defined via a dedicated HasLabel-only enum '
+        . '(e.g. ReportLibraryNavigationGroup, ServiceManagementAdministrationNavigationGroup, CommunicationNavigationGroup) '
+        . 'so the convention is type-safe and discoverable. '
+        . 'Either reuse an existing cluster enum or add a new case / new enum for this cluster.'
+    );
+});
+
+test('cluster sub-navigation must use a HasLabel-only enum, never an enum that carries icons', function () {
+    $clusters = Filament::getCurrentOrDefaultPanel()->getClusters();
+
+    expect($clusters)->not()->toBeEmpty();
+
+    $offenders = [];
+
+    foreach ($clusters as $clusterClass) {
+        foreach ($clusterClass::getClusteredComponents() as $component) {
+            $group = $component::getNavigationGroup();
+
+            if (! $group instanceof UnitEnum) {
+                continue;
+            }
+
+            if ($group instanceof HasIcon) {
+                $offenders[] = "  - {$component} (in {$clusterClass}) uses " . $group::class . "::{$group->name}";
+            }
+        }
+    }
+
+    expect($offenders)->toBeEmpty(
+        "The following clustered components use a sub-group enum that implements HasIcon:\n"
+        . implode("\n", $offenders) . "\n\n"
+        . 'Cluster sub-group enums must implement HasLabel only — using the main NavigationGroup enum '
+        . '(or any enum with HasIcon) renders an icon next to the sub-group heading in the cluster sub-nav, '
+        . 'inconsistent with sibling sub-groups. Use a dedicated HasLabel-only enum (e.g. ReportLibraryNavigationGroup) instead.'
+    );
+});
+
+test('Dashboard subclasses inside clusters must explicitly declare $navigationIcon to suppress the Dashboard home-icon fallback', function () {
+    $clusters = Filament::getCurrentOrDefaultPanel()->getClusters();
+
+    expect($clusters)->not()->toBeEmpty();
+
+    $offenders = [];
+
+    foreach ($clusters as $clusterClass) {
+        foreach ($clusterClass::getClusteredComponents() as $component) {
+            if (! is_subclass_of($component, Dashboard::class)) {
+                continue;
+            }
+
+            $iconValue = (new ReflectionClass($component))
+                ->getProperty('navigationIcon')
+                ->getValue();
+
+            if ($iconValue === null) {
+                $offenders[] = "  - {$component} (in {$clusterClass})";
+            }
+        }
+    }
+
+    expect($offenders)->toBeEmpty(
+        "The following Dashboard subclasses inside clusters do not explicitly declare \$navigationIcon:\n"
+        . implode("\n", $offenders) . "\n\n"
+        . "When \$navigationIcon is null on a Dashboard subclass, the parent's getNavigationIcon() falls back to a home icon, "
+        . 'which leaks into the cluster sub-nav. '
+        . "Either suppress it (`protected static string | BackedEnum | null \$navigationIcon = '';`) "
+        . "or set a deliberate icon."
+    );
 });

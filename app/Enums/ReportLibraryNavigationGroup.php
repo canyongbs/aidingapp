@@ -34,33 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Filament\Resources\EmailTemplates;
+namespace App\Enums;
 
-use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\CreateEmailTemplate;
-use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\EditEmailTemplate;
-use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\ListEmailTemplates;
-use AidingApp\Engagement\Models\EmailTemplate;
-use App\Enums\CommunicationNavigationGroup;
-use App\Filament\Clusters\Communication;
-use Filament\Resources\Resource;
-use UnitEnum;
+use Filament\Support\Contracts\HasLabel;
 
-class EmailTemplateResource extends Resource
+enum ReportLibraryNavigationGroup implements HasLabel
 {
-    protected static ?string $model = EmailTemplate::class;
+    case ServiceDesk;
 
-    protected static string | UnitEnum | null $navigationGroup = CommunicationNavigationGroup::Communication;
+    case Purchasing;
 
-    protected static ?int $navigationSort = 120;
+    case Projects;
 
-    protected static ?string $cluster = Communication::class;
-
-    public static function getPages(): array
+    public function getLabel(): string
     {
-        return [
-            'index' => ListEmailTemplates::route('/'),
-            'create' => CreateEmailTemplate::route('/create'),
-            'edit' => EditEmailTemplate::route('/{record}/edit'),
-        ];
+        return match ($this) {
+            self::ServiceDesk => 'Service Desk',
+            self::Purchasing => 'Purchasing',
+            self::Projects => 'Projects',
+        };
     }
 }
