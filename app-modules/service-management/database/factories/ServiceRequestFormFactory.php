@@ -34,31 +34,31 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages\ListServiceRequestForms;
-use App\Models\User;
-use App\Settings\LicenseSettings;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-it('is gated with proper access control', function () {
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->serviceManagement = false;
-    $settings->save();
+/**
+ * @extends Factory<ServiceRequestForm>
+ */
+class ServiceRequestFormFactory extends Factory
+{
+    public function definition(): array
+    {
+        return [
+            'description' => $this->faker->optional()->sentence(),
+            'service_request_type_id' => ServiceRequestType::factory(),
+            'is_wizard' => false,
+        ];
+    }
 
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    livewire(ListServiceRequestForms::class)->assertForbidden();
-
-    $user->givePermissionTo('settings.view-any');
-    $user->refresh();
-
-    livewire(ListServiceRequestForms::class)->assertForbidden();
-
-    $settings->data->addons->serviceManagement = true;
-    $settings->save();
-
-    livewire(ListServiceRequestForms::class)->assertOk();
-});
+    public function wizard(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'is_wizard' => true,
+            'content' => null,
+        ]);
+    }
+}

@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Form\Enums\Rounding;
+use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
@@ -51,7 +53,7 @@ beforeEach(function () {
 it('redirects unauthenticated users to the login page when accessing the preview-entry endpoint', function () {
     $type = ServiceRequestType::factory()->create();
 
-    $form = new ServiceRequestForm(['name' => 'Test Form']);
+    $form = new ServiceRequestForm();
     $form->type()->associate($type);
     $form->save();
 
@@ -68,7 +70,7 @@ it('is forbidden when service management is not enabled on the preview-entry end
 
     $type = ServiceRequestType::factory()->create();
 
-    $form = new ServiceRequestForm(['name' => 'Test Form']);
+    $form = new ServiceRequestForm();
     $form->type()->associate($type);
     $form->save();
 
@@ -84,7 +86,6 @@ it('always returns is_authenticated as false in preview mode regardless of the f
 
     // Form explicitly requires authentication
     $form = new ServiceRequestForm([
-        'name' => 'Auth Required Form',
         'is_authenticated' => true,
     ]);
     $form->type()->associate($type);
@@ -100,31 +101,12 @@ it('always returns is_authenticated as false in preview mode regardless of the f
     $response->assertJsonMissingPath('authentication_url');
 });
 
-it('always returns recaptcha_enabled as false in preview mode regardless of the form setting', function () {
-    $user = User::factory()->create();
-
-    $type = ServiceRequestType::factory()->create();
-
-    // Form explicitly has reCAPTCHA enabled
-    $form = new ServiceRequestForm([
-        'name' => 'Recaptcha Form',
-        'recaptcha_enabled' => true,
-    ]);
-    $form->type()->associate($type);
-    $form->save();
-
-    actingAs($user)
-        ->getJson(route('service-request-forms.preview-entry', ['serviceRequestForm' => $form]))
-        ->assertSuccessful()
-        ->assertJsonPath('recaptcha_enabled', false);
-});
-
 it('does not include a submission_url in the preview-entry response', function () {
     $user = User::factory()->create();
 
     $type = ServiceRequestType::factory()->create();
 
-    $form = new ServiceRequestForm(['name' => 'Test Form']);
+    $form = new ServiceRequestForm();
     $form->type()->associate($type);
     $form->save();
 
@@ -136,18 +118,58 @@ it('does not include a submission_url in the preview-entry response', function (
         ->assertJsonMissingPath('submission_url');
 });
 
-it('returns the form name and schema in the preview-entry response', function () {
+it('inherits the rounding from the portal settings in the preview', function () {
     $user = User::factory()->create();
 
     $type = ServiceRequestType::factory()->create();
 
-    $form = new ServiceRequestForm(['name' => 'My Preview Form']);
+    $form = new ServiceRequestForm();
     $form->type()->associate($type);
     $form->save();
+
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_rounding = Rounding::Full;
+    $portalSettings->save();
 
     actingAs($user)
         ->getJson(route('service-request-forms.preview-entry', ['serviceRequestForm' => $form]))
         ->assertSuccessful()
-        ->assertJsonPath('name', 'My Preview Form')
+        ->assertJsonPath('rounding', Rounding::Full->value);
+});
+
+it('falls back to a default rounding when the portal setting is not configured', function () {
+    $user = User::factory()->create();
+
+    $type = ServiceRequestType::factory()->create();
+
+    $form = new ServiceRequestForm();
+    $form->type()->associate($type);
+    $form->save();
+
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_rounding = null;
+    $portalSettings->save();
+
+    actingAs($user)
+        ->getJson(route('service-request-forms.preview-entry', ['serviceRequestForm' => $form]))
+        ->assertSuccessful()
+        ->assertJsonPath('rounding', 'md');
+});
+
+it('returns the schema in the preview-entry response and does not display the form name', function () {
+    $user = User::factory()->create();
+
+    $type = ServiceRequestType::factory()->create();
+
+    $form = new ServiceRequestForm();
+    $form->type()->associate($type);
+    $form->save();
+
+    // The form belongs to a type and no longer carries a meaningful name, so the preview
+    // does not include one at all.
+    actingAs($user)
+        ->getJson(route('service-request-forms.preview-entry', ['serviceRequestForm' => $form]))
+        ->assertSuccessful()
+        ->assertJsonMissingPath('name')
         ->assertJsonStructure(['schema', 'primary_color']);
 });

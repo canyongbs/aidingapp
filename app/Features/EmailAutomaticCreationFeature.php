@@ -34,34 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages\CreateServiceRequestForm;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages\EditServiceRequestForm;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestForms\Pages\ListServiceRequestForms;
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
-use App\Filament\Clusters\ServiceManagementAdministration;
-use Filament\Resources\Resource;
-use UnitEnum;
+use App\Support\AbstractFeatureFlag;
 
-class ServiceRequestFormResource extends Resource
+class EmailAutomaticCreationFeature extends AbstractFeatureFlag
 {
-    protected static ?string $model = ServiceRequestForm::class;
-
-    protected static ?int $navigationSort = 30;
-
-    protected static string | UnitEnum | null $navigationGroup = 'Service Requests';
-
-    protected static ?string $navigationLabel = 'Forms';
-
-    protected static ?string $cluster = ServiceManagementAdministration::class;
-
-    public static function getPages(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'index' => ListServiceRequestForms::route('/'),
-            'create' => CreateServiceRequestForm::route('/create'),
-            'edit' => EditServiceRequestForm::route('/{record}/edit'),
-        ];
+        return false;
     }
 }
