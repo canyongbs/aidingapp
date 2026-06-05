@@ -34,27 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace App\Features;
 
-use Filament\Support\Contracts\HasLabel;
+use App\Support\AbstractFeatureFlag;
 
-enum ServiceRequestTypeEmailTemplateRole: string implements HasLabel
+class ServiceRequestTypeEmailPreferenceFeature extends AbstractFeatureFlag
 {
-    case Manager = 'manager';
-
-    case AssignedManager = 'assigned_manager';
-
-    case Auditor = 'auditor';
-
-    case Customer = 'customer';
-
-    public function getLabel(): string
+    public function resolve(mixed $scope): mixed
     {
-        return match ($this) {
-            self::Manager => 'All Managers',
-            self::AssignedManager => 'Assigned Manager',
-            self::Auditor => 'Auditors',
-            self::Customer => 'Customers',
-        };
+        return false;
     }
 }

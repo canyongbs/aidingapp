@@ -38,23 +38,17 @@ namespace AidingApp\ServiceManagement\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
-enum ServiceRequestTypeEmailTemplateRole: string implements HasLabel
+enum ServiceRequestNotificationChannel: string implements HasLabel
 {
-    case Manager = 'manager';
+    case Email = 'email';
 
-    case AssignedManager = 'assigned_manager';
-
-    case Auditor = 'auditor';
-
-    case Customer = 'customer';
+    case Notification = 'notification';
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::Manager => 'All Managers',
-            self::AssignedManager => 'Assigned Manager',
-            self::Auditor => 'Auditors',
-            self::Customer => 'Customers',
+            self::Email => 'Email',
+            self::Notification => 'App',
         };
     }
 }

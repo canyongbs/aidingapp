@@ -33,20 +33,34 @@
 --}}
 
 @php
-    use Illuminate\Support\HtmlString;
+    use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+    use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
+    use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 
     $isDisabled = $isDisabled();
     $statePath = $getStatePath();
+    $roleCount = count(ServiceRequestTypeEmailTemplateRole::cases());
+    $channelCount = count(ServiceRequestNotificationChannel::cases());
 @endphp
 
 <div class="divide-gray-950/5 grid xl:divide-y dark:divide-white/10">
+    <style>
+        @media (min-width: 1280px) {
+            .matrix-xl-roles {
+                grid-template-columns: repeat({{ $roleCount }}, minmax(0, 1fr));
+            }
+        }
+    </style>
     <div class="divide-gray-950/5 hidden xl:flex xl:divide-x xl:divide-y-0 dark:divide-white/10">
         <div class="flex-1"></div>
 
-        <div class="divide-gray-950/5 grid grid-cols-3 gap-0 divide-x text-xs dark:divide-white/10">
-            @foreach (['Managers', 'Auditors', 'Customers'] as $role)
+        <div
+            class="divide-gray-950/5 grid gap-0 divide-x text-xs dark:divide-white/10"
+            style="grid-template-columns: repeat({{ $roleCount }}, minmax(0, 1fr))"
+        >
+            @foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role)
                 <div class="flex w-32 items-center justify-center p-2 text-gray-950 dark:text-white">
-                    {{ $role }}
+                    {{ $role->getLabel() }}
                 </div>
             @endforeach
         </div>
@@ -55,11 +69,14 @@
     <div class="divide-gray-950/5 hidden xl:flex xl:divide-x xl:divide-y-0 dark:divide-white/10">
         <div class="flex-1"></div>
 
-        <div class="divide-gray-950/5 grid grid-cols-6 divide-x text-xs dark:divide-white/10">
-            @foreach (['Managers', 'Auditors', 'Customers'] as $role)
-                @foreach (['Email', 'App'] as $type)
+        <div
+            class="divide-gray-950/5 grid divide-x text-xs dark:divide-white/10"
+            style="grid-template-columns: repeat({{ $roleCount * $channelCount }}, minmax(0, 1fr))"
+        >
+            @foreach (ServiceRequestTypeEmailTemplateRole::cases() as $role)
+                @foreach (ServiceRequestNotificationChannel::cases() as $channel)
                     <div class="flex w-16 items-center justify-center p-2 text-center text-gray-950 dark:text-white">
-                        {{ $type }}
+                        {{ $channel->getLabel() }}
                     </div>
                 @endforeach
             @endforeach
@@ -67,43 +84,44 @@
     </div>
 
     <div class="divide-gray-950/5 grid divide-y dark:divide-white/10">
-        @foreach ([
-                'service_request_created' => 'Service Request Created',
-                'service_request_assigned' => 'Service Request Assigned',
-                'service_request_update' => 'Service Request Update',
-                'service_request_status_change' => 'Service Request Status Change',
-                'service_request_closed' => 'Service Request Closed',
-                'survey_response' => 'Survey Response'
-            ]
-            as $eventSlug => $event)
+        @foreach (ServiceRequestEmailTemplateType::cases() as $templateType)
+            @php
+                $eventSlug = $templateType->getEventSlug();
+            @endphp
+
             <div
                 class="divide-gray-950/5 flex flex-col divide-y xl:flex-row xl:divide-x xl:divide-y-0 dark:divide-white/10"
             >
                 <div
                     class="flex items-center px-3 py-2 text-sm text-gray-950 xl:flex-1 dark:text-white"
-                    @if ($eventSlug === 'service_request_status_change') x-tooltip.raw="Applies to all status changes other than those in a closed classification" @endif
+                    @if ($templateType === ServiceRequestEmailTemplateType::StatusChange)
+                        x-tooltip.raw="Applies to all status changes other than those in a closed classification"
+                    @endif
                 >
-                    {{ $event }}
+                    {{ $templateType->getViewLabel() }}
                 </div>
 
                 <div
-                    class="divide-gray-950/5 grid grid-cols-1 gap-3 px-3 py-2 text-sm xl:grid-cols-3 xl:gap-0 xl:divide-x xl:px-0 xl:py-0 dark:divide-white/10"
+                    class="matrix-xl-roles divide-gray-950/5 grid grid-cols-1 gap-3 px-3 py-2 text-sm xl:gap-0 xl:divide-x xl:px-0 xl:py-0 dark:divide-white/10"
                 >
-                    @foreach (['managers' => 'Managers', 'auditors' => 'Auditors', 'customers' => 'Customers'] as $roleSlug => $role)
+                    @foreach (ServiceRequestTypeEmailTemplateRole::cases() as $templateRole)
+                        @php
+                            $roleSlug = $templateRole->value . "s";
+                        @endphp
+
                         <div class="flex flex-col gap-1 xl:w-32">
-                            <div class="xl:hidden">
-                                {{ $role }}
-                            </div>
+                            <div class="xl:hidden">{{ $templateRole->getLabel() }}s</div>
 
                             <div
                                 class="divide-gray-950/5 grid h-full grid-cols-2 gap-1 xl:gap-0 xl:divide-x dark:divide-white/10"
                             >
-                                @foreach (['email' => 'Email', 'notification' => 'App'] as $typeSlug => $type)
+                                @foreach (ServiceRequestNotificationChannel::cases() as $channel)
                                     @php
-                                        $isSurveyResponse = $eventSlug === 'survey_response';
+                                        $isSurveyResponse = $templateType === ServiceRequestEmailTemplateType::SurveyResponse;
+                                        $typeSlug = $channel->value;
                                         $shouldShow = ! (
-                                            ($isSurveyResponse && in_array($roleSlug, ['managers', 'auditors'])) ||
-                                            ($isSurveyResponse && $roleSlug === 'customers' && $typeSlug === 'notification')
+                                            ($isSurveyResponse && in_array($roleSlug, ["managers", "auditors", "assigned_managers"])) ||
+                                            ($isSurveyResponse && $roleSlug === "customers" && $typeSlug === "notification")
                                         );
                                     @endphp
 
@@ -113,9 +131,9 @@
                                         >
                                             <x-filament::input.checkbox
                                                 :disabled="$isDisabled"
-                                                :wire:model="$statePath . '.is_' . $roleSlug . '_' . $eventSlug . '_' . $typeSlug . '_enabled'"
+                                                :wire:model="$statePath . '.is_' . $roleSlug . '_' . $eventSlug . '_' . $channel->value . '_enabled'"
                                             />
-                                            <span class="xl:sr-only">{{ $type }}</span>
+                                            <span class="xl:sr-only">{{ $channel->getLabel() }}</span>
                                         </label>
                                     @else
                                         <div class="xl:flex xl:w-16 xl:justify-center xl:px-3 xl:py-2"></div>

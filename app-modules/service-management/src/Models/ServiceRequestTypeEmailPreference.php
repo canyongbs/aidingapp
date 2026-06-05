@@ -34,27 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\ServiceManagement\Models;
 
-use Filament\Support\Contracts\HasLabel;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-enum ServiceRequestTypeEmailTemplateRole: string implements HasLabel
+/**
+ * @mixin IdeHelperServiceRequestTypeEmailPreference
+ */
+class ServiceRequestTypeEmailPreference extends Model
 {
-    case Manager = 'manager';
+    use HasUuids;
+    use SoftDeletes;
 
-    case AssignedManager = 'assigned_manager';
+    protected $table = 'service_request_type_email_preference';
 
-    case Auditor = 'auditor';
+    protected $fillable = [
+        'service_request_type_id',
+        'service_request_email_template_type',
+        'service_request_email_template_role',
+        'notification_channel',
+        'is_enabled',
+    ];
 
-    case Customer = 'customer';
+    protected $casts = [
+        'is_enabled' => 'boolean',
+        'service_request_email_template_type' => ServiceRequestEmailTemplateType::class,
+        'service_request_email_template_role' => ServiceRequestTypeEmailTemplateRole::class,
+        'notification_channel' => ServiceRequestNotificationChannel::class,
+    ];
 
-    public function getLabel(): string
+    /**
+     * @return BelongsTo<ServiceRequestType, $this>
+     */
+    public function serviceRequestType(): BelongsTo
     {
-        return match ($this) {
-            self::Manager => 'All Managers',
-            self::AssignedManager => 'Assigned Manager',
-            self::Auditor => 'Auditors',
-            self::Customer => 'Customers',
-        };
+        return $this->belongsTo(ServiceRequestType::class, 'service_request_type_id');
     }
 }
