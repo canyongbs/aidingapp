@@ -47,6 +47,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\WorkloadAssigner;
+use App\Features\ServiceRequestAssignmentByTypeFeature;
 use App\Models\User;
 use Filament\Notifications\Notification;
 
@@ -446,6 +447,7 @@ test('reclassify with default assignment updates priority_id', function () {
 });
 
 test('reclassify with override assignment creates manual assignment to selected user', function () {
+    ServiceRequestAssignmentByTypeFeature::activate();
     $originalType = ServiceRequestType::factory()->create([
         'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
     ]);
