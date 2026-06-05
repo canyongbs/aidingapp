@@ -50,6 +50,9 @@
             class="flex items-start px-6 py-3 text-sm text-gray-700 transition duration-75"
             :class="to ? 'group hover:bg-gray-50' : ''"
         >
+            <div v-if="$slots.icon" class="mr-3 shrink-0 self-center">
+                <slot name="icon" />
+            </div>
             <div class="flex-1 min-w-0">
                 <div class="flex items-baseline gap-2 flex-wrap">
                     <span class="font-medium text-gray-950"><slot name="primary" /></span>

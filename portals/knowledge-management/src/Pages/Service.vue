@@ -68,6 +68,9 @@
                 :key="serviceRequest.id"
                 :to="{ name: 'view-service-request', params: { serviceRequestId: serviceRequest.id } }"
             >
+                <template v-if="serviceRequest.icon" #icon>
+                    <div v-html="serviceRequest.icon" class="text-brand-700 [&>svg]:size-6" aria-hidden="true"></div>
+                </template>
                 <template #primary>{{ serviceRequest.title }}</template>
                 <template #secondary>{{ serviceRequest.number }}</template>
                 <template #description>Last Updated: {{ serviceRequest.updated_at }}</template>

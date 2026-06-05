@@ -32,8 +32,8 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { CheckCircleIcon, XCircleIcon } from '@heroicons/vue/20/solid';
     import { onMounted, ref } from 'vue';
+    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import LoadingSpinner from '../../../../resources/js/components/LoadingSpinner.vue';
     import Breadcrumbs from '../Components/Breadcrumbs.vue';
@@ -159,16 +159,13 @@
                         <h3 class="text-sm font-semibold" :class="severityTextColor(advisory.severity)">
                             {{ advisory.title }}
                         </h3>
-                        <CheckCircleIcon
-                            v-if="advisory.status?.classification === 'resolved'"
-                            class="size-5 shrink-0 text-green-500"
-                            :title="advisory.status.name"
-                        />
-                        <XCircleIcon
-                            v-else-if="advisory.status"
-                            class="size-5 shrink-0 text-red-400"
-                            :title="advisory.status.name"
-                        />
+                        <BaseBadge
+                            v-if="advisory.status"
+                            :color="advisory.status.classification === 'resolved' ? 'success' : 'danger'"
+                            class="shrink-0"
+                        >
+                            {{ advisory.status.name }}
+                        </BaseBadge>
                     </div>
                     <p
                         v-if="advisory.description"
