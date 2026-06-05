@@ -108,6 +108,32 @@ class ListServiceRequests extends ListRecords
                     ->view('filament.tables.columns.service-request.number')
                     ->searchable(['service_request_number', 'title'])
                     ->sortable(),
+                TextColumn::make('priority.type.name')
+                    ->label('Type')
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        $serviceRequest = new ServiceRequest();
+                        $priority = new ServiceRequestPriority();
+                        $type = new ServiceRequestType();
+
+                        return $query
+                            ->orderBy(
+                                $type->newQuery()
+                                    ->select($type->qualifyColumn('name'))
+                                    ->join(
+                                        $priority->getTable(),
+                                        $priority->qualifyColumn($priority->type()->getForeignKeyName()),
+                                        '=',
+                                        $type->qualifyColumn($type->getKeyName())
+                                    )
+                                    ->whereColumn(
+                                        $priority->qualifyColumn($priority->getKeyName()),
+                                        $serviceRequest->qualifyColumn($serviceRequest->priority()->getForeignKeyName())
+                                    )
+                                    ->limit(1),
+                                $direction
+                            );
+                    })
+                    ->toggleable(),
                 TextColumn::make('division.name')
                     ->label('Division')
                     ->searchable()
