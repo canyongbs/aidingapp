@@ -46,13 +46,18 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
+use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
+use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpenedNotification;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestStatusChangeNotification;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestClosed;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use App\Features\ServiceRequestTypeEmailPreferenceFeature;
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
+
+use function Pest\Laravel\actingAs;
 
 beforeEach(function () {
     ServiceRequestTypeEmailPreferenceFeature::activate();
@@ -75,6 +80,82 @@ if (! function_exists('enablePreference')) {
         ]);
     }
 }
+
+describe('Created → Customer', function () {
+    it('sends customer created notification when preference is enabled and status is Open', function () {
+        Notification::fake();
+
+        $type = ServiceRequestType::factory()->create();
+        enablePreference($type, ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class);
+    });
+
+    it('sends customer created notification with template when template exists', function () {
+        Notification::fake();
+
+        $type = ServiceRequestType::factory()->create();
+        enablePreference($type, ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
+        $template = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::Created,
+            'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+        ]);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class, function ($notification) use ($template) {
+            return $notification->emailTemplate?->is($template);
+        });
+    });
+
+    it('does not send customer created notification when preference is disabled', function () {
+        Notification::fake();
+
+        $type = ServiceRequestType::factory()->create();
+        enablePreference($type, ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email, false);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        Notification::assertNotSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class);
+    });
+
+    it('does not send customer created notification when status is not Open', function () {
+        Notification::fake();
+
+        $type = ServiceRequestType::factory()->create();
+        enablePreference($type, ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $inProgressStatus = ServiceRequestStatus::factory()->inProgress()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($inProgressStatus, 'status')
+            ->create();
+
+        Notification::assertNotSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class);
+    });
+});
 
 describe('Closed → Customer', function () {
     it('sends customer closed notification when preference is enabled and template exists', function () {
@@ -718,6 +799,137 @@ describe('Closed → Deduplication', function () {
 
         expect($assignedManagerEmails)->toHaveCount(1);
         expect($assignedManagerEmails->first()->emailTemplate?->is($managerTemplate))->toBeTrue();
+    });
+});
+
+describe('Closed → Feedback', function () {
+    it('sends feedback notification when preference is enabled and has_enabled_feedback_collection is true', function () {
+        Notification::fake();
+
+        $user = User::factory()->create();
+        actingAs($user);
+        Gate::define('feature-feedback-management', fn () => true);
+
+        $type = ServiceRequestType::factory()->create(['has_enabled_feedback_collection' => true]);
+        enablePreference($type, ServiceRequestEmailTemplateType::SurveyResponse, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($serviceRequest->respondent, SendClosedServiceFeedbackNotification::class);
+    });
+
+    it('sends feedback notification with template when preference is enabled and template exists', function () {
+        Notification::fake();
+
+        $user = User::factory()->create();
+        actingAs($user);
+        Gate::define('feature-feedback-management', fn () => true);
+
+        $type = ServiceRequestType::factory()->create(['has_enabled_feedback_collection' => true]);
+        enablePreference($type, ServiceRequestEmailTemplateType::SurveyResponse, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
+        $template = ServiceRequestTypeEmailTemplate::factory()->for($type, 'serviceRequestType')->create([
+            'type' => ServiceRequestEmailTemplateType::SurveyResponse,
+            'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+        ]);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($serviceRequest->respondent, SendClosedServiceFeedbackNotification::class, function ($notification) use ($template) {
+            return $notification->emailTemplate?->is($template);
+        });
+    });
+
+    it('sends feedback notification without template when preference is disabled', function () {
+        Notification::fake();
+
+        $user = User::factory()->create();
+        actingAs($user);
+        Gate::define('feature-feedback-management', fn () => true);
+
+        $type = ServiceRequestType::factory()->create(['has_enabled_feedback_collection' => true]);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($serviceRequest->respondent, SendClosedServiceFeedbackNotification::class, function ($notification) {
+            return is_null($notification->emailTemplate);
+        });
+    });
+
+    it('does not send feedback notification when has_enabled_feedback_collection is false', function () {
+        Notification::fake();
+
+        Gate::define('feature-feedback-management', fn () => true);
+
+        $type = ServiceRequestType::factory()->create(['has_enabled_feedback_collection' => false]);
+        enablePreference($type, ServiceRequestEmailTemplateType::SurveyResponse, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertNotSentTo($serviceRequest->respondent, SendClosedServiceFeedbackNotification::class);
+    });
+
+    it('does not send feedback notification when status does not change to closed', function () {
+        Notification::fake();
+
+        Gate::define('feature-feedback-management', fn () => true);
+
+        $type = ServiceRequestType::factory()->create(['has_enabled_feedback_collection' => true]);
+        enablePreference($type, ServiceRequestEmailTemplateType::SurveyResponse, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($closedStatus, 'status')
+            ->create();
+
+        Notification::fake();
+
+        $serviceRequest->title = 'Updated title';
+        $serviceRequest->save();
+
+        Notification::assertNotSentTo($serviceRequest->respondent, SendClosedServiceFeedbackNotification::class);
     });
 });
 

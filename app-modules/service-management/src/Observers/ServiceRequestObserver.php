@@ -150,9 +150,10 @@ class ServiceRequestObserver
         }
 
         if (
+            $serviceRequest->wasChanged('status_id') &&
             Gate::check(Feature::FeedbackManagement->getGateName()) &&
             $serviceRequest->priority->type->has_enabled_feedback_collection &&
-            $serviceRequest->status?->classification == SystemServiceRequestClassification::Closed &&
+            $serviceRequest->status?->classification === SystemServiceRequestClassification::Closed &&
             ! $serviceRequest->feedback()->count()
         ) {
             if ($serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::SurveyResponse, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email)) {

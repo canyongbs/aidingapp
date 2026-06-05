@@ -289,6 +289,25 @@ describe('Manager', function () {
             return $notification->channel === DatabaseChannel::class;
         });
     });
+
+    it('sends manager update email for internal updates when preference is enabled', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->managerUsers()->attach($manager);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Update, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email);
+
+        ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => true]);
+
+        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function ($notification) {
+            return $notification->channel === MailChannel::class;
+        });
+    });
 });
 
 describe('Auditor', function () {
@@ -394,6 +413,25 @@ describe('Auditor', function () {
 
         Notification::assertNotSentTo($auditor, ServiceRequestUpdated::class, function ($notification) {
             return $notification->channel === DatabaseChannel::class;
+        });
+    });
+
+    it('sends auditor update email for internal updates when preference is enabled', function () {
+        Notification::fake();
+
+        $auditor = User::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+        $type->auditorUsers()->attach($auditor);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->create();
+
+        enablePreference($type, ServiceRequestEmailTemplateType::Update, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Email);
+
+        ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => true]);
+
+        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function ($notification) {
+            return $notification->channel === MailChannel::class;
         });
     });
 });
