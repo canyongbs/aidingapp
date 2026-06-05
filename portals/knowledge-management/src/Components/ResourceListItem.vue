@@ -1,4 +1,4 @@
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,25 +30,42 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    import { ChevronRightIcon } from '@heroicons/vue/20/solid';
 
-@reference './portal.css';
+    defineProps({
+        to: {
+            type: [Object, String],
+            required: true,
+        },
+    });
+</script>
 
-.app-loading {
-    @apply h-screen flex items-center justify-center gap-2;
-}
-
-.app-loading-icon {
-    @apply h-5 w-5 shrink-0;
-    animation: spin 1s linear infinite;
-}
-
-.app-loading-label {
-    @apply font-medium;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
+<template>
+    <li>
+        <router-link
+            :to="to"
+            class="group flex items-center px-6 py-3 text-sm text-gray-700 transition duration-75 hover:bg-gray-50"
+        >
+            <div v-if="$slots.icon" class="mr-3 shrink-0">
+                <slot name="icon" />
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-baseline gap-2 flex-wrap">
+                    <span class="font-medium text-gray-950"><slot name="primary" /></span>
+                    <span v-if="$slots.secondary" class="text-gray-500 text-sm"><slot name="secondary" /></span>
+                </div>
+                <p v-if="$slots.description" class="mt-0.5 text-sm text-gray-500">
+                    <slot name="description" />
+                </p>
+            </div>
+            <div v-if="$slots.badge" class="ml-3 shrink-0">
+                <slot name="badge" />
+            </div>
+            <ChevronRightIcon
+                class="ml-2 shrink-0 size-5 text-gray-400 opacity-0 transition-all group-hover:translate-x-1 group-hover:opacity-100"
+            />
+        </router-link>
+    </li>
+</template>
