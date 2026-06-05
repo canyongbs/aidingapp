@@ -37,6 +37,7 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\Pages;
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\KnowledgeBaseCategoryResource;
+use App\Features\KnowledgeBaseCategorySortFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -73,6 +74,10 @@ class ListKnowledgeBaseCategories extends ListRecords
                     ->icon(fn (string $state): string => $state)
                     ->tooltip(fn (?string $state): ?string => filled($state) ? (string) str($state)->after('heroicon-o-')->headline() : null),
             ])
+            ->when(
+                KnowledgeBaseCategorySortFeature::active(),
+                fn (Table $table) => $table->defaultSort('sort')->reorderable('sort'),
+            )
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
