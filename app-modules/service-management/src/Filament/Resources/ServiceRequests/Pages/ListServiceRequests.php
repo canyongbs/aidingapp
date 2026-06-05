@@ -345,7 +345,7 @@ class ListServiceRequests extends ListRecords
      * @param  Collection<(int|string), mixed>  $categoriesByParent
      * @param  Collection<(int|string), mixed>  $typesByCategory
      *
-     * @return array{name: string, value: string, disabled: bool, children: array<int, mixed>}
+     * @return array{name: string, value: string, children: array<int, mixed>}
      */
     protected static function buildCategoryNode(
         ServiceRequestTypeCategory $category,
