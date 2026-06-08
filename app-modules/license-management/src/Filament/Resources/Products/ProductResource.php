@@ -42,6 +42,7 @@ use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ListProducts;
 use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ManageProductLicenses;
 use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ViewProduct;
 use AidingApp\LicenseManagement\Models\Product;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use UnitEnum;
@@ -50,7 +51,7 @@ class ProductResource extends Resource
 {
     protected static ?string $model = Product::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Purchasing';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Purchasing;
 
     protected static ?string $navigationLabel = 'License Management';
 

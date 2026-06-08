@@ -35,6 +35,7 @@
     import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/vue/16/solid';
     import axios from 'axios';
     import { ref } from 'vue';
+    import LoadingSpinner from '../../../../../resources/js/components/LoadingSpinner.vue';
     import { useServiceRequestTypes } from '../../composables/useServiceRequestTypes.js';
     import { getAuthHeaders } from '../../utils/token.js';
     import BaseTab from '../BaseTab.vue';
@@ -127,11 +128,7 @@
         <!-- Tree -->
         <div class="flex-1 overflow-y-auto px-4 py-2">
             <div v-if="isLoading" class="flex flex-col items-center justify-center h-full gap-3 text-gray-400">
-                <svg class="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                </svg>
-                <span class="text-sm">Loading request types…</span>
+                <LoadingSpinner label="Loading request types…" />
             </div>
 
             <div v-else-if="loadError" class="flex flex-col items-center justify-center h-full gap-2 text-center px-4">

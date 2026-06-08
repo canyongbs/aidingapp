@@ -41,6 +41,7 @@ use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\EditContract
 use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ListContracts;
 use AidingApp\ContractManagement\Filament\Resources\Contracts\Pages\ViewContract;
 use AidingApp\ContractManagement\Models\Contract;
+use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
 use UnitEnum;
 
@@ -48,7 +49,7 @@ class ContractResource extends Resource
 {
     protected static ?string $model = Contract::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Purchasing';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Purchasing;
 
     protected static ?string $navigationLabel = 'Contract Management';
 

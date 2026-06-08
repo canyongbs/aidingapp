@@ -36,12 +36,13 @@
 
 namespace App\Filament\Clusters;
 
+use App\Enums\NavigationGroup;
 use Filament\Clusters\Cluster;
 use UnitEnum;
 
 class ProductIntegrations extends Cluster
 {
-    protected static string | UnitEnum | null $navigationGroup = 'Global Admin';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::GlobalAdmin;
 
     protected static ?int $navigationSort = 50;
 }

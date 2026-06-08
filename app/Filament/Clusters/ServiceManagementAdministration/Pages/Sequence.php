@@ -37,6 +37,7 @@
 namespace App\Filament\Clusters\ServiceManagementAdministration\Pages;
 
 use App\Enums\Feature;
+use App\Enums\ServiceManagementAdministrationNavigationGroup;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use BackedEnum;
 use Filament\Pages\Page;
@@ -47,7 +48,7 @@ class Sequence extends Page
 {
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Requests';
+    protected static string | UnitEnum | null $navigationGroup = ServiceManagementAdministrationNavigationGroup::ServiceRequests;
 
     protected static ?int $navigationSort = 40;
 

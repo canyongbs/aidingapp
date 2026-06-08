@@ -41,6 +41,7 @@ use AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages\EditEngagement
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages\ListEngagementFiles;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages\ViewEngagementFile;
 use AidingApp\Engagement\Models\EngagementFile;
+use App\Enums\NavigationGroup;
 use BackedEnum;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
@@ -55,7 +56,7 @@ class EngagementFileResource extends Resource
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-duplicate';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Engagement Features';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::EngagementFeatures;
 
     protected static ?int $navigationSort = 7;
 

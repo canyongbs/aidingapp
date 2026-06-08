@@ -41,8 +41,10 @@ use AidingApp\Report\Filament\Widgets\ServiceRequestFeedbackStats;
 use AidingApp\Report\Filament\Widgets\ServiceRequestFeedbackTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
+use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
+use BackedEnum;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Pages\Dashboard;
@@ -59,7 +61,7 @@ class ServiceRequestFeedback extends Dashboard
 
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
+    protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::ServiceDesk;
 
     protected static ?string $navigationLabel = 'CSAT/NPS';
 
@@ -68,6 +70,8 @@ class ServiceRequestFeedback extends Dashboard
     protected static string $routePath = 'csat-nps';
 
     protected static ?int $navigationSort = 20;
+
+    protected static string | BackedEnum | null $navigationIcon = '';
 
     protected string $cacheTag = 'report-service-request-feedback';
 

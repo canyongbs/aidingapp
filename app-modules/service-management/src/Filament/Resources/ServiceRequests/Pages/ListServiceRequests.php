@@ -47,10 +47,13 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceReques
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Features\TeamRenameFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
 use App\Models\User;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -58,6 +61,7 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -104,6 +108,32 @@ class ListServiceRequests extends ListRecords
                     ->view('filament.tables.columns.service-request.number')
                     ->searchable(['service_request_number', 'title'])
                     ->sortable(),
+                TextColumn::make('priority.type.name')
+                    ->label('Type')
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        $serviceRequest = new ServiceRequest();
+                        $priority = new ServiceRequestPriority();
+                        $type = new ServiceRequestType();
+
+                        return $query
+                            ->orderBy(
+                                $type->newQuery()
+                                    ->select($type->qualifyColumn('name'))
+                                    ->join(
+                                        $priority->getTable(),
+                                        $priority->qualifyColumn($priority->type()->getForeignKeyName()),
+                                        '=',
+                                        $type->qualifyColumn($type->getKeyName())
+                                    )
+                                    ->whereColumn(
+                                        $priority->qualifyColumn($priority->getKeyName()),
+                                        $serviceRequest->qualifyColumn($serviceRequest->priority()->getForeignKeyName())
+                                    )
+                                    ->limit(1),
+                                $direction
+                            );
+                    })
+                    ->toggleable(),
                 TextColumn::make('division.name')
                     ->label('Division')
                     ->searchable()
@@ -147,6 +177,29 @@ class ListServiceRequests extends ListRecords
                     ->getOptionLabelFromRecordUsing(fn (ServiceRequestPriority $record) => "{$record->type->name} - {$record->name}")
                     ->multiple()
                     ->preload(),
+                Filter::make('type')
+                    ->label('Type')
+                    ->schema([
+                        SelectTree::make('types')
+                            ->label('Type')
+                            ->getTreeUsing(fn () => static::buildTypeTreeOptions())
+                            ->multiple()
+                            ->placeholder('All')
+                            ->independent(true)
+                            ->expandSelected(true),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        ! empty($data['types']),
+                        fn (Builder $query) => $query->whereHas(
+                            'priority',
+                            fn (Builder $query) => $query->whereIn('type_id', $data['types'])
+                        )
+                    ))
+                    ->indicateUsing(
+                        fn (array $data): ?string => empty($data['types'])
+                        ? null
+                        : 'Type: ' . ServiceRequestType::whereIn('id', $data['types'])->pluck('name')->implode(', ')
+                    ),
                 SelectFilter::make('status')
                     ->relationship('status', 'name')
                     ->default(
@@ -252,10 +305,73 @@ class ListServiceRequests extends ListRecords
             ->poll('60s');
     }
 
+    /**
+     * @return array<int, array{name: string, value: string, disabled: bool, children: array<int, mixed>}>
+     */
+    public static function buildTypeTreeOptions(): array
+    {
+        $categories = ServiceRequestTypeCategory::query()
+            ->orderBy('sort')
+            ->get()
+            ->groupBy('parent_id');
+
+        $types = ServiceRequestType::query()
+            ->orderBy('sort')
+            ->get()
+            ->groupBy('category_id');
+
+        $tree = collect($categories->get('', collect()))
+            ->map(fn (ServiceRequestTypeCategory $category) => static::buildCategoryNode($category, $categories, $types))
+            ->all();
+
+        $uncategorizedTypes = $types->get('', collect())
+            ->map(fn (ServiceRequestType $type) => [
+                'name' => $type->name,
+                'value' => $type->getKey(),
+                'disabled' => false,
+                'children' => [],
+            ])
+            ->all();
+
+        return array_merge($uncategorizedTypes, $tree);
+    }
+
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make(),
+        ];
+    }
+
+    /**
+     * @param  Collection<(int|string), mixed>  $categoriesByParent
+     * @param  Collection<(int|string), mixed>  $typesByCategory
+     *
+     * @return array{name: string, value: string, disabled: bool, children: array<int, mixed>}
+     */
+    protected static function buildCategoryNode(
+        ServiceRequestTypeCategory $category,
+        Collection $categoriesByParent,
+        Collection $typesByCategory,
+    ): array {
+        $childCategories = $categoriesByParent->get($category->getKey(), collect())
+            ->map(fn (ServiceRequestTypeCategory $child) => static::buildCategoryNode($child, $categoriesByParent, $typesByCategory))
+            ->all();
+
+        $childTypes = $typesByCategory->get($category->getKey(), collect())
+            ->map(fn (ServiceRequestType $type) => [
+                'name' => $type->name,
+                'value' => $type->getKey(),
+                'disabled' => false,
+                'children' => [],
+            ])
+            ->all();
+
+        return [
+            'name' => $category->name,
+            'value' => 'category_' . $category->getKey(),
+            'disabled' => true,
+            'children' => array_merge($childCategories, $childTypes),
         ];
     }
 }

@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages\E
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages\ListChangeRequestStatuses;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages\ViewChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
+use App\Enums\ServiceManagementAdministrationNavigationGroup;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -57,7 +58,7 @@ class ChangeRequestStatusResource extends Resource
 
     protected static ?int $navigationSort = 50;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Change Requests';
+    protected static string | UnitEnum | null $navigationGroup = ServiceManagementAdministrationNavigationGroup::ChangeRequests;
 
     protected static ?string $navigationLabel = 'Statuses';
 

@@ -61,7 +61,7 @@ class SendEducatableServiceRequestOpenedNotification extends Notification implem
 
     public function __construct(
         protected ServiceRequest $serviceRequest,
-        protected ?ServiceRequestTypeEmailTemplate $emailTemplate,
+        public ?ServiceRequestTypeEmailTemplate $emailTemplate,
     ) {
         $this->afterCommit = true;
     }

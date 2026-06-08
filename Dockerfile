@@ -268,7 +268,7 @@ COPY --chmod=755 docker/etc/s6-overlay/ /etc/s6-overlay/
 WORKDIR /var/www/html
 
 # Install JS package management
-ENV NVM_VERSION=v0.40.4
+ENV NVM_VERSION=v0.40.5
 # If we change this version, remember to also update the .nvmrc file
 ENV NODE_VERSION=24.16.0
 ENV NPM_VERSION=^11.16.0

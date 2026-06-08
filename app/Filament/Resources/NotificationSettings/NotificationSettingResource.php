@@ -36,6 +36,7 @@
 
 namespace App\Filament\Resources\NotificationSettings;
 
+use App\Enums\CommunicationNavigationGroup;
 use App\Filament\Clusters\Communication;
 use App\Filament\Resources\NotificationSettings\Pages\CreateNotificationSetting;
 use App\Filament\Resources\NotificationSettings\Pages\EditNotificationSetting;
@@ -48,7 +49,7 @@ class NotificationSettingResource extends Resource
 {
     protected static ?string $model = NotificationSetting::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Communication';
+    protected static string | UnitEnum | null $navigationGroup = CommunicationNavigationGroup::Communication;
 
     protected static ?int $navigationSort = 110;
 
