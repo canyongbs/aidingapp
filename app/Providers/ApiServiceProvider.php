@@ -70,6 +70,8 @@ class ApiServiceProvider extends ServiceProvider
     {
         $this->registerApi(majorVersion: 1);
 
+        $this->loadRoutesFrom(base_path('routes/public_api.php'));
+
         Scramble::configure()
             ->expose(ui: false, document: false);
     }
