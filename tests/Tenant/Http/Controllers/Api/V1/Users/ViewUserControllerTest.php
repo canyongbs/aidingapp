@@ -76,17 +76,21 @@ it('returns user profile details', function () {
         ]);
 });
 
-it('returns 404 when the requested user has an admin role', function () {
+it('returns 404 when the requested user has an admin role', function (string $adminRole) {
     $systemUser = SystemUser::create(['name' => 'Test API User Admin Check']);
 
     $adminUser = User::factory()->create();
-    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+    $adminUser->assignRole($adminRole);
 
     Sanctum::actingAs($systemUser, ['api']);
 
     getJson(route('api.v1.users.show', ['user' => $adminUser], false))
         ->assertNotFound();
-});
+})->with([
+    'SaaS Global Admin' => [Authenticatable::SUPER_ADMIN_ROLE],
+    'Partner Admin' => [Authenticatable::PARTNER_ADMIN_ROLE],
+    'AI Admin' => [Authenticatable::AI_ADMIN_ROLE],
+]);
 
 it('returns 401 when called without authentication', function () {
     $user = User::factory()->create();

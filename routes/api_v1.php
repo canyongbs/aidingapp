@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,26 +34,13 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Http\Controllers\GenerateOtpLoginCodeController;
-use App\Http\Controllers\SetAzureSsoSettingController;
-use App\Http\Controllers\UtilizationMetricsApiController;
-use App\Multitenancy\Http\Middleware\CheckOlympusKey;
+use App\Http\Controllers\Api\V1\Users\ViewUserController;
 use Illuminate\Support\Facades\Route;
-use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-use Spatie\Health\Http\Controllers\HealthCheckJsonResultsController;
 
-Route::middleware([
-    EnsureFrontendRequestsAreStateful::class,
-    CheckOlympusKey::class,
-])->group(function () {
-    Route::post('/azure-sso/update', SetAzureSsoSettingController::class)
-        ->name('azure-sso.update');
-
-    Route::get('/health', HealthCheckJsonResultsController::class)
-        ->name('health');
-
-    Route::get('/utilization-metrics', UtilizationMetricsApiController::class)
-        ->name('utilization-metrics');
-
-    Route::post('/otp-code', GenerateOtpLoginCodeController::class)->name('otp-code.generate');
+Route::api(majorVersion: 1, routes: function () {
+    Route::name('users.')
+        ->prefix('users')
+        ->group(function () {
+            Route::get('/{user}', ViewUserController::class)->name('show');
+        });
 });
