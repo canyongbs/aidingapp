@@ -117,7 +117,7 @@ it('returns correct roles relationship structure', function () {
     $response->assertOk();
 
     expect($response['data']['roles'])->toBe([
-        ['id' => $role->id, 'name' => $role->name],
+        $role->name,
     ]);
 });
 

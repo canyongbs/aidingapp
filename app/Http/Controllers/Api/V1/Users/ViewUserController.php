@@ -40,6 +40,7 @@ use App\Http\Resources\Api\V1\UserResource;
 use App\Models\User;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Gate;
 
 class ViewUserController
 {
@@ -49,6 +50,9 @@ class ViewUserController
     #[Group('Users')]
     public function __invoke(User $user): JsonResource
     {
+        Gate::authorize('viewAny', User::class);
+        Gate::authorize('view', $user);
+
         if ($user->isAdmin()) {
             abort(404);
         }

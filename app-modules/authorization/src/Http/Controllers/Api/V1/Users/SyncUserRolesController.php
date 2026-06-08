@@ -37,7 +37,7 @@
 namespace AidingApp\Authorization\Http\Controllers\Api\V1\Users;
 
 use AidingApp\Authorization\Http\Requests\Api\V1\SyncUserRolesRequest;
-use AidingApp\Authorization\Http\Resources\Api\V1\UserResource;
+use App\Http\Resources\Api\V1\UserResource;
 use App\Models\User;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -55,7 +55,7 @@ class SyncUserRolesController
 
         $user->syncRoles($request->validated('role_ids'));
 
-        $user->load('roles');
+        $user->load(['roles', 'department', 'permissionsFromRoles']);
 
         return $user->toResource(UserResource::class);
     }
