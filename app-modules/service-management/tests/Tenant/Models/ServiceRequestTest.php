@@ -39,6 +39,8 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 if (! function_exists('recentUpdateCreatorInfo')) {
     function recentUpdateCreatorInfo(ServiceRequest $serviceRequest): string
@@ -89,4 +91,20 @@ it('renders a user update as Service Provider, unchanged', function () {
         ->create();
 
     expect(recentUpdateCreatorInfo($serviceRequest))->toBe('Sam Staff - Service Provider');
+});
+
+it('appends the file-attachment note when the update has uploads', function () {
+    Storage::fake('s3');
+
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    $update = ServiceRequestUpdate::factory()
+        ->for($serviceRequest)
+        ->for(Contact::factory()->state(['full_name' => 'Jane Doe']), 'createdBy')
+        ->create();
+
+    $update->addMedia(UploadedFile::fake()->image('report.png'))->toMediaCollection('uploads');
+
+    expect((string) $serviceRequest->getRecentUpdateFormatted())
+        ->toContain('<br><br>Note: Files were attached with this update. Please login the service portal to see the files.');
 });
