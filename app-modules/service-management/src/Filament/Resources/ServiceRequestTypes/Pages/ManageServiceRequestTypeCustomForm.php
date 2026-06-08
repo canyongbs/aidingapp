@@ -88,13 +88,16 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
     {
         return $schema
             ->components([
-                Textarea::make('description')
-                    ->string()
-                    ->columnSpanFull(),
-                Toggle::make('is_wizard')
-                    ->label('Multi-step service request form')
-                    ->live(),
-                Section::make('Fields')
+                Section::make('Properties')
+                    ->schema([
+                        Textarea::make('description')
+                            ->string()
+                            ->columnSpanFull(),
+                        Toggle::make('is_wizard')
+                            ->label('Multi-step service request form')
+                            ->live(),
+                    ]),
+                Section::make('Form Design')
                     ->schema([
                         $this->fieldBuilder('content'),
                     ])
