@@ -50,7 +50,14 @@ class DepartmentFactory extends Factory
         return [
             'name' => $this->faker->unique()->sentence(),
             'description' => $this->faker->sentence(),
-            'division_id' => $this->faker->boolean() ? Division::factory() : null,
+            'division_id' => null,
         ];
+    }
+
+    public function withDivision(): static
+    {
+        return $this->state(fn () => [
+            'division_id' => Division::factory(),
+        ]);
     }
 }
