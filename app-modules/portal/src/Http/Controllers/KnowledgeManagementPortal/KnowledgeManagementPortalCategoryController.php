@@ -52,6 +52,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
             KnowledgeBaseCategoryData::collect(
                 KnowledgeBaseCategory::query()
                     ->where('parent_id', null)
+                    ->whereHas('knowledgeBaseItems', fn (Builder $query) => $query->public())
                     ->orderBy(KnowledgeBaseCategorySortFeature::active() ? 'sort' : 'name')
                     ->get()
                     ->map(function (KnowledgeBaseCategory $category) {

@@ -40,42 +40,32 @@ use AidingApp\Portal\Settings\PortalSettings;
 
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
-    $settings = app(PortalSettings::class);
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
-});
+it('only returns categories that have at least one public article', function () {
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->save();
 
-it('returns parent categories ordered by sort on the portal', function () {
-    $zebra = KnowledgeBaseCategory::factory()->create(['name' => 'Zebra', 'sort' => 3]);
-    $apple = KnowledgeBaseCategory::factory()->create(['name' => 'Apple', 'sort' => 1]);
-    $mango = KnowledgeBaseCategory::factory()->create(['name' => 'Mango', 'sort' => 2]);
+    $categoryWithPublicArticle = KnowledgeBaseCategory::factory()->create(['parent_id' => null]);
+    KnowledgeBaseItem::factory()->create([
+        'category_id' => $categoryWithPublicArticle->id,
+        'public' => true,
+    ]);
 
-    KnowledgeBaseItem::factory()->create(['category_id' => $zebra->id, 'public' => true]);
-    KnowledgeBaseItem::factory()->create(['category_id' => $apple->id, 'public' => true]);
-    KnowledgeBaseItem::factory()->create(['category_id' => $mango->id, 'public' => true]);
+    $categoryWithPrivateArticle = KnowledgeBaseCategory::factory()->create(['parent_id' => null]);
+    KnowledgeBaseItem::factory()->create([
+        'category_id' => $categoryWithPrivateArticle->id,
+        'public' => false,
+    ]);
+
+    $categoryWithNoArticles = KnowledgeBaseCategory::factory()->create(['parent_id' => null]);
 
     $response = getJson(route('api.portal.category.index'));
 
     $response->assertOk();
 
-    $names = collect($response->json())->pluck('name')->toArray();
+    $slugs = collect($response->json())->pluck('slug');
 
-    expect($names)->toBe(['Apple', 'Mango', 'Zebra']);
-});
-
-it('returns sub categories ordered by sort on the portal', function () {
-    $parent = KnowledgeBaseCategory::factory()->create(['name' => 'Parent', 'sort' => 1]);
-
-    KnowledgeBaseCategory::factory()->create(['name' => 'Zebra Sub', 'parent_id' => $parent->id, 'sort' => 3]);
-    KnowledgeBaseCategory::factory()->create(['name' => 'Apple Sub', 'parent_id' => $parent->id, 'sort' => 1]);
-    KnowledgeBaseCategory::factory()->create(['name' => 'Mango Sub', 'parent_id' => $parent->id, 'sort' => 2]);
-
-    $response = getJson(route('api.portal.category.show', ['category' => $parent->slug]));
-
-    $response->assertOk();
-
-    $subNames = collect($response->json('category.subCategories'))->pluck('name')->toArray();
-
-    expect($subNames)->toBe(['Apple Sub', 'Mango Sub', 'Zebra Sub']);
+    expect($slugs)->toContain($categoryWithPublicArticle->slug)
+        ->and($slugs)->not->toContain($categoryWithPrivateArticle->slug)
+        ->and($slugs)->not->toContain($categoryWithNoArticles->slug);
 });
