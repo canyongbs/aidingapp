@@ -154,7 +154,7 @@ test('it cannot change status of service requests for user who is not a manager'
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $originalStatus = ServiceRequestStatus::factory()->open()->create();
-    $newStatus = ServiceRequestStatus::factory()->open()->create();
+    $newStatus = ServiceRequestStatus::factory()->open()->create(['name' => 'In Review']);
 
     $serviceRequests = ServiceRequest::factory()
         ->state([
@@ -217,7 +217,7 @@ test('it cannot change status of service requests without required permissions',
     $serviceRequestType->managerUsers()->attach($user);
 
     $originalStatus = ServiceRequestStatus::factory()->open()->create();
-    $newStatus = ServiceRequestStatus::factory()->open()->create();
+    $newStatus = ServiceRequestStatus::factory()->open()->create(['name' => 'In Review']);
 
     $serviceRequests = ServiceRequest::factory()
         ->state([

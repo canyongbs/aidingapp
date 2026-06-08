@@ -34,38 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages;
+namespace App\Features;
 
-use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBaseStatusResource;
-use App\Features\KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Schema;
-use Illuminate\Validation\Rules\Unique;
+use App\Support\AbstractFeatureFlag;
 
-class CreateKnowledgeBaseStatus extends CreateRecord
+class KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature extends AbstractFeatureFlag
 {
-    protected static string $resource = KnowledgeBaseStatusResource::class;
-
-    public function form(Schema $schema): Schema
+    public function resolve(mixed $scope): mixed
     {
-        /*
-         * TODO: KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature cleanup — once the feature flag is removed:
-         * - Remove the ->when(KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::active(), ...) wrapper below
-         * - Apply ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()) directly on the name field
-         */
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->string()
-                    ->when(
-                        KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::active(),
-                        fn (TextInput $input) => $input->unique(modifyRuleUsing: function (Unique $rule) {
-                            $rule->withoutTrashed();
-                        }),
-                    ),
-            ]);
+        return false;
     }
 }
