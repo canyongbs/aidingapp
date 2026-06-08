@@ -55,9 +55,9 @@ class UserResource extends JsonResource
             'name' => $this->resource->name,
             'email' => $this->resource->email,
             'roles' => $this->resource->roles->pluck('name'),
-            'department' => $this->resource->relationLoaded('department') && $this->resource->department ? [
-                'id' => $this->resource->department->getKey(),
-                'name' => $this->resource->department->getAttribute('name'),
+            'department' => $this->resource->department ? [
+                'id' => $this->resource->department->id,
+                'name' => $this->resource->department->name,
             ] : null,
             'permissions' => $this->resource->permissionsFromRoles->pluck('name'),
         ];

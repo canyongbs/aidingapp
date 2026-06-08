@@ -39,7 +39,7 @@ namespace App\Http\Controllers\Api\V1\Users;
 use App\Http\Resources\Api\V1\UserResource;
 use App\Models\User;
 use Dedoc\Scramble\Attributes\Group;
-use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class ViewUserController
 {
@@ -47,7 +47,7 @@ class ViewUserController
      * @response UserResource
      */
     #[Group('Users')]
-    public function __invoke(Request $request, User $user): UserResource
+    public function __invoke(User $user): JsonResource
     {
         if ($user->isAdmin()) {
             abort(404);
@@ -55,6 +55,6 @@ class ViewUserController
 
         $user->loadMissing(['roles', 'department', 'permissionsFromRoles']);
 
-        return new UserResource($user);
+        return $user->toResource(UserResource::class);
     }
 }

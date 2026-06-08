@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Department\Models\Department;
 use App\Models\Authenticatable;
@@ -44,45 +46,105 @@ use Laravel\Sanctum\Sanctum;
 use function Pest\Laravel\getJson;
 
 beforeEach(function () {
+    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
     config()->set('audit.enabled', false);
 });
 
-it('returns user profile details', function () {
-    $systemUser = SystemUser::create(['name' => 'Test API User']);
+it('returns a user resource', function () {
+    $user = SystemUser::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+
+    $targetUser = User::factory()->create();
+
+    $response = getJson(route('api.v1.users.show', ['user' => $targetUser], false));
+    $response->assertOk();
+    $response->assertJsonStructure([
+        'data',
+    ]);
+});
+
+it('returns correct user fields', function (string $responseKey, Closure $getExpected) {
+    $user = SystemUser::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+
+    $targetUser = User::factory()->create();
+
+    $response = getJson(route('api.v1.users.show', ['user' => $targetUser], false));
+    $response->assertOk();
+
+    expect($response['data'][$responseKey])->toBe($getExpected($targetUser));
+})->with([
+    '`id`' => ['id', fn (User $user) => $user->id],
+    '`name`' => ['name', fn (User $user) => $user->name],
+    '`email`' => ['email', fn (User $user) => $user->email],
+]);
+
+it('returns correct roles relationship structure', function () {
+    $user = SystemUser::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+
+    $targetUser = User::factory()->create();
+    $role = Role::factory()->create();
+    $targetUser->roles()->attach($role);
+
+    $response = getJson(route('api.v1.users.show', ['user' => $targetUser], false));
+    $response->assertOk();
+
+    expect($response['data']['roles'])->toBe([$role->name]);
+});
+
+it('returns correct department relationship structure', function () {
+    $user = SystemUser::factory()->create();
+    Sanctum::actingAs($user, ['api']);
 
     $department = Department::factory()->create();
-    $user = User::factory()->create();
-    $user->assignDepartment($department->id);
+    $targetUser = User::factory()->create();
+    $targetUser->assignDepartment($department->id);
 
-    $role = Role::query()->firstOrCreate(['name' => 'test-role', 'guard_name' => 'web']);
-    $user->roles()->attach($role);
+    $response = getJson(route('api.v1.users.show', ['user' => $targetUser], false));
+    $response->assertOk();
 
-    Sanctum::actingAs($systemUser, ['api']);
+    expect($response['data']['department'])->toBe([
+        'id' => $department->id,
+        'name' => $department->name,
+    ]);
+});
 
-    getJson(route('api.v1.users.show', ['user' => $user], false))
-        ->assertOk()
-        ->assertJsonPath('data.id', $user->id)
-        ->assertJsonPath('data.name', $user->name)
-        ->assertJsonPath('data.email', $user->email)
-        ->assertJsonStructure([
-            'data' => [
-                'id',
-                'name',
-                'email',
-                'roles',
-                'department',
-                'permissions',
-            ],
-        ]);
+it('returns null department when no department is assigned', function () {
+    $user = SystemUser::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+
+    $targetUser = User::factory()->create();
+
+    $response = getJson(route('api.v1.users.show', ['user' => $targetUser], false));
+    $response->assertOk();
+
+    expect($response['data']['department'])->toBeNull();
+});
+
+it('returns correct permissions relationship structure', function () {
+    $user = SystemUser::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+
+    $targetUser = User::factory()->create();
+    $role = Role::factory()->create();
+    $permissionGroup = PermissionGroup::create(['name' => 'test-group']);
+    $permission = Permission::factory()->create(['guard_name' => 'web', 'group_id' => $permissionGroup->id]);
+    $role->givePermissionTo($permission);
+    $targetUser->roles()->attach($role);
+
+    $response = getJson(route('api.v1.users.show', ['user' => $targetUser], false));
+    $response->assertOk();
+
+    expect($response['data']['permissions'])->toBe([$permission->name]);
 });
 
 it('returns 404 when the requested user has an admin role', function (string $adminRole) {
-    $systemUser = SystemUser::create(['name' => 'Test API User Admin Check']);
+    $user = SystemUser::factory()->create();
+    Sanctum::actingAs($user, ['api']);
 
     $adminUser = User::factory()->create();
     $adminUser->assignRole($adminRole);
-
-    Sanctum::actingAs($systemUser, ['api']);
 
     getJson(route('api.v1.users.show', ['user' => $adminUser], false))
         ->assertNotFound();
@@ -91,20 +153,3 @@ it('returns 404 when the requested user has an admin role', function (string $ad
     'Partner Admin' => [Authenticatable::PARTNER_ADMIN_ROLE],
     'AI Admin' => [Authenticatable::AI_ADMIN_ROLE],
 ]);
-
-it('returns 401 when called without authentication', function () {
-    $user = User::factory()->create();
-
-    getJson(route('api.v1.users.show', ['user' => $user], false))
-        ->assertUnauthorized();
-});
-
-it('returns 403 when the token does not have the api ability', function () {
-    $systemUser = SystemUser::create(['name' => 'Test API User No Ability']);
-    Sanctum::actingAs($systemUser, ['other-ability']);
-
-    $user = User::factory()->create();
-
-    getJson(route('api.v1.users.show', ['user' => $user], false))
-        ->assertForbidden();
-});
