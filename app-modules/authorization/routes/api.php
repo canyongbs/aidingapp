@@ -34,31 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Controllers\Api\V1\Users;
+use AidingApp\Authorization\Http\Controllers\Api\V1\Users\SyncUserRolesController;
+use Illuminate\Support\Facades\Route;
 
-use App\Http\Resources\Api\V1\UserResource;
-use App\Models\User;
-use Dedoc\Scramble\Attributes\Group;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Gate;
-
-class ViewUserController
-{
-    /**
-     * @response UserResource
-     */
-    #[Group('Users')]
-    public function __invoke(User $user): JsonResource
-    {
-        Gate::authorize('viewAny', User::class);
-        Gate::authorize('view', $user);
-
-        if ($user->isAdmin()) {
-            abort(404);
-        }
-
-        $user->loadMissing(['roles', 'department', 'permissionsFromRoles']);
-
-        return $user->toResource(UserResource::class);
-    }
-}
+Route::api(majorVersion: 1, routes: function () {
+    Route::name('users.')
+        ->prefix('users')
+        ->group(function () {
+            Route::put('/{user}/roles', SyncUserRolesController::class)->name('roles.sync');
+        });
+});

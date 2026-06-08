@@ -34,31 +34,62 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Controllers\Api\V1\Users;
+namespace AidingApp\Authorization\Http\Requests\Api\V1;
 
-use App\Http\Resources\Api\V1\UserResource;
+use AidingApp\Authorization\Models\Role;
+use App\Models\Authenticatable;
 use App\Models\User;
-use Dedoc\Scramble\Attributes\Group;
-use Illuminate\Http\Resources\Json\JsonResource;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
-class ViewUserController
+class SyncUserRolesRequest extends FormRequest
 {
-    /**
-     * @response UserResource
-     */
-    #[Group('Users')]
-    public function __invoke(User $user): JsonResource
+    public function authorize(): bool
     {
-        Gate::authorize('viewAny', User::class);
-        Gate::authorize('view', $user);
+        /** @var User $user */
+        $user = $this->route('user');
+        abort_if($user->isAdmin(), 404);
 
-        if ($user->isAdmin()) {
-            abort(404);
-        }
+        return true;
+    }
 
-        $user->loadMissing(['roles', 'department', 'permissionsFromRoles']);
+    /**
+     * @return array<string, mixed>
+     */
+    public function rules(): array
+    {
+        return [
+            'role_ids' => ['present', 'array'],
+            'role_ids.*' => ['uuid', 'exists:roles,id'],
+        ];
+    }
 
-        return $user->toResource(UserResource::class);
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator) {
+            $roleIds = $this->input('role_ids', []);
+
+            if (empty($roleIds)) {
+                return;
+            }
+
+            $adminRoleNames = [
+                Authenticatable::SUPER_ADMIN_ROLE,
+                Authenticatable::PARTNER_ADMIN_ROLE,
+                Authenticatable::AI_ADMIN_ROLE,
+            ];
+
+            $hasAdminRole = Role::query()
+                ->whereIn('id', $roleIds)
+                ->whereIn('name', $adminRoleNames)
+                ->exists();
+
+            if ($hasAdminRole) {
+                $validator->errors()->add(
+                    'role_ids',
+                    'Admin roles cannot be assigned or removed through this endpoint.'
+                );
+            }
+        });
     }
 }

@@ -50,8 +50,36 @@ beforeEach(function () {
     config()->set('audit.enabled', false);
 });
 
+it('is gated with proper access control', function () {
+    $targetUser = User::factory()->create();
+
+    $user = SystemUser::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+    getJson(route('api.v1.users.show', ['user' => $targetUser], false))
+        ->assertForbidden();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('user.view-any');
+    Sanctum::actingAs($user, ['api']);
+    getJson(route('api.v1.users.show', ['user' => $targetUser], false))
+        ->assertForbidden();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('user.*.view');
+    Sanctum::actingAs($user, ['api']);
+    getJson(route('api.v1.users.show', ['user' => $targetUser], false))
+        ->assertForbidden();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['user.view-any', 'user.*.view']);
+    Sanctum::actingAs($user, ['api']);
+    getJson(route('api.v1.users.show', ['user' => $targetUser], false))
+        ->assertOk();
+});
+
 it('returns a user resource', function () {
     $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['user.view-any', 'user.*.view']);
     Sanctum::actingAs($user, ['api']);
 
     $targetUser = User::factory()->create();
@@ -65,6 +93,7 @@ it('returns a user resource', function () {
 
 it('returns correct user fields', function (string $responseKey, Closure $getExpected) {
     $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['user.view-any', 'user.*.view']);
     Sanctum::actingAs($user, ['api']);
 
     $targetUser = User::factory()->create();
@@ -81,6 +110,7 @@ it('returns correct user fields', function (string $responseKey, Closure $getExp
 
 it('returns correct roles relationship structure', function () {
     $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['user.view-any', 'user.*.view']);
     Sanctum::actingAs($user, ['api']);
 
     $targetUser = User::factory()->create();
@@ -95,6 +125,7 @@ it('returns correct roles relationship structure', function () {
 
 it('returns correct department relationship structure', function () {
     $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['user.view-any', 'user.*.view']);
     Sanctum::actingAs($user, ['api']);
 
     $department = Department::factory()->create();
@@ -112,6 +143,7 @@ it('returns correct department relationship structure', function () {
 
 it('returns null department when no department is assigned', function () {
     $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['user.view-any', 'user.*.view']);
     Sanctum::actingAs($user, ['api']);
 
     $targetUser = User::factory()->create();
@@ -124,6 +156,7 @@ it('returns null department when no department is assigned', function () {
 
 it('returns correct permissions relationship structure', function () {
     $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['user.view-any', 'user.*.view']);
     Sanctum::actingAs($user, ['api']);
 
     $targetUser = User::factory()->create();
@@ -141,6 +174,7 @@ it('returns correct permissions relationship structure', function () {
 
 it('returns 404 when the requested user has an admin role', function (string $adminRole) {
     $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['user.view-any', 'user.*.view']);
     Sanctum::actingAs($user, ['api']);
 
     $adminUser = User::factory()->create();
