@@ -45,13 +45,19 @@ class ServiceRequestStatusSeeder extends Seeder
 {
     public function run(): void
     {
-        ServiceRequestStatus::query()->createOrFirst([
-            'classification' => SystemServiceRequestClassification::Open,
-            'name' => 'New',
-            'color' => Color::Blue,
-            'is_system_protected' => true,
-            'sort' => 1,
-        ]);
+        // Match only on the stable identity (name + classification) so a re-run never inserts a
+        // second "New" when a non-identity attribute (e.g. sort, color) differs from the existing row.
+        ServiceRequestStatus::query()->firstOrCreate(
+            [
+                'name' => 'New',
+                'classification' => SystemServiceRequestClassification::Open,
+            ],
+            [
+                'color' => Color::Blue,
+                'is_system_protected' => true,
+                'sort' => 1,
+            ],
+        );
 
         ServiceRequestStatus::factory()
             ->createMany(

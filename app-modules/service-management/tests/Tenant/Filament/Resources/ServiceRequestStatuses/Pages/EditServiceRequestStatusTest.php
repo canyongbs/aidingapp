@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestStatusRequestFactory;
+use App\Features\KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use CanyonGBS\Common\Enums\Color;
@@ -254,4 +255,39 @@ test('EditServiceRequestStatus allows modifying all columns on non-system protec
     assertEquals($request['name'], $serviceRequestStatus->name);
     assertEquals($request['classification'], $serviceRequestStatus->classification);
     assertEquals($request['color'], $serviceRequestStatus->color);
+});
+
+// Name Uniqueness Tests
+
+test('EditServiceRequestStatus prevents renaming to a case-insensitive duplicate name', function () {
+    KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::activate();
+
+    asSuperAdmin();
+
+    ServiceRequestStatus::factory()->create(['name' => 'Backlog']);
+    $serviceRequestStatus = ServiceRequestStatus::factory()->create(['name' => 'Draft']);
+
+    livewire(EditServiceRequestStatus::class, [
+        'record' => $serviceRequestStatus->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'backlog'])
+        ->call('save')
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    expect($serviceRequestStatus->fresh()->name)->toBe('Draft');
+});
+
+test('EditServiceRequestStatus allows saving a status without changing its name', function () {
+    KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::activate();
+
+    asSuperAdmin();
+
+    $serviceRequestStatus = ServiceRequestStatus::factory()->create(['name' => 'Draft']);
+
+    livewire(EditServiceRequestStatus::class, [
+        'record' => $serviceRequestStatus->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'Draft'])
+        ->call('save')
+        ->assertHasNoFormErrors();
 });
