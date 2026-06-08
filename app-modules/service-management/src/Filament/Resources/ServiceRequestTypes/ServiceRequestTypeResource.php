@@ -50,6 +50,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\Man
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ServiceRequestTypeEmailTemplatePage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ViewServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Enums\ServiceManagementAdministrationNavigationGroup;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use Filament\Navigation\NavigationItem;
 use Filament\Resources\Pages\Page;
@@ -64,7 +65,7 @@ class ServiceRequestTypeResource extends Resource
 {
     protected static ?string $model = ServiceRequestType::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Requests';
+    protected static string | UnitEnum | null $navigationGroup = ServiceManagementAdministrationNavigationGroup::ServiceRequests;
 
     protected static ?string $navigationLabel = 'Types';
 

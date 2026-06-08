@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -32,23 +34,18 @@
 </COPYRIGHT>
 */
 
-@reference './portal.css';
+namespace App\Enums;
 
-.app-loading {
-    @apply h-screen flex items-center justify-center gap-2;
-}
+use Filament\Support\Contracts\HasLabel;
 
-.app-loading-icon {
-    @apply h-5 w-5 shrink-0;
-    animation: spin 1s linear infinite;
-}
+enum CommunicationNavigationGroup implements HasLabel
+{
+    case Communication;
 
-.app-loading-label {
-    @apply font-medium;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::Communication => 'Communication',
+        };
     }
 }

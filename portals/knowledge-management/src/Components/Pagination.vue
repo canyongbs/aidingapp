@@ -45,15 +45,15 @@
             type: Number,
             required: true,
         },
-        fromArticle: {
+        fromItem: {
             type: Number,
             required: true,
         },
-        toArticle: {
+        toItem: {
             type: Number,
             required: true,
         },
-        totalArticles: {
+        totalItems: {
             type: Number,
             required: true,
         },
@@ -105,7 +105,7 @@
         </button>
 
         <span class="hidden md:inline text-sm font-medium text-gray-700">
-            Showing {{ fromArticle }} to {{ toArticle }} of {{ totalArticles }} results
+            Showing {{ fromItem }} to {{ toItem }} of {{ totalItems }} results
         </span>
 
         <button

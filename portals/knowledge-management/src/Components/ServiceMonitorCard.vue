@@ -51,7 +51,7 @@
     });
 </script>
 <template>
-    <div class="flex w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5">
+    <div class="flex items-start w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5">
         <div class="shrink-0 size-6" aria-hidden="true">
             <CheckCircleIcon v-if="status === true" class="size-6 text-green-700" />
             <XCircleIcon v-if="status === false" class="size-6 text-red-600" />

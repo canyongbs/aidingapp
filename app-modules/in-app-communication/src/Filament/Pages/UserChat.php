@@ -37,6 +37,7 @@
 namespace AidingApp\InAppCommunication\Filament\Pages;
 
 use App\Enums\Feature;
+use App\Enums\NavigationGroup;
 use App\Models\User;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Gate;
@@ -50,7 +51,7 @@ class UserChat extends Page
 
     protected static ?string $slug = 'live-chat';
 
-    protected static string | UnitEnum | null $navigationGroup = 'Live Chat';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::LiveChat;
 
     protected static ?int $navigationSort = 10;
 

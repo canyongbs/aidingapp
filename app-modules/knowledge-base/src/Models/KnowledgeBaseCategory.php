@@ -38,8 +38,11 @@ namespace AidingApp\KnowledgeBase\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseCategoryFactory;
+use AidingApp\KnowledgeBase\Observers\KnowledgeBaseCategoryObserver;
+use App\Features\KnowledgeBaseCategorySortFeature;
 use App\Models\BaseModel;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -50,6 +53,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 /**
  * @mixin IdeHelperKnowledgeBaseCategory
  */
+#[ObservedBy([KnowledgeBaseCategoryObserver::class])]
 class KnowledgeBaseCategory extends BaseModel implements Auditable
 {
     use SoftDeletes;
@@ -64,6 +68,11 @@ class KnowledgeBaseCategory extends BaseModel implements Auditable
         'description',
         'icon',
         'slug',
+        'sort',
+    ];
+
+    protected $casts = [
+        'sort' => 'integer',
     ];
 
     /**
@@ -87,7 +96,13 @@ class KnowledgeBaseCategory extends BaseModel implements Auditable
      */
     public function subCategories(): HasMany
     {
-        return $this->hasMany(self::class, 'parent_id');
+        $query = $this->hasMany(self::class, 'parent_id');
+
+        if (KnowledgeBaseCategorySortFeature::active()) {
+            $query->orderBy('sort');
+        }
+
+        return $query;
     }
 
     protected function serializeDate(DateTimeInterface $date): string

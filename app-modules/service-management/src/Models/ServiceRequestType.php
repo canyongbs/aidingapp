@@ -41,8 +41,12 @@ use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeFactory;
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
+use App\Features\ServiceRequestTypeEmailPreferenceFeature;
 use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
@@ -237,6 +241,33 @@ class ServiceRequestType extends BaseModel implements Auditable
     public function templates(): HasMany
     {
         return $this->hasMany(ServiceRequestTypeEmailTemplate::class, 'service_request_type_id');
+    }
+
+    /**
+     * @return HasMany<ServiceRequestTypeEmailPreference, $this>
+     */
+    public function emailPreferences(): HasMany
+    {
+        return $this->hasMany(ServiceRequestTypeEmailPreference::class, 'service_request_type_id');
+    }
+
+    public function isPreferenceEnabled(
+        ServiceRequestEmailTemplateType $templateType,
+        ServiceRequestTypeEmailTemplateRole $role,
+        ServiceRequestNotificationChannel $channel,
+    ): bool {
+        if (! ServiceRequestTypeEmailPreferenceFeature::active()) {
+            $attribute = 'is_' . $role->value . 's_' . $templateType->getEventSlug() . '_' . $channel->value . '_enabled';
+
+            return (bool) ($this->{$attribute} ?? false);
+        }
+
+        return $this->emailPreferences
+            ->first(
+                fn (ServiceRequestTypeEmailPreference $preference): bool => $preference->service_request_email_template_type === $templateType
+                    && $preference->service_request_email_template_role === $role
+                    && $preference->notification_channel === $channel,
+            )->is_enabled ?? false;
     }
 
     /**
