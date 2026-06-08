@@ -1051,3 +1051,64 @@ it('builds type tree options with uncategorized types at root level', function (
     expect($tree[1]['children'])->toHaveCount(1);
     expect($tree[1]['children'][0]['name'])->toBe('Categorized Type');
 });
+
+it('filters out empty categories from type tree options', function () {
+    ServiceRequestType::query()->delete();
+    ServiceRequestTypeCategory::query()->delete();
+
+    $categoryWithTypes = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Has Types',
+        'sort' => 1,
+        'parent_id' => null,
+    ]);
+
+    $emptyCategory = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Empty Category',
+        'sort' => 2,
+        'parent_id' => null,
+    ]);
+
+    ServiceRequestType::factory()->create([
+        'name' => 'Type A',
+        'sort' => 1,
+        'category_id' => $categoryWithTypes->getKey(),
+    ]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    expect($tree)->toHaveCount(1);
+    expect($tree[0]['name'])->toBe('Has Types');
+    expect($tree[0]['children'])->toHaveCount(1);
+    expect($tree[0]['children'][0]['name'])->toBe('Type A');
+});
+
+it('filters out nested empty categories from type tree options', function () {
+    ServiceRequestType::query()->delete();
+    ServiceRequestTypeCategory::query()->delete();
+
+    $parentCategory = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Parent',
+        'sort' => 1,
+        'parent_id' => null,
+    ]);
+
+    ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Empty Child',
+        'sort' => 1,
+        'parent_id' => $parentCategory->getKey(),
+    ]);
+
+    $type = ServiceRequestType::factory()->create([
+        'name' => 'Direct Type',
+        'sort' => 2,
+        'category_id' => $parentCategory->getKey(),
+    ]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    expect($tree)->toHaveCount(1);
+    expect($tree[0]['name'])->toBe('Parent');
+    expect($tree[0]['children'])->toHaveCount(1);
+    expect($tree[0]['children'][0]['name'])->toBe('Direct Type');
+    expect($tree[0]['children'][0]['value'])->toBe($type->getKey());
+});

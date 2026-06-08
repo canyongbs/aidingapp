@@ -320,6 +320,8 @@ class ListServiceRequests extends ListRecords
 
         $tree = collect($categories->get('', collect()))
             ->map(fn (ServiceRequestTypeCategory $category) => static::buildCategoryNode($category, $categories, $types))
+            ->filter(fn (array $node) => ! empty($node['children']))
+            ->values()
             ->all();
 
         $uncategorizedTypes = $types->get('', collect())
@@ -353,6 +355,8 @@ class ListServiceRequests extends ListRecords
     ): array {
         $childCategories = $categoriesByParent->get($category->getKey(), collect())
             ->map(fn (ServiceRequestTypeCategory $child) => static::buildCategoryNode($child, $categoriesByParent, $typesByCategory))
+            ->filter(fn (array $node) => ! empty($node['children']))
+            ->values()
             ->all();
 
         $childTypes = $typesByCategory->get($category->getKey(), collect())
