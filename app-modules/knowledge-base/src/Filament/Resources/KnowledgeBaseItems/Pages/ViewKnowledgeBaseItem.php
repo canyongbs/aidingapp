@@ -46,6 +46,7 @@ use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -87,18 +88,38 @@ class ViewKnowledgeBaseItem extends ViewRecord
                             ->id('content'),
                         Tab::make('Properties')
                             ->schema([
+                                Grid::make(Division::count() > 1 ? 4 : 3)
+                                    ->schema([
+                                        TextEntry::make('status.name')
+                                            ->label('Status'),
+                                        TextEntry::make('category.name')
+                                            ->label('Category'),
+                                        TextEntry::make('division.name')
+                                            ->visible(fn (): bool => Division::count() > 1)
+                                            ->label('Division'),
+                                        TextEntry::make('managers')
+                                            ->label('Managers')
+                                            ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->managers->pluck('name')->join(', ')),
+                                    ]),
+                                Grid::make(3)
+                                    ->schema([
+                                        TextEntry::make('public')
+                                            ->label('Public')
+                                            ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No'),
+                                        TextEntry::make('is_featured')
+                                            ->label('Featured')
+                                            ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No'),
+                                        TextEntry::make('has_table_of_contents')
+                                            ->label('Table of Contents')
+                                            ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No'),
+                                    ]),
                                 TextEntry::make('notes')
                                     ->label('Notes')
                                     ->columnSpanFull(),
-                                TextEntry::make('public')
-                                    ->label('Public')
-                                    ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No'),
-                                TextEntry::make('is_featured')
-                                    ->label('Featured')
-                                    ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No'),
                                 TextEntry::make('tags')
                                     ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->tags->pluck('name'))
-                                    ->badge(),
+                                    ->badge()
+                                    ->columnSpanFull(),
                                 TextEntry::make('rating')
                                     ->label('Rating')
                                     ->getStateUsing(function (KnowledgeBaseItem $record): string {
@@ -113,20 +134,6 @@ class ViewKnowledgeBaseItem extends ViewRecord
                             ])
                             ->id('properties')
                             ->columns(2),
-                        Tab::make('Metadata')
-                            ->schema([
-                                TextEntry::make('status.name')
-                                    ->label('Status'),
-                                TextEntry::make('category.name')
-                                    ->label('Category'),
-                                TextEntry::make('division.name')
-                                    ->visible(fn (): bool => Division::count() > 1)
-                                    ->label('Division'),
-                                TextEntry::make('managers')
-                                    ->label('Managers')
-                                    ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->managers->pluck('name')->join(', ')),
-                            ])
-                            ->id('metadata'),
                         Tab::make('Concerns')
                             ->schema([
                                 Livewire::make(KnowledgeBaseItemConcernsTable::class, ['record' => $this->getRecord()]),
