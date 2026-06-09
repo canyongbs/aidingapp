@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\MediaCreatedByFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -47,16 +46,12 @@ return new class () extends Migration {
             Schema::table('media', function (Blueprint $table) {
                 $table->nullableUuidMorphs('created_by');
             });
-
-            MediaCreatedByFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            MediaCreatedByFeature::deactivate();
-
             Schema::table('media', function (Blueprint $table) {
                 $table->dropMorphs('created_by');
             });

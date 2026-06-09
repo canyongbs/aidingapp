@@ -36,7 +36,6 @@
 
 namespace App\Observers;
 
-use App\Features\MediaCreatedByFeature;
 use App\Models\Media;
 use Illuminate\Support\Facades\Auth;
 
@@ -44,7 +43,7 @@ class MediaObserver
 {
     public function creating(Media $media): void
     {
-        if (! MediaCreatedByFeature::active() || $media->createdBy) {
+        if ($media->createdBy) {
             return;
         }
 
