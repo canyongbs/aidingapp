@@ -43,7 +43,7 @@ use Illuminate\Notifications\Notification;
 
 class NotifyServiceRequestUsers
 {
-    public function execute(ServiceRequest $serviceRequest, Notification $notification, bool $shouldSendToManagers, bool $shouldSendToAuditors): void
+    public function execute(ServiceRequest $serviceRequest, Notification $notification, bool $shouldSendToManagers, bool $shouldSendToAuditors, ?User $excludeUser = null): void
     {
         if (! ($shouldSendToManagers || $shouldSendToAuditors)) {
             return;
@@ -52,6 +52,7 @@ class NotifyServiceRequestUsers
         $typeKey = $serviceRequest->priority->type->getKey();
 
         $user = User::query()
+            ->when($excludeUser, fn (Builder $query) => $query->whereNot('id', $excludeUser->getKey()))
             ->where(function (Builder $query) use ($serviceRequest, $shouldSendToManagers, $shouldSendToAuditors, $typeKey) {
                 if ($shouldSendToManagers) {
                     $query->whereHas(

@@ -56,6 +56,7 @@ use App\Models\User;
 use Carbon\CarbonInterface;
 use Closure;
 use DateTimeInterface;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -66,6 +67,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -444,7 +446,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         ];
     }
 
-    public function getRecentUpdateFormatted(?string $timezone = null): string
+    public function getRecentUpdateFormatted(?string $timezone = null): Htmlable | string
     {
         $recentUpdate = $this->serviceRequestUpdates()
             ->orderBy('created_at', 'desc')
@@ -456,23 +458,26 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
         if ($recentUpdate->createdBy instanceof Contact) {
             $contact = $recentUpdate->createdBy;
-            $organizationName = $contact->organization ? $contact->organization->name : 'N/A';
-            $creatorInfo = "{$contact->full_name} - {$organizationName}";
+            $creatorInfo = e($contact->full_name) . ' - Customer';
+
+            if ($contact->organization) {
+                $creatorInfo .= '<br>' . e($contact->organization->name);
+            }
         } else {
             $user = $recentUpdate->createdBy;
             assert($user instanceof User);
-            $creatorInfo = "{$user->name} - Service Provider";
+            $creatorInfo = e($user->name) . ' - Service Provider';
         }
 
         $updateDate = ! is_null($timezone) ? $recentUpdate->created_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $recentUpdate->created_at->format('M j, Y \a\t h:i A (T)');
 
-        $updateText = "{$creatorInfo}\n\n{$updateDate} - {$recentUpdate->update}";
+        $updateText = $creatorInfo . '<br><br>' . e($updateDate) . ' - ' . e($recentUpdate->update);
 
         if ($recentUpdate->hasMedia($recentUpdate->getMediaCollection('uploads')->name)) {
-            $updateText .= "\n\nNote: Files were attached with this update. Please login the service portal to see the files.";
+            $updateText .= '<br><br>Note: Files were attached with this update. Please login the service portal to see the files.';
         }
 
-        return $updateText;
+        return new HtmlString($updateText);
     }
 
     protected function casts(): array

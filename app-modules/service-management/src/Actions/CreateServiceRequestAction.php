@@ -36,8 +36,15 @@
 
 namespace AidingApp\ServiceManagement\Actions;
 
+use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
+use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
+use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use Illuminate\Support\Facades\DB;
 
 class CreateServiceRequestAction
@@ -54,7 +61,81 @@ class CreateServiceRequestAction
 
             $this->assignServiceRequestToDepartment->execute($serviceRequest);
 
+            $this->notifyManagersOfCreation($serviceRequest);
+
             return $serviceRequest;
         });
+    }
+
+    protected function notifyManagersOfCreation(ServiceRequest $serviceRequest): void
+    {
+        if (! $serviceRequest->priority) {
+            return;
+        }
+
+        $type = $serviceRequest->priority->type;
+
+        $assignedUser = $serviceRequest->assignedTo?->user;
+
+        $shouldExcludeAssignedUserFromEmail = $assignedUser && $type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email);
+        $shouldExcludeAssignedUserFromNotification = $assignedUser && $type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification);
+
+        $managerEmailTemplate = ServiceRequestTypeEmailTemplate::query()
+            ->where('service_request_type_id', $type->getKey())
+            ->where('type', ServiceRequestEmailTemplateType::Created)
+            ->where('role', ServiceRequestTypeEmailTemplateRole::Manager)
+            ->first();
+
+        $auditorEmailTemplate = ServiceRequestTypeEmailTemplate::query()
+            ->where('service_request_type_id', $type->getKey())
+            ->where('type', ServiceRequestEmailTemplateType::Created)
+            ->where('role', ServiceRequestTypeEmailTemplateRole::Auditor)
+            ->first();
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequest,
+            new ServiceRequestCreated($serviceRequest, $managerEmailTemplate, MailChannel::class),
+            $type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Email),
+            false,
+            $shouldExcludeAssignedUserFromEmail ? $assignedUser : null,
+        );
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequest,
+            new ServiceRequestCreated($serviceRequest, $auditorEmailTemplate, MailChannel::class),
+            false,
+            $type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Email),
+        );
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequest,
+            new ServiceRequestCreated($serviceRequest, $managerEmailTemplate, DatabaseChannel::class),
+            $type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification),
+            false,
+            $shouldExcludeAssignedUserFromNotification ? $assignedUser : null,
+        );
+
+        app(NotifyServiceRequestUsers::class)->execute(
+            $serviceRequest,
+            new ServiceRequestCreated($serviceRequest, $auditorEmailTemplate, DatabaseChannel::class),
+            false,
+            $type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Auditor, ServiceRequestNotificationChannel::Notification),
+        );
+
+        if ($assignedUser) {
+            $assignedManagerCreatedEmailTemplate = ServiceRequestTypeEmailTemplate::query()
+                ->where('service_request_type_id', $type->getKey())
+                ->where('type', ServiceRequestEmailTemplateType::Created)
+                ->where('role', ServiceRequestTypeEmailTemplateRole::AssignedManager)
+                ->first();
+
+            if ($type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Email)) {
+                $assignedUser->notify(new ServiceRequestCreated($serviceRequest, $assignedManagerCreatedEmailTemplate, MailChannel::class));
+            }
+
+            if ($type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::AssignedManager, ServiceRequestNotificationChannel::Notification)) {
+                $assignedUser->notify(new ServiceRequestCreated($serviceRequest, $assignedManagerCreatedEmailTemplate, DatabaseChannel::class));
+            }
+        }
     }
 }

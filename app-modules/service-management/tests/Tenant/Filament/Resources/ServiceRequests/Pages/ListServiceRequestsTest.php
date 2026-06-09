@@ -914,7 +914,7 @@ it('shows all service requests when no type filter is selected', function () {
         ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB));
 });
 
-it('builds type tree options with categories as disabled groups and types as selectable items', function () {
+it('builds type tree options with categories as groups and types as selectable items', function () {
     ServiceRequestType::query()->delete();
     ServiceRequestTypeCategory::query()->delete();
 
@@ -954,24 +954,19 @@ it('builds type tree options with categories as disabled groups and types as sel
 
     // Area A
     expect($tree[0]['name'])->toBe('Area A');
-    expect($tree[0]['disabled'])->toBeTrue();
     expect($tree[0]['value'])->toBe('category_' . $categoryA->getKey());
     expect($tree[0]['children'])->toHaveCount(2);
     expect($tree[0]['children'][0]['name'])->toBe('Type A1');
     expect($tree[0]['children'][0]['value'])->toBe($typeA1->getKey());
-    expect($tree[0]['children'][0]['disabled'])->toBeFalse();
     expect($tree[0]['children'][1]['name'])->toBe('Type A2');
     expect($tree[0]['children'][1]['value'])->toBe($typeA2->getKey());
-    expect($tree[0]['children'][1]['disabled'])->toBeFalse();
 
     // Area B
     expect($tree[1]['name'])->toBe('Area B');
-    expect($tree[1]['disabled'])->toBeTrue();
     expect($tree[1]['value'])->toBe('category_' . $categoryB->getKey());
     expect($tree[1]['children'])->toHaveCount(1);
     expect($tree[1]['children'][0]['name'])->toBe('Type B1');
     expect($tree[1]['children'][0]['value'])->toBe($typeB1->getKey());
-    expect($tree[1]['children'][0]['disabled'])->toBeFalse();
 });
 
 it('builds type tree options with nested categories maintaining sort order', function () {
@@ -1008,21 +1003,17 @@ it('builds type tree options with nested categories maintaining sort order', fun
 
     // Parent Area
     expect($tree[0]['name'])->toBe('Parent Area');
-    expect($tree[0]['disabled'])->toBeTrue();
     expect($tree[0]['children'])->toHaveCount(2);
 
     // Child Area (nested category, comes first by sort order)
     expect($tree[0]['children'][0]['name'])->toBe('Child Area');
-    expect($tree[0]['children'][0]['disabled'])->toBeTrue();
     expect($tree[0]['children'][0]['children'])->toHaveCount(1);
     expect($tree[0]['children'][0]['children'][0]['name'])->toBe('Child Type');
     expect($tree[0]['children'][0]['children'][0]['value'])->toBe($childType->getKey());
-    expect($tree[0]['children'][0]['children'][0]['disabled'])->toBeFalse();
 
     // Parent Type (type in parent category)
     expect($tree[0]['children'][1]['name'])->toBe('Parent Type');
     expect($tree[0]['children'][1]['value'])->toBe($parentType->getKey());
-    expect($tree[0]['children'][1]['disabled'])->toBeFalse();
 });
 
 it('builds type tree options with uncategorized types at root level', function () {
@@ -1054,11 +1045,70 @@ it('builds type tree options with uncategorized types at root level', function (
     // Uncategorized type at root level first
     expect($tree[0]['name'])->toBe('Uncategorized Type');
     expect($tree[0]['value'])->toBe($uncategorizedType->getKey());
-    expect($tree[0]['disabled'])->toBeFalse();
 
     // Categorized area after uncategorized types
     expect($tree[1]['name'])->toBe('Categorized Area');
-    expect($tree[1]['disabled'])->toBeTrue();
     expect($tree[1]['children'])->toHaveCount(1);
     expect($tree[1]['children'][0]['name'])->toBe('Categorized Type');
+});
+
+it('filters out empty categories from type tree options', function () {
+    ServiceRequestType::query()->delete();
+    ServiceRequestTypeCategory::query()->delete();
+
+    $categoryWithTypes = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Has Types',
+        'sort' => 1,
+        'parent_id' => null,
+    ]);
+
+    $emptyCategory = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Empty Category',
+        'sort' => 2,
+        'parent_id' => null,
+    ]);
+
+    ServiceRequestType::factory()->create([
+        'name' => 'Type A',
+        'sort' => 1,
+        'category_id' => $categoryWithTypes->getKey(),
+    ]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    expect($tree)->toHaveCount(1);
+    expect($tree[0]['name'])->toBe('Has Types');
+    expect($tree[0]['children'])->toHaveCount(1);
+    expect($tree[0]['children'][0]['name'])->toBe('Type A');
+});
+
+it('filters out nested empty categories from type tree options', function () {
+    ServiceRequestType::query()->delete();
+    ServiceRequestTypeCategory::query()->delete();
+
+    $parentCategory = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Parent',
+        'sort' => 1,
+        'parent_id' => null,
+    ]);
+
+    ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Empty Child',
+        'sort' => 1,
+        'parent_id' => $parentCategory->getKey(),
+    ]);
+
+    $type = ServiceRequestType::factory()->create([
+        'name' => 'Direct Type',
+        'sort' => 2,
+        'category_id' => $parentCategory->getKey(),
+    ]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    expect($tree)->toHaveCount(1);
+    expect($tree[0]['name'])->toBe('Parent');
+    expect($tree[0]['children'])->toHaveCount(1);
+    expect($tree[0]['children'][0]['name'])->toBe('Direct Type');
+    expect($tree[0]['children'][0]['value'])->toBe($type->getKey());
 });
