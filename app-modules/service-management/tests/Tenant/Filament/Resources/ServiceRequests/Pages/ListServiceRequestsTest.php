@@ -60,6 +60,8 @@ use function Tests\asSuperAdmin;
 test('The correct details are displayed on the ListServiceRequests page', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.*.update');
@@ -85,6 +87,7 @@ test('The correct details are displayed on the ListServiceRequests page', functi
             relationship: 'assignments'
         )
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -139,6 +142,8 @@ test('The correct details are displayed on the ListServiceRequests page', functi
 test('The correct details are displayed on the ListServiceRequests page via direct user manager', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.*.update');
@@ -158,6 +163,7 @@ test('The correct details are displayed on the ListServiceRequests page via dire
             relationship: 'assignments'
         )
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -212,8 +218,11 @@ test('The correct details are displayed on the ListServiceRequests page via dire
 test('category is rendered inline with the service request number on the ListServiceRequests page', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $serviceRequest = ServiceRequest::factory()->create([
         'category' => ServiceRequestCategory::Incident,
+        'status_id' => $openStatus->getKey(),
     ]);
 
     livewire(ListServiceRequests::class)
@@ -226,16 +235,20 @@ test('category is rendered inline with the service request number on the ListSer
 test('can filter service request by category', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $incidentServiceRequests = ServiceRequest::factory()
         ->count(2)
         ->create([
             'category' => ServiceRequestCategory::Incident,
+            'status_id' => $openStatus->getKey(),
         ]);
 
     $requestServiceRequests = ServiceRequest::factory()
         ->count(2)
         ->create([
             'category' => ServiceRequestCategory::Request,
+            'status_id' => $openStatus->getKey(),
         ]);
 
     livewire(ListServiceRequests::class)
@@ -248,14 +261,16 @@ test('can filter service request by category', function () {
 test('can sort service requests by type', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $firstType = ServiceRequestType::factory()->create(['name' => 'Alpha Type']);
     $secondType = ServiceRequestType::factory()->create(['name' => 'Beta Type']);
 
     $firstPriority = ServiceRequestPriority::factory()->create(['type_id' => $firstType->getKey()]);
     $secondPriority = ServiceRequestPriority::factory()->create(['type_id' => $secondType->getKey()]);
 
-    $firstServiceRequest = ServiceRequest::factory()->create(['priority_id' => $firstPriority->getKey()]);
-    $secondServiceRequest = ServiceRequest::factory()->create(['priority_id' => $secondPriority->getKey()]);
+    $firstServiceRequest = ServiceRequest::factory()->create(['priority_id' => $firstPriority->getKey(), 'status_id' => $openStatus->getKey()]);
+    $secondServiceRequest = ServiceRequest::factory()->create(['priority_id' => $secondPriority->getKey(), 'status_id' => $openStatus->getKey()]);
 
     livewire(ListServiceRequests::class)
         ->sortTable('priority.type.name', 'asc')
@@ -267,11 +282,13 @@ test('can sort service requests by type', function () {
 test('type column displays the correct service request type name', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $serviceRequestType = ServiceRequestType::factory()->create(['name' => 'Test Type']);
 
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $serviceRequestType->getKey()]);
 
-    $serviceRequest = ServiceRequest::factory()->create(['priority_id' => $priority->getKey()]);
+    $serviceRequest = ServiceRequest::factory()->create(['priority_id' => $priority->getKey(), 'status_id' => $openStatus->getKey()]);
 
     livewire(ListServiceRequests::class)
         ->assertTableColumnStateSet(
@@ -330,6 +347,8 @@ test('ListServiceRequests is gated with proper feature access control', function
 test('can filter service request by organization', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $organizations = Organization::factory()->count(10)->create();
 
     $organization = $organizations->first();
@@ -337,11 +356,11 @@ test('can filter service request by organization', function () {
     $serviceRequestsInOrganization = ServiceRequest::factory()
         ->count(3)
         ->for(Contact::factory()->state(['organization_id' => $organization->id]), 'respondent')
-        ->create();
+        ->create(['status_id' => $openStatus->getKey()]);
 
     $serviceRequestsNotInOrganization = ServiceRequest::factory()
         ->count(3)
-        ->create();
+        ->create(['status_id' => $openStatus->getKey()]);
 
     livewire(ListServiceRequests::class)
         ->assertCanSeeTableRecords($serviceRequestsInOrganization->merge($serviceRequestsNotInOrganization))
@@ -359,6 +378,8 @@ test('service requests only visible to service request type managers', function 
 
     $settings->save();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
@@ -373,13 +394,14 @@ test('service requests only visible to service request type managers', function 
 
     $serviceRequests = ServiceRequest::factory()
         ->count(3)
-        ->create();
+        ->create(['status_id' => $openStatus->getKey()]);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'status_id' => $openStatus->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
@@ -401,6 +423,8 @@ test('service requests only visible to direct user service request type managers
 
     $settings->save();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
@@ -409,13 +433,14 @@ test('service requests only visible to direct user service request type managers
 
     $serviceRequests = ServiceRequest::factory()
         ->count(3)
-        ->create();
+        ->create(['status_id' => $openStatus->getKey()]);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->managerUsers()->attach($user);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'status_id' => $openStatus->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
@@ -437,6 +462,8 @@ test('service requests only visible to service request type auditors', function 
 
     $settings->save();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
@@ -451,13 +478,14 @@ test('service requests only visible to service request type auditors', function 
 
     $serviceRequests = ServiceRequest::factory()
         ->count(3)
-        ->create();
+        ->create(['status_id' => $openStatus->getKey()]);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->auditorDepartments()->attach($department);
 
     $serviceRequestsWithAuditors = ServiceRequest::factory()->state([
+        'status_id' => $openStatus->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
@@ -479,6 +507,8 @@ test('service requests only visible to direct user service request type auditors
 
     $settings->save();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
@@ -487,13 +517,14 @@ test('service requests only visible to direct user service request type auditors
 
     $serviceRequests = ServiceRequest::factory()
         ->count(3)
-        ->create();
+        ->create(['status_id' => $openStatus->getKey()]);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->auditorUsers()->attach($user);
 
     $serviceRequestsWithAuditors = ServiceRequest::factory()->state([
+        'status_id' => $openStatus->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
@@ -592,7 +623,9 @@ test('can list direct user manager to service request type', function () {
 });
 
 it('can filter service requests by assigned to with unassigned option', function () {
-    $unassignedRequest = ServiceRequest::factory()->create();
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
+    $unassignedRequest = ServiceRequest::factory()->create(['status_id' => $openStatus->getKey()]);
 
     $user = User::factory()->create();
 
@@ -626,6 +659,7 @@ it('can filter service requests by assigned to with unassigned option', function
             relationship: 'assignments'
         )
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -642,6 +676,7 @@ it('can filter service requests by assigned to with unassigned option', function
             relationship: 'assignments'
         )
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -682,7 +717,9 @@ it('can filter service requests by assigned to with unassigned option', function
 });
 
 it('can filter service requests by assigned to with unassigned option via direct user manager', function () {
-    $unassignedRequest = ServiceRequest::factory()->create();
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
+    $unassignedRequest = ServiceRequest::factory()->create(['status_id' => $openStatus->getKey()]);
 
     $user = User::factory()->create();
 
@@ -706,6 +743,7 @@ it('can filter service requests by assigned to with unassigned option via direct
             relationship: 'assignments'
         )
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -738,6 +776,8 @@ it('can filter service requests by assigned to with unassigned option via direct
 it('can filter service requests by searched assigned user outside initial preload options', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     User::factory()->count(75)->create();
 
     $searchedUser = User::factory()->create();
@@ -767,6 +807,7 @@ it('can filter service requests by searched assigned user outside initial preloa
             relationship: 'assignments'
         )
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => $priority->getKey(),
         ])
         ->create();
@@ -781,6 +822,7 @@ it('can filter service requests by searched assigned user outside initial preloa
             relationship: 'assignments'
         )
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => $priority->getKey(),
         ])
         ->create();
@@ -823,6 +865,8 @@ it('default non closed service request will not display', function () {
 it('can filter service requests by type', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $typeA = ServiceRequestType::factory()->create();
     $typeB = ServiceRequestType::factory()->create();
 
@@ -836,11 +880,11 @@ it('can filter service requests by type', function () {
 
     $serviceRequestsTypeA = ServiceRequest::factory()
         ->count(2)
-        ->create(['priority_id' => $priorityA->getKey()]);
+        ->create(['priority_id' => $priorityA->getKey(), 'status_id' => $openStatus->getKey()]);
 
     $serviceRequestsTypeB = ServiceRequest::factory()
         ->count(2)
-        ->create(['priority_id' => $priorityB->getKey()]);
+        ->create(['priority_id' => $priorityB->getKey(), 'status_id' => $openStatus->getKey()]);
 
     livewire(ListServiceRequests::class)
         ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB))
@@ -851,6 +895,8 @@ it('can filter service requests by type', function () {
 
 it('can filter service requests by multiple types', function () {
     asSuperAdmin();
+
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
 
     $typeA = ServiceRequestType::factory()->create();
     $typeB = ServiceRequestType::factory()->create();
@@ -870,15 +916,15 @@ it('can filter service requests by multiple types', function () {
 
     $serviceRequestsTypeA = ServiceRequest::factory()
         ->count(2)
-        ->create(['priority_id' => $priorityA->getKey()]);
+        ->create(['priority_id' => $priorityA->getKey(), 'status_id' => $openStatus->getKey()]);
 
     $serviceRequestsTypeB = ServiceRequest::factory()
         ->count(2)
-        ->create(['priority_id' => $priorityB->getKey()]);
+        ->create(['priority_id' => $priorityB->getKey(), 'status_id' => $openStatus->getKey()]);
 
     $serviceRequestsTypeC = ServiceRequest::factory()
         ->count(2)
-        ->create(['priority_id' => $priorityC->getKey()]);
+        ->create(['priority_id' => $priorityC->getKey(), 'status_id' => $openStatus->getKey()]);
 
     livewire(ListServiceRequests::class)
         ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB)->merge($serviceRequestsTypeC))
@@ -889,6 +935,8 @@ it('can filter service requests by multiple types', function () {
 
 it('shows all service requests when no type filter is selected', function () {
     asSuperAdmin();
+
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
 
     $typeA = ServiceRequestType::factory()->create();
     $typeB = ServiceRequestType::factory()->create();
@@ -903,11 +951,11 @@ it('shows all service requests when no type filter is selected', function () {
 
     $serviceRequestsTypeA = ServiceRequest::factory()
         ->count(2)
-        ->create(['priority_id' => $priorityA->getKey()]);
+        ->create(['priority_id' => $priorityA->getKey(), 'status_id' => $openStatus->getKey()]);
 
     $serviceRequestsTypeB = ServiceRequest::factory()
         ->count(2)
-        ->create(['priority_id' => $priorityB->getKey()]);
+        ->create(['priority_id' => $priorityB->getKey(), 'status_id' => $openStatus->getKey()]);
 
     livewire(ListServiceRequests::class)
         ->filterTable('type', ['types' => []])
