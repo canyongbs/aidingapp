@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestConversationQueued as ServiceRequestConversationQueuedNotification;
 use App\Enums\Feature;
 use App\Enums\PresenceStatus;
-use App\Features\ServiceRequestTypeLiveChatSettingsFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
@@ -80,10 +79,6 @@ class QueueServiceRequestConversation
     protected function validateEligibility(ServiceRequest $serviceRequest, User $agent): void
     {
         if (! Gate::check(Feature::RealtimeChat->getGateName())) {
-            throw ValidationException::withMessages(['conversation' => 'An agent is not currently available.']);
-        }
-
-        if (! ServiceRequestTypeLiveChatSettingsFeature::active()) {
             throw ValidationException::withMessages(['conversation' => 'An agent is not currently available.']);
         }
 

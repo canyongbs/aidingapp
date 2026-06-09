@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
 use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
-use App\Features\ServiceRequestTypeLiveChatSettingsFeature;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
 use App\Filament\Forms\Components\UserSelect;
@@ -129,7 +128,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->label('Live Chat')
                             ->columnSpanFull()
                             ->live()
-                            ->visible(fn (): bool => Gate::check(Feature::RealtimeChat->getGateName()) && ServiceRequestTypeLiveChatSettingsFeature::active()),
+                            ->visible(fn (): bool => Gate::check(Feature::RealtimeChat->getGateName())),
                         Select::make('max_simultaneous_chats')
                             ->label('Maximum Simultaneous Chats')
                             ->options([
@@ -142,7 +141,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ])
                             ->placeholder('Unlimited')
                             ->columnSpanFull()
-                            ->visible(fn (Get $get): bool => $get('is_live_chat_enabled') && Gate::check(Feature::RealtimeChat->getGateName()) && ServiceRequestTypeLiveChatSettingsFeature::active()),
+                            ->visible(fn (Get $get): bool => $get('is_live_chat_enabled') && Gate::check(Feature::RealtimeChat->getGateName())),
                     ]),
             ]);
     }

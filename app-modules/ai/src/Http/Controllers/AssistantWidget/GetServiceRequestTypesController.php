@@ -42,7 +42,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\ServiceRequestTypeLiveChatSettingsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -65,7 +64,7 @@ class GetServiceRequestTypesController extends Controller
 
         $aiClarificationGlobalEnabled = app(AiClarificationSettings::class)->is_enabled;
         $aiResolutionGlobalEnabled = app(AiResolutionSettings::class)->is_enabled;
-        $liveChatFeatureEnabled = ServiceRequestTypeLiveChatSettingsFeature::active();
+        $liveChatFeatureEnabled = true;
 
         $categoriesById = [];
 
