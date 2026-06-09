@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestTypeLiveChatSettingsFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -61,16 +60,12 @@ return new class () extends Migration {
                 $table->string('finished_reason')->nullable();
                 $table->timestamps();
             });
-
-            ServiceRequestTypeLiveChatSettingsFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            ServiceRequestTypeLiveChatSettingsFeature::deactivate();
-
             Schema::dropIfExists('service_request_conversations');
 
             Schema::table('service_request_types', function (Blueprint $table) {
