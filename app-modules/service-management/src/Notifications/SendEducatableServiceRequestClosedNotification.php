@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Notifications;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\DataTransferObjects\NotificationResultData;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
@@ -81,7 +82,7 @@ class SendEducatableServiceRequestClosedNotification extends Notification implem
 
         $template = $this->emailTemplate;
         $timezone = Tenant::current()->getTimezone();
-        $mergeData = $this->serviceRequest->getTemplateMergeData($timezone);
+        $mergeData = $this->serviceRequest->getTemplateMergeData($timezone, recipientName: $notifiable instanceof Contact ? $notifiable->{$notifiable::displayNameKey()} : null);
 
         $subject = $template?->getSubject($mergeData)?->toHtml();
         $body = $template?->getBody(

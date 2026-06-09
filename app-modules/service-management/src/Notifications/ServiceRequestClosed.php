@@ -80,7 +80,7 @@ class ServiceRequestClosed extends BaseNotification implements ShouldQueue
     {
         $template = $this->emailTemplate;
         $timezone = $notifiable->getTimezone();
-        $mergeData = $this->serviceRequest->getTemplateMergeData($timezone);
+        $mergeData = $this->serviceRequest->getTemplateMergeData($timezone, recipientName: $notifiable->name);
 
         $subject = $template?->getSubject($mergeData)?->toHtml();
         $body = $template?->getBody(

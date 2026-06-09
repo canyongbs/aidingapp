@@ -149,17 +149,20 @@ class ServiceRequestTypeEmailTemplate extends Model implements Auditable, HasMed
      */
     public static function getMergeTags(): array
     {
+        // Keys are the merge tag identifiers stored in saved templates (do not change without a data migration).
+        // Values are the labels shown in the RichEditor merge tag picker.
         return [
-            'contact name' => '{{ contact name }}',
-            'service request number' => '{{ service request number }}',
-            'created date' => '{{ created date }}',
-            'updated date' => '{{ updated date }}',
-            'status' => '{{ status }}',
-            'assigned staff name' => '{{ assigned staff name }}',
-            'title' => '{{ title }}',
-            'description' => '{{ description }}',
-            'type' => '{{ type }}',
-            'recent update' => '{{ recent update }}',
+            'recipients name' => "recipient's name",
+            'contact name' => "contact's name",
+            'assigned staff name' => 'assigned manager',
+            'created date' => 'created date',
+            'updated date' => 'updated date',
+            'service request number' => 'service request number',
+            'title' => 'title',
+            'description' => 'description',
+            'status' => 'status',
+            'type' => 'type',
+            'recent update' => 'recent update',
         ];
     }
 
