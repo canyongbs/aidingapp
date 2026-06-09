@@ -40,16 +40,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
-    {        
-      Schema::table('media', function (Blueprint $table) {
-          $table->nullableUuidMorphs('created_by');
-      });
+    {
+        Schema::table('media', function (Blueprint $table) {
+            $table->nullableUuidMorphs('created_by');
+        });
     }
 
     public function down(): void
-    {        
-      Schema::table('media', function (Blueprint $table) {
-          $table->dropMorphs('created_by');
-      });
+    {
+        Schema::table('media', function (Blueprint $table) {
+            $table->dropMorphs('created_by');
+        });
     }
 };
