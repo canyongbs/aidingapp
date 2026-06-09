@@ -38,6 +38,7 @@ use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 
@@ -48,7 +49,10 @@ use function Tests\asSuperAdmin;
 test('it can bulk delete service requests as super admin', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $serviceRequests = ServiceRequest::factory()
+        ->state(['status_id' => $openStatus->getKey()])
         ->count(3)
         ->create();
 
@@ -74,12 +78,15 @@ test('it can bulk delete service requests as a department manager', function () 
     $serviceRequestType = ServiceRequestType::factory()->create();
     $serviceRequestType->managerDepartments()->attach($department);
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $serviceRequestPriority = ServiceRequestPriority::factory()
         ->for($serviceRequestType, 'type')
         ->create();
 
     $serviceRequests = ServiceRequest::factory()
         ->for($serviceRequestPriority, 'priority')
+        ->state(['status_id' => $openStatus->getKey()])
         ->count(3)
         ->create();
 
@@ -103,12 +110,15 @@ test('it can bulk delete service requests as a direct user manager', function ()
     $serviceRequestType = ServiceRequestType::factory()->create();
     $serviceRequestType->managerUsers()->attach($user);
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $serviceRequestPriority = ServiceRequestPriority::factory()
         ->for($serviceRequestType, 'type')
         ->create();
 
     $serviceRequests = ServiceRequest::factory()
         ->for($serviceRequestPriority, 'priority')
+        ->state(['status_id' => $openStatus->getKey()])
         ->count(3)
         ->create();
 

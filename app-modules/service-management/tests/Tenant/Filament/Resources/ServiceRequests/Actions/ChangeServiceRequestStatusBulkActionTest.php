@@ -52,7 +52,10 @@ test('it can change status of multiple service requests as super admin', functio
 
     $newStatus = ServiceRequestStatus::factory()->open()->create();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create(['name' => 'Initial Open']);
+
     $serviceRequests = ServiceRequest::factory()
+        ->state(['status_id' => $openStatus->getKey()])
         ->count(3)
         ->create();
 
@@ -79,8 +82,11 @@ test('it can change status of multiple service requests for user directly assign
 
     $newStatus = ServiceRequestStatus::factory()->open()->create();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create(['name' => 'Initial Open']);
+
     $serviceRequests = ServiceRequest::factory()
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -120,8 +126,11 @@ test('it can change status of multiple service requests for user belonging to a 
 
     $newStatus = ServiceRequestStatus::factory()->open()->create();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create(['name' => 'Initial Open']);
+
     $serviceRequests = ServiceRequest::factory()
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
