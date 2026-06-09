@@ -361,11 +361,13 @@ test('Can edit a service request', function () {
     $settings->save();
 
     $contact = Contact::factory()->create();
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
     $serviceRequest = ServiceRequest::factory()->state([
         'respondent_id' => $contact->getKey(),
+        'status_id' => $openStatus->getKey(),
     ])->create();
 
-    $newStatus = ServiceRequestStatus::factory()->create();
+    $newStatus = ServiceRequestStatus::factory()->inProgress()->create();
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
