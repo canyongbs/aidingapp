@@ -184,9 +184,7 @@ class ListServiceRequests extends ListRecords
                             ->label('Type')
                             ->getTreeUsing(fn () => static::buildTypeTreeOptions())
                             ->multiple()
-                            ->placeholder('All')
-                            ->independent(true)
-                            ->expandSelected(true),
+                            ->placeholder('All'),
                     ])
                     ->query(fn (Builder $query, array $data): Builder => $query->when(
                         ! empty($data['types']),
@@ -306,7 +304,7 @@ class ListServiceRequests extends ListRecords
     }
 
     /**
-     * @return array<int, array{name: string, value: string, disabled: bool, children: array<int, mixed>}>
+     * @return array<int, array{name: string, value: string, children: array<int, mixed>}>
      */
     public static function buildTypeTreeOptions(): array
     {
@@ -322,13 +320,14 @@ class ListServiceRequests extends ListRecords
 
         $tree = collect($categories->get('', collect()))
             ->map(fn (ServiceRequestTypeCategory $category) => static::buildCategoryNode($category, $categories, $types))
+            ->filter(fn (array $node) => ! empty($node['children']))
+            ->values()
             ->all();
 
         $uncategorizedTypes = $types->get('', collect())
             ->map(fn (ServiceRequestType $type) => [
                 'name' => $type->name,
                 'value' => $type->getKey(),
-                'disabled' => false,
                 'children' => [],
             ])
             ->all();
@@ -347,7 +346,7 @@ class ListServiceRequests extends ListRecords
      * @param  Collection<(int|string), mixed>  $categoriesByParent
      * @param  Collection<(int|string), mixed>  $typesByCategory
      *
-     * @return array{name: string, value: string, disabled: bool, children: array<int, mixed>}
+     * @return array{name: string, value: string, children: array<int, mixed>}
      */
     protected static function buildCategoryNode(
         ServiceRequestTypeCategory $category,
@@ -356,13 +355,14 @@ class ListServiceRequests extends ListRecords
     ): array {
         $childCategories = $categoriesByParent->get($category->getKey(), collect())
             ->map(fn (ServiceRequestTypeCategory $child) => static::buildCategoryNode($child, $categoriesByParent, $typesByCategory))
+            ->filter(fn (array $node) => ! empty($node['children']))
+            ->values()
             ->all();
 
         $childTypes = $typesByCategory->get($category->getKey(), collect())
             ->map(fn (ServiceRequestType $type) => [
                 'name' => $type->name,
                 'value' => $type->getKey(),
-                'disabled' => false,
                 'children' => [],
             ])
             ->all();
@@ -370,7 +370,6 @@ class ListServiceRequests extends ListRecords
         return [
             'name' => $category->name,
             'value' => 'category_' . $category->getKey(),
-            'disabled' => true,
             'children' => array_merge($childCategories, $childTypes),
         ];
     }
