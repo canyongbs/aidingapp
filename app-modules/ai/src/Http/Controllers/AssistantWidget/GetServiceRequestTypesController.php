@@ -64,7 +64,6 @@ class GetServiceRequestTypesController extends Controller
 
         $aiClarificationGlobalEnabled = app(AiClarificationSettings::class)->is_enabled;
         $aiResolutionGlobalEnabled = app(AiResolutionSettings::class)->is_enabled;
-        $liveChatFeatureEnabled = true;
 
         $categoriesById = [];
 
@@ -91,7 +90,7 @@ class GetServiceRequestTypesController extends Controller
                 'category_id' => $type->category_id,
                 'is_ai_clarification_enabled' => $aiClarificationGlobalEnabled && $type->is_ai_clarification_enabled,
                 'is_ai_resolution_enabled' => $aiResolutionGlobalEnabled && $type->is_ai_resolution_enabled,
-                'is_live_chat_enabled' => $liveChatFeatureEnabled && $type->is_live_chat_enabled,
+                'is_live_chat_enabled' => $type->is_live_chat_enabled,
                 'priorities' => $type->priorities->map(fn ($priority) => [
                     'id' => $priority->getKey(),
                     'name' => $priority->name,
