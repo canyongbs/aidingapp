@@ -37,7 +37,8 @@
 namespace AidingApp\ServiceManagement\Rules;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use Closure;use Illuminate\Contracts\Validation\ValidationRule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Translation\PotentiallyTranslatedString;
 
