@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use App\Models\User;
@@ -64,7 +65,7 @@ class ServiceRequestConversationFactory extends Factory
             'conversation_id' => Conversation::factory(),
             'accepted_at' => $this->faker->dateTimeBetween('-29 minutes', '-10 minutes'),
             'finished_at' => $this->faker->dateTimeBetween('-9 minutes', now()),
-            'finished_reason' => 'agent_ended',
+            'finished_reason' => ServiceRequestConversationFinishedReason::AgentEnded,
         ]);
     }
 }
