@@ -37,7 +37,6 @@
 namespace AidingApp\Project\Models;
 
 use AidingApp\Department\Models\Department;
-use App\Features\TeamRenameFeature;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
@@ -51,7 +50,7 @@ class ProjectAuditorDepartment extends Pivot
 
     public function getTable(): string
     {
-        return TeamRenameFeature::active() ? 'project_auditor_departments' : 'project_auditor_teams';
+        return 'project_auditor_departments';
     }
 
     /**
@@ -67,6 +66,6 @@ class ProjectAuditorDepartment extends Pivot
      */
     public function department(): BelongsTo
     {
-        return $this->belongsTo(Department::class, TeamRenameFeature::active() ? 'department_id' : 'team_id', 'id', 'department');
+        return $this->belongsTo(Department::class, 'department_id', 'id', 'department');
     }
 }

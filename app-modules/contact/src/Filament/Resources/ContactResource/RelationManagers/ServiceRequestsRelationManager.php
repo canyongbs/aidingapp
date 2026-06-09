@@ -48,7 +48,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
-use App\Features\TeamRenameFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
@@ -118,7 +117,7 @@ class ServiceRequestsRelationManager extends RelationManager
                                             ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                                                 $query->where(function (Builder $query) {
                                                     $query->whereHas('managerUsers', fn (Builder $query) => $query->where('users.id', auth()->user()->getKey()))
-                                                        ->orWhereHas('managerDepartments', fn (Builder $query) => $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), auth()->user()->department?->getKey()));
+                                                        ->orWhereHas('managerDepartments', fn (Builder $query) => $query->where('departments.id', auth()->user()->department?->getKey()));
                                                 });
                                             }),
                                     )
@@ -190,13 +189,13 @@ class ServiceRequestsRelationManager extends RelationManager
                 $query->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                     return $query->where(function (Builder $query) {
                         $query->whereHas('priority.type.managerDepartments', function (Builder $query): void {
-                            $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), auth()->user()->department?->getKey());
+                            $query->where('departments.id', auth()->user()->department?->getKey());
                         })
                             ->orWhereHas('priority.type.managerUsers', function (Builder $query): void {
                                 $query->where('users.id', auth()->user()->getKey());
                             })
                             ->orWhereHas('priority.type.auditorDepartments', function (Builder $query): void {
-                                $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), auth()->user()->department?->getKey());
+                                $query->where('departments.id', auth()->user()->department?->getKey());
                             })
                             ->orWhereHas('priority.type.auditorUsers', function (Builder $query): void {
                                 $query->where('users.id', auth()->user()->getKey());

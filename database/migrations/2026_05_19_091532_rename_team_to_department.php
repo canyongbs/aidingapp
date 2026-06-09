@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\TeamRenameFeature;
 use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -105,16 +104,12 @@ return new class () extends Migration {
             $this->renamePermissionGroups(['Team' => 'Department']);
 
             $this->renameAdvisoryConstraintsForward();
-
-            TeamRenameFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            TeamRenameFeature::deactivate();
-
             $this->renameAdvisoryConstraintsBackward();
 
             $this->renamePermissionGroups(['Department' => 'Team']);

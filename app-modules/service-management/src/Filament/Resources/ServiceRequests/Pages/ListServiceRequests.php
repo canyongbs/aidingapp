@@ -49,7 +49,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\TeamRenameFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
 use App\Models\User;
@@ -95,9 +94,9 @@ class ListServiceRequests extends ListRecords
                         });
 
                         $query->orWhereHas('priority.type.managerDepartments', function (Builder $query): void {
-                            $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), auth()->user()->department?->getKey());
+                            $query->where('departments.id', auth()->user()->department?->getKey());
                         })->orWhereHas('priority.type.auditorDepartments', function (Builder $query): void {
-                            $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), auth()->user()->department?->getKey());
+                            $query->where('departments.id', auth()->user()->department?->getKey());
                         });
                     });
                 }))
@@ -284,7 +283,7 @@ class ListServiceRequests extends ListRecords
                                         });
 
                                         $query->orWhereHas('priority.type.managerDepartments', function (Builder $query): void {
-                                            $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), auth()->user()->department?->getKey());
+                                            $query->where('departments.id', auth()->user()->department?->getKey());
                                         });
                                     });
                                 })

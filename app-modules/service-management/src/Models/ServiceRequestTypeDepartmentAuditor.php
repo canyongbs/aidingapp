@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeDepartmentAuditorFactory;
-use App\Features\TeamRenameFeature;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,7 +55,7 @@ class ServiceRequestTypeDepartmentAuditor extends Pivot
 
     public function getTable(): string
     {
-        return TeamRenameFeature::active() ? 'service_request_type_auditor_departments' : 'service_request_type_auditor_teams';
+        return 'service_request_type_auditor_departments';
     }
 
     /**
@@ -72,6 +71,6 @@ class ServiceRequestTypeDepartmentAuditor extends Pivot
      */
     public function department(): BelongsTo
     {
-        return $this->belongsTo(Department::class, TeamRenameFeature::active() ? 'department_id' : 'team_id');
+        return $this->belongsTo(Department::class, 'department_id');
     }
 }
