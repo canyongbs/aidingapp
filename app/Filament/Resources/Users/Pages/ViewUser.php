@@ -36,7 +36,6 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
-use App\Features\TeamRenameFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use App\Rules\EmailNotInUseOrSoftDeleted;
@@ -107,7 +106,7 @@ class ViewUser extends ViewRecord
                     ->disabled(),
                 Section::make('Department')
                     ->schema([
-                        Select::make(TeamRenameFeature::active() ? 'department_id' : 'team_id')
+                        Select::make('department_id')
                             ->hiddenLabel()
                             ->relationship('department', 'name')
                             ->disabled(),

@@ -47,7 +47,6 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
 use App\Features\ServiceRequestTypeEmailPreferenceFeature;
-use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
@@ -178,7 +177,7 @@ class ServiceRequestType extends BaseModel implements Auditable
             related: Department::class,
             table: (new ServiceRequestTypeDepartmentManager())->getTable(),
             foreignPivotKey: 'service_request_type_id',
-            relatedPivotKey: TeamRenameFeature::active() ? 'department_id' : 'team_id',
+            relatedPivotKey: 'department_id',
         )
             ->using(ServiceRequestTypeDepartmentManager::class)
             ->withPivot('id')
@@ -208,7 +207,7 @@ class ServiceRequestType extends BaseModel implements Auditable
             related: Department::class,
             table: (new ServiceRequestTypeDepartmentAuditor())->getTable(),
             foreignPivotKey: 'service_request_type_id',
-            relatedPivotKey: TeamRenameFeature::active() ? 'department_id' : 'team_id',
+            relatedPivotKey: 'department_id',
         )
             ->using(ServiceRequestTypeDepartmentAuditor::class)
             ->withPivot('id')
