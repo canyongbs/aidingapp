@@ -48,8 +48,8 @@ return new class () extends SettingsMigration {
                 $table->uuid('id')->primary();
                 $table->string('type');
                 $table->string('role');
-                $table->json('subject')->nullable();
-                $table->json('body')->nullable();
+                $table->jsonb('subject')->nullable();
+                $table->jsonb('body')->nullable();
                 $table->text('ai_instructions')->nullable();
                 $table->timestamps();
 

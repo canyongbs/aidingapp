@@ -47,12 +47,6 @@ use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
- * @property ServiceRequestEmailTemplateType $type
- * @property ServiceRequestTypeEmailTemplateRole $role
- * @property array<string, mixed>|null $subject
- * @property array<string, mixed>|null $body
- * @property string|null $ai_instructions
- *
  * @mixin IdeHelperServiceRequestNotificationAutomationEmailTemplate
  */
 class ServiceRequestNotificationAutomationEmailTemplate extends BaseModel implements HasRichContent
