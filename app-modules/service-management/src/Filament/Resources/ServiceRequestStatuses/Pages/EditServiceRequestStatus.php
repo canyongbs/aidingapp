@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Concerns\EditPageRedirection;
+use App\Features\KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -50,6 +51,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class EditServiceRequestStatus extends EditRecord
 {
@@ -59,6 +61,11 @@ class EditServiceRequestStatus extends EditRecord
 
     public function form(Schema $schema): Schema
     {
+        /*
+         * TODO: KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature cleanup — once the feature flag is removed:
+         * - Remove the ->when(KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::active(), ...) wrapper below
+         * - Apply ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()) directly on the name field
+         */
         return $schema
             ->components([
                 Section::make()
@@ -67,7 +74,13 @@ class EditServiceRequestStatus extends EditRecord
                         TextInput::make('name')
                             ->label('Name')
                             ->required()
-                            ->string(),
+                            ->string()
+                            ->when(
+                                KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::active(),
+                                fn (TextInput $input) => $input->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule) {
+                                    $rule->withoutTrashed();
+                                }),
+                            ),
                         Select::make('classification')
                             ->searchable()
                             ->options(SystemServiceRequestClassification::class)

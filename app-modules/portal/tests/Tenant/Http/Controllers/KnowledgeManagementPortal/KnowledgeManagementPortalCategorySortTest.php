@@ -35,6 +35,7 @@
 */
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Settings\PortalSettings;
 
 use function Pest\Laravel\getJson;
@@ -46,9 +47,13 @@ beforeEach(function () {
 });
 
 it('returns parent categories ordered by sort on the portal', function () {
-    KnowledgeBaseCategory::factory()->create(['name' => 'Zebra', 'sort' => 3]);
-    KnowledgeBaseCategory::factory()->create(['name' => 'Apple', 'sort' => 1]);
-    KnowledgeBaseCategory::factory()->create(['name' => 'Mango', 'sort' => 2]);
+    $zebra = KnowledgeBaseCategory::factory()->create(['name' => 'Zebra', 'sort' => 3]);
+    $apple = KnowledgeBaseCategory::factory()->create(['name' => 'Apple', 'sort' => 1]);
+    $mango = KnowledgeBaseCategory::factory()->create(['name' => 'Mango', 'sort' => 2]);
+
+    KnowledgeBaseItem::factory()->create(['category_id' => $zebra->id, 'public' => true]);
+    KnowledgeBaseItem::factory()->create(['category_id' => $apple->id, 'public' => true]);
+    KnowledgeBaseItem::factory()->create(['category_id' => $mango->id, 'public' => true]);
 
     $response = getJson(route('api.portal.category.index'));
 

@@ -51,8 +51,8 @@ class ServiceRequestStatusFactory extends Factory
     public function definition(): array
     {
         return [
-            'classification' => SystemServiceRequestClassification::Open,
-            'name' => $this->faker->word,
+            'classification' => $this->faker->randomElement(SystemServiceRequestClassification::cases()),
+            'name' => $this->faker->unique()->word(),
             'color' => $this->faker->randomElement(Color::cases()),
             'is_system_protected' => false,
             'sort' => $this->getNewOrder(),
