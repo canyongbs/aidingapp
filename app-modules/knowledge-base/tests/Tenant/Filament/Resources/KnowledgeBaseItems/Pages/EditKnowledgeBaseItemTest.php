@@ -218,7 +218,7 @@ test('managers UserSelect shows all users including admins when withoutAdminFilt
     expect(invade($field)->filterAdmins)->toBeFalse();
 });
 
-test('the edit page has an article_attachments file upload field', function () {
+test('file attachments can be uploaded and saved on the edit page', function () {
     Storage::fake('s3');
 
     $settings = app(LicenseSettings::class);
@@ -234,39 +234,19 @@ test('the edit page has an article_attachments file upload field', function () {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
 
     livewire(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSuccessful()
-        ->assertFormFieldExists('article_attachments');
-});
+        ->fillForm([
+            'article_attachments' => [
+                UploadedFile::fake()->create('test-document.pdf', 100),
+                UploadedFile::fake()->create('spreadsheet.xlsx', 200),
+            ],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
 
-test('the article_attachments media collection is registered on the model', function () {
-    Storage::fake('s3');
+    $knowledgeBaseItem->refresh();
 
-    $article = KnowledgeBaseItem::factory()->create();
+    $media = $knowledgeBaseItem->getMedia('article_attachments');
 
-    $article
-        ->addMedia(UploadedFile::fake()->create('test-document.pdf', 100))
-        ->toMediaCollection('article_attachments');
-
-    expect($article->getMedia('article_attachments'))->toHaveCount(1);
-    expect($article->getFirstMedia('article_attachments')->file_name)->toBe('test-document.pdf');
-});
-
-test('multiple files can be added to article_attachments collection', function () {
-    Storage::fake('s3');
-
-    $article = KnowledgeBaseItem::factory()->create();
-
-    $article
-        ->addMedia(UploadedFile::fake()->create('document1.pdf', 100))
-        ->toMediaCollection('article_attachments');
-
-    $article
-        ->addMedia(UploadedFile::fake()->create('spreadsheet.xlsx', 200))
-        ->toMediaCollection('article_attachments');
-
-    $article
-        ->addMedia(UploadedFile::fake()->create('presentation.docx', 150))
-        ->toMediaCollection('article_attachments');
-
-    expect($article->getMedia('article_attachments'))->toHaveCount(3);
+    expect($media)->toHaveCount(2);
+    expect($media->pluck('file_name')->sort()->values()->all())->toBe(['spreadsheet.xlsx', 'test-document.pdf']);
 });
