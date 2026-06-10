@@ -77,6 +77,7 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @property string $display_name
+ *
  * @mixin IdeHelperContact
  */
 #[ObservedBy([ContactObserver::class])]
