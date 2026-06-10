@@ -46,9 +46,10 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::table('service_request_assignments', function (Blueprint $table) {
-                $table->string('assigned_by_type')->nullable()->after('assigned_by_id');
+                $table->string('assigned_by_type')->nullable();
             });
 
+            //TODO: ServiceRequestAssignmentByTypeFeature clean up: Please remove the fllowing code while removing feature flag. line: 53 to 55
             DB::table('service_request_assignments')
                 ->whereNotNull('assigned_by_id')
                 ->update(['assigned_by_type' => (new User())->getMorphClass()]);
@@ -70,6 +71,7 @@ return new class () extends Migration {
                 $table->dropIndex(['assigned_by_type', 'assigned_by_id']);
             });
 
+            //TODO: ServiceRequestAssignmentByTypeFeature clean up: Please remove the fllowing code while removing feature flag. line: 75 to 78
             DB::table('service_request_assignments')
                 ->whereNotNull('assigned_by_type')
                 ->where('assigned_by_type', '!=', (new User())->getMorphClass())
