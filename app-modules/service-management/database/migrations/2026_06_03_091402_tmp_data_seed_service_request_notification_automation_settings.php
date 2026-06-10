@@ -34,33 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement;
+use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
+use App\Features\ServiceRequestNotificationAutomationFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
-
-class ServiceManagementPlugin implements Plugin
-{
-    public function getId(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return 'service-request';
+        DB::transaction(function () {
+            DB::table('settings')
+                ->where('group', 'service-request-notification-automation')
+                ->where('name', 'ai_prompt')
+                ->update([
+                    'payload' => json_encode(ServiceRequestNotificationAutomationSettings::defaultAiPrompt()),
+                    'updated_at' => now(),
+                ]);
+
+            ServiceRequestNotificationAutomationFeature::activate();
+        });
     }
 
-    public function register(Panel $panel): void
+    public function down(): void
     {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
-        )
-            ->discoverPages(
-                in: __DIR__ . '/Filament/Pages',
-                for: 'AidingApp\\ServiceManagement\\Filament\\Pages'
-            )
-            ->livewireComponents([
-                ServiceRequestMediaTable::class,
-            ]);
+        ServiceRequestNotificationAutomationFeature::deactivate();
     }
-
-    public function boot(Panel $panel): void {}
-}
+};

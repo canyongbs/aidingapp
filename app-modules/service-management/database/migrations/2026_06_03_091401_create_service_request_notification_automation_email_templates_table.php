@@ -34,33 +34,47 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
-
-class ServiceManagementPlugin implements Plugin
-{
-    public function getId(): string
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return 'service-request';
+        DB::transaction(function () {
+            Schema::create('service_request_notification_automation_email_templates', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->string('type');
+                $table->string('role');
+                $table->jsonb('subject')->nullable();
+                $table->jsonb('body')->nullable();
+                $table->text('ai_instructions')->nullable();
+                $table->timestamps();
+
+                $table->unique(['type', 'role']);
+            });
+
+            try {
+                $this->migrator->add('service-request-notification-automation.is_enabled', false);
+            } catch (SettingAlreadyExists) {
+            }
+
+            try {
+                $this->migrator->add('service-request-notification-automation.ai_prompt', []);
+            } catch (SettingAlreadyExists) {
+            }
+        });
     }
 
-    public function register(Panel $panel): void
+    public function down(): void
     {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
-        )
-            ->discoverPages(
-                in: __DIR__ . '/Filament/Pages',
-                for: 'AidingApp\\ServiceManagement\\Filament\\Pages'
-            )
-            ->livewireComponents([
-                ServiceRequestMediaTable::class,
-            ]);
-    }
+        DB::transaction(function () {
+            $this->migrator->deleteIfExists('service-request-notification-automation.is_enabled');
+            $this->migrator->deleteIfExists('service-request-notification-automation.ai_prompt');
 
-    public function boot(Panel $panel): void {}
-}
+            Schema::dropIfExists('service_request_notification_automation_email_templates');
+        });
+    }
+};

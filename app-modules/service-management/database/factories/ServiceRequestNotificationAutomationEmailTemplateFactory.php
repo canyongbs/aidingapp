@@ -34,33 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ServiceManagementPlugin implements Plugin
+/**
+ * @extends Factory<ServiceRequestNotificationAutomationEmailTemplate>
+ */
+class ServiceRequestNotificationAutomationEmailTemplateFactory extends Factory
 {
-    public function getId(): string
+    /**
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
-        return 'service-request';
+        return [
+            'type' => $this->faker->randomElement(ServiceRequestEmailTemplateType::cases()),
+            'role' => fn (array $attributes) => $attributes['type'] === ServiceRequestEmailTemplateType::SurveyResponse
+                ? ServiceRequestTypeEmailTemplateRole::Customer
+                : $this->faker->randomElement(ServiceRequestTypeEmailTemplateRole::cases()),
+            'subject' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->sentence()]]]]],
+            'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->paragraph()]]]]],
+            'ai_instructions' => $this->faker->sentence(),
+        ];
     }
-
-    public function register(Panel $panel): void
-    {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
-        )
-            ->discoverPages(
-                in: __DIR__ . '/Filament/Pages',
-                for: 'AidingApp\\ServiceManagement\\Filament\\Pages'
-            )
-            ->livewireComponents([
-                ServiceRequestMediaTable::class,
-            ]);
-    }
-
-    public function boot(Panel $panel): void {}
 }

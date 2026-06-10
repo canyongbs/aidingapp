@@ -34,33 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
-
-class ServiceManagementPlugin implements Plugin
-{
-    public function getId(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return 'service-request';
+        DB::transaction(function () {
+            Schema::table('tenants', function (Blueprint $table) {
+                $table->dropUnique('tenants_domain_unique');
+
+                $table->uniqueIndex('domain', 'tenants_domain_unique')->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
+            });
+        });
     }
 
-    public function register(Panel $panel): void
+    public function down(): void
     {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
-        )
-            ->discoverPages(
-                in: __DIR__ . '/Filament/Pages',
-                for: 'AidingApp\\ServiceManagement\\Filament\\Pages'
-            )
-            ->livewireComponents([
-                ServiceRequestMediaTable::class,
-            ]);
+        DB::transaction(function () {
+            Schema::table('tenants', function (Blueprint $table) {
+                $table->dropIndex('tenants_domain_unique');
+                $table->unique('domain');
+            });
+        });
     }
-
-    public function boot(Panel $panel): void {}
-}
+};
