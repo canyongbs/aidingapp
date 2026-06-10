@@ -268,6 +268,14 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     }
 
     /**
+     * @return HasMany<ServiceRequestConversation, $this>
+     */
+    public function conversations(): HasMany
+    {
+        return $this->hasMany(ServiceRequestConversation::class);
+    }
+
+    /**
      * @return HasOne<ServiceRequestFeedback, $this>
      */
     public function feedback(): HasOne

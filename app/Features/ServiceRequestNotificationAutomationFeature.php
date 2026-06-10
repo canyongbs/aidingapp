@@ -38,7 +38,7 @@ namespace App\Features;
 
 use App\Support\AbstractFeatureFlag;
 
-class ServiceRequestTypeLiveChatSettingsFeature extends AbstractFeatureFlag
+class ServiceRequestNotificationAutomationFeature extends AbstractFeatureFlag
 {
     public function resolve(mixed $scope): mixed
     {

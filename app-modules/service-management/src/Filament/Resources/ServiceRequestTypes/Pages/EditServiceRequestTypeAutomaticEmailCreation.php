@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateConditi
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Concerns\EditPageRedirection;
-use App\Features\EmailAutomaticCreationFeature;
 use App\Models\Tenant;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
@@ -117,7 +116,7 @@ class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
                             ->label('Condition')
                             ->options(EmailAutomaticCreationContactCreateCondition::class)
                             ->inline()
-                            ->visible(fn (Get $get): bool => EmailAutomaticCreationFeature::active() && $get('is_email_automatic_creation_enabled') && $get('is_email_automatic_creation_contact_create_enabled'))
+                            ->visible(fn (Get $get): bool => $get('is_email_automatic_creation_enabled') && $get('is_email_automatic_creation_contact_create_enabled'))
                             ->required(),
                         Section::make('Ineligible Contacts')
                             ->schema([

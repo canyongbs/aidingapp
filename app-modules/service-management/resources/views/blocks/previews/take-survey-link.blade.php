@@ -31,7 +31,7 @@
     
     </COPYRIGHT>
 --}}
-<div style="text-align: {{ $alignment }}">
+<div style="text-align: {{ $alignment ?? 'center' }}">
     <a
         href="{{ $url ?? '#' }}"
         style="

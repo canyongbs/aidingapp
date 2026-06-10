@@ -34,14 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+use AidingApp\ServiceManagement\Filament\Pages\ManageServiceRequestNotificationAutomationSettings;
+use App\Models\User;
 
-use App\Support\AbstractFeatureFlag;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+use function Tests\asSuperAdmin;
 
-class MediaCreatedByFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
-    }
-}
+test('it prevents access when the user does not have permission', function () {
+    actingAs(User::factory()->create());
+
+    get(ManageServiceRequestNotificationAutomationSettings::getUrl())
+        ->assertForbidden();
+});
+
+test('it allows access for super admins', function () {
+    asSuperAdmin();
+
+    get(ManageServiceRequestNotificationAutomationSettings::getUrl())
+        ->assertSuccessful();
+});

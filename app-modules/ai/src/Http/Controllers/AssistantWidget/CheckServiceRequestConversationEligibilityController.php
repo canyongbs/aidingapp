@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Actions\CountActiveServiceRequestConversations;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
 use App\Enums\PresenceStatus;
-use App\Features\ServiceRequestTypeLiveChatSettingsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -58,10 +57,6 @@ class CheckServiceRequestConversationEligibilityController extends Controller
         abort_if(! $serviceRequest->respondent()->is($contact), Response::HTTP_FORBIDDEN);
 
         if (! Gate::check(Feature::RealtimeChat->getGateName())) {
-            return response()->json(['eligible' => false]);
-        }
-
-        if (! ServiceRequestTypeLiveChatSettingsFeature::active()) {
             return response()->json(['eligible' => false]);
         }
 

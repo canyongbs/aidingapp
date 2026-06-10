@@ -36,15 +36,12 @@
 
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Department\Models\Department;
-use App\Features\UserImportExportFeature;
 use App\Filament\Imports\UserImporter;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\ValidationException;
-
-beforeEach(fn () => UserImportExportFeature::activate());
 
 /**
  * @param  array<string, mixed>  $row

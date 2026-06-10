@@ -38,7 +38,6 @@ namespace App\Providers;
 
 use AidingApp\Engagement\Jobs\CreateBatchedEngagement;
 use AidingApp\Notification\Enums\NotificationChannel;
-use App\Features\MediaCreatedByFeature;
 use App\Models\Media;
 use App\Models\SystemUser;
 use App\Models\Tenant;
@@ -150,10 +149,6 @@ class AppServiceProvider extends ServiceProvider
         Feature::discover();
 
         FileAdder::macro('createdBy', function (Model $creator): FileAdder {
-            if (! MediaCreatedByFeature::active()) {
-                return $this;
-            }
-
             $relation = (new Media())->createdBy();
 
             return $this->withProperties([

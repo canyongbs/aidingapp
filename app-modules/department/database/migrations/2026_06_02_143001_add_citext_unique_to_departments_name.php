@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -42,28 +41,13 @@ use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    use FixesDuplicateNames;
-
     private string $table = 'departments';
 
     private string $column = 'name';
 
-    private bool $usesSoftDeletes = true;
-
-    private int $chunkSize = 100;
-
     public function up(): void
     {
         DB::transaction(function () {
-            /*
-             * TODO: UserImportExportFeature cleanup — once this migration has run in all environments:
-             * - Remove the $this->fixDuplicates() call below
-             * - Remove the $this->revertDuplicates() call in down()
-             * - Remove the $chunkSize property
-             * - Remove the $usesSoftDeletes property
-             */
-            $this->fixDuplicates();
-
             DB::statement('ALTER TABLE departments DROP CONSTRAINT IF EXISTS departments_name_unique');
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
@@ -84,7 +68,5 @@ return new class () extends Migration {
         Schema::table($this->table, function (Blueprint $table) {
             $table->unique($this->column, 'departments_name_unique');
         });
-
-        $this->revertDuplicates();
     }
 };

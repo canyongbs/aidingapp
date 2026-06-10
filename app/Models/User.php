@@ -60,7 +60,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserManager;
 use AidingApp\Task\Models\Task;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use App\Enums\PresenceStatus;
-use App\Features\TeamRenameFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Settings\DisplaySettings;
 use App\Settings\PresenceSettings;
@@ -267,7 +266,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
      */
     public function department(): BelongsTo
     {
-        return $this->belongsTo(Department::class, TeamRenameFeature::active() ? 'department_id' : 'team_id');
+        return $this->belongsTo(Department::class, 'department_id');
     }
 
     /**

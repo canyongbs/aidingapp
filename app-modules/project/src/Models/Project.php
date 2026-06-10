@@ -43,7 +43,6 @@ use AidingApp\Project\Models\Scopes\ProjectVisibilityScope;
 use AidingApp\Project\Observers\ProjectObserver;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Task;
-use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -119,9 +118,9 @@ class Project extends BaseModel implements Auditable
         return $this
             ->belongsToMany(
                 Department::class,
-                TeamRenameFeature::active() ? 'project_manager_departments' : 'project_manager_teams',
+                'project_manager_departments',
                 'project_id',
-                TeamRenameFeature::active() ? 'department_id' : 'team_id',
+                'department_id',
             )
             ->using(ProjectManagerDepartment::class)
             ->withTimestamps();
@@ -146,9 +145,9 @@ class Project extends BaseModel implements Auditable
         return $this
             ->belongsToMany(
                 Department::class,
-                TeamRenameFeature::active() ? 'project_auditor_departments' : 'project_auditor_teams',
+                'project_auditor_departments',
                 'project_id',
-                TeamRenameFeature::active() ? 'department_id' : 'team_id',
+                'department_id',
             )
             ->using(ProjectAuditorDepartment::class)
             ->withTimestamps();

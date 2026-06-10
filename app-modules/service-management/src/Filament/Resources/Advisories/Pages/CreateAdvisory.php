@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
-use App\Features\TeamRenameFeature;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -74,7 +73,7 @@ class CreateAdvisory extends CreateRecord
                     ->preload()
                     ->searchable()
                     ->relationship('status', 'name'),
-                Select::make(TeamRenameFeature::active() ? 'assigned_department_id' : 'assigned_team_id')
+                Select::make('assigned_department_id')
                     ->label('Assigned Department')
                     ->preload()
                     ->searchable()

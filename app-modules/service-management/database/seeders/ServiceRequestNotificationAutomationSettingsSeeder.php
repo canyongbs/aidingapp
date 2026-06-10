@@ -34,14 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\ServiceManagement\Database\Seeders;
 
-use App\Support\AbstractFeatureFlag;
+use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
+use Illuminate\Database\Seeder;
 
-class TeamRenameFeature extends AbstractFeatureFlag
+class ServiceRequestNotificationAutomationSettingsSeeder extends Seeder
 {
-    public function resolve(mixed $scope): mixed
+    public function run(): void
     {
-        return false;
+        $settings = app(ServiceRequestNotificationAutomationSettings::class);
+        $settings->ai_prompt = ServiceRequestNotificationAutomationSettings::defaultAiPrompt();
+        $settings->save();
     }
 }

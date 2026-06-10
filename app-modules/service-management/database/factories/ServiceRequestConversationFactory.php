@@ -34,14 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use App\Support\AbstractFeatureFlag;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class UserImportExportFeature extends AbstractFeatureFlag
+/**
+ * @extends Factory<ServiceRequestConversation>
+ */
+class ServiceRequestConversationFactory extends Factory
 {
-    public function resolve(mixed $scope): mixed
+    public function definition(): array
     {
-        return false;
+        return [
+            'service_request_id' => ServiceRequest::factory(),
+            'contact_id' => Contact::factory(),
+            'user_id' => User::factory(),
+            'queued_at' => $this->faker->dateTimeBetween('-1 hour', '-30 minutes'),
+        ];
+    }
+
+    public function finished(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'conversation_id' => Conversation::factory(),
+            'accepted_at' => $this->faker->dateTimeBetween('-29 minutes', '-10 minutes'),
+            'finished_at' => $this->faker->dateTimeBetween('-9 minutes', now()),
+            'finished_reason' => ServiceRequestConversationFinishedReason::AgentEnded,
+        ]);
     }
 }
