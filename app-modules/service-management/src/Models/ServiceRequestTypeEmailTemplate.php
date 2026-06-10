@@ -152,7 +152,7 @@ class ServiceRequestTypeEmailTemplate extends Model implements Auditable, HasMed
         // Keys are the merge tag identifiers stored in saved templates (do not change without a data migration).
         // Values are the labels shown in the RichEditor merge tag picker.
         return [
-            'recipients name' => "recipient's name",
+            'recipient name' => "recipient's name",
             'contact name' => "contact's name",
             'assigned staff name' => 'assigned manager',
             'created date' => 'created date',

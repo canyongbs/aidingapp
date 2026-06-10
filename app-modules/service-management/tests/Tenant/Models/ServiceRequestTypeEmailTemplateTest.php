@@ -70,7 +70,7 @@ it('exposes the expected merge tags with stable keys and friendly labels in orde
     $mergeTags = ServiceRequestTypeEmailTemplate::getMergeTags();
 
     expect(array_keys($mergeTags))->toBe([
-        'recipients name',
+        'recipient name',
         'contact name',
         'assigned staff name',
         'created date',
@@ -84,7 +84,7 @@ it('exposes the expected merge tags with stable keys and friendly labels in orde
     ]);
 
     // The new recipient tag carries an apostrophe only in its label, never in its key.
-    expect($mergeTags['recipients name'])->toBe("recipient's name");
+    expect($mergeTags['recipient name'])->toBe("recipient's name");
     expect(array_keys($mergeTags))->not->toContain("recipient's name");
 
     expect($mergeTags['contact name'])->toBe("contact's name");
@@ -107,8 +107,8 @@ it('substitutes the recipient name in the body and subject while the relabeled c
         ->state([
             'type' => ServiceRequestEmailTemplateType::Created,
             'role' => ServiceRequestTypeEmailTemplateRole::Manager,
-            'body' => mergeTagBody(['recipients name', 'contact name']),
-            'subject' => mergeTagBody(['recipients name']),
+            'body' => mergeTagBody(['recipient name', 'contact name']),
+            'subject' => mergeTagBody(['recipient name']),
         ])
         ->create();
 
@@ -136,7 +136,7 @@ it('renders the staff recipient full name into a staff notification body', funct
         ->state([
             'type' => ServiceRequestEmailTemplateType::Created,
             'role' => ServiceRequestTypeEmailTemplateRole::Manager,
-            'body' => mergeTagBody(['recipients name']),
+            'body' => mergeTagBody(['recipient name']),
         ])
         ->create();
 
@@ -160,7 +160,7 @@ it('renders the contact recipient full name into an educatable notification body
         ->state([
             'type' => ServiceRequestEmailTemplateType::Created,
             'role' => ServiceRequestTypeEmailTemplateRole::Customer,
-            'body' => mergeTagBody(['recipients name']),
+            'body' => mergeTagBody(['recipient name']),
         ])
         ->create();
 
