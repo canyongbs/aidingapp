@@ -175,7 +175,7 @@ class ReclassifyServiceRequestAction extends Action
                         ];
 
                         if (ServiceRequestAssignmentByTypeFeature::active()) {
-                            $assignmentData['assigned_by_type'] = auth()->user()?->getMorphClass() ?? null;
+                            $assignmentData['assigned_by_type'] = auth()->user()?->getMorphClass();
                         }
 
                         $record->assignments()->create($assignmentData);

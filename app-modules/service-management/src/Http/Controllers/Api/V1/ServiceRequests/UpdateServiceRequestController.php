@@ -36,9 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests;
 
-use AidingApp\ServiceManagement\Actions\UpdateServiceRequest;
+use AidingApp\ServiceManagement\Actions\UpdateServiceRequestAction;
 use AidingApp\ServiceManagement\DataTransferObjects\UpdateServiceRequestData;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Exceptions\AttemptedToAssignNonManagerToServiceRequest;
 use AidingApp\ServiceManagement\Http\Resources\Api\V1\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -49,6 +50,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class UpdateServiceRequestController
 {
@@ -56,7 +58,7 @@ class UpdateServiceRequestController
      * @response ServiceRequestResource
      */
     #[Group('Service Requests')]
-    public function __invoke(Request $request, UpdateServiceRequest $updateServiceRequest, ServiceRequest $serviceRequest): JsonResource
+    public function __invoke(Request $request, UpdateServiceRequestAction $updateServiceRequestAction, ServiceRequest $serviceRequest): JsonResource
     {
         Gate::authorize('viewAny', ServiceRequest::class);
         Gate::authorize('update', $serviceRequest);
@@ -69,7 +71,13 @@ class UpdateServiceRequestController
             'close_details' => ['nullable', 'string'],
         ]);
 
-        $serviceRequest = $updateServiceRequest->execute($serviceRequest, UpdateServiceRequestData::fromData($data));
+        try {
+            $serviceRequest = $updateServiceRequestAction->execute($serviceRequest, UpdateServiceRequestData::fromData($data));
+        } catch (AttemptedToAssignNonManagerToServiceRequest) {
+            throw ValidationException::withMessages([
+                'assigned_to_id' => 'The selected user must be a manager user or belong to a department designated as managers of this Service Request Type.',
+            ]);
+        }
 
         return $serviceRequest
             ->fresh(['status', 'priority', 'assignedTo.user', 'respondent'])

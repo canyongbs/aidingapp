@@ -42,7 +42,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\ServiceRequestAssignmentByTypeFeature;
 use Illuminate\Support\Arr;
 
-class UpdateServiceRequest
+class UpdateServiceRequestAction
 {
     public function execute(ServiceRequest $serviceRequest, UpdateServiceRequestData $data): ServiceRequest
     {
@@ -59,7 +59,7 @@ class UpdateServiceRequest
             ];
 
             if (ServiceRequestAssignmentByTypeFeature::active()) {
-                $assignmentData['assigned_by_type'] = auth()->user() ? auth()->user()->getMorphClass() : null;
+                $assignmentData['assigned_by_type'] = auth()->user()?->getMorphClass();
             }
             $serviceRequest->assignments()->create($assignmentData);
         }

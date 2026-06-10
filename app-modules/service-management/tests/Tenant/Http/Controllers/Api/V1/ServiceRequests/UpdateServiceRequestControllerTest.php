@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -276,4 +277,57 @@ it('returns null assignee when no assignment exists', function () {
     $response->assertOk();
 
     expect($response['data']['assignee'])->toBeNull();
+});
+
+it('rejects assigning a user who is not a manager of the service request type', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
+    Sanctum::actingAs($user, ['api']);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    $nonManagerUser = User::factory()->create();
+
+    $response = patchJson(route('api.v1.service-requests.update', ['serviceRequest' => $serviceRequest], false), [
+        'assigned_to_id' => $nonManagerUser->id,
+    ]);
+    $response->assertUnprocessable();
+    $response->assertJsonValidationErrors([
+        'assigned_to_id' => 'The selected user must be a manager user or belong to a department designated as managers of this Service Request Type.',
+    ]);
+});
+
+it('allows assigning a direct manager user of the service request type', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
+    Sanctum::actingAs($user, ['api']);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    $managerUser = User::factory()->create();
+    $serviceRequest->priority->type->managerUsers()->attach($managerUser);
+
+    $response = patchJson(route('api.v1.service-requests.update', ['serviceRequest' => $serviceRequest], false), [
+        'assigned_to_id' => $managerUser->id,
+    ]);
+    $response->assertOk();
+
+    expect($response['data']['assignee']['id'])->toBe($managerUser->id);
+});
+
+it('allows assigning a user whose department manages the service request type', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
+    Sanctum::actingAs($user, ['api']);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    $department = Department::factory()->create();
+    $managerUser = User::factory()->create();
+    $managerUser->department()->associate($department)->save();
+    $serviceRequest->priority->type->managerDepartments()->attach($department);
+
+    $response = patchJson(route('api.v1.service-requests.update', ['serviceRequest' => $serviceRequest], false), [
+        'assigned_to_id' => $managerUser->id,
+    ]);
+    $response->assertOk();
+
+    expect($response['data']['assignee']['id'])->toBe($managerUser->id);
 });

@@ -37,17 +37,20 @@
 namespace AidingApp\ServiceManagement\DataTransferObjects;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use Spatie\LaravelData\Attributes\MapOutputName;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Spatie\LaravelData\Optional;
 
+#[MapOutputName(SnakeCaseMapper::class)]
 class UpdateServiceRequestData extends Data
 {
     public function __construct(
-        public string | Optional $status_id, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
-        public string | Optional $priority_id, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
-        public string | Optional $close_details, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
-        public string | Optional $assigned_to_id, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
-        public ServiceRequestCategory | Optional $category, // @phpstan-ignore MeliorStan.parameterNameNotCamelCase
+        public string | Optional $statusId,
+        public string | Optional $priorityId,
+        public string | Optional $closeDetails,
+        public string | Optional $assignedToId,
+        public ServiceRequestCategory | Optional $category,
     ) {}
 
     /**
@@ -56,10 +59,10 @@ class UpdateServiceRequestData extends Data
     public static function fromData(array $data): self
     {
         return new self(
-            status_id: $data['status_id'] ?? Optional::create(),
-            priority_id: $data['priority_id'] ?? Optional::create(),
-            close_details: $data['close_details'] ?? Optional::create(),
-            assigned_to_id: $data['assigned_to_id'] ?? Optional::create(),
+            statusId: $data['status_id'] ?? Optional::create(),
+            priorityId: $data['priority_id'] ?? Optional::create(),
+            closeDetails: $data['close_details'] ?? Optional::create(),
+            assignedToId: $data['assigned_to_id'] ?? Optional::create(),
             category: isset($data['category'])
             ? ($data['category'] instanceof ServiceRequestCategory
               ? $data['category']

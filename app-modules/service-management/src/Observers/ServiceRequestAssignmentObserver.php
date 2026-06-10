@@ -49,7 +49,6 @@ use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestAssign
 use AidingApp\ServiceManagement\Notifications\ServiceRequestAssigned;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Models\SystemUser;
 
 class ServiceRequestAssignmentObserver
 {
@@ -61,14 +60,10 @@ class ServiceRequestAssignmentObserver
 
         $user = auth()->user();
 
-        $assigneeIsManager = $type->managerUsers()->where('users.id', $serviceRequestAssignment->user_id)->exists() ||
+        $isManager = $type->managerUsers()->where('users.id', $serviceRequestAssignment->user_id)->exists() ||
             $type->managerDepartments()->whereRelation('users', 'users.id', $serviceRequestAssignment->user_id)->exists();
 
-        $isSystemActor = $user instanceof SystemUser;
-
-        $assignmentAllowed = $assigneeIsManager || $isSystemActor;
-
-        throw_if(! $assignmentAllowed, new AttemptedToAssignNonManagerToServiceRequest());
+        throw_if(! $isManager, new AttemptedToAssignNonManagerToServiceRequest());
 
         if (blank($serviceRequestAssignment->service_request_status_id)) {
             $serviceRequestAssignment->service_request_status_id = $serviceRequestAssignment->serviceRequest->status_id;

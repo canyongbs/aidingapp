@@ -104,7 +104,7 @@ class AssignedToRelationManager extends RelationManager
                         ];
 
                         if (ServiceRequestAssignmentByTypeFeature::active()) {
-                            $data['assigned_by_type'] = auth()->user()?->getMorphClass() ?? null;
+                            $data['assigned_by_type'] = auth()->user()?->getMorphClass();
                         }
 
                         $this->getOwnerRecord()->assignments()->create($data);
@@ -124,7 +124,7 @@ class AssignedToRelationManager extends RelationManager
                         ];
 
                         if (ServiceRequestAssignmentByTypeFeature::active()) {
-                            $assignmentData['assigned_by_type'] = auth()->user()?->getMorphClass() ?? null;
+                            $assignmentData['assigned_by_type'] = auth()->user()?->getMorphClass();
                         }
 
                         $this->getOwnerRecord()->assignments()->create($assignmentData);
