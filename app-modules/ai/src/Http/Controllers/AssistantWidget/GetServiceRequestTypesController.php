@@ -133,6 +133,16 @@ class GetServiceRequestTypesController extends Controller
 
         usort($topLevelTypes, fn (array $first, array $second) => ($first['sort'] ?? 0) <=> ($second['sort'] ?? 0));
 
+        $filterEmptyCategories = function (array &$nodes) use (&$filterEmptyCategories): array {
+            return array_values(array_filter($nodes, function (array &$node) use (&$filterEmptyCategories): bool {
+                $node['children'] = $filterEmptyCategories($node['children']);
+
+                return ! empty($node['types']) || ! empty($node['children']);
+            }));
+        };
+
+        $topLevelCategories = $filterEmptyCategories($topLevelCategories);
+
         return response()->json([
             'categories' => $topLevelCategories,
             'types' => $topLevelTypes,
