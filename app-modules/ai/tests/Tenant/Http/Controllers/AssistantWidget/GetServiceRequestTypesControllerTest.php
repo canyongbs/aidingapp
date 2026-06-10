@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -38,6 +38,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use Illuminate\Testing\TestResponse;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
@@ -49,7 +50,7 @@ beforeEach(function () {
     $portalSettings->save();
 });
 
-function authenticatedWidgetRequest(string $url): \Illuminate\Testing\TestResponse
+function authenticatedWidgetRequest(string $url): TestResponse
 {
     $contact = Contact::factory()->create();
     $contact->createToken('assistant-widget-access-token');
