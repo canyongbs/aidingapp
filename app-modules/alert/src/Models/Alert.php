@@ -52,7 +52,6 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @property-read Contact $concern
- *
  * @mixin IdeHelperAlert
  */
 #[ObservedBy([AlertObserver::class])]
