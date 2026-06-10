@@ -52,6 +52,7 @@ use Filament\Actions\Action as BaseAction;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
@@ -191,6 +192,17 @@ class EditKnowledgeBaseItem extends EditRecord
                                             ->onColor('success')
                                             ->offColor('gray'),
                                     ]),
+                                SpatieMediaLibraryFileUpload::make('article_attachments')
+                                    ->label('File Attachments')
+                                    ->disk('s3')
+                                    ->visibility('private')
+                                    ->collection('article_attachments')
+                                    ->multiple()
+                                    ->preserveFilenames()
+                                    ->reorderable()
+                                    ->downloadable()
+                                    ->columnSpanFull()
+                                    ->helperText('Note: Uploaded file attachments are not evaluated or used by the AI Support Assistant at this time.'),
                                 Textarea::make('notes')
                                     ->label('Notes')
                                     ->columnSpanFull()

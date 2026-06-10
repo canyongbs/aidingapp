@@ -34,24 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\KnowledgeBase\Http\Controllers;
 
-use Spatie\LaravelData\Data;
+use AidingApp\KnowledgeBase\Http\Requests\KnowledgeBaseArticleMediaDownloadRequest;
+use App\Http\Controllers\Controller;
+use App\Models\Media;
+use Illuminate\Http\RedirectResponse;
 
-class KnowledgeBaseArticleData extends Data
+class KnowledgeBaseArticleMediaDownloadController extends Controller
 {
-    /**
-     * @param  array<int, array{name: string, url: string}>|null  $attachments
-     */
-    public function __construct(
-        public string $id,
-        public string $categorySlug,
-        public string $name,
-        public ?string $lastUpdated,
-        public ?string $content,
-        public ?array $tags,
-        public ?array $vote,
-        public bool $featured,
-        public ?array $attachments = null,
-    ) {}
+    public function __invoke(KnowledgeBaseArticleMediaDownloadRequest $request, Media $media): RedirectResponse
+    {
+        return redirect(
+            $media->getTemporaryUrl(
+                expiration: now()->addMinute(),
+                options: ['ResponseContentDisposition' => 'attachment; filename="' . $media->file_name . '"']
+            )
+        );
+    }
 }
