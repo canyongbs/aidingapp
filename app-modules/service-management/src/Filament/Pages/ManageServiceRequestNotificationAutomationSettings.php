@@ -232,10 +232,10 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
      */
     protected function getTemplateFormSchema(ServiceRequestEmailTemplateType $type, ServiceRequestTypeEmailTemplateRole $role): array
     {
-        $mergeTags = array_keys(ServiceRequestTypeEmailTemplate::getMergeTags());
+        $mergeTags = ServiceRequestTypeEmailTemplate::getMergeTags();
 
         if ($type !== ServiceRequestEmailTemplateType::Update) {
-            $mergeTags = array_values(array_diff($mergeTags, ['recent update']));
+            unset($mergeTags['recent update']);
         }
 
         $hasAnyContent = function (Get $get): bool {
