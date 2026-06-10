@@ -34,19 +34,32 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\CreateServiceRequestUpdateController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ListServiceRequestsController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\UpdateServiceRequestController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ViewServiceRequestController;
-use Illuminate\Support\Facades\Route;
+namespace AidingApp\ServiceManagement\DataTransferObjects;
 
-Route::api(majorVersion: 1, routes: function () {
-    Route::name('service-requests.')
-        ->prefix('service-requests')
-        ->group(function () {
-            Route::get('/', ListServiceRequestsController::class)->name('index');
-            Route::get('/{serviceRequest}', ViewServiceRequestController::class)->name('show');
-            Route::patch('/{serviceRequest}', UpdateServiceRequestController::class)->name('update');
-            Route::post('/{serviceRequest}/updates', CreateServiceRequestUpdateController::class)->name('updates.store');
-        });
-});
+use Spatie\LaravelData\Attributes\MapName;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Spatie\LaravelData\Optional;
+
+#[MapName(SnakeCaseMapper::class)]
+class CreateServiceRequestUpdateDataObject extends Data
+{
+    public function __construct(
+        public string|Optional $update,
+        public bool|Optional $internal,
+        public string|Optional $created_by_id,
+        public string|Optional $created_by_type,
+        public array|Optional $files,
+    ) {}
+
+    public static function fromData(array $data): static
+    {
+        return new self(
+            update: $data['update'] ?? Optional::create(),
+            internal: $data['internal'] ?? Optional::create(),
+            created_by_id: $data['created_by_id'] ?? Optional::create(),
+            created_by_type: $data['created_by_type'] ?? Optional::create(),
+            files: $data['files'] ?? Optional::create(),
+        );
+    }
+}

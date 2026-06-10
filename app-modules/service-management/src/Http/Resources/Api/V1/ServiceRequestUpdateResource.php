@@ -34,19 +34,41 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\CreateServiceRequestUpdateController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ListServiceRequestsController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\UpdateServiceRequestController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ViewServiceRequestController;
-use Illuminate\Support\Facades\Route;
+namespace AidingApp\ServiceManagement\Http\Resources\Api\V1;
 
-Route::api(majorVersion: 1, routes: function () {
-    Route::name('service-requests.')
-        ->prefix('service-requests')
-        ->group(function () {
-            Route::get('/', ListServiceRequestsController::class)->name('index');
-            Route::get('/{serviceRequest}', ViewServiceRequestController::class)->name('show');
-            Route::patch('/{serviceRequest}', UpdateServiceRequestController::class)->name('update');
-            Route::post('/{serviceRequest}/updates', CreateServiceRequestUpdateController::class)->name('updates.store');
-        });
-});
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+/**
+ * @property ServiceRequestUpdate $resource
+ */
+class ServiceRequestUpdateResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+            'id' => $this->resource->id,
+            'update' => $this->resource->update,
+            'internal' => $this->resource->internal,
+            'update_type' => $this->resource->update_type,
+            'created_by' => [
+                'id' => $this->resource->created_by_id,
+                'type' => $this->resource->created_by_type,
+            ],
+            'files' => $this->resource->getMedia('uploads')->map(fn ($media) => [
+                'id' => $media->id,
+                'url' => $media->getUrl(),
+                'name' => $media->name,
+                'file_name' => $media->file_name,
+            ]),
+            'created_at' => $this->resource->created_at,
+            'updated_at' => $this->resource->updated_at,
+        ];
+    }
+}
