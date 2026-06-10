@@ -179,6 +179,9 @@ test('reclassify requires priority_id', function () {
     ]);
 
     $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
         'priority_id' => $originalPriority->getKey(),
     ])->create();
 
