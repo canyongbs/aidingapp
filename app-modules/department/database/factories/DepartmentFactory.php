@@ -50,13 +50,14 @@ class DepartmentFactory extends Factory
         return [
             'name' => $this->faker->unique()->sentence(),
             'description' => $this->faker->sentence(),
+            'division_id' => null,
         ];
     }
 
-    public function configure(): DepartmentFactory|Factory
+    public function withDivision(): static
     {
-        return $this->afterMaking(function (Department $department) {
-            $department->division()->associate($this->faker->randomElement([Division::inRandomOrder()->first(), null]));
-        });
+        return $this->state(fn () => [
+            'division_id' => Division::factory(),
+        ]);
     }
 }
