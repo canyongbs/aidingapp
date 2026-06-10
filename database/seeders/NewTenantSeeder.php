@@ -48,6 +48,7 @@ use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
 use AidingApp\Project\Database\Seeders\ProjectMilestoneStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
+use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestNotificationAutomationSettingsSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
 use App\Models\Authenticatable;
@@ -86,6 +87,9 @@ class NewTenantSeeder extends Seeder
 
             // AI
             AiSupportAssistantSettingsSeeder::class,
+
+            // Service Request Notification Automation
+            ServiceRequestNotificationAutomationSettingsSeeder::class,
         ]);
     }
 }

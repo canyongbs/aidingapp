@@ -34,33 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use App\Support\AbstractFeatureFlag;
 
-class ServiceManagementPlugin implements Plugin
+class ServiceRequestNotificationAutomationFeature extends AbstractFeatureFlag
 {
-    public function getId(): string
+    public function resolve(mixed $scope): mixed
     {
-        return 'service-request';
+        return false;
     }
-
-    public function register(Panel $panel): void
-    {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
-        )
-            ->discoverPages(
-                in: __DIR__ . '/Filament/Pages',
-                for: 'AidingApp\\ServiceManagement\\Filament\\Pages'
-            )
-            ->livewireComponents([
-                ServiceRequestMediaTable::class,
-            ]);
-    }
-
-    public function boot(Panel $panel): void {}
 }
