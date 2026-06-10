@@ -10,7 +10,8 @@
                     "content": null,
                     "tags": [],
                     "vote": null,
-                    "featured": false
+                    "featured": false,
+                    "attachments": null
                 },
                 {
                     "id": "9dbe944d-330e-40c1-94b2-3312b07b7589",
@@ -20,7 +21,8 @@
                     "content": null,
                     "tags": [],
                     "vote": null,
-                    "featured": false
+                    "featured": false,
+                    "attachments": null
                 }
             ],
             "links": [

@@ -10,7 +10,8 @@
                     "content": null,
                     "tags": [],
                     "vote": null,
-                    "featured": true
+                    "featured": true,
+                    "attachments": null
                 }
             ],
             "links": [

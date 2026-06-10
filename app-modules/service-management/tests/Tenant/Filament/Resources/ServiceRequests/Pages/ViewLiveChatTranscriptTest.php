@@ -1,0 +1,220 @@
+<?php
+
+/*
+<COPYRIGHT>
+
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
+
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+
+    Notice:
+
+    - You may not provide the software to third parties as a hosted or managed
+      service, where the service provides users with access to any substantial set of
+      the features or functionality of the software.
+    - You may not move, change, disable, or circumvent the license key functionality
+      in the software, and you may not remove or obscure any functionality in the
+      software that is protected by the license key.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      to applicable law.
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
+      vigorously.
+    - The software solution, including services, infrastructure, and code, is offered as a
+      Software as a Service (SaaS) by Canyon GBS Inc.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
+
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+
+</COPYRIGHT>
+*/
+
+use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Models\User;
+use App\Settings\LicenseSettings;
+
+use function Pest\Laravel\actingAs;
+use function Tests\asSuperAdmin;
+
+it('can be accessed by a super admin', function () {
+    $user = User::factory()->create();
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    $conversation = ServiceRequestConversation::factory()->finished()->create([
+        'service_request_id' => $serviceRequest->getKey(),
+    ]);
+
+    asSuperAdmin($user);
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('view-live-chat-transcript', [
+                'record' => $serviceRequest,
+                'conversation' => $conversation,
+            ])
+        )->assertSuccessful();
+});
+
+it('cannot be accessed when the `RealtimeChat` feature is disabled', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->realtimeChat = false;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    $conversation = ServiceRequestConversation::factory()->finished()->create([
+        'service_request_id' => $serviceRequest->getKey(),
+    ]);
+
+    asSuperAdmin($user)
+        ->get(
+            ServiceRequestResource::getUrl('view-live-chat-transcript', [
+                'record' => $serviceRequest,
+                'conversation' => $conversation,
+            ])
+        )->assertForbidden();
+
+    $settings->data->addons->realtimeChat = true;
+
+    $settings->save();
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('view-live-chat-transcript', [
+                'record' => $serviceRequest,
+                'conversation' => $conversation,
+            ])
+        )->assertSuccessful();
+});
+
+it('cannot be accessed by a user who is not a manager or auditor of the service request type', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->realtimeChat = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    $conversation = ServiceRequestConversation::factory()->finished()->create([
+        'service_request_id' => $serviceRequest->getKey(),
+    ]);
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('view-live-chat-transcript', [
+                'record' => $serviceRequest,
+                'conversation' => $conversation,
+            ])
+        )->assertForbidden();
+});
+
+it('can be accessed by a user who is a manager of the service request type', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->realtimeChat = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $department = Department::factory()->create();
+    $user->department()->associate($department)->save();
+
+    $type = ServiceRequestType::factory()->create();
+
+    $serviceRequest = ServiceRequest::factory()->create([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $type->getKey(),
+        ])->getKey(),
+    ]);
+
+    $conversation = ServiceRequestConversation::factory()->finished()->create([
+        'service_request_id' => $serviceRequest->getKey(),
+    ]);
+
+    $type->managerDepartments()->attach($department);
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('view-live-chat-transcript', [
+                'record' => $serviceRequest,
+                'conversation' => $conversation,
+            ])
+        )->assertSuccessful();
+});
+
+it('returns 404 when the `ServiceRequestConversation` does not belong to the service request', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->realtimeChat = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    asSuperAdmin($user);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    $otherServiceRequest = ServiceRequest::factory()->create();
+    $conversation = ServiceRequestConversation::factory()->finished()->create([
+        'service_request_id' => $otherServiceRequest->getKey(),
+    ]);
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('view-live-chat-transcript', [
+                'record' => $serviceRequest,
+                'conversation' => $conversation,
+            ])
+        )->assertNotFound();
+});
+
+it('returns 404 when the `ServiceRequestConversation` has no `conversation_id`', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->realtimeChat = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    asSuperAdmin($user);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    $conversation = ServiceRequestConversation::factory()->create([
+        'service_request_id' => $serviceRequest->getKey(),
+    ]);
+
+    actingAs($user)
+        ->get(
+            ServiceRequestResource::getUrl('view-live-chat-transcript', [
+                'record' => $serviceRequest,
+                'conversation' => $conversation,
+            ])
+        )->assertNotFound();
+});

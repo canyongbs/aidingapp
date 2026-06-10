@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Filament\Actions\FillServiceRequestEmailTemplatesWithAiAction;
 use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
 use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
@@ -67,6 +68,8 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     public ServiceRequestEmailTemplateType $type;
 
     public static string | UnitEnum | null $navigationGroup = ServiceManagementAdministrationNavigationGroup::EmailTemplates;
+
+    protected ?bool $hasUnsavedDataChangesAlert = true;
 
     public function getRelationManagers(): array
     {
@@ -154,6 +157,13 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
         $this->getSavedNotification()->send();
     }
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            FillServiceRequestEmailTemplatesWithAiAction::make(),
+        ];
+    }
+
     protected function normalizeRichContent(mixed $content): mixed
     {
         if (! is_array($content)) {
@@ -190,10 +200,10 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     /** @return array<int, RichEditor> */
     protected function getEmailTemplateFormSchema(ServiceRequestTypeEmailTemplateRole $role): array
     {
-        $mergeTags = array_keys(ServiceRequestTypeEmailTemplate::getMergeTags());
+        $mergeTags = ServiceRequestTypeEmailTemplate::getMergeTags();
 
         if ($this->type !== ServiceRequestEmailTemplateType::Update) {
-            $mergeTags = array_values(array_diff($mergeTags, ['recent update']));
+            unset($mergeTags['recent update']);
         }
 
         $normalizeEmptyContent = fn ($state) => $this->normalizeRichContent($state);

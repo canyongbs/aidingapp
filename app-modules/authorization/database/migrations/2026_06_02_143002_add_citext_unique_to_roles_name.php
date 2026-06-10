@@ -34,41 +34,19 @@
 </COPYRIGHT>
 */
 
-use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    use FixesDuplicateNames;
-
     private string $table = 'roles';
 
     private string $column = 'name';
 
-    private bool $usesSoftDeletes = false;
-
-    private int $chunkSize = 100;
-
-    /**
-     * @var array<int, string>
-     */
-    private array $groupByColumns = ['guard_name'];
-
     public function up(): void
     {
         DB::transaction(function () {
-            /*
-             * TODO: UserImportExportFeature cleanup — once this migration has run in all environments:
-             * - Remove the $this->fixDuplicates() call below
-             * - Remove the $this->revertDuplicates() call in down()
-             * - Remove the $chunkSize property
-             * - Remove the $usesSoftDeletes property
-             * - Remove the $groupByColumns property
-             */
-            $this->fixDuplicates();
-
             DB::statement('ALTER TABLE roles DROP CONSTRAINT IF EXISTS roles_name_guard_name_unique');
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
@@ -88,7 +66,5 @@ return new class () extends Migration {
         Schema::table($this->table, function (Blueprint $table) {
             $table->unique([$this->column, 'guard_name'], 'roles_name_guard_name_unique');
         });
-
-        $this->revertDuplicates();
     }
 };

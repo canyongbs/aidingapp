@@ -120,6 +120,17 @@ class ServiceRequestTypesController extends Controller
             return ($left['sort'] ?? 0) <=> ($right['sort'] ?? 0);
         });
 
+        // Remove categories that have no types and no children with types (recursively)
+        $filterEmptyCategories = function (array &$nodes) use (&$filterEmptyCategories): array {
+            return array_values(array_filter($nodes, function (array &$node) use (&$filterEmptyCategories): bool {
+                $node['children'] = $filterEmptyCategories($node['children']);
+
+                return ! empty($node['types']) || ! empty($node['children']);
+            }));
+        };
+
+        $topLevelCategories = $filterEmptyCategories($topLevelCategories);
+
         return response()->json([
             'categories' => $topLevelCategories,
             'types' => $topLevelTypes,

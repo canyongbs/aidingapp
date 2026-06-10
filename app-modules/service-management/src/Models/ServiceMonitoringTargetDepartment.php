@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetDepartmentFactory;
-use App\Features\TeamRenameFeature;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -56,7 +55,7 @@ class ServiceMonitoringTargetDepartment extends Pivot
 
     public function getTable(): string
     {
-        return TeamRenameFeature::active() ? 'service_monitoring_target_department' : 'service_monitoring_target_team';
+        return 'service_monitoring_target_department';
     }
 
     /**
@@ -64,7 +63,7 @@ class ServiceMonitoringTargetDepartment extends Pivot
      */
     public function department(): BelongsTo
     {
-        return $this->belongsTo(Department::class, TeamRenameFeature::active() ? 'department_id' : 'team_id');
+        return $this->belongsTo(Department::class, 'department_id');
     }
 
     /**

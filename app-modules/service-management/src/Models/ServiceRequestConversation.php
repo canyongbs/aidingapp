@@ -38,10 +38,12 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\InAppCommunication\Models\Conversation;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestConversationFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -49,6 +51,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ServiceRequestConversation extends BaseModel
 {
+    /** @use HasFactory<ServiceRequestConversationFactory> */
+    use HasFactory;
+
     use HasUuids;
 
     protected $fillable = [

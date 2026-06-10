@@ -37,7 +37,6 @@
 namespace App\Models;
 
 use AidingApp\Contact\Models\Contact;
-use App\Features\MediaCreatedByFeature;
 use App\Observers\MediaObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
@@ -60,7 +59,7 @@ class Media extends SpatieMedia
 
     public function getCreatedByNameAttribute(): string
     {
-        if (! MediaCreatedByFeature::active() || ! ($creator = $this->createdBy)) {
+        if (! ($creator = $this->createdBy)) {
             return 'N/A';
         }
 
@@ -73,7 +72,7 @@ class Media extends SpatieMedia
 
     public function getCreatedBySubLabelAttribute(): ?string
     {
-        if (! MediaCreatedByFeature::active() || ! ($creator = $this->createdBy)) {
+        if (! ($creator = $this->createdBy)) {
             return null;
         }
 

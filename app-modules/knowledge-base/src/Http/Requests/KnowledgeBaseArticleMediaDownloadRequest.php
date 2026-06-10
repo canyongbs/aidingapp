@@ -34,14 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\KnowledgeBase\Http\Requests;
 
-use App\Support\AbstractFeatureFlag;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use Illuminate\Foundation\Http\FormRequest;
 
-class TeamRenameFeature extends AbstractFeatureFlag
+class KnowledgeBaseArticleMediaDownloadRequest extends FormRequest
 {
-    public function resolve(mixed $scope): mixed
+    public function authorize(): bool
     {
-        return false;
+        $media = $this->route('media');
+
+        if ($media->model_type !== (new KnowledgeBaseItem())->getMorphClass()) {
+            return false;
+        }
+
+        if ($media->collection_name !== 'article_attachments') {
+            return false;
+        }
+
+        $article = KnowledgeBaseItem::find($media->model_id);
+
+        if (! $article) {
+            return false;
+        }
+
+        if (! $article->public) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return array<string, array<string>>
+     */
+    public function rules(): array
+    {
+        return [];
     }
 }

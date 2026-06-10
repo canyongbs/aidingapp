@@ -34,17 +34,29 @@
 </COPYRIGHT>
 */
 
-use App\Features\UserImportExportFeature;
+use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
+use App\Features\ServiceRequestNotificationAutomationFeature;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
 return new class () extends Migration {
     public function up(): void
     {
-        UserImportExportFeature::activate();
+        DB::transaction(function () {
+            DB::table('settings')
+                ->where('group', 'service-request-notification-automation')
+                ->where('name', 'ai_prompt')
+                ->update([
+                    'payload' => json_encode(ServiceRequestNotificationAutomationSettings::defaultAiPrompt()),
+                    'updated_at' => now(),
+                ]);
+
+            ServiceRequestNotificationAutomationFeature::activate();
+        });
     }
 
     public function down(): void
     {
-        UserImportExportFeature::deactivate();
+        ServiceRequestNotificationAutomationFeature::deactivate();
     }
 };

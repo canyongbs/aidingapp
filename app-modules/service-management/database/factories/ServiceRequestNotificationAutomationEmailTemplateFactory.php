@@ -34,14 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use App\Support\AbstractFeatureFlag;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class MediaCreatedByFeature extends AbstractFeatureFlag
+/**
+ * @extends Factory<ServiceRequestNotificationAutomationEmailTemplate>
+ */
+class ServiceRequestNotificationAutomationEmailTemplateFactory extends Factory
 {
-    public function resolve(mixed $scope): mixed
+    /**
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
-        return false;
+        return [
+            'type' => $this->faker->randomElement(ServiceRequestEmailTemplateType::cases()),
+            'role' => fn (array $attributes) => $attributes['type'] === ServiceRequestEmailTemplateType::SurveyResponse
+                ? ServiceRequestTypeEmailTemplateRole::Customer
+                : $this->faker->randomElement(ServiceRequestTypeEmailTemplateRole::cases()),
+            'subject' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->sentence()]]]]],
+            'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->paragraph()]]]]],
+            'ai_instructions' => $this->faker->sentence(),
+        ];
     }
 }

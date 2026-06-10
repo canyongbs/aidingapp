@@ -40,7 +40,6 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetFactory;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -97,9 +96,9 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
     {
         return $this->belongsToMany(
             Department::class,
-            TeamRenameFeature::active() ? 'service_monitoring_target_department' : 'service_monitoring_target_team',
+            'service_monitoring_target_department',
             'service_monitoring_target_id',
-            TeamRenameFeature::active() ? 'department_id' : 'team_id',
+            'department_id',
         )
             ->using(ServiceMonitoringTargetDepartment::class)
             ->withTimestamps();

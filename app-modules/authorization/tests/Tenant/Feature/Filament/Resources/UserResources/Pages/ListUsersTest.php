@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Department\Models\Department;
-use App\Features\UserImportExportFeature;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -179,9 +178,7 @@ it('can filter users by departments', function () {
         ->assertCanNotSeeTableRecords($userWithoutDepartment);
 });
 
-it('shows the import and export header actions to a user with the user.import permission when the feature is enabled', function () {
-    UserImportExportFeature::activate();
-
+it('shows the import and export header actions to a user with the user.import permission', function () {
     $user = User::factory()
         ->create()
         ->givePermissionTo('user.view-any', 'user.*.view', 'user.import');
@@ -193,8 +190,6 @@ it('shows the import and export header actions to a user with the user.import pe
 });
 
 it('hides the import and export header actions from a user without the user.import permission', function () {
-    UserImportExportFeature::activate();
-
     $user = User::factory()
         ->create()
         ->givePermissionTo('user.view-any', 'user.*.view');
@@ -202,18 +197,5 @@ it('hides the import and export header actions from a user without the user.impo
 
     livewire(ListUsers::class)
         ->assertActionHidden('import')
-        ->assertActionHidden('export');
-});
-
-it('keeps the import action available but hides the export action when the feature is disabled', function () {
-    UserImportExportFeature::deactivate();
-
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('user.view-any', 'user.*.view', 'user.import');
-    actingAs($user);
-
-    livewire(ListUsers::class)
-        ->assertActionVisible('import')
         ->assertActionHidden('export');
 });

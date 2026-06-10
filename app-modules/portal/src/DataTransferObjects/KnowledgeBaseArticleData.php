@@ -40,6 +40,9 @@ use Spatie\LaravelData\Data;
 
 class KnowledgeBaseArticleData extends Data
 {
+    /**
+     * @param  array<int, array{name: string, url: string}>|null  $attachments
+     */
     public function __construct(
         public string $id,
         public string $categorySlug,
@@ -49,5 +52,6 @@ class KnowledgeBaseArticleData extends Data
         public ?array $tags,
         public ?array $vote,
         public bool $featured,
+        public ?array $attachments = null,
     ) {}
 }

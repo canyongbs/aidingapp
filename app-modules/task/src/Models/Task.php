@@ -44,7 +44,6 @@ use AidingApp\Task\Database\Factories\TaskFactory;
 use AidingApp\Task\Enums\TaskStatus;
 use AidingApp\Task\Models\Scopes\ConfidentialTaskScope;
 use AidingApp\Task\Observers\TaskObserver;
-use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Bvtterfly\ModelStateMachine\HasStateMachine;
@@ -166,9 +165,9 @@ class Task extends BaseModel implements Auditable
     {
         return $this->belongsToMany(
             Department::class,
-            TeamRenameFeature::active() ? 'confidential_task_departments' : 'confidential_task_teams',
+            'confidential_task_departments',
             'task_id',
-            TeamRenameFeature::active() ? 'department_id' : 'team_id',
+            'department_id',
         )
             ->using(ConfidentialTaskDepartment::class)
             ->withTimestamps();

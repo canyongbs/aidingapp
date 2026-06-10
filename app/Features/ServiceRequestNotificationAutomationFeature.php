@@ -38,7 +38,7 @@ namespace App\Features;
 
 use App\Support\AbstractFeatureFlag;
 
-class UserImportExportFeature extends AbstractFeatureFlag
+class ServiceRequestNotificationAutomationFeature extends AbstractFeatureFlag
 {
     public function resolve(mixed $scope): mixed
     {

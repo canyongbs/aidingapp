@@ -116,6 +116,10 @@ class KnowledgeManagementPortalArticleController extends Controller
                         ->first()
                 )->toArray(),
                 'featured' => $article->is_featured,
+                'attachments' => $article->getMedia('article_attachments')->map(fn ($media) => [
+                    'name' => $media->file_name,
+                    'url' => route('api.portal.knowledge-base-article.media.download', ['media' => $media->getKey()]),
+                ])->toArray(),
             ]),
             'portal_view_count' => $article->portal_view_count,
             'helpful_vote_percentage' => $helpfulVotePercentage,

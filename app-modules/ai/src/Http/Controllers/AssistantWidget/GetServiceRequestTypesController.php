@@ -42,7 +42,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\ServiceRequestTypeLiveChatSettingsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -65,7 +64,6 @@ class GetServiceRequestTypesController extends Controller
 
         $aiClarificationGlobalEnabled = app(AiClarificationSettings::class)->is_enabled;
         $aiResolutionGlobalEnabled = app(AiResolutionSettings::class)->is_enabled;
-        $liveChatFeatureEnabled = ServiceRequestTypeLiveChatSettingsFeature::active();
 
         $categoriesById = [];
 
@@ -92,7 +90,7 @@ class GetServiceRequestTypesController extends Controller
                 'category_id' => $type->category_id,
                 'is_ai_clarification_enabled' => $aiClarificationGlobalEnabled && $type->is_ai_clarification_enabled,
                 'is_ai_resolution_enabled' => $aiResolutionGlobalEnabled && $type->is_ai_resolution_enabled,
-                'is_live_chat_enabled' => $liveChatFeatureEnabled && $type->is_live_chat_enabled,
+                'is_live_chat_enabled' => $type->is_live_chat_enabled,
                 'priorities' => $type->priorities->map(fn ($priority) => [
                     'id' => $priority->getKey(),
                     'name' => $priority->name,
@@ -134,6 +132,16 @@ class GetServiceRequestTypesController extends Controller
         $sortRecursive($topLevelCategories);
 
         usort($topLevelTypes, fn (array $first, array $second) => ($first['sort'] ?? 0) <=> ($second['sort'] ?? 0));
+
+        $filterEmptyCategories = function (array &$nodes) use (&$filterEmptyCategories): array {
+            return array_values(array_filter($nodes, function (array &$node) use (&$filterEmptyCategories): bool {
+                $node['children'] = $filterEmptyCategories($node['children']);
+
+                return ! empty($node['types']) || ! empty($node['children']);
+            }));
+        };
+
+        $topLevelCategories = $filterEmptyCategories($topLevelCategories);
 
         return response()->json([
             'categories' => $topLevelCategories,

@@ -37,7 +37,6 @@
 namespace AidingApp\Department\Policies;
 
 use AidingApp\Department\Models\Department;
-use App\Features\TeamRenameFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -45,80 +44,57 @@ class DepartmentPolicy
 {
     public function viewAny(Authenticatable $authenticatable): Response
     {
-        $prefix = $this->permissionPrefix();
-
         return $authenticatable->canOrElse(
-            abilities: "{$prefix}.view-any",
+            abilities: 'department.view-any',
             denyResponse: 'You do not have permission to view departments.'
         );
     }
 
     public function view(Authenticatable $authenticatable, Department $department): Response
     {
-        $prefix = $this->permissionPrefix();
-
         return $authenticatable->canOrElse(
-            abilities: "{$prefix}.*.view",
+            abilities: 'department.*.view',
             denyResponse: 'You do not have permission to view this department.'
         );
     }
 
     public function create(Authenticatable $authenticatable): Response
     {
-        $prefix = $this->permissionPrefix();
-
         return $authenticatable->canOrElse(
-            abilities: "{$prefix}.create",
+            abilities: 'department.create',
             denyResponse: 'You do not have permission to create departments.'
         );
     }
 
     public function update(Authenticatable $authenticatable): Response
     {
-        $prefix = $this->permissionPrefix();
-
         return $authenticatable->canOrElse(
-            abilities: "{$prefix}.*.update",
+            abilities: 'department.*.update',
             denyResponse: 'You do not have permission to update this department.'
         );
     }
 
     public function delete(Authenticatable $authenticatable, Department $department): Response
     {
-        $prefix = $this->permissionPrefix();
-
         return $authenticatable->canOrElse(
-            abilities: "{$prefix}.*.delete",
+            abilities: 'department.*.delete',
             denyResponse: 'You do not have permission to delete this department.'
         );
     }
 
     public function restore(Authenticatable $authenticatable, Department $department): Response
     {
-        $prefix = $this->permissionPrefix();
-
         return $authenticatable->canOrElse(
-            abilities: "{$prefix}.*.restore",
+            abilities: 'department.*.restore',
             denyResponse: 'You do not have permission to restore this department.'
         );
     }
 
     public function forceDelete(Authenticatable $authenticatable, Department $department): Response
     {
-        $prefix = $this->permissionPrefix();
-
         return $authenticatable->canOrElse(
-            abilities: "{$prefix}.*.force-delete",
+            abilities: 'department.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete this department.'
         );
-    }
-
-    // TODO: Cleanup Task - Once TeamRenameFeature is removed, delete this helper entirely
-    // and replace every `{$prefix}` interpolation above with the literal string 'department'
-    // (e.g. 'department.view-any', 'department.*.update', etc.). The legacy 'team.*' branch
-    // is only kept so non-super-admin users keep working while the rename migration is pending.
-    private function permissionPrefix(): string
-    {
-        return TeamRenameFeature::active() ? 'department' : 'team';
     }
 }
