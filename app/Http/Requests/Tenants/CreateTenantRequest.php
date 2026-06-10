@@ -37,16 +37,17 @@
 namespace App\Http\Requests\Tenants;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CreateTenantRequest extends FormRequest
 {
     /**
-     * @return array<string, array<string>>
+     * @return array<string, array<mixed>>
      */
     public function rules(): array
     {
         return [
-            'domain' => ['required', 'string', 'max:255', 'unique:landlord.tenants,domain', 'regex:/^((?:[a-zA-Z0-9-]*?\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,})$/i'],
+            'domain' => ['required', 'string', 'max:255', Rule::unique('landlord.tenants', 'domain')->whereNull('deleted_at'), 'regex:/^((?:[a-zA-Z0-9-]*?\.)?[a-zA-Z0-9-]+\.[a-zA-Z]{2,})$/i'],
             'database' => ['required', 'string', 'max:255'],
             'limits' => ['required', 'array'],
             'limits.emails' => ['required', 'integer', 'min:0'],
