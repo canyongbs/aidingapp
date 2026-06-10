@@ -34,80 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\InAppCommunication\Models\Conversation;
-use AidingApp\ServiceManagement\Database\Factories\ServiceRequestConversationFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestConversationFinishedReason;
-use App\Models\BaseModel;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @mixin IdeHelperServiceRequestConversation
+ * @extends Factory<ServiceRequestConversation>
  */
-class ServiceRequestConversation extends BaseModel
+class ServiceRequestConversationFactory extends Factory
 {
-    /** @use HasFactory<ServiceRequestConversationFactory> */
-    use HasFactory;
-
-    use HasUuids;
-
-    protected $fillable = [
-        'service_request_id',
-        'contact_id',
-        'user_id',
-        'conversation_id',
-        'queued_at',
-        'accepted_at',
-        'finished_at',
-        'finished_reason',
-    ];
-
-    protected $casts = [
-        'queued_at' => 'datetime',
-        'accepted_at' => 'datetime',
-        'finished_at' => 'datetime',
-        'finished_reason' => ServiceRequestConversationFinishedReason::class,
-    ];
-
-    /**
-     * @return BelongsTo<ServiceRequest, $this>
-     */
-    public function serviceRequest(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(ServiceRequest::class);
+        return [
+            'service_request_id' => ServiceRequest::factory(),
+            'contact_id' => Contact::factory(),
+            'user_id' => User::factory(),
+            'queued_at' => $this->faker->dateTimeBetween('-1 hour', '-30 minutes'),
+        ];
     }
 
-    /**
-     * @return BelongsTo<Contact, $this>
-     */
-    public function contact(): BelongsTo
+    public function finished(): static
     {
-        return $this->belongsTo(Contact::class);
-    }
-
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-
-    /**
-     * @return BelongsTo<Conversation, $this>
-     */
-    public function conversation(): BelongsTo
-    {
-        return $this->belongsTo(Conversation::class);
-    }
-
-    public function isPending(): bool
-    {
-        return (! $this->accepted_at) && (! $this->finished_at);
+        return $this->state(fn (array $attributes) => [
+            'conversation_id' => Conversation::factory(),
+            'accepted_at' => $this->faker->dateTimeBetween('-29 minutes', '-10 minutes'),
+            'finished_at' => $this->faker->dateTimeBetween('-9 minutes', now()),
+            'finished_reason' => ServiceRequestConversationFinishedReason::AgentEnded,
+        ]);
     }
 }
