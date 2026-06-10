@@ -438,9 +438,10 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     /**
      * @return array<string, Closure>
      */
-    public function getTemplateMergeData(?string $timezone = null): array
+    public function getTemplateMergeData(?string $timezone = null, ?string $recipientName = null): array
     {
         return [
+            'recipient name' => fn () => $recipientName ?? '',
             'contact name' => fn () => $this->respondent->{$this->respondent::displayNameKey()},
             'service request number' => fn () => $this->service_request_number,
             'created date' => fn () => ! is_null($timezone) ? $this->created_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $this->created_at->format('M j, Y \a\t h:i A (T)'),

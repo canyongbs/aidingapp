@@ -200,10 +200,10 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     /** @return array<int, RichEditor> */
     protected function getEmailTemplateFormSchema(ServiceRequestTypeEmailTemplateRole $role): array
     {
-        $mergeTags = array_keys(ServiceRequestTypeEmailTemplate::getMergeTags());
+        $mergeTags = ServiceRequestTypeEmailTemplate::getMergeTags();
 
         if ($this->type !== ServiceRequestEmailTemplateType::Update) {
-            $mergeTags = array_values(array_diff($mergeTags, ['recent update']));
+            unset($mergeTags['recent update']);
         }
 
         $normalizeEmptyContent = fn ($state) => $this->normalizeRichContent($state);

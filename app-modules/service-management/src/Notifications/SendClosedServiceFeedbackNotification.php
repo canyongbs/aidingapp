@@ -86,7 +86,7 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
     {
         $template = $this->emailTemplate;
         $timezone = Tenant::current()->getTimezone();
-        $mergeData = $this->serviceRequest->getTemplateMergeData($timezone);
+        $mergeData = $this->serviceRequest->getTemplateMergeData($timezone, recipientName: $notifiable instanceof Contact ? $notifiable->{$notifiable::displayNameKey()} : null);
 
         $name = match ($notifiable::class) {
             Contact::class => $notifiable->first_name,
