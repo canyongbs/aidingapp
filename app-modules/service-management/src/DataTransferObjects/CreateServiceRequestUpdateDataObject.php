@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\DataTransferObjects;
 
+use Illuminate\Http\UploadedFile;
 use Spatie\LaravelData\Attributes\MapName;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
@@ -45,7 +46,7 @@ use Spatie\LaravelData\Optional;
 class CreateServiceRequestUpdateDataObject extends Data
 {
     /**
-     * @param array<int, \Illuminate\Http\UploadedFile>|Optional $files
+     * @param array<int, UploadedFile>|Optional $files
      */
     public function __construct(
         public string|Optional $update,
