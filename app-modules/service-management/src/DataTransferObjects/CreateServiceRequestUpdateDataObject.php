@@ -44,21 +44,23 @@ use Spatie\LaravelData\Optional;
 #[MapName(SnakeCaseMapper::class)]
 class CreateServiceRequestUpdateDataObject extends Data
 {
+    /**
+     * @param array<int, \Illuminate\Http\UploadedFile>|Optional $files
+     */
     public function __construct(
         public string|Optional $update,
         public bool|Optional $internal,
-        public string|Optional $created_by_id,
-        public string|Optional $created_by_type,
         public array|Optional $files,
     ) {}
 
-    public static function fromData(array $data): static
+    /**
+     * @param array<string, mixed> $data
+     */
+    public static function fromData(array $data): self
     {
         return new self(
             update: $data['update'] ?? Optional::create(),
             internal: $data['internal'] ?? Optional::create(),
-            created_by_id: $data['created_by_id'] ?? Optional::create(),
-            created_by_type: $data['created_by_type'] ?? Optional::create(),
             files: $data['files'] ?? Optional::create(),
         );
     }
