@@ -36,7 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Http\Requests\Api\V1\ServiceRequests;
 
-use \Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\File;
 
