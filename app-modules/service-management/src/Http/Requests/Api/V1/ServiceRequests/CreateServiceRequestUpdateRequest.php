@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Http\Requests\Api\V1\ServiceRequests;
 
+use \Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules\File;
 
@@ -46,6 +47,9 @@ class CreateServiceRequestUpdateRequest extends FormRequest
         return true;
     }
 
+    /**
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
     public function rules(): array
     {
         return [
