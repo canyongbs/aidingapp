@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Imports;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
+use App\Features\ContactTypeManagementFeature;
 use App\Models\User;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -69,13 +70,25 @@ class ContactImporter extends Importer
                 ->example('John'),
             ImportColumn::make('type')
                 ->relationship(
-                    resolveUsing: fn (mixed $state) => ContactType::query()
-                        ->when(
-                            Str::isUuid($state),
-                            fn (Builder $query) => $query->whereKey($state),
-                            fn (Builder $query) => $query->where('name', $state),
-                        )
-                        ->first(),
+                    resolveUsing: function (mixed $state): ?ContactType {
+                        $type = ContactType::query()
+                            ->when(
+                                Str::isUuid($state),
+                                fn (Builder $query) => $query->whereKey($state),
+                                fn (Builder $query) => $query->where('name', $state),
+                            )
+                            ->first();
+
+                        /*
+                         * TODO: ContactTypeManagementFeature cleanup — once the feature flag is removed,
+                         * drop the active() guard and always fall back to ContactType::resolveDefault().
+                         */
+                        if ($type === null && ContactTypeManagementFeature::active()) {
+                            return ContactType::resolveDefault();
+                        }
+
+                        return $type;
+                    },
                 )
                 ->guess(['type_id', 'type_name'])
                 ->requiredMapping()

@@ -36,8 +36,7 @@
 
 namespace AidingApp\Contact\Tests\Tenant\ContactType\RequestFactories;
 
-use AidingApp\Contact\Enums\ContactTypeColorOptions;
-use AidingApp\Contact\Enums\SystemContactClassification;
+use CanyonGBS\Common\Enums\Color;
 use Worksome\RequestFactories\RequestFactory;
 
 class EditContactTypeRequestFactory extends RequestFactory
@@ -45,9 +44,8 @@ class EditContactTypeRequestFactory extends RequestFactory
     public function definition(): array
     {
         return [
-            'classification' => fake()->randomElement(SystemContactClassification::cases()),
             'name' => fake()->name(),
-            'color' => fake()->randomElement(ContactTypeColorOptions::cases()),
+            'color' => fake()->randomElement(Color::cases()),
         ];
     }
 }

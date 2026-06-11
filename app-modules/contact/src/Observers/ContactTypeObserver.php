@@ -34,33 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Database\Seeders;
+namespace AidingApp\Contact\Observers;
 
 use AidingApp\Contact\Models\ContactType;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Seeder;
 
-class ContactTypeSeeder extends Seeder
+class ContactTypeObserver
 {
-    public function run(): void
+    public function saving(ContactType $contactType): void
     {
-        // No type is seeded as the default — each institution sets its own.
-        // When none is_default, ContactType::resolveDefault() falls back to the
-        // first (oldest) entry, which will be 'Student'.
-        ContactType::factory()
-            ->createMany(
-                [
-                    [
-                        'name' => 'Student',
-                        'color' => Color::Green->value,
-                        'is_default' => false,
-                    ],
-                    [
-                        'name' => 'Employee',
-                        'color' => Color::Blue->value,
-                        'is_default' => false,
-                    ],
-                ]
-            );
+        if ($contactType->is_default) {
+            ContactType::query()
+                ->where('is_default', true)
+                ->update(['is_default' => false]);
+        }
+    }
+
+    public function deleted(ContactType $contactType): void
+    {
+        if ($contactType->is_default) {
+            $contactType->updateQuietly(['is_default' => false]);
+        }
     }
 }

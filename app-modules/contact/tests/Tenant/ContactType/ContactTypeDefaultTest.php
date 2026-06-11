@@ -1,0 +1,90 @@
+<?php
+
+/*
+<COPYRIGHT>
+
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
+
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+
+    Notice:
+
+    - You may not provide the software to third parties as a hosted or managed
+      service, where the service provides users with access to any substantial set of
+      the features or functionality of the software.
+    - You may not move, change, disable, or circumvent the license key functionality
+      in the software, and you may not remove or obscure any functionality in the
+      software that is protected by the license key.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      to applicable law.
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
+      vigorously.
+    - The software solution, including services, infrastructure, and code, is offered as a
+      Software as a Service (SaaS) by Canyon GBS Inc.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
+
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+
+</COPYRIGHT>
+*/
+
+use AidingApp\Contact\Models\ContactType;
+
+use function Pest\Laravel\assertDatabaseHas;
+use function PHPUnit\Framework\assertNull;
+use function PHPUnit\Framework\assertTrue;
+
+test('only one ContactType can be the default at a time', function () {
+    $first = ContactType::factory()->create(['is_default' => true]);
+    $second = ContactType::factory()->create(['is_default' => true]);
+
+    assertTrue($second->fresh()->is_default);
+    expect($first->fresh()->is_default)->toBeFalse();
+
+    assertDatabaseHas(ContactType::class, ['id' => $second->id, 'is_default' => true]);
+    assertDatabaseHas(ContactType::class, ['id' => $first->id, 'is_default' => false]);
+});
+
+test('promoting an existing ContactType to default unsets the previous default', function () {
+    $original = ContactType::factory()->create(['is_default' => true]);
+    $other = ContactType::factory()->create(['is_default' => false]);
+
+    $other->update(['is_default' => true]);
+
+    expect($other->fresh()->is_default)->toBeTrue()
+        ->and($original->fresh()->is_default)->toBeFalse();
+});
+
+test('soft deleting the default ContactType unsets the default flag', function () {
+    $default = ContactType::factory()->create(['is_default' => true]);
+
+    $default->delete();
+
+    expect($default->fresh()->is_default)->toBeFalse()
+        ->and($default->fresh()->trashed())->toBeTrue();
+});
+
+test('resolveDefault returns the configured default when one exists', function () {
+    ContactType::factory()->create(['is_default' => false]);
+    $default = ContactType::factory()->create(['is_default' => true]);
+    ContactType::factory()->create(['is_default' => false]);
+
+    expect(ContactType::resolveDefault()->is($default))->toBeTrue();
+});
+
+test('resolveDefault falls back to the oldest type when no default is set', function () {
+    $oldest = ContactType::factory()->create(['is_default' => false, 'created_at' => now()->subDay()]);
+    ContactType::factory()->create(['is_default' => false, 'created_at' => now()]);
+
+    expect(ContactType::resolveDefault()->is($oldest))->toBeTrue();
+});
+
+test('resolveDefault returns null when no types exist', function () {
+    assertNull(ContactType::resolveDefault());
+});
