@@ -42,11 +42,6 @@ use Illuminate\Validation\Rules\File;
 
 class CreateServiceRequestUpdateRequest extends FormRequest
 {
-    public function authorize(): bool
-    {
-        return true;
-    }
-
     /**
      * @return array<string, ValidationRule|array<mixed>|string>
      */
@@ -80,14 +75,5 @@ class CreateServiceRequestUpdateRequest extends FormRequest
                 ]),
             ],
         ];
-    }
-
-    protected function prepareForValidation(): void
-    {
-        if ($this->hasFile('files') && ! is_array($this->file('files'))) {
-            $this->files->set('files', [$this->file('files')]);
-        } elseif (! $this->hasFile('files') && $this->has('files') && ! is_array($this->input('files'))) {
-            $this->merge(['files' => [$this->input('files')]]);
-        }
     }
 }
