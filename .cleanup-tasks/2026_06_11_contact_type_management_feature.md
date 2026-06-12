@@ -24,7 +24,7 @@ Once the feature flag is removed, the application should behave as if the flag w
     - `app-modules/contact/src/Enums/SystemContactClassification.php`
     - `app-modules/contact/src/Enums/ContactTypeColorOptions.php`
 
-- Add a migration to drop the `classification` column from `contact_types` (it was only kept nullable for the flag-off fallback).
+- Add a migration to drop the `classification` column from `contact_types` (it was only kept nullable for the flag-off fallback). When you do, also remove the classification backfill and the `->string('classification')->nullable(false)->change()` restore from the `down()` of `2026_06_11_183351_add_is_default_to_contact_types_table.php` (see the `TODO: ContactTypeManagementFeature cleanup` comment there) — that column will no longer exist.
 
 - In `app-modules/contact/database/migrations/2026_06_11_183351_add_is_default_to_contact_types_table.php` (the combined setup migration): remove the `ContactTypeManagementFeature::activate()` / `deactivate()` calls and the `use App\Features\ContactTypeManagementFeature;` import. Do NOT delete the whole migration — it also adds the permanent `is_default` column and performs the one-time color data conversion. Leaving the flag class referenced here would fatal on `migrate:fresh` once the class is deleted.
 

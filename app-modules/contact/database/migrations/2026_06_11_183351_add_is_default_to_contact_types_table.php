@@ -96,6 +96,21 @@ return new class () extends Migration {
                     ->update(['color' => $to]);
             }
 
+            DB::table('contact_types')
+                ->whereNotIn('color', ['info', 'warning', 'success', 'danger', 'primary', 'gray'])
+                ->update(['color' => 'gray']);
+
+            /*
+             * TODO: ContactTypeManagementFeature cleanup — when the feature flag is removed and a
+             * migration is added to drop the `classification` column, delete this classification
+             * backfill and the `->string('classification')->nullable(false)->change()` restore below
+             * (the column will no longer exist). The color reversal above stays — it reverses the
+             * permanent color conversion, not the flag.
+             */
+            DB::table('contact_types')
+                ->whereNull('classification')
+                ->update(['classification' => 'new']);
+
             Schema::table('contact_types', function (Blueprint $table) {
                 $table->dropColumn('is_default');
 
