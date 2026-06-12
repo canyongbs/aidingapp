@@ -80,33 +80,6 @@ function columnNativeType(string $table, string $column): ?string
 //    });
 //});
 
-describe('2026_05_15_201835_tmp_update_ai_support_assistant_default_instructions', function () {
-    it('overwrites any existing AI support assistant instructions with the new default', function () {
-        isolatedMigration(
-            '2026_05_15_201835_tmp_update_ai_support_assistant_default_instructions',
-            function () {
-                DB::table('settings')
-                    ->where('group', 'ai-support-assistant')
-                    ->where('name', 'instructions')
-                    ->update(['payload' => json_encode('Tenant-customized instructions that must be overwritten.')]);
-
-                $migrate = Artisan::call('migrate', [
-                    '--path' => 'app-modules/ai/database/migrations/2026_05_15_201835_tmp_update_ai_support_assistant_default_instructions.php',
-                ]);
-
-                expect($migrate)->toBe(Command::SUCCESS);
-
-                $payload = DB::table('settings')
-                    ->where('group', 'ai-support-assistant')
-                    ->where('name', 'instructions')
-                    ->value('payload');
-
-                expect(json_decode($payload, true))->toBe(AiSupportAssistantSettings::defaultInstructions());
-            }
-        );
-    });
-});
-
 describe('2026_06_02_122811_tmp_data_migrate_service_request_type_email_preferences', function () {
     it('migrates all boolean preference columns into the email preference table with no data loss', function () {
         isolatedMigration(
