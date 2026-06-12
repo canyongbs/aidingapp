@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Filament\Resources\Users\UserResource;
+use App\Models\SystemUser;
 use App\Models\User;
 use Exception;
 use Filament\Actions\EditAction;
@@ -93,12 +94,14 @@ class ViewServiceRequestUpdate extends ViewRecord
                             ->getStateUsing(fn (ServiceRequestUpdate $record): string => match ($record->createdBy::class) {
                                 User::class => $record->createdBy->name,
                                 Contact::class => $record->createdBy->full_name,
+                                SystemUser::class => $record->createdBy->name,
                                 ServiceRequest::class => 'AI',
                                 default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
                             })
                             ->url(fn (ServiceRequestUpdate $record): ?string => match ($record->createdBy::class) {
                                 User::class => UserResource::getUrl('view', ['record' => $record->createdBy]),
                                 Contact::class => ContactResource::getUrl('view', ['record' => $record->createdBy]),
+                                SystemUser::class => null,
                                 ServiceRequest::class => null,
                                 default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
                             }),

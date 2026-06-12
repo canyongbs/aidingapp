@@ -34,19 +34,35 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\CreateServiceRequestUpdateController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ListServiceRequestsController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\UpdateServiceRequestController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ViewServiceRequestController;
-use Illuminate\Support\Facades\Route;
+namespace AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests;
 
-Route::api(majorVersion: 1, routes: function () {
-    Route::name('service-requests.')
-        ->prefix('service-requests')
-        ->group(function () {
-            Route::get('/', ListServiceRequestsController::class)->name('index');
-            Route::get('/{serviceRequest}', ViewServiceRequestController::class)->name('show');
-            Route::patch('/{serviceRequest}', UpdateServiceRequestController::class)->name('update');
-            Route::post('/{serviceRequest}/updates', CreateServiceRequestUpdateController::class)->name('updates.store');
-        });
-});
+use AidingApp\ServiceManagement\Actions\CreateServiceRequestUpdateAction;
+use AidingApp\ServiceManagement\DataTransferObjects\CreateServiceRequestUpdateDataObject;
+use AidingApp\ServiceManagement\Http\Requests\Api\V1\ServiceRequests\CreateServiceRequestUpdateRequest;
+use AidingApp\ServiceManagement\Http\Resources\Api\V1\ServiceRequestUpdateResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Facades\Gate;
+
+class CreateServiceRequestUpdateController
+{
+    /**
+     * @response ServiceRequestUpdateResource
+     */
+    #[Group('Service Requests')]
+    public function __invoke(
+        CreateServiceRequestUpdateRequest $request,
+        ServiceRequest $serviceRequest,
+        CreateServiceRequestUpdateAction $createServiceRequestUpdateAction,
+    ): JsonResource {
+        Gate::authorize('viewAny', ServiceRequest::class);
+        Gate::authorize('create', ServiceRequestUpdate::class);
+
+        $createServiceRequestUpdate = $createServiceRequestUpdateAction->execute(CreateServiceRequestUpdateDataObject::fromData($request->validated()), $serviceRequest);
+
+        return $createServiceRequestUpdate
+            ->toResource(ServiceRequestUpdateResource::class);
+    }
+}

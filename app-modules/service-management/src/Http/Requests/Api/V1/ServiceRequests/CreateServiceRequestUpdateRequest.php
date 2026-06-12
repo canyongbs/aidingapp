@@ -34,19 +34,47 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\CreateServiceRequestUpdateController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ListServiceRequestsController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\UpdateServiceRequestController;
-use AidingApp\ServiceManagement\Http\Controllers\Api\V1\ServiceRequests\ViewServiceRequestController;
-use Illuminate\Support\Facades\Route;
+namespace AidingApp\ServiceManagement\Http\Requests\Api\V1\ServiceRequests;
 
-Route::api(majorVersion: 1, routes: function () {
-    Route::name('service-requests.')
-        ->prefix('service-requests')
-        ->group(function () {
-            Route::get('/', ListServiceRequestsController::class)->name('index');
-            Route::get('/{serviceRequest}', ViewServiceRequestController::class)->name('show');
-            Route::patch('/{serviceRequest}', UpdateServiceRequestController::class)->name('update');
-            Route::post('/{serviceRequest}/updates', CreateServiceRequestUpdateController::class)->name('updates.store');
-        });
-});
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\File;
+
+class CreateServiceRequestUpdateRequest extends FormRequest
+{
+    /**
+     * @return array<string, ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'update' => ['required', 'string'],
+            'internal' => ['nullable', 'boolean'],
+            'files' => ['nullable', 'array'],
+            'files.*' => [
+                'max:10240',
+                File::types([
+                    'application/pdf',
+                    'application/vnd.ms-excel',
+                    'application/vnd.ms-powerpoint',
+                    'application/vnd.ms-word',
+                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'image/jpeg',
+                    'image/pdf',
+                    'image/png',
+                    'text/csv',
+                    'text/markdown',
+                    'text/plain',
+                    'application/octet-stream',
+                    'video/mp4',
+                    'video/webm',
+                    'video/ogg',
+                    'video/quicktime',
+                    'video/x-msvideo',
+                ]),
+            ],
+        ];
+    }
+}
