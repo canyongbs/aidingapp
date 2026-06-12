@@ -349,7 +349,10 @@
                 </div>
                 <div v-else class="flex flex-col gap-6">
                     <div class="flex flex-col gap-4">
-                        <Subheading :title="category.name" />
+                        <div class="flex flex-col gap-1">
+                            <Subheading :title="category.name" />
+                            <p v-if="category.description" class="text-sm text-gray-500">{{ category.description }}</p>
+                        </div>
                         <SubCategories
                             v-if="category.subCategories.length > 0"
                             :subCategories="category.subCategories"
