@@ -119,7 +119,7 @@ it('substitutes the recipient name in the body and subject while the relabeled c
 
     expect($body)
         ->toContain('Jane Recipient')
-        ->toContain($contact->{$contact::displayNameKey()});
+        ->toContain(e($contact->{$contact::displayNameKey()}));
 
     expect($subject)->toContain('Jane Recipient');
 });
