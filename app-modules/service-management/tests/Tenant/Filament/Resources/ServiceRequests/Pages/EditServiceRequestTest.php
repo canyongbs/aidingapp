@@ -772,7 +772,9 @@ test('service requests not authorized if user is a direct auditorUser of the ser
 });
 
 test('EditServiceRequest page displays the uploaded files section', function () {
-    $serviceRequest = ServiceRequest::factory()->create();
+    $serviceRequest = ServiceRequest::factory()->create([
+        'status_id' => ServiceRequestStatus::factory()->state(['classification' => SystemServiceRequestClassification::Open]),
+    ]);
 
     asSuperAdmin()
         ->get(ServiceRequestResource::getUrl('edit', ['record' => $serviceRequest]))
