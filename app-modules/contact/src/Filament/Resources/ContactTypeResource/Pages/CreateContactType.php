@@ -39,8 +39,12 @@ namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 use AidingApp\Contact\Enums\ContactTypeColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Filament\Resources\ContactTypeResource;
+use AidingApp\Contact\Models\ContactType;
+use App\Features\ContactTypeManagementFeature;
+use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
 
@@ -48,6 +52,11 @@ class CreateContactType extends CreateRecord
 {
     protected static string $resource = ContactTypeResource::class;
 
+    /*
+     * TODO: ContactTypeManagementFeature cleanup — once the feature flag is removed:
+     * - Delete the `classification` Select and the legacy `color` Select below.
+     * - Drop the `->visible(...)` guards on ColorSelect and the `is_default` Toggle.
+     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -61,13 +70,42 @@ class CreateContactType extends CreateRecord
                     ->searchable()
                     ->options(SystemContactClassification::class)
                     ->required()
-                    ->enum(SystemContactClassification::class),
+                    ->enum(SystemContactClassification::class)
+                    ->hidden(ContactTypeManagementFeature::active()),
                 Select::make('color')
                     ->label('Color')
                     ->searchable()
                     ->options(ContactTypeColorOptions::class)
                     ->required()
-                    ->enum(ContactTypeColorOptions::class),
+                    ->enum(ContactTypeColorOptions::class)
+                    ->hidden(ContactTypeManagementFeature::active()),
+                ColorSelect::make()
+                    ->required()
+                    ->visible(ContactTypeManagementFeature::active()),
+                Toggle::make('is_default')
+                    ->label('Default')
+                    ->live()
+                    ->hint(function (?ContactType $record, ?bool $state): ?string {
+                        if ($record?->is_default) {
+                            return null;
+                        }
+
+                        if (! $state) {
+                            return null;
+                        }
+
+                        $currentDefault = ContactType::query()
+                            ->where('is_default', true)
+                            ->value('name');
+
+                        if (blank($currentDefault)) {
+                            return null;
+                        }
+
+                        return "The current default type is '{$currentDefault}', you are replacing it.";
+                    })
+                    ->hintColor('danger')
+                    ->visible(ContactTypeManagementFeature::active()),
             ]);
     }
 }

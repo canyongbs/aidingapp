@@ -34,33 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Database\Seeders;
-
 use AidingApp\Contact\Models\ContactType;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Seeder;
 
-class ContactTypeSeeder extends Seeder
-{
-    public function run(): void
-    {
-        // No type is seeded as the default — each institution sets its own.
-        // When none is_default, ContactType::resolveDefault() falls back to the
-        // first (oldest) entry, which will be 'Student'.
-        ContactType::factory()
-            ->createMany(
-                [
-                    [
-                        'name' => 'Student',
-                        'color' => Color::Green->value,
-                        'is_default' => false,
-                    ],
-                    [
-                        'name' => 'Employee',
-                        'color' => Color::Blue->value,
-                        'is_default' => false,
-                    ],
-                ]
-            );
-    }
-}
+use function PHPUnit\Framework\assertNull;
+
+test('resolveDefault returns the configured default when one exists', function () {
+    ContactType::factory()->create(['is_default' => false]);
+    $default = ContactType::factory()->create(['is_default' => true]);
+    ContactType::factory()->create(['is_default' => false]);
+
+    expect(ContactType::resolveDefault()->is($default))->toBeTrue();
+});
+
+test('resolveDefault falls back to the oldest type when no default is set', function () {
+    $oldest = ContactType::factory()->create(['is_default' => false, 'created_at' => now()->subDay()]);
+    ContactType::factory()->create(['is_default' => false, 'created_at' => now()]);
+
+    expect(ContactType::resolveDefault()->is($oldest))->toBeTrue();
+});
+
+test('resolveDefault returns null when no types exist', function () {
+    assertNull(ContactType::resolveDefault());
+});

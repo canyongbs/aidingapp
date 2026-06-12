@@ -39,6 +39,8 @@ namespace AidingApp\Contact\Database\Factories;
 use AidingApp\Contact\Enums\ContactTypeColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\ContactType;
+use App\Features\ContactTypeManagementFeature;
+use CanyonGBS\Common\Enums\Color;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -51,7 +53,13 @@ class ContactTypeFactory extends Factory
         return [
             'classification' => $this->faker->randomElement(SystemContactClassification::cases()),
             'name' => $this->faker->word,
-            'color' => $this->faker->randomElement(ContactTypeColorOptions::cases()),
+            /*
+             * TODO: ContactTypeManagementFeature cleanup — once the feature flag is removed:
+             * - Remove the `classification` line and the ternary; always use Color::cases().
+             */
+            'color' => ContactTypeManagementFeature::active()
+                ? $this->faker->randomElement(Color::cases())
+                : $this->faker->randomElement(ContactTypeColorOptions::cases()),
         ];
     }
 }

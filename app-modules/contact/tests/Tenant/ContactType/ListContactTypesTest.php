@@ -74,11 +74,6 @@ test('The correct details are displayed on the ListContactTypes page', function 
                 $contactType
             )
             ->assertTableColumnFormattedStateSet(
-                'classification',
-                $contactType->classification->getLabel(),
-                $contactType
-            )
-            ->assertTableColumnFormattedStateSet(
                 'color',
                 $contactType->color->getLabel(),
                 $contactType

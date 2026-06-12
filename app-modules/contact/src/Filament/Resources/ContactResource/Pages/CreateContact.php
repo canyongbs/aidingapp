@@ -40,6 +40,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
+use App\Features\ContactTypeManagementFeature;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -146,6 +147,11 @@ class CreateContact extends CreateRecord
                         ->label('Type')
                         ->required()
                         ->relationship('type', 'name')
+                        // TODO: ContactTypeManagementFeature cleanup — once the feature flag is removed,
+                        // drop the active() guard and always default to ContactType::resolveDefault().
+                        ->default(fn () => ContactTypeManagementFeature::active()
+                            ? ContactType::resolveDefault()?->getKey()
+                            : null)
                         ->exists(
                             table: (new ContactType())->getTable(),
                             column: (new ContactType())->getKeyName()

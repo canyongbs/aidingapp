@@ -40,8 +40,12 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\ContactTypeFactory;
 use AidingApp\Contact\Enums\ContactTypeColorOptions;
 use AidingApp\Contact\Enums\SystemContactClassification;
+use AidingApp\Contact\Observers\ContactTypeObserver;
+use App\Features\ContactTypeManagementFeature;
 use App\Models\BaseModel;
+use CanyonGBS\Common\Enums\Color;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -50,6 +54,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 /**
  * @mixin IdeHelperContactType
  */
+#[ObservedBy([ContactTypeObserver::class])]
 class ContactType extends BaseModel implements Auditable
 {
     use SoftDeletes;
@@ -62,12 +67,19 @@ class ContactType extends BaseModel implements Auditable
         'classification',
         'name',
         'color',
+        'is_default',
     ];
 
-    protected $casts = [
-        'classification' => SystemContactClassification::class,
-        'color' => ContactTypeColorOptions::class,
-    ];
+    /**
+     * Resolve the ContactType used when one must be assigned without an explicit
+     * selection (e.g. inbound email, portal self-registration): the configured
+     * default, otherwise the oldest non-trashed type.
+     */
+    public static function resolveDefault(): ?self
+    {
+        return static::query()->where('is_default', true)->first()
+            ?? static::query()->oldest()->first();
+    }
 
     /**
      * @return HasMany<Contact, $this>
@@ -80,6 +92,23 @@ class ContactType extends BaseModel implements Auditable
     public function getTable()
     {
         return 'contact_types';
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'classification' => SystemContactClassification::class,
+            /*
+             * TODO: ContactTypeManagementFeature cleanup — once the feature flag is removed:
+             * - Replace this ternary with `'color' => Color::class,`
+             * - Drop the SystemContactClassification cast (and the column) entirely.
+             */
+            'color' => ContactTypeManagementFeature::active() ? Color::class : ContactTypeColorOptions::class,
+            'is_default' => 'boolean',
+        ];
     }
 
     protected function serializeDate(DateTimeInterface $date): string

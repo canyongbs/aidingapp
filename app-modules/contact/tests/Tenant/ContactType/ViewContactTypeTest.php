@@ -56,10 +56,9 @@ test('The correct details are displayed on the ViewContactType page', function (
             [
                 'Name',
                 $contactType->name,
-                'Classification',
-                $contactType->classification->getLabel(),
                 'Color',
-                $contactType->color,
+                $contactType->color->getLabel(),
+                'Default',
             ]
         );
 });
