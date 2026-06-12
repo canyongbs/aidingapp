@@ -36,7 +36,6 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
-use App\Features\TeamRenameFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -97,7 +96,7 @@ class CreateUser extends CreateRecord
                     ]),
                 Section::make('Department')
                     ->schema([
-                        Select::make(TeamRenameFeature::active() ? 'department_id' : 'team_id')
+                        Select::make('department_id')
                             ->hiddenLabel()
                             ->relationship('department', 'name'),
                     ])

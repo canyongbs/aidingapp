@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\KnowledgeBase\Http\Controllers\KnowledgeBaseArticleMediaDownloadController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\AdvisoryController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\AssetManagementPortalController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\EvaluateServiceRequestAiResolutionController;
@@ -151,6 +152,8 @@ Route::prefix('api')
                     ->name('service-request-update.storeServiceRequestUpdate');
                 Route::get('/service-request/media/{media}/download', ServiceRequestMediaDownloadController::class)
                     ->name('service-request.media.download');
+                Route::get('/knowledge-base-article/media/{media}/download', KnowledgeBaseArticleMediaDownloadController::class)
+                    ->name('knowledge-base-article.media.download');
                 Route::post('/knowledge_base_article_vote/store', StoreKnowledgeBaseArticleVoteController::class)
                     ->name('knowledge_base_article_vote.storeKnowledgeBaseArticleVote');
 

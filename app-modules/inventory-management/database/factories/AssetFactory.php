@@ -53,9 +53,9 @@ class AssetFactory extends Factory
             'serial_number' => $this->faker->isbn13(),
             'name' => $this->faker->catchPhrase(),
             'description' => $this->faker->paragraph(),
-            'type_id' => AssetType::inRandomOrder()->first() ?? AssetType::factory()->create(),
-            'status_id' => AssetStatus::inRandomOrder()->first() ?? AssetStatus::factory()->create(),
-            'location_id' => AssetLocation::inRandomOrder()->first() ?? AssetLocation::factory()->create(),
+            'type_id' => AssetType::factory(),
+            'status_id' => AssetStatus::factory(),
+            'location_id' => AssetLocation::factory(),
             'purchase_date' => $this->faker->dateTime(),
         ];
     }

@@ -180,6 +180,9 @@ test('reclassify requires priority_id', function () {
     ]);
 
     $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
         'priority_id' => $originalPriority->getKey(),
     ])->create();
 
@@ -209,6 +212,9 @@ test('reclassify requires assignment_method', function () {
     ]);
 
     $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
         'priority_id' => $originalPriority->getKey(),
     ])->create();
 
@@ -238,6 +244,9 @@ test('reclassify with override but missing assign_to produces validation error',
     ]);
 
     $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
         'priority_id' => $originalPriority->getKey(),
     ])->create();
 
@@ -262,6 +271,9 @@ test('type options exclude the current service request type', function () {
     $otherType = ServiceRequestType::factory()->create();
 
     $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $currentType->getKey(),
         ])->getKey(),
@@ -289,6 +301,9 @@ test('type options exclude archived service request types', function () {
     $activeType = ServiceRequestType::factory()->create();
 
     $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $currentType->getKey(),
         ])->getKey(),
@@ -323,6 +338,9 @@ test('override assign_to only lists eligible managers for selected type', functi
     $ineligibleUser = User::factory()->create(['name' => 'Ineligible User']);
 
     $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $originalType->getKey(),
         ])->getKey(),
@@ -364,6 +382,9 @@ test('selecting a new type auto-selects priority with matching name', function (
     ]);
 
     $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
         'priority_id' => $originalPriority->getKey(),
     ])->create();
 
@@ -392,6 +413,9 @@ test('selecting a new type clears priority when no matching name exists', functi
     ]);
 
     $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
         'priority_id' => $originalPriority->getKey(),
     ])->create();
 

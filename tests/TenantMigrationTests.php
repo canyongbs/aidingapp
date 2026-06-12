@@ -35,9 +35,30 @@
 */
 
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
+use AidingApp\Division\Models\Division;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestTypeEmailPreferenceFeature;
+use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Symfony\Component\Console\Command\Command;
+
+function columnNativeType(string $table, string $column): ?string
+{
+    return DB::selectOne(
+        'SELECT udt_name FROM information_schema.columns WHERE table_name = ? AND column_name = ?',
+        [$table, $column],
+    )?->udt_name;
+}
 
 // Example migration test, leave commented out for future use as a template/example
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
@@ -80,6 +101,227 @@ describe('2026_05_15_201835_tmp_update_ai_support_assistant_default_instructions
                     ->value('payload');
 
                 expect(json_decode($payload, true))->toBe(AiSupportAssistantSettings::defaultInstructions());
+            }
+        );
+    });
+});
+
+describe('2026_06_02_122811_tmp_data_migrate_service_request_type_email_preferences', function () {
+    it('migrates all boolean preference columns into the email preference table with no data loss', function () {
+        isolatedMigration(
+            '2026_06_02_122811_tmp_data_migrate_service_request_type_email_preferences',
+            function () {
+                $typeA = ServiceRequestType::factory()->create();
+                $typeB = ServiceRequestType::factory()->create();
+
+                $columnMap = [
+                    'is_managers_service_request_created_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Created->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_managers_service_request_assigned_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Assigned->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_managers_service_request_update_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Update->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_managers_service_request_status_change_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::StatusChange->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_managers_service_request_closed_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Closed->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_auditors_service_request_created_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Created->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_auditors_service_request_assigned_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Assigned->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_auditors_service_request_update_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Update->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_auditors_service_request_status_change_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::StatusChange->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_auditors_service_request_closed_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Closed->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_customers_service_request_created_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Created->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_customers_service_request_assigned_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Assigned->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_customers_service_request_update_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Update->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_customers_service_request_status_change_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::StatusChange->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_customers_service_request_closed_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Closed->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_customers_survey_response_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::SurveyResponse->value, ServiceRequestNotificationChannel::Email->value],
+                    'is_managers_service_request_created_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Created->value, ServiceRequestNotificationChannel::Notification->value],
+                    'is_managers_service_request_assigned_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Assigned->value, ServiceRequestNotificationChannel::Notification->value],
+                    'is_managers_service_request_update_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Update->value, ServiceRequestNotificationChannel::Notification->value],
+                    'is_managers_service_request_status_change_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::StatusChange->value, ServiceRequestNotificationChannel::Notification->value],
+                    'is_managers_service_request_closed_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Closed->value, ServiceRequestNotificationChannel::Notification->value],
+                    'is_auditors_service_request_created_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Created->value, ServiceRequestNotificationChannel::Notification->value],
+                    'is_auditors_service_request_assigned_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Assigned->value, ServiceRequestNotificationChannel::Notification->value],
+                    'is_auditors_service_request_update_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Update->value, ServiceRequestNotificationChannel::Notification->value],
+                    'is_auditors_service_request_status_change_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::StatusChange->value, ServiceRequestNotificationChannel::Notification->value],
+                    'is_auditors_service_request_closed_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Closed->value, ServiceRequestNotificationChannel::Notification->value],
+                    'is_customers_service_request_created_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Created->value, ServiceRequestNotificationChannel::Notification->value],
+                    'is_customers_service_request_assigned_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Assigned->value, ServiceRequestNotificationChannel::Notification->value],
+                    'is_customers_service_request_update_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Update->value, ServiceRequestNotificationChannel::Notification->value],
+                    'is_customers_service_request_status_change_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::StatusChange->value, ServiceRequestNotificationChannel::Notification->value],
+                    'is_customers_service_request_closed_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Closed->value, ServiceRequestNotificationChannel::Notification->value],
+                ];
+
+                $valuesForTypeA = [];
+                $valuesForTypeB = [];
+
+                foreach (array_keys($columnMap) as $index => $column) {
+                    $valuesForTypeA[$column] = $index % 2 === 0;
+                    $valuesForTypeB[$column] = $index % 3 === 0;
+                }
+
+                DB::table('service_request_types')->where('id', $typeA->id)->update($valuesForTypeA);
+                DB::table('service_request_types')->where('id', $typeB->id)->update($valuesForTypeB);
+
+                $migrate = Artisan::call('migrate', [
+                    '--path' => 'app-modules/service-management/database/migrations/2026_06_02_122811_tmp_data_migrate_service_request_type_email_preferences.php',
+                ]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                $expectedCountPerType = count($columnMap);
+
+                expect(DB::table('service_request_type_email_preference')->where('service_request_type_id', $typeA->id)->count())
+                    ->toBe($expectedCountPerType)
+                    ->and(DB::table('service_request_type_email_preference')->where('service_request_type_id', $typeB->id)->count())
+                    ->toBe($expectedCountPerType);
+
+                foreach ($columnMap as $column => [$role, $templateType, $channel]) {
+                    $prefA = DB::table('service_request_type_email_preference')
+                        ->where('service_request_type_id', $typeA->id)
+                        ->where('service_request_email_template_role', $role)
+                        ->where('service_request_email_template_type', $templateType)
+                        ->where('notification_channel', $channel)
+                        ->first();
+
+                    expect($prefA)->not->toBeNull()
+                        ->and((bool) $prefA->is_enabled)->toBe($valuesForTypeA[$column]);
+
+                    $prefB = DB::table('service_request_type_email_preference')
+                        ->where('service_request_type_id', $typeB->id)
+                        ->where('service_request_email_template_role', $role)
+                        ->where('service_request_email_template_type', $templateType)
+                        ->where('notification_channel', $channel)
+                        ->first();
+
+                    expect($prefB)->not->toBeNull()
+                        ->and((bool) $prefB->is_enabled)->toBe($valuesForTypeB[$column]);
+                }
+
+                expect(ServiceRequestTypeEmailPreferenceFeature::active())->toBeTrue();
+            }
+        );
+    });
+});
+
+describe('2026_06_04_203158_add_citext_unique_to_knowledge_base_statuses_name', function () {
+    it('merges case-insensitive duplicates keeping the latest, reassigns its articles, soft deletes the rest and converts the name column to citext', function () {
+        isolatedMigration(
+            '2026_06_04_203158_add_citext_unique_to_knowledge_base_statuses_name',
+            function () {
+                $oldest = KnowledgeBaseStatus::factory()->create(['name' => 'Published', 'created_at' => now()->subMinutes(3)]);
+                $middle = KnowledgeBaseStatus::factory()->create(['name' => 'published', 'created_at' => now()->subMinutes(2)]);
+                $latest = KnowledgeBaseStatus::factory()->create(['name' => 'PUBLISHED', 'created_at' => now()->subMinute()]);
+                $unrelated = KnowledgeBaseStatus::factory()->create(['name' => 'Draft', 'created_at' => now()]);
+
+                $articleOnOldest = KnowledgeBaseItem::factory()->create(['status_id' => $oldest->id]);
+                $articleOnMiddle = KnowledgeBaseItem::factory()->create(['status_id' => $middle->id]);
+                $articleOnLatest = KnowledgeBaseItem::factory()->create(['status_id' => $latest->id]);
+                $articleOnUnrelated = KnowledgeBaseItem::factory()->create(['status_id' => $unrelated->id]);
+
+                $migrate = Artisan::call('migrate', [
+                    '--path' => 'app-modules/knowledge-base/database/migrations/2026_06_04_203158_add_citext_unique_to_knowledge_base_statuses_name.php',
+                ]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                // The latest duplicate is kept live; the two earlier ones are soft deleted.
+                expect(columnNativeType('knowledge_base_statuses', 'name'))->toBe('citext')
+                    ->and(KnowledgeBaseStatus::withTrashed()->find($latest->id)->deleted_at)->toBeNull()
+                    ->and(KnowledgeBaseStatus::withTrashed()->find($oldest->id)->deleted_at)->not->toBeNull()
+                    ->and(KnowledgeBaseStatus::withTrashed()->find($middle->id)->deleted_at)->not->toBeNull()
+                    ->and(KnowledgeBaseStatus::withTrashed()->find($unrelated->id)->deleted_at)->toBeNull()
+                    ->and(KnowledgeBaseStatus::query()->whereRaw('LOWER(name) = ?', ['published'])->count())->toBe(1);
+
+                // Articles from the merged statuses are reassigned to the kept status; the unrelated one is left alone.
+                expect(DB::table('knowledge_base_articles')->where('id', $articleOnOldest->id)->value('status_id'))->toBe($latest->id)
+                    ->and(DB::table('knowledge_base_articles')->where('id', $articleOnMiddle->id)->value('status_id'))->toBe($latest->id)
+                    ->and(DB::table('knowledge_base_articles')->where('id', $articleOnLatest->id)->value('status_id'))->toBe($latest->id)
+                    ->and(DB::table('knowledge_base_articles')->where('id', $articleOnUnrelated->id)->value('status_id'))->toBe($unrelated->id);
+            }
+        );
+    });
+});
+
+describe('2026_06_05_193725_add_citext_unique_to_service_request_statuses_name', function () {
+    it('merges same-classification duplicates, suffix-renames cross-classification duplicates, reassigns relations and converts the name column to citext', function () {
+        isolatedMigration(
+            '2026_06_05_193725_add_citext_unique_to_service_request_statuses_name',
+            function () {
+                $division = Division::factory()->create();
+
+                // Same name + same classification: should merge, keeping the latest (system protected) row.
+                $olderTriage = ServiceRequestStatus::factory()->systemProtected()->create([
+                    'name' => 'Triage',
+                    'classification' => SystemServiceRequestClassification::Open,
+                    'created_at' => now()->subMinutes(5),
+                ]);
+                $newerTriage = ServiceRequestStatus::factory()->systemProtected()->create([
+                    'name' => 'triage',
+                    'classification' => SystemServiceRequestClassification::Open,
+                    'created_at' => now()->subMinute(),
+                ]);
+
+                $serviceRequest = ServiceRequest::factory()->create([
+                    'status_id' => $olderTriage->id,
+                    'division_id' => $division->id,
+                ]);
+                // Insert the assignment directly to bypass the manager-validation observer; the
+                // migration reassigns this FK at the database level regardless.
+                $assignmentId = Str::orderedUuid()->toString();
+                DB::table('service_request_assignments')->insert([
+                    'id' => $assignmentId,
+                    'service_request_id' => $serviceRequest->id,
+                    'user_id' => User::factory()->create()->id,
+                    'assigned_at' => now(),
+                    'service_request_status_id' => $olderTriage->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // History records the loser status id inside both JSON value columns.
+                $historyId = Str::orderedUuid()->toString();
+                DB::table('service_request_histories')->insert([
+                    'id' => $historyId,
+                    'service_request_id' => $serviceRequest->id,
+                    'original_values' => json_encode(['status_id' => $olderTriage->id]),
+                    'new_values' => json_encode(['status_id' => $olderTriage->id]),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+
+                // Same name + different classification: should be suffix-renamed, not merged.
+                $openBacklog = ServiceRequestStatus::factory()->create([
+                    'name' => 'Backlog',
+                    'classification' => SystemServiceRequestClassification::Open,
+                    'created_at' => now()->subMinutes(2),
+                ]);
+                $closedBacklog = ServiceRequestStatus::factory()->create([
+                    'name' => 'Backlog',
+                    'classification' => SystemServiceRequestClassification::Closed,
+                    'created_at' => now()->subMinute(),
+                ]);
+
+                $migrate = Artisan::call('migrate', [
+                    '--path' => 'app-modules/service-management/database/migrations/2026_06_05_193725_add_citext_unique_to_service_request_statuses_name.php',
+                ]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                // Same-classification duplicates merged: latest kept, older soft deleted, relations reassigned.
+                expect(columnNativeType('service_request_statuses', 'name'))->toBe('citext')
+                    ->and(ServiceRequestStatus::withTrashed()->find($newerTriage->id)->deleted_at)->toBeNull()
+                    ->and(ServiceRequestStatus::withTrashed()->find($olderTriage->id)->deleted_at)->not->toBeNull()
+                    ->and($serviceRequest->fresh()->status_id)->toBe($newerTriage->id)
+                    ->and(DB::table('service_request_assignments')->where('id', $assignmentId)->value('service_request_status_id'))->toBe($newerTriage->id)
+                    ->and(ServiceRequestStatus::query()->whereRaw('LOWER(name) = ?', ['triage'])->count())->toBe(1);
+
+                // History JSON status_id references are repointed from the loser to the kept status.
+                $history = DB::table('service_request_histories')->where('id', $historyId)->first();
+                expect(json_decode($history->original_values, true)['status_id'])->toBe($newerTriage->id)
+                    ->and(json_decode($history->new_values, true)['status_id'])->toBe($newerTriage->id);
+
+                // Cross-classification duplicates preserved, but disambiguated by suffix.
+                expect($closedBacklog->fresh()->name)->toBe('Backlog')
+                    ->and($openBacklog->fresh()->name)->toBe('Backlog-2')
+                    ->and($closedBacklog->fresh()->deleted_at)->toBeNull()
+                    ->and($openBacklog->fresh()->deleted_at)->toBeNull();
             }
         );
     });

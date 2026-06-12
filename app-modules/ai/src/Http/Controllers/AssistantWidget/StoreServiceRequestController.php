@@ -42,8 +42,9 @@ use AidingApp\Form\Filament\Blocks\UploadFormFieldBlock;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
-use AidingApp\ServiceManagement\Actions\AssignServiceRequestToDepartment;
+use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -130,25 +131,22 @@ class StoreServiceRequestController extends Controller
                 ->where('is_system_protected', true)
                 ->firstOrFail();
 
-            $serviceRequest = new ServiceRequest([
-                'title' => $data['title'],
-                'close_details' => $data['description'],
-                'status_id' => $serviceRequestStatus->getKey(),
-                'status_updated_at' => CarbonImmutable::now(),
-            ]);
-
-            $serviceRequest->respondent()->associate($contact);
-            $serviceRequest->priority()->associate($priority);
-            $serviceRequest->save();
-            $serviceRequest->refresh();
+            $serviceRequest = app(CreateServiceRequestAction::class)->execute(
+                ServiceRequestDataObject::fromData([
+                    'type_id' => $type->getKey(),
+                    'priority_id' => $priority->getKey(),
+                    'status_id' => $serviceRequestStatus->getKey(),
+                    'respondent_id' => $contact->getKey(),
+                    'title' => $data['title'],
+                    'close_details' => $data['description'],
+                ])
+            );
 
             $updateUuids = $this->generateUpdateUuids($data);
 
             $this->storeClarifyingQuestions($data, $serviceRequest, $contact, $type, $updateUuids);
 
             $this->handleAiResolution($data, $serviceRequest, $contact, $type, $updateUuids);
-
-            app(AssignServiceRequestToDepartment::class)->execute($serviceRequest);
 
             Bus::batch(
                 array_map(

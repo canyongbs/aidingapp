@@ -49,6 +49,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -58,6 +59,8 @@ use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ListServiceRequests page', function () {
     asSuperAdmin();
+
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
 
     $user = User::factory()->create();
 
@@ -84,6 +87,7 @@ test('The correct details are displayed on the ListServiceRequests page', functi
             relationship: 'assignments'
         )
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -99,6 +103,7 @@ test('The correct details are displayed on the ListServiceRequests page', functi
 
     $component
         ->assertTableColumnExists('service_request_number')
+        ->assertTableColumnExists('priority.type.name')
         ->assertTableColumnExists('related_to')
         ->assertTableColumnExists('division.name')
         ->assertTableColumnExists('sla')
@@ -137,6 +142,8 @@ test('The correct details are displayed on the ListServiceRequests page', functi
 test('The correct details are displayed on the ListServiceRequests page via direct user manager', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.*.update');
@@ -156,6 +163,7 @@ test('The correct details are displayed on the ListServiceRequests page via dire
             relationship: 'assignments'
         )
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -171,6 +179,7 @@ test('The correct details are displayed on the ListServiceRequests page via dire
 
     $component
         ->assertTableColumnExists('service_request_number')
+        ->assertTableColumnExists('priority.type.name')
         ->assertTableColumnExists('related_to')
         ->assertTableColumnExists('division.name')
         ->assertTableColumnExists('sla')
@@ -209,8 +218,11 @@ test('The correct details are displayed on the ListServiceRequests page via dire
 test('category is rendered inline with the service request number on the ListServiceRequests page', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $serviceRequest = ServiceRequest::factory()->create([
         'category' => ServiceRequestCategory::Incident,
+        'status_id' => $openStatus->getKey(),
     ]);
 
     livewire(ListServiceRequests::class)
@@ -223,16 +235,20 @@ test('category is rendered inline with the service request number on the ListSer
 test('can filter service request by category', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $incidentServiceRequests = ServiceRequest::factory()
         ->count(2)
         ->create([
             'category' => ServiceRequestCategory::Incident,
+            'status_id' => $openStatus->getKey(),
         ]);
 
     $requestServiceRequests = ServiceRequest::factory()
         ->count(2)
         ->create([
             'category' => ServiceRequestCategory::Request,
+            'status_id' => $openStatus->getKey(),
         ]);
 
     livewire(ListServiceRequests::class)
@@ -240,6 +256,46 @@ test('can filter service request by category', function () {
         ->filterTable('category', ServiceRequestCategory::Incident->value)
         ->assertCanSeeTableRecords($incidentServiceRequests)
         ->assertCanNotSeeTableRecords($requestServiceRequests);
+});
+
+test('can sort service requests by type', function () {
+    asSuperAdmin();
+
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
+    $firstType = ServiceRequestType::factory()->create(['name' => 'Alpha Type']);
+    $secondType = ServiceRequestType::factory()->create(['name' => 'Beta Type']);
+
+    $firstPriority = ServiceRequestPriority::factory()->create(['type_id' => $firstType->getKey()]);
+    $secondPriority = ServiceRequestPriority::factory()->create(['type_id' => $secondType->getKey()]);
+
+    $firstServiceRequest = ServiceRequest::factory()->create(['priority_id' => $firstPriority->getKey(), 'status_id' => $openStatus->getKey()]);
+    $secondServiceRequest = ServiceRequest::factory()->create(['priority_id' => $secondPriority->getKey(), 'status_id' => $openStatus->getKey()]);
+
+    livewire(ListServiceRequests::class)
+        ->sortTable('priority.type.name', 'asc')
+        ->assertCanSeeTableRecords([$firstServiceRequest, $secondServiceRequest], inOrder: true)
+        ->sortTable('priority.type.name', 'desc')
+        ->assertCanSeeTableRecords([$secondServiceRequest, $firstServiceRequest], inOrder: true);
+});
+
+test('type column displays the correct service request type name', function () {
+    asSuperAdmin();
+
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
+    $serviceRequestType = ServiceRequestType::factory()->create(['name' => 'Test Type']);
+
+    $priority = ServiceRequestPriority::factory()->create(['type_id' => $serviceRequestType->getKey()]);
+
+    $serviceRequest = ServiceRequest::factory()->create(['priority_id' => $priority->getKey(), 'status_id' => $openStatus->getKey()]);
+
+    livewire(ListServiceRequests::class)
+        ->assertTableColumnStateSet(
+            'priority.type.name',
+            'Test Type',
+            $serviceRequest
+        );
 });
 
 // TODO: Sorting and Searching tests
@@ -291,6 +347,8 @@ test('ListServiceRequests is gated with proper feature access control', function
 test('can filter service request by organization', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $organizations = Organization::factory()->count(10)->create();
 
     $organization = $organizations->first();
@@ -298,11 +356,11 @@ test('can filter service request by organization', function () {
     $serviceRequestsInOrganization = ServiceRequest::factory()
         ->count(3)
         ->for(Contact::factory()->state(['organization_id' => $organization->id]), 'respondent')
-        ->create();
+        ->create(['status_id' => $openStatus->getKey()]);
 
     $serviceRequestsNotInOrganization = ServiceRequest::factory()
         ->count(3)
-        ->create();
+        ->create(['status_id' => $openStatus->getKey()]);
 
     livewire(ListServiceRequests::class)
         ->assertCanSeeTableRecords($serviceRequestsInOrganization->merge($serviceRequestsNotInOrganization))
@@ -320,6 +378,8 @@ test('service requests only visible to service request type managers', function 
 
     $settings->save();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
@@ -334,13 +394,14 @@ test('service requests only visible to service request type managers', function 
 
     $serviceRequests = ServiceRequest::factory()
         ->count(3)
-        ->create();
+        ->create(['status_id' => $openStatus->getKey()]);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->managerDepartments()->attach($department);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'status_id' => $openStatus->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
@@ -362,6 +423,8 @@ test('service requests only visible to direct user service request type managers
 
     $settings->save();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
@@ -370,13 +433,14 @@ test('service requests only visible to direct user service request type managers
 
     $serviceRequests = ServiceRequest::factory()
         ->count(3)
-        ->create();
+        ->create(['status_id' => $openStatus->getKey()]);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->managerUsers()->attach($user);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'status_id' => $openStatus->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
@@ -398,6 +462,8 @@ test('service requests only visible to service request type auditors', function 
 
     $settings->save();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
@@ -412,13 +478,14 @@ test('service requests only visible to service request type auditors', function 
 
     $serviceRequests = ServiceRequest::factory()
         ->count(3)
-        ->create();
+        ->create(['status_id' => $openStatus->getKey()]);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->auditorDepartments()->attach($department);
 
     $serviceRequestsWithAuditors = ServiceRequest::factory()->state([
+        'status_id' => $openStatus->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
@@ -440,6 +507,8 @@ test('service requests only visible to direct user service request type auditors
 
     $settings->save();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
@@ -448,13 +517,14 @@ test('service requests only visible to direct user service request type auditors
 
     $serviceRequests = ServiceRequest::factory()
         ->count(3)
-        ->create();
+        ->create(['status_id' => $openStatus->getKey()]);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->auditorUsers()->attach($user);
 
     $serviceRequestsWithAuditors = ServiceRequest::factory()->state([
+        'status_id' => $openStatus->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
@@ -553,7 +623,9 @@ test('can list direct user manager to service request type', function () {
 });
 
 it('can filter service requests by assigned to with unassigned option', function () {
-    $unassignedRequest = ServiceRequest::factory()->create();
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
+    $unassignedRequest = ServiceRequest::factory()->create(['status_id' => $openStatus->getKey()]);
 
     $user = User::factory()->create();
 
@@ -587,6 +659,7 @@ it('can filter service requests by assigned to with unassigned option', function
             relationship: 'assignments'
         )
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -603,6 +676,7 @@ it('can filter service requests by assigned to with unassigned option', function
             relationship: 'assignments'
         )
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -643,7 +717,9 @@ it('can filter service requests by assigned to with unassigned option', function
 });
 
 it('can filter service requests by assigned to with unassigned option via direct user manager', function () {
-    $unassignedRequest = ServiceRequest::factory()->create();
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
+    $unassignedRequest = ServiceRequest::factory()->create(['status_id' => $openStatus->getKey()]);
 
     $user = User::factory()->create();
 
@@ -667,6 +743,7 @@ it('can filter service requests by assigned to with unassigned option via direct
             relationship: 'assignments'
         )
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
                 'type_id' => $serviceRequestType->getKey(),
             ])->getKey(),
@@ -699,6 +776,8 @@ it('can filter service requests by assigned to with unassigned option via direct
 it('can filter service requests by searched assigned user outside initial preload options', function () {
     asSuperAdmin();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     User::factory()->count(75)->create();
 
     $searchedUser = User::factory()->create();
@@ -728,6 +807,7 @@ it('can filter service requests by searched assigned user outside initial preloa
             relationship: 'assignments'
         )
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => $priority->getKey(),
         ])
         ->create();
@@ -742,6 +822,7 @@ it('can filter service requests by searched assigned user outside initial preloa
             relationship: 'assignments'
         )
         ->state([
+            'status_id' => $openStatus->getKey(),
             'priority_id' => $priority->getKey(),
         ])
         ->create();
@@ -779,4 +860,303 @@ it('default non closed service request will not display', function () {
         ->assertCanNotSeeTableRecords($closedServiceRequests)
         ->removeTableFilter('status')
         ->assertCanSeeTableRecords($nonClosedServiceRequests->merge($closedServiceRequests));
+});
+
+it('can filter service requests by type', function () {
+    asSuperAdmin();
+
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
+    $typeA = ServiceRequestType::factory()->create();
+    $typeB = ServiceRequestType::factory()->create();
+
+    $priorityA = ServiceRequestPriority::factory()->create([
+        'type_id' => $typeA->getKey(),
+    ]);
+
+    $priorityB = ServiceRequestPriority::factory()->create([
+        'type_id' => $typeB->getKey(),
+    ]);
+
+    $serviceRequestsTypeA = ServiceRequest::factory()
+        ->count(2)
+        ->create(['priority_id' => $priorityA->getKey(), 'status_id' => $openStatus->getKey()]);
+
+    $serviceRequestsTypeB = ServiceRequest::factory()
+        ->count(2)
+        ->create(['priority_id' => $priorityB->getKey(), 'status_id' => $openStatus->getKey()]);
+
+    livewire(ListServiceRequests::class)
+        ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB))
+        ->filterTable('type', ['types' => [$typeA->getKey()]])
+        ->assertCanSeeTableRecords($serviceRequestsTypeA)
+        ->assertCanNotSeeTableRecords($serviceRequestsTypeB);
+});
+
+it('can filter service requests by multiple types', function () {
+    asSuperAdmin();
+
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
+    $typeA = ServiceRequestType::factory()->create();
+    $typeB = ServiceRequestType::factory()->create();
+    $typeC = ServiceRequestType::factory()->create();
+
+    $priorityA = ServiceRequestPriority::factory()->create([
+        'type_id' => $typeA->getKey(),
+    ]);
+
+    $priorityB = ServiceRequestPriority::factory()->create([
+        'type_id' => $typeB->getKey(),
+    ]);
+
+    $priorityC = ServiceRequestPriority::factory()->create([
+        'type_id' => $typeC->getKey(),
+    ]);
+
+    $serviceRequestsTypeA = ServiceRequest::factory()
+        ->count(2)
+        ->create(['priority_id' => $priorityA->getKey(), 'status_id' => $openStatus->getKey()]);
+
+    $serviceRequestsTypeB = ServiceRequest::factory()
+        ->count(2)
+        ->create(['priority_id' => $priorityB->getKey(), 'status_id' => $openStatus->getKey()]);
+
+    $serviceRequestsTypeC = ServiceRequest::factory()
+        ->count(2)
+        ->create(['priority_id' => $priorityC->getKey(), 'status_id' => $openStatus->getKey()]);
+
+    livewire(ListServiceRequests::class)
+        ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB)->merge($serviceRequestsTypeC))
+        ->filterTable('type', ['types' => [$typeA->getKey(), $typeB->getKey()]])
+        ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB))
+        ->assertCanNotSeeTableRecords($serviceRequestsTypeC);
+});
+
+it('shows all service requests when no type filter is selected', function () {
+    asSuperAdmin();
+
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
+    $typeA = ServiceRequestType::factory()->create();
+    $typeB = ServiceRequestType::factory()->create();
+
+    $priorityA = ServiceRequestPriority::factory()->create([
+        'type_id' => $typeA->getKey(),
+    ]);
+
+    $priorityB = ServiceRequestPriority::factory()->create([
+        'type_id' => $typeB->getKey(),
+    ]);
+
+    $serviceRequestsTypeA = ServiceRequest::factory()
+        ->count(2)
+        ->create(['priority_id' => $priorityA->getKey(), 'status_id' => $openStatus->getKey()]);
+
+    $serviceRequestsTypeB = ServiceRequest::factory()
+        ->count(2)
+        ->create(['priority_id' => $priorityB->getKey(), 'status_id' => $openStatus->getKey()]);
+
+    livewire(ListServiceRequests::class)
+        ->filterTable('type', ['types' => []])
+        ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB));
+});
+
+it('builds type tree options with categories as groups and types as selectable items', function () {
+    ServiceRequestType::query()->delete();
+    ServiceRequestTypeCategory::query()->delete();
+
+    $categoryA = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Area A',
+        'sort' => 1,
+        'parent_id' => null,
+    ]);
+
+    $categoryB = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Area B',
+        'sort' => 2,
+        'parent_id' => null,
+    ]);
+
+    $typeA1 = ServiceRequestType::factory()->create([
+        'name' => 'Type A1',
+        'sort' => 1,
+        'category_id' => $categoryA->getKey(),
+    ]);
+
+    $typeA2 = ServiceRequestType::factory()->create([
+        'name' => 'Type A2',
+        'sort' => 2,
+        'category_id' => $categoryA->getKey(),
+    ]);
+
+    $typeB1 = ServiceRequestType::factory()->create([
+        'name' => 'Type B1',
+        'sort' => 1,
+        'category_id' => $categoryB->getKey(),
+    ]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    expect($tree)->toHaveCount(2);
+
+    // Area A
+    expect($tree[0]['name'])->toBe('Area A');
+    expect($tree[0]['value'])->toBe('category_' . $categoryA->getKey());
+    expect($tree[0]['children'])->toHaveCount(2);
+    expect($tree[0]['children'][0]['name'])->toBe('Type A1');
+    expect($tree[0]['children'][0]['value'])->toBe($typeA1->getKey());
+    expect($tree[0]['children'][1]['name'])->toBe('Type A2');
+    expect($tree[0]['children'][1]['value'])->toBe($typeA2->getKey());
+
+    // Area B
+    expect($tree[1]['name'])->toBe('Area B');
+    expect($tree[1]['value'])->toBe('category_' . $categoryB->getKey());
+    expect($tree[1]['children'])->toHaveCount(1);
+    expect($tree[1]['children'][0]['name'])->toBe('Type B1');
+    expect($tree[1]['children'][0]['value'])->toBe($typeB1->getKey());
+});
+
+it('builds type tree options with nested categories maintaining sort order', function () {
+    ServiceRequestType::query()->delete();
+    ServiceRequestTypeCategory::query()->delete();
+
+    $parentCategory = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Parent Area',
+        'sort' => 1,
+        'parent_id' => null,
+    ]);
+
+    $childCategory = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Child Area',
+        'sort' => 1,
+        'parent_id' => $parentCategory->getKey(),
+    ]);
+
+    $parentType = ServiceRequestType::factory()->create([
+        'name' => 'Parent Type',
+        'sort' => 2,
+        'category_id' => $parentCategory->getKey(),
+    ]);
+
+    $childType = ServiceRequestType::factory()->create([
+        'name' => 'Child Type',
+        'sort' => 1,
+        'category_id' => $childCategory->getKey(),
+    ]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    expect($tree)->toHaveCount(1);
+
+    // Parent Area
+    expect($tree[0]['name'])->toBe('Parent Area');
+    expect($tree[0]['children'])->toHaveCount(2);
+
+    // Child Area (nested category, comes first by sort order)
+    expect($tree[0]['children'][0]['name'])->toBe('Child Area');
+    expect($tree[0]['children'][0]['children'])->toHaveCount(1);
+    expect($tree[0]['children'][0]['children'][0]['name'])->toBe('Child Type');
+    expect($tree[0]['children'][0]['children'][0]['value'])->toBe($childType->getKey());
+
+    // Parent Type (type in parent category)
+    expect($tree[0]['children'][1]['name'])->toBe('Parent Type');
+    expect($tree[0]['children'][1]['value'])->toBe($parentType->getKey());
+});
+
+it('builds type tree options with uncategorized types at root level', function () {
+    ServiceRequestType::query()->delete();
+    ServiceRequestTypeCategory::query()->delete();
+
+    $category = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Categorized Area',
+        'sort' => 1,
+        'parent_id' => null,
+    ]);
+
+    ServiceRequestType::factory()->create([
+        'name' => 'Categorized Type',
+        'sort' => 1,
+        'category_id' => $category->getKey(),
+    ]);
+
+    $uncategorizedType = ServiceRequestType::factory()->create([
+        'name' => 'Uncategorized Type',
+        'sort' => 1,
+        'category_id' => null,
+    ]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    expect($tree)->toHaveCount(2);
+
+    // Uncategorized type at root level first
+    expect($tree[0]['name'])->toBe('Uncategorized Type');
+    expect($tree[0]['value'])->toBe($uncategorizedType->getKey());
+
+    // Categorized area after uncategorized types
+    expect($tree[1]['name'])->toBe('Categorized Area');
+    expect($tree[1]['children'])->toHaveCount(1);
+    expect($tree[1]['children'][0]['name'])->toBe('Categorized Type');
+});
+
+it('filters out empty categories from type tree options', function () {
+    ServiceRequestType::query()->delete();
+    ServiceRequestTypeCategory::query()->delete();
+
+    $categoryWithTypes = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Has Types',
+        'sort' => 1,
+        'parent_id' => null,
+    ]);
+
+    $emptyCategory = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Empty Category',
+        'sort' => 2,
+        'parent_id' => null,
+    ]);
+
+    ServiceRequestType::factory()->create([
+        'name' => 'Type A',
+        'sort' => 1,
+        'category_id' => $categoryWithTypes->getKey(),
+    ]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    expect($tree)->toHaveCount(1);
+    expect($tree[0]['name'])->toBe('Has Types');
+    expect($tree[0]['children'])->toHaveCount(1);
+    expect($tree[0]['children'][0]['name'])->toBe('Type A');
+});
+
+it('filters out nested empty categories from type tree options', function () {
+    ServiceRequestType::query()->delete();
+    ServiceRequestTypeCategory::query()->delete();
+
+    $parentCategory = ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Parent',
+        'sort' => 1,
+        'parent_id' => null,
+    ]);
+
+    ServiceRequestTypeCategory::factory()->create([
+        'name' => 'Empty Child',
+        'sort' => 1,
+        'parent_id' => $parentCategory->getKey(),
+    ]);
+
+    $type = ServiceRequestType::factory()->create([
+        'name' => 'Direct Type',
+        'sort' => 2,
+        'category_id' => $parentCategory->getKey(),
+    ]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    expect($tree)->toHaveCount(1);
+    expect($tree[0]['name'])->toBe('Parent');
+    expect($tree[0]['children'])->toHaveCount(1);
+    expect($tree[0]['children'][0]['name'])->toBe('Direct Type');
+    expect($tree[0]['children'][0]['value'])->toBe($type->getKey());
 });

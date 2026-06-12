@@ -38,6 +38,7 @@ namespace App\Providers\Filament;
 
 use AidingApp\Authorization\Filament\Pages\Auth\Login;
 use AidingApp\Theme\Settings\ThemeSettings;
+use App\Enums\NavigationGroup;
 use App\Filament\Clusters\ProfileSettings;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ProductHealth;
@@ -55,7 +56,6 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Infolists\Components\Entry;
 use Filament\Navigation\MenuItem;
-use Filament\Navigation\NavigationGroup;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Enums\Width;
@@ -110,6 +110,7 @@ class AdminPanelProvider extends PanelProvider
             })
             ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
             ->maxContentWidth('full')
+            ->navigationGroups(NavigationGroup::class)
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->resources([])
@@ -136,52 +137,6 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
                 TrackPresence::class,
             ], isPersistent: true)
-            ->navigationGroups([
-                NavigationGroup::make()
-                    ->label('Live Chat')
-                    ->icon('heroicon-o-chat-bubble-left-right')
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Clients')
-                    ->icon('heroicon-o-building-office-2')
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Projects')
-                    ->icon('heroicon-o-folder')
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Service Desk')
-                    ->icon('heroicon-o-lifebuoy')
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Purchasing')
-                    ->icon('heroicon-o-document-text')
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Analytics')
-                    ->icon('heroicon-o-chart-bar-square')
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Engagement Features')
-                    ->icon('heroicon-o-signal')
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Premium Features')
-                    ->icon('heroicon-o-rocket-launch')
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Users')
-                    ->icon('heroicon-o-user-group')
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Settings')
-                    ->icon('heroicon-o-adjustments-vertical')
-                    ->collapsed(),
-                NavigationGroup::make()
-                    ->label('Global Admin')
-                    ->icon('heroicon-o-shield-check')
-                    ->collapsed(),
-            ])
             ->sidebarCollapsibleOnDesktop()
             ->plugins([
                 FilamentSpatieLaravelHealthPlugin::make()

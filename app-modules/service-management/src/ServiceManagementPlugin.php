@@ -53,6 +53,10 @@ class ServiceManagementPlugin implements Plugin
             in: __DIR__ . '/Filament/Resources',
             for: 'AidingApp\\ServiceManagement\\Filament\\Resources'
         )
+            ->discoverPages(
+                in: __DIR__ . '/Filament/Pages',
+                for: 'AidingApp\\ServiceManagement\\Filament\\Pages'
+            )
             ->livewireComponents([
                 ServiceRequestMediaTable::class,
             ]);

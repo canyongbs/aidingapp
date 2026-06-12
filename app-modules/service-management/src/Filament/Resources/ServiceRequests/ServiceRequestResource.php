@@ -41,13 +41,15 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditSer
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\Feedback;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageAssignments;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageLiveChats;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageServiceRequestUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ServiceRequestTimeline;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewLiveChatTranscript;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
-use App\Features\TeamRenameFeature;
+use App\Enums\NavigationGroup;
 use App\Models\User;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
@@ -60,7 +62,7 @@ class ServiceRequestResource extends Resource
 {
     protected static ?string $model = ServiceRequest::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
+    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::ServiceDesk;
 
     protected static ?int $navigationSort = 10;
 
@@ -97,9 +99,9 @@ class ServiceRequestResource extends Resource
 
                     if ($userDepartmentId) {
                         $query->orWhereHas('priority.type.managerDepartments', function (Builder $query) use ($userDepartmentId) {
-                            $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), $userDepartmentId);
+                            $query->where('departments.id', $userDepartmentId);
                         })->orWhereHas('priority.type.auditorDepartments', function (Builder $query) use ($userDepartmentId) {
-                            $query->where((TeamRenameFeature::active() ? 'departments.id' : 'teams.id'), $userDepartmentId);
+                            $query->where('departments.id', $userDepartmentId);
                         });
                     }
                 });
@@ -138,6 +140,11 @@ class ServiceRequestResource extends Resource
         return Gate::check(Feature::FeedbackManagement->getGateName());
     }
 
+    public static function shouldShowLiveChats(Page $page): bool
+    {
+        return Gate::check(Feature::RealtimeChat->getGateName());
+    }
+
     public static function getRecordSubNavigation(Page $page): array
     {
         $navigationItems = [
@@ -156,6 +163,10 @@ class ServiceRequestResource extends Resource
             array_splice($navigationItems, array_search(ServiceRequestTimeline::class, $navigationItems), 0, Feedback::class);
         }
 
+        if (static::shouldShowLiveChats($page)) {
+            array_splice($navigationItems, array_search(ServiceRequestTimeline::class, $navigationItems), 0, ManageLiveChats::class);
+        }
+
         return $page->generateNavigationItems($navigationItems);
     }
 
@@ -170,6 +181,8 @@ class ServiceRequestResource extends Resource
             'view' => ViewServiceRequest::route('/{record}'),
             'edit' => EditServiceRequest::route('/{record}/edit'),
             'manage-feedback' => Feedback::route('/{record}/manage-feedback'),
+            'manage-live-chats' => ManageLiveChats::route('/{record}/live-chats'),
+            'view-live-chat-transcript' => ViewLiveChatTranscript::route('/{record}/live-chats/{conversation}'),
             'timeline' => ServiceRequestTimeline::route('/{record}/timeline'),
         ];
     }

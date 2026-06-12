@@ -20,7 +20,8 @@
                         }
                     ],
                     "vote": null,
-                    "featured": false
+                    "featured": false,
+                    "attachments": null
                 }
             ],
             "links": [

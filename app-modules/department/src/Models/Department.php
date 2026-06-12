@@ -46,7 +46,6 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTargetDepartment;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeDepartmentAuditor;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeDepartmentManager;
-use App\Features\TeamRenameFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -69,7 +68,7 @@ class Department extends BaseModel
 
     public function getTable(): string
     {
-        return TeamRenameFeature::active() ? 'departments' : 'teams';
+        return 'departments';
     }
 
     /**
@@ -77,7 +76,7 @@ class Department extends BaseModel
      */
     public function users(): HasMany
     {
-        return $this->hasMany(User::class, TeamRenameFeature::active() ? 'department_id' : 'team_id');
+        return $this->hasMany(User::class, 'department_id');
     }
 
     /**
@@ -87,8 +86,8 @@ class Department extends BaseModel
     {
         return $this->belongsToMany(
             ServiceMonitoringTarget::class,
-            TeamRenameFeature::active() ? 'service_monitoring_target_department' : 'service_monitoring_target_team',
-            TeamRenameFeature::active() ? 'department_id' : 'team_id',
+            'service_monitoring_target_department',
+            'department_id',
             'service_monitoring_target_id',
         )
             ->using(ServiceMonitoringTargetDepartment::class)
@@ -103,7 +102,7 @@ class Department extends BaseModel
         return $this->belongsToMany(
             ServiceRequestType::class,
             (new ServiceRequestTypeDepartmentManager())->getTable(),
-            TeamRenameFeature::active() ? 'department_id' : 'team_id',
+            'department_id',
             'service_request_type_id',
         )
             ->using(ServiceRequestTypeDepartmentManager::class)
@@ -119,7 +118,7 @@ class Department extends BaseModel
         return $this->belongsToMany(
             ServiceRequestType::class,
             (new ServiceRequestTypeDepartmentAuditor())->getTable(),
-            TeamRenameFeature::active() ? 'department_id' : 'team_id',
+            'department_id',
             'service_request_type_id',
         )
             ->using(ServiceRequestTypeDepartmentAuditor::class)
@@ -143,8 +142,8 @@ class Department extends BaseModel
         return $this
             ->belongsToMany(
                 Project::class,
-                TeamRenameFeature::active() ? 'project_manager_departments' : 'project_manager_teams',
-                TeamRenameFeature::active() ? 'department_id' : 'team_id',
+                'project_manager_departments',
+                'department_id',
                 'project_id',
             )
             ->using(ProjectManagerDepartment::class)
@@ -159,8 +158,8 @@ class Department extends BaseModel
         return $this
             ->belongsToMany(
                 Project::class,
-                TeamRenameFeature::active() ? 'project_auditor_departments' : 'project_auditor_teams',
-                TeamRenameFeature::active() ? 'department_id' : 'team_id',
+                'project_auditor_departments',
+                'department_id',
                 'project_id',
             )
             ->using(ProjectAuditorDepartment::class)

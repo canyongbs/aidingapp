@@ -38,6 +38,9 @@ namespace App\Providers;
 
 use AidingApp\Authorization\Settings\AzureSsoSettings;
 use App\Health\Checks\AzureCredentialsExpiringCheck;
+use CanyonGBS\Common\Health\Checks\OpcacheCachedFilesCheck;
+use CanyonGBS\Common\Health\Checks\OpcacheHitRateCheck;
+use CanyonGBS\Common\Health\Services\OpcacheStatusService;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Health\Checks\Checks\CacheCheck;
@@ -98,6 +101,12 @@ class HealthServiceProvider extends ServiceProvider
                     filled($azureSsoSettings->tenant_id);
                 })
                 ->daily(),
+            OpcacheHitRateCheck::new()
+                ->if(fn () => app(OpcacheStatusService::class)->getStatus() !== false)
+                ->label('OPcache Hit Rate'),
+            OpcacheCachedFilesCheck::new()
+                ->if(fn () => app(OpcacheStatusService::class)->getStatus() !== false)
+                ->label('OPcache Cached Files'),
             // ScheduleCheck::new()
             //     ->heartbeatMaxAgeInMinutes(2),
         ]);

@@ -37,6 +37,7 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\RelationManagers;
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use App\Features\KnowledgeBaseCategorySortFeature;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\AssociateAction;
@@ -122,6 +123,10 @@ class SubCategoriesRelationManager extends RelationManager
                     ->icon(fn (string $state): string => $state)
                     ->tooltip(fn (?string $state): ?string => filled($state) ? (string) str($state)->after('heroicon-o-')->headline() : null),
             ])
+            ->when(
+                KnowledgeBaseCategorySortFeature::active(),
+                fn (Table $table) => $table->defaultSort('sort')->reorderable('sort'),
+            )
             ->headerActions([
                 CreateAction::make()
                     ->modalHeading('Create knowledge base subcategory'),

@@ -46,7 +46,7 @@
         "canyon-gbs/project": "*",
         "canyon-gbs/purchasing": "*",
         "canyon-gbs/report": "*",
-        "canyongbs/common": "^2.17.1",
+        "canyongbs/common": "^2.18.0",
         "canyongbs/model-state-machine": "^2.0.6",
         "cknow/laravel-money": "^8.1",
         "codewithdennis/filament-select-tree": "^4.0",
@@ -79,7 +79,7 @@
         "php-mime-mail-parser/php-mime-mail-parser": "^9.0",
         "saade/filament-fullcalendar": "^4.0@beta",
         "sentry/sentry-laravel": "^4.16.0",
-        "shuvroroy/filament-spatie-laravel-health": "^3.0",
+        "shuvroroy/filament-spatie-laravel-health": "^3.3",
         "socialiteproviders/google": "^4.1",
         "socialiteproviders/microsoft-azure": "^5.2",
         "spatie/laravel-cookie-consent": "^3.3",
@@ -230,10 +230,11 @@
             "pestphp/pest-plugin": true,
             "php-http/discovery": true
         },
-        "audit": {
-            "abandoned": "report"
-        },
-        "source-fallback": false
+        "policy": {
+            "abandoned": {
+                "audit": "report"
+            }
+        }
     },
     "prefer-stable": true,
     "minimum-stability": "stable",

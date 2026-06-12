@@ -37,8 +37,10 @@
 namespace AidingApp\Report\Filament\Pages;
 
 use App\Enums\Feature;
+use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
+use BackedEnum;
 use Filament\Pages\Dashboard;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
@@ -47,7 +49,7 @@ class AdvisoryManagement extends Dashboard
 {
     protected static ?string $cluster = ReportLibrary::class;
 
-    protected static string | UnitEnum | null $navigationGroup = 'Service Desk';
+    protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::ServiceDesk;
 
     protected static ?string $navigationLabel = 'Advisories';
 
@@ -58,6 +60,8 @@ class AdvisoryManagement extends Dashboard
     protected string $view = 'filament.pages.coming-soon';
 
     protected static ?int $navigationSort = 50;
+
+    protected static string | BackedEnum | null $navigationIcon = '';
 
     public static function canAccess(): bool
     {

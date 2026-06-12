@@ -41,7 +41,9 @@ use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -214,4 +216,37 @@ test('managers UserSelect shows all users including admins when withoutAdminFilt
         ->relationship('managers', 'name');
 
     expect(invade($field)->filterAdmins)->toBeFalse();
+});
+
+test('file attachments can be uploaded and saved on the edit page', function () {
+    Storage::fake('s3');
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->knowledgeManagement = true;
+    $settings->save();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('knowledge_base_item.view-any');
+    $user->givePermissionTo('knowledge_base_item.*.update');
+
+    actingAs($user);
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
+
+    livewire(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+        ->fillForm([
+            'article_attachments' => [
+                UploadedFile::fake()->create('test-document.pdf', 100),
+                UploadedFile::fake()->create('spreadsheet.xlsx', 200),
+            ],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $knowledgeBaseItem->refresh();
+
+    $media = $knowledgeBaseItem->getMedia('article_attachments');
+
+    expect($media)->toHaveCount(2);
+    expect($media->pluck('file_name')->sort()->values()->all())->toBe(['spreadsheet.xlsx', 'test-document.pdf']);
 });
