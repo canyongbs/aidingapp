@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
