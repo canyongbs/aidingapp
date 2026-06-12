@@ -39,6 +39,7 @@
 
     const props = defineProps({
         sendMessageUrl: { type: String, required: true },
+        retryMessageUrl: { type: String, default: null },
         websocketsConfig: { type: Object, required: true },
         primaryColor: { type: Object, required: true },
         rounding: { type: String, default: 'md' },
@@ -153,6 +154,7 @@
         <ChatPanel
             :is-open="isOpen"
             :send-message-url="sendMessageUrl"
+            :retry-message-url="retryMessageUrl"
             :websockets-config="websocketsConfig"
             :is-authenticated="isAuthenticated"
             :portal-service-management="portalServiceManagement"

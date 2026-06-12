@@ -48,6 +48,7 @@ use AidingApp\Ai\Http\Controllers\AssistantWidget\GetWidgetConfigController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\ListConversationMessagesController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\RequestAuthenticationController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\RequestServiceRequestConversationController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\RetryMessageController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\SendConversationMessageController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\SendMessageController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\ServeWidgetAssetController;
@@ -91,6 +92,9 @@ Route::middleware([
 
                         Route::post('messages', SendMessageController::class)
                             ->name('messages');
+
+                        Route::post('messages/retry', RetryMessageController::class)
+                            ->name('messages.retry');
 
                         Route::get('service-request-types', GetServiceRequestTypesController::class)
                             ->middleware(['auth:sanctum'])

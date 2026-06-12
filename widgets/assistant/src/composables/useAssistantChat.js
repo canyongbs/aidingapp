@@ -35,7 +35,7 @@ import axios from 'axios';
 import { computed, onUnmounted, ref, watch } from 'vue';
 import { useAssistantConnection } from './useAssistantConnection.js';
 
-export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticated = false) {
+export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticated = false, retryMessageUrl = null) {
     const messages = ref([]);
     const threadId = ref(null);
     const guestToken = ref(null);
@@ -43,6 +43,11 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
     const wordQueue = ref([]);
     const isTyping = ref(false);
     const authEndpoint = ref(websocketsConfig.authEndpoint || '/api/broadcasting/auth');
+
+    // The last message the user sent, so we can resend it when retrying.
+    let lastUserMessage = null;
+    // Pending timer for the automatic retry after a rate limit resets.
+    let rateLimitRetryTimeout = null;
 
     // Guests use a token to identify their session
     if (!isAuthenticated) {
@@ -64,6 +69,22 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
     const addAssistantMessage = () => {
         messages.value.push({ author: 'assistant', content: '', isComplete: false, error: null });
         return messages.value.length - 1;
+    };
+
+    // Cancel any pending auto-retry and clear error/retry state left on earlier messages, so a
+    // stale "Try again" button can never resend the wrong (latest) message.
+    const clearTransientState = () => {
+        if (rateLimitRetryTimeout) {
+            clearTimeout(rateLimitRetryTimeout);
+            rateLimitRetryTimeout = null;
+        }
+
+        messages.value.forEach((message) => {
+            if (message.error || message.canRetry) {
+                message.error = null;
+                message.canRetry = false;
+            }
+        });
     };
 
     const typeNextWord = (messageIndex) => {
@@ -115,6 +136,10 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
 
         isSending.value = true;
 
+        clearTransientState();
+
+        lastUserMessage = content;
+
         addUserMessage(content);
 
         const payload = { content, thread_id: threadId.value };
@@ -141,6 +166,79 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
         }
     };
 
+    const lastAssistantMessageIndex = () => {
+        for (let i = messages.value.length - 1; i >= 0; i--) {
+            if (messages.value[i].author === 'assistant') return i;
+        }
+        return -1;
+    };
+
+    const retryMessage = async () => {
+        if (!retryMessageUrl || !lastUserMessage || !threadId.value || isSending.value) return;
+
+        isSending.value = true;
+
+        clearTransientState();
+
+        // Reset the most recent assistant message so the retried response streams into it.
+        const index = lastAssistantMessageIndex();
+        if (index !== -1) {
+            messages.value[index] = { author: 'assistant', content: '', isComplete: false, error: null };
+        } else {
+            addAssistantMessage();
+        }
+
+        const payload = { content: lastUserMessage, thread_id: threadId.value };
+
+        if (guestToken.value) {
+            payload.guest_token = guestToken.value;
+        }
+
+        try {
+            await axios.post(retryMessageUrl, payload);
+        } catch (error) {
+            const messageIndex = messages.value.findIndex((m) => m.author === 'assistant' && !m.isComplete);
+            if (messageIndex !== -1) {
+                messages.value[messageIndex].error = 'Failed to send message.';
+                messages.value[messageIndex].isComplete = true;
+                messages.value[messageIndex].canRetry = true;
+            }
+        } finally {
+            isSending.value = false;
+        }
+    };
+
+    const handleStreamChunk = (chunk, isComplete, error, rateLimitResetsAfterSeconds) => {
+        const messageIndex = messages.value.findIndex((m) => m.author === 'assistant' && !m.isComplete);
+
+        // Heavy traffic: the backend hit a rate limit. Wait for the limit to reset, then retry
+        // the message automatically.
+        if (rateLimitResetsAfterSeconds) {
+            if (messageIndex !== -1) {
+                messages.value[messageIndex].error = 'Heavy traffic, just a few more moments...';
+                messages.value[messageIndex].canRetry = false;
+            }
+
+            if (rateLimitRetryTimeout) clearTimeout(rateLimitRetryTimeout);
+            rateLimitRetryTimeout = setTimeout(() => retryMessage(), rateLimitResetsAfterSeconds * 1000);
+
+            return;
+        }
+
+        // A hard error: stop the loading state and offer a manual retry.
+        if (error) {
+            if (messageIndex !== -1) {
+                messages.value[messageIndex].error = error;
+                messages.value[messageIndex].isComplete = true;
+                messages.value[messageIndex].canRetry = true;
+            }
+
+            return;
+        }
+
+        updateAssistantMessage(chunk, isComplete, error);
+    };
+
     const getToken = () => {
         return localStorage.getItem('token') || null;
     };
@@ -150,9 +248,7 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
     const connectToThread = async (id) => {
         if (!id) return;
 
-        await connection.connect(id, (chunk, is_complete, err) => {
-            updateAssistantMessage(chunk, is_complete, err);
-        });
+        await connection.connect(id, handleStreamChunk);
     };
 
     watch(threadId, async (newId) => {
@@ -161,6 +257,10 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
     });
 
     onUnmounted(() => {
+        if (rateLimitRetryTimeout) {
+            clearTimeout(rateLimitRetryTimeout);
+            rateLimitRetryTimeout = null;
+        }
         connection.disconnect();
     });
 
@@ -175,6 +275,7 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
         isSending,
         isAssistantResponding,
         sendMessage,
+        retryMessage,
         setAuthenticated,
     };
 }

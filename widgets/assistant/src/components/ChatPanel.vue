@@ -43,6 +43,7 @@
     const props = defineProps({
         isOpen: { type: Boolean, default: false },
         sendMessageUrl: { type: String, required: true },
+        retryMessageUrl: { type: String, default: null },
         websocketsConfig: { type: Object, required: true },
         isAuthenticated: { type: Boolean, default: false },
         portalServiceManagement: { type: Boolean, default: false },
@@ -57,11 +58,8 @@
     const pendingView = ref(null);
     const activeServiceRequestNumber = ref(null);
 
-    const { messages, isSending, isAssistantResponding, sendMessage, setAuthenticated } = useAssistantChat(
-        props.sendMessageUrl,
-        props.websocketsConfig,
-        props.isAuthenticated,
-    );
+    const { messages, isSending, isAssistantResponding, sendMessage, retryMessage, setAuthenticated } =
+        useAssistantChat(props.sendMessageUrl, props.websocketsConfig, props.isAuthenticated, props.retryMessageUrl);
 
     function onOpenServiceRequest() {
         if (props.isAuthenticated) {
@@ -142,7 +140,12 @@
             />
 
             <template v-else>
-                <ChatMessages :messages="messages" :welcome-message="welcomeMessage" :is-open="props.isOpen" />
+                <ChatMessages
+                    :messages="messages"
+                    :welcome-message="welcomeMessage"
+                    :is-open="props.isOpen"
+                    @retry="retryMessage"
+                />
 
                 <ChatInput :disabled="isSending || isAssistantResponding" @send="sendMessage" />
             </template>
