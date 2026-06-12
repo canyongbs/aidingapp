@@ -50,11 +50,6 @@ class CreateServiceRequestUpdateController
 {
     /**
      * @response ServiceRequestUpdateResource
-     *
-     * @requestMediaType multipart/form-data
-     *
-     * @bodyParam internal boolean Whether the update is internal.
-     * @bodyParam files file[] Files to upload.
      */
     #[Group('Service Requests')]
     public function __invoke(
