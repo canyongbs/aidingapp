@@ -103,6 +103,8 @@ it('can create a service request update with valid data', function () {
 
     expect(ServiceRequestUpdate::where('service_request_id', $serviceRequest->id)->count())
         ->toBe(1);
+    expect(ServiceRequestUpdate::where('update', 'This is a test update')->first()->internal)
+        ->toBe(true);
 });
 
 it('can create a service request update with only required fields', function () {
@@ -114,12 +116,12 @@ it('can create a service request update with only required fields', function () 
     Sanctum::actingAs($user, ['api']);
 
     $response = postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
-        'update' => 'Minimal update',
+        'update' => 'Test update',
     ]);
 
     $response->assertSuccessful();
     $response->assertJsonFragment([
-        'update' => 'Minimal update',
+        'update' => 'Test update',
     ]);
 });
 
@@ -189,7 +191,7 @@ it('can create a service request update with file attachments', function () {
     $response = postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
         'update' => 'Update with file',
         'files' => [
-            UploadedFile::fake()->create('document.pdf', 100, 'application/pdf'),
+            UploadedFile::fake()->createWithContent('document.pdf', 'dummy content for text plain file'),
         ],
     ]);
 
@@ -226,4 +228,6 @@ it('persists the update associated with the correct service request', function (
         ->toBe(1);
     expect(ServiceRequestUpdate::where('service_request_id', $otherServiceRequest->id)->count())
         ->toBe(0);
+    expect(ServiceRequestUpdate::where('update', 'Correct service request update')->first()->service_request_id)
+        ->toBe($serviceRequest->id);
 });

@@ -50,7 +50,7 @@ class CreateServiceRequestUpdateDataObject extends Data
      */
     public function __construct(
         public string|Optional $update,
-        public bool|Optional $internal,
+        public bool $internal,
         public array|Optional $files,
     ) {}
 
@@ -61,7 +61,7 @@ class CreateServiceRequestUpdateDataObject extends Data
     {
         return new self(
             update: $data['update'] ?? Optional::create(),
-            internal: $data['internal'] ?? Optional::create(),
+            internal: $data['internal'] ?? false,
             files: $data['files'] ?? Optional::create(),
         );
     }
