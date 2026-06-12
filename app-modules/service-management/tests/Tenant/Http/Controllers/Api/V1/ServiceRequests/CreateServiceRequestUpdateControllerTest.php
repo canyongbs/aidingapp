@@ -107,6 +107,45 @@ it('can create a service request update with valid data', function () {
         ->toBe(true);
 });
 
+it('can create a non-internal service request update', function () {
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request_update.create');
+    Sanctum::actingAs($user, ['api']);
+
+    $response = postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
+        'update' => 'This is a public update',
+        'internal' => false,
+    ]);
+
+    $response->assertSuccessful();
+    $response->assertJsonFragment([
+        'update' => 'This is a public update',
+        'internal' => false,
+    ]);
+
+    expect(ServiceRequestUpdate::where('update', 'This is a public update')->first()->internal)
+        ->toBe(false);
+});
+
+it('defaults internal to false when it is omitted', function () {
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request_update.create');
+    Sanctum::actingAs($user, ['api']);
+
+    postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
+        'update' => 'Update without internal flag',
+    ])->assertSuccessful();
+
+    expect(ServiceRequestUpdate::where('update', 'Update without internal flag')->first()->internal)
+        ->toBe(false);
+});
+
 it('can create a service request update with only required fields', function () {
     $serviceRequest = ServiceRequest::factory()->create();
 
@@ -176,6 +215,24 @@ it('returns 404 for a non-existent service request', function () {
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => 'non-existent-id'], false), [
         'update' => 'Test update',
     ])->assertNotFound();
+});
+
+it('stamps the update as created by the authenticated system user', function () {
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request_update.create');
+    Sanctum::actingAs($user, ['api']);
+
+    postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
+        'update' => 'Authored update',
+    ])->assertSuccessful();
+
+    $serviceRequestUpdate = ServiceRequestUpdate::where('service_request_id', $serviceRequest->id)->first();
+
+    expect($serviceRequestUpdate->created_by_id)->toBe($user->getKey());
+    expect($serviceRequestUpdate->created_by_type)->toBe($user->getMorphClass());
 });
 
 it('can create a service request update with file attachments', function () {
