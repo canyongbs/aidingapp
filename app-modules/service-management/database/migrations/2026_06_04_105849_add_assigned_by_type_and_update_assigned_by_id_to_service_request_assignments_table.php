@@ -49,7 +49,7 @@ return new class () extends Migration {
                 $table->string('assigned_by_type')->nullable();
             });
 
-            //TODO: ServiceRequestAssignmentByTypeFeature clean up: Please remove the fllowing code while removing feature flag. line: 53 to 55
+            //TODO: ServiceRequestAssignmentByTypeFeature clean up: Please remove the following code while removing feature flag. line: 53 to 55
             DB::table('service_request_assignments')
                 ->whereNotNull('assigned_by_id')
                 ->update(['assigned_by_type' => (new User())->getMorphClass()]);
@@ -71,7 +71,7 @@ return new class () extends Migration {
                 $table->dropIndex(['assigned_by_type', 'assigned_by_id']);
             });
 
-            //TODO: ServiceRequestAssignmentByTypeFeature clean up: Please remove the fllowing code while removing feature flag. line: 75 to 78
+            //TODO: ServiceRequestAssignmentByTypeFeature clean up: Please remove the following code while removing feature flag. line: 75 to 78
             DB::table('service_request_assignments')
                 ->whereNotNull('assigned_by_type')
                 ->where('assigned_by_type', '!=', (new User())->getMorphClass())

@@ -331,3 +331,43 @@ it('allows assigning a user whose department manages the service request type', 
 
     expect($response['data']['assignee']['id'])->toBe($managerUser->id);
 });
+
+it('returns 200 with unchanged data when an empty body is sent', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
+    Sanctum::actingAs($user, ['api']);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    $response = patchJson(route('api.v1.service-requests.update', ['serviceRequest' => $serviceRequest], false), []);
+    $response->assertOk();
+
+    expect($response['data']['id'])->toBe($serviceRequest->id);
+    expect($response['data']['status']['id'])->toBe($serviceRequest->status_id);
+    expect($response['data']['priority']['id'])->toBe($serviceRequest->priority_id);
+    expect($response['data']['category'])->toBe($serviceRequest->category->value);
+    expect($response['data']['close_details'])->toBe($serviceRequest->close_details);
+});
+
+it('does not modify fields that are not included in the request', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
+    Sanctum::actingAs($user, ['api']);
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    $originalPriorityId = $serviceRequest->priority_id;
+    $originalCategory = $serviceRequest->category->value;
+    $originalCloseDetails = $serviceRequest->close_details;
+
+    $newStatus = ServiceRequestStatus::factory()->open()->create();
+
+    $response = patchJson(route('api.v1.service-requests.update', ['serviceRequest' => $serviceRequest], false), [
+        'status_id' => $newStatus->id,
+    ]);
+    $response->assertOk();
+
+    expect($response['data']['status']['id'])->toBe($newStatus->id);
+    expect($response['data']['priority']['id'])->toBe($originalPriorityId);
+    expect($response['data']['category'])->toBe($originalCategory);
+    expect($response['data']['close_details'])->toBe($originalCloseDetails);
+});
