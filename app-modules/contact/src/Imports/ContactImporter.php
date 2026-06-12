@@ -140,7 +140,6 @@ class ContactImporter extends Importer
         /** @var User $user */
         $user = $this->import->user;
 
-        $record->assignedTo()->associate($user);
         $record->createdBy()->associate($user);
     }
 

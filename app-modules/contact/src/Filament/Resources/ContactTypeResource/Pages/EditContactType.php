@@ -90,7 +90,7 @@ class EditContactType extends EditRecord
                 Toggle::make('is_default')
                     ->label('Default')
                     ->live()
-                    ->hint(function (?ContactType $record, $state): ?string {
+                    ->hint(function (?ContactType $record, ?bool $state): ?string {
                         if ($record?->is_default) {
                             return null;
                         }

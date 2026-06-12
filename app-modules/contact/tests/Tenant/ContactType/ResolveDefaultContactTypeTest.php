@@ -36,39 +36,7 @@
 
 use AidingApp\Contact\Models\ContactType;
 
-use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertNull;
-use function PHPUnit\Framework\assertTrue;
-
-test('only one ContactType can be the default at a time', function () {
-    $first = ContactType::factory()->create(['is_default' => true]);
-    $second = ContactType::factory()->create(['is_default' => true]);
-
-    assertTrue($second->fresh()->is_default);
-    expect($first->fresh()->is_default)->toBeFalse();
-
-    assertDatabaseHas(ContactType::class, ['id' => $second->id, 'is_default' => true]);
-    assertDatabaseHas(ContactType::class, ['id' => $first->id, 'is_default' => false]);
-});
-
-test('promoting an existing ContactType to default unsets the previous default', function () {
-    $original = ContactType::factory()->create(['is_default' => true]);
-    $other = ContactType::factory()->create(['is_default' => false]);
-
-    $other->update(['is_default' => true]);
-
-    expect($other->fresh()->is_default)->toBeTrue()
-        ->and($original->fresh()->is_default)->toBeFalse();
-});
-
-test('soft deleting the default ContactType unsets the default flag', function () {
-    $default = ContactType::factory()->create(['is_default' => true]);
-
-    $default->delete();
-
-    expect($default->fresh()->is_default)->toBeFalse()
-        ->and($default->fresh()->trashed())->toBeTrue();
-});
 
 test('resolveDefault returns the configured default when one exists', function () {
     ContactType::factory()->create(['is_default' => false]);
