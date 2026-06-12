@@ -156,7 +156,14 @@ test('reclassify action is hidden on closed service requests', function () {
 // Validation
 
 test('reclassify requires type_id', function () {
-    $serviceRequest = ServiceRequest::factory()->create();
+    $serviceRequest = ServiceRequest::factory()
+        ->for(
+            ServiceRequestStatus::factory()->state([
+                'classification' => SystemServiceRequestClassification::Open,
+            ]),
+            'status',
+        )
+        ->create();
 
     asSuperAdmin();
 
