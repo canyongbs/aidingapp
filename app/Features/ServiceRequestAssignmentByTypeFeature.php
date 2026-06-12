@@ -34,33 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Database\Seeders;
+namespace App\Features;
 
-use AidingApp\Contact\Models\ContactType;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Seeder;
+use App\Support\AbstractFeatureFlag;
 
-class ContactTypeSeeder extends Seeder
+class ServiceRequestAssignmentByTypeFeature extends AbstractFeatureFlag
 {
-    public function run(): void
+    public function resolve(mixed $scope): mixed
     {
-        // No type is seeded as the default — each institution sets its own.
-        // When none is_default, ContactType::resolveDefault() falls back to the
-        // first (oldest) entry, which will be 'Student'.
-        ContactType::factory()
-            ->createMany(
-                [
-                    [
-                        'name' => 'Student',
-                        'color' => Color::Green->value,
-                        'is_default' => false,
-                    ],
-                    [
-                        'name' => 'Employee',
-                        'color' => Color::Blue->value,
-                        'is_default' => false,
-                    ],
-                ]
-            );
+        return false;
     }
 }

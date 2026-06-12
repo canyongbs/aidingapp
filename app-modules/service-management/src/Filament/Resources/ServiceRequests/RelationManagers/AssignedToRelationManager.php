@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Relatio
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use App\Features\ServiceRequestAssignmentByTypeFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
@@ -95,12 +96,18 @@ class AssignedToRelationManager extends RelationManager
                     ->color('gray')
                     ->requiresConfirmation()
                     ->action(function () {
-                        $this->getOwnerRecord()->assignments()->create([
+                        $data = [
                             'user_id' => auth()->user()?->getKey(),
                             'assigned_by_id' => auth()->user()?->getKey() ?? null,
                             'assigned_at' => now(),
                             'status' => ServiceRequestAssignmentStatus::Active,
-                        ]);
+                        ];
+
+                        if (ServiceRequestAssignmentByTypeFeature::active()) {
+                            $data['assigned_by_type'] = auth()->user()?->getMorphClass();
+                        }
+
+                        $this->getOwnerRecord()->assignments()->create($data);
 
                         $this->dispatch('assignment-history-refresh');
                     }),
@@ -109,12 +116,18 @@ class AssignedToRelationManager extends RelationManager
                     ->label(fn () => $this->getOwnerRecord()->assignedTo ? 'Reassign' : 'Assign')
                     ->color('gray')
                     ->action(function (array $data) {
-                        $this->getOwnerRecord()->assignments()->create([
+                        $assignmentData = [
                             'user_id' => $data['userId'],
                             'assigned_by_id' => auth()->user()->getKey() ?? null,
                             'assigned_at' => now(),
                             'status' => ServiceRequestAssignmentStatus::Active,
-                        ]);
+                        ];
+
+                        if (ServiceRequestAssignmentByTypeFeature::active()) {
+                            $assignmentData['assigned_by_type'] = auth()->user()?->getMorphClass();
+                        }
+
+                        $this->getOwnerRecord()->assignments()->create($assignmentData);
 
                         $this->dispatch('assignment-history-refresh');
                     })

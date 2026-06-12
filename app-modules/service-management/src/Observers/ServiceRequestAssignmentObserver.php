@@ -59,6 +59,8 @@ class ServiceRequestAssignmentObserver
     {
         $type = $serviceRequestAssignment->serviceRequest->priority->type;
 
+        $user = auth()->user();
+
         $isManager = $type->managerUsers()->where('users.id', $serviceRequestAssignment->user_id)->exists() ||
             $type->managerDepartments()->whereRelation('users', 'users.id', $serviceRequestAssignment->user_id)->exists();
 

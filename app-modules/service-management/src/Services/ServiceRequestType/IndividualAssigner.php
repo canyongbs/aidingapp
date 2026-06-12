@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ServiceRequestAssignmentByTypeFeature;
 
 class IndividualAssigner implements ServiceRequestTypeAssigner
 {
@@ -46,12 +47,18 @@ class IndividualAssigner implements ServiceRequestTypeAssigner
         $manager = $serviceRequest->priority->type->assignmentTypeIndividual;
 
         if ($manager) {
-            $serviceRequest->assignments()->create([
+            $data = [
                 'user_id' => $manager->getKey(),
                 'assigned_by_id' => null,
                 'assigned_at' => now(),
                 'status' => ServiceRequestAssignmentStatus::Active,
-            ]);
+            ];
+
+            if (ServiceRequestAssignmentByTypeFeature::active()) {
+                $data['assigned_by_type'] = null;
+            }
+
+            $serviceRequest->assignments()->create($data);
         }
     }
 }

@@ -34,33 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Database\Seeders;
-
 use AidingApp\Contact\Models\ContactType;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Seeder;
 
-class ContactTypeSeeder extends Seeder
-{
-    public function run(): void
-    {
-        // No type is seeded as the default — each institution sets its own.
-        // When none is_default, ContactType::resolveDefault() falls back to the
-        // first (oldest) entry, which will be 'Student'.
-        ContactType::factory()
-            ->createMany(
-                [
-                    [
-                        'name' => 'Student',
-                        'color' => Color::Green->value,
-                        'is_default' => false,
-                    ],
-                    [
-                        'name' => 'Employee',
-                        'color' => Color::Blue->value,
-                        'is_default' => false,
-                    ],
-                ]
-            );
-    }
-}
+use function Pest\Laravel\assertDatabaseHas;
+use function PHPUnit\Framework\assertTrue;
+
+test('only one ContactType can be the default at a time', function () {
+    $first = ContactType::factory()->create(['is_default' => true]);
+    $second = ContactType::factory()->create(['is_default' => true]);
+
+    assertTrue($second->fresh()->is_default);
+    expect($first->fresh()->is_default)->toBeFalse();
+
+    assertDatabaseHas(ContactType::class, ['id' => $second->id, 'is_default' => true]);
+    assertDatabaseHas(ContactType::class, ['id' => $first->id, 'is_default' => false]);
+});
+
+test('promoting an existing ContactType to default unsets the previous default', function () {
+    $original = ContactType::factory()->create(['is_default' => true]);
+    $other = ContactType::factory()->create(['is_default' => false]);
+
+    $other->update(['is_default' => true]);
+
+    expect($other->fresh()->is_default)->toBeTrue()
+        ->and($original->fresh()->is_default)->toBeFalse();
+});
+
+test('soft deleting the default ContactType unsets the default flag', function () {
+    $default = ContactType::factory()->create(['is_default' => true]);
+
+    $default->delete();
+
+    expect($default->fresh()->is_default)->toBeFalse()
+        ->and($default->fresh()->trashed())->toBeTrue();
+});

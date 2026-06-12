@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceReques
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestAssignmentByTypeFeature;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
@@ -166,12 +167,18 @@ class ReclassifyServiceRequestAction extends Action
                     $record->refresh();
 
                     if ($data['assignment_method'] === 'override') {
-                        $record->assignments()->create([
+                        $assignmentData = [
                             'user_id' => $data['assign_to'],
                             'assigned_by_id' => auth()->id(),
                             'assigned_at' => now(),
                             'status' => ServiceRequestAssignmentStatus::Active,
-                        ]);
+                        ];
+
+                        if (ServiceRequestAssignmentByTypeFeature::active()) {
+                            $assignmentData['assigned_by_type'] = auth()->user()?->getMorphClass();
+                        }
+
+                        $record->assignments()->create($assignmentData);
                     } else {
                         $record->priority->type
                             ->assignment_type

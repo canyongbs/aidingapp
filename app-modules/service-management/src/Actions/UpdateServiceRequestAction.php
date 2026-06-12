@@ -34,33 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Database\Seeders;
+namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\Contact\Models\ContactType;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Seeder;
+use AidingApp\ServiceManagement\DataTransferObjects\UpdateServiceRequestData;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ServiceRequestAssignmentByTypeFeature;
+use Illuminate\Support\Arr;
 
-class ContactTypeSeeder extends Seeder
+class UpdateServiceRequestAction
 {
-    public function run(): void
+    public function execute(ServiceRequest $serviceRequest, UpdateServiceRequestData $data): ServiceRequest
     {
-        // No type is seeded as the default — each institution sets its own.
-        // When none is_default, ContactType::resolveDefault() falls back to the
-        // first (oldest) entry, which will be 'Student'.
-        ContactType::factory()
-            ->createMany(
-                [
-                    [
-                        'name' => 'Student',
-                        'color' => Color::Green->value,
-                        'is_default' => false,
-                    ],
-                    [
-                        'name' => 'Employee',
-                        'color' => Color::Blue->value,
-                        'is_default' => false,
-                    ],
-                ]
-            );
+        $dataArray = $data->toArray();
+        $newData = Arr::except($dataArray, ['assigned_to_id']);
+        $serviceRequest->fill($newData)->save();
+
+        if ($dataArray['assigned_to_id'] ?? null) {
+            $assignmentData = [
+                'user_id' => $dataArray['assigned_to_id'],
+                'assigned_by_id' => auth()->id(),
+                'assigned_at' => now(),
+                'status' => ServiceRequestAssignmentStatus::Active,
+            ];
+
+            if (ServiceRequestAssignmentByTypeFeature::active()) {
+                $assignmentData['assigned_by_type'] = auth()->user()?->getMorphClass();
+            }
+            $serviceRequest->assignments()->create($assignmentData);
+        }
+
+        return $serviceRequest;
     }
 }

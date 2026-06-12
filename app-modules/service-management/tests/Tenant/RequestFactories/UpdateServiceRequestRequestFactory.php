@@ -34,33 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Database\Seeders;
+namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
-use AidingApp\Contact\Models\ContactType;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Seeder;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use Worksome\RequestFactories\RequestFactory;
 
-class ContactTypeSeeder extends Seeder
+class UpdateServiceRequestRequestFactory extends RequestFactory
 {
-    public function run(): void
+    public function definition(): array
     {
-        // No type is seeded as the default — each institution sets its own.
-        // When none is_default, ContactType::resolveDefault() falls back to the
-        // first (oldest) entry, which will be 'Student'.
-        ContactType::factory()
-            ->createMany(
-                [
-                    [
-                        'name' => 'Student',
-                        'color' => Color::Green->value,
-                        'is_default' => false,
-                    ],
-                    [
-                        'name' => 'Employee',
-                        'color' => Color::Blue->value,
-                        'is_default' => false,
-                    ],
-                ]
-            );
+        return [
+            'status_id' => ServiceRequestStatus::factory()->open()->create()->id,
+            'priority_id' => ServiceRequestPriority::factory()->create()->id,
+            'category' => fake()->randomElement(ServiceRequestCategory::cases())->value,
+            'close_details' => $this->faker->sentence,
+        ];
     }
 }

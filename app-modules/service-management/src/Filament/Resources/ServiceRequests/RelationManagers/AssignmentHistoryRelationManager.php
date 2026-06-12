@@ -37,12 +37,15 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use App\Features\ServiceRequestAssignmentByTypeFeature;
+use App\Models\SystemUser;
 use App\Models\User;
 use App\Settings\DisplaySettings;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Livewire\Attributes\On;
 
 class AssignmentHistoryRelationManager extends RelationManager
@@ -84,8 +87,20 @@ class AssignmentHistoryRelationManager extends RelationManager
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->with([
                 'user.department',
-                'assignedBy.department',
                 'serviceRequestStatus',
+                ...(
+                    ServiceRequestAssignmentByTypeFeature::active()
+                    ? [
+                        'assignedBy' => function (MorphTo $morphTo) {
+                            $morphTo->morphWith([
+                                User::class => ['department'],
+                            ]);
+                        },
+                    ]
+                    : [
+                        'assignedBy.department',
+                    ]
+                ),
             ]))
             ->emptyStateHeading('No assignment history')
             ->defaultSort('assigned_at', 'desc')
@@ -95,10 +110,17 @@ class AssignmentHistoryRelationManager extends RelationManager
                     ->description(fn (ServiceRequestAssignment $record): ?string => $userLine($record->user)),
                 TextColumn::make('assignedBy.name')
                     ->label('By')
-                    ->state(fn (ServiceRequestAssignment $record): string => $record->assignedBy
-                        ? $record->assignedBy->name
-                        : 'Auto-Assignment')
-                    ->description(fn (ServiceRequestAssignment $record): ?string => $userLine($record->assignedBy)),
+                    ->state(function (ServiceRequestAssignment $record) {
+                        /** @var User|SystemUser|null $assignBy */
+                        $assignBy = $record->assignedBy;
+
+                        if ($assignBy) {
+                            return $assignBy->name;
+                        }
+
+                        return 'Auto-Assignment';
+                    })
+                    ->description(fn (ServiceRequestAssignment $record): ?string => $record->assignedBy instanceof User ? $userLine($record->assignedBy) : null),
                 TextColumn::make('serviceRequestStatus.name')
                     ->label('Status')
                     ->badge()

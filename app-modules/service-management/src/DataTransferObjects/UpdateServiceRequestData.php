@@ -34,33 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Database\Seeders;
+namespace AidingApp\ServiceManagement\DataTransferObjects;
 
-use AidingApp\Contact\Models\ContactType;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Seeder;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use Spatie\LaravelData\Attributes\MapOutputName;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Spatie\LaravelData\Optional;
 
-class ContactTypeSeeder extends Seeder
+#[MapOutputName(SnakeCaseMapper::class)]
+class UpdateServiceRequestData extends Data
 {
-    public function run(): void
+    public function __construct(
+        public string | Optional $statusId,
+        public string | Optional $priorityId,
+        public string | Optional $closeDetails,
+        public string | Optional $assignedToId,
+        public ServiceRequestCategory | Optional $category,
+    ) {}
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    public static function fromData(array $data): self
     {
-        // No type is seeded as the default — each institution sets its own.
-        // When none is_default, ContactType::resolveDefault() falls back to the
-        // first (oldest) entry, which will be 'Student'.
-        ContactType::factory()
-            ->createMany(
-                [
-                    [
-                        'name' => 'Student',
-                        'color' => Color::Green->value,
-                        'is_default' => false,
-                    ],
-                    [
-                        'name' => 'Employee',
-                        'color' => Color::Blue->value,
-                        'is_default' => false,
-                    ],
-                ]
-            );
+        return new self(
+            statusId: $data['status_id'] ?? Optional::create(),
+            priorityId: $data['priority_id'] ?? Optional::create(),
+            closeDetails: $data['close_details'] ?? Optional::create(),
+            assignedToId: $data['assigned_to_id'] ?? Optional::create(),
+            category: isset($data['category'])
+            ? ($data['category'] instanceof ServiceRequestCategory
+              ? $data['category']
+              : ServiceRequestCategory::from($data['category']))
+            : Optional::create(),
+        );
     }
 }

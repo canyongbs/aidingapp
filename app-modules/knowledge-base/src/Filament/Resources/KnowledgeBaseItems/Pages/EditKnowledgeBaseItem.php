@@ -201,6 +201,7 @@ class EditKnowledgeBaseItem extends EditRecord
                                     ->preserveFilenames()
                                     ->reorderable()
                                     ->downloadable()
+                                    ->previewable(false)
                                     ->columnSpanFull()
                                     ->helperText('Note: Uploaded file attachments are not evaluated or used by the AI Support Assistant at this time.'),
                                 Textarea::make('notes')
