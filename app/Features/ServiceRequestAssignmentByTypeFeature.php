@@ -34,34 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @extends Factory<ServiceRequestAssignment>
- */
-class ServiceRequestAssignmentFactory extends Factory
+class ServiceRequestAssignmentByTypeFeature extends AbstractFeatureFlag
 {
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'service_request_id' => ServiceRequest::factory(),
-            'user_id' => User::factory(),
-            'assigned_by_id' => User::factory(),
-            'assigned_by_type' => (new User())->getMorphClass(),
-            'assigned_at' => $this->faker->dateTimeBetween('-1 year', now()),
-        ];
-    }
-
-    public function active(): self
-    {
-        return $this->state([
-            'status' => ServiceRequestAssignmentStatus::Active,
-        ]);
+        return false;
     }
 }

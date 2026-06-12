@@ -34,34 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ServiceManagement\Actions;
 
+use AidingApp\ServiceManagement\DataTransferObjects\UpdateServiceRequestData;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Features\ServiceRequestAssignmentByTypeFeature;
+use Illuminate\Support\Arr;
 
-/**
- * @extends Factory<ServiceRequestAssignment>
- */
-class ServiceRequestAssignmentFactory extends Factory
+class UpdateServiceRequestAction
 {
-    public function definition(): array
+    public function execute(ServiceRequest $serviceRequest, UpdateServiceRequestData $data): ServiceRequest
     {
-        return [
-            'service_request_id' => ServiceRequest::factory(),
-            'user_id' => User::factory(),
-            'assigned_by_id' => User::factory(),
-            'assigned_by_type' => (new User())->getMorphClass(),
-            'assigned_at' => $this->faker->dateTimeBetween('-1 year', now()),
-        ];
-    }
+        $dataArray = $data->toArray();
+        $newData = Arr::except($dataArray, ['assigned_to_id']);
+        $serviceRequest->fill($newData)->save();
 
-    public function active(): self
-    {
-        return $this->state([
-            'status' => ServiceRequestAssignmentStatus::Active,
-        ]);
+        if ($dataArray['assigned_to_id'] ?? null) {
+            $assignmentData = [
+                'user_id' => $dataArray['assigned_to_id'],
+                'assigned_by_id' => auth()->id(),
+                'assigned_at' => now(),
+                'status' => ServiceRequestAssignmentStatus::Active,
+            ];
+
+            if (ServiceRequestAssignmentByTypeFeature::active()) {
+                $assignmentData['assigned_by_type'] = auth()->user()?->getMorphClass();
+            }
+            $serviceRequest->assignments()->create($assignmentData);
+        }
+
+        return $serviceRequest;
     }
 }

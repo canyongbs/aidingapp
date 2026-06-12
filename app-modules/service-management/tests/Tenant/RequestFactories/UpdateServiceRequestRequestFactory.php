@@ -34,34 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use Worksome\RequestFactories\RequestFactory;
 
-/**
- * @extends Factory<ServiceRequestAssignment>
- */
-class ServiceRequestAssignmentFactory extends Factory
+class UpdateServiceRequestRequestFactory extends RequestFactory
 {
     public function definition(): array
     {
         return [
-            'service_request_id' => ServiceRequest::factory(),
-            'user_id' => User::factory(),
-            'assigned_by_id' => User::factory(),
-            'assigned_by_type' => (new User())->getMorphClass(),
-            'assigned_at' => $this->faker->dateTimeBetween('-1 year', now()),
+            'status_id' => ServiceRequestStatus::factory()->open()->create()->id,
+            'priority_id' => ServiceRequestPriority::factory()->create()->id,
+            'category' => fake()->randomElement(ServiceRequestCategory::cases())->value,
+            'close_details' => $this->faker->sentence,
         ];
-    }
-
-    public function active(): self
-    {
-        return $this->state([
-            'status' => ServiceRequestAssignmentStatus::Active,
-        ]);
     }
 }

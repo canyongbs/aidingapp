@@ -34,34 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ServiceManagement\DataTransferObjects;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use Spatie\LaravelData\Attributes\MapOutputName;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Spatie\LaravelData\Optional;
 
-/**
- * @extends Factory<ServiceRequestAssignment>
- */
-class ServiceRequestAssignmentFactory extends Factory
+#[MapOutputName(SnakeCaseMapper::class)]
+class UpdateServiceRequestData extends Data
 {
-    public function definition(): array
-    {
-        return [
-            'service_request_id' => ServiceRequest::factory(),
-            'user_id' => User::factory(),
-            'assigned_by_id' => User::factory(),
-            'assigned_by_type' => (new User())->getMorphClass(),
-            'assigned_at' => $this->faker->dateTimeBetween('-1 year', now()),
-        ];
-    }
+    public function __construct(
+        public string | Optional $statusId,
+        public string | Optional $priorityId,
+        public string | Optional $closeDetails,
+        public string | Optional $assignedToId,
+        public ServiceRequestCategory | Optional $category,
+    ) {}
 
-    public function active(): self
+    /**
+     * @param array<string, mixed> $data
+     */
+    public static function fromData(array $data): self
     {
-        return $this->state([
-            'status' => ServiceRequestAssignmentStatus::Active,
-        ]);
+        return new self(
+            statusId: $data['status_id'] ?? Optional::create(),
+            priorityId: $data['priority_id'] ?? Optional::create(),
+            closeDetails: $data['close_details'] ?? Optional::create(),
+            assignedToId: $data['assigned_to_id'] ?? Optional::create(),
+            category: isset($data['category'])
+            ? ($data['category'] instanceof ServiceRequestCategory
+              ? $data['category']
+              : ServiceRequestCategory::from($data['category']))
+            : Optional::create(),
+        );
     }
 }
