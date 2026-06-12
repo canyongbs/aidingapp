@@ -52,6 +52,7 @@ class CreateServiceRequestUpdateRequest extends FormRequest
             'internal' => ['nullable', 'boolean'],
             'files' => ['nullable', 'array'],
             'files.*' => [
+                'max:10240',
                 File::types([
                     'application/pdf',
                     'application/vnd.ms-excel',

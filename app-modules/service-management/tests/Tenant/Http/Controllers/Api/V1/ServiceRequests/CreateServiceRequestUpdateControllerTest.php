@@ -191,7 +191,7 @@ it('can create a service request update with file attachments', function () {
     $response = postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
         'update' => 'Update with file',
         'files' => [
-            UploadedFile::fake()->createWithContent('document.pdf', 'dummy content for text plain file'),
+            UploadedFile::fake()->createWithContent('document.txt', 'dummy content for text plain file'),
         ],
     ]);
 

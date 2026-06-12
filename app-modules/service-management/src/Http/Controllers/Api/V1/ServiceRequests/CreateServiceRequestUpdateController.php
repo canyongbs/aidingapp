@@ -45,7 +45,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 
 class CreateServiceRequestUpdateController
 {
@@ -66,9 +65,7 @@ class CreateServiceRequestUpdateController
         Gate::authorize('viewAny', ServiceRequest::class);
         Gate::authorize('create', ServiceRequestUpdate::class);
 
-        Log::info('Creating service request update with data: ', $request->validated());
-
-        $createServiceRequestUpdate = $createServiceRequestUpdateAction->execute(CreateServiceRequestUpdateDataObject::from($request->validated()), $serviceRequest);
+        $createServiceRequestUpdate = $createServiceRequestUpdateAction->execute(CreateServiceRequestUpdateDataObject::fromData($request->validated()), $serviceRequest);
 
         return $createServiceRequestUpdate
             ->toResource(ServiceRequestUpdateResource::class);
