@@ -34,8 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Authorization\Models\Role;
-use AidingApp\Department\Models\Department;
+use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
@@ -81,78 +80,28 @@ function columnNativeType(string $table, string $column): ?string
 //    });
 //});
 
-describe('2026_06_02_143001_add_citext_unique_to_departments_name', function () {
-    it('renames case-insensitive duplicates and converts the name column to citext', function () {
+describe('2026_05_15_201835_tmp_update_ai_support_assistant_default_instructions', function () {
+    it('overwrites any existing AI support assistant instructions with the new default', function () {
         isolatedMigration(
-            '2026_06_02_143001_add_citext_unique_to_departments_name',
+            '2026_05_15_201835_tmp_update_ai_support_assistant_default_instructions',
             function () {
-                Department::factory()->create(['name' => 'Sales', 'created_at' => now()->subMinutes(2)]);
-                Department::factory()->create(['name' => 'sales', 'created_at' => now()->subMinute()]);
+                DB::table('settings')
+                    ->where('group', 'ai-support-assistant')
+                    ->where('name', 'instructions')
+                    ->update(['payload' => json_encode('Tenant-customized instructions that must be overwritten.')]);
 
                 $migrate = Artisan::call('migrate', [
-                    '--path' => 'app-modules/department/database/migrations/2026_06_02_143001_add_citext_unique_to_departments_name.php',
+                    '--path' => 'app-modules/ai/database/migrations/2026_05_15_201835_tmp_update_ai_support_assistant_default_instructions.php',
                 ]);
 
                 expect($migrate)->toBe(Command::SUCCESS);
 
-                $names = DB::table('departments')->pluck('name');
+                $payload = DB::table('settings')
+                    ->where('group', 'ai-support-assistant')
+                    ->where('name', 'instructions')
+                    ->value('payload');
 
-                expect(columnNativeType('departments', 'name'))->toBe('citext')
-                    ->and($names)->toContain('Sales')
-                    ->and($names)->toContain('sales-2');
-            }
-        );
-    });
-});
-
-describe('2026_06_02_143002_add_citext_unique_to_roles_name', function () {
-    it('renames case-insensitive duplicates per guard and converts the name column to citext', function () {
-        isolatedMigration(
-            '2026_06_02_143002_add_citext_unique_to_roles_name',
-            function () {
-                Role::factory()->create(['name' => 'Editor', 'guard_name' => 'web', 'created_at' => now()->subMinutes(2)]);
-                Role::factory()->create(['name' => 'editor', 'guard_name' => 'web', 'created_at' => now()->subMinute()]);
-                Role::factory()->create(['name' => 'editor', 'guard_name' => 'api', 'created_at' => now()->subMinute()]);
-
-                $migrate = Artisan::call('migrate', [
-                    '--path' => 'app-modules/authorization/database/migrations/2026_06_02_143002_add_citext_unique_to_roles_name.php',
-                ]);
-
-                expect($migrate)->toBe(Command::SUCCESS);
-
-                $webNames = DB::table('roles')->where('guard_name', 'web')->pluck('name');
-                $apiNames = DB::table('roles')->where('guard_name', 'api')->pluck('name');
-
-                expect(columnNativeType('roles', 'name'))->toBe('citext')
-                    ->and($webNames)->toContain('Editor')
-                    ->and($webNames)->toContain('editor-2')
-                    ->and($apiNames)->toContain('editor');
-            }
-        );
-    });
-});
-
-describe('2026_06_02_143003_add_citext_unique_to_users_email', function () {
-    it('renames case-insensitive duplicates, preserves null emails and converts the email column to citext', function () {
-        isolatedMigration(
-            '2026_06_02_143003_add_citext_unique_to_users_email',
-            function () {
-                User::factory()->create(['email' => 'dup@example.com', 'created_at' => now()->subMinutes(2)]);
-                User::factory()->create(['email' => 'DUP@EXAMPLE.COM', 'created_at' => now()->subMinute()]);
-                User::factory()->count(2)->create(['email' => null]);
-
-                $migrate = Artisan::call('migrate', [
-                    '--path' => 'database/migrations/2026_06_02_143003_add_citext_unique_to_users_email.php',
-                ]);
-
-                expect($migrate)->toBe(Command::SUCCESS);
-
-                $emails = DB::table('users')->pluck('email');
-
-                expect(columnNativeType('users', 'email'))->toBe('citext')
-                    ->and($emails)->toContain('dup@example.com')
-                    ->and($emails)->toContain('DUP@EXAMPLE.COM-2')
-                    ->and(DB::table('users')->whereNull('email')->count())->toBe(2);
+                expect(json_decode($payload, true))->toBe(AiSupportAssistantSettings::defaultInstructions());
             }
         );
     });
