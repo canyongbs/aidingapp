@@ -87,6 +87,13 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
         });
     };
 
+    // Discard any words still queued for the typewriter effect and stop the animation, so
+    // partially-streamed text doesn't linger or bleed into a subsequent (retried) response.
+    const resetWordQueue = () => {
+        wordQueue.value = [];
+        isTyping.value = false;
+    };
+
     const typeNextWord = (messageIndex) => {
         if (wordQueue.value.length === 0) {
             isTyping.value = false;
@@ -179,6 +186,7 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
         isSending.value = true;
 
         clearTransientState();
+        resetWordQueue();
 
         // Reset the most recent assistant message so the retried response streams into it.
         const index = lastAssistantMessageIndex();
@@ -211,10 +219,13 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
     const handleStreamChunk = (chunk, isComplete, error, rateLimitResetsAfterSeconds) => {
         const messageIndex = messages.value.findIndex((m) => m.author === 'assistant' && !m.isComplete);
 
-        // Heavy traffic: the backend hit a rate limit. Wait for the limit to reset, then retry
-        // the message automatically.
+        // Heavy traffic: the backend hit a rate limit. Discard any partially-streamed text, show
+        // the notice, and retry the message automatically once the limit resets.
         if (rateLimitResetsAfterSeconds) {
+            resetWordQueue();
+
             if (messageIndex !== -1) {
+                messages.value[messageIndex].content = '';
                 messages.value[messageIndex].error = 'Heavy traffic, just a few more moments...';
                 messages.value[messageIndex].canRetry = false;
             }
@@ -225,9 +236,12 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
             return;
         }
 
-        // A hard error: stop the loading state and offer a manual retry.
+        // A hard error: discard any partial text, stop the loading state, and offer a manual retry.
         if (error) {
+            resetWordQueue();
+
             if (messageIndex !== -1) {
+                messages.value[messageIndex].content = '';
                 messages.value[messageIndex].error = error;
                 messages.value[messageIndex].isComplete = true;
                 messages.value[messageIndex].canRetry = true;

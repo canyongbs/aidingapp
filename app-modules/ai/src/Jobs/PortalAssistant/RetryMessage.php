@@ -55,7 +55,6 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
-use Prism\Prism\Exceptions\PrismException;
 use Prism\Prism\ValueObjects\Messages\UserMessage;
 use Prism\Prism\ValueObjects\ToolResult;
 use Throwable;
@@ -110,111 +109,107 @@ class RetryMessage implements ShouldQueue
                 ...(filled($message->internal_content) ? [new DeveloperMessage($message->internal_content)] : []),
             ];
 
-            retry(3, function () use ($aiService, $context, $nextRequestOptions, $messages) {
-                $stream = $aiService->streamRaw(
-                    prompt: $context,
-                    files: KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id'])->all(),
-                    options: $nextRequestOptions,
-                    messages: $messages,
-                    reasoningEffort: AiReasoningEffort::Minimal,
-                );
+            $stream = $aiService->streamRaw(
+                prompt: $context,
+                files: KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id'])->all(),
+                options: $nextRequestOptions,
+                messages: $messages,
+                reasoningEffort: AiReasoningEffort::Minimal,
+            );
 
-                $response = new PortalAssistantMessage();
-                $response->thread()->associate($this->thread);
-                $response->content = '';
-                $response->context = $context;
-                $response->is_assistant = true;
+            $response = new PortalAssistantMessage();
+            $response->thread()->associate($this->thread);
+            $response->content = '';
+            $response->context = $context;
+            $response->is_assistant = true;
 
-                $chunkBuffer = [];
-                $chunkCount = 0;
+            $chunkBuffer = [];
+            $chunkCount = 0;
 
-                $finishChunk = null;
+            $finishChunk = null;
 
-                foreach ($stream() as $chunk) {
-                    if ($chunk instanceof Meta) {
-                        $response->message_id = $chunk->messageId;
-                        $response->next_request_options = $chunk->nextRequestOptions;
+            foreach ($stream() as $chunk) {
+                if ($chunk instanceof Meta) {
+                    $response->message_id = $chunk->messageId;
+                    $response->next_request_options = $chunk->nextRequestOptions;
 
-                        continue;
-                    }
-
-                    if ($chunk instanceof ToolCall) {
-                        continue;
-                    }
-
-                    if ($chunk instanceof ToolResult) {
-                        continue;
-                    }
-
-                    if ($chunk instanceof Finish) {
-                        $finishChunk = $chunk;
-
-                        if ($chunk->error) {
-                            Log::error('Portal Assistant: Stream finished with error', [
-                                'thread_id' => $this->thread->getKey(),
-                                'error' => $chunk->error,
-                                'finishReason' => $chunk->finishReason?->name,
-                            ]);
-                        }
-
-                        continue;
-                    }
-
-                    if ($chunk instanceof Text) {
-                        $chunkBuffer[] = $chunk->content;
-                        $chunkCount++;
-
-                        if ($chunkCount >= 10) {
-                            event(new PortalAssistantMessageChunk(
-                                $this->thread,
-                                content: implode('', $chunkBuffer),
-                            ));
-                            $response->content .= implode('', $chunkBuffer);
-
-                            $chunkBuffer = [];
-                            $chunkCount = 0;
-                        }
-                    }
+                    continue;
                 }
 
-                // When the stream was rate limited or errored, surface that to the client and do
-                // not persist a partial assistant response. The client can then retry the message.
-                if ($finishChunk?->rateLimitResetsAt || $finishChunk?->error) {
-                    event(new PortalAssistantMessageChunk(
-                        $this->thread,
-                        content: '',
-                        isComplete: false,
-                        error: $finishChunk->error,
-                        rateLimitResetsAt: $finishChunk->rateLimitResetsAt,
-                    ));
-
-                    return;
+                if ($chunk instanceof ToolCall) {
+                    continue;
                 }
 
-                if ($finishChunk?->isIncomplete) {
-                    $chunkBuffer[] = '...';
+                if ($chunk instanceof ToolResult) {
+                    continue;
+                }
+
+                if ($chunk instanceof Finish) {
+                    $finishChunk = $chunk;
+
+                    if ($chunk->error) {
+                        Log::error('Portal Assistant: Stream finished with error', [
+                            'thread_id' => $this->thread->getKey(),
+                            'error' => $chunk->error,
+                            'finishReason' => $chunk->finishReason?->name,
+                        ]);
+                    }
+
+                    continue;
+                }
+
+                if ($chunk instanceof Text) {
+                    $chunkBuffer[] = $chunk->content;
                     $chunkCount++;
-                }
 
-                if (! empty($chunkBuffer)) {
-                    event(new PortalAssistantMessageChunk(
-                        $this->thread,
-                        content: implode('', $chunkBuffer),
-                    ));
-                    $response->content .= implode('', $chunkBuffer);
-                }
+                    if ($chunkCount >= 10) {
+                        event(new PortalAssistantMessageChunk(
+                            $this->thread,
+                            content: implode('', $chunkBuffer),
+                        ));
+                        $response->content .= implode('', $chunkBuffer);
 
+                        $chunkBuffer = [];
+                        $chunkCount = 0;
+                    }
+                }
+            }
+
+            // When the stream was rate limited or errored, surface that to the client and do
+            // not persist a partial assistant response. The client can then retry the message.
+            if ($finishChunk?->rateLimitResetsAt || $finishChunk?->error) {
                 event(new PortalAssistantMessageChunk(
                     $this->thread,
                     content: '',
-                    isComplete: true,
+                    isComplete: false,
+                    error: $finishChunk->error,
+                    rateLimitResetsAt: $finishChunk->rateLimitResetsAt,
                 ));
 
-                $response->save();
-                $this->thread->touch();
-            }, sleepMilliseconds: 1000, when: function (Throwable $exception) {
-                return $exception instanceof PrismException;
-            });
+                return;
+            }
+
+            if ($finishChunk?->isIncomplete) {
+                $chunkBuffer[] = '...';
+                $chunkCount++;
+            }
+
+            if (! empty($chunkBuffer)) {
+                event(new PortalAssistantMessageChunk(
+                    $this->thread,
+                    content: implode('', $chunkBuffer),
+                ));
+                $response->content .= implode('', $chunkBuffer);
+            }
+
+            event(new PortalAssistantMessageChunk(
+                $this->thread,
+                content: '',
+                isComplete: true,
+            ));
+
+            $response->save();
+            $this->thread->touch();
         } catch (Throwable $exception) {
             report($exception);
 
