@@ -1,0 +1,27 @@
+Return-Path: <forwarder@school.edu>
+X-SES-Spam-Verdict: PASS
+X-SES-Virus-Verdict: PASS
+From: Staff Member <forwarder@school.edu>
+To: test-sr-help@mail.aiding.app
+Subject: FW: General inquiry
+Date: Thu, 20 Feb 2025 20:25:37 +0000
+Message-ID: <unparseable-fwd-0001@school.edu>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="bnd_unparseable_fwd"
+
+--bnd_unparseable_fwd
+Content-Type: text/plain; charset="UTF-8"
+
+I'm forwarding this along, but I pasted the content without any headers:
+
+The student said they need help with enrollment and were not sure who to contact.
+
+--bnd_unparseable_fwd
+Content-Type: text/html; charset="UTF-8"
+
+<html><body>
+<p>I'm forwarding this along, but I pasted the content without any headers:</p>
+<p>The student said they need help with enrollment and were not sure who to contact.</p>
+</body></html>
+
+--bnd_unparseable_fwd--
