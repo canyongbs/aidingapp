@@ -1,0 +1,39 @@
+Return-Path: <forwarder@school.edu>
+X-SES-Spam-Verdict: PASS
+X-SES-Virus-Verdict: PASS
+From: Staff Member <forwarder@school.edu>
+To: test-sr-help@mail.aiding.app
+Subject: Fwd: Library book overdue
+Date: Thu, 20 Feb 2025 20:25:37 +0000
+Message-ID: <apple-fwd-0001@school.edu>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="bnd_apple_fwd"
+
+--bnd_apple_fwd
+Content-Type: text/plain; charset="UTF-8"
+
+FYI -- forwarding to the help desk.
+
+Begin forwarded message:
+
+From: Jordan Student <student@example.com>
+Subject: Library book overdue
+Date: February 20, 2025 at 2:00:00 PM EST
+To: Support Desk <support@school.edu>
+
+My library book is showing overdue but I returned it last week. Please advise.
+
+--bnd_apple_fwd
+Content-Type: text/html; charset="UTF-8"
+
+<html><body>
+<p>FYI -- forwarding to the help desk.</p>
+<br>
+<div>Begin forwarded message:</div>
+<br>
+<div>From: Jordan Student &lt;student@example.com&gt;</div>
+<div>Subject: Library book overdue</div>
+<p>My library book is showing overdue but I returned it last week. Please advise.</p>
+</body></html>
+
+--bnd_apple_fwd--

@@ -1,0 +1,41 @@
+Return-Path: <forwarder@school.edu>
+X-SES-Spam-Verdict: PASS
+X-SES-Virus-Verdict: PASS
+From: Staff Member <forwarder@school.edu>
+To: test-sr-help@mail.aiding.app
+Subject: Fwd: FW: Account help
+Date: Thu, 20 Feb 2025 20:25:37 +0000
+Message-ID: <gmail-nested-0001@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="bnd_nested_fwd"
+
+--bnd_nested_fwd
+Content-Type: text/plain; charset="UTF-8"
+
+Passing this along to the help desk.
+
+---------- Forwarded message ---------
+From: Jordan Student <student@example.com>
+Date: Thu, 20 Feb 2025 at 14:00
+Subject: FW: Account help
+To: Support Desk <support@school.edu>
+
+I still cannot sign in to my account. Can someone help?
+
+Thanks,
+Jordan
+
+--bnd_nested_fwd
+Content-Type: text/html; charset="UTF-8"
+
+<html><body>
+<p>Passing this along to the help desk.</p>
+<div class="gmail_quote">
+<div>---------- Forwarded message ---------</div>
+<div>From: Jordan Student &lt;student@example.com&gt;</div>
+<div>Subject: FW: Account help</div>
+<p>I still cannot sign in to my account. Can someone help?</p>
+</div>
+</body></html>
+
+--bnd_nested_fwd--
