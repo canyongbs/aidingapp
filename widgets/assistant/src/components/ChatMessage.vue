@@ -39,6 +39,8 @@
         message: { type: Object, required: true },
     });
 
+    const emit = defineEmits(['retry']);
+
     const { renderMarkdown } = useMarkdown();
 </script>
 
@@ -72,8 +74,22 @@
                     {{ props.message.error }}
                 </div>
 
+                <button
+                    v-if="props.message.canRetry"
+                    type="button"
+                    @click="emit('retry')"
+                    class="text-xs font-semibold text-red-600 underline hover:no-underline mt-1"
+                >
+                    Try again
+                </button>
+
                 <div
-                    v-if="props.message.author === 'assistant' && !props.message.content && !props.message.isComplete"
+                    v-if="
+                        props.message.author === 'assistant' &&
+                        !props.message.content &&
+                        !props.message.isComplete &&
+                        !props.message.error
+                    "
                     class="flex items-center space-x-1"
                 >
                     <div class="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce"></div>

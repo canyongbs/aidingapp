@@ -61,6 +61,7 @@ if (!config || !config.send_message_url || !config.websockets_config) {
                     h(App, {
                         ...props,
                         sendMessageUrl: config.send_message_url,
+                        retryMessageUrl: config.retry_message_url,
                         websocketsConfig: { ...config.websockets_config, authEndpoint: config.auth_endpoint },
                         primaryColor: config.primary_color,
                         rounding: config.rounding,

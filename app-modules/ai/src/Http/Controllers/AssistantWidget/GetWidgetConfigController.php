@@ -67,6 +67,7 @@ class GetWidgetConfigController extends Controller
             'asset_url' => route('widgets.assistant.asset') . '/',
             'js' => route('widgets.assistant.asset', ['file' => $widgetEntry['file']]),
             'send_message_url' => route('widgets.assistant.api.messages'),
+            'retry_message_url' => route('widgets.assistant.api.messages.retry'),
             'websockets_config' => $websocketsConfig,
             'auth_endpoint' => route('widgets.assistant.api.broadcasting.auth'),
             'primary_color' => collect(Color::all()[$settings->knowledge_management_portal_primary_color->value ?? 'blue'])

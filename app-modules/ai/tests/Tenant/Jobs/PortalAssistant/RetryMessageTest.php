@@ -34,54 +34,47 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Events\PortalAssistant;
-
+use AidingApp\Ai\Enums\AiModel;
+use AidingApp\Ai\Events\PortalAssistant\PortalAssistantMessageChunk;
+use AidingApp\Ai\Jobs\PortalAssistant\RetryMessage;
+use AidingApp\Ai\Models\PortalAssistantMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
-use Carbon\CarbonInterface;
-use Illuminate\Broadcasting\Channel;
-use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
-use Illuminate\Foundation\Events\Dispatchable;
+use AidingApp\Ai\Services\TestAiService;
+use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
+use AidingApp\Ai\Support\StreamingChunks\Finish;
+use AidingApp\Ai\Support\StreamingChunks\Text;
+use Illuminate\Support\Facades\Event;
 
-class PortalAssistantMessageChunk implements ShouldBroadcastNow
-{
-    use Dispatchable;
-    use InteractsWithSockets;
+beforeEach(function () {
+    $settings = app(AiIntegratedAssistantSettings::class);
+    $settings->default_model = AiModel::Test;
+    $settings->save();
+});
 
-    public function __construct(
-        public PortalAssistantThread $thread,
-        public string $content,
-        public bool $isComplete = false,
-        public ?string $error = null,
-        public ?CarbonInterface $rateLimitResetsAt = null,
-    ) {}
+it('reuses the existing user message when retrying instead of duplicating it', function () {
+    Event::fake([PortalAssistantMessageChunk::class]);
 
-    public function broadcastAs(): string
-    {
-        return 'portal-assistant-message.chunk';
-    }
+    $thread = PortalAssistantThread::factory()->create();
 
-    /**
-     * @return array<string, mixed>
-     */
-    public function broadcastWith(): array
-    {
-        return [
-            'content' => $this->content,
-            'is_complete' => $this->isComplete,
-            'error' => $this->error,
-            'rate_limit_resets_after_seconds' => $this->rateLimitResetsAt ? (now()->diffInSeconds($this->rateLimitResetsAt) + 1) : null,
-        ];
-    }
+    PortalAssistantMessage::factory()->for($thread, 'thread')->create([
+        'content' => 'What are your office hours?',
+        'is_assistant' => false,
+    ]);
 
-    /**
-     * @return array<int, Channel>
-     */
-    public function broadcastOn(): array
-    {
-        $channelName = "portal-assistant-thread-{$this->thread->getKey()}";
+    $service = Mockery::mock(TestAiService::class)->makePartial();
+    $service->shouldReceive('streamRaw')->andReturn(function () {
+        yield new Text('We are open 9 to 5.');
 
-        return [new PrivateChannel($channelName)];
-    }
-}
+        yield new Finish();
+    });
+    app()->instance(TestAiService::class, $service);
+
+    dispatch_sync(new RetryMessage($thread, 'What are your office hours?'));
+
+    expect(PortalAssistantMessage::query()->where('is_assistant', false)->count())->toBe(1);
+
+    $response = PortalAssistantMessage::query()->where('is_assistant', true)->first();
+
+    expect($response)->not->toBeNull()
+        ->and($response->content)->toBe('We are open 9 to 5.');
+});
