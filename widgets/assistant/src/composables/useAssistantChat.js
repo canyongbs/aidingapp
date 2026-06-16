@@ -35,7 +35,7 @@ import axios from 'axios';
 import { computed, onUnmounted, ref, watch } from 'vue';
 import { useAssistantConnection } from './useAssistantConnection.js';
 
-export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticated = false) {
+export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticated = false, retryMessageUrl = null) {
     const messages = ref([]);
     const threadId = ref(null);
     const guestToken = ref(null);
@@ -43,6 +43,11 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
     const wordQueue = ref([]);
     const isTyping = ref(false);
     const authEndpoint = ref(websocketsConfig.authEndpoint || '/api/broadcasting/auth');
+
+    // The last message the user sent, so we can resend it when retrying.
+    let lastUserMessage = null;
+    // Pending timer for the automatic retry after a rate limit resets.
+    let rateLimitRetryTimeout = null;
 
     // Guests use a token to identify their session
     if (!isAuthenticated) {
@@ -64,6 +69,29 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
     const addAssistantMessage = () => {
         messages.value.push({ author: 'assistant', content: '', isComplete: false, error: null });
         return messages.value.length - 1;
+    };
+
+    // Cancel any pending auto-retry and clear error/retry state left on earlier messages, so a
+    // stale "Try again" button can never resend the wrong (latest) message.
+    const clearTransientState = () => {
+        if (rateLimitRetryTimeout) {
+            clearTimeout(rateLimitRetryTimeout);
+            rateLimitRetryTimeout = null;
+        }
+
+        messages.value.forEach((message) => {
+            if (message.error || message.canRetry) {
+                message.error = null;
+                message.canRetry = false;
+            }
+        });
+    };
+
+    // Discard any words still queued for the typewriter effect and stop the animation, so
+    // partially-streamed text doesn't linger or bleed into a subsequent (retried) response.
+    const resetWordQueue = () => {
+        wordQueue.value = [];
+        isTyping.value = false;
     };
 
     const typeNextWord = (messageIndex) => {
@@ -115,6 +143,10 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
 
         isSending.value = true;
 
+        clearTransientState();
+
+        lastUserMessage = content;
+
         addUserMessage(content);
 
         const payload = { content, thread_id: threadId.value };
@@ -134,11 +166,102 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
             }
             addAssistantMessage();
         } catch (error) {
-            addAssistantMessage();
-            updateAssistantMessage('', true, 'Failed to send message.');
+            const index = addAssistantMessage();
+            messages.value[index].error = 'Failed to send message.';
+            messages.value[index].isComplete = true;
+            messages.value[index].canRetry = true;
         } finally {
             isSending.value = false;
         }
+    };
+
+    const lastAssistantMessageIndex = () => {
+        for (let i = messages.value.length - 1; i >= 0; i--) {
+            if (messages.value[i].author === 'assistant') return i;
+        }
+        return -1;
+    };
+
+    const retryMessage = async () => {
+        if (!lastUserMessage || isSending.value) return;
+
+        isSending.value = true;
+
+        clearTransientState();
+        resetWordQueue();
+
+        // Reset the most recent assistant message so the retried response streams into it.
+        const index = lastAssistantMessageIndex();
+        if (index !== -1) {
+            messages.value[index] = { author: 'assistant', content: '', isComplete: false, error: null };
+        } else {
+            addAssistantMessage();
+        }
+
+        // If we don't have a thread yet (initial send failed), re-attempt via the send endpoint.
+        const url = threadId.value && retryMessageUrl ? retryMessageUrl : sendMessageUrl;
+        const payload = { content: lastUserMessage, thread_id: threadId.value };
+
+        if (guestToken.value) {
+            payload.guest_token = guestToken.value;
+        }
+
+        try {
+            const response = await axios.post(url, payload);
+            if (response.data.thread_id) {
+                threadId.value = response.data.thread_id;
+            }
+            if (response.data.guest_token && !isAuthenticated) {
+                guestToken.value = response.data.guest_token;
+                localStorage.setItem('assistantGuestToken', guestToken.value);
+            }
+        } catch (error) {
+            const messageIndex = messages.value.findIndex((m) => m.author === 'assistant' && !m.isComplete);
+            if (messageIndex !== -1) {
+                messages.value[messageIndex].error = 'Failed to send message.';
+                messages.value[messageIndex].isComplete = true;
+                messages.value[messageIndex].canRetry = true;
+            }
+        } finally {
+            isSending.value = false;
+        }
+    };
+
+    const handleStreamChunk = (chunk, isComplete, error, rateLimitResetsAfterSeconds) => {
+        const messageIndex = messages.value.findIndex((m) => m.author === 'assistant' && !m.isComplete);
+
+        // Heavy traffic: the backend hit a rate limit. Discard any partially-streamed text, show
+        // the notice, and retry the message automatically once the limit resets.
+        if (rateLimitResetsAfterSeconds) {
+            resetWordQueue();
+
+            if (messageIndex !== -1) {
+                messages.value[messageIndex].content = '';
+                messages.value[messageIndex].error = 'Heavy traffic, just a few more moments...';
+                messages.value[messageIndex].canRetry = false;
+            }
+
+            if (rateLimitRetryTimeout) clearTimeout(rateLimitRetryTimeout);
+            rateLimitRetryTimeout = setTimeout(() => retryMessage(), rateLimitResetsAfterSeconds * 1000);
+
+            return;
+        }
+
+        // A hard error: discard any partial text, stop the loading state, and offer a manual retry.
+        if (error) {
+            resetWordQueue();
+
+            if (messageIndex !== -1) {
+                messages.value[messageIndex].content = '';
+                messages.value[messageIndex].error = error;
+                messages.value[messageIndex].isComplete = true;
+                messages.value[messageIndex].canRetry = true;
+            }
+
+            return;
+        }
+
+        updateAssistantMessage(chunk, isComplete, error);
     };
 
     const getToken = () => {
@@ -150,9 +273,7 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
     const connectToThread = async (id) => {
         if (!id) return;
 
-        await connection.connect(id, (chunk, is_complete, err) => {
-            updateAssistantMessage(chunk, is_complete, err);
-        });
+        await connection.connect(id, handleStreamChunk);
     };
 
     watch(threadId, async (newId) => {
@@ -161,6 +282,10 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
     });
 
     onUnmounted(() => {
+        if (rateLimitRetryTimeout) {
+            clearTimeout(rateLimitRetryTimeout);
+            rateLimitRetryTimeout = null;
+        }
         connection.disconnect();
     });
 
@@ -175,6 +300,7 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
         isSending,
         isAssistantResponding,
         sendMessage,
+        retryMessage,
         setAuthenticated,
     };
 }

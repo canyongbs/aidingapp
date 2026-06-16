@@ -107,7 +107,7 @@ export function useAssistantConnection(
 
         channel.listen('.portal-assistant-message.chunk', (event) => {
             if (onChunk) {
-                onChunk(event.content || '', event.is_complete, event.error);
+                onChunk(event.content || '', event.is_complete, event.error, event.rate_limit_resets_after_seconds);
             }
         });
     };

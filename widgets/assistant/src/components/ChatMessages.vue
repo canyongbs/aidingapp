@@ -42,6 +42,8 @@
         isOpen: { type: Boolean, default: false },
     });
 
+    const emit = defineEmits(['retry']);
+
     const messagesContainer = ref(null);
     const autoScroll = ref(true);
 
@@ -121,6 +123,11 @@
             </div>
         </div>
 
-        <ChatMessage v-for="(chatMessage, index) in props.messages" :key="index" :message="chatMessage" />
+        <ChatMessage
+            v-for="(chatMessage, index) in props.messages"
+            :key="index"
+            :message="chatMessage"
+            @retry="emit('retry')"
+        />
     </div>
 </template>

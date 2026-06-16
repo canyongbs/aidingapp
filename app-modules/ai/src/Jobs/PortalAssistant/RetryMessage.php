@@ -59,7 +59,7 @@ use Prism\Prism\ValueObjects\Messages\UserMessage;
 use Prism\Prism\ValueObjects\ToolResult;
 use Throwable;
 
-class SendMessage implements ShouldQueue
+class RetryMessage implements ShouldQueue
 {
     use Dispatchable;
     use InteractsWithQueue;
@@ -75,18 +75,23 @@ class SendMessage implements ShouldQueue
         protected PortalAssistantThread $thread,
         protected string $content,
         protected array $request = [],
-        protected ?string $internalContent = null,
     ) {}
 
     public function handle(): void
     {
-        $message = new PortalAssistantMessage();
-        $message->thread()->associate($this->thread);
-        $message->author()->associate($this->thread->author);
-        $message->content = $this->content;
-        $message->internal_content = $this->internalContent;
+        // Reuse the existing last user message when retrying so we don't duplicate it. Only
+        // recreate it if it is missing or its content has changed.
+        $message = $this->thread->messages()->where('is_assistant', false)->latest()->first();
+
+        if ($message?->content !== $this->content) {
+            $message = new PortalAssistantMessage();
+            $message->thread()->associate($this->thread);
+            $message->author()->associate($this->thread->author);
+            $message->content = $this->content;
+            $message->is_assistant = false;
+        }
+
         $message->request = $this->request;
-        $message->is_assistant = false;
         $message->save();
 
         $supportAssistantSettings = app(AiSupportAssistantSettings::class);
@@ -100,8 +105,8 @@ class SendMessage implements ShouldQueue
             $nextRequestOptions = $this->thread->messages()->where('is_assistant', true)->latest()->value('next_request_options') ?? [];
 
             $messages = [
-                new UserMessage($this->content),
-                ...(filled($this->internalContent) ? [new DeveloperMessage($this->internalContent)] : []),
+                new UserMessage($message->content),
+                ...(filled($message->internal_content) ? [new DeveloperMessage($message->internal_content)] : []),
             ];
 
             $stream = $aiService->streamRaw(
