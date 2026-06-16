@@ -64,6 +64,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperServiceRequestType
+ *
  * @property EmailAutomaticCreationContactCreateCondition $email_automatic_creation_contact_create_condition
  */
 #[ObservedBy([ServiceRequestTypeObserver::class])]
