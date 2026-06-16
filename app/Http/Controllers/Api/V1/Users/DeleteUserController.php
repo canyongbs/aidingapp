@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,15 +34,26 @@
 </COPYRIGHT>
 */
 
-use App\Http\Controllers\Api\V1\Users\DeleteUserController;
-use App\Http\Controllers\Api\V1\Users\ViewUserController;
-use Illuminate\Support\Facades\Route;
+namespace App\Http\Controllers\Api\V1\Users;
 
-Route::api(majorVersion: 1, routes: function () {
-    Route::name('users.')
-        ->prefix('users')
-        ->group(function () {
-            Route::get('/{user}', ViewUserController::class)->name('show');
-            Route::delete('/{user}', DeleteUserController::class)->name('destroy');
-        });
-});
+use App\Models\User;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
+
+class DeleteUserController
+{
+    #[Group('Users')]
+    public function __invoke(User $user): Response
+    {
+        if ($user->isAdmin()) {
+            abort(404);
+        }
+
+        Gate::authorize('delete', $user);
+
+        $user->delete();
+
+        return response()->noContent();
+    }
+}
