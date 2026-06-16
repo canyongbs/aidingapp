@@ -166,8 +166,10 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
             }
             addAssistantMessage();
         } catch (error) {
-            addAssistantMessage();
-            updateAssistantMessage('', true, 'Failed to send message.');
+            const index = addAssistantMessage();
+            messages.value[index].error = 'Failed to send message.';
+            messages.value[index].isComplete = true;
+            messages.value[index].canRetry = true;
         } finally {
             isSending.value = false;
         }
@@ -181,7 +183,7 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
     };
 
     const retryMessage = async () => {
-        if (!retryMessageUrl || !lastUserMessage || !threadId.value || isSending.value) return;
+        if (!lastUserMessage || isSending.value) return;
 
         isSending.value = true;
 
@@ -196,6 +198,8 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
             addAssistantMessage();
         }
 
+        // If we don't have a thread yet (initial send failed), re-attempt via the send endpoint.
+        const url = threadId.value && retryMessageUrl ? retryMessageUrl : sendMessageUrl;
         const payload = { content: lastUserMessage, thread_id: threadId.value };
 
         if (guestToken.value) {
@@ -203,7 +207,14 @@ export function useAssistantChat(sendMessageUrl, websocketsConfig, isAuthenticat
         }
 
         try {
-            await axios.post(retryMessageUrl, payload);
+            const response = await axios.post(url, payload);
+            if (response.data.thread_id) {
+                threadId.value = response.data.thread_id;
+            }
+            if (response.data.guest_token && !isAuthenticated) {
+                guestToken.value = response.data.guest_token;
+                localStorage.setItem('assistantGuestToken', guestToken.value);
+            }
         } catch (error) {
             const messageIndex = messages.value.findIndex((m) => m.author === 'assistant' && !m.isComplete);
             if (messageIndex !== -1) {
