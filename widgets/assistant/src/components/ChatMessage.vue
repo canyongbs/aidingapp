@@ -84,7 +84,12 @@
                 </button>
 
                 <div
-                    v-if="props.message.author === 'assistant' && !props.message.content && !props.message.isComplete && !props.message.error"
+                    v-if="
+                        props.message.author === 'assistant' &&
+                        !props.message.content &&
+                        !props.message.isComplete &&
+                        !props.message.error
+                    "
                     class="flex items-center space-x-1"
                 >
                     <div class="w-1.5 h-1.5 bg-brand-400 rounded-full animate-bounce"></div>
