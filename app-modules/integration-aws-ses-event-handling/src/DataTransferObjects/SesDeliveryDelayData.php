@@ -37,6 +37,7 @@
 namespace AidingApp\IntegrationAwsSesEventHandling\DataTransferObjects;
 
 use Spatie\LaravelData\Attributes\DataCollectionOf;
+use Spatie\LaravelData\Attributes\MapInputName;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\Optional;
@@ -48,7 +49,8 @@ class SesDeliveryDelayData extends Data
         #[DataCollectionOf(SesDelayedRecipientsData::class)]
         public DataCollection $delayedRecipients,
         public string $expirationTime,
-        public string|Optional $reportingMTA,
+        #[MapInputName('reportingMTA')]
+        public string|Optional $reportingMta,
         public string $timestamp,
     ) {}
 }

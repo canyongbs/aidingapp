@@ -135,15 +135,15 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             DB::commit();
         } catch (
-            UnableToRetrieveContentFromSesS3EmailPayload | SesS3InboundSpamOrVirusDetected | UnableToDetectTenantFromSesS3EmailPayload | SesS3InboundServiceRequestTypeNotFound $e) {
+            UnableToRetrieveContentFromSesS3EmailPayload | SesS3InboundSpamOrVirusDetected | UnableToDetectTenantFromSesS3EmailPayload | SesS3InboundServiceRequestTypeNotFound $exception) {
                 DB::rollBack();
 
                 // Instantly fail for this exception
-                $this->fail($e);
-            } catch (Throwable $e) {
+                $this->fail($exception);
+            } catch (Throwable $throwable) {
                 DB::rollBack();
 
-                throw $e;
+                throw $throwable;
             }
     }
 
@@ -701,8 +701,8 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         try {
             // @phpstan-ignore method.nonObject
             $content = $result['Body']?->getContents();
-        } catch (Throwable $e) {
-            throw new UnableToRetrieveContentFromSesS3EmailPayload($this->emailFilePath, $e);
+        } catch (Throwable $throwable) {
+            throw new UnableToRetrieveContentFromSesS3EmailPayload($this->emailFilePath, $throwable);
         }
 
         throw_if(empty($content), new UnableToRetrieveContentFromSesS3EmailPayload($this->emailFilePath));

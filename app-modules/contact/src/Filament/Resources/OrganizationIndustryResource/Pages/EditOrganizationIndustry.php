@@ -70,7 +70,7 @@ class EditOrganizationIndustry extends EditRecord
                         Toggle::make('is_default')
                             ->label('Default')
                             ->live()
-                            ->hint(function (?OrganizationIndustry $record, $state): ?string {
+                            ->hint(function (?OrganizationIndustry $record, mixed $state): ?string {
                                 if ($record?->is_default) {
                                     return null;
                                 }

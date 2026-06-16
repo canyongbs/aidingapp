@@ -185,7 +185,7 @@ class ServiceRequestsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('id')
-            ->modifyQueryUsing(function ($query) {
+            ->modifyQueryUsing(function (Builder $query) {
                 $query->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
                     return $query->where(function (Builder $query) {
                         $query->whereHas('priority.type.managerDepartments', function (Builder $query): void {
@@ -194,7 +194,8 @@ class ServiceRequestsRelationManager extends RelationManager
                             ->orWhereHas('priority.type.managerUsers', function (Builder $query): void {
                                 $query->where('users.id', auth()->user()->getKey());
                             })
-                            ->orWhereHas('priority.type.auditorDepartments', function (Builder $query): void {
+                 
+                             ->orWhereHas('priority.type.auditorDepartments', function (Builder $query): void {
                                 $query->where('departments.id', auth()->user()->department?->getKey());
                             })
                             ->orWhereHas('priority.type.auditorUsers', function (Builder $query): void {
@@ -246,7 +247,7 @@ class ServiceRequestsRelationManager extends RelationManager
                 ViewAction::make(),
                 EditAction::make()
                     ->slideOver()
-                    ->mutateRecordDataUsing(function (array $data, $record) {
+                    ->mutateRecordDataUsing(function (array $data, ?ServiceRequest $record) {
                         $data['type_id'] = $record?->priority?->type_id;
 
                         return $data;

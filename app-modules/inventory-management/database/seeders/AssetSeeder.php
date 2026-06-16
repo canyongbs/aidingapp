@@ -50,7 +50,7 @@ class AssetSeeder extends Seeder
             ->each(function (Asset $asset) {
                 $entityCount = rand(0, 10);
 
-                for ($i = 0; $i < $entityCount; $i++) {
+                for ($index = 0; $index < $entityCount; $index++) {
                     MaintenanceActivity::factory()
                         ->randomizeState()
                         ->for($asset, 'asset')
