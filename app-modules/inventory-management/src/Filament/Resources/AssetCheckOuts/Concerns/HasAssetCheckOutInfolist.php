@@ -74,9 +74,9 @@ trait HasAssetCheckOutInfolist
             Fieldset::make('')
                 ->schema([
                     TextEntry::make('checked_out_at')
-                        ->dateTime('g:ia - M j, Y'),
+                        ->dateTime(),
                     TextEntry::make('expected_check_in_at')
-                        ->dateTime('g:ia - M j, Y'),
+                        ->dateTime(),
                     TextEntry::make('notes'),
                 ]),
         ];

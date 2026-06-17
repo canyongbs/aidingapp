@@ -95,7 +95,7 @@ class KnowledgeManagementPortalArticleController extends Controller
                 'id' => $article->getKey(),
                 'categorySlug' => $article->category->slug,
                 'name' => $article->title,
-                'lastUpdated' => $article->updated_at->format('M d Y, h:i a'),
+                'lastUpdated' => $article->updated_at->format('M j, Y g:i a (T)'),
                 'content' => $content,
                 'tags' => $article->tags()
                     ->orderBy('name')

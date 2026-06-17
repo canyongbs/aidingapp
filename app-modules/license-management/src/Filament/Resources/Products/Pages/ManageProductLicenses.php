@@ -95,7 +95,6 @@ class ManageProductLicenses extends ManageRelatedRecords
                     ->columnSpanFull(),
                 DatePicker::make('start_date')
                     ->label('Start Date')
-                    ->displayFormat('m-d-Y')
                     ->closeOnDateSelection()
                     ->required()
                     ->native(false)
@@ -115,7 +114,6 @@ class ManageProductLicenses extends ManageRelatedRecords
                     DatePicker::make('expiration_date')
                         ->label('Expiration Date')
                         ->default('No Expiration')
-                        ->displayFormat('m-d-Y')
                         ->closeOnDateSelection()
                         ->required(fn (Get $get) => ! $get('license_does_not_expire'))
                         ->disabled(fn (Get $get) => $get('license_does_not_expire'))
@@ -139,12 +137,12 @@ class ManageProductLicenses extends ManageRelatedRecords
                 TextColumn::make('start_date')
                     ->label('Start Date')
                     ->sortable()
-                    ->dateTime('m-d-Y'),
+                    ->dateTime(),
                 TextColumn::make('expiration_date')
                     ->label('Expiration Date')
                     ->placeholder('No Expiration')
                     ->sortable()
-                    ->dateTime('m-d-Y'),
+                    ->dateTime(),
                 TextColumn::make('Status')
                     ->label('Status'),
             ])
@@ -179,10 +177,10 @@ class ManageProductLicenses extends ManageRelatedRecords
                             ->columnSpanFull(),
                         TextEntry::make('start_date')
                             ->label('Start Date')
-                            ->date('m-d-Y'),
+                            ->date(),
                         TextEntry::make('expiration_date')
                             ->label('Expiration Date')
-                            ->date('m-d-Y')
+                            ->date()
                             ->placeholder('License Does Not Expire'),
                     ]),
             ]);

@@ -146,7 +146,7 @@ class AssetCheckIn extends BaseModel implements Auditable, ProvidesATimeline
     protected function formattedCheckedInAt(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value, array $attributes) => Carbon::parse($attributes['checked_in_at'])->format('g:ia - M j, Y'),
+            get: fn (?string $value, array $attributes) => Carbon::parse($attributes['checked_in_at'])->format('M j, Y g:i a (T)'),
         );
     }
 }

@@ -444,8 +444,8 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
             'recipient name' => fn () => $recipientName ?? '',
             'contact name' => fn () => $this->respondent->{$this->respondent::displayNameKey()},
             'service request number' => fn () => $this->service_request_number,
-            'created date' => fn () => ! is_null($timezone) ? $this->created_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $this->created_at->format('M j, Y \a\t h:i A (T)'),
-            'updated date' => fn () => ! is_null($timezone) ? $this->updated_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $this->updated_at->format('M j, Y \a\t h:i A (T)'),
+            'created date' => fn () => ! is_null($timezone) ? $this->created_at->setTimeZone($timezone)->format('M j, Y g:i a (T)') : $this->created_at->format('M j, Y g:i a (T)'),
+            'updated date' => fn () => ! is_null($timezone) ? $this->updated_at->setTimeZone($timezone)->format('M j, Y g:i a (T)') : $this->updated_at->format('M j, Y g:i a (T)'),
             'assigned staff name' => fn () => $this->assignedTo->user->name ?? 'Unassigned',
             'status' => fn () => $this->status->name,
             'title' => fn () => $this->title,
@@ -478,7 +478,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
             $creatorInfo = e($user->name) . ' - Service Provider';
         }
 
-        $updateDate = ! is_null($timezone) ? $recentUpdate->created_at->setTimeZone($timezone)->format('M j, Y \a\t h:i A (T)') : $recentUpdate->created_at->format('M j, Y \a\t h:i A (T)');
+        $updateDate = ! is_null($timezone) ? $recentUpdate->created_at->setTimeZone($timezone)->format('M j, Y \a\t g:i a (T)') : $recentUpdate->created_at->format('M j, Y \a\t g:i a (T)');
 
         $updateText = $creatorInfo . '<br><br>' . e($updateDate) . ' - ' . e($recentUpdate->update);
 

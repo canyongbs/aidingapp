@@ -125,7 +125,7 @@ class EngagementsRelationManager extends RelationManager
                                                 TextEntry::make('type')
                                                     ->getStateUsing(fn (EmailMessageEvent $record): string => $record->type?->getLabel()),
                                                 TextEntry::make('occured_at')
-                                                    ->getStateUsing(fn (EmailMessageEvent $record): string => $record->occurred_at->format('Y-m-d H:i:s')),
+                                                    ->getStateUsing(fn (EmailMessageEvent $record): string => $record->occurred_at->format('M j, Y g:i a (T)')),
                                             ])
                                             ->columns(),
                                     ])
@@ -149,7 +149,7 @@ class EngagementsRelationManager extends RelationManager
                     Section::make([
                         TextEntry::make('sent_at')
                             ->getStateUsing(fn (Timeline $record): string => $record->timelineable->sent_at)
-                            ->dateTime('Y-m-d H:i:s'),
+                            ->dateTime(),
                     ])->grow(false),
                 ])
                     ->from('md')

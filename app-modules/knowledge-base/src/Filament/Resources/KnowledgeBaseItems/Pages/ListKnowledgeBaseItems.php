@@ -122,12 +122,12 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->formatStateUsing(fn (bool $state): string => $state ? 'Yes' : 'No'),
                 TextColumn::make('created_at')
                     ->label('Created')
-                    ->dateTime('d-m-Y')
+                    ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')
                     ->label('Last Updated')
-                    ->dateTime('m-d-Y')
+                    ->dateTime()
                     ->sortable()
                     ->toggleable(),
                 TextColumn::make('tags.name')

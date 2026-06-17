@@ -97,7 +97,7 @@ class ListContacts extends ListRecords
                     }),
                 TextColumn::make('created_at')
                     ->label('Created')
-                    ->dateTime('g:ia - M j, Y')
+                    ->dateTime()
                     ->sortable(),
             ])
             ->filters([

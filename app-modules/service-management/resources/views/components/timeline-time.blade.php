@@ -34,7 +34,7 @@
 
 @php
     $datetime = $datetime ?? null;
-    $tooltip = $datetime?->format('M j, Y g:i A');
+    $tooltip = $datetime?->format('M j, Y g:i a (T)');
 
     if (! $datetime) {
         $display = '';

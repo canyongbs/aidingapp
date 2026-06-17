@@ -109,7 +109,7 @@
                         @if ($showTimestamp)
                             <div class="mt-0.5 text-xs">
                                 <span class="text-gray-500 dark:text-gray-500">
-                                    {{ $message->created_at->format('g:i A') }}
+                                    {{ $message->created_at->format('g:i a') }}
                                 </span>
                             </div>
                         @endif

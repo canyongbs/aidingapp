@@ -98,7 +98,6 @@ class EditContract extends EditRecord
                 DatePicker::make('start_date')
                     ->label('Start Date')
                     ->native(false)
-                    ->displayFormat('m/d/Y')
                     ->live(onBlur: true)
                     ->afterStateUpdated(
                         fn (Get $get, Set $set) => $get('start_date') > $get('end_date') ? $set('end_date', '') : ''
@@ -109,7 +108,6 @@ class EditContract extends EditRecord
                 DatePicker::make('end_date')
                     ->label('End Date')
                     ->native(false)
-                    ->displayFormat('m/d/Y')
                     ->placeholder('Select end date')
                     ->minDate(fn (Get $get) => $get('start_date'))
                     ->live(onBlur: true)

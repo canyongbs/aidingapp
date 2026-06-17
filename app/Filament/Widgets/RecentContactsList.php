@@ -89,7 +89,7 @@ class RecentContactsList extends BaseWidget
                     ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')
                     ->label('Created')
-                    ->dateTime('g:ia - M j, Y ')
+                    ->dateTime()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->recordActions([

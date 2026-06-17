@@ -113,13 +113,7 @@ class ServiceRequestMediaTable extends TableWidget
 
                 TextColumn::make('created_at')
                     ->label('Date')
-                    ->dateTime('M j, Y')
-                    ->description(fn (Media $record): string => $record->created_at !== null
-                        ? $record->created_at
-                            ->copy()
-                            ->setTimezone($timezone)
-                            ->format('g:i A (T)')
-                        : '')
+                    ->dateTime()
                     ->sortable(),
             ])
             ->recordActions([

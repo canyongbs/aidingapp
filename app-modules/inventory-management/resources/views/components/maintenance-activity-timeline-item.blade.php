@@ -36,12 +36,13 @@
     <div class="flex flex-row justify-between">
         <x-timeline::timeline.heading>
             <div class="flex">
-                Maintenance Activity Scheduled - {{ $record->scheduled_date->format('M, d Y g:i A') }}
+                Maintenance Activity Scheduled - {{ $record->scheduled_date->format('M j, Y g:i a (T)') }}
 
                 <span class="ml-2 flex">
                     @if ($record->isCompleted())
                         <x-filament::badge color="success">
-                            {{ $record->status->getLabel() }} {{ $record->completed_date?->format('M, d Y g:i A') }}
+                            {{ $record->status->getLabel() }}
+                            {{ $record->completed_date?->format('M j, Y g:i a (T)') }}
                         </x-filament::badge>
                     @else
                         <x-filament::badge>

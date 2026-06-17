@@ -45,7 +45,7 @@
         $date = $date instanceof Carbon ? $date : Carbon::parse($date);
         $days = (int) abs(Carbon::today()->diffInDays($date, false));
 
-        return $date->format('m-d-Y') . ' (' . $days . ' ' . Str::plural('day', $days) . ')';
+        return $date->format('M j, Y') . ' (' . $days . ' ' . Str::plural('day', $days) . ')';
     };
 @endphp
 

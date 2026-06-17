@@ -75,7 +75,7 @@ class StoreServiceRequestUpdateController extends Controller
                         'id' => $update->getKey(),
                         'update' => $update->update,
                         'created_by_type' => $update->created_by_type,
-                        'created_at' => $update->created_at->format('m-d-Y g:i A'),
+                        'created_at' => $update->created_at->format('M j, Y g:i a (T)'),
                         'media' => $update->getUploadedMedia(),
                     ];
                 });

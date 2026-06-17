@@ -108,11 +108,11 @@ class ViewServiceRequest extends ViewRecord
                                     }),
                                 TextEntry::make('created_at')
                                     ->label('Created')
-                                    ->dateTime('M j, Y g:i A (T)')
+                                    ->dateTime()
                                     ->hintIcon(null),
                                 TextEntry::make('updated_at')
                                     ->label('Last Updated')
-                                    ->dateTime('M j, Y g:i A (T)')
+                                    ->dateTime()
                                     ->hintIcon(null),
                             ])->columns(3),
                         Grid::make(3)

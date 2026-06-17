@@ -118,11 +118,11 @@ class Feedback extends ViewRecord
         }
 
         $timezone = app(DisplaySettings::class)->getTimezone();
-        $sentAt = $serviceRequest->survey_sent_at->setTimezone($timezone)->format('M j, Y \a\t h:i A (T)');
+        $sentAt = $serviceRequest->survey_sent_at->setTimezone($timezone)->format('M j, Y g:i a (T)');
         $message = __('service-management::service_requests.feedback.survey_sent', ['sent_at' => $sentAt]);
 
         if (filled($serviceRequest->reminder_sent_at)) {
-            $reminderAt = $serviceRequest->reminder_sent_at->setTimezone($timezone)->format('M j, Y \a\t h:i A (T)');
+            $reminderAt = $serviceRequest->reminder_sent_at->setTimezone($timezone)->format('M j, Y g:i a (T)');
             $message .= '<br>' . __('service-management::service_requests.feedback.reminder_sent', ['reminder_at' => $reminderAt]);
         }
 

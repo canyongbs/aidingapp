@@ -113,7 +113,7 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResolutionSlaComplianceStatus())
                     ->tooltip(fn (ServiceRequest $record): ?string => $record->getResolutionSlaComplianceStatus()?->getLabel())
                     ->toggleable(),
-                TextColumn::make('created_at')->date('Y-m-d')
+                TextColumn::make('created_at')->date()
                     ->toggleable(),
             ])
             ->filters([
