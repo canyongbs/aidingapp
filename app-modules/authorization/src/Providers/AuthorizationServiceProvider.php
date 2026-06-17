@@ -54,7 +54,7 @@ class AuthorizationServiceProvider extends ServiceProvider
     {
         Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new AuthorizationPlugin()));
 
-        $this->app->bind(\Filament\Auth\Http\Controllers\LogoutController::class, function ($app) {
+        $this->app->bind(\Filament\Auth\Http\Controllers\LogoutController::class, function () {
             return new LogoutController();
         });
 

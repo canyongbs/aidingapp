@@ -37,6 +37,7 @@
 namespace AidingApp\Authorization\Models\Concerns;
 
 use App\Actions\Finders\ApplicationModules;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Spatie\Permission\PermissionRegistrar;
 use Spatie\Permission\Traits\HasRoles;
@@ -66,9 +67,9 @@ trait HasRolesWithPivot
         }
 
         return $relation->wherePivot($permissionRegistrar->teamsKey, getPermissionsTeamId())
-            ->where(function ($q) use ($permissionRegistrar) {
+            ->where(function (Builder $query) use ($permissionRegistrar) {
                 $teamField = config('permission.table_names.roles') . '.' . $permissionRegistrar->teamsKey;
-                $q->whereNull($teamField)->orWhere($teamField, getPermissionsTeamId());
+                $query->whereNull($teamField)->orWhere($teamField, getPermissionsTeamId());
             });
     }
 }

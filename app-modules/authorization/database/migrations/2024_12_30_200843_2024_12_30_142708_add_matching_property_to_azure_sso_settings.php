@@ -44,7 +44,7 @@ return new class () extends SettingsMigration {
         $this->migrator->inGroup('azure_sso', function (SettingsBlueprint $blueprint): void {
             try {
                 $blueprint->add('matching_property', 'user_principal_name');
-            } catch (SettingAlreadyExists $e) {
+            } catch (SettingAlreadyExists $exception) {
                 // Ignore
             }
         });

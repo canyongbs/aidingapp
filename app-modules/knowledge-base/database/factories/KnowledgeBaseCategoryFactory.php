@@ -56,6 +56,9 @@ class KnowledgeBaseCategoryFactory extends Factory
         ];
     }
 
+    /**
+     * @return array<int, string>
+     */
     private function icons(): array
     {
         return cache()->remember('heroicon-factory-options', now()->addMinutes(5), function (): array {

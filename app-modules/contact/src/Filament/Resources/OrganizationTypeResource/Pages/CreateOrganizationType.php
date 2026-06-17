@@ -65,7 +65,7 @@ class CreateOrganizationType extends CreateRecord
                         Toggle::make('is_default')
                             ->label('Default')
                             ->live()
-                            ->hint(function (?OrganizationType $record, $state): ?string {
+                            ->hint(function (?OrganizationType $record, mixed $state): ?string {
                                 if ($record?->is_default) {
                                     return null;
                                 }
