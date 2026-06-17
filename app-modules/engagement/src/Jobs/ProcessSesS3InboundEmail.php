@@ -494,16 +494,30 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 return;
             }
 
+            /*
+             * When an email is forwarded into the Service Request Type address, the actual sender is
+             * the forwarder, not the person the request is for. Detect the forward and substitute the
+             * original sender, subject, and body so the Service Request is created for the original
+             * sender as if they had emailed in directly.
+             */
+            $forwarded = $this->parseForwardedEmail($parser);
+
+            $effectiveSender = $forwarded['sender'] ?? $sender;
+            $effectiveSenderName = $forwarded['senderName'] ?? ($parser->getAddresses('from')[0]['display'] ?? null);
+            $effectiveSubject = $forwarded['subject'] ?? $parser->getHeader('subject');
+            $effectiveBody = $forwarded['body'] ?? $parser->getMessageBody('text');
+            $effectiveNotificationBody = $forwarded['body'] ?? $parser->getMessageBody('htmlEmbedded');
+
             $contacts = Contact::query()
-                ->where('email', $sender)
+                ->where('email', $effectiveSender)
                 ->get();
 
             if ($contacts->isEmpty()) {
                 if (! $serviceRequestType->is_email_automatic_creation_contact_create_enabled) {
-                    Notification::route('mail', $sender)
+                    Notification::route('mail', $effectiveSender)
                         ->notifyNow(new IneligibleContactSesS3InboundEmailServiceRequestNotification(
                             $serviceRequestTypeDomain,
-                            $parser->getMessageBody('htmlEmbedded')
+                            $effectiveNotificationBody
                         ));
 
                     return;
@@ -512,31 +526,31 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 $organization = null;
 
                 if ($serviceRequestType->email_automatic_creation_contact_create_condition === EmailAutomaticCreationContactCreateCondition::IfEligible) {
-                    $domain = Str::afterLast($sender, '@');
+                    $domain = Str::afterLast($effectiveSender, '@');
 
                     $organization = Organization::query()
                         ->whereRaw('LOWER(?) = ANY (SELECT LOWER(value) FROM jsonb_array_elements_text(domains))', [mb_strtolower($domain)])
                         ->first();
 
                     if (! $organization) {
-                        Notification::route('mail', $sender)
+                        Notification::route('mail', $effectiveSender)
                             ->notifyNow(new IneligibleContactSesS3InboundEmailServiceRequestNotification(
                                 $serviceRequestTypeDomain,
-                                $parser->getMessageBody('htmlEmbedded')
+                                $effectiveNotificationBody
                             ));
 
                         return;
                     }
                 }
 
-                $contacts = $contacts->add($this->buildContactFromSender($sender, $parser, $organization));
+                $contacts = $contacts->add($this->buildContactFromSender($effectiveSender, $effectiveSenderName, $organization));
             }
 
-            $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser) {
+            $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser, $effectiveSubject, $effectiveBody) {
                 $serviceRequest = $contact->serviceRequests()
                     ->make([
-                        'title' => $parser->getHeader('subject'),
-                        'close_details' => $parser->getMessageBody('text'),
+                        'title' => $effectiveSubject,
+                        'close_details' => $effectiveBody,
                     ]);
 
                 $serviceRequestStatus = ServiceRequestStatus::query()
@@ -582,9 +596,136 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         });
     }
 
-    protected function buildContactFromSender(string $sender, Parser $parser, ?Organization $organization = null): Contact
+    /**
+     * @return array{sender: string, senderName: ?string, subject: ?string, body: string}|null
+     */
+    protected function parseForwardedEmail(Parser $parser): ?array
     {
-        $senderName = $parser->getAddresses('from')[0]['display'];
+        $outerSubject = (string) $parser->getHeader('subject');
+        $body = (string) $parser->getMessageBody('text');
+
+        if (blank($body)) {
+            return null;
+        }
+
+        $hasForwardSubject = (bool) preg_match('/^\s*(?:fwd?|fw)\s*:/i', $outerSubject);
+
+        $blockOffset = null;
+
+        $markers = [
+            '/^[ \t]*-{2,}[ \t]*Forwarded message[ \t]*-{2,}[ \t]*$/im', // Gmail
+            '/^[ \t]*Begin forwarded message:[ \t]*$/im',                // Apple Mail
+            '/^[ \t]*-{2,}[ \t]*Original Message[ \t]*-{2,}[ \t]*$/im',  // Outlook (older)
+        ];
+
+        foreach ($markers as $marker) {
+            if (preg_match($marker, $body, $m, PREG_OFFSET_CAPTURE)) {
+                // The header block starts on the line after the separator.
+                $blockOffset = $m[0][1] + strlen($m[0][0]);
+
+                break;
+            }
+        }
+
+        if ($blockOffset === null && $hasForwardSubject) {
+            // Outlook inline forward: a "From:" line followed within a few lines by a "Subject:" line.
+            if (preg_match('/^[ \t]*From:[ \t]*.+(?:\r?\n.*){0,5}?\r?\n[ \t]*Subject:[ \t]*.*$/im', $body, $m, PREG_OFFSET_CAPTURE)) {
+                $blockOffset = $m[0][1];
+            }
+        }
+
+        if ($blockOffset === null) {
+            return null;
+        }
+
+        $afterMarker = substr($body, $blockOffset);
+
+        // Original sender from the first "From:" line in the forwarded block.
+        $sender = null;
+        $senderName = null;
+
+        if (preg_match('/^[ \t]*From:[ \t]*(.+)$/im', $afterMarker, $fromMatch)) {
+            $fromLine = trim($fromMatch[1]);
+
+            if (preg_match('/<([^>@\s]+@[^>\s]+)>/', $fromLine, $emailMatch)) {
+                $sender = $emailMatch[1];
+                $senderName = trim(Str::before($fromLine, '<'), " \t\"");
+            } elseif (preg_match('/[\w.+-]+@[\w-]+\.[\w.-]+/', $fromLine, $emailMatch)) {
+                $sender = $emailMatch[0];
+                $senderName = trim(str_replace($sender, '', $fromLine), " \t\"<>");
+            }
+        }
+
+        if (blank($sender)) {
+            return null;
+        }
+
+        // Original subject from the block's "Subject:" line, else the Fwd/FW prefix stripped off the outer subject.
+        if (preg_match('/^[ \t]*Subject:[ \t]*(.+)$/im', $afterMarker, $subjectMatch)) {
+            $subject = $this->stripForwardSubjectPrefix(trim($subjectMatch[1]));
+        } else {
+            $subject = $this->stripForwardSubjectPrefix($outerSubject);
+        }
+
+        return [
+            'sender' => $sender,
+            'senderName' => blank($senderName) ? null : $senderName,
+            'subject' => blank($subject) ? null : $subject,
+            'body' => $this->extractBodyAfterHeaderBlock($afterMarker),
+        ];
+    }
+
+    protected function stripForwardSubjectPrefix(string $subject): string
+    {
+        return trim((string) preg_replace('/^(?:\s*(?:fwd?|fw)\s*:\s*)+/i', '', $subject));
+    }
+
+    protected function extractBodyAfterHeaderBlock(string $afterMarker): string
+    {
+        $lines = preg_split('/\r\n|\r|\n/', $afterMarker) ?: [];
+        $count = count($lines);
+        $headerPattern = '/^[ \t]*(?:From|Sent|Date|To|Cc|Bcc|Subject|Reply-To)[ \t]*:/i';
+
+        $index = 0;
+
+        // Skip blank lines preceding the header block (e.g. after "Begin forwarded message:").
+        while ($index < $count && trim($lines[$index]) === '') {
+            $index++;
+        }
+
+        $seenHeader = false;
+
+        // Consume the contiguous header lines and their folded continuations.
+        while ($index < $count) {
+            $line = $lines[$index];
+
+            if (preg_match($headerPattern, $line)) {
+                $seenHeader = true;
+                $index++;
+
+                continue;
+            }
+
+            if ($seenHeader && preg_match('/^[ \t]+\S/', $line)) {
+                $index++;
+
+                continue;
+            }
+
+            break;
+        }
+
+        // Skip the blank line(s) separating the headers from the body.
+        while ($index < $count && trim($lines[$index]) === '') {
+            $index++;
+        }
+
+        return trim(implode("\n", array_slice($lines, $index)));
+    }
+
+    protected function buildContactFromSender(string $sender, ?string $senderName, ?Organization $organization = null): Contact
+    {
+        $senderName = trim((string) $senderName);
 
         $firstName = Str::before($senderName, ' ') ?: 'Unknown';
         $lastName = Str::after($senderName, ' ') ?: 'Unknown';

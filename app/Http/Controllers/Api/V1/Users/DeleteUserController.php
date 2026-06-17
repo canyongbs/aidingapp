@@ -34,34 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Livewire;
+namespace App\Http\Controllers\Api\V1\Users;
 
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use Filament\Actions\Concerns\InteractsWithActions;
-use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
-use Filament\Schemas\Concerns\RestrictsFileUploadsToSchemaComponents;
-use Illuminate\Contracts\View\View;
-use Livewire\Component;
+use App\Models\User;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 
-class RenderServiceRequestFeedbackForm extends Component implements HasForms, HasActions
+class DeleteUserController
 {
-    use InteractsWithActions;
-    use InteractsWithForms, RestrictsFileUploadsToSchemaComponents {
-        RestrictsFileUploadsToSchemaComponents::_startUpload insteadof InteractsWithForms;
-        RestrictsFileUploadsToSchemaComponents::_finishUpload insteadof InteractsWithForms;
-    }
-
-    public bool $show = true;
-
-    public ServiceRequest $serviceRequest;
-
-    public ?array $data = [];
-
-    public function render(): View
+    #[Group('Users')]
+    public function __invoke(User $user): Response
     {
-        return view('service-management::livewire.render-service-request-feedback-form')
-            ->title(__('Service request feedback for :service_no', ['service_no' => $this->serviceRequest->service_request_number]));
+        Gate::authorize('viewAny', User::class);
+        Gate::authorize('delete', $user);
+
+        if ($user->isAdmin()) {
+            abort(404);
+        }
+
+        $user->delete();
+
+        return response()->noContent();
     }
 }

@@ -1,0 +1,41 @@
+Return-Path: <forwarder@school.edu>
+X-SES-Spam-Verdict: PASS
+X-SES-Virus-Verdict: PASS
+From: Staff Member <forwarder@school.edu>
+To: test-sr-help@mail.aiding.app
+Subject: Fwd: Help with my account
+Date: Thu, 20 Feb 2025 20:25:37 +0000
+Message-ID: <gmail-fwd-0001@mail.gmail.com>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="bnd_gmail_fwd"
+
+--bnd_gmail_fwd
+Content-Type: text/plain; charset="UTF-8"
+
+Hi team, please create a ticket for this student. Thanks!
+
+---------- Forwarded message ---------
+From: Jordan Student <student@example.com>
+Date: Thu, 20 Feb 2025 at 14:00
+Subject: Help with my account
+To: Support Desk <support@school.edu>
+
+Hello, I cannot log into my student portal. Please help me reset my password.
+
+Thanks,
+Jordan
+
+--bnd_gmail_fwd
+Content-Type: text/html; charset="UTF-8"
+
+<html><body>
+<p>Hi team, please create a ticket for this student. Thanks!</p>
+<div class="gmail_quote">
+<div>---------- Forwarded message ---------</div>
+<div>From: Jordan Student &lt;student@example.com&gt;</div>
+<div>Subject: Help with my account</div>
+<p>Hello, I cannot log into my student portal. Please help me reset my password.</p>
+</div>
+</body></html>
+
+--bnd_gmail_fwd--

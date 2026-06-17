@@ -1,0 +1,42 @@
+Return-Path: <forwarder@school.edu>
+X-SES-Spam-Verdict: PASS
+X-SES-Virus-Verdict: PASS
+From: Staff Member <forwarder@school.edu>
+To: test-sr-help@mail.aiding.app
+Subject: FW: Account access
+Date: Thu, 20 Feb 2025 20:25:37 +0000
+Message-ID: <outlook-div-0001@school.edu>
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="bnd_outlook_div"
+
+--bnd_outlook_div
+Content-Type: text/plain; charset="UTF-8"
+
+Forwarding to IT.
+
+________________________________
+From: Jordan Student <student@example.com>
+Sent: Thursday, February 20, 2025 2:00 PM
+To: Support Desk <support@school.edu>
+Subject: Account access
+
+I cannot access the portal even after resetting my password.
+
+Regards,
+Jordan
+
+--bnd_outlook_div
+Content-Type: text/html; charset="UTF-8"
+
+<html><body>
+<p>Forwarding to IT.</p>
+<div style="border-top:1px solid #ccc; padding-top:6px">
+<p><b>From:</b> Jordan Student &lt;student@example.com&gt;<br>
+<b>Sent:</b> Thursday, February 20, 2025 2:00 PM<br>
+<b>To:</b> Support Desk &lt;support@school.edu&gt;<br>
+<b>Subject:</b> Account access</p>
+<p>I cannot access the portal even after resetting my password.</p>
+</div>
+</body></html>
+
+--bnd_outlook_div--
