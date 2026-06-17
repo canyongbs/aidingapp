@@ -71,7 +71,7 @@ class ServiceRequestsExporter extends Exporter
                 ->label('Assigned To'),
             ExportColumn::make('created_at')
                 ->label('Date/Time Opened')
-                ->state(fn (ServiceRequest $record): string => $record->created_at->format('m/d/Y g:i A')),
+                ->state(fn (ServiceRequest $record): string => $record->created_at->format('M j, Y g:i a (T)')),
             ExportColumn::make('closed_at')
                 ->label('Date/Time Closed')
                 ->state(function (ServiceRequest $record): ?string {
@@ -80,7 +80,7 @@ class ServiceRequestsExporter extends Exporter
                     }
                     $resolvedAt = $record->getResolvedAt();
 
-                    return $resolvedAt->format('m/d/Y g:i A');
+                    return $resolvedAt->format('M j, Y g:i a (T)');
                 }),
             ExportColumn::make('age')
                 ->label('Age')

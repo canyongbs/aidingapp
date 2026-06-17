@@ -135,7 +135,7 @@ class ServiceRequestsTable extends BaseWidget
                     ->placeholder('Unassigned'),
                 TextColumn::make('created_at')
                     ->label('Date/Time Opened')
-                    ->dateTime('m/d/Y g:i A'),
+                    ->dateTime(),
                 TextColumn::make('resolved_at')
                     ->label('Date/Time Closed')
                     ->getStateUsing(function (ServiceRequest $record): ?string {
@@ -144,7 +144,7 @@ class ServiceRequestsTable extends BaseWidget
                         }
                         $resolvedAt = $record->getResolvedAt();
 
-                        return $resolvedAt->format('m/d/Y g:i A');
+                        return $resolvedAt->format('M j, Y g:i a (T)');
                     })
                     ->placeholder('Not closed'),
                 TextColumn::make('age')

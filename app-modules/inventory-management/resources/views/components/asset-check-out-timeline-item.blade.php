@@ -71,7 +71,7 @@
                 <x-timeline::timeline.labeled-field>
                     <x-slot:label>Expected return</x-slot>
 
-                    {{ $record->expected_check_in_at?->format('M, d Y g:i A') }}
+                    {{ $record->expected_check_in_at?->format('M j, Y g:i a (T)') }}
                 </x-timeline::timeline.labeled-field>
             @endif
         @endif

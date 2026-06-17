@@ -134,8 +134,8 @@ test('The correct details are displayed on the ListServiceRequests page', functi
             ->assertSee($serviceRequest->category->getLabel())
             ->assertSee($serviceRequest->status->name)
             ->assertSee($serviceRequest->respondent->full_name)
-            ->assertSee($serviceRequest->created_at->format('m-d-Y') . ' (0 days)')
-            ->assertSee($serviceRequest->updated_at->format('m-d-Y') . ' (0 days)')
+            ->assertSee($serviceRequest->created_at->format('M j, Y') . ' (0 days)')
+            ->assertSee($serviceRequest->updated_at->format('M j, Y') . ' (0 days)')
     );
 });
 
@@ -210,8 +210,8 @@ test('The correct details are displayed on the ListServiceRequests page via dire
             ->assertSee($serviceRequest->category->getLabel())
             ->assertSee($serviceRequest->status->name)
             ->assertSee($serviceRequest->respondent->full_name)
-            ->assertSee($serviceRequest->created_at->format('m-d-Y') . ' (0 days)')
-            ->assertSee($serviceRequest->updated_at->format('m-d-Y') . ' (0 days)')
+            ->assertSee($serviceRequest->created_at->format('M j, Y') . ' (0 days)')
+            ->assertSee($serviceRequest->updated_at->format('M j, Y') . ' (0 days)')
     );
 });
 

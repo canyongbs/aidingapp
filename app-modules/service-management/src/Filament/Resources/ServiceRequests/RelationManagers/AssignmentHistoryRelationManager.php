@@ -128,11 +128,11 @@ class AssignmentHistoryRelationManager extends RelationManager
                     ->placeholder('—'),
                 TextColumn::make('assigned_at')
                     ->label('Date')
-                    ->dateTime('M j, Y')
+                    ->dateTime()
                     ->description(fn (ServiceRequestAssignment $record): string => $record->assigned_at
                         ->copy()
                         ->setTimezone($timezone)
-                        ->format('g:i A (T)')),
+                        ->format('M j, Y g:i a (T)')),
             ]);
     }
 }

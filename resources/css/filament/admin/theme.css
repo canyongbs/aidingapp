@@ -128,3 +128,7 @@ li[data-group-label=''] > ul > .fi-sidebar-item > .fi-sidebar-item-button > .fi-
 .treeselect-list {
     @apply bg-white dark:bg-gray-900;
 }
+
+.fi-datetime-description {
+    @apply text-gray-500 dark:text-gray-400;
+}

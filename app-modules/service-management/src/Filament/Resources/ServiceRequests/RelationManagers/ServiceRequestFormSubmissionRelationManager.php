@@ -73,7 +73,7 @@ class ServiceRequestFormSubmissionRelationManager extends RelationManager
             ])
             ->recordActions([
                 ViewAction::make()
-                    ->modalHeading(fn (ServiceRequestFormSubmission $record) => 'Submission Details: ' . $record->submitted_at->format('M j, Y H:i:s'))
+                    ->modalHeading(fn (ServiceRequestFormSubmission $record) => 'Submission Details: ' . $record->submitted_at->format('M j, Y g:i a (T)'))
                     ->schema(function (ServiceRequestFormSubmission $record): ?array {
                         assert($record->submissible instanceof ServiceRequestForm);
 

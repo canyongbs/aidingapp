@@ -92,7 +92,6 @@ class ListContracts extends ListRecords
                     ->schema([
                         DatePicker::make('start_date')
                             ->native(false)
-                            ->displayFormat('m/d/Y')
                             ->closeOnDateSelection(),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
@@ -106,7 +105,6 @@ class ListContracts extends ListRecords
                     ->schema([
                         DatePicker::make('end_date')
                             ->native(false)
-                            ->displayFormat('m/d/Y')
                             ->closeOnDateSelection(),
                     ])
                     ->query(function (Builder $query, array $data): Builder {

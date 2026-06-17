@@ -74,7 +74,7 @@ trait HasAssetCheckInInfolist
             Fieldset::make('')
                 ->schema([
                     TextEntry::make('checked_in_at')
-                        ->dateTime('g:ia - M j, Y'),
+                        ->dateTime(),
                     TextEntry::make('notes'),
                 ]),
         ];

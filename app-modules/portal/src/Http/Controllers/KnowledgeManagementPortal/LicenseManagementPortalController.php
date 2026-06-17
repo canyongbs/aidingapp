@@ -50,7 +50,7 @@ class LicenseManagementPortalController extends Controller
             ->withWhereHas('product:id,name,version')
             ->get()
             ->map(function (ProductLicense $license) {
-                $license->formatted_expiration_date = $license->expiration_date?->format('m-d-Y');
+                $license->formatted_expiration_date = $license->expiration_date?->format('M j, Y');
 
                 return $license;
             });

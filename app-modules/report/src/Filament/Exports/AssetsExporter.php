@@ -79,7 +79,7 @@ class AssetsExporter extends Exporter
                 }),
             ExportColumn::make('purchase_date')
                 ->label('Purchase Date')
-                ->state(fn (Asset $record): string => $record->purchase_date->format('m/d/Y')),
+                ->state(fn (Asset $record): string => $record->purchase_date->format('M j, Y')),
             ExportColumn::make('purchase_age')
                 ->label('Device Age'),
         ];

@@ -103,7 +103,6 @@ class ServiceRequestFeedback extends Dashboard
             Section::make()
                 ->schema([
                     DatePicker::make('startDate')
-                        ->displayFormat('m-d-Y')
                         ->native(false)
                         ->maxDate(fn (Get $get) => $get('endDate') ?: now())
                         ->afterStateUpdated(function (callable $set, mixed $state, Get $get) {
@@ -112,7 +111,6 @@ class ServiceRequestFeedback extends Dashboard
                             }
                         }),
                     DatePicker::make('endDate')
-                        ->displayFormat('m-d-Y')
                         ->native(false)
                         ->minDate(fn (Get $get) => $get('startDate') ?: now())
                         ->maxDate(now())

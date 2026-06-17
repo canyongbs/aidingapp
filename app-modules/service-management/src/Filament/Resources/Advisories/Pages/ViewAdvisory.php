@@ -70,10 +70,10 @@ class ViewAdvisory extends ViewRecord
                         TextEntry::make('assignedDepartment.name')
                             ->label('Assigned Department'),
                         TextEntry::make('created_at')
-                            ->datetime('Y-m-d H:i:s')
+                            ->datetime()
                             ->label('Created'),
                         TextEntry::make('updated_at')
-                            ->datetime('Y-m-d H:i:s')
+                            ->datetime()
                             ->label('Last Updated'),
                     ])
                     ->columns(),

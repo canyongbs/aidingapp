@@ -78,11 +78,11 @@ class ListUsers extends ListRecords
                 TextColumn::make('job_title'),
                 TextColumn::make('created_at')
                     ->label('Created At')
-                    ->dateTime(config('project.datetime_format') ?? 'Y-m-d H:i:s')
+                    ->dateTime()
                     ->sortable(),
                 TextColumn::make('updated_at')
                     ->label('Updated At')
-                    ->dateTime(config('project.datetime_format') ?? 'Y-m-d H:i:s')
+                    ->dateTime()
                     ->sortable(),
             ])
             ->filters([

@@ -63,9 +63,9 @@ class ListAssetCheckIns extends ListRecords
                     ->searchable(),
                 TextColumn::make('checkOut.checked_out_at')
                     ->label('Checked out at')
-                    ->dateTime('g:ia - M j, Y'),
+                    ->dateTime(),
                 TextColumn::make('checked_in_at')
-                    ->dateTime('g:ia - M j, Y'),
+                    ->dateTime(),
                 TextColumn::make('created_at')
                     ->label('Status')
                     ->state(fn (AssetCheckIn $record): AssetCheckOutStatus => $record->checkOut->status)
