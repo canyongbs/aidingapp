@@ -82,6 +82,14 @@ class PronounsPolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.delete',
+            denyResponse: 'You do not have permission to delete any pronouns.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, Pronouns $model): Response
     {
         return $authenticatable->canOrElse(
@@ -90,11 +98,27 @@ class PronounsPolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.restore',
+            denyResponse: 'You do not have permission to restore any pronouns.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, Pronouns $model): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete these pronouns.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.force-delete',
+            denyResponse: 'You do not have permission to permanently delete any pronouns.'
         );
     }
 }

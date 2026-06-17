@@ -199,3 +199,21 @@ it('hides the import and export header actions from a user without the user.impo
         ->assertActionHidden('import')
         ->assertActionHidden('export');
 });
+
+it('only shows the bulk delete action to a user with the user.delete permission', function () {
+    User::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('user.view-any', 'user.*.view');
+
+    actingAs($user);
+
+    livewire(ListUsers::class)
+        ->assertTableBulkActionHidden('delete');
+
+    $user->givePermissionTo('user.*.delete');
+
+    livewire(ListUsers::class)
+        ->assertTableBulkActionVisible('delete');
+});

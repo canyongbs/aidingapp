@@ -35,6 +35,7 @@
 */
 
 use App\Filament\Resources\NotificationSettings\Pages\ListNotificationSettings;
+use App\Models\NotificationSetting;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -51,4 +52,22 @@ it('is gated with proper access control', function () {
     $user->refresh();
 
     livewire(ListNotificationSettings::class)->assertOk();
+});
+
+it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+    new NotificationSetting(['name' => 'test']);
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('settings.view-any', 'settings.*.view');
+
+    actingAs($user);
+
+    livewire(ListNotificationSettings::class)
+        ->assertTableBulkActionHidden('delete');
+
+    $user->givePermissionTo('settings.*.delete');
+
+    livewire(ListNotificationSettings::class)
+        ->assertTableBulkActionVisible('delete');
 });

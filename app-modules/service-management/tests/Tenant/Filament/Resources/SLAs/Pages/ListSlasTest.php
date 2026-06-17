@@ -35,6 +35,7 @@
 */
 
 use AidingApp\ServiceManagement\Filament\Resources\SLAs\Pages\ListSlas;
+use AidingApp\ServiceManagement\Models\Sla;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -61,4 +62,22 @@ it('is gated with proper access control', function () {
     $settings->save();
 
     livewire(ListSlas::class)->assertOk();
+});
+
+it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+    new Sla(['name' => 'test']);
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('settings.view-any', 'settings.*.view');
+
+    actingAs($user);
+
+    livewire(ListSlas::class)
+        ->assertTableBulkActionHidden('delete');
+
+    $user->givePermissionTo('settings.*.delete');
+
+    livewire(ListSlas::class)
+        ->assertTableBulkActionVisible('delete');
 });
