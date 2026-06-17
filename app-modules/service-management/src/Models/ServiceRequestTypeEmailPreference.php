@@ -45,9 +45,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * @property ServiceRequestEmailTemplateType $service_request_email_template_type
- * @property ServiceRequestTypeEmailTemplateRole $service_request_email_template_role
- * @property ServiceRequestNotificationChannel $notification_channel
+ * @mixin IdeHelperServiceRequestTypeEmailPreference
  */
 class ServiceRequestTypeEmailPreference extends Model
 {
