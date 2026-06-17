@@ -63,8 +63,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * @property EmailAutomaticCreationContactCreateCondition $email_automatic_creation_contact_create_condition
- *
  * @mixin IdeHelperServiceRequestType
  */
 #[ObservedBy([ServiceRequestTypeObserver::class])]
