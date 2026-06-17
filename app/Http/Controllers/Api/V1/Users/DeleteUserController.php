@@ -46,11 +46,12 @@ class DeleteUserController
     #[Group('Users')]
     public function __invoke(User $user): Response
     {
+        Gate::authorize('viewAny', User::class);
+        Gate::authorize('delete', $user);
+
         if ($user->isAdmin()) {
             abort(404);
         }
-
-        Gate::authorize('delete', $user);
 
         $user->delete();
 
