@@ -81,7 +81,7 @@ class NotificationSettingPolicy
             denyResponse: 'You do not have permission to delete this notification setting.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

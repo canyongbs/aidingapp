@@ -127,7 +127,7 @@ class SlaPolicy
             denyResponse: 'You do not have permission to permanently delete this SLA.'
         );
     }
-    
+
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

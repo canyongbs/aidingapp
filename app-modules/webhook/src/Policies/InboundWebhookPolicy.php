@@ -84,7 +84,7 @@ class InboundWebhookPolicy
     {
         return Response::deny('Inbound webhooks cannot be restored.');
     }
-    
+
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return Response::deny('Inbound webhooks cannot be restored.');
@@ -94,7 +94,7 @@ class InboundWebhookPolicy
     {
         return Response::deny('Inbound webhooks cannot be force deleted.');
     }
-    
+
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return Response::deny('Inbound webhooks cannot be force deleted.');

@@ -85,7 +85,7 @@ class TaskPolicy
             denyResponse: 'You do not have permission to delete this task.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -101,7 +101,7 @@ class TaskPolicy
             denyResponse: 'You do not have permission to restore this task.'
         );
     }
-    
+
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -117,7 +117,7 @@ class TaskPolicy
             denyResponse: 'You do not have permission to permanently delete this task.'
         );
     }
-    
+
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
