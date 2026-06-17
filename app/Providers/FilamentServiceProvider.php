@@ -196,7 +196,7 @@ class FilamentServiceProvider extends ServiceProvider
                 ->deferFilters(false)
                 ->defaultDateTimeDisplayFormat($defaultDateTimeDisplayFormat)
                 ->defaultTimeDisplayFormat('g:i a')
-                ->paginationPageOptions([5, 10, 25, 50]);
+                ->paginationPageOptions([5, 10, 20]);
         });
         Schema::configureUsing(fn (Schema $infolist) => $infolist
             ->defaultDateTimeDisplayFormat($defaultDateTimeDisplayFormat)
@@ -300,12 +300,6 @@ class FilamentServiceProvider extends ServiceProvider
 
         PhoneEntry::configureUsing(function (PhoneEntry $phoneEntry): void {
             $phoneEntry->displayFormat(PhoneInputNumberType::INTERNATIONAL);
-        });
-
-        Table::configureUsing(function (Table $table): void {
-            $table
-                ->deferFilters(false)
-                ->paginationPageOptions([5, 10, 20]);
         });
 
         Fieldset::configureUsing(fn (Fieldset $fieldset) => $fieldset

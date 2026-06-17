@@ -97,10 +97,10 @@ class ViewUser extends ViewRecord
                             ->label('User can only log in via a social provider.')
                             ->columnSpanFull(),
                         TextInput::make('created_at')
-                            ->formatStateUsing(fn ($state) => Carbon::parse($state)->format(config('project.datetime_format') ?? 'Y-m-d H:i:s'))
+                            ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('M j, Y g:i a (T)'))
                             ->disabled(),
                         TextInput::make('updated_at')
-                            ->formatStateUsing(fn ($state) => Carbon::parse($state)->format(config('project.datetime_format') ?? 'Y-m-d H:i:s'))
+                            ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('M j, Y g:i a (T)'))
                             ->disabled(),
                     ])
                     ->disabled(),

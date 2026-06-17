@@ -88,7 +88,7 @@ class ListAssets extends ListRecords
                 TextColumn::make('purchase_age')
                     ->label('Device Age')
                     ->sortable(['purchase_date'])
-                    ->tooltip(fn (Asset $record) => $record->purchase_date->format('M j, Y g:i a (T)')),
+                    ->tooltip(fn (Asset $record) => $record->purchase_date->format('M j, Y')),
             ])
             ->filters([
                 SelectFilter::make('type')
