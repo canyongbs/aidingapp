@@ -41,13 +41,17 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
+use Filament\Schemas\Concerns\RestrictsFileUploadsToSchemaComponents;
 use Illuminate\Contracts\View\View;
 use Livewire\Component;
 
 class RenderServiceRequestFeedbackForm extends Component implements HasForms, HasActions
 {
     use InteractsWithActions;
-    use InteractsWithForms;
+    use InteractsWithForms, RestrictsFileUploadsToSchemaComponents {
+        RestrictsFileUploadsToSchemaComponents::_startUpload insteadof InteractsWithForms;
+        RestrictsFileUploadsToSchemaComponents::_finishUpload insteadof InteractsWithForms;
+    }
 
     public bool $show = true;
 
