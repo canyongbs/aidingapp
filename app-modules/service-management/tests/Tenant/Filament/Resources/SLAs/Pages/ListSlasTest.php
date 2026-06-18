@@ -76,7 +76,7 @@ it('only shows the bulk delete action to a user with the settings.delete permiss
 
     livewire(ListSlas::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
-        
+
     $user->givePermissionTo('settings.*.delete');
 
     livewire(ListSlas::class)

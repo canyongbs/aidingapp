@@ -95,7 +95,7 @@ class ServiceRequestAssignmentPolicy
             denyResponse: 'You do not have permissions to delete this service request assignment.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -111,7 +111,7 @@ class ServiceRequestAssignmentPolicy
             denyResponse: 'You do not have permissions to restore this service request assignment.'
         );
     }
-    
+
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -127,7 +127,7 @@ class ServiceRequestAssignmentPolicy
             denyResponse: 'You do not have permissions to force delete this service request assignment.'
         );
     }
-    
+
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

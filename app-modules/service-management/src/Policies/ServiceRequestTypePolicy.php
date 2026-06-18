@@ -107,7 +107,7 @@ class ServiceRequestTypePolicy
             denyResponse: 'You do not have permissions to delete this service request type.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -123,7 +123,7 @@ class ServiceRequestTypePolicy
             denyResponse: 'You do not have permissions to restore this service request type.'
         );
     }
-    
+
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -143,7 +143,7 @@ class ServiceRequestTypePolicy
             denyResponse: 'You do not have permissions to force delete this service request type.'
         );
     }
-    
+
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

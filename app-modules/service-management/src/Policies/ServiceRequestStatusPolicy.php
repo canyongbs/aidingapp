@@ -107,7 +107,7 @@ class ServiceRequestStatusPolicy
             denyResponse: 'You do not have permissions to delete this service request status.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -123,7 +123,7 @@ class ServiceRequestStatusPolicy
             denyResponse: 'You do not have permissions to restore this service request status.'
         );
     }
-    
+
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -147,7 +147,7 @@ class ServiceRequestStatusPolicy
             denyResponse: 'You do not have permissions to force delete this service request status.'
         );
     }
-    
+
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
