@@ -95,6 +95,14 @@ class ServiceRequestHistoryPolicy
             denyResponse: 'You do not have permissions to delete this service request history.'
         );
     }
+    
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_request_history.*.delete'],
+            denyResponse: 'You do not have permissions to delete any service request history.'
+        );
+    }
 
     public function restore(Authenticatable $authenticatable, ServiceRequestHistory $serviceRequestHistory): Response
     {
@@ -103,12 +111,28 @@ class ServiceRequestHistoryPolicy
             denyResponse: 'You do not have permissions to restore this service request history.'
         );
     }
+    
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_request_history.*.restore'],
+            denyResponse: 'You do not have permissions to restore any service request history.'
+        );
+    }
 
     public function forceDelete(Authenticatable $authenticatable, ServiceRequestHistory $serviceRequestHistory): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['service_request_history.*.force-delete'],
             denyResponse: 'You do not have permissions to force delete this service request history.'
+        );
+    }
+    
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_request_history.*.force-delete'],
+            denyResponse: 'You do not have permissions to force delete any service request history.'
         );
     }
 

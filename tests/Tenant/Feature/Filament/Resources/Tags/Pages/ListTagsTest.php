@@ -38,6 +38,7 @@ use App\Filament\Resources\Tags\Pages\ListTags;
 use App\Models\Tag;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -74,10 +75,10 @@ it('only shows the bulk delete action to a user with the tag.delete permission',
     actingAs($user);
 
     livewire(ListTags::class)
-        ->assertTableBulkActionHidden('delete');
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('settings.*.delete');
 
     livewire(ListTags::class)
-        ->assertTableBulkActionVisible('delete');
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

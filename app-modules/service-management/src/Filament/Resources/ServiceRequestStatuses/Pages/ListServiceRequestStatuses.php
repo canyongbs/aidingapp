@@ -97,6 +97,7 @@ class ListServiceRequestStatuses extends ListRecords
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete')
                         ->action(function (DeleteBulkAction $component): void {
                             $total = 0;
                             $totalDeleted = 0;

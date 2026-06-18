@@ -37,6 +37,7 @@
 use App\Filament\Resources\NotificationSettings\Pages\ListNotificationSettings;
 use App\Models\NotificationSetting;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -64,10 +65,10 @@ it('only shows the bulk delete action to a user with the settings.delete permiss
     actingAs($user);
 
     livewire(ListNotificationSettings::class)
-        ->assertTableBulkActionHidden('delete');
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('settings.*.delete');
 
     livewire(ListNotificationSettings::class)
-        ->assertTableBulkActionVisible('delete');
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

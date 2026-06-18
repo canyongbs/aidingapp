@@ -98,12 +98,28 @@ class ServiceRequestFormPolicy
             denyResponse: 'You do not have permission to delete this service request form.'
         );
     }
+    
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.delete',
+            denyResponse: 'You do not have permission to delete any service request form.'
+        );
+    }
 
     public function restore(Authenticatable $authenticatable, ServiceRequestForm $serviceRequestForm): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.restore',
             denyResponse: 'You do not have permission to restore this service request form.'
+        );
+    }
+    
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.restore',
+            denyResponse: 'You do not have permission to restore any service request form.'
         );
     }
 
@@ -116,6 +132,14 @@ class ServiceRequestFormPolicy
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete this service request form.'
+        );
+    }
+    
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.force-delete',
+            denyResponse: 'You do not have permission to permanently delete any service request form.'
         );
     }
 

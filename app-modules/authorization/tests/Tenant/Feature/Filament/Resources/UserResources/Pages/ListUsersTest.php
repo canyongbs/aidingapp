@@ -38,6 +38,7 @@ use AidingApp\Department\Models\Department;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Authenticatable;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Lab404\Impersonate\Services\ImpersonateManager;
 
 use function Pest\Laravel\actingAs;
@@ -210,10 +211,10 @@ it('only shows the bulk delete action to a user with the user.delete permission'
     actingAs($user);
 
     livewire(ListUsers::class)
-        ->assertTableBulkActionHidden('delete');
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('user.*.delete');
 
     livewire(ListUsers::class)
-        ->assertTableBulkActionVisible('delete');
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

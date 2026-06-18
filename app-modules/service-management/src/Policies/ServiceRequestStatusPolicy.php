@@ -107,12 +107,28 @@ class ServiceRequestStatusPolicy
             denyResponse: 'You do not have permissions to delete this service request status.'
         );
     }
+    
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.delete',
+            denyResponse: 'You do not have permissions to delete any service request status.'
+        );
+    }
 
     public function restore(Authenticatable $authenticatable, ServiceRequestStatus $serviceRequestStatus): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.restore',
             denyResponse: 'You do not have permissions to restore this service request status.'
+        );
+    }
+    
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.restore',
+            denyResponse: 'You do not have permissions to restore any service request status.'
         );
     }
 
@@ -129,6 +145,14 @@ class ServiceRequestStatusPolicy
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permissions to force delete this service request status.'
+        );
+    }
+    
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.force-delete',
+            denyResponse: 'You do not have permissions to force delete any service request status.'
         );
     }
 

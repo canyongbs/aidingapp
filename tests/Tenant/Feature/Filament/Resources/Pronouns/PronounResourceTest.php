@@ -37,6 +37,7 @@
 use App\Filament\Resources\Pronouns\PronounsResource;
 use App\Models\Pronouns;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -65,10 +66,10 @@ it('only shows the bulk delete action to a user with the settings.delete permiss
     actingAs($user);
 
     livewire(PronounsResource::getPages()['index']->getPage())
-        ->assertTableBulkActionHidden('delete');
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('settings.*.delete');
 
     livewire(PronounsResource::getPages()['index']->getPage())
-        ->assertTableBulkActionVisible('delete');
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
