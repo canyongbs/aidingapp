@@ -81,19 +81,49 @@ it('returns a paginated list of users', function () {
     expect($response['data'])->toHaveCount(3);
 });
 
-it('returns correct user resource fields', function () {
+it('returns correct user fields', function (string $responseKey, Closure $getExpected) {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);
 
+    $targetUser = User::factory()->create();
+
+    $response = getJson(route('api.v1.users.index', [], false));
+    $response->assertOk();
+
+    $item = collect($response['data'])->firstWhere('id', $targetUser->id);
+
+    expect($item[$responseKey])->toBe($getExpected($targetUser));
+})->with([
+    '`id`'    => ['id',    fn (User $user) => $user->id],
+    '`name`'  => ['name',  fn (User $user) => $user->name],
+    '`email`' => ['email', fn (User $user) => $user->email],
+]);
+
+it('returns correct roles relationship structure', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('user.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    $targetUser = User::factory()->create();
     $role = Role::factory()->create();
-    $permissionGroup = PermissionGroup::create(['name' => 'test-group']);
-    $permission = Permission::factory()->create(['guard_name' => 'web', 'group_id' => $permissionGroup->id]);
-    $role->givePermissionTo($permission);
+    $targetUser->roles()->attach($role);
+
+    $response = getJson(route('api.v1.users.index', [], false));
+    $response->assertOk();
+
+    $item = collect($response['data'])->firstWhere('id', $targetUser->id);
+
+    expect($item['roles'])->toBe([$role->name]);
+});
+
+it('returns correct department relationship structure', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('user.view-any');
+    Sanctum::actingAs($user, ['api']);
 
     $department = Department::factory()->create();
     $targetUser = User::factory()->create();
-    $targetUser->roles()->attach($role);
     $targetUser->assignDepartment($department->id);
 
     $response = getJson(route('api.v1.users.index', [], false));
@@ -101,15 +131,45 @@ it('returns correct user resource fields', function () {
 
     $item = collect($response['data'])->firstWhere('id', $targetUser->id);
 
-    expect($item['id'])->toBe($targetUser->id);
-    expect($item['name'])->toBe($targetUser->name);
-    expect($item['email'])->toBe($targetUser->email);
-    expect($item['roles'])->toBe([$role->name]);
-    expect($item['permissions'])->toBe([$permission->name]);
     expect($item['department'])->toBe([
         'id' => $department->id,
         'name' => $department->name,
     ]);
+});
+
+it('returns null department when no department is assigned', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('user.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    $targetUser = User::factory()->create();
+
+    $response = getJson(route('api.v1.users.index', [], false));
+    $response->assertOk();
+
+    $item = collect($response['data'])->firstWhere('id', $targetUser->id);
+
+    expect($item['department'])->toBeNull();
+});
+
+it('returns correct permissions relationship structure', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('user.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    $targetUser = User::factory()->create();
+    $role = Role::factory()->create();
+    $permissionGroup = PermissionGroup::create(['name' => 'test-group']);
+    $permission = Permission::factory()->create(['guard_name' => 'web', 'group_id' => $permissionGroup->id]);
+    $role->givePermissionTo($permission);
+    $targetUser->roles()->attach($role);
+
+    $response = getJson(route('api.v1.users.index', [], false));
+    $response->assertOk();
+
+    $item = collect($response['data'])->firstWhere('id', $targetUser->id);
+
+    expect($item['permissions'])->toBe([$permission->name]);
 });
 
 it('excludes users with admin roles from the list', function (string $adminRole) {
@@ -148,7 +208,7 @@ it('can filter users by name', function () {
 
     expect($response['meta']['total'])->toBe(1);
     expect($response['data'][0]['id'])->toBe($matchingUser->id);
-    expect($response['data'][0]['name'])->toBe('John Doe');
+    expect($response['data'][0]['name'])->toBe($matchingUser->name);
 });
 
 it('can filter users by department', function () {
@@ -168,7 +228,7 @@ it('can filter users by department', function () {
 
     expect($response['meta']['total'])->toBe(1);
     expect($response['data'][0]['id'])->toBe($matchingUser->id);
-    expect($response['data'][0]['department']['name'])->toBe('Engineering');
+    expect($response['data'][0]['department']['name'])->toBe($department->name);
 
     // Partial name
     $response = getJson(route('api.v1.users.index', ['filter' => ['department' => 'Engin']], false));
@@ -179,8 +239,8 @@ it('can filter users by department', function () {
 });
 
 dataset('user_sorts', [
-    '`name`' => ['name',  ['name' => 'Alpha User'],         ['name' => 'Zulu User'],         'name',  'Alpha User',         'Zulu User'],
-    '`email`' => ['email', ['email' => 'alpha@example.com'], ['email' => 'zulu@example.com'], 'email', 'alpha@example.com', 'zulu@example.com'],
+    '`name`'  => ['name',  ['name' => 'Alpha User'],          ['name' => 'Zulu User'],          'name',  'Alpha User',          'Zulu User'],
+    '`email`' => ['email', ['email' => 'alpha@example.com'],  ['email' => 'zulu@example.com'],  'email', 'alpha@example.com',  'zulu@example.com'],
 ]);
 
 it('can sort users by all attributes ascending', function (string $requestKey, array $firstAttributes, array $secondAttributes, string $responseKey, mixed $responseFirstValue, mixed $responseSecondValue) {

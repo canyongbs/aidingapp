@@ -74,7 +74,7 @@ class ListUsersController
             ->allowedFilters(
                 AllowedFilter::partial('name'),
                 AllowedFilter::callback('department', function (Builder $query, string $value): void {
-                    $query->whereHas('department', fn (Builder $q) => $q->where('name', 'ilike', '%' . $value . '%'));
+                    $query->whereHas('department', fn (Builder $deptQuery) => $deptQuery->where('name', 'ilike', '%' . $value . '%'));
                 }),
             )
             ->allowedSorts(
