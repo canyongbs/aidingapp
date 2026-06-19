@@ -94,7 +94,7 @@ class ProductPolicy
             denyResponse: 'You do not have permission to delete this product.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -110,7 +110,7 @@ class ProductPolicy
             denyResponse: 'You do not have permission to restore this product.'
         );
     }
-    
+
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -126,7 +126,7 @@ class ProductPolicy
             denyResponse: 'You do not have permission to force delete this product.'
         );
     }
-    
+
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

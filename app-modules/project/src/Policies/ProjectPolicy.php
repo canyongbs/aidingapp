@@ -116,7 +116,7 @@ class ProjectPolicy
             denyResponse: 'You do not have permission to delete this project.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -143,7 +143,7 @@ class ProjectPolicy
             denyResponse: 'You do not have permission to restore this project.'
         );
     }
-    
+
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -170,7 +170,7 @@ class ProjectPolicy
             denyResponse: 'You do not have permission to permanently delete this project.'
         );
     }
-    
+
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

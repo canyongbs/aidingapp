@@ -94,7 +94,7 @@ class KnowledgeBaseItemPolicy
             denyResponse: 'You do not have permissions to delete this knowledge base item.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -110,7 +110,7 @@ class KnowledgeBaseItemPolicy
             denyResponse: 'You do not have permissions to restore this knowledge base item.'
         );
     }
-    
+
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -126,7 +126,7 @@ class KnowledgeBaseItemPolicy
             denyResponse: 'You do not have permissions to force delete this knowledge base item.'
         );
     }
-    
+
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

@@ -81,7 +81,7 @@ class MaintenanceActivityPolicy
             denyResponse: 'You do not have permission to delete this maintenance activity.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -97,7 +97,7 @@ class MaintenanceActivityPolicy
             denyResponse: 'You do not have permission to restore this maintenance activity.'
         );
     }
-    
+
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -113,7 +113,7 @@ class MaintenanceActivityPolicy
             denyResponse: 'You do not have permission to permanently delete this maintenance activity.'
         );
     }
-    
+
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

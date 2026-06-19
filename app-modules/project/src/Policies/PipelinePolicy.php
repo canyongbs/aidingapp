@@ -93,7 +93,7 @@ class PipelinePolicy
             denyResponse: 'You do not have permission to delete this pipeline.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -113,7 +113,7 @@ class PipelinePolicy
             denyResponse: 'You do not have permission to restore this pipeline.'
         );
     }
-    
+
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -133,7 +133,7 @@ class PipelinePolicy
             denyResponse: 'You do not have permission to force delete this pipeline.'
         );
     }
-    
+
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
