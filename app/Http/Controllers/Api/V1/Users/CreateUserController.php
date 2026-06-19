@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,19 +34,45 @@
 </COPYRIGHT>
 */
 
-use App\Http\Controllers\Api\V1\Users\CreateUserController;
-use App\Http\Controllers\Api\V1\Users\DeleteUserController;
-use App\Http\Controllers\Api\V1\Users\ListUsersController;
-use App\Http\Controllers\Api\V1\Users\ViewUserController;
-use Illuminate\Support\Facades\Route;
+namespace App\Http\Controllers\Api\V1\Users;
 
-Route::api(majorVersion: 1, routes: function () {
-    Route::name('users.')
-        ->prefix('users')
-        ->group(function () {
-            Route::get('/', ListUsersController::class)->name('index');
-            Route::post('/', CreateUserController::class)->name('store');
-            Route::get('/{user}', ViewUserController::class)->name('show');
-            Route::delete('/{user}', DeleteUserController::class)->name('destroy');
-        });
-});
+use App\Actions\CreateUserAction;
+use App\DataTransferObjects\CreateUserDataObject;
+use App\Http\Requests\Api\V1\Users\CreateUserRequest;
+use App\Http\Resources\Api\V1\UserResource;
+use App\Models\User;
+use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Gate;
+
+class CreateUserController
+{
+    /**
+     * @response UserResource
+     */
+    #[Group('Users')]
+    public function __invoke(CreateUserRequest $request, CreateUserAction $createUserAction): JsonResponse
+    {
+        Gate::authorize('create', User::class);
+
+        $validated = $request->validated();
+
+        $data = collect($validated)->except(['department', 'roles'])->toArray();
+
+        if ($department = $request->getResolvedDepartment()) {
+            $data['department_id'] = $department->id;
+        }
+
+        if ($roles = $request->getResolvedRoles()) {
+            $data['roles'] = $roles;
+        }
+
+        $user = $createUserAction->execute(CreateUserDataObject::fromData($data));
+
+        $user->load(['roles', 'department', 'permissionsFromRoles']);
+
+        return $user->toResource(UserResource::class)
+            ->response()
+            ->setStatusCode(201);
+    }
+}

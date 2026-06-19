@@ -34,19 +34,29 @@
 </COPYRIGHT>
 */
 
-use App\Http\Controllers\Api\V1\Users\CreateUserController;
-use App\Http\Controllers\Api\V1\Users\DeleteUserController;
-use App\Http\Controllers\Api\V1\Users\ListUsersController;
-use App\Http\Controllers\Api\V1\Users\ViewUserController;
-use Illuminate\Support\Facades\Route;
+namespace App\Actions;
 
-Route::api(majorVersion: 1, routes: function () {
-    Route::name('users.')
-        ->prefix('users')
-        ->group(function () {
-            Route::get('/', ListUsersController::class)->name('index');
-            Route::post('/', CreateUserController::class)->name('store');
-            Route::get('/{user}', ViewUserController::class)->name('show');
-            Route::delete('/{user}', DeleteUserController::class)->name('destroy');
-        });
-});
+use App\DataTransferObjects\CreateUserDataObject;
+use App\Models\User;
+use App\Notifications\SetPasswordNotification;
+use Illuminate\Support\Arr;
+
+class CreateUserAction
+{
+    public function execute(CreateUserDataObject $data): User
+    {
+        $userData = Arr::except($data->toArray(), ['roles']);
+
+        $user = User::create($userData);
+
+        if (! empty($data->roles)) {
+            $user->syncRoles($data->roles);
+        }
+
+        if (! $user->is_external) {
+            $user->notify(new SetPasswordNotification());
+        }
+
+        return $user;
+    }
+}
