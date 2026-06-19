@@ -82,6 +82,14 @@ class OrganizationPolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['organization.*.delete'],
+            denyResponse: 'You do not have permission to delete any organization.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, Organization $organization): Response
     {
         return $authenticatable->canOrElse(
@@ -90,11 +98,27 @@ class OrganizationPolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['organization.*.restore'],
+            denyResponse: 'You do not have permission to restore any organization.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, Organization $organization): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['organization.*.force-delete'],
             denyResponse: 'You do not have permission to force delete this organization.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['organization.*.force-delete'],
+            denyResponse: 'You do not have permission to force delete any organization.'
         );
     }
 }

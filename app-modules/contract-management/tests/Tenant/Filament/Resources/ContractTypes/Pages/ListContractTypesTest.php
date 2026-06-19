@@ -35,11 +35,14 @@
 */
 
 use AidingApp\ContractManagement\Filament\Resources\ContractTypes\Pages\ListContractTypes;
+use AidingApp\ContractManagement\Models\ContractType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
+use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
     $settings = app(LicenseSettings::class);
@@ -65,4 +68,22 @@ it('is gated with proper access control', function () {
     $user->givePermissionTo('settings.view-any');
 
     get(ListContractTypes::getUrl())->assertSuccessful();
+});
+
+it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+    ContractType::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('settings.view-any', 'settings.*.view');
+
+    actingAs($user);
+
+    livewire(ListContractTypes::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('settings.*.delete');
+
+    livewire(ListContractTypes::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

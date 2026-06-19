@@ -82,6 +82,14 @@ class DepartmentPolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'department.*.delete',
+            denyResponse: 'You do not have permission to delete any department.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, Department $department): Response
     {
         return $authenticatable->canOrElse(
@@ -90,11 +98,27 @@ class DepartmentPolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'department.*.restore',
+            denyResponse: 'You do not have permission to restore any department.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, Department $department): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'department.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete this department.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'department.*.force-delete',
+            denyResponse: 'You do not have permission to permanently delete any department.'
         );
     }
 }
