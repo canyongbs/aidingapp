@@ -94,7 +94,7 @@ class ChangeRequestPolicy
             denyResponse: 'You do not have permission to delete this change request.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -110,7 +110,7 @@ class ChangeRequestPolicy
             denyResponse: 'You do not have permission to restore this change request.'
         );
     }
-    
+
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -126,7 +126,7 @@ class ChangeRequestPolicy
             denyResponse: 'You do not have permission to permanently delete this change request.'
         );
     }
-    
+
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

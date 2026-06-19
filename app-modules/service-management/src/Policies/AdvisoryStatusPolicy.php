@@ -98,7 +98,7 @@ class AdvisoryStatusPolicy
             denyResponse: 'You do not have permission to delete this advisory status.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -114,7 +114,7 @@ class AdvisoryStatusPolicy
             denyResponse: 'You do not have permission to restore this advisory status.'
         );
     }
-    
+
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -134,7 +134,7 @@ class AdvisoryStatusPolicy
             denyResponse: 'You do not have permission to permanently delete this advisory status.'
         );
     }
-    
+
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
