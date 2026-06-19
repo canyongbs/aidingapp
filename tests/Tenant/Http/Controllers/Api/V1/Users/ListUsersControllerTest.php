@@ -95,8 +95,8 @@ it('returns correct user fields', function (string $responseKey, Closure $getExp
 
     expect($item[$responseKey])->toBe($getExpected($targetUser));
 })->with([
-    '`id`'    => ['id',    fn (User $user) => $user->id],
-    '`name`'  => ['name',  fn (User $user) => $user->name],
+    '`id`' => ['id',    fn (User $user) => $user->id],
+    '`name`' => ['name',  fn (User $user) => $user->name],
     '`email`' => ['email', fn (User $user) => $user->email],
 ]);
 
@@ -239,7 +239,7 @@ it('can filter users by department', function () {
 });
 
 dataset('user_sorts', [
-    '`name`'  => ['name',  ['name' => 'Alpha User'],          ['name' => 'Zulu User'],          'name',  'Alpha User',          'Zulu User'],
+    '`name`' => ['name',  ['name' => 'Alpha User'],          ['name' => 'Zulu User'],          'name',  'Alpha User',          'Zulu User'],
     '`email`' => ['email', ['email' => 'alpha@example.com'],  ['email' => 'zulu@example.com'],  'email', 'alpha@example.com',  'zulu@example.com'],
 ]);
 
