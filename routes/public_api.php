@@ -35,6 +35,7 @@
 */
 
 use App\Http\Controllers\Api\V1\Users\DeleteUserController;
+use App\Http\Controllers\Api\V1\Users\ListUsersController;
 use App\Http\Controllers\Api\V1\Users\ViewUserController;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +43,7 @@ Route::api(majorVersion: 1, routes: function () {
     Route::name('users.')
         ->prefix('users')
         ->group(function () {
+            Route::get('/', ListUsersController::class)->name('index');
             Route::get('/{user}', ViewUserController::class)->name('show');
             Route::delete('/{user}', DeleteUserController::class)->name('destroy');
         });
