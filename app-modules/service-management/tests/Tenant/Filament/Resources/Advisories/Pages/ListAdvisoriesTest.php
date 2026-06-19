@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Models\Advisory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertSoftDeleted;
@@ -122,4 +123,22 @@ test('bulk delete Advisories', function () {
     foreach ($advisories as $advisory) {
         assertSoftDeleted($advisory);
     }
+});
+
+it('only shows the bulk delete action to a user with the advisory.delete permission', function () {
+    Advisory::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('advisory.view-any', 'advisory.*.view');
+
+    actingAs($user);
+
+    livewire(ListAdvisories::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('advisory.*.delete');
+
+    livewire(ListAdvisories::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

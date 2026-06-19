@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertNotSoftDeleted;
@@ -144,4 +145,22 @@ test('prevent deletion of AdvisorySeverity if it has associated Advisories', fun
     foreach ($advisorySeverities as $advisorySeverity) {
         assertNotSoftDeleted($advisorySeverity);
     }
+});
+
+it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+    AdvisorySeverity::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('settings.view-any', 'settings.*.view');
+
+    actingAs($user);
+
+    livewire(ListAdvisorySeverities::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('settings.*.delete');
+
+    livewire(ListAdvisorySeverities::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

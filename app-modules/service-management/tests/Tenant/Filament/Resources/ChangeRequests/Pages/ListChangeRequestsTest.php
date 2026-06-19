@@ -35,7 +35,13 @@
 */
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\ChangeRequestResource;
+use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\Pages\ListChangeRequests;
+use AidingApp\ServiceManagement\Models\ChangeRequest;
+use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 use function Tests\Helpers\testResourceRequiresPermissionForAccess;
 
 testResourceRequiresPermissionForAccess(
@@ -44,3 +50,21 @@ testResourceRequiresPermissionForAccess(
     method: 'index',
     feature: 'changeManagement'
 );
+
+it('only shows the bulk delete action to a user with the change_request.delete permission', function () {
+    ChangeRequest::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('change_request.view-any', 'change_request.*.view');
+
+    actingAs($user);
+
+    livewire(ListChangeRequests::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('change_request.*.delete');
+
+    livewire(ListChangeRequests::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});

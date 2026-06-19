@@ -98,7 +98,7 @@ test('bulk delete ServiceMonitorings', function () {
 });
 
 it('only shows the bulk delete action to a user with the service_monitoring.delete permission', function () {
-    ServiceMonitoringTarget::factory()::factory(15)->create();
+    ServiceMonitoringTarget::factory(15)->create();
 
     $user = User::factory()
         ->create()

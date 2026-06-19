@@ -98,12 +98,28 @@ class AdvisorySeverityPolicy
             denyResponse: 'You do not have permission to delete this advisory severity.'
         );
     }
+    
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.delete',
+            denyResponse: 'You do not have permission to delete any advisory severity.'
+        );
+    }
 
     public function restore(Authenticatable $authenticatable, AdvisorySeverity $advisorySeverity): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.restore',
             denyResponse: 'You do not have permission to restore this advisory severity.'
+        );
+    }
+    
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.restore',
+            denyResponse: 'You do not have permission to restore any advisory severity.'
         );
     }
 
@@ -116,6 +132,14 @@ class AdvisorySeverityPolicy
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete this advisory severity.'
+        );
+    }
+    
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.force-delete',
+            denyResponse: 'You do not have permission to permanently delete any advisory severity.'
         );
     }
 
