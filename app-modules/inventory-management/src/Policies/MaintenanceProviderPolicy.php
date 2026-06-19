@@ -94,6 +94,14 @@ class MaintenanceProviderPolicy
             denyResponse: 'You do not have permission to delete this maintenance provider.'
         );
     }
+    
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['maintenance_provider.*.delete'],
+            denyResponse: 'You do not have permission to delete any maintenance provider.'
+        );
+    }
 
     public function restore(Authenticatable $authenticatable, MaintenanceProvider $maintenanceProvider): Response
     {
@@ -102,12 +110,28 @@ class MaintenanceProviderPolicy
             denyResponse: 'You do not have permission to restore this maintenance provider.'
         );
     }
+    
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['maintenance_provider.*.restore'],
+            denyResponse: 'You do not have permission to restore any maintenance provider.'
+        );
+    }
 
     public function forceDelete(Authenticatable $authenticatable, MaintenanceProvider $maintenanceProvider): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['maintenance_provider.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this maintenance provider.'
+        );
+    }
+    
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['maintenance_provider.*.force-delete'],
+            denyResponse: 'You do not have permission to permanently delete any maintenance provider.'
         );
     }
 

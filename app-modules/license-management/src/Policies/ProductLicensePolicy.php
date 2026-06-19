@@ -94,6 +94,14 @@ class ProductLicensePolicy
             denyResponse: 'You do not have permission to delete this product license.'
         );
     }
+    
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['product_license.*.delete'],
+            denyResponse: 'You do not have permission to delete any product license.'
+        );
+    }
 
     public function restore(Authenticatable $authenticatable, ProductLicense $productLicense): Response
     {
@@ -102,12 +110,28 @@ class ProductLicensePolicy
             denyResponse: 'You do not have permission to restore this product license.'
         );
     }
+    
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['product_license.*.restore'],
+            denyResponse: 'You do not have permission to restore any product license.'
+        );
+    }
 
     public function forceDelete(Authenticatable $authenticatable, ProductLicense $productLicense): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['product_license.*.force-delete'],
             denyResponse: 'You do not have permission to force delete this product license.'
+        );
+    }
+    
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['product_license.*.force-delete'],
+            denyResponse: 'You do not have permission to force delete any product license.'
         );
     }
 

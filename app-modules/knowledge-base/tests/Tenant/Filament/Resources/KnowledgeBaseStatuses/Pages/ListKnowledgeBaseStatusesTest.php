@@ -35,10 +35,14 @@
 */
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBaseStatusResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages\ListKnowledgeBaseStatuses;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 // TODO: Write ListKnowledgeBaseStatuses tests
 //test('The correct details are displayed on the ListKnowledgeBaseStatuses page', function () {});
@@ -87,4 +91,22 @@ test('ListKnowledgeBaseStatuses is gated with proper feature access control', fu
         ->get(
             KnowledgeBaseStatusResource::getUrl('index')
         )->assertSuccessful();
+});
+
+it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+    KnowledgeBaseStatus::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('settings.view-any', 'settings.*.view');
+
+    actingAs($user);
+
+    livewire(ListKnowledgeBaseStatuses::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('settings.*.delete');
+
+    livewire(ListKnowledgeBaseStatuses::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

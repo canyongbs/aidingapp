@@ -273,7 +273,6 @@ class ListServiceRequests extends ListRecords
                     ChangeServiceRequestStatusBulkAction::make(),
                     AddServiceRequestUpdateBulkAction::make(),
                     DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete')
                         ->action(function (Collection $records) {
                             $deletedRecordsCount = ServiceRequest::query()
                                 ->whereKey($records)

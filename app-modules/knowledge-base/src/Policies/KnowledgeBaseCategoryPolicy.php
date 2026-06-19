@@ -94,6 +94,14 @@ class KnowledgeBaseCategoryPolicy
             denyResponse: 'You do not have permissions to delete this knowledge base category.'
         );
     }
+    
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.delete',
+            denyResponse: 'You do not have permissions to delete any knowledge base category.'
+        );
+    }
 
     public function restore(Authenticatable $authenticatable, KnowledgeBaseCategory $knowledgeBaseCategory): Response
     {
@@ -102,12 +110,28 @@ class KnowledgeBaseCategoryPolicy
             denyResponse: 'You do not have permissions to restore this knowledge base category.'
         );
     }
+    
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.restore',
+            denyResponse: 'You do not have permissions to restore any knowledge base category.'
+        );
+    }
 
     public function forceDelete(Authenticatable $authenticatable, KnowledgeBaseCategory $knowledgeBaseCategory): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permissions to permanently delete this knowledge base category.'
+        );
+    }
+    
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.force-delete',
+            denyResponse: 'You do not have permissions to permanently delete any knowledge base category.'
         );
     }
 

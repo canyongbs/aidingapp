@@ -94,6 +94,14 @@ class KnowledgeBaseItemPolicy
             denyResponse: 'You do not have permissions to delete this knowledge base item.'
         );
     }
+    
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['knowledge_base_item.*.delete'],
+            denyResponse: 'You do not have permissions to delete any knowledge base item.'
+        );
+    }
 
     public function restore(Authenticatable $authenticatable, KnowledgeBaseItem $knowledgeBaseItem): Response
     {
@@ -102,12 +110,28 @@ class KnowledgeBaseItemPolicy
             denyResponse: 'You do not have permissions to restore this knowledge base item.'
         );
     }
+    
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['knowledge_base_item.*.restore'],
+            denyResponse: 'You do not have permissions to restore any knowledge base item.'
+        );
+    }
 
     public function forceDelete(Authenticatable $authenticatable, KnowledgeBaseItem $knowledgeBaseItem): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['knowledge_base_item.*.force-delete'],
             denyResponse: 'You do not have permissions to force delete this knowledge base item.'
+        );
+    }
+    
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['knowledge_base_item.*.force-delete'],
+            denyResponse: 'You do not have permissions to force delete any knowledge base item.'
         );
     }
 

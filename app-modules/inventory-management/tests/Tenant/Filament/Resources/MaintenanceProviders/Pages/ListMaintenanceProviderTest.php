@@ -35,8 +35,10 @@
 */
 
 use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\Pages\ListMaintenanceProviders;
+use AidingApp\InventoryManagement\Models\MaintenanceProvider;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -61,4 +63,22 @@ it('is gated with proper access control', function () {
     $settings->save();
 
     livewire(ListMaintenanceProviders::class)->assertOk();
+});
+
+it('only shows the bulk delete action to a user with the maintenance_provider.delete permission', function () {
+    MaintenanceProvider::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('maintenance_provider.view-any', 'maintenance_provider.*.view');
+
+    actingAs($user);
+
+    livewire(ListMaintenanceProviders::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('maintenance_provider.*.delete');
+
+    livewire(ListMaintenanceProviders::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

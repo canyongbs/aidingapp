@@ -35,10 +35,14 @@
 */
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\KnowledgeBaseCategoryResource;
+use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\Pages\ListKnowledgeBaseCategories;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 // TODO: Write ListKnowledgeBaseCategory tests
 //test('The correct details are displayed on the ListKnowledgeBaseCategory page', function () {});
@@ -87,4 +91,22 @@ test('ListKnowledgeBaseCategory is gated with proper feature access control', fu
         ->get(
             KnowledgeBaseCategoryResource::getUrl('index')
         )->assertSuccessful();
+});
+
+it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+    KnowledgeBaseCategory::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('settings.view-any', 'settings.*.view');
+
+    actingAs($user);
+
+    livewire(ListKnowledgeBaseCategories::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('settings.*.delete');
+
+    livewire(ListKnowledgeBaseCategories::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

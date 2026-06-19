@@ -100,6 +100,14 @@ class ProjectFilePolicy
 
         return Response::allow();
     }
+    
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'project.*.update',
+            denyResponse: 'You do not have permission to delete any project file.'
+        );
+    }
 
     /**
      * @return array<Feature>
