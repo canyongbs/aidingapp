@@ -65,7 +65,7 @@ class ListAssetLocations extends ListRecords
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                      ->authorizeIndividualRecords('delete'),
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ]);
     }

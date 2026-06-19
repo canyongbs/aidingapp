@@ -95,7 +95,7 @@ class AssetCheckOutPolicy
             denyResponse: 'You do not have permission to delete this asset check out.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

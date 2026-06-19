@@ -81,7 +81,7 @@ class OrganizationTypePolicy
             denyResponse: 'You do not have permission to delete this organization type.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

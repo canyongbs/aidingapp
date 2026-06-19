@@ -95,7 +95,7 @@ class AssetLocationPolicy
             denyResponse: 'You do not have permission to delete this asset location.'
         );
     }
-    
+
     public function deleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -111,7 +111,7 @@ class AssetLocationPolicy
             denyResponse: 'You do not have permission to restore this asset location.'
         );
     }
-    
+
     public function restoreAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -127,7 +127,7 @@ class AssetLocationPolicy
             denyResponse: 'You do not have permission to permanently delete this asset location.'
         );
     }
-    
+
     public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(

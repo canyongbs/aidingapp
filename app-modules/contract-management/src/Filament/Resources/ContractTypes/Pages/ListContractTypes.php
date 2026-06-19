@@ -65,7 +65,7 @@ class ListContractTypes extends ListRecords
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                      ->authorizeIndividualRecords('delete'),
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ])
             ->defaultSort('order', 'ASC')
