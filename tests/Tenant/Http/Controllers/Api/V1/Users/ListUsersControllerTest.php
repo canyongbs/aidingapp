@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -107,7 +107,7 @@ it('returns correct user resource fields', function () {
     expect($item['roles'])->toBe([$role->name]);
     expect($item['permissions'])->toBe([$permission->name]);
     expect($item['department'])->toBe([
-        'id'   => $department->id,
+        'id' => $department->id,
         'name' => $department->name,
     ]);
 });
@@ -130,8 +130,8 @@ it('excludes users with admin roles from the list', function (string $adminRole)
     expect($returnedIds)->not->toContain($adminUser->id);
 })->with([
     'SaaS Global Admin' => [Authenticatable::SUPER_ADMIN_ROLE],
-    'Partner Admin'     => [Authenticatable::PARTNER_ADMIN_ROLE],
-    'AI Admin'          => [Authenticatable::AI_ADMIN_ROLE],
+    'Partner Admin' => [Authenticatable::PARTNER_ADMIN_ROLE],
+    'AI Admin' => [Authenticatable::AI_ADMIN_ROLE],
 ]);
 
 it('can filter users by name', function () {
@@ -179,7 +179,7 @@ it('can filter users by department', function () {
 });
 
 dataset('user_sorts', [
-    '`name`'  => ['name',  ['name' => 'Alpha User'],         ['name' => 'Zulu User'],         'name',  'Alpha User',         'Zulu User'],
+    '`name`' => ['name',  ['name' => 'Alpha User'],         ['name' => 'Zulu User'],         'name',  'Alpha User',         'Zulu User'],
     '`email`' => ['email', ['email' => 'alpha@example.com'], ['email' => 'zulu@example.com'], 'email', 'alpha@example.com', 'zulu@example.com'],
 ]);
 
@@ -212,4 +212,3 @@ it('can sort users by all attributes descending', function (string $requestKey, 
     expect($response['data'][0][$responseKey])->toBe($responseSecondValue);
     expect($response['data'][1][$responseKey])->toBe($responseFirstValue);
 })->with('user_sorts');
-
