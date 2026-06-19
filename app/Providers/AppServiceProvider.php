@@ -43,13 +43,11 @@ use App\Models\SystemUser;
 use App\Models\Tenant;
 use App\Overrides\Filament\Actions\Imports\Jobs\ImportCsvOverride;
 use App\Overrides\Filament\Actions\Imports\Jobs\PrepareCsvExportOverride;
-use App\Overrides\Laravel\PermissionMigrationCreator;
 use App\Settings\SettingsProperties\EmailSettingsProperty;
 use Exception;
 use Filament\Actions\Exports\Jobs\PrepareCsvExport;
 use Filament\Actions\Imports\Jobs\ImportCsv;
 use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Notifications\SendQueuedNotifications;
@@ -117,10 +115,6 @@ class AppServiceProvider extends ServiceProvider
             configureScope(function (Scope $scope): void {
                 $scope->removeUser();
             });
-        });
-
-        $this->app->singleton(PermissionMigrationCreator::class, function (Application $app) {
-            return new PermissionMigrationCreator($app['files'], $app->basePath('stubs'));
         });
 
         $this->app->singleton('current-commit', function () {

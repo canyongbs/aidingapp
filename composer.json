@@ -46,7 +46,7 @@
         "canyon-gbs/project": "*",
         "canyon-gbs/purchasing": "*",
         "canyon-gbs/report": "*",
-        "canyongbs/common": "^2.18.0",
+        "canyongbs/common": "^2.21.0",
         "canyongbs/model-state-machine": "^2.0.6",
         "cknow/laravel-money": "^8.1",
         "codewithdennis/filament-select-tree": "^4.0",
