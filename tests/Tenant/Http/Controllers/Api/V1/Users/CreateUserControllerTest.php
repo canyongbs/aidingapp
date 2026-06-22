@@ -130,7 +130,7 @@ it('creates a user with all optional fields', function () {
     expect($created->hasRole($role))->toBeTrue();
 });
 
-it('sends SetPasswordNotification when is_external is false', function () {
+it('sends SetPasswordNotification only to non-external users', function (bool $isExternal, bool $shouldSend) {
     Notification::fake();
 
     $user = SystemUser::factory()->create();
@@ -138,33 +138,22 @@ it('sends SetPasswordNotification when is_external is false', function () {
     Sanctum::actingAs($user, ['api']);
 
     postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'Internal User',
-        'email' => 'internal@example.com',
-        'is_external' => false,
+        'name' => 'Test User',
+        'email' => 'notifytest@example.com',
+        'is_external' => $isExternal,
     ])->assertCreated();
 
-    $created = User::where('email', 'internal@example.com')->firstOrFail();
+    $created = User::where('email', 'notifytest@example.com')->firstOrFail();
 
-    Notification::assertSentTo($created, SetPasswordNotification::class);
-});
-
-it('does not send SetPasswordNotification when is_external is true', function () {
-    Notification::fake();
-
-    $user = SystemUser::factory()->create();
-    $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
-
-    postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'External User',
-        'email' => 'external@example.com',
-        'is_external' => true,
-    ])->assertCreated();
-
-    $created = User::where('email', 'external@example.com')->firstOrFail();
-
-    Notification::assertNotSentTo($created, SetPasswordNotification::class);
-});
+    if ($shouldSend) {
+        Notification::assertSentTo($created, SetPasswordNotification::class);
+    } else {
+        Notification::assertNotSentTo($created, SetPasswordNotification::class);
+    }
+})->with([
+    'internal user receives notification' => [false, true],
+    'external user does not receive notification' => [true, false],
+]);
 
 it('resolves department case-insensitively', function () {
     $department = Department::factory()->create(['name' => 'Human Resources']);
@@ -263,8 +252,8 @@ it('returns 422 when a role name does not exist', function () {
         ->assertJsonValidationErrors(['roles.0']);
 });
 
-it('rejects admin roles', function (string $adminRole) {
-    Role::firstOrCreate(['name' => $adminRole, 'guard_name' => 'web']);
+it('rejects admin roles', function (string $roleToCreate, string $roleNameToSend) {
+    Role::firstOrCreate(['name' => $roleToCreate, 'guard_name' => 'web']);
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
@@ -274,30 +263,15 @@ it('rejects admin roles', function (string $adminRole) {
         'name' => 'Admin Attempt',
         'email' => 'adminattempt@example.com',
         'is_external' => false,
-        'roles' => [$adminRole],
+        'roles' => [$roleNameToSend],
     ])->assertUnprocessable()
         ->assertJsonValidationErrors(['roles.0']);
 })->with([
-    'SaaS Global Admin' => [Authenticatable::SUPER_ADMIN_ROLE],
-    'Partner Admin' => [Authenticatable::PARTNER_ADMIN_ROLE],
-    'AI Admin' => [Authenticatable::AI_ADMIN_ROLE],
+    'SaaS Global Admin' => [Authenticatable::SUPER_ADMIN_ROLE, Authenticatable::SUPER_ADMIN_ROLE],
+    'Partner Admin' => [Authenticatable::PARTNER_ADMIN_ROLE, Authenticatable::PARTNER_ADMIN_ROLE],
+    'AI Admin' => [Authenticatable::AI_ADMIN_ROLE, Authenticatable::AI_ADMIN_ROLE],
+    'SaaS Global Admin (lowercase)' => [Authenticatable::SUPER_ADMIN_ROLE, 'saas global admin'],
 ]);
-
-it('rejects admin roles case-insensitively', function () {
-    Role::firstOrCreate(['name' => Authenticatable::SUPER_ADMIN_ROLE, 'guard_name' => 'web']);
-
-    $user = SystemUser::factory()->create();
-    $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
-
-    postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'Admin Attempt',
-        'email' => 'adminattempt2@example.com',
-        'is_external' => false,
-        'roles' => ['saas global admin'],
-    ])->assertUnprocessable()
-        ->assertJsonValidationErrors(['roles.0']);
-});
 
 it('requires name, email, and is_external fields', function () {
     $user = SystemUser::factory()->create();
