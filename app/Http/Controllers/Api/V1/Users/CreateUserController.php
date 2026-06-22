@@ -57,14 +57,10 @@ class CreateUserController
 
         $validated = $request->validated();
 
-        $data = collect($validated)->except(['department', 'roles'])->toArray();
+        $data = collect($validated)->except(['department'])->toArray();
 
         if ($department = $request->getResolvedDepartment()) {
             $data['department_id'] = $department->id;
-        }
-
-        if ($roles = $request->getResolvedRoles()) {
-            $data['roles'] = $roles;
         }
 
         $user = $createUserAction->execute(CreateUserDataObject::fromData($data));

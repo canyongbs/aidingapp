@@ -40,6 +40,7 @@ use App\DataTransferObjects\CreateUserDataObject;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
 use Illuminate\Support\Arr;
+use Spatie\LaravelData\Optional;
 
 class CreateUserAction
 {
@@ -49,7 +50,7 @@ class CreateUserAction
 
         $user = User::create($userData);
 
-        if (! empty($data->roles)) {
+        if (! ($data->roles instanceof Optional)) {
             $user->syncRoles($data->roles);
         }
 

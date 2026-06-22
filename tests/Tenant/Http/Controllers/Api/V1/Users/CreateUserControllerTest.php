@@ -41,11 +41,13 @@ use App\Models\SystemUser;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\postJson;
 
 beforeEach(function () {
+    Queue::fake();
     config()->set('audit.enabled', false);
 });
 
@@ -56,17 +58,14 @@ it('is gated with proper access control', function () {
         'is_external' => false,
     ];
 
-    // Unauthenticated request is rejected
     postJson(route('api.v1.users.store', absolute: false), $payload)
         ->assertUnauthorized();
 
-    // Authenticated but without permission is rejected
     $user = SystemUser::factory()->create();
     Sanctum::actingAs($user, ['api']);
     postJson(route('api.v1.users.store', absolute: false), $payload)
         ->assertForbidden();
 
-    // With 'user.create' permission → success
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
     Sanctum::actingAs($user, ['api']);
@@ -94,25 +93,12 @@ it('creates a user and returns a 201 response with required fields', function ()
     expect($response['data']['email'])->toBe('jane.doe@example.com');
     expect($response['data']['department'])->toBeNull();
     expect($response['data']['roles'])->toBeEmpty();
-});
-
-it('persists the new user to the database', function () {
-    $user = SystemUser::factory()->create();
-    $user->givePermissionTo('user.create');
-    Sanctum::actingAs($user, ['api']);
-
-    postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'Persisted User',
-        'email' => 'persisted@example.com',
-        'is_external' => false,
-    ])->assertCreated();
-
-    expect(User::where('email', 'persisted@example.com')->exists())->toBeTrue();
+    expect(User::where('email', 'jane.doe@example.com')->exists())->toBeTrue();
 });
 
 it('creates a user with all optional fields', function () {
     $department = Department::factory()->create(['name' => 'Engineering']);
-    $role = Role::factory()->create(['name' => 'custom-role', 'guard_name' => 'api']);
+    $role = Role::factory()->create(['name' => 'custom-role', 'guard_name' => 'web']);
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
@@ -199,7 +185,7 @@ it('resolves department case-insensitively', function () {
 });
 
 it('resolves role names case-insensitively', function () {
-    $role = Role::factory()->create(['name' => 'Support Agent', 'guard_name' => 'api']);
+    $role = Role::factory()->create(['name' => 'Support Agent', 'guard_name' => 'web']);
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
@@ -278,7 +264,7 @@ it('returns 422 when a role name does not exist', function () {
 });
 
 it('rejects admin roles', function (string $adminRole) {
-    Role::firstOrCreate(['name' => $adminRole, 'guard_name' => 'api']);
+    Role::firstOrCreate(['name' => $adminRole, 'guard_name' => 'web']);
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
@@ -298,7 +284,7 @@ it('rejects admin roles', function (string $adminRole) {
 ]);
 
 it('rejects admin roles case-insensitively', function () {
-    Role::firstOrCreate(['name' => Authenticatable::SUPER_ADMIN_ROLE, 'guard_name' => 'api']);
+    Role::firstOrCreate(['name' => Authenticatable::SUPER_ADMIN_ROLE, 'guard_name' => 'web']);
 
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');

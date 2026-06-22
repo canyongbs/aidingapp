@@ -36,8 +36,6 @@
 
 namespace App\DataTransferObjects;
 
-use AidingApp\Authorization\Models\Role;
-use Illuminate\Database\Eloquent\Collection;
 use Spatie\LaravelData\Attributes\MapName;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\Mappers\SnakeCaseMapper;
@@ -47,7 +45,7 @@ use Spatie\LaravelData\Optional;
 class CreateUserDataObject extends Data
 {
     /**
-     * @param Collection<int, Role>|Optional $roles
+     * @param array<int, string>|Optional $roles
      */
     public function __construct(
         public string $name,
@@ -59,7 +57,7 @@ class CreateUserDataObject extends Data
         public int | Optional $workExtension,
         public string | Optional $mobile,
         public string | Optional $departmentId,
-        public Collection | Optional $roles,
+        public array | Optional $roles,
     ) {}
 
     /**
