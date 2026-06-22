@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -136,4 +137,25 @@ test('ListAdvisoryUpdates is gated with proper feature access control', function
     $settings->save();
 
     get(AdvisoryUpdateResource::getUrl())->assertSuccessful();
+});
+
+test('only shows the bulk delete action to a user with the advisory_update delete permission', function () {
+    AdvisoryUpdate::factory()
+        ->for(Advisory::factory(), 'advisory')
+        ->count(5)
+        ->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('advisory_update.view-any', 'advisory_update.*.view');
+
+    actingAs($user);
+
+    livewire(ListAdvisoryUpdates::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('advisory_update.*.delete');
+
+    livewire(ListAdvisoryUpdates::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

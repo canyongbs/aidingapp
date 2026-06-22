@@ -34,52 +34,43 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
-use AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages\ListEngagementFiles;
-use AidingApp\Engagement\Models\EngagementFile;
+use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ManageAdvisoryUpdate;
+use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
 use App\Models\User;
+use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-// TODO: Add tests for the ListEngagementFiles
-//test('The correct details are displayed on the ListEngagementFiles page', function () {});
-
-// TODO: Sorting and Searching tests
-
-// Permission Tests
-
-test('ListEngagementFiles is gated with proper access control', function () {
-    $user = User::factory()->create();
-
-    actingAs($user)
-        ->get(
-            EngagementFileResource::getUrl('index')
-        )->assertForbidden();
-
-    $user->givePermissionTo('engagement_file.view-any');
-
-    actingAs($user)
-        ->get(
-            EngagementFileResource::getUrl('index')
-        )->assertSuccessful();
+beforeEach(function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->data->addons->advisoryManagement = true;
+    $settings->save();
 });
 
-test('only shows the bulk delete action to a user with the engagement_file delete permission', function () {
-    EngagementFile::factory(5)->create();
-
+test('only shows the updates bulk delete action to a user with the advisory_update delete permission', function () {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('engagement_file.view-any', 'engagement_file.*.view');
+        ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any');
 
     actingAs($user);
 
-    livewire(ListEngagementFiles::class)
+    $advisory = Advisory::factory()->create();
+
+    AdvisoryUpdate::factory()->for($advisory, 'advisory')->count(3)->create();
+
+    livewire(ManageAdvisoryUpdate::class, [
+        'record' => $advisory->getRouteKey(),
+    ])
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
-    $user->givePermissionTo('engagement_file.*.delete');
+    $user->givePermissionTo('advisory_update.*.delete');
 
-    livewire(ListEngagementFiles::class)
+    livewire(ManageAdvisoryUpdate::class, [
+        'record' => $advisory->getRouteKey(),
+    ])
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

@@ -34,52 +34,35 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
-use AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages\ListEngagementFiles;
-use AidingApp\Engagement\Models\EngagementFile;
+use AidingApp\Alert\Models\Alert;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
+use AidingApp\Contact\Models\Contact;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-// TODO: Add tests for the ListEngagementFiles
-//test('The correct details are displayed on the ListEngagementFiles page', function () {});
-
-// TODO: Sorting and Searching tests
-
-// Permission Tests
-
-test('ListEngagementFiles is gated with proper access control', function () {
-    $user = User::factory()->create();
-
-    actingAs($user)
-        ->get(
-            EngagementFileResource::getUrl('index')
-        )->assertForbidden();
-
-    $user->givePermissionTo('engagement_file.view-any');
-
-    actingAs($user)
-        ->get(
-            EngagementFileResource::getUrl('index')
-        )->assertSuccessful();
-});
-
-test('only shows the bulk delete action to a user with the engagement_file delete permission', function () {
-    EngagementFile::factory(5)->create();
-
+test('only shows the concerns bulk delete action to a user with the alert delete permission', function () {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('engagement_file.view-any', 'engagement_file.*.view');
+        ->givePermissionTo('contact.view-any', 'contact.*.view', 'alert.view-any');
 
     actingAs($user);
 
-    livewire(ListEngagementFiles::class)
+    $contact = Contact::factory()->create();
+
+    Alert::factory()->count(3)->create(['concern_id' => $contact->getKey()]);
+
+    livewire(ManageContactAlerts::class, [
+        'record' => $contact->getRouteKey(),
+    ])
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
-    $user->givePermissionTo('engagement_file.*.delete');
+    $user->givePermissionTo('alert.*.delete');
 
-    livewire(ListEngagementFiles::class)
+    livewire(ManageContactAlerts::class, [
+        'record' => $contact->getRouteKey(),
+    ])
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
