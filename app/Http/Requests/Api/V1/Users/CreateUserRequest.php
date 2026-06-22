@@ -49,6 +49,7 @@ class CreateUserRequest extends FormRequest
 {
     protected ?Department $resolvedDepartment = null;
 
+    /** @var Collection<int, Role>|null */
     protected ?Collection $resolvedRoles = null;
 
     public function authorize(): bool
@@ -89,6 +90,9 @@ class CreateUserRequest extends FormRequest
         return $this->resolvedDepartment;
     }
 
+    /**
+     * @return Collection<int, Role>|null
+     */
     public function getResolvedRoles(): ?Collection
     {
         return $this->resolvedRoles;

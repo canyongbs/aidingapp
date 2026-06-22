@@ -36,25 +36,29 @@
 
 namespace App\DataTransferObjects;
 
+use AidingApp\Authorization\Models\Role;
 use Illuminate\Database\Eloquent\Collection;
+use Spatie\LaravelData\Attributes\MapName;
 use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 use Spatie\LaravelData\Optional;
 
+#[MapName(SnakeCaseMapper::class)]
 class CreateUserDataObject extends Data
 {
     /**
-     * @param Collection|Optional $roles Resolved Role model instances
+     * @param Collection<int, Role>|Optional $roles
      */
     public function __construct(
         public string $name,
         public string $email,
-        public bool $is_external,
-        public string | Optional $job_title,
-        public string | Optional $phone_number,
-        public string | Optional $work_number,
-        public int | Optional $work_extension,
+        public bool $isExternal,
+        public string | Optional $jobTitle,
+        public string | Optional $phoneNumber,
+        public string | Optional $workNumber,
+        public int | Optional $workExtension,
         public string | Optional $mobile,
-        public string | Optional $department_id,
+        public string | Optional $departmentId,
         public Collection | Optional $roles,
     ) {}
 
@@ -66,13 +70,13 @@ class CreateUserDataObject extends Data
         return new self(
             name: $data['name'],
             email: $data['email'],
-            is_external: $data['is_external'],
-            job_title: $data['job_title'] ?? Optional::create(),
-            phone_number: $data['phone_number'] ?? Optional::create(),
-            work_number: $data['work_number'] ?? Optional::create(),
-            work_extension: $data['work_extension'] ?? Optional::create(),
+            isExternal: $data['is_external'],
+            jobTitle: $data['job_title'] ?? Optional::create(),
+            phoneNumber: $data['phone_number'] ?? Optional::create(),
+            workNumber: $data['work_number'] ?? Optional::create(),
+            workExtension: $data['work_extension'] ?? Optional::create(),
             mobile: $data['mobile'] ?? Optional::create(),
-            department_id: $data['department_id'] ?? Optional::create(),
+            departmentId: $data['department_id'] ?? Optional::create(),
             roles: $data['roles'] ?? Optional::create(),
         );
     }
