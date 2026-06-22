@@ -48,6 +48,7 @@ export default defineConfig({
                 'app-modules/task/resources/js/kanban.js',
                 'app-modules/project/resources/js/kanban.js',
             ],
+            assets: ['resources/images/**', 'resources/svg/**'],
             refresh: [
                 ...refreshPaths,
                 'app/Filament/**',
