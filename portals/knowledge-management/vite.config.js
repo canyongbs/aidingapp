@@ -41,22 +41,12 @@ export default defineConfig({
     base: '/js/portals/knowledge-management/',
     build: {
         manifest: true,
-        rollupOptions: {
+        rolldownOptions: {
             input: {
                 portal: resolve(__dirname, './src/portal.js'),
                 loader: resolve(__dirname, './src/loader.js'),
             },
             output: {
-                manualChunks: {
-                    // Vue ecosystem
-                    'vue-vendor': ['vue', 'vue-router', 'pinia'],
-                    // FormKit
-                    formkit: ['@formkit/vue', '@formkit/icons', '@formkit/themes'],
-                    // PrimeVue
-                    primevue: ['primevue/config'],
-                    // Axios and other utilities
-                    utils: ['axios'],
-                },
                 entryFileNames: (chunkInfo) => {
                     return chunkInfo.name === 'loader'
                         ? 'aiding-app-knowledge-management-portal.js'
