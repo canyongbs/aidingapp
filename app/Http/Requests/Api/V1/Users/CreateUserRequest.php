@@ -90,14 +90,6 @@ class CreateUserRequest extends FormRequest
         return $this->resolvedDepartment;
     }
 
-    /**
-     * @return Collection<int, Role>|null
-     */
-    public function getResolvedRoles(): ?Collection
-    {
-        return $this->resolvedRoles;
-    }
-
     protected function validateDepartment(Validator $validator): void
     {
         $departmentName = $this->input('department');

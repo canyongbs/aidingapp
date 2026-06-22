@@ -40,19 +40,24 @@ use App\DataTransferObjects\CreateUserDataObject;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Spatie\LaravelData\Optional;
 
 class CreateUserAction
 {
     public function execute(CreateUserDataObject $data): User
     {
-        $userData = Arr::except($data->toArray(), ['roles']);
+        $user = DB::transaction(function () use ($data) {
+            $userData = Arr::except($data->toArray(), ['roles']);
 
-        $user = User::create($userData);
+            $user = User::create($userData);
 
-        if (! ($data->roles instanceof Optional)) {
-            $user->syncRoles($data->roles);
-        }
+            if (! ($data->roles instanceof Optional)) {
+                $user->syncRoles($data->roles);
+            }
+
+            return $user;
+        });
 
         if (! $user->is_external) {
             $user->notify(new SetPasswordNotification());
