@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmail
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
 use App\Enums\Feature;
-use App\Features\ServiceRequestNotificationAutomationFeature;
 use App\Filament\Clusters\GlobalArtificialIntelligence;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -75,10 +74,6 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
 
     public static function canAccess(): bool
     {
-        if (! ServiceRequestNotificationAutomationFeature::active()) {
-            return false;
-        }
-
         if (! Gate::check(Feature::ServiceManagement->getGateName())) {
             return false;
         }
