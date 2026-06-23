@@ -205,7 +205,7 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
 
         $state = [
             'is_enabled' => $settings->is_enabled,
-            'ai_prompt' => $settings->ai_prompt,
+            'ai_prompt' => $settings->ai_prompt ?: ServiceRequestNotificationAutomationSettings::defaultAiPrompt(),
             'templates' => [],
         ];
 
