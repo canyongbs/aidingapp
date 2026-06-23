@@ -40,6 +40,12 @@ use App\Models\Export;
 use App\Models\FailedImportRow;
 use App\Models\Import;
 use App\Settings\DisplaySettings;
+use Filament\Actions\AssociateAction;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Actions\DissociateAction;
+use Filament\Actions\DissociateBulkAction;
 use Filament\Actions\Exports\Models\Export as BaseExport;
 use Filament\Actions\Imports\Models\FailedImportRow as BaseFailedImportRow;
 use Filament\Actions\Imports\Models\Import as BaseImport;
@@ -48,6 +54,8 @@ use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -314,5 +322,21 @@ class FilamentServiceProvider extends ServiceProvider
         Textarea::configureUsing(function (Textarea $textarea): void {
             $textarea->disableGrammarly();
         });
+
+        // Relationship attach/associate/detach/dissociate actions have no policy method of
+        // their own, so without an explicit check they default to "allow". Because this panel
+        // disables read-only relation managers on view pages, they would otherwise be usable by
+        // anyone who can view the parent. Gate them on the "update" ability of the owner record,
+        // since mutating a parent's relationships is a form of updating that parent. The
+        // $livewire type union also acts as a guard: these actions only ever live inside a
+        // relation manager or ManageRelatedRecords page, and a mismatch would throw.
+        $authorizeOwnerRecordUpdate = fn (RelationManager | ManageRelatedRecords $livewire): bool => (bool) auth()->user()?->can('update', $livewire->getOwnerRecord());
+
+        AttachAction::configureUsing(fn (AttachAction $action): AttachAction => $action->authorize($authorizeOwnerRecordUpdate));
+        AssociateAction::configureUsing(fn (AssociateAction $action): AssociateAction => $action->authorize($authorizeOwnerRecordUpdate));
+        DetachAction::configureUsing(fn (DetachAction $action): DetachAction => $action->authorize($authorizeOwnerRecordUpdate));
+        DissociateAction::configureUsing(fn (DissociateAction $action): DissociateAction => $action->authorize($authorizeOwnerRecordUpdate));
+        DetachBulkAction::configureUsing(fn (DetachBulkAction $action): DetachBulkAction => $action->authorize($authorizeOwnerRecordUpdate));
+        DissociateBulkAction::configureUsing(fn (DissociateBulkAction $action): DissociateBulkAction => $action->authorize($authorizeOwnerRecordUpdate));
     }
 }
