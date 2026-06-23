@@ -39,7 +39,6 @@ namespace AidingApp\KnowledgeBase\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseCategoryFactory;
 use AidingApp\KnowledgeBase\Observers\KnowledgeBaseCategoryObserver;
-use App\Features\KnowledgeBaseCategorySortFeature;
 use App\Models\BaseModel;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -96,13 +95,8 @@ class KnowledgeBaseCategory extends BaseModel implements Auditable
      */
     public function subCategories(): HasMany
     {
-        $query = $this->hasMany(self::class, 'parent_id');
-
-        if (KnowledgeBaseCategorySortFeature::active()) {
-            $query->orderBy('sort');
-        }
-
-        return $query;
+        return $this->hasMany(self::class, 'parent_id')
+            ->orderBy('sort');
     }
 
     protected function serializeDate(DateTimeInterface $date): string

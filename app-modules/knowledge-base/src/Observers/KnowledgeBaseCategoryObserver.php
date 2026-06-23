@@ -37,7 +37,6 @@
 namespace AidingApp\KnowledgeBase\Observers;
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use App\Features\KnowledgeBaseCategorySortFeature;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -46,10 +45,6 @@ class KnowledgeBaseCategoryObserver
 {
     public function creating(KnowledgeBaseCategory $category): void
     {
-        if (! KnowledgeBaseCategorySortFeature::active()) {
-            return;
-        }
-
         if (! isset($category->sort)) {
             if ($category->parent_id !== null) {
                 if (! Str::isUuid($category->parent_id)) {

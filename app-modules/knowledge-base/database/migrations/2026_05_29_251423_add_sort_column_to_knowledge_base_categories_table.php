@@ -34,80 +34,24 @@
 </COPYRIGHT>
 */
 
-use App\Features\KnowledgeBaseCategorySortFeature;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /**
-     * TODO: Cleanup KnowledgeBaseCategorySortFeature:
-     *
-     * 1. Remove the data backfill blocks (parent categories + sub categories loops)
-     *    -> Delete everything between the first Schema::table() and the second Schema::table()
-     * 2. Remove the second Schema::table() call that changes sort to non-nullable
-     *    -> Delete: Schema::table('knowledge_base_categories', function (Blueprint $table) { $table->integer('sort')->default(0)->nullable(false)->change(); });
-     * 3. Change the first Schema::table() to add sort as non-nullable with default(0)
-     *    -> Change to: $table->integer('sort')->default(0);
-     */
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('knowledge_base_categories', function (Blueprint $table) {
-                $table->integer('sort')->nullable();
-                $table->index('sort');
-            });
-
-            $sortIndex = 0;
-            DB::table('knowledge_base_categories')
-                ->whereNull('parent_id')
-                ->orderBy('name')
-                ->each(function (object $category) use (&$sortIndex) {
-                    $sortIndex++;
-
-                    DB::table('knowledge_base_categories')
-                        ->where('id', $category->id)
-                        ->update(['sort' => $sortIndex]);
-                });
-
-            DB::table('knowledge_base_categories')
-                ->whereNotNull('parent_id')
-                ->distinct()
-                ->select('parent_id')
-                ->orderBy('parent_id')
-                ->each(function (object $row) {
-                    $subSortIndex = 0;
-
-                    DB::table('knowledge_base_categories')
-                        ->where('parent_id', $row->parent_id)
-                        ->orderBy('name')
-                        ->each(function (object $category) use (&$subSortIndex) {
-                            $subSortIndex++;
-
-                            DB::table('knowledge_base_categories')
-                                ->where('id', $category->id)
-                                ->update(['sort' => $subSortIndex]);
-                        });
-                });
-
-            Schema::table('knowledge_base_categories', function (Blueprint $table) {
-                $table->integer('sort')->default(0)->nullable(false)->change();
-            });
-
-            KnowledgeBaseCategorySortFeature::activate();
+        Schema::table('knowledge_base_categories', function (Blueprint $table) {
+            $table->integer('sort')->default(0);
+            $table->index('sort');
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            KnowledgeBaseCategorySortFeature::deactivate();
-
-            Schema::table('knowledge_base_categories', function (Blueprint $table) {
-                $table->dropIndex(['sort']);
-                $table->dropColumn('sort');
-            });
+        Schema::table('knowledge_base_categories', function (Blueprint $table) {
+            $table->dropIndex(['sort']);
+            $table->dropColumn('sort');
         });
     }
 };
