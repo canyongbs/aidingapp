@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Actions;
 use AidingApp\ServiceManagement\DataTransferObjects\UpdateServiceRequestData;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\ServiceRequestAssignmentByTypeFeature;
 use Illuminate\Support\Arr;
 
 class UpdateServiceRequestAction
@@ -54,13 +53,10 @@ class UpdateServiceRequestAction
             $assignmentData = [
                 'user_id' => $dataArray['assigned_to_id'],
                 'assigned_by_id' => auth()->id(),
+                'assigned_by_type' => auth()->user()?->getMorphClass(),
                 'assigned_at' => now(),
                 'status' => ServiceRequestAssignmentStatus::Active,
             ];
-
-            if (ServiceRequestAssignmentByTypeFeature::active()) {
-                $assignmentData['assigned_by_type'] = auth()->user()?->getMorphClass();
-            }
             $serviceRequest->assignments()->create($assignmentData);
         }
 

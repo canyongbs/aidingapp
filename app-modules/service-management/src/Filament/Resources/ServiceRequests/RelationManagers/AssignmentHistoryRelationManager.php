@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Features\ServiceRequestAssignmentByTypeFeature;
 use App\Models\SystemUser;
 use App\Models\User;
 use App\Settings\DisplaySettings;
@@ -88,19 +87,11 @@ class AssignmentHistoryRelationManager extends RelationManager
             ->modifyQueryUsing(fn (Builder $query) => $query->with([
                 'user.department',
                 'serviceRequestStatus',
-                ...(
-                    ServiceRequestAssignmentByTypeFeature::active()
-                    ? [
-                        'assignedBy' => function (MorphTo $morphTo) {
-                            $morphTo->morphWith([
-                                User::class => ['department'],
-                            ]);
-                        },
-                    ]
-                    : [
-                        'assignedBy.department',
-                    ]
-                ),
+                'assignedBy' => function (MorphTo $morphTo) {
+                    $morphTo->morphWith([
+                        User::class => ['department'],
+                    ]);
+                },
             ]))
             ->emptyStateHeading('No assignment history')
             ->defaultSort('assigned_at', 'desc')

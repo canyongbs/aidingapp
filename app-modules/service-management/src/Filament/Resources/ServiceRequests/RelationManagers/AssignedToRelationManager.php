@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Relatio
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
-use App\Features\ServiceRequestAssignmentByTypeFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
@@ -99,13 +98,10 @@ class AssignedToRelationManager extends RelationManager
                         $data = [
                             'user_id' => auth()->user()?->getKey(),
                             'assigned_by_id' => auth()->user()?->getKey() ?? null,
+                            'assigned_by_type' => auth()->user()?->getMorphClass(),
                             'assigned_at' => now(),
                             'status' => ServiceRequestAssignmentStatus::Active,
                         ];
-
-                        if (ServiceRequestAssignmentByTypeFeature::active()) {
-                            $data['assigned_by_type'] = auth()->user()?->getMorphClass();
-                        }
 
                         $this->getOwnerRecord()->assignments()->create($data);
 
@@ -119,13 +115,10 @@ class AssignedToRelationManager extends RelationManager
                         $assignmentData = [
                             'user_id' => $data['userId'],
                             'assigned_by_id' => auth()->user()->getKey() ?? null,
+                            'assigned_by_type' => auth()->user()?->getMorphClass(),
                             'assigned_at' => now(),
                             'status' => ServiceRequestAssignmentStatus::Active,
                         ];
-
-                        if (ServiceRequestAssignmentByTypeFeature::active()) {
-                            $assignmentData['assigned_by_type'] = auth()->user()?->getMorphClass();
-                        }
 
                         $this->getOwnerRecord()->assignments()->create($assignmentData);
 
