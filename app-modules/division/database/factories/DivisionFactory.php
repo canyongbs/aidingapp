@@ -52,7 +52,7 @@ class DivisionFactory extends Factory
     {
         return [
             'name' => $this->faker->unique()->company(),
-            'code' => $this->faker->unique()->word(),
+            'code' => $this->faker->unique()->bothify('????-#####'),
             'description' => $this->faker->optional()->sentences(asText: true),
             'is_default' => false,
             'created_by_id' => User::factory(),
