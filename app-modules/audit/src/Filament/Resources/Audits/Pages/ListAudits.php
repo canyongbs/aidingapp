@@ -61,7 +61,7 @@ class ListAudits extends ListRecords
                     ->sortable(),
                 TextColumn::make('user.name')
                     ->label('Change Agent (User)')
-                    ->sortable(),
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy(User::select('name')->whereColumn('users.id', 'audits.change_agent_id'), $direction)),
                 TextColumn::make('event')
                     ->label('Event')
                     ->sortable(),
