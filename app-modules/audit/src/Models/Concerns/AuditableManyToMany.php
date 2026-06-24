@@ -54,7 +54,7 @@ trait AuditableManyToMany
         $relationName = null
     ): BelongsToMany {
         return new BelongsToMany(
-            $query,
+            $query, // @phpstan-ignore argument.type (The override class does not specify generics, so the builder type is not covariant.)
             $parent,
             $table,
             $foreignPivotKey,
@@ -78,7 +78,7 @@ trait AuditableManyToMany
         $inverse = false
     ): MorphToMany {
         return new MorphToMany(
-            $query,
+            $query, // @phpstan-ignore argument.type (The override class does not specify generics, so the builder type is not covariant.)
             $parent,
             $name,
             $table,
