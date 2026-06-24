@@ -39,6 +39,7 @@ namespace AidingApp\Audit\Filament\Resources\Audits\Pages;
 use AidingApp\Audit\Actions\Finders\AuditableModels;
 use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
 use App\Filament\Tables\Columns\IdColumn;
+use App\Models\SystemUser;
 use App\Models\User;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
@@ -54,14 +55,31 @@ class ListAudits extends ListRecords
     public function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['changeAgent']))
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('auditable_type')
                     ->label('Auditable')
                     ->sortable(),
-                TextColumn::make('user.name')
-                    ->label('Change Agent (User)')
-                    ->sortable(query: fn (Builder $query, string $direction): Builder => $query->orderBy(User::select('name')->whereColumn('users.id', 'audits.change_agent_id'), $direction)),
+                TextColumn::make('changeAgent.name')
+                    ->label('Change Agent')
+                    ->sortable(
+                        query: fn (Builder $query, string $direction): Builder => $query->orderByRaw(
+                            'COALESCE((' .
+                                User::query()
+                                    ->select('name')
+                                    ->whereColumn('users.id', 'audits.change_agent_id')
+                                    ->where('audits.change_agent_type', 'user')
+                                    ->toRawSql() .
+                                '), (' .
+                                SystemUser::query()
+                                    ->select('name')
+                                    ->whereColumn('system_users.id', 'audits.change_agent_id')
+                                    ->where('audits.change_agent_type', 'system_user')
+                                    ->toRawSql() .
+                                ')) ' . $direction
+                        )
+                    ),
                 TextColumn::make('event')
                     ->label('Event')
                     ->sortable(),
