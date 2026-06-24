@@ -37,7 +37,6 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages;
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBaseStatusResource;
-use App\Features\KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
@@ -49,23 +48,13 @@ class CreateKnowledgeBaseStatus extends CreateRecord
 
     public function form(Schema $schema): Schema
     {
-        /*
-         * TODO: KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature cleanup — once the feature flag is removed:
-         * - Remove the ->when(KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::active(), ...) wrapper below
-         * - Apply ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()) directly on the name field
-         */
         return $schema
             ->components([
                 TextInput::make('name')
                     ->label('Name')
                     ->required()
                     ->string()
-                    ->when(
-                        KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::active(),
-                        fn (TextInput $input) => $input->unique(modifyRuleUsing: function (Unique $rule) {
-                            $rule->withoutTrashed();
-                        }),
-                    ),
+                    ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
             ]);
     }
 }

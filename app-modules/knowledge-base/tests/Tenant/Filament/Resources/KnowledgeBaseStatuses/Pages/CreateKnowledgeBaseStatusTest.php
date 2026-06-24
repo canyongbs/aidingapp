@@ -38,10 +38,8 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBa
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages\CreateKnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseStatuses\RequestFactories\CreateKnowledgeBaseStatusRequestFactory;
-use App\Features\KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Database\QueryException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -128,8 +126,6 @@ test('CreateKnowledgeBaseStatus is gated with proper feature access control', fu
 });
 
 test('CreateKnowledgeBaseStatus prevents creating a case-insensitive duplicate name', function () {
-    KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::activate();
-
     $user = User::factory()->create();
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.create');
@@ -147,8 +143,6 @@ test('CreateKnowledgeBaseStatus prevents creating a case-insensitive duplicate n
 });
 
 test('CreateKnowledgeBaseStatus allows reusing the name of a soft deleted status', function () {
-    KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::activate();
-
     $user = User::factory()->create();
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.create');
@@ -165,19 +159,3 @@ test('CreateKnowledgeBaseStatus allows reusing the name of a soft deleted status
     expect(KnowledgeBaseStatus::query()->where('name', 'Published')->count())->toBe(1);
 });
 
-test('CreateKnowledgeBaseStatus does not apply the unique form rule when the feature is disabled', function () {
-    KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::deactivate();
-
-    $user = User::factory()->create();
-    $user->givePermissionTo('settings.view-any');
-    $user->givePermissionTo('settings.create');
-
-    KnowledgeBaseStatus::factory()->create(['name' => 'Published']);
-
-    actingAs($user);
-
-    expect(fn () => livewire(CreateKnowledgeBaseStatus::class)
-        ->fillForm(['name' => 'published'])
-        ->call('create'))
-        ->toThrow(QueryException::class);
-});

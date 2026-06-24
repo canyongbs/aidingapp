@@ -38,7 +38,6 @@ namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBaseStatusResource;
 use App\Concerns\EditPageRedirection;
-use App\Features\KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
@@ -54,23 +53,13 @@ class EditKnowledgeBaseStatus extends EditRecord
 
     public function form(Schema $schema): Schema
     {
-        /*
-         * TODO: KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature cleanup — once the feature flag is removed:
-         * - Remove the ->when(KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::active(), ...) wrapper below
-         * - Apply ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()) directly on the name field
-         */
         return $schema
             ->components([
                 TextInput::make('name')
                     ->label('Name')
                     ->required()
                     ->string()
-                    ->when(
-                        KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::active(),
-                        fn (TextInput $input) => $input->unique(ignoreRecord: true, modifyRuleUsing: function (Unique $rule) {
-                            $rule->withoutTrashed();
-                        }),
-                    ),
+                    ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
             ]);
     }
 

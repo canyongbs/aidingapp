@@ -39,10 +39,8 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestStatusRequestFactory;
-use App\Features\KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Database\QueryException;
 use Illuminate\Validation\Rules\Enum;
 
 use function Pest\Laravel\actingAs;
@@ -168,8 +166,6 @@ test('CreateServiceRequestStatus is gated with proper feature access control', f
 // Name Uniqueness Tests
 
 test('CreateServiceRequestStatus prevents creating a case-insensitive duplicate name', function () {
-    KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::activate();
-
     asSuperAdmin();
 
     ServiceRequestStatus::factory()->create(['name' => 'Backlog']);
@@ -181,8 +177,6 @@ test('CreateServiceRequestStatus prevents creating a case-insensitive duplicate 
 });
 
 test('CreateServiceRequestStatus allows reusing the name of a soft deleted status', function () {
-    KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::activate();
-
     asSuperAdmin();
 
     ServiceRequestStatus::factory()->create(['name' => 'Backlog'])->delete();
@@ -195,15 +189,3 @@ test('CreateServiceRequestStatus allows reusing the name of a soft deleted statu
     expect(ServiceRequestStatus::query()->where('name', 'Backlog')->count())->toBe(1);
 });
 
-test('CreateServiceRequestStatus does not apply the unique form rule when the feature is disabled', function () {
-    KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::deactivate();
-
-    asSuperAdmin();
-
-    ServiceRequestStatus::factory()->create(['name' => 'Backlog']);
-
-    expect(fn () => livewire(CreateServiceRequestStatus::class)
-        ->fillForm(CreateServiceRequestStatusRequestFactory::new()->state(['name' => 'backlog'])->create())
-        ->call('create'))
-        ->toThrow(QueryException::class);
-});

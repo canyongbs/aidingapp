@@ -48,13 +48,6 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
-            /*
-             * TODO: KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature cleanup — once this migration has run in all environments:
-             * - Remove the $this->mergeDuplicates() call below and the mergeDuplicates() helper method
-             * - Keep the citext column conversion and the unique index — those are permanent
-             */
-            $this->mergeDuplicates();
-
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
             Schema::table($this->table, function (Blueprint $table) {
@@ -69,42 +62,5 @@ return new class () extends Migration {
         DB::statement('DROP INDEX IF EXISTS knowledge_base_statuses_name_unique');
 
         DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-    }
-
-    private function mergeDuplicates(): void
-    {
-        $duplicateNames = DB::table($this->table)
-            ->whereNull('deleted_at')
-            ->selectRaw("LOWER({$this->column}) as lower_name")
-            ->groupByRaw("LOWER({$this->column})")
-            ->havingRaw('COUNT(*) > 1')
-            ->pluck('lower_name');
-
-        foreach ($duplicateNames as $duplicateName) {
-            $records = DB::table($this->table)
-                ->whereNull('deleted_at')
-                ->whereRaw("LOWER({$this->column}) = ?", [$duplicateName])
-                ->orderByDesc('created_at')
-                ->orderByDesc('id')
-                ->get(['id']);
-
-            if ($records->count() <= 1) {
-                continue;
-            }
-
-            $keepId = $records->first()->id;
-            $removeIds = $records->skip(1)->pluck('id')->all();
-
-            DB::table('knowledge_base_articles')
-                ->whereIn('status_id', $removeIds)
-                ->update(['status_id' => $keepId]);
-
-            DB::table($this->table)
-                ->whereIn('id', $removeIds)
-                ->update([
-                    'deleted_at' => now(),
-                    'updated_at' => now(),
-                ]);
-        }
     }
 };
