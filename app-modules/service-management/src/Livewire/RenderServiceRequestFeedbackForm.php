@@ -48,10 +48,8 @@ use Livewire\Component;
 class RenderServiceRequestFeedbackForm extends Component implements HasForms, HasActions
 {
     use InteractsWithActions;
-    use InteractsWithForms, RestrictsFileUploadsToSchemaComponents {
-        RestrictsFileUploadsToSchemaComponents::_startUpload insteadof InteractsWithForms;
-        RestrictsFileUploadsToSchemaComponents::_finishUpload insteadof InteractsWithForms;
-    }
+    use InteractsWithForms;
+    use RestrictsFileUploadsToSchemaComponents;
 
     public bool $show = true;
 
