@@ -144,6 +144,14 @@ class ServiceRequestPolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_request.*.delete'],
+            denyResponse: 'You do not have permission to delete any service request.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
         $user = auth()->user();
@@ -162,6 +170,14 @@ class ServiceRequestPolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_request.*.restore'],
+            denyResponse: 'You do not have permission to restore any service request.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
         $user = auth()->user();
@@ -177,6 +193,14 @@ class ServiceRequestPolicy
         return $authenticatable->canOrElse(
             abilities: ['service_request.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this service request.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_request.*.force-delete'],
+            denyResponse: 'You do not have permission to permanently delete any service request.'
         );
     }
 

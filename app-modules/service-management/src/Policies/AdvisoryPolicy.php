@@ -95,6 +95,14 @@ class AdvisoryPolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['advisory.*.delete'],
+            denyResponse: 'You do not have permission to delete any advisory.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, Advisory $advisory): Response
     {
         return $authenticatable->canOrElse(
@@ -103,11 +111,27 @@ class AdvisoryPolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['advisory.*.restore'],
+            denyResponse: 'You do not have permission to restore any advisory.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, Advisory $advisory): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['advisory.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this advisory.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['advisory.*.force-delete'],
+            denyResponse: 'You do not have permission to permanently delete any advisory.'
         );
     }
 

@@ -101,6 +101,14 @@ class ServiceRequestUpdatePolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_request_update.*.delete'],
+            denyResponse: 'You do not have permissions to delete any service request update.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, ServiceRequestUpdate $serviceRequestUpdate): Response
     {
         return $authenticatable->canOrElse(
@@ -109,11 +117,27 @@ class ServiceRequestUpdatePolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_request_update.*.restore'],
+            denyResponse: 'You do not have permissions to restore any service request update.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, ServiceRequestUpdate $serviceRequestUpdate): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['service_request_update.*.force-delete'],
             denyResponse: 'You do not have permissions to force delete this service request update.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_request_update.*.force-delete'],
+            denyResponse: 'You do not have permissions to force delete any service request update.'
         );
     }
 

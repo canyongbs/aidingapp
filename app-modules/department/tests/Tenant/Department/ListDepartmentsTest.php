@@ -35,9 +35,13 @@
 */
 
 use AidingApp\Department\Filament\Resources\Departments\DepartmentResource;
+use AidingApp\Department\Filament\Resources\Departments\Pages\ListDepartments;
+use AidingApp\Department\Models\Department;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 // Permission Tests
 
@@ -55,4 +59,22 @@ test('ListDepartments is gated with proper access control', function () {
         ->get(
             DepartmentResource::getUrl('index')
         )->assertSuccessful();
+});
+
+it('only shows the bulk delete action to a user with the department.delete permission', function () {
+    Department::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('department.view-any', 'department.*.view');
+
+    actingAs($user);
+
+    livewire(ListDepartments::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('department.*.delete');
+
+    livewire(ListDepartments::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

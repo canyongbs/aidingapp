@@ -108,11 +108,27 @@ class ServiceRequestTypePolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.delete',
+            denyResponse: 'You do not have permissions to delete any service request type.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, ServiceRequestType $serviceRequestType): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.restore',
             denyResponse: 'You do not have permissions to restore this service request type.'
+        );
+    }
+
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.restore',
+            denyResponse: 'You do not have permissions to restore any service request type.'
         );
     }
 
@@ -125,6 +141,14 @@ class ServiceRequestTypePolicy
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permissions to force delete this service request type.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.force-delete',
+            denyResponse: 'You do not have permissions to force delete any service request type.'
         );
     }
 

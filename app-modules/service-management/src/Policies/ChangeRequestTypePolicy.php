@@ -95,11 +95,27 @@ class ChangeRequestTypePolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['change_request_type.*.delete'],
+            denyResponse: 'You do not have permission to delete any change request type.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, ChangeRequestType $changeRequestType): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['change_request_type.*.restore'],
             denyResponse: 'You do not have permission to restore this change request type.'
+        );
+    }
+
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['change_request_type.*.restore'],
+            denyResponse: 'You do not have permission to restore any change request type.'
         );
     }
 
@@ -112,6 +128,14 @@ class ChangeRequestTypePolicy
         return $authenticatable->canOrElse(
             abilities: ['change_request_type.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this change request type.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['change_request_type.*.force-delete'],
+            denyResponse: 'You do not have permission to permanently delete any change request type.'
         );
     }
 

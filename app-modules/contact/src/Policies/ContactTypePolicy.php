@@ -82,6 +82,14 @@ class ContactTypePolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.delete',
+            denyResponse: 'You do not have permission to delete any contact type.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, ContactType $contactType): Response
     {
         return $authenticatable->canOrElse(
@@ -90,11 +98,27 @@ class ContactTypePolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.restore',
+            denyResponse: 'You do not have permission to restore any contact type.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, ContactType $contactType): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permission to force delete contact type.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.force-delete',
+            denyResponse: 'You do not have permission to force delete any contact type.'
         );
     }
 }

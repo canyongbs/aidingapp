@@ -95,6 +95,14 @@ class ProductPolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['product.*.delete'],
+            denyResponse: 'You do not have permission to delete any product.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, Product $product): Response
     {
         return $authenticatable->canOrElse(
@@ -103,11 +111,27 @@ class ProductPolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['product.*.restore'],
+            denyResponse: 'You do not have permission to restore any product.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, Product $product): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['product.*.force-delete'],
             denyResponse: 'You do not have permission to force delete this product.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['product.*.force-delete'],
+            denyResponse: 'You do not have permission to force delete any product.'
         );
     }
 

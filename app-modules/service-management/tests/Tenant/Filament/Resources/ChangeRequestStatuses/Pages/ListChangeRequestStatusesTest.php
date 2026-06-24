@@ -36,8 +36,10 @@
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\ChangeRequestStatusResource;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages\ListChangeRequestStatuses;
+use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -70,4 +72,22 @@ it('is gated with proper access control', function () {
     $settings->save();
 
     livewire(ListChangeRequestStatuses::class)->assertOk();
+});
+
+it('only shows the bulk delete action to a user with the change_request_status.delete permission', function () {
+    ChangeRequestStatus::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('change_request_status.view-any', 'change_request_status.*.view');
+
+    actingAs($user);
+
+    livewire(ListChangeRequestStatuses::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('change_request_status.*.delete');
+
+    livewire(ListChangeRequestStatuses::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

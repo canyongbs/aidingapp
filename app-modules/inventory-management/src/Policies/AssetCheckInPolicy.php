@@ -96,6 +96,14 @@ class AssetCheckInPolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['asset_check_in.*.delete'],
+            denyResponse: 'You do not have permission to delete any asset check in.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, AssetCheckIn $assetCheckIn): Response
     {
         return $authenticatable->canOrElse(
@@ -104,11 +112,27 @@ class AssetCheckInPolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['asset_check_in.*.restore'],
+            denyResponse: 'You do not have permission to restore any asset check in.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, AssetCheckIn $assetCheckIn): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['asset_check_in.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this asset check in.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['asset_check_in.*.force-delete'],
+            denyResponse: 'You do not have permission to permanently delete any asset check in.'
         );
     }
 

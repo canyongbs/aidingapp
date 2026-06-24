@@ -38,6 +38,7 @@ use AidingApp\Department\Models\Department;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Authenticatable;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Lab404\Impersonate\Services\ImpersonateManager;
 
 use function Pest\Laravel\actingAs;
@@ -198,4 +199,22 @@ it('hides the import and export header actions from a user without the user.impo
     livewire(ListUsers::class)
         ->assertActionHidden('import')
         ->assertActionHidden('export');
+});
+
+it('only shows the bulk delete action to a user with the user.delete permission', function () {
+    User::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('user.view-any', 'user.*.view');
+
+    actingAs($user);
+
+    livewire(ListUsers::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('user.*.delete');
+
+    livewire(ListUsers::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

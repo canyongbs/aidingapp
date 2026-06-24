@@ -90,6 +90,14 @@ class ContactPolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['contact.*.delete'],
+            denyResponse: 'You do not have permission to delete any contact.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
@@ -98,11 +106,27 @@ class ContactPolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['contact.*.restore'],
+            denyResponse: 'You do not have permission to restore any contact.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, Contact $contact): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['contact.*.force-delete'],
             denyResponse: 'You do not have permission to force delete this contact.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['contact.*.force-delete'],
+            denyResponse: 'You do not have permission to force delete any contact.'
         );
     }
 }

@@ -36,8 +36,10 @@
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\ListChangeRequestTypes;
+use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -70,4 +72,22 @@ it('is gated with proper access control', function () {
     $settings->save();
 
     livewire(ListChangeRequestTypes::class)->assertOk();
+});
+
+it('only shows the bulk delete action to a user with the change_request_type.delete permission', function () {
+    ChangeRequestType::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('change_request_type.view-any', 'change_request_type.*.view');
+
+    actingAs($user);
+
+    livewire(ListChangeRequestTypes::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('change_request_type.*.delete');
+
+    livewire(ListChangeRequestTypes::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

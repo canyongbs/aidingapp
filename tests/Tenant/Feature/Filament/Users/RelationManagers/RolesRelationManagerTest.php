@@ -41,6 +41,7 @@ use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\AttachAction;
+use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Select;
 
 use function Pest\Laravel\actingAs;
@@ -149,4 +150,30 @@ it('does not display the Saas Global Admin role if the user is not itself a Saas
             return empty($options) ? true : false;
         })
         ->assertSuccessful();
+});
+
+it('only shows the attach role action to a user with the user.update permission', function () {
+    $user = User::factory()->create();
+
+    $loggedInUser = User::factory()->create();
+
+    $loggedInUser->givePermissionTo('role.view-any', 'role.*.view', 'user.view-any', 'user.*.view');
+
+    $loggedInUser->refresh();
+
+    actingAs($loggedInUser);
+
+    livewire(RolesRelationManager::class, [
+        'ownerRecord' => $user,
+        'pageClass' => EditUser::class,
+    ])
+        ->assertActionHidden(TestAction::make('attach')->table());
+
+    $loggedInUser->givePermissionTo('user.*.update');
+
+    livewire(RolesRelationManager::class, [
+        'ownerRecord' => $user,
+        'pageClass' => EditUser::class,
+    ])
+        ->assertActionVisible(TestAction::make('attach')->table());
 });

@@ -94,6 +94,14 @@ class ServiceMonitoringTargetPolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_monitoring.*.delete'],
+            denyResponse: 'You do not have permission to delete this service monitoring.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
@@ -102,11 +110,27 @@ class ServiceMonitoringTargetPolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_monitoring.*.restore'],
+            denyResponse: 'You do not have permission to restore any service monitoring.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['service_monitoring.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this service monitoring.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_monitoring.*.force-delete'],
+            denyResponse: 'You do not have permission to permanently delete any service monitoring.'
         );
     }
 

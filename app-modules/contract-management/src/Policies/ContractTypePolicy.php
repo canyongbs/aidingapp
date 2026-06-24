@@ -95,6 +95,14 @@ class ContractTypePolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.delete',
+            denyResponse: 'You do not have permission to delete any contract type.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, ContractType $contractType): Response
     {
         return $authenticatable->canOrElse(
@@ -103,11 +111,27 @@ class ContractTypePolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.restore',
+            denyResponse: 'You do not have permission to restore any contract type.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, ContractType $contractType): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete this contract type.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.force-delete',
+            denyResponse: 'You do not have permission to permanently delete any contract type.'
         );
     }
 

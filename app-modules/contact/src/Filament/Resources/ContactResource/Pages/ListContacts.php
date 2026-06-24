@@ -114,7 +114,8 @@ class ListContacts extends ListRecords
             ->toolbarActions([
                 BulkActionGroup::make([
                     BulkEngagementAction::make(context: 'contacts'),
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
                     BulkAction::make('bulk_update')
                         ->icon('heroicon-o-pencil-square')
                         ->form([

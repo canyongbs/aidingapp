@@ -82,6 +82,14 @@ class AlertPolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['alert.*.delete'],
+            denyResponse: 'You do not have permission to delete any alert.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, Alert $alert): Response
     {
         return $authenticatable->canOrElse(
@@ -90,11 +98,27 @@ class AlertPolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['alert.*.restore'],
+            denyResponse: 'You do not have permission to restore any alert.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, Alert $alert): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['alert.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this alert.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['alert.*.force-delete'],
+            denyResponse: 'You do not have permission to permanently delete any alert.'
         );
     }
 }

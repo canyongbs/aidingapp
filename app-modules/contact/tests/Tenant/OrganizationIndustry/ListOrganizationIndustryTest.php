@@ -35,10 +35,14 @@
 */
 
 use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource;
+use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\ListOrganizationIndustries;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\OrganizationIndustry;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 test('List OrganizationIndustry is gated with proper access control', function () {
     $user = User::factory()->create();
@@ -54,4 +58,22 @@ test('List OrganizationIndustry is gated with proper access control', function (
         ->get(
             OrganizationIndustryResource::getUrl('index')
         )->assertSuccessful();
+});
+
+it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+    OrganizationIndustry::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('settings.view-any', 'settings.*.view');
+
+    actingAs($user);
+
+    livewire(ListOrganizationIndustries::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('settings.*.delete');
+
+    livewire(ListOrganizationIndustries::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

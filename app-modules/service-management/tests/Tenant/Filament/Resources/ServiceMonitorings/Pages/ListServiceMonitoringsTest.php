@@ -39,6 +39,7 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertSoftDeleted;
@@ -94,4 +95,22 @@ test('bulk delete ServiceMonitorings', function () {
     foreach ($serviceMonitoringTargets as $serviceMonitoringTarget) {
         assertSoftDeleted($serviceMonitoringTarget);
     }
+});
+
+it('only shows the bulk delete action to a user with the service_monitoring.delete permission', function () {
+    ServiceMonitoringTarget::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('service_monitoring.view-any', 'service_monitoring.*.view');
+
+    actingAs($user);
+
+    livewire(ListServiceMonitorings::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('service_monitoring.*.delete');
+
+    livewire(ListServiceMonitorings::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

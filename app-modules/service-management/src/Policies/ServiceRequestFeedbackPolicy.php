@@ -101,6 +101,14 @@ class ServiceRequestFeedbackPolicy
         return Response::allow();
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_request.*.update'],
+            denyResponse: 'You do not have permission to delete any service request feedback.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, ServiceRequestFeedback $serviceRequestFeedback): Response
     {
         if ($authenticatable->cannot('update', $serviceRequestFeedback->serviceRequest)) {
@@ -110,6 +118,14 @@ class ServiceRequestFeedbackPolicy
         return Response::allow();
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_request.*.update'],
+            denyResponse: 'You do not have permission to restore any service request feedback.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, ServiceRequestFeedback $serviceRequestFeedback): Response
     {
         if ($authenticatable->cannot('update', $serviceRequestFeedback->serviceRequest)) {
@@ -117,6 +133,14 @@ class ServiceRequestFeedbackPolicy
         }
 
         return Response::allow();
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['service_request.*.update'],
+            denyResponse: 'You do not have permission to permanently delete any service request feedback.'
+        );
     }
 
     /**

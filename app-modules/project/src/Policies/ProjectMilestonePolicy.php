@@ -101,6 +101,14 @@ class ProjectMilestonePolicy
         return Response::allow();
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'project.*.delete',
+            denyResponse: 'You do not have permission to delete any project milestone.'
+        );
+    }
+
     /**
      * @return array<Feature>
      */

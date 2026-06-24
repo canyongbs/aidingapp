@@ -82,6 +82,14 @@ class MaintenanceActivityPolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['maintenance_activity.*.delete'],
+            denyResponse: 'You do not have permission to delete any maintenance activity.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, MaintenanceActivity $maintenanceActivity): Response
     {
         return $authenticatable->canOrElse(
@@ -90,11 +98,27 @@ class MaintenanceActivityPolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['maintenance_activity.*.restore'],
+            denyResponse: 'You do not have permission to restore any maintenance activity.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, MaintenanceActivity $maintenanceActivity): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['maintenance_activity.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this maintenance activity.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['maintenance_activity.*.force-delete'],
+            denyResponse: 'You do not have permission to permanently delete any maintenance activity.'
         );
     }
 }

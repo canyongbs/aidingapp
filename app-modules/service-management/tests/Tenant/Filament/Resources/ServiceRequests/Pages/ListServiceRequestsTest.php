@@ -52,6 +52,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -1159,4 +1160,22 @@ it('filters out nested empty categories from type tree options', function () {
     expect($tree[0]['children'])->toHaveCount(1);
     expect($tree[0]['children'][0]['name'])->toBe('Direct Type');
     expect($tree[0]['children'][0]['value'])->toBe($type->getKey());
+});
+
+it('only shows the bulk delete action to a user with the service_request.delete permission', function () {
+    ServiceRequest::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('service_request.view-any', 'service_request.*.view');
+
+    actingAs($user);
+
+    livewire(ListServiceRequests::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('service_request.*.delete');
+
+    livewire(ListServiceRequests::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

@@ -35,10 +35,13 @@
 */
 
 use App\Filament\Resources\Pronouns\PronounsResource;
+use App\Models\Pronouns;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
+use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
     $user = User::factory()->create();
@@ -51,4 +54,22 @@ it('is gated with proper access control', function () {
     $user->refresh();
 
     get(PronounsResource::getUrl('index'))->assertOk();
+});
+
+it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+    Pronouns::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('settings.view-any', 'settings.*.view');
+
+    actingAs($user);
+
+    livewire(PronounsResource::getPages()['index']->getPage())
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('settings.*.delete');
+
+    livewire(PronounsResource::getPages()['index']->getPage())
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
