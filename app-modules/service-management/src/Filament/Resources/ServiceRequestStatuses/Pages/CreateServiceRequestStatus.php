@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
-use App\Features\KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -53,11 +52,6 @@ class CreateServiceRequestStatus extends CreateRecord
 
     public function form(Schema $schema): Schema
     {
-        /*
-         * TODO: KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature cleanup — once the feature flag is removed:
-         * - Remove the ->when(KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::active(), ...) wrapper below
-         * - Apply ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()) directly on the name field
-         */
         return $schema
             ->components([
                 Section::make()
@@ -67,12 +61,7 @@ class CreateServiceRequestStatus extends CreateRecord
                             ->label('Name')
                             ->required()
                             ->string()
-                            ->when(
-                                KnowledgeBaseAndServiceRequestStatusNameUniquenessFeature::active(),
-                                fn (TextInput $input) => $input->unique(modifyRuleUsing: function (Unique $rule) {
-                                    $rule->withoutTrashed();
-                                }),
-                            ),
+                            ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                         Select::make('classification')
                             ->searchable()
                             ->options(SystemServiceRequestClassification::class)
