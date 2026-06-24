@@ -130,7 +130,7 @@ class CreateUserRequest extends FormRequest
             if (in_array(strtolower($roleName), $loweredAdminNames, true)) {
                 $validator->errors()->add(
                     "roles.{$index}",
-                    'Admin roles cannot be assigned through this endpoint.'
+                    'Invalid role.'
                 );
 
                 return;
