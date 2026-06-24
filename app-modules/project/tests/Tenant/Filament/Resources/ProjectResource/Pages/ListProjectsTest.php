@@ -39,6 +39,7 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ListProjects;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -187,4 +188,22 @@ it('can see project in list if logged in user is a superadmin, the creator, a ma
     livewire(ListProjects::class)
         ->assertCanSeeTableRecords([$project])
         ->assertSuccessful();
+});
+
+it('only shows the bulk delete action to a user with the project.delete permission', function () {
+    Project::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('project.view-any', 'project.*.view');
+
+    actingAs($user);
+
+    livewire(ListProjects::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('project.*.delete');
+
+    livewire(ListProjects::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

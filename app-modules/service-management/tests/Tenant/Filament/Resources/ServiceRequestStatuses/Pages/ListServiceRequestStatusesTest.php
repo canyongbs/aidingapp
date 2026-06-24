@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -134,4 +135,22 @@ test('ListServiceRequestStatuses is gated with proper feature access control', f
         ->get(
             ServiceRequestStatusResource::getUrl()
         )->assertSuccessful();
+});
+
+it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+    ServiceRequestStatus::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('settings.view-any', 'settings.*.view');
+
+    actingAs($user);
+
+    livewire(ListServiceRequestStatuses::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('settings.*.delete');
+
+    livewire(ListServiceRequestStatuses::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

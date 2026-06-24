@@ -94,6 +94,14 @@ class PipelinePolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['pipeline.*.delete'],
+            denyResponse: 'You do not have permission to delete any pipeline.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, Pipeline $pipeline): Response
     {
         if ($pipeline->project && (! $authenticatable->can('update', $pipeline->project))) {
@@ -106,6 +114,14 @@ class PipelinePolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['pipeline.*.restore'],
+            denyResponse: 'You do not have permission to restore any pipeline.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, Pipeline $pipeline): Response
     {
         if ($pipeline->project && (! $authenticatable->can('update', $pipeline->project))) {
@@ -115,6 +131,14 @@ class PipelinePolicy
         return $authenticatable->canOrElse(
             abilities: ['pipeline.*.force-delete'],
             denyResponse: 'You do not have permission to force delete this pipeline.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['pipeline.*.force-delete'],
+            denyResponse: 'You do not have permission to force delete any pipeline.'
         );
     }
 }

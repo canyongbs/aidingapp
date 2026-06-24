@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertNotSoftDeleted;
@@ -145,4 +146,22 @@ test('prevent deletion of AdvisoryStatus if it has associated Advisories', funct
     foreach ($advisoryStatuses as $advisoryStatus) {
         assertNotSoftDeleted($advisoryStatus);
     }
+});
+
+it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+    AdvisoryStatus::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('settings.view-any', 'settings.*.view');
+
+    actingAs($user);
+
+    livewire(ListAdvisoryStatuses::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('settings.*.delete');
+
+    livewire(ListAdvisoryStatuses::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

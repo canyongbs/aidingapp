@@ -270,7 +270,8 @@ class ListKnowledgeBaseItems extends ListRecords
             ->toolbarActions([
                 BulkActionGroup::make([
                     AssignManagerBulkAction::make(),
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ])
             ->defaultSort('updated_at', 'desc');

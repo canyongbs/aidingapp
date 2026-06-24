@@ -82,6 +82,14 @@ class OrganizationTypePolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.delete',
+            denyResponse: 'You do not have permission to delete any organization type.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
         return $authenticatable->canOrElse(
@@ -90,11 +98,27 @@ class OrganizationTypePolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.restore',
+            denyResponse: 'You do not have permission to restore any organization type.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, OrganizationType $organizationType): Response
     {
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permission to force delete this organization type.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.force-delete',
+            denyResponse: 'You do not have permission to force delete any organization type.'
         );
     }
 }

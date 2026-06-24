@@ -39,6 +39,7 @@ use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\ListContactTy
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -100,4 +101,22 @@ test('ListContactTypes is gated with proper access control', function () {
         ->get(
             ContactTypeResource::getUrl('index')
         )->assertSuccessful();
+});
+
+it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+    ContactType::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('settings.view-any', 'settings.*.view');
+
+    actingAs($user);
+
+    livewire(ListContactTypes::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('settings.*.delete');
+
+    livewire(ListContactTypes::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

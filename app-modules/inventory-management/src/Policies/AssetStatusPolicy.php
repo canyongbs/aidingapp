@@ -96,6 +96,14 @@ class AssetStatusPolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['asset_status.*.delete'],
+            denyResponse: 'You do not have permission to delete any asset status.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, AssetStatus $assetStatus): Response
     {
         return $authenticatable->canOrElse(
@@ -104,11 +112,27 @@ class AssetStatusPolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['asset_status.*.restore'],
+            denyResponse: 'You do not have permission to restore any asset status.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, AssetStatus $assetStatus): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['asset_status.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this asset status.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['asset_status.*.force-delete'],
+            denyResponse: 'You do not have permission to permanently delete any asset status.'
         );
     }
 

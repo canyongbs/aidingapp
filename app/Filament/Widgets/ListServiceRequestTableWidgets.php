@@ -147,7 +147,8 @@ class ListServiceRequestTableWidgets extends BaseWidget
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ])
             ->defaultSort('created_at', 'desc')

@@ -35,11 +35,14 @@
 */
 
 use AidingApp\LicenseManagement\Filament\Resources\Products\Pages\ListProducts;
+use AidingApp\LicenseManagement\Models\Product;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
+use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
     $settings = app(LicenseSettings::class);
@@ -65,4 +68,22 @@ it('is gated with proper access control', function () {
     $user->givePermissionTo('product.view-any');
 
     get(ListProducts::getUrl())->assertSuccessful();
+});
+
+it('only shows the bulk delete action to a user with the product.delete permission', function () {
+    Product::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('product.view-any', 'product.*.view');
+
+    actingAs($user);
+
+    livewire(ListProducts::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('product.*.delete');
+
+    livewire(ListProducts::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

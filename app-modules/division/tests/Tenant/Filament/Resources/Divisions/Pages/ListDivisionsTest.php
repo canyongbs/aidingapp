@@ -35,9 +35,13 @@
 */
 
 use AidingApp\Division\Filament\Resources\Divisions\DivisionResource;
+use AidingApp\Division\Filament\Resources\Divisions\Pages\ListDivisions;
+use AidingApp\Division\Models\Division;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 test('ListDivisions is gated with proper access control', function () {
     $user = User::factory()->create();
@@ -53,4 +57,22 @@ test('ListDivisions is gated with proper access control', function () {
         ->get(
             DivisionResource::getUrl('index')
         )->assertSuccessful();
+});
+
+it('only shows the bulk delete action to a user with the division.delete permission', function () {
+    Division::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('division.view-any', 'division.*.view');
+
+    actingAs($user);
+
+    livewire(ListDivisions::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('division.*.delete');
+
+    livewire(ListDivisions::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

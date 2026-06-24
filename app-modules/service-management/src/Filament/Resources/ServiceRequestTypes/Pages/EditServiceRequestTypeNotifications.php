@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRe
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use App\Concerns\EditPageRedirection;
-use App\Features\ServiceRequestTypeEmailPreferenceFeature;
 use Filament\Forms\Components\ViewField;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
@@ -95,12 +94,6 @@ class EditServiceRequestTypeNotifications extends EditRecord
         $record = $this->getRecord();
         assert($record instanceof ServiceRequestType);
 
-        if (! ServiceRequestTypeEmailPreferenceFeature::active()) {
-            $data['settings'] = $record->only($this->generateLegacySettingsAttributeList());
-
-            return $data;
-        }
-
         $preferences = $record->emailPreferences()->get();
 
         $settings = [];
@@ -136,20 +129,6 @@ class EditServiceRequestTypeNotifications extends EditRecord
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        if (! ServiceRequestTypeEmailPreferenceFeature::active()) {
-            $data = [
-                ...$data,
-                ...collect($data['settings'])
-                    ->only($this->generateLegacySettingsAttributeList())
-                    ->filter(fn (mixed $value): bool => is_bool($value))
-                    ->all(),
-            ];
-
-            unset($data['settings']);
-
-            return $data;
-        }
-
         $settings = $data['settings'] ?? [];
         $record = $this->getRecord();
         assert($record instanceof ServiceRequestType);
@@ -186,36 +165,10 @@ class EditServiceRequestTypeNotifications extends EditRecord
 
     protected function afterSave(): void
     {
-        if (! ServiceRequestTypeEmailPreferenceFeature::active()) {
-            return;
-        }
-
         ServiceRequestTypeEmailPreference::upsert(
             $this->preferencesToUpsert,
             uniqueBy: ['service_request_type_id', 'service_request_email_template_type', 'service_request_email_template_role', 'notification_channel'],
             update: ['is_enabled'],
         );
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    private function generateLegacySettingsAttributeList(): array
-    {
-        $attributes = [];
-
-        foreach (ServiceRequestTypeEmailTemplateRole::cases() as $templateRole) {
-            $roleSlug = $templateRole->value . 's';
-
-            foreach (ServiceRequestEmailTemplateType::cases() as $templateType) {
-                $eventSlug = $templateType->getEventSlug();
-
-                foreach (ServiceRequestNotificationChannel::cases() as $channel) {
-                    $attributes[] = "is_{$roleSlug}_{$eventSlug}_{$channel->value}_enabled";
-                }
-            }
-        }
-
-        return $attributes;
     }
 }

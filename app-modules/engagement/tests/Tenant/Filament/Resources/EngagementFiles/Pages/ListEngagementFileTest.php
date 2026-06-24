@@ -35,9 +35,13 @@
 */
 
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages\ListEngagementFiles;
+use AidingApp\Engagement\Models\EngagementFile;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
 // TODO: Add tests for the ListEngagementFiles
 //test('The correct details are displayed on the ListEngagementFiles page', function () {});
@@ -60,4 +64,22 @@ test('ListEngagementFiles is gated with proper access control', function () {
         ->get(
             EngagementFileResource::getUrl('index')
         )->assertSuccessful();
+});
+
+test('only shows the bulk delete action to a user with the engagement_file delete permission', function () {
+    EngagementFile::factory(5)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('engagement_file.view-any', 'engagement_file.*.view');
+
+    actingAs($user);
+
+    livewire(ListEngagementFiles::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('engagement_file.*.delete');
+
+    livewire(ListEngagementFiles::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

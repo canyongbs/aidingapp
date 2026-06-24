@@ -96,6 +96,14 @@ class AssetTypePolicy
         );
     }
 
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['asset_type.*.delete'],
+            denyResponse: 'You do not have permission to delete any asset type.'
+        );
+    }
+
     public function restore(Authenticatable $authenticatable, AssetType $assetType): Response
     {
         return $authenticatable->canOrElse(
@@ -104,11 +112,27 @@ class AssetTypePolicy
         );
     }
 
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['asset_type.*.restore'],
+            denyResponse: 'You do not have permission to restore any asset type.'
+        );
+    }
+
     public function forceDelete(Authenticatable $authenticatable, AssetType $assetType): Response
     {
         return $authenticatable->canOrElse(
             abilities: ['asset_type.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this asset type.'
+        );
+    }
+
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: ['asset_type.*.force-delete'],
+            denyResponse: 'You do not have permission to permanently delete any asset type.'
         );
     }
 

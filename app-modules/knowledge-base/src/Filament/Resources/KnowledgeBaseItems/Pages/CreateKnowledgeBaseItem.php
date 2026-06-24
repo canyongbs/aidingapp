@@ -41,7 +41,6 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseI
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use App\Features\KnowledgeBaseCategorySortFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Scopes\TagsForClass;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
@@ -111,8 +110,8 @@ class CreateKnowledgeBaseItem extends CreateRecord
                                 'category',
                                 'name',
                                 'parent_id',
-                                modifyQueryUsing: fn (Builder $query) => $query->orderBy(KnowledgeBaseCategorySortFeature::active() ? 'sort' : 'name'),
-                                modifyChildQueryUsing: fn (Builder $query) => $query->orderBy(KnowledgeBaseCategorySortFeature::active() ? 'sort' : 'name'),
+                                modifyQueryUsing: fn (Builder $query) => $query->orderBy('sort'),
+                                modifyChildQueryUsing: fn (Builder $query) => $query->orderBy('sort'),
                             )
                             ->enableBranchNode()
                             ->searchable()

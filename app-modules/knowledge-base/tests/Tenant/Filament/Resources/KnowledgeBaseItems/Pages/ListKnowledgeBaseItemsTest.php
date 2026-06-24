@@ -45,6 +45,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Models\Tag;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -728,4 +729,22 @@ test('duplicating a knowledge base article is gated by the knowledge_base_item.c
 
     livewire(ListKnowledgeBaseItems::class)
         ->assertTableActionHidden('replicate', $knowledgeBaseItem);
+});
+
+it('only shows the bulk delete action to a user with the knowledge_base_item.delete permission', function () {
+    KnowledgeBaseItem::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('knowledge_base_item.view-any', 'knowledge_base_item.*.view');
+
+    actingAs($user);
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('knowledge_base_item.*.delete');
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

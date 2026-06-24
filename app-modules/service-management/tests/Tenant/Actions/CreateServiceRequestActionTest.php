@@ -52,13 +52,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpenedNotification;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
-use App\Features\ServiceRequestTypeEmailPreferenceFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
-
-beforeEach(function () {
-    ServiceRequestTypeEmailPreferenceFeature::activate();
-});
 
 if (! function_exists('enablePreference')) {
     function enablePreference(

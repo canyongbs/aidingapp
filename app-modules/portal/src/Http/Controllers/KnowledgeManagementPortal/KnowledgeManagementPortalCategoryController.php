@@ -39,7 +39,6 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
-use App\Features\KnowledgeBaseCategorySortFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -53,7 +52,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
                 KnowledgeBaseCategory::query()
                     ->where('parent_id', null)
                     ->whereHas('knowledgeBaseItems', fn (Builder $query) => $query->public())
-                    ->orderBy(KnowledgeBaseCategorySortFeature::active() ? 'sort' : 'name')
+                    ->orderBy('sort')
                     ->get()
                     ->map(function (KnowledgeBaseCategory $category) {
                         return [
@@ -79,11 +78,8 @@ class KnowledgeManagementPortalCategoryController extends Controller
                 'subCategories' => $category
                     ->subCategories()
                     ->with(['parentCategory:id,name,slug'])
-                    ->when(
-                        KnowledgeBaseCategorySortFeature::active(),
-                        fn ($query) => $query->reorder()->orderBy('sort'),
-                        fn ($query) => $query->reorder()->orderBy('name'),
-                    )
+                    ->reorder()
+                    ->orderBy('sort')
                     ->get()
                     ->map(function (KnowledgeBaseCategory $subCategory) {
                         return KnowledgeBaseCategoryData::from([

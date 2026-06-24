@@ -194,7 +194,8 @@ abstract class BaseTaskRelationManager extends ManageRelatedRecords
             ->recordUrl(null)
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DetachBulkAction::make(),
+                    DetachBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ]);
     }

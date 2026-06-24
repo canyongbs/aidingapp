@@ -52,16 +52,11 @@ use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestOpened
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestStatusChangeNotification;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestClosed;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
-use App\Features\ServiceRequestTypeEmailPreferenceFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
 
 use function Pest\Laravel\actingAs;
-
-beforeEach(function () {
-    ServiceRequestTypeEmailPreferenceFeature::activate();
-});
 
 if (! function_exists('enablePreference')) {
     function enablePreference(

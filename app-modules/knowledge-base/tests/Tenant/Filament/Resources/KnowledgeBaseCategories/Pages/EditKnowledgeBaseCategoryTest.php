@@ -43,6 +43,7 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\AssociateAction;
 use Filament\Actions\CreateAction;
+use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Select;
 
 use function Pest\Laravel\actingAs;
@@ -231,4 +232,33 @@ test('can attach subcategories into categories', function () {
         ->subCategories
         ->pluck('id')
         ->toContain($knowledgeBaseSubCategory->getKey());
+});
+
+test('only shows the subcategories bulk delete action to a user with the settings delete permission', function () {
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('settings.view-any', 'settings.*.update');
+
+    actingAs($user);
+
+    $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
+
+    KnowledgeBaseCategory::factory()
+        ->count(3)
+        ->state(['parent_id' => $knowledgeBaseCategory->getKey()])
+        ->create();
+
+    livewire(SubCategoriesRelationManager::class, [
+        'ownerRecord' => $knowledgeBaseCategory,
+        'pageClass' => EditKnowledgeBaseCategory::class,
+    ])
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('settings.*.delete');
+
+    livewire(SubCategoriesRelationManager::class, [
+        'ownerRecord' => $knowledgeBaseCategory,
+        'pageClass' => EditKnowledgeBaseCategory::class,
+    ])
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

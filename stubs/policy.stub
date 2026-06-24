@@ -32,13 +32,28 @@ class {{ class }}
     {
         //
     }
+    
+    public function deleteAny(Authenticatable $authenticatable): Response
+    {
+        //
+    }
 
     public function restore(Authenticatable $authenticatable, {{ model }} ${{ modelVariable }}): Response
     {
         //
     }
+    
+    public function restoreAny(Authenticatable $authenticatable): Response
+    {
+        //
+    }
 
     public function forceDelete(Authenticatable $authenticatable, {{ model }} ${{ modelVariable }}): Response
+    {
+        //
+    }
+    
+    public function forceDeleteAny(Authenticatable $authenticatable): Response
     {
         //
     }

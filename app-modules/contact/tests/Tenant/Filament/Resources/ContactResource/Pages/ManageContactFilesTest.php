@@ -34,14 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactFiles;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
+use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 
-use App\Support\AbstractFeatureFlag;
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
-class ServiceRequestTypeEmailPreferenceFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
-    }
-}
+test('only shows the files bulk delete action to a user with the engagement_file delete permission', function () {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('contact.view-any', 'contact.*.view', 'engagement_file.view-any');
+
+    actingAs($user);
+
+    $contact = Contact::factory()->create();
+
+    livewire(EngagementFilesRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ManageContactFiles::class,
+    ])
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('engagement_file.*.delete');
+
+    livewire(EngagementFilesRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ManageContactFiles::class,
+    ])
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
