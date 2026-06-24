@@ -1547,17 +1547,5 @@ $ignoreErrors[] = [
     'count' => 1,
     'path' => __DIR__ . '/app/Models/Authenticatable.php',
 ];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 6,
-    'path' => __DIR__ . '/tests/Tenant/Http/Controllers/Api/V1/Users/ListUsersControllerTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TValue in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 6,
-    'path' => __DIR__ . '/tests/Tenant/Http/Controllers/Api/V1/Users/ListUsersControllerTest.php',
-];
 
 return ['parameters' => ['ignoreErrors' => $ignoreErrors]];

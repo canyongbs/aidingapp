@@ -91,9 +91,7 @@ it('returns correct user fields', function (string $responseKey, Closure $getExp
     $response = getJson(route('api.v1.users.index', [], false));
     $response->assertOk();
 
-    $item = collect($response['data'])->firstWhere('id', $targetUser->id);
-
-    expect($item[$responseKey])->toBe($getExpected($targetUser));
+    expect($response['data'][0][$responseKey])->toBe($getExpected($targetUser));
 })->with([
     '`id`' => ['id',    fn (User $user) => $user->id],
     '`name`' => ['name',  fn (User $user) => $user->name],
@@ -112,9 +110,7 @@ it('returns correct roles relationship structure', function () {
     $response = getJson(route('api.v1.users.index', [], false));
     $response->assertOk();
 
-    $item = collect($response['data'])->firstWhere('id', $targetUser->id);
-
-    expect($item['roles'])->toBe([$role->name]);
+    expect($response['data'][0]['roles'])->toBe([$role->name]);
 });
 
 it('returns correct department relationship structure', function () {
@@ -129,9 +125,7 @@ it('returns correct department relationship structure', function () {
     $response = getJson(route('api.v1.users.index', [], false));
     $response->assertOk();
 
-    $item = collect($response['data'])->firstWhere('id', $targetUser->id);
-
-    expect($item['department'])->toBe([
+    expect($response['data'][0]['department'])->toBe([
         'id' => $department->id,
         'name' => $department->name,
     ]);
@@ -147,9 +141,7 @@ it('returns null department when no department is assigned', function () {
     $response = getJson(route('api.v1.users.index', [], false));
     $response->assertOk();
 
-    $item = collect($response['data'])->firstWhere('id', $targetUser->id);
-
-    expect($item['department'])->toBeNull();
+    expect($response['data'][0]['department'])->toBeNull();
 });
 
 it('returns correct permissions relationship structure', function () {
@@ -167,9 +159,7 @@ it('returns correct permissions relationship structure', function () {
     $response = getJson(route('api.v1.users.index', [], false));
     $response->assertOk();
 
-    $item = collect($response['data'])->firstWhere('id', $targetUser->id);
-
-    expect($item['permissions'])->toBe([$permission->name]);
+    expect($response['data'][0]['permissions'])->toBe([$permission->name]);
 });
 
 it('excludes users with admin roles from the list', function (string $adminRole) {
@@ -184,10 +174,8 @@ it('excludes users with admin roles from the list', function (string $adminRole)
     $response = getJson(route('api.v1.users.index', [], false));
     $response->assertOk();
 
-    $returnedIds = collect($response['data'])->pluck('id');
-
-    expect($returnedIds)->toContain($regularUser->id);
-    expect($returnedIds)->not->toContain($adminUser->id);
+    expect($response['meta']['total'])->toBe(1);
+    expect($response['data'][0]['id'])->toBe($regularUser->id);
 })->with([
     'SaaS Global Admin' => [Authenticatable::SUPER_ADMIN_ROLE],
     'Partner Admin' => [Authenticatable::PARTNER_ADMIN_ROLE],

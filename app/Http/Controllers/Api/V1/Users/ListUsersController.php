@@ -42,7 +42,6 @@ use App\Models\User;
 use Dedoc\Scramble\Attributes\Example;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
@@ -73,9 +72,7 @@ class ListUsersController
         )
             ->allowedFilters(
                 AllowedFilter::partial('name'),
-                AllowedFilter::callback('department', function (Builder $query, string $value): void {
-                    $query->whereHas('department', fn (Builder $deptQuery) => $deptQuery->where('name', 'ilike', '%' . $value . '%'));
-                }),
+                AllowedFilter::partial('department', 'department.name'),
             )
             ->allowedSorts(
                 AllowedSort::field('name'),
