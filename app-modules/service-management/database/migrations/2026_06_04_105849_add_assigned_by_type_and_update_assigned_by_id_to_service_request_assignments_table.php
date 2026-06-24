@@ -34,8 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestAssignmentByTypeFeature;
-use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -49,33 +47,19 @@ return new class () extends Migration {
                 $table->string('assigned_by_type')->nullable();
             });
 
-            //TODO: ServiceRequestAssignmentByTypeFeature clean up: Please remove the following code while removing feature flag. line: 53 to 55
-            DB::table('service_request_assignments')
-                ->whereNotNull('assigned_by_id')
-                ->update(['assigned_by_type' => (new User())->getMorphClass()]);
-
             Schema::table('service_request_assignments', function (Blueprint $table) {
                 $table->dropForeign(['assigned_by_id']);
                 $table->index(['assigned_by_type', 'assigned_by_id']);
             });
-
-            ServiceRequestAssignmentByTypeFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            ServiceRequestAssignmentByTypeFeature::deactivate();
             Schema::table('service_request_assignments', function (Blueprint $table) {
                 $table->dropIndex(['assigned_by_type', 'assigned_by_id']);
             });
-
-            //TODO: ServiceRequestAssignmentByTypeFeature clean up: Please remove the following code while removing feature flag. line: 75 to 78
-            DB::table('service_request_assignments')
-                ->whereNotNull('assigned_by_type')
-                ->where('assigned_by_type', '!=', (new User())->getMorphClass())
-                ->update(['assigned_by_id' => null]);
 
             Schema::table('service_request_assignments', function (Blueprint $table) {
                 $table->foreign('assigned_by_id')->references('id')->on('users');

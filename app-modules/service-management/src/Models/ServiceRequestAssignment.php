@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Observers\ServiceRequestAssignmentObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use AidingApp\Timeline\Timelines\ServiceRequestAssignmentTimeline;
-use App\Features\ServiceRequestAssignmentByTypeFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -89,16 +88,11 @@ class ServiceRequestAssignment extends BaseModel implements Auditable, ProvidesA
     }
 
     /**
-     * @return BelongsTo<User, $this>|MorphTo<Model, $this>
-     * TODO: ServiceRequestAssignmentByTypeFeature clean up: remove belongsto relationship and make this relation morphTo only.
+     * @return MorphTo<Model, $this>
      */
-    public function assignedBy(): BelongsTo|MorphTo
+    public function assignedBy(): MorphTo
     {
-        if (ServiceRequestAssignmentByTypeFeature::active()) {
-            return $this->morphTo();
-        }
-
-        return $this->belongsTo(User::class, 'assigned_by_id');
+        return $this->morphTo();
     }
 
     /**
