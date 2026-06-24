@@ -41,7 +41,6 @@ use AidingApp\Notification\Enums\NotificationChannel;
 use App\Models\Media;
 use App\Models\SystemUser;
 use App\Models\Tenant;
-use App\Models\User;
 use App\Overrides\Filament\Actions\Imports\Jobs\ImportCsvOverride;
 use App\Overrides\Filament\Actions\Imports\Jobs\PrepareCsvExportOverride;
 use App\Overrides\Laravel\PermissionMigrationCreator;
@@ -102,7 +101,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Relation::morphMap([
-            'user' => User::class,
             'system_user' => SystemUser::class,
             'tenant' => Tenant::class,
             'email_settings_property' => EmailSettingsProperty::class,
