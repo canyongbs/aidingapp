@@ -65,19 +65,18 @@ class ListAudits extends ListRecords
                     ->label('Change Agent')
                     ->sortable(
                         query: fn (Builder $query, string $direction): Builder => $query->orderByRaw(
-                            'COALESCE((' .
+                            'CASE audits.change_agent_type ' .
+                                "WHEN 'user' THEN (" .
                                 User::query()
                                     ->select('name')
                                     ->whereColumn('users.id', 'audits.change_agent_id')
-                                    ->where('audits.change_agent_type', 'user')
                                     ->toRawSql() .
-                                '), (' .
+                                ") WHEN 'system_user' THEN (" .
                                 SystemUser::query()
                                     ->select('name')
                                     ->whereColumn('system_users.id', 'audits.change_agent_id')
-                                    ->where('audits.change_agent_type', 'system_user')
                                     ->toRawSql() .
-                                ')) ' . $direction
+                                ') END ' . $direction
                         )
                     ),
                 TextColumn::make('event')
@@ -86,10 +85,25 @@ class ListAudits extends ListRecords
             ])
             ->filters([
                 SelectFilter::make('change_agent_user')
-                    ->label('Change Agent (User)')
-                    ->options(fn (): array => User::query()->pluck('name', 'id')->all())
+                    ->label('Change Agent')
+                    ->options(fn (): array => [
+                        'Users' => User::query()->pluck('name', 'id')
+                            ->mapWithKeys(fn (string $name, string $id) => ["user:{$id}" => $name])
+                            ->all(),
+                        'System Users' => SystemUser::query()->pluck('name', 'id')
+                            ->mapWithKeys(fn (string $name, string $id) => ["system_user:{$id}" => $name])
+                            ->all(),
+                    ])
                     ->searchable()
-                    ->query(fn (Builder $query, array $data) => $data['value'] ? $query->where('change_agent_type', 'user')->where('change_agent_id', $data['value']) : null),
+                    ->query(function (Builder $query, array $data) {
+                        if (! $data['value']) {
+                            return null;
+                        }
+
+                        [$type, $id] = explode(':', $data['value'], 2);
+
+                        return $query->where('change_agent_type', $type)->where('change_agent_id', $id);
+                    }),
                 SelectFilter::make('auditable')
                     ->label('Auditable')
                     ->options(AuditableModels::all())
