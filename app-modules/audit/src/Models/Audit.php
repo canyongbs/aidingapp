@@ -42,6 +42,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\MassPrunable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use OwenIt\Auditing\Models\Audit as BaseAudit;
 use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
@@ -70,5 +72,13 @@ class Audit extends BaseAudit
                     ->retention_duration_in_days
             ),
         );
+    }
+
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function changeAgent(): MorphTo
+    {
+        return $this->morphTo();
     }
 }

@@ -39,6 +39,7 @@ namespace AidingApp\Audit\Filament\Resources\Audits\Pages;
 use AidingApp\Audit\Actions\Finders\AuditableModels;
 use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
 use App\Filament\Tables\Columns\IdColumn;
+use App\Models\SystemUser;
 use App\Models\User;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
@@ -54,24 +55,55 @@ class ListAudits extends ListRecords
     public function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with(['changeAgent']))
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('auditable_type')
                     ->label('Auditable')
                     ->sortable(),
-                TextColumn::make('user.name')
-                    ->label('Change Agent (User)')
-                    ->sortable(),
+                TextColumn::make('changeAgent.name')
+                    ->label('Change Agent')
+                    ->sortable(
+                        query: fn (Builder $query, string $direction): Builder => $query->orderByRaw(
+                            'CASE audits.change_agent_type ' .
+                                "WHEN 'user' THEN (" .
+                                User::query()
+                                    ->select('name')
+                                    ->whereColumn('users.id', 'audits.change_agent_id')
+                                    ->toRawSql() .
+                                ") WHEN 'system_user' THEN (" .
+                                SystemUser::query()
+                                    ->select('name')
+                                    ->whereColumn('system_users.id', 'audits.change_agent_id')
+                                    ->toRawSql() .
+                                ') END ' . $direction
+                        )
+                    ),
                 TextColumn::make('event')
                     ->label('Event')
                     ->sortable(),
             ])
             ->filters([
                 SelectFilter::make('change_agent_user')
-                    ->label('Change Agent (User)')
-                    ->options(fn (): array => User::query()->pluck('name', 'id')->all())
+                    ->label('Change Agent')
+                    ->options(fn (): array => [
+                        'Users' => User::query()->pluck('name', 'id')
+                            ->mapWithKeys(fn (string $name, string $id) => ["user:{$id}" => $name])
+                            ->all(),
+                        'System Users' => SystemUser::query()->pluck('name', 'id')
+                            ->mapWithKeys(fn (string $name, string $id) => ["system_user:{$id}" => $name])
+                            ->all(),
+                    ])
                     ->searchable()
-                    ->query(fn (Builder $query, array $data) => $data['value'] ? $query->where('change_agent_type', 'user')->where('change_agent_id', $data['value']) : null),
+                    ->query(function (Builder $query, array $data) {
+                        if (! $data['value']) {
+                            return null;
+                        }
+
+                        [$type, $id] = explode(':', $data['value'], 2);
+
+                        return $query->where('change_agent_type', $type)->where('change_agent_id', $id);
+                    }),
                 SelectFilter::make('auditable')
                     ->label('Auditable')
                     ->options(AuditableModels::all())
