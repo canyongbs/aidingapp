@@ -48,7 +48,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
 use App\Enums\Feature;
-use App\Features\ServiceRequestNotificationAutomationFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\RichEditor\RichContentRenderer;
@@ -67,10 +66,6 @@ class FillServiceRequestEmailTemplatesWithAiAction extends Action
             ->label('Fill with AI')
             ->icon('heroicon-m-sparkles')
             ->visible(function (): bool {
-                if (! ServiceRequestNotificationAutomationFeature::active()) {
-                    return false;
-                }
-
                 if (! Gate::check(Feature::ServiceManagement->getGateName())) {
                     return false;
                 }
