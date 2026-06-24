@@ -45,6 +45,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Livewire\Attributes\On;
 
 class AssignmentHistoryRelationManager extends RelationManager
@@ -84,15 +85,14 @@ class AssignmentHistoryRelationManager extends RelationManager
         };
 
         return $table
-            ->modifyQueryUsing(fn (Builder $query) => $query->with([
-                'user.department',
-                'serviceRequestStatus',
-                'assignedBy' => function (MorphTo $morphTo) {
-                    $morphTo->morphWith([
+            ->modifyQueryUsing(fn (Builder $query) => $query
+                ->with(['user.department', 'serviceRequestStatus'])
+                ->with(['assignedBy' => function (Relation $relation) {
+                    assert($relation instanceof MorphTo);
+                    $relation->morphWith([
                         User::class => ['department'],
                     ]);
-                },
-            ]))
+                }]))
             ->emptyStateHeading('No assignment history')
             ->defaultSort('assigned_at', 'desc')
             ->columns([
