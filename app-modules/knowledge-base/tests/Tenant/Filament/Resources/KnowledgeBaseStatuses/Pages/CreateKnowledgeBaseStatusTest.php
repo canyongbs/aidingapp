@@ -158,4 +158,3 @@ test('CreateKnowledgeBaseStatus allows reusing the name of a soft deleted status
 
     expect(KnowledgeBaseStatus::query()->where('name', 'Published')->count())->toBe(1);
 });
-

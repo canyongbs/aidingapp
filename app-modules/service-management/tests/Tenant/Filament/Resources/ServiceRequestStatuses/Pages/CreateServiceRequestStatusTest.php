@@ -188,4 +188,3 @@ test('CreateServiceRequestStatus allows reusing the name of a soft deleted statu
 
     expect(ServiceRequestStatus::query()->where('name', 'Backlog')->count())->toBe(1);
 });
-
