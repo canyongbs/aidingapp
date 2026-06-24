@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Imports;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
-use App\Features\ContactTypeManagementFeature;
 use App\Models\User;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -79,11 +78,7 @@ class ContactImporter extends Importer
                             )
                             ->first();
 
-                        /*
-                         * TODO: ContactTypeManagementFeature cleanup — once the feature flag is removed,
-                         * drop the active() guard and always fall back to ContactType::resolveDefault().
-                         */
-                        if ($type === null && ContactTypeManagementFeature::active()) {
+                        if ($type === null) {
                             return ContactType::resolveDefault();
                         }
 

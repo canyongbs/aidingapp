@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,32 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Enums;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Support\Contracts\HasLabel;
-
-enum SystemContactClassification: string implements HasLabel
-{
-    case New = 'new';
-
-    case Assigned = 'assigned';
-
-    case InProgress = 'in_progress';
-
-    case Converted = 'converted';
-
-    case Recycled = 'recycled';
-
-    case NotInterested = 'not_interested';
-
-    case Custom = 'custom';
-
-    public function getLabel(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return match ($this) {
-            SystemContactClassification::InProgress => 'In Progress',
-            SystemContactClassification::NotInterested => 'Not Interested',
-            default => $this->name,
-        };
+        Schema::table('contact_types', function (Blueprint $table) {
+            $table->dropColumn('classification');
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('contact_types', function (Blueprint $table) {
+            $table->string('classification')->nullable();
+        });
+    }
+};

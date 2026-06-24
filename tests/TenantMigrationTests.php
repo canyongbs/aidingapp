@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\ContactTypeManagementFeature;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -68,7 +67,7 @@ function columnNativeType(string $table, string $column): ?string
 //});
 
 describe('2026_06_11_183351_add_is_default_to_contact_types_table', function () {
-    it('converts legacy semantic contact type colors, adds is_default and activates the feature', function () {
+    it('converts legacy semantic contact type colors and adds is_default', function () {
         isolatedMigration(
             '2026_06_11_183351_add_is_default_to_contact_types_table',
             function () {
@@ -97,8 +96,6 @@ describe('2026_06_11_183351_add_is_default_to_contact_types_table', function () 
                     ]);
                 }
 
-                expect(ContactTypeManagementFeature::active())->toBeFalse();
-
                 $migrate = Artisan::call('migrate', [
                     '--path' => 'app-modules/contact/database/migrations/2026_06_11_183351_add_is_default_to_contact_types_table.php',
                 ]);
@@ -111,8 +108,6 @@ describe('2026_06_11_183351_add_is_default_to_contact_types_table', function () 
                         ->and(DB::table('contact_types')->where('id', $ids[$legacyColor])->value('is_default'))
                         ->toBeFalsy();
                 }
-
-                expect(ContactTypeManagementFeature::active())->toBeTrue();
             }
         );
     });

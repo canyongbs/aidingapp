@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
@@ -54,7 +53,7 @@ beforeEach(function () {
 
 test('it registers a new portal contact for matching organization domain', function () {
     ContactType::factory()->create([
-        'classification' => SystemContactClassification::New,
+        'is_default' => true,
     ]);
 
     $organization = Organization::factory()->create([
@@ -178,7 +177,7 @@ test('it forbids registration when email domain does not match an enabled organi
 
 test('it normalizes stored www domain and allows only base-domain email registration', function () {
     ContactType::factory()->create([
-        'classification' => SystemContactClassification::New,
+        'is_default' => true,
     ]);
 
     Organization::factory()->create([
