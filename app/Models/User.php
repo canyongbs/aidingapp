@@ -135,6 +135,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'work_extension',
         'mobile',
         'last_activity_at',
+        'department_id',
     ];
 
     /**

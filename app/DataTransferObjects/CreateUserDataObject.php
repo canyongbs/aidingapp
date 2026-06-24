@@ -34,19 +34,48 @@
 </COPYRIGHT>
 */
 
-use App\Http\Controllers\Api\V1\Users\CreateUserController;
-use App\Http\Controllers\Api\V1\Users\DeleteUserController;
-use App\Http\Controllers\Api\V1\Users\ListUsersController;
-use App\Http\Controllers\Api\V1\Users\ViewUserController;
-use Illuminate\Support\Facades\Route;
+namespace App\DataTransferObjects;
 
-Route::api(majorVersion: 1, routes: function () {
-    Route::name('users.')
-        ->prefix('users')
-        ->group(function () {
-            Route::get('/', ListUsersController::class)->name('index');
-            Route::post('/', CreateUserController::class)->name('store');
-            Route::get('/{user}', ViewUserController::class)->name('show');
-            Route::delete('/{user}', DeleteUserController::class)->name('destroy');
-        });
-});
+use Spatie\LaravelData\Attributes\MapName;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+use Spatie\LaravelData\Optional;
+
+#[MapName(SnakeCaseMapper::class)]
+class CreateUserDataObject extends Data
+{
+    /**
+     * @param array<int, string>|Optional $roles
+     */
+    public function __construct(
+        public string $name,
+        public string $email,
+        public bool $isExternal,
+        public string | Optional $jobTitle,
+        public string | Optional $phoneNumber,
+        public string | Optional $workNumber,
+        public int | Optional $workExtension,
+        public string | Optional $mobile,
+        public string | Optional $departmentId,
+        public array | Optional $roles,
+    ) {}
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    public static function fromData(array $data): self
+    {
+        return new self(
+            name: $data['name'],
+            email: $data['email'],
+            isExternal: $data['is_external'],
+            jobTitle: $data['job_title'] ?? Optional::create(),
+            phoneNumber: $data['phone_number'] ?? Optional::create(),
+            workNumber: $data['work_number'] ?? Optional::create(),
+            workExtension: $data['work_extension'] ?? Optional::create(),
+            mobile: $data['mobile'] ?? Optional::create(),
+            departmentId: $data['department_id'] ?? Optional::create(),
+            roles: $data['roles'] ?? Optional::create(),
+        );
+    }
+}
