@@ -64,7 +64,7 @@ class EnsureAssistantWidgetIsEmbeddableAndAuthorized
                 return response()->json(['error' => 'Embedding is not enabled for the assistant.'], 403);
             }
 
-            $allowedDomains = collect($settings->embed_assistant_allowed_domains ?? []);
+            $allowedDomains = collect($settings->embed_assistant_allowed_domains);
 
             if (! $allowedDomains->contains($requestingUrlHeader)) {
                 return response()->json(['error' => 'Origin/Referer not allowed. Domain must be added to allowed domains list'], 403);

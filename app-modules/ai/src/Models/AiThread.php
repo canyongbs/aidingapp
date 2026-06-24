@@ -106,7 +106,7 @@ class AiThread extends Model implements HasMedia
             User::class,
             table: 'ai_messages',
             foreignPivotKey: 'thread_id',
-        )->using(AiMessage::class); // @phpstan-ignore argument.type (Same as above)
+        )->using(AiMessage::class); // @phpstan-ignore argument.type, argument.templateType (Same as above)
     }
 
     /**

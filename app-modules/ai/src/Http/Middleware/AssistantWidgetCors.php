@@ -64,7 +64,7 @@ class AssistantWidgetCors
         $requestingUrlHost = parse_url($requestingUrlHeader, PHP_URL_HOST);
 
         $settings = app(PortalSettings::class);
-        $allowedDomains = $settings->embed_assistant_allowed_domains ?? [];
+        $allowedDomains = $settings->embed_assistant_allowed_domains;
 
         $isAllowed = $requestingUrlHost === $appRootDomain || in_array($requestingUrlHost, $allowedDomains);
 

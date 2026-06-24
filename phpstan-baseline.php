@@ -78,12 +78,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/audit/src/Overrides/BelongsToMany.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Access to an undefined property OwenIt\\\\Auditing\\\\Contracts\\\\Auditable\\:\\:\\$isCustomEvent\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 3,
-    'path' => __DIR__ . '/app-modules/audit/src/Overrides/BelongsToMany.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Class AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany extends generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany but does not specify its types\\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \\(2\\-4 required\\)$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -103,12 +97,6 @@ $ignoreErrors[] = [
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property OwenIt\\\\Auditing\\\\Contracts\\\\Auditable\\:\\:\\$auditEvent\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 3,
-    'path' => __DIR__ . '/app-modules/audit/src/Overrides/MorphToMany.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property OwenIt\\\\Auditing\\\\Contracts\\\\Auditable\\:\\:\\$isCustomEvent\\.$#',
     'identifier' => 'property.notFound',
     'count' => 3,
     'path' => __DIR__ . '/app-modules/audit/src/Overrides/MorphToMany.php',

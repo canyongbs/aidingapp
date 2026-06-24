@@ -62,7 +62,7 @@ trait AttachOverrides
         $relationName = $this->relationName;
 
         $parentModel->auditEvent = 'attach';
-        $parentModel->isCustomEvent = true;
+        $parentModel->isCustomEvent = true; // @phpstan-ignore property.notFound (The isCustomEvent property is provided by the OwenIt\Auditing\Auditable trait at runtime.)
         $parentModel->auditCustomOld = [
             $relationName => $parentModel->{$relationName}()->get()->toArray(),
         ];
@@ -73,7 +73,7 @@ trait AttachOverrides
             $relationName => $parentModel->{$relationName}()->get()->toArray(),
         ];
         Event::dispatch(new AuditCustom($parentModel));
-        $parentModel->isCustomEvent = false;
+        $parentModel->isCustomEvent = false; // @phpstan-ignore property.notFound (The isCustomEvent property is provided by the OwenIt\Auditing\Auditable trait at runtime.)
     }
 
     public function detach($ids = null, $touch = true)
@@ -88,7 +88,7 @@ trait AttachOverrides
         $relationName = $this->relationName;
 
         $parentModel->auditEvent = 'detach';
-        $parentModel->isCustomEvent = true;
+        $parentModel->isCustomEvent = true; // @phpstan-ignore property.notFound (The isCustomEvent property is provided by the OwenIt\Auditing\Auditable trait at runtime.)
         $parentModel->auditCustomOld = [
             $relationName => $parentModel->{$relationName}()->get()->toArray(),
         ];
@@ -99,7 +99,7 @@ trait AttachOverrides
             $relationName => $parentModel->{$relationName}()->get()->toArray(),
         ];
         Event::dispatch(new AuditCustom($parentModel));
-        $parentModel->isCustomEvent = false;
+        $parentModel->isCustomEvent = false; // @phpstan-ignore property.notFound (The isCustomEvent property is provided by the OwenIt\Auditing\Auditable trait at runtime.)
 
         return empty($results) ? 0 : $results;
     }
@@ -138,9 +138,9 @@ trait AttachOverrides
             ];
         }
 
-        $parentModel->isCustomEvent = true;
+        $parentModel->isCustomEvent = true; // @phpstan-ignore property.notFound (The isCustomEvent property is provided by the OwenIt\Auditing\Auditable trait at runtime.)
         Event::dispatch(new AuditCustom($parentModel));
-        $parentModel->isCustomEvent = false;
+        $parentModel->isCustomEvent = false; // @phpstan-ignore property.notFound (The isCustomEvent property is provided by the OwenIt\Auditing\Auditable trait at runtime.)
 
         return $changes;
     }
