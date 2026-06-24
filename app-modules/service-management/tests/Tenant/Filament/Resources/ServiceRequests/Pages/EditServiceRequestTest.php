@@ -37,6 +37,9 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Division\Models\Division;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
@@ -45,6 +48,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestRequestFactory;
 use App\Models\User;
@@ -524,7 +528,14 @@ test('send feedback email if service request is closed', function () {
         'has_enabled_feedback_collection' => true,
         'has_enabled_csat' => true,
         'has_enabled_nps' => true,
-        'is_customers_survey_response_email_enabled' => true,
+    ]);
+
+    ServiceRequestTypeEmailPreference::create([
+        'service_request_type_id' => $serviceRequestType->getKey(),
+        'service_request_email_template_type' => ServiceRequestEmailTemplateType::SurveyResponse,
+        'service_request_email_template_role' => ServiceRequestTypeEmailTemplateRole::Customer,
+        'notification_channel' => ServiceRequestNotificationChannel::Email,
+        'is_enabled' => true,
     ]);
 
     $serviceRequestType->managerDepartments()->attach($department);
@@ -598,7 +609,14 @@ test('send feedback email if service request is closed for direct user manager',
         'has_enabled_feedback_collection' => true,
         'has_enabled_csat' => true,
         'has_enabled_nps' => true,
-        'is_customers_survey_response_email_enabled' => true,
+    ]);
+
+    ServiceRequestTypeEmailPreference::create([
+        'service_request_type_id' => $serviceRequestType->getKey(),
+        'service_request_email_template_type' => ServiceRequestEmailTemplateType::SurveyResponse,
+        'service_request_email_template_role' => ServiceRequestTypeEmailTemplateRole::Customer,
+        'notification_channel' => ServiceRequestNotificationChannel::Email,
+        'is_enabled' => true,
     ]);
 
     $serviceRequestType->managerUsers()->attach($user);

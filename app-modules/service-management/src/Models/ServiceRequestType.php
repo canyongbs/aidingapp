@@ -46,7 +46,6 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
-use App\Features\ServiceRequestTypeEmailPreferenceFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
@@ -85,39 +84,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'icon',
         'default_category',
         'assignment_type',
-        'is_managers_service_request_created_email_enabled',
-        'is_managers_service_request_created_notification_enabled',
-        'is_managers_service_request_assigned_email_enabled',
-        'is_managers_service_request_assigned_notification_enabled',
-        'is_managers_service_request_closed_email_enabled',
-        'is_managers_service_request_closed_notification_enabled',
-        'is_auditors_service_request_created_email_enabled',
-        'is_auditors_service_request_created_notification_enabled',
-        'is_auditors_service_request_assigned_email_enabled',
-        'is_auditors_service_request_assigned_notification_enabled',
-        'is_auditors_service_request_closed_email_enabled',
-        'is_auditors_service_request_closed_notification_enabled',
         'last_assigned_id',
-        'is_managers_service_request_update_email_enabled',
-        'is_managers_service_request_update_notification_enabled',
-        'is_managers_service_request_status_change_email_enabled',
-        'is_managers_service_request_status_change_notification_enabled',
-        'is_auditors_service_request_update_email_enabled',
-        'is_auditors_service_request_update_notification_enabled',
-        'is_auditors_service_request_status_change_email_enabled',
-        'is_auditors_service_request_status_change_notification_enabled',
-        'is_customers_service_request_created_email_enabled',
-        'is_customers_service_request_created_notification_enabled',
-        'is_customers_service_request_assigned_email_enabled',
-        'is_customers_service_request_assigned_notification_enabled',
-        'is_customers_service_request_update_email_enabled',
-        'is_customers_service_request_update_notification_enabled',
-        'is_customers_service_request_status_change_email_enabled',
-        'is_customers_service_request_status_change_notification_enabled',
-        'is_customers_service_request_closed_email_enabled',
-        'is_customers_service_request_closed_notification_enabled',
-        'is_customers_service_request_closed_notification_enabled',
-        'is_customers_survey_response_email_enabled',
         'is_email_automatic_creation_enabled',
         'is_email_automatic_creation_contact_create_enabled',
         'email_automatic_creation_priority_id',
@@ -255,12 +222,6 @@ class ServiceRequestType extends BaseModel implements Auditable
         ServiceRequestTypeEmailTemplateRole $role,
         ServiceRequestNotificationChannel $channel,
     ): bool {
-        if (! ServiceRequestTypeEmailPreferenceFeature::active()) {
-            $attribute = 'is_' . $role->value . 's_' . $templateType->getEventSlug() . '_' . $channel->value . '_enabled';
-
-            return (bool) ($this->{$attribute} ?? false);
-        }
-
         return $this->emailPreferences
             ->first(
                 fn (ServiceRequestTypeEmailPreference $preference): bool => $preference->service_request_email_template_type === $templateType
@@ -301,37 +262,6 @@ class ServiceRequestType extends BaseModel implements Auditable
             'has_enabled_nps' => 'boolean',
             'default_category' => ServiceRequestCategory::class,
             'assignment_type' => ServiceRequestTypeAssignmentTypes::class,
-            'is_managers_service_request_created_email_enabled' => 'boolean',
-            'is_managers_service_request_created_notification_enabled' => 'boolean',
-            'is_managers_service_request_assigned_email_enabled' => 'boolean',
-            'is_managers_service_request_assigned_notification_enabled' => 'boolean',
-            'is_managers_service_request_closed_email_enabled' => 'boolean',
-            'is_managers_service_request_closed_notification_enabled' => 'boolean',
-            'is_auditors_service_request_created_email_enabled' => 'boolean',
-            'is_auditors_service_request_created_notification_enabled' => 'boolean',
-            'is_auditors_service_request_assigned_email_enabled' => 'boolean',
-            'is_auditors_service_request_assigned_notification_enabled' => 'boolean',
-            'is_auditors_service_request_closed_email_enabled' => 'boolean',
-            'is_auditors_service_request_closed_notification_enabled' => 'boolean',
-            'is_managers_service_request_update_email_enabled' => 'boolean',
-            'is_managers_service_request_update_notification_enabled' => 'boolean',
-            'is_managers_service_request_status_change_email_enabled' => 'boolean',
-            'is_managers_service_request_status_change_notification_enabled' => 'boolean',
-            'is_auditors_service_request_update_email_enabled' => 'boolean',
-            'is_auditors_service_request_update_notification_enabled' => 'boolean',
-            'is_auditors_service_request_status_change_email_enabled' => 'boolean',
-            'is_auditors_service_request_status_change_notification_enabled' => 'boolean',
-            'is_customers_service_request_created_email_enabled' => 'boolean',
-            'is_customers_service_request_created_notification_enabled' => 'boolean',
-            'is_customers_service_request_assigned_email_enabled' => 'boolean',
-            'is_customers_service_request_assigned_notification_enabled' => 'boolean',
-            'is_customers_service_request_update_email_enabled' => 'boolean',
-            'is_customers_service_request_update_notification_enabled' => 'boolean',
-            'is_customers_service_request_status_change_email_enabled' => 'boolean',
-            'is_customers_service_request_status_change_notification_enabled' => 'boolean',
-            'is_customers_service_request_closed_email_enabled' => 'boolean',
-            'is_customers_service_request_closed_notification_enabled' => 'boolean',
-            'is_customers_survey_response_email_enabled' => 'boolean',
             'is_email_automatic_creation_enabled' => 'boolean',
             'is_email_automatic_creation_contact_create_enabled' => 'boolean',
             'is_reminders_enabled' => 'boolean',

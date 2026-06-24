@@ -37,15 +37,10 @@
 use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
-use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
-use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\ContactTypeManagementFeature;
-use App\Features\ServiceRequestTypeEmailPreferenceFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -78,100 +73,6 @@ function columnNativeType(string $table, string $column): ?string
 //        );
 //    });
 //});
-
-describe('2026_06_02_122811_tmp_data_migrate_service_request_type_email_preferences', function () {
-    it('migrates all boolean preference columns into the email preference table with no data loss', function () {
-        isolatedMigration(
-            '2026_06_02_122811_tmp_data_migrate_service_request_type_email_preferences',
-            function () {
-                $typeA = ServiceRequestType::factory()->create();
-                $typeB = ServiceRequestType::factory()->create();
-
-                $columnMap = [
-                    'is_managers_service_request_created_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Created->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_managers_service_request_assigned_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Assigned->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_managers_service_request_update_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Update->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_managers_service_request_status_change_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::StatusChange->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_managers_service_request_closed_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Closed->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_auditors_service_request_created_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Created->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_auditors_service_request_assigned_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Assigned->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_auditors_service_request_update_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Update->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_auditors_service_request_status_change_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::StatusChange->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_auditors_service_request_closed_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Closed->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_customers_service_request_created_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Created->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_customers_service_request_assigned_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Assigned->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_customers_service_request_update_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Update->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_customers_service_request_status_change_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::StatusChange->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_customers_service_request_closed_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Closed->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_customers_survey_response_email_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::SurveyResponse->value, ServiceRequestNotificationChannel::Email->value],
-                    'is_managers_service_request_created_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Created->value, ServiceRequestNotificationChannel::Notification->value],
-                    'is_managers_service_request_assigned_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Assigned->value, ServiceRequestNotificationChannel::Notification->value],
-                    'is_managers_service_request_update_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Update->value, ServiceRequestNotificationChannel::Notification->value],
-                    'is_managers_service_request_status_change_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::StatusChange->value, ServiceRequestNotificationChannel::Notification->value],
-                    'is_managers_service_request_closed_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Manager->value, ServiceRequestEmailTemplateType::Closed->value, ServiceRequestNotificationChannel::Notification->value],
-                    'is_auditors_service_request_created_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Created->value, ServiceRequestNotificationChannel::Notification->value],
-                    'is_auditors_service_request_assigned_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Assigned->value, ServiceRequestNotificationChannel::Notification->value],
-                    'is_auditors_service_request_update_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Update->value, ServiceRequestNotificationChannel::Notification->value],
-                    'is_auditors_service_request_status_change_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::StatusChange->value, ServiceRequestNotificationChannel::Notification->value],
-                    'is_auditors_service_request_closed_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Auditor->value, ServiceRequestEmailTemplateType::Closed->value, ServiceRequestNotificationChannel::Notification->value],
-                    'is_customers_service_request_created_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Created->value, ServiceRequestNotificationChannel::Notification->value],
-                    'is_customers_service_request_assigned_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Assigned->value, ServiceRequestNotificationChannel::Notification->value],
-                    'is_customers_service_request_update_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Update->value, ServiceRequestNotificationChannel::Notification->value],
-                    'is_customers_service_request_status_change_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::StatusChange->value, ServiceRequestNotificationChannel::Notification->value],
-                    'is_customers_service_request_closed_notification_enabled' => [ServiceRequestTypeEmailTemplateRole::Customer->value, ServiceRequestEmailTemplateType::Closed->value, ServiceRequestNotificationChannel::Notification->value],
-                ];
-
-                $valuesForTypeA = [];
-                $valuesForTypeB = [];
-
-                foreach (array_keys($columnMap) as $index => $column) {
-                    $valuesForTypeA[$column] = $index % 2 === 0;
-                    $valuesForTypeB[$column] = $index % 3 === 0;
-                }
-
-                DB::table('service_request_types')->where('id', $typeA->id)->update($valuesForTypeA);
-                DB::table('service_request_types')->where('id', $typeB->id)->update($valuesForTypeB);
-
-                $migrate = Artisan::call('migrate', [
-                    '--path' => 'app-modules/service-management/database/migrations/2026_06_02_122811_tmp_data_migrate_service_request_type_email_preferences.php',
-                ]);
-
-                expect($migrate)->toBe(Command::SUCCESS);
-
-                $expectedCountPerType = count($columnMap);
-
-                expect(DB::table('service_request_type_email_preference')->where('service_request_type_id', $typeA->id)->count())
-                    ->toBe($expectedCountPerType)
-                    ->and(DB::table('service_request_type_email_preference')->where('service_request_type_id', $typeB->id)->count())
-                    ->toBe($expectedCountPerType);
-
-                foreach ($columnMap as $column => [$role, $templateType, $channel]) {
-                    $prefA = DB::table('service_request_type_email_preference')
-                        ->where('service_request_type_id', $typeA->id)
-                        ->where('service_request_email_template_role', $role)
-                        ->where('service_request_email_template_type', $templateType)
-                        ->where('notification_channel', $channel)
-                        ->first();
-
-                    expect($prefA)->not->toBeNull()
-                        ->and((bool) $prefA->is_enabled)->toBe($valuesForTypeA[$column]);
-
-                    $prefB = DB::table('service_request_type_email_preference')
-                        ->where('service_request_type_id', $typeB->id)
-                        ->where('service_request_email_template_role', $role)
-                        ->where('service_request_email_template_type', $templateType)
-                        ->where('notification_channel', $channel)
-                        ->first();
-
-                    expect($prefB)->not->toBeNull()
-                        ->and((bool) $prefB->is_enabled)->toBe($valuesForTypeB[$column]);
-                }
-
-                expect(ServiceRequestTypeEmailPreferenceFeature::active())->toBeTrue();
-            }
-        );
-    });
-});
 
 describe('2026_06_04_203158_add_citext_unique_to_knowledge_base_statuses_name', function () {
     it('merges case-insensitive duplicates keeping the latest, reassigns its articles, soft deletes the rest and converts the name column to citext', function () {
