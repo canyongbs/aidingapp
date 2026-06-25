@@ -34,62 +34,21 @@
 </COPYRIGHT>
 */
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /**
-     * @var array<string, string>
-     */
-    private array $colorMap = [
-        'info' => 'blue',
-        'warning' => 'amber',
-        'success' => 'green',
-        'danger' => 'red',
-        'primary' => 'gray',
-    ];
-
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('contact_types', function (Blueprint $table) {
-                $table->boolean('is_default')->default(false);
-            });
-
-            foreach ($this->colorMap as $from => $to) {
-                DB::table('contact_types')
-                    ->where('color', $from)
-                    ->update(['color' => $to]);
-            }
+        Schema::table('contact_types', function (Blueprint $table) {
+            $table->boolean('is_default')->default(false);
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            // 'primary' -> 'gray' is not reversible (both legacy 'primary' and 'gray'
-            // become 'gray'), so 'gray' rows are left untouched on rollback.
-            $reverse = [
-                'blue' => 'info',
-                'amber' => 'warning',
-                'green' => 'success',
-                'red' => 'danger',
-            ];
-
-            foreach ($reverse as $from => $to) {
-                DB::table('contact_types')
-                    ->where('color', $from)
-                    ->update(['color' => $to]);
-            }
-
-            DB::table('contact_types')
-                ->whereNotIn('color', ['info', 'warning', 'success', 'danger', 'primary', 'gray'])
-                ->update(['color' => 'gray']);
-
-            Schema::table('contact_types', function (Blueprint $table) {
-                $table->dropColumn('is_default');
-            });
+        Schema::table('contact_types', function (Blueprint $table) {
+            $table->dropColumn('is_default');
         });
     }
 };
