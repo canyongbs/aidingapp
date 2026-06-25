@@ -54,6 +54,8 @@ class SendClosedServiceRequestFeedbackReminders implements ShouldQueue, ShouldBe
     use Queueable;
     use SerializesModels;
 
+    public int $uniqueFor = 900;
+
     public function handle(): void
     {
         $serviceRequests = ServiceRequest::query()
