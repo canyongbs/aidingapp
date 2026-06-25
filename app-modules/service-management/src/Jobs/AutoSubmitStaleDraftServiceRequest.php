@@ -56,6 +56,8 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
     use Queueable;
     use SerializesModels;
 
+    public int $uniqueFor = 900;
+
     public function __construct(
         protected string $serviceRequestId,
     ) {}

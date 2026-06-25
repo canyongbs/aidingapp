@@ -57,6 +57,8 @@ class EndServiceRequestConversations implements ShouldQueue, ShouldBeUnique
     use Queueable;
     use SerializesModels;
 
+    public int $uniqueFor = 900;
+
     public function handle(): void
     {
         $this->expireQueuedConversations();
