@@ -36,7 +36,6 @@
 
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Symfony\Component\Console\Command\Command;
 
 function columnNativeType(string $table, string $column): ?string
@@ -65,5 +64,3 @@ function columnNativeType(string $table, string $column): ?string
 //        );
 //    });
 //});
-
-
