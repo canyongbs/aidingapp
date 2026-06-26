@@ -52,6 +52,8 @@ class AutoSubmitStaleDraftServiceRequests implements ShouldQueue, ShouldBeUnique
     use Queueable;
     use SerializesModels;
 
+    public int $uniqueFor = 900;
+
     public function handle(): void
     {
         $cutoffTime = now()->subHour();
