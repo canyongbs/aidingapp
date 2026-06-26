@@ -238,6 +238,17 @@ class EditKnowledgeBaseItem extends EditRecord
             ]);
     }
 
+    public function getRedirectUrl(): ?string
+    {
+        $parameters = ['record' => $this->record];
+
+        if ($this->tab) {
+            $parameters['tab'] = $this->tab;
+        }
+
+        return KnowledgeBaseItemResource::getUrl('view', $parameters);
+    }
+
     protected function getSavedNotificationTitle(): ?string
     {
         return 'Article details successfully saved';
@@ -259,16 +270,5 @@ class EditKnowledgeBaseItem extends EditRecord
                 ->color('primary')
                 ->label('Save'),
         ];
-    }
-
-    public function getRedirectUrl(): ?string
-    {
-        $parameters = ['record' => $this->record];
-
-        if ($this->tab) {
-            $parameters['tab'] = $this->tab;
-        }
-
-        return KnowledgeBaseItemResource::getUrl('view', $parameters);
     }
 }
