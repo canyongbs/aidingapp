@@ -64,6 +64,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Url;
 
 class EditKnowledgeBaseItem extends EditRecord
 {
@@ -72,13 +73,25 @@ class EditKnowledgeBaseItem extends EditRecord
 
     protected static string $resource = KnowledgeBaseItemResource::class;
 
+    #[Url]
+    public ?string $tab = null;
+
+    public function mount(int | string $record): void
+    {
+        parent::mount($record);
+
+        if (! in_array($this->tab, ['resource', 'properties'])) {
+            $this->tab = 'resource';
+        }
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Tabs::make()
                     ->tabs([
-                        Tab::make('Content')
+                        'resource' => Tab::make('Content')
                             ->label('Resource')
                             ->schema([
                                 RichEditor::make('article_details')
@@ -104,7 +117,7 @@ class EditKnowledgeBaseItem extends EditRecord
                                     DraftKnowledgeBaseItemWithAiAction::make(),
                                 ]),
                             ]),
-                        Tab::make('Properties')
+                        'properties' => Tab::make('Properties')
                             ->schema([
                                 TextInput::make('title')
                                     ->label('Article Title')
@@ -220,7 +233,8 @@ class EditKnowledgeBaseItem extends EditRecord
                             ])
                             ->columns(2),
                     ])
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->livewireProperty('tab'),
             ]);
     }
 
@@ -245,5 +259,16 @@ class EditKnowledgeBaseItem extends EditRecord
                 ->color('primary')
                 ->label('Save'),
         ];
+    }
+
+    public function getRedirectUrl(): ?string
+    {
+        $parameters = ['record' => $this->record];
+
+        if ($this->tab) {
+            $parameters['tab'] = $this->tab;
+        }
+
+        return KnowledgeBaseItemResource::getUrl('view', $parameters);
     }
 }
