@@ -513,7 +513,8 @@
                                 </svg>
 
                                 <span v-if="isGeneratingQuestions" class="text-sm text-gray-700"
-                                    >Generating {{ numberOfClarifyingQuestions === 1 ? 'question' : 'questions' }}…</span
+                                    >Generating
+                                    {{ numberOfClarifyingQuestions === 1 ? 'question' : 'questions' }}…</span
                                 >
                                 <span v-else class="text-sm text-gray-700">Evaluating your request…</span>
                             </div>
