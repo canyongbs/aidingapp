@@ -70,7 +70,7 @@ class GenerateServiceRequestQuestionsController extends Controller
         $aiService = app(AiIntegratedAssistantSettings::class)->getDefaultModel()->getService();
 
         $totalQuestions = AiClarificationSettings::NUMBER_OF_QUESTIONS;
-        $questionsWord = $totalQuestions === 1 ? 'one question' : "exactly {$totalQuestions} questions";
+        $questionsWord = $totalQuestions === 1 ? 'one question' : "exactly {$totalQuestions} questions"; /** @phpstan-ignore identical.alwaysTrue */
 
         $response = $aiService->complete(
             prompt: "Return each question on a new line, no need to number them. There should be {$questionsWord} in total, clarifying the service request based on the provided form data.",

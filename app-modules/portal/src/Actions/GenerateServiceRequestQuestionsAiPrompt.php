@@ -72,7 +72,7 @@ class GenerateServiceRequestQuestionsAiPrompt
         }
 
         $totalQuestions = AiClarificationSettings::NUMBER_OF_QUESTIONS;
-        $questionsWord = $totalQuestions === 1 ? 'one clarifying question' : "{$totalQuestions} clarifying questions";
+        $questionsWord = $totalQuestions === 1 ? 'one clarifying question' : "{$totalQuestions} clarifying questions"; /** @phpstan-ignore identical.alwaysTrue */
 
         $prompt .= "\n\nReview the submitted form data (below) and come up with {$questionsWord}. The answer should give the human agent handling this request the information they need to resolve it faster. Only ask about information that is directly relevant to resolving this particular request. Each question must be simple and focused on a single topic — do not ask compound questions that cover multiple topics.\n\n";
 
