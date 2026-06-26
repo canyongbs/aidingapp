@@ -89,7 +89,8 @@ class GenerateServiceRequestForm
         if (app(AiClarificationSettings::class)->is_enabled
             && $type->is_ai_clarification_enabled) {
             $maxOrder = $form->steps->max('order') ?? 0;
-            $form->steps->push($this->formatStep('Questions', $maxOrder + 1, collect([])));
+            $stepLabel = AiClarificationSettings::NUMBER_OF_QUESTIONS === 1 ? 'Question' : 'Questions';
+            $form->steps->push($this->formatStep($stepLabel, $maxOrder + 1, collect([])));
         }
 
         return $form;

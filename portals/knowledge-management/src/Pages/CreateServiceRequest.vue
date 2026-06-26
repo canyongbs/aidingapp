@@ -81,6 +81,7 @@
     const hasGeneratedQuestions = ref(false);
     const isGeneratingQuestions = ref(false);
     const categoryData = ref(null);
+    const numberOfClarifyingQuestions = ref(1);
     const isEvaluatingAiResolution = ref(false);
     const aiResolutionData = ref(null);
     const aiResolutionAttempted = ref(null);
@@ -153,6 +154,7 @@
 
             // Set category data from API response
             categoryData.value = response.data.category || null;
+            numberOfClarifyingQuestions.value = response.data.number_of_clarifying_questions ?? 1;
         });
     }
 
@@ -511,7 +513,7 @@
                                 </svg>
 
                                 <span v-if="isGeneratingQuestions" class="text-sm text-gray-700"
-                                    >Generating questions…</span
+                                    >Generating {{ numberOfClarifyingQuestions === 1 ? 'question' : 'questions' }}…</span
                                 >
                                 <span v-else class="text-sm text-gray-700">Evaluating your request…</span>
                             </div>
