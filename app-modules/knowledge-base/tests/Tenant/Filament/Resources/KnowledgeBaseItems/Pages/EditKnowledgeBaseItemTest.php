@@ -144,7 +144,7 @@ test('managers UserSelect does not show admin users in options by default', func
 
     livewire(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
         ->assertSuccessful()
-        ->assertFormFieldExists('manager_ids', function (UserSelect $field) use ($regularUser, $adminUser): bool {
+        ->assertFormFieldExists('properties.manager_ids', function (UserSelect $field) use ($regularUser, $adminUser): bool {
             $options = $field->getSearchResults($regularUser->name);
             $adminOptions = $field->getSearchResults($adminUser->name);
 
@@ -170,7 +170,7 @@ test('managers UserSelect shows a pre-selected admin user so they can be deselec
 
     livewire(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
         ->assertSuccessful()
-        ->assertFormFieldExists('manager_ids', function (UserSelect $field) use ($adminUser): bool {
+        ->assertFormFieldExists('properties.manager_ids', function (UserSelect $field) use ($adminUser): bool {
             $options = $field->getSearchResults($adminUser->name);
 
             return ! empty($options);
@@ -196,7 +196,7 @@ test('managers UserSelect shows all users including admins when filter_admins_fr
 
     livewire(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
         ->assertSuccessful()
-        ->assertFormFieldExists('manager_ids', function (UserSelect $field) use ($adminUser): bool {
+        ->assertFormFieldExists('properties.manager_ids', function (UserSelect $field) use ($adminUser): bool {
             $options = $field->getSearchResults($adminUser->name);
 
             return ! empty($options);

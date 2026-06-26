@@ -43,7 +43,6 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
@@ -121,7 +120,7 @@ test('rating displays Unrated when article has no votes', function () {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSeeText('Unrated');
+        ->assertSchemaComponentStateSet('properties.rating', 'Unrated', 'infolist');
 });
 
 test('rating displays correct percentage when article has votes', function () {
@@ -150,7 +149,7 @@ test('rating displays correct percentage when article has votes', function () {
         ->create();
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSeeText('67%');
+        ->assertSchemaComponentStateSet('properties.rating', '67%', 'infolist');
 });
 
 test('rating displays 100 percent when all votes are helpful', function () {
@@ -170,7 +169,7 @@ test('rating displays 100 percent when all votes are helpful', function () {
         ->create();
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSeeText('100%');
+        ->assertSchemaComponentStateSet('properties.rating', '100%', 'infolist');
 });
 
 test('rating displays 0 percent when no votes are helpful', function () {
@@ -190,7 +189,7 @@ test('rating displays 0 percent when no votes are helpful', function () {
         ->create();
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSeeText('0%');
+        ->assertSchemaComponentStateSet('properties.rating', '0%', 'infolist');
 });
 
 // Health Tab Tests
@@ -203,12 +202,12 @@ test('Health tab title_filled shows correct state', function () {
         ->create();
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSchemaComponentStateSet('title_filled', false, 'infolist');
+        ->assertSchemaComponentStateSet('health.title_filled', false, 'infolist');
 
     $knowledgeBaseItem->update(['title' => 'Test Article']);
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSchemaComponentStateSet('title_filled', true, 'infolist');
+        ->assertSchemaComponentStateSet('health.title_filled', true, 'infolist');
 });
 
 test('Health tab article_filled shows correct state', function () {
@@ -219,7 +218,7 @@ test('Health tab article_filled shows correct state', function () {
         ->create();
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSchemaComponentStateSet('article_filled', false, 'infolist');
+        ->assertSchemaComponentStateSet('health.article_filled', false, 'infolist');
 
     $knowledgeBaseItem->update([
         'article_details' => [
@@ -231,7 +230,7 @@ test('Health tab article_filled shows correct state', function () {
     ]);
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSchemaComponentStateSet('article_filled', false, 'infolist');
+        ->assertSchemaComponentStateSet('health.article_filled', false, 'infolist');
 
     $knowledgeBaseItem->update([
         'article_details' => [
@@ -243,7 +242,7 @@ test('Health tab article_filled shows correct state', function () {
     ]);
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSchemaComponentStateSet('article_filled', false, 'infolist');
+        ->assertSchemaComponentStateSet('health.article_filled', false, 'infolist');
 
     $knowledgeBaseItem->update([
         'article_details' => [
@@ -255,7 +254,7 @@ test('Health tab article_filled shows correct state', function () {
     ]);
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSchemaComponentStateSet('article_filled', true, 'infolist');
+        ->assertSchemaComponentStateSet('health.article_filled', true, 'infolist');
 });
 
 test('Health tab manager_assigned shows correct state', function () {
@@ -265,12 +264,12 @@ test('Health tab manager_assigned shows correct state', function () {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSchemaComponentStateSet('manager_assigned', false, 'infolist');
+        ->assertSchemaComponentStateSet('health.manager_assigned', false, 'infolist');
 
     $knowledgeBaseItem->managers()->attach($user);
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSchemaComponentStateSet('manager_assigned', true, 'infolist');
+        ->assertSchemaComponentStateSet('health.manager_assigned', true, 'infolist');
 });
 
 test('Health tab no_unresolved_concerns shows correct state', function () {
@@ -284,12 +283,12 @@ test('Health tab no_unresolved_concerns shows correct state', function () {
         ->create();
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSchemaComponentStateSet('no_unresolved_concerns', false, 'infolist');
+        ->assertSchemaComponentStateSet('health.no_unresolved_concerns', false, 'infolist');
 
     $concern->update(['status' => ConcernStatus::Resolved]);
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSchemaComponentStateSet('no_unresolved_concerns', true, 'infolist');
+        ->assertSchemaComponentStateSet('health.no_unresolved_concerns', true, 'infolist');
 });
 
 test('Health tab no_broken_links shows correct state', function () {
@@ -303,7 +302,7 @@ test('Health tab no_broken_links shows correct state', function () {
         ->create();
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSchemaComponentStateSet('no_broken_links', false, 'infolist');
+        ->assertSchemaComponentStateSet('health.no_broken_links', false, 'infolist');
 
     $knowledgeBaseItem->update([
         'are_broken_links_detected' => false,
@@ -311,7 +310,7 @@ test('Health tab no_broken_links shows correct state', function () {
     ]);
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSchemaComponentStateSet('no_broken_links', true, 'infolist');
+        ->assertSchemaComponentStateSet('health.no_broken_links', true, 'infolist');
 });
 
 test('Health tab no_broken_images shows correct state', function () {
@@ -325,7 +324,7 @@ test('Health tab no_broken_images shows correct state', function () {
         ->create();
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSchemaComponentStateSet('no_broken_images', false, 'infolist');
+        ->assertSchemaComponentStateSet('health.no_broken_images', false, 'infolist');
 
     $knowledgeBaseItem->update([
         'are_broken_images_detected' => false,
@@ -333,5 +332,5 @@ test('Health tab no_broken_images shows correct state', function () {
     ]);
 
     livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
-        ->assertSchemaComponentStateSet('no_broken_images', true, 'infolist');
+        ->assertSchemaComponentStateSet('health.no_broken_images', true, 'infolist');
 });
