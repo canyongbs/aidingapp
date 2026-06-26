@@ -71,7 +71,7 @@ class GenerateServiceRequestQuestionController extends Controller
             'previous_questions_and_answers' => ['nullable', 'array'],
             'previous_questions_and_answers.*.encrypted_question' => ['required', 'string'],
             'previous_questions_and_answers.*.answer' => ['required', 'string'],
-            'question_number' => ['required', 'integer', 'min:1', 'max:3'],
+            'question_number' => ['required', 'integer', 'min:1', 'max:' . AiClarificationSettings::NUMBER_OF_QUESTIONS],
         ]);
 
         $formData = [

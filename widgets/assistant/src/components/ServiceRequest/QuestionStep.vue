@@ -45,6 +45,7 @@
         formData: { type: Object, required: true },
         previousQuestionsAndAnswers: { type: Array, default: () => [] },
         questionNumber: { type: Number, required: true },
+        totalQuestions: { type: Number, required: true },
         selectedType: { type: Object, required: true },
         cachedQuestion: { type: Object, default: null },
         initialAnswer: { type: String, default: '' },
@@ -161,9 +162,11 @@
                 <ArrowLeftIcon class="w-4 h-4" />
             </button>
             <div class="flex-1 flex items-center gap-2 min-w-0 text-xs">
-                <span class="text-brand-700 font-semibold truncate">Clarifying Questions</span>
-                <span class="text-brand-300 shrink-0">·</span>
-                <span class="text-brand-500 truncate">Question {{ questionNumber }} of 3</span>
+                <span class="text-brand-700 font-semibold truncate">Clarifying Question</span>
+                <template v-if="totalQuestions > 1">
+                    <span class="text-brand-300 shrink-0">·</span>
+                    <span class="text-brand-500 truncate">Question {{ questionNumber }} of {{ totalQuestions }}</span>
+                </template>
             </div>
         </div>
 

@@ -51,12 +51,13 @@ export function useServiceRequestWizard() {
 
     const aiClarificationEnabled = ref(false);
     const aiResolutionEnabled = ref(false);
+    const numberOfClarifyingQuestions = ref(1);
     const questionsAndAnswers = ref([]);
     const aiResolutionResult = ref(null);
     const wasAiResolved = ref(false);
 
-    const questionStepRefs = ref([null, null, null]);
-    const generatedQuestions = ref([null, null, null]);
+    const questionStepRefs = ref([]);
+    const generatedQuestions = ref([]);
     const customStepRefs = ref([]);
 
     function onTypeSelectContinue(data) {
@@ -65,6 +66,10 @@ export function useServiceRequestWizard() {
 
         aiClarificationEnabled.value = data.type.is_ai_clarification_enabled ?? false;
         aiResolutionEnabled.value = data.type.is_ai_resolution_enabled ?? false;
+        numberOfClarifyingQuestions.value = data.rawData?.number_of_clarifying_questions ?? 1;
+
+        questionStepRefs.value = Array(numberOfClarifyingQuestions.value).fill(null);
+        generatedQuestions.value = Array(numberOfClarifyingQuestions.value).fill(null);
 
         submitState.value = useServiceRequestSubmit(data.rawData.store_url_base, data.type.id, data.priority);
 
@@ -103,7 +108,7 @@ export function useServiceRequestWizard() {
     function advanceAfterCustomSteps() {
         if (aiClarificationEnabled.value) {
             questionsAndAnswers.value = [];
-            generatedQuestions.value = [null, null, null];
+            generatedQuestions.value = Array(numberOfClarifyingQuestions.value).fill(null);
             step.value = 'question-1';
         } else if (aiResolutionEnabled.value) {
             step.value = 'ai-resolution';
@@ -124,7 +129,7 @@ export function useServiceRequestWizard() {
             }
         }
 
-        if (questionNumber < 3) {
+        if (questionNumber < numberOfClarifyingQuestions.value) {
             step.value = `question-${questionNumber + 1}`;
         } else if (aiResolutionEnabled.value) {
             step.value = 'ai-resolution';
@@ -148,7 +153,7 @@ export function useServiceRequestWizard() {
 
     function onAiResolutionBack() {
         if (aiClarificationEnabled.value) {
-            step.value = 'question-3';
+            step.value = `question-${numberOfClarifyingQuestions.value}`;
         } else if (customFormSteps.value.length > 0) {
             currentCustomStepIndex.value = customFormSteps.value.length - 1;
             step.value = 'custom-step';
@@ -272,6 +277,7 @@ export function useServiceRequestWizard() {
         serviceRequestNumber,
         aiClarificationEnabled,
         aiResolutionEnabled,
+        numberOfClarifyingQuestions,
         questionsAndAnswers,
         aiResolutionResult,
         wasAiResolved,
