@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use AidingApp\Contact\Models\ContactType;
-use App\Features\ContactTypeManagementFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -50,10 +49,6 @@ class ViewContactType extends ViewRecord
 {
     protected static string $resource = ContactTypeResource::class;
 
-    /*
-     * TODO: ContactTypeManagementFeature cleanup — once the feature flag is removed:
-     * - Delete the `classification` entry and the `->visible(...)` guard on `is_default`.
-     */
     public function infolist(Schema $schema): Schema
     {
         return $schema
@@ -62,17 +57,13 @@ class ViewContactType extends ViewRecord
                     ->schema([
                         TextEntry::make('name')
                             ->label('Name'),
-                        TextEntry::make('classification')
-                            ->label('Classification')
-                            ->visible(! ContactTypeManagementFeature::active()),
                         TextEntry::make('color')
                             ->label('Color')
                             ->badge()
                             ->color(fn (ContactType $contactType) => $contactType->color->value),
                         IconEntry::make('is_default')
                             ->label('Default')
-                            ->boolean()
-                            ->visible(ContactTypeManagementFeature::active()),
+                            ->boolean(),
                     ])
                     ->columns(),
             ]);

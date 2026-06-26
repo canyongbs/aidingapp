@@ -34,10 +34,8 @@
 </COPYRIGHT>
 */
 
-use App\Features\ContactTypeManagementFeature;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Symfony\Component\Console\Command\Command;
 
 function columnNativeType(string $table, string $column): ?string
@@ -66,54 +64,3 @@ function columnNativeType(string $table, string $column): ?string
 //        );
 //    });
 //});
-
-describe('2026_06_11_183351_add_is_default_to_contact_types_table', function () {
-    it('converts legacy semantic contact type colors, adds is_default and activates the feature', function () {
-        isolatedMigration(
-            '2026_06_11_183351_add_is_default_to_contact_types_table',
-            function () {
-                $legacyColors = [
-                    'info' => 'blue',
-                    'warning' => 'amber',
-                    'success' => 'green',
-                    'danger' => 'red',
-                    'primary' => 'gray',
-                    'gray' => 'gray',
-                ];
-
-                $ids = [];
-
-                foreach (array_keys($legacyColors) as $legacyColor) {
-                    $id = (string) Str::orderedUuid();
-                    $ids[$legacyColor] = $id;
-
-                    DB::table('contact_types')->insert([
-                        'id' => $id,
-                        'classification' => 'new',
-                        'name' => "Type {$legacyColor}",
-                        'color' => $legacyColor,
-                        'created_at' => now(),
-                        'updated_at' => now(),
-                    ]);
-                }
-
-                expect(ContactTypeManagementFeature::active())->toBeFalse();
-
-                $migrate = Artisan::call('migrate', [
-                    '--path' => 'app-modules/contact/database/migrations/2026_06_11_183351_add_is_default_to_contact_types_table.php',
-                ]);
-
-                expect($migrate)->toBe(Command::SUCCESS);
-
-                foreach ($legacyColors as $legacyColor => $expectedColor) {
-                    expect(DB::table('contact_types')->where('id', $ids[$legacyColor])->value('color'))
-                        ->toBe($expectedColor)
-                        ->and(DB::table('contact_types')->where('id', $ids[$legacyColor])->value('is_default'))
-                        ->toBeFalsy();
-                }
-
-                expect(ContactTypeManagementFeature::active())->toBeTrue();
-            }
-        );
-    });
-});
