@@ -53,10 +53,23 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
+use Livewire\Attributes\Url;
 
 class ViewKnowledgeBaseItem extends ViewRecord
 {
     protected static string $resource = KnowledgeBaseItemResource::class;
+
+    #[Url]
+    public ?string $tab = null;
+
+    public function mount(int | string $record): void
+    {
+        parent::mount($record);
+
+        if (! in_array($this->tab, ['resource', 'properties', 'concerns', 'health'])) {
+            $this->tab = 'resource';
+        }
+    }
 
     public function getTitle(): string|Htmlable
     {
@@ -77,16 +90,15 @@ class ViewKnowledgeBaseItem extends ViewRecord
                 View::make('knowledge-base::filament.pages.badges'),
                 Tabs::make()
                     ->tabs([
-                        Tab::make('Content')
+                        'resource' => Tab::make('Content')
                             ->label('Resource')
                             ->schema([
                                 TextEntry::make('article_details')
                                     ->columnSpanFull()
                                     ->hiddenLabel()
                                     ->html(),
-                            ])
-                            ->id('content'),
-                        Tab::make('Properties')
+                            ]),
+                        'properties' => Tab::make('Properties')
                             ->schema([
                                 Grid::make(Division::count() > 1 ? 4 : 3)
                                     ->schema([
@@ -132,14 +144,12 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                         return (int) round(($record->getAttribute('helpful_votes_count') / $totalVotes) * 100) . '%';
                                     }),
                             ])
-                            ->id('properties')
                             ->columns(2),
-                        Tab::make('Concerns')
+                        'concerns' => Tab::make('Concerns')
                             ->schema([
                                 Livewire::make(KnowledgeBaseItemConcernsTable::class, ['record' => $this->getRecord()]),
-                            ])
-                            ->id('concerns'),
-                        Tab::make('Health')
+                            ]),
+                        'health' => Tab::make('Health')
                             ->schema([
                                 IconEntry::make('title_filled')
                                     ->label('Title Filled')
@@ -166,11 +176,10 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                         ? implode("\n", $record->broken_images ?? [])
                                         : 'No broken images were detected in this article.'),
                             ])
-                            ->columns(2)
-                            ->id('health'),
+                            ->columns(2),
                     ])
                     ->columnSpanFull()
-                    ->persistTabInQueryString(),
+                    ->livewireProperty('tab'),
             ]);
     }
 
@@ -178,7 +187,16 @@ class ViewKnowledgeBaseItem extends ViewRecord
     {
         return [
             CreateConcernAction::make(),
-            EditAction::make(),
+            EditAction::make()
+                ->url(function (): string {
+                    $parameters = ['record' => $this->getRecord()];
+
+                    if ($this->tab) {
+                        $parameters['tab'] = $this->tab;
+                    }
+
+                    return KnowledgeBaseItemResource::getUrl('edit', $parameters);
+                }),
             DeleteAction::make(),
         ];
     }
