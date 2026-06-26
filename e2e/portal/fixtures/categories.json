@@ -1,0 +1,20 @@
+[
+    {
+        "slug": "getting-started",
+        "name": "Getting Started",
+        "description": "Learn the basics of using the platform",
+        "icon": null
+    },
+    {
+        "slug": "account-management",
+        "name": "Account Management",
+        "description": "Manage your account settings and preferences",
+        "icon": null
+    },
+    {
+        "slug": "troubleshooting",
+        "name": "Troubleshooting",
+        "description": "Find solutions to common issues",
+        "icon": null
+    }
+]
