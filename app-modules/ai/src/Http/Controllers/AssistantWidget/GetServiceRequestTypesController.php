@@ -150,6 +150,7 @@ class GetServiceRequestTypesController extends Controller
             'store_url_base' => route('widgets.assistant.api.service-request.store', ['type' => '__TYPE__']),
             'form_url_base' => route('widgets.assistant.api.service-request-form', ['type' => '__TYPE__']),
             'generate_question_url_base' => route('widgets.assistant.api.service-request.generate-question', ['type' => '__TYPE__']),
+            'number_of_clarifying_questions' => AiClarificationSettings::NUMBER_OF_QUESTIONS,
             'evaluate_ai_resolution_url_base' => route('widgets.assistant.api.service-request.evaluate-ai-resolution', ['type' => '__TYPE__']),
             'conversation_eligibility_url_base' => route('widgets.assistant.api.service-request.conversation.eligibility', ['serviceRequest' => '__SR__']),
             'conversation_request_url_base' => route('widgets.assistant.api.service-request.conversation.request', ['serviceRequest' => '__SR__']),

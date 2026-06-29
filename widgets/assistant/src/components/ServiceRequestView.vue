@@ -62,6 +62,7 @@
         serviceRequestNumber,
         aiClarificationEnabled,
         aiResolutionEnabled,
+        numberOfClarifyingQuestions,
         questionsAndAnswers,
         generatedQuestions,
         wasAiResolved,
@@ -131,52 +132,25 @@
             @submit="onCustomStepSubmit"
         />
 
-        <QuestionStep
-            v-if="step === 'question-1' && aiClarificationEnabled"
-            :ref="(el) => setQuestionStepRef(0, el)"
-            :generate-question-url="detailsData.rawData.generate_question_url_base"
-            :form-data="formDataForAi"
-            :previous-questions-and-answers="[]"
-            :question-number="1"
-            :selected-type="detailsData.type"
-            :cached-question="generatedQuestions[0]"
-            :initial-answer="questionsAndAnswers[0]?.answer ?? ''"
-            @back="onQuestionBack(1)"
-            @next="onQuestionNext(1)"
-            @question-generated="cacheGeneratedQuestion(1, $event)"
-        />
-
-        <QuestionStep
-            v-if="step === 'question-2' && aiClarificationEnabled"
-            :ref="(el) => setQuestionStepRef(1, el)"
-            :generate-question-url="detailsData.rawData.generate_question_url_base"
-            :form-data="formDataForAi"
-            :previous-questions-and-answers="questionsAndAnswers.slice(0, 1)"
-            :question-number="2"
-            :selected-type="detailsData.type"
-            :cached-question="generatedQuestions[1]"
-            :initial-answer="questionsAndAnswers[1]?.answer ?? ''"
-            @back="onQuestionBack(2)"
-            @next="onQuestionNext(2)"
-            @question-generated="cacheGeneratedQuestion(2, $event)"
-        />
-
-        <QuestionStep
-            v-if="step === 'question-3' && aiClarificationEnabled"
-            :ref="(el) => setQuestionStepRef(2, el)"
-            :generate-question-url="detailsData.rawData.generate_question_url_base"
-            :form-data="formDataForAi"
-            :previous-questions-and-answers="questionsAndAnswers.slice(0, 2)"
-            :question-number="3"
-            :selected-type="detailsData.type"
-            :cached-question="generatedQuestions[2]"
-            :initial-answer="questionsAndAnswers[2]?.answer ?? ''"
-            :is-final-step="!aiResolutionEnabled"
-            :is-submitting="isSubmitting"
-            @back="onQuestionBack(3)"
-            @next="onQuestionNext(3)"
-            @question-generated="cacheGeneratedQuestion(3, $event)"
-        />
+        <template v-for="n in numberOfClarifyingQuestions" :key="`question-${n}`">
+            <QuestionStep
+                v-if="step === `question-${n}` && aiClarificationEnabled"
+                :ref="(el) => setQuestionStepRef(n - 1, el)"
+                :generate-question-url="detailsData.rawData.generate_question_url_base"
+                :form-data="formDataForAi"
+                :previous-questions-and-answers="questionsAndAnswers.slice(0, n - 1)"
+                :question-number="n"
+                :total-questions="numberOfClarifyingQuestions"
+                :selected-type="detailsData.type"
+                :cached-question="generatedQuestions[n - 1]"
+                :initial-answer="questionsAndAnswers[n - 1]?.answer ?? ''"
+                :is-final-step="n === numberOfClarifyingQuestions && !aiResolutionEnabled"
+                :is-submitting="isSubmitting"
+                @back="onQuestionBack(n)"
+                @next="onQuestionNext(n)"
+                @question-generated="cacheGeneratedQuestion(n, $event)"
+            />
+        </template>
 
         <AiResolutionStep
             v-if="step === 'ai-resolution' && aiResolutionEnabled"

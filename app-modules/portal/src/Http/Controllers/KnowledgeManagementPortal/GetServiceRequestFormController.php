@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\Form\Actions\GenerateFormKitSchema;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
@@ -87,6 +88,7 @@ class GetServiceRequestFormController extends Controller
         return response()->json([
             'schema' => app(GenerateFormKitSchema::class)($form),
             'category' => $category,
+            'number_of_clarifying_questions' => AiClarificationSettings::NUMBER_OF_QUESTIONS,
         ]);
     }
 }

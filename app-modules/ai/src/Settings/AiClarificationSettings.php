@@ -40,6 +40,8 @@ use Spatie\LaravelSettings\Settings;
 
 class AiClarificationSettings extends Settings
 {
+    public const int NUMBER_OF_QUESTIONS = 1;
+
     public bool $is_enabled = false;
 
     public static function group(): string
