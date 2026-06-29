@@ -36,6 +36,7 @@
 
 namespace AidingApp\Ai\Actions;
 
+use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -70,13 +71,15 @@ class GenerateServiceRequestQuestionAiPrompt
 
         $formDataMarkdown = $this->renderFormDataMarkdown($formData, $fieldsMap);
 
-        $prompt = "Review the support ticket submitted by {$requesterName} for the service request type {$serviceRequestType->name}.";
+        $prompt = "You are a support agent handling a ticket submitted by {$requesterName} for the service request type {$serviceRequestType->name}.";
 
         if (! empty($serviceRequestType->description)) {
             $prompt .= " The service request type description is: {$serviceRequestType->description}.";
         }
 
-        $prompt .= "\n\nPlease review the submitted form data below and generate exactly one clarifying question (question {$questionNumber} of 3) that will help collect the information needed to adequately service this ticket. Be concise and focused on actionable, specific information to resolve the request.\n\n";
+        $totalQuestions = AiClarificationSettings::NUMBER_OF_QUESTIONS;
+
+        $prompt .= "\n\nReview the submitted form data below and generate exactly one clarifying question (question {$questionNumber} of {$totalQuestions}). The answer should give the human agent handling this request the information they need to resolve it faster. Only ask about information that is directly relevant to resolving this particular request. Do not ask compound questions that cover multiple topics — ask one simple, focused question.\n\n";
 
         $prompt .= $formDataMarkdown;
 

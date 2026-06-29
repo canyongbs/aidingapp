@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Enums;
 
+use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 
 enum ServiceRequestDraftStage: string
@@ -80,7 +81,7 @@ enum ServiceRequestDraftStage: string
             ->where('update_type', ServiceRequestUpdateType::ClarifyingQuestion)
             ->count();
 
-        if ($clarifyingQuestionsCount < 3) {
+        if ($clarifyingQuestionsCount < AiClarificationSettings::NUMBER_OF_QUESTIONS) {
             return self::ClarifyingQuestions;
         }
 
