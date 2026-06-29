@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use AidingApp\Contact\Models\ContactType;
-use App\Features\ContactTypeManagementFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -54,10 +53,6 @@ class ListContactTypes extends ListRecords
 {
     protected static string $resource = ContactTypeResource::class;
 
-    /*
-     * TODO: ContactTypeManagementFeature cleanup — once the feature flag is removed:
-     * - Delete the `classification` column and the `->visible(...)` guard on `is_default`.
-     */
     public function table(Table $table): Table
     {
         return $table
@@ -67,19 +62,13 @@ class ListContactTypes extends ListRecords
                     ->label('Name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('classification')
-                    ->label('Classification')
-                    ->searchable()
-                    ->sortable()
-                    ->visible(! ContactTypeManagementFeature::active()),
                 TextColumn::make('color')
                     ->label('Color')
                     ->badge()
                     ->color(fn (ContactType $contactType) => $contactType->color->value),
                 IconColumn::make('is_default')
                     ->label('Default')
-                    ->boolean()
-                    ->visible(ContactTypeManagementFeature::active()),
+                    ->boolean(),
                 TextColumn::make('contacts_count')
                     ->label('# of Contacts')
                     ->counts('contacts')

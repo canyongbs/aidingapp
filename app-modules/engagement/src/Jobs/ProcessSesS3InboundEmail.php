@@ -36,7 +36,6 @@
 
 namespace AidingApp\Engagement\Jobs;
 
-use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
@@ -53,7 +52,6 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
-use App\Features\ContactTypeManagementFeature;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV3;
 use Aws\Kms\KmsClient;
@@ -737,15 +735,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             'full_name' => $firstName . ' ' . $lastName,
         ]);
 
-        /*
-         * TODO: ContactTypeManagementFeature cleanup — once the feature flag is removed:
-         * - Keep only the ContactType::resolveDefault() branch and drop the classification query.
-         */
-        $type = ContactTypeManagementFeature::active()
-            ? ContactType::resolveDefault()
-            : ContactType::query()
-                ->where('classification', SystemContactClassification::New)
-                ->firstOrFail();
+        $type = ContactType::resolveDefault();
 
         $contact->type()->associate($type);
 

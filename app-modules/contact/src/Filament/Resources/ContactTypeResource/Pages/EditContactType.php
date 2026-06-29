@@ -36,16 +36,12 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
-use AidingApp\Contact\Enums\ContactTypeColorOptions;
-use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use AidingApp\Contact\Models\ContactType;
 use App\Concerns\EditPageRedirection;
-use App\Features\ContactTypeManagementFeature;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\EditRecord;
@@ -57,11 +53,6 @@ class EditContactType extends EditRecord
 
     protected static string $resource = ContactTypeResource::class;
 
-    /*
-     * TODO: ContactTypeManagementFeature cleanup — once the feature flag is removed:
-     * - Delete the `classification` Select and the legacy `color` Select below.
-     * - Drop the `->visible(...)` guards on ColorSelect and the `is_default` Toggle.
-     */
     public function form(Schema $schema): Schema
     {
         return $schema
@@ -70,23 +61,8 @@ class EditContactType extends EditRecord
                     ->label('Name')
                     ->required()
                     ->string(),
-                Select::make('classification')
-                    ->label('Classification')
-                    ->searchable()
-                    ->options(SystemContactClassification::class)
-                    ->required()
-                    ->enum(SystemContactClassification::class)
-                    ->hidden(ContactTypeManagementFeature::active()),
-                Select::make('color')
-                    ->label('Color')
-                    ->searchable()
-                    ->options(ContactTypeColorOptions::class)
-                    ->required()
-                    ->enum(ContactTypeColorOptions::class)
-                    ->hidden(ContactTypeManagementFeature::active()),
                 ColorSelect::make()
-                    ->required()
-                    ->visible(ContactTypeManagementFeature::active()),
+                    ->required(),
                 Toggle::make('is_default')
                     ->label('Default')
                     ->live()
@@ -109,8 +85,7 @@ class EditContactType extends EditRecord
 
                         return "The current default type is '{$currentDefault}', you are replacing it.";
                     })
-                    ->hintColor('danger')
-                    ->visible(ContactTypeManagementFeature::active()),
+                    ->hintColor('danger'),
             ]);
     }
 

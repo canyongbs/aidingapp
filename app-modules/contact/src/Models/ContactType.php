@@ -38,10 +38,7 @@ namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\ContactTypeFactory;
-use AidingApp\Contact\Enums\ContactTypeColorOptions;
-use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Observers\ContactTypeObserver;
-use App\Features\ContactTypeManagementFeature;
 use App\Models\BaseModel;
 use CanyonGBS\Common\Enums\Color;
 use DateTimeInterface;
@@ -64,7 +61,6 @@ class ContactType extends BaseModel implements Auditable
     use HasFactory;
 
     protected $fillable = [
-        'classification',
         'name',
         'color',
         'is_default',
@@ -100,13 +96,7 @@ class ContactType extends BaseModel implements Auditable
     protected function casts(): array
     {
         return [
-            'classification' => SystemContactClassification::class,
-            /*
-             * TODO: ContactTypeManagementFeature cleanup — once the feature flag is removed:
-             * - Replace this ternary with `'color' => Color::class,`
-             * - Drop the SystemContactClassification cast (and the column) entirely.
-             */
-            'color' => ContactTypeManagementFeature::active() ? Color::class : ContactTypeColorOptions::class,
+            'color' => Color::class,
             'is_default' => 'boolean',
         ];
     }

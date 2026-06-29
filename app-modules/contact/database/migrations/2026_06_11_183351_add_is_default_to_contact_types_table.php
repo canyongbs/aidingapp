@@ -33,89 +33,22 @@
 
 </COPYRIGHT>
 */
-use App\Features\ContactTypeManagementFeature;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /**
-     * @var array<string, string>
-     */
-    private array $colorMap = [
-        'info' => 'blue',
-        'warning' => 'amber',
-        'success' => 'green',
-        'danger' => 'red',
-        'primary' => 'gray',
-    ];
-
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('contact_types', function (Blueprint $table) {
-                $table->boolean('is_default')->default(false);
-
-                /*
-                 * TODO: ContactTypeManagementFeature cleanup — once the feature flag is removed:
-                 * - Drop the `classification` column entirely (a follow-up migration).
-                 * It is only kept (made nullable) here so the flag-off path can continue to
-                 * write/read classification while the feature is being rolled out.
-                 */
-                $table->string('classification')->nullable()->change();
-            });
-
-            foreach ($this->colorMap as $from => $to) {
-                DB::table('contact_types')
-                    ->where('color', $from)
-                    ->update(['color' => $to]);
-            }
-
-            ContactTypeManagementFeature::activate();
+        Schema::table('contact_types', function (Blueprint $table) {
+            $table->boolean('is_default')->default(false);
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            ContactTypeManagementFeature::deactivate();
-
-            // 'primary' -> 'gray' is not reversible (both legacy 'primary' and 'gray'
-            // become 'gray'), so 'gray' rows are left untouched on rollback.
-            $reverse = [
-                'blue' => 'info',
-                'amber' => 'warning',
-                'green' => 'success',
-                'red' => 'danger',
-            ];
-
-            foreach ($reverse as $from => $to) {
-                DB::table('contact_types')
-                    ->where('color', $from)
-                    ->update(['color' => $to]);
-            }
-
-            DB::table('contact_types')
-                ->whereNotIn('color', ['info', 'warning', 'success', 'danger', 'primary', 'gray'])
-                ->update(['color' => 'gray']);
-
-            /*
-             * TODO: ContactTypeManagementFeature cleanup — when the feature flag is removed and a
-             * migration is added to drop the `classification` column, delete this classification
-             * backfill and the `->string('classification')->nullable(false)->change()` restore below
-             * (the column will no longer exist). The color reversal above stays — it reverses the
-             * permanent color conversion, not the flag.
-             */
-            DB::table('contact_types')
-                ->whereNull('classification')
-                ->update(['classification' => 'new']);
-
-            Schema::table('contact_types', function (Blueprint $table) {
-                $table->dropColumn('is_default');
-
-                $table->string('classification')->nullable(false)->change();
-            });
+        Schema::table('contact_types', function (Blueprint $table) {
+            $table->dropColumn('is_default');
         });
     }
 };

@@ -37,14 +37,12 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
-use AidingApp\Contact\Enums\SystemContactClassification;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Portal\Actions\FindOrganizationByEmailDomain;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalRegisterRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\ContactTypeManagementFeature;
 use App\Http\Controllers\Controller;
 use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
@@ -75,15 +73,7 @@ class KnowledgeManagementPortalRegisterController extends Controller
                 'phone' => $data['phone'] ?? null,
                 'sms_opt_out' => $data['sms_opt_out'],
             ]);
-        /*
-         * TODO: ContactTypeManagementFeature cleanup — once the feature flag is removed:
-         * - Keep only the ContactType::resolveDefault() branch and drop the classification query.
-         */
-        $type = ContactTypeManagementFeature::active()
-            ? ContactType::resolveDefault()
-            : ContactType::query()
-                ->where('classification', SystemContactClassification::New)
-                ->first();
+        $type = ContactType::resolveDefault();
 
         $organization = app(FindOrganizationByEmailDomain::class)($data['email']);
 

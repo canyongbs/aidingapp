@@ -34,32 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Enums;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use Filament\Support\Contracts\HasLabel;
-
-enum SystemContactClassification: string implements HasLabel
-{
-    case New = 'new';
-
-    case Assigned = 'assigned';
-
-    case InProgress = 'in_progress';
-
-    case Converted = 'converted';
-
-    case Recycled = 'recycled';
-
-    case NotInterested = 'not_interested';
-
-    case Custom = 'custom';
-
-    public function getLabel(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return match ($this) {
-            SystemContactClassification::InProgress => 'In Progress',
-            SystemContactClassification::NotInterested => 'Not Interested',
-            default => $this->name,
-        };
+        Schema::table('contact_types', function (Blueprint $table) {
+            $table->dropColumn('classification');
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('contact_types', function (Blueprint $table) {
+            $table->string('classification')->nullable();
+        });
+    }
+};
