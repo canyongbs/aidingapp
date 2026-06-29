@@ -38,7 +38,7 @@ import { dirname, extname, resolve } from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const ROOT_DIR = resolve(__dirname, '..');
+const ROOT_DIR = resolve(__dirname, '../..');
 const PUBLIC_DIR = resolve(ROOT_DIR, 'public');
 const PORT = parseInt(process.env.E2E_PORT ?? '9999', 10);
 

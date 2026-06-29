@@ -5,7 +5,7 @@ This directory contains Playwright end-to-end tests for Aiding App frontend comp
 ## Structure
 
 ```
-e2e/
+tests/e2e/
 ├── server.js              # Minimal static file server used by all tests
 ├── portal/
 │   ├── portal-fixture.js  # Shared Playwright fixture for portal tests
@@ -21,7 +21,7 @@ e2e/
 
 Tests run in **fully standalone mode** — no backend server required.
 
-1. `e2e/server.js` is started automatically by Playwright (`webServer` in `playwright.config.js`).  
+1. `tests/e2e/server.js` is started automatically by Playwright (`webServer` in `playwright.config.js`).  
    It serves:
     - The portal JS bundle and assets from `public/` (built output).
     - A minimal test-harness HTML page at `/portal` that embeds the `<knowledge-management-portal-embed>` custom element.
@@ -96,8 +96,8 @@ test('shows login when auth required', async ({ page }) => {
 
 ## Extending to widgets and Filament
 
-The `e2e/server.js` already serves all of `public/`, so widget bundles built by `npm run build:widgets` are also reachable. To add widget tests:
+The `tests/e2e/server.js` already serves all of `public/`, so widget bundles built by `npm run build:widgets` are also reachable. To add widget tests:
 
-1. Create `e2e/widgets/` directory.
+1. Create `tests/e2e/widgets/` directory.
 2. Add a `*-fixture.js` with appropriate mock routes for that widget.
 3. Write spec files in the same directory.

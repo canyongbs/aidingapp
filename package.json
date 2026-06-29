@@ -11,7 +11,7 @@
         "dev:widgets": "(cd widgets && npm i && npm run dev)",
         "postinstall": "node npm-postinstall.cjs",
         "test:e2e": "playwright test",
-        "test:e2e:portal": "playwright test e2e/portal/",
+        "test:e2e:portal": "playwright test tests/e2e/portal/",
         "test:e2e:ui": "playwright test --ui",
         "test:e2e:report": "playwright show-report"
     },

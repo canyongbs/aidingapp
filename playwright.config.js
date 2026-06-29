@@ -34,7 +34,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-    testDir: './e2e',
+    testDir: './tests/e2e',
     fullyParallel: true,
     forbidOnly: !!process.env.CI,
     retries: process.env.CI ? 2 : 0,
@@ -47,7 +47,7 @@ export default defineConfig({
         video: 'on-first-retry',
     },
     webServer: {
-        command: 'node e2e/server.js',
+        command: 'node tests/e2e/server.js',
         port: parseInt(process.env.E2E_PORT ?? '9999', 10),
         reuseExistingServer: !process.env.CI,
         stdout: 'pipe',
