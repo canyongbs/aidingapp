@@ -86,6 +86,7 @@
     const aiResolutionData = ref(null);
     const aiResolutionAttempted = ref(null);
     const showAiResolutionStep = ref(false);
+    const preloadedResolutionPromise = ref(null);
 
     watch(
         route,
@@ -278,9 +279,7 @@
         },
     });
 
-    async function evaluateAiResolution() {
-        isEvaluatingAiResolution.value = true;
-
+    async function preloadAiResolution() {
         try {
             const { post } = consumer();
             const formNode = getNode('form');
@@ -290,6 +289,34 @@
                 props.apiUrl + '/service-request/create/' + route.params.typeId + '/evaluate-ai-resolution',
                 { formData },
             );
+
+            return response;
+        } catch {
+            return null;
+        }
+    }
+
+    async function evaluateAiResolution() {
+        isEvaluatingAiResolution.value = true;
+
+        try {
+            let response = null;
+
+            if (preloadedResolutionPromise.value) {
+                response = await preloadedResolutionPromise.value;
+                preloadedResolutionPromise.value = null;
+            }
+
+            if (!response) {
+                const { post } = consumer();
+                const formNode = getNode('form');
+                const formData = formNode ? formNode.value : {};
+
+                response = await post(
+                    props.apiUrl + '/service-request/create/' + route.params.typeId + '/evaluate-ai-resolution',
+                    { formData },
+                );
+            }
 
             if (response.data.confidence_score !== undefined) {
                 aiResolutionAttempted.value = {
@@ -418,6 +445,8 @@
 
         if (!hasFields) {
             isGeneratingQuestions.value = true;
+
+            preloadedResolutionPromise.value = preloadAiResolution();
 
             try {
                 const { post } = consumer();

@@ -40,8 +40,6 @@ use AidingApp\Ai\Actions\GenerateServiceRequestQuestionAiPrompt;
 use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -114,7 +112,6 @@ class GenerateServiceRequestQuestionController extends Controller
         $response = $aiService->complete(
             prompt: 'Return only the question text. No numbering, no prefix, no explanation. Just the question.',
             content: $prompt,
-            files: KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id'])->all(),
         );
 
         $question = trim($response);

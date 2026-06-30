@@ -48,6 +48,7 @@
         questions: { type: Object, default: () => ({}) },
         selectedType: { type: Object, required: true },
         isSubmitting: { type: Boolean, default: false },
+        preloadedResolution: { type: Promise, default: null },
     });
 
     const emit = defineEmits(['back', 'resolved', 'declined', 'skip']);
@@ -66,24 +67,34 @@
         isLoading.value = true;
 
         try {
-            const url = props.evaluateAiResolutionUrl.replace('__TYPE__', props.selectedType.id);
+            let data;
 
-            const response = await axios.post(
-                url,
-                {
-                    title: props.formData.title,
-                    description: props.formData.description,
-                    priority_id: props.formData.priority_id,
-                    custom_fields: props.formData.custom_fields,
-                    questions: props.questions,
-                },
-                { headers: getAuthHeaders() },
-            );
+            if (props.preloadedResolution) {
+                data = await props.preloadedResolution;
+            }
 
-            if (response.data.is_ai_resolution_available) {
-                proposedAnswer.value = response.data.proposed_answer;
-                confidenceScore.value = response.data.confidence_score;
-                encryptedProposedAnswer.value = response.data.encrypted_proposed_answer;
+            if (!data) {
+                const url = props.evaluateAiResolutionUrl.replace('__TYPE__', props.selectedType.id);
+
+                const response = await axios.post(
+                    url,
+                    {
+                        title: props.formData.title,
+                        description: props.formData.description,
+                        priority_id: props.formData.priority_id,
+                        custom_fields: props.formData.custom_fields,
+                        questions: props.questions,
+                    },
+                    { headers: getAuthHeaders() },
+                );
+
+                data = response.data;
+            }
+
+            if (data.is_ai_resolution_available) {
+                proposedAnswer.value = data.proposed_answer;
+                confidenceScore.value = data.confidence_score;
+                encryptedProposedAnswer.value = data.encrypted_proposed_answer;
             } else {
                 emit('skip');
             }

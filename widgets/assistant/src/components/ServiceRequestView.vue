@@ -66,6 +66,7 @@
         questionsAndAnswers,
         generatedQuestions,
         wasAiResolved,
+        preloadedResolution,
         hasNextStep,
         formDataForAi,
         questionsPayload,
@@ -159,6 +160,7 @@
             :questions="questionsPayload"
             :selected-type="detailsData.type"
             :is-submitting="isSubmitting"
+            :preloaded-resolution="preloadedResolution"
             @back="onAiResolutionBack"
             @resolved="onAiResolutionResolved"
             @declined="onAiResolutionDeclined"
