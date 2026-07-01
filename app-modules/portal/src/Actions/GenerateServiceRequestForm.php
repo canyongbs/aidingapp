@@ -79,7 +79,7 @@ class GenerateServiceRequestForm
                 'multiple' => $uploadsMediaCollection->getMaxNumberOfFiles() > 1,
                 'limit' => $uploadsMediaCollection->getMaxNumberOfFiles(),
                 'accept' => $uploadsMediaCollection->getExtensionsFull(),
-                'size' => $uploadsMediaCollection->getMaxFileSizeInMB(),
+                'size' => $uploadsMediaCollection->getMaxFileSizeInMb(),
                 'uploadUrl' => route('api.portal.service-request.request-upload-url'),
             ]),
         ]);

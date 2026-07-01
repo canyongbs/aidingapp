@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Str;
@@ -51,7 +52,7 @@ class UnmatchedInboundCommunicationsJob implements ShouldQueue
     public function handle(): void
     {
         UnmatchedInboundCommunication::query()
-            ->chunkById(100, function ($communications) {
+            ->chunkById(100, function (Collection $communications) {
                 foreach ($communications as $communication) {
                     match ($communication->type) {
                         EngagementResponseType::Email => $this->processEmail($communication),

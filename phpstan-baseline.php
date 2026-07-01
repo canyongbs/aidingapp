@@ -41,18 +41,7 @@ $ignoreErrors[] = [
     'count' => 1,
     'path' => __DIR__ . '/app-modules/audit/src/Filament/Actions/AuditAttachAction.php',
 ];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Filament/Actions/AuditAttachAction.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$record of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Filament/Actions/AuditAttachAction.php',
-];
+
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method OwenIt\\\\Auditing\\\\Contracts\\\\Auditable\\:\\:auditDetach\\(\\)\\.$#',
     'identifier' => 'method.notFound',
@@ -438,12 +427,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/division/database/factories/DivisionFactory.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$deliverables of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/database/migrations/2025_01_13_153104_data_remove_sms_data_from_engagement.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method App\\\\Models\\\\Contracts\\\\Educatable\\:\\:notify\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
@@ -514,12 +497,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/engagement/src/Jobs/DeliverEngagements.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$communications of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/src/Jobs/UnmatchedInboundCommunicationsJob.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:orderedEngagements\\(\\)\\.$#',
@@ -738,18 +715,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/knowledge-base/database/factories/KnowledgeBaseItemFactory.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$articles of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/database/migrations/2025_05_26_103749_data_migrate_article_details_to_article_details_fulltext_in_knowledge_base_articles.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Variable name "\\$e" is shorter than minimum length of 3 characters\\.$#',
-    'identifier' => 'MeliorStan.shortVariable',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/database/migrations/2025_05_26_103749_data_migrate_article_details_to_article_details_fulltext_in_knowledge_base_articles.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Access to an undefined property App\\\\Models\\\\Tag\\:\\:\\$pivot\\.$#',
     'identifier' => 'property.notFound',
     'count' => 1,
@@ -760,18 +725,6 @@ $ignoreErrors[] = [
     'identifier' => 'argument.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/license-management/database/migrations/2024_11_21_194048_data_seed_permissions_for_product_license_module.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/license-management/src/Filament/Resources/Products/Pages/ManageProductLicenses.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#3 \\$record of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/license-management/src/Filament/Resources/Products/Pages/ManageProductLicenses.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^PHPDoc type array of property AidingApp\\\\LicenseManagement\\\\Models\\\\ProductLicense\\:\\:\\$appends is not covariant with PHPDoc type list\\<string\\> of overridden property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$appends\\.$#',
@@ -906,12 +859,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/StoreKnowledgeBaseArticleVoteController.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$query of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/StoreKnowledgeBaseArticleVoteController.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Cannot access property \\$code on object\\|string\\.$#',
     'identifier' => 'property.nonObject',
     'count' => 1,
@@ -974,12 +921,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\Form\\\\Models\\\\Submissible\\:\\:\\$type\\.$#',
     'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$priority of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
 ];
@@ -1218,12 +1159,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/ServiceRequestTypeResource.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$join of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestUpdates/ServiceRequestUpdateResource.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\:\\:\\$default_category\\.$#',
     'identifier' => 'property.notFound',
     'count' => 1,
@@ -1318,30 +1253,6 @@ $ignoreErrors[] = [
     'identifier' => 'trait.unused',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Models/Concerns/HasRelationBasedStateMachine.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method name "getMaxFileSizeInMB" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.methodNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/MediaCollections/UploadsMediaCollection.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method name "maxFileSizeInMB" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.methodNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/MediaCollections/UploadsMediaCollection.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter name "maxFileSizeInMB" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.parameterNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/MediaCollections/UploadsMediaCollection.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property name "maxFileSizeInMB" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.propertyNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/MediaCollections/UploadsMediaCollection.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Negated boolean expression is always true\\.$#',
