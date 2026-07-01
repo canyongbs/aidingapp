@@ -146,6 +146,8 @@ class StoreServiceRequestController extends Controller
             ...app(GenerateSubmissibleValidation::class)($form),
             'Questions' => ['nullable', 'array'],
             'Questions.*' => ['required', 'string'],
+            'Question' => ['nullable', 'array'],
+            'Question.*' => ['required', 'string'],
             'is_ai_resolution_attempted' => ['nullable', 'boolean'],
             'is_ai_resolution_successful' => ['nullable', 'boolean'],
             'ai_resolution_confidence_score' => ['nullable', 'integer', 'min:1', 'max:100'],
@@ -164,7 +166,7 @@ class StoreServiceRequestController extends Controller
             throw new ValidationException($validator);
         }
 
-        return collect($validator->validated())->except('Questions');
+        return collect($validator->validated())->except(['Questions', 'Question']);
     }
 
     /**
@@ -200,7 +202,7 @@ class StoreServiceRequestController extends Controller
     {
         $count = 0;
 
-        $questions = $request->input('Questions', []);
+        $questions = $request->input('Questions', $request->input('Question', []));
         $count += count($questions) * 2;
 
         if ($request->boolean('is_ai_resolution_attempted') && $request->input('encrypted_ai_proposed_answer')) {
@@ -233,7 +235,7 @@ class StoreServiceRequestController extends Controller
         ServiceRequestType $type,
         Collection $updateUuids
     ): void {
-        $questions = $request->input('Questions', []);
+        $questions = $request->input('Questions', $request->input('Question', []));
 
         if (empty($questions)) {
             return;

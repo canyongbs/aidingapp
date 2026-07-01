@@ -84,10 +84,12 @@ class GenerateAiResolutionPrompt
         $prompt .= "\n\n## Original Request Details\n\n";
         $prompt .= $this->renderFormDataMarkdown($formData, $fieldsMap);
 
-        $prompt .= "\n## Clarifying Questions and Answers\n\n";
+        if (! empty($questionsAndAnswers)) {
+            $prompt .= "\n## Clarifying Questions and Answers\n\n";
 
-        foreach ($questionsAndAnswers as $question => $answer) {
-            $prompt .= "**Q:** {$question}\n**A:** {$answer}\n\n";
+            foreach ($questionsAndAnswers as $question => $answer) {
+                $prompt .= "**Q:** {$question}\n**A:** {$answer}\n\n";
+            }
         }
 
         $prompt .= "\n## Your Task\n\n";
