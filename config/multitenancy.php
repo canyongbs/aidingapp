@@ -42,6 +42,7 @@ use App\Multitenancy\Tasks\SwitchS3FilesystemTask;
 use App\Multitenancy\Tasks\SwitchS3PublicFilesystemTask;
 use App\Multitenancy\Tasks\SwitchSessionDriver;
 use App\Multitenancy\Tasks\SwitchTenantDatabasesTask;
+use App\Multitenancy\TenantFinder\SubscriptionAwareDomainTenantFinder;
 use Illuminate\Broadcasting\BroadcastEvent;
 use Illuminate\Events\CallQueuedListener;
 use Illuminate\Mail\SendQueuedMailable;
@@ -49,7 +50,6 @@ use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Queue\CallQueuedClosure;
 use Spatie\Multitenancy\Actions\ForgetCurrentTenantAction;
 use Spatie\Multitenancy\Actions\MakeQueueTenantAwareAction;
-use App\Multitenancy\TenantFinder\SubscriptionAwareDomainTenantFinder;
 use Spatie\Multitenancy\Actions\MakeTenantCurrentAction;
 use Spatie\Multitenancy\Actions\MigrateTenantAction;
 
