@@ -158,7 +158,7 @@ class EditServiceRequest extends EditRecord
                             ->collection($uploadsMediaCollection->getName())
                             ->multiple($uploadsMediaCollection->getMaxNumberOfFiles() > 1)
                             ->when($uploadsMediaCollection->getMaxNumberOfFiles(), fn (SpatieMediaLibraryFileUpload $component) => $component->maxFiles($uploadsMediaCollection->getMaxNumberOfFiles()))
-                            ->when($uploadsMediaCollection->getMaxFileSizeInMB(), fn (SpatieMediaLibraryFileUpload $component) => $component->maxSize($uploadsMediaCollection->getMaxFileSizeInMB() * 1000))
+                            ->when($uploadsMediaCollection->getMaxFileSizeInMb(), fn (SpatieMediaLibraryFileUpload $component) => $component->maxSize($uploadsMediaCollection->getMaxFileSizeInMb() * 1000))
                             ->acceptedFileTypes($uploadsMediaCollection->getMimes())
                             ->downloadable(),
                     ]),
