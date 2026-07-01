@@ -175,6 +175,18 @@ class AdminPanelProvider extends PanelProvider
                     return $showBanner ? new HtmlString(Blade::render('<livewire:sso-credentials-expiring-alert />')) : null;
                 },
             )
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_AFTER,
+                function (): ?Htmlable {
+                    $tenant = Tenant::current();
+
+                    if (! $tenant?->subscription_status?->showsExpirationBanner()) {
+                        return null;
+                    }
+
+                    return new HtmlString(Blade::render('<livewire:subscription-expired-banner />'));
+                },
+            )
             ->globalSearchResourceOptIn();
     }
 

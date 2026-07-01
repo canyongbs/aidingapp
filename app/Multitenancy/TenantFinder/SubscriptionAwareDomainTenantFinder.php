@@ -34,40 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Requests\Tenants;
+namespace App\Multitenancy\TenantFinder;
 
 use App\Enums\TenantSubscriptionStatus;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum;
+use Illuminate\Http\Request;
+use Spatie\Multitenancy\Contracts\IsTenant;
+use Spatie\Multitenancy\TenantFinder\DomainTenantFinder;
 
-class SyncTenantRequest extends FormRequest
+class SubscriptionAwareDomainTenantFinder extends DomainTenantFinder
 {
-    /**
-     * @return array<string, array<int, string|Enum>>
-     */
-    public function rules(): array
+    public function findForRequest(Request $request): ?IsTenant
     {
-        return [
-            'limits' => ['required', 'array'],
-            'limits.emails' => ['required', 'integer', 'min:0'],
-            'limits.resetDate' => ['required', 'string', 'date_format:m-d'],
-            'addons' => ['required', 'array'],
-            'addons.onlineForms' => ['required', 'boolean'],
-            'addons.serviceManagement' => ['required', 'boolean'],
-            'addons.knowledgeManagement' => ['required', 'boolean'],
-            'addons.realtimeChat' => ['required', 'boolean'],
-            'addons.mobileApps' => ['required', 'boolean'],
-            'addons.changeManagement' => ['required', 'boolean'],
-            'addons.assetManagement' => ['required', 'boolean'],
-            'addons.feedbackManagement' => ['required', 'boolean'],
-            'addons.contractManagement' => ['required', 'boolean'],
-            'addons.licenseManagement' => ['required', 'boolean'],
-            'addons.projectManagement' => ['required', 'boolean'],
-            'addons.serviceMonitoring' => ['required', 'boolean'],
-            'addons.advisoryManagement' => ['required', 'boolean'],
-            'subscriptionStatus' => ['required', Rule::enum(TenantSubscriptionStatus::class)],
-            'expirationBannerText' => ['nullable', 'string'],
-        ];
+        $host = $request->getHost();
+
+        return app(IsTenant::class)::whereDomain($host)
+            ->where('subscription_status', '!=', TenantSubscriptionStatus::Expired->value)
+            ->first();
     }
 }
