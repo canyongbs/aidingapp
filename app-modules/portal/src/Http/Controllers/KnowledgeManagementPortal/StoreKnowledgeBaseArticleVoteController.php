@@ -39,6 +39,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Http\Requests\StoreKnowledgeBaseArticleVoteRequest;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
+use Illuminate\Database\Eloquent\Builder;
 use AidingApp\Portal\Models\PortalGuest;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -75,7 +76,7 @@ class StoreKnowledgeBaseArticleVoteController extends Controller
         }
         $helpfulVoteData = KnowledgeBaseItem::withCount([
             'votes',
-            'votes as helpful_votes_count' => function ($query) {
+            'votes as helpful_votes_count' => function (Builder $query) {
                 $query->where('is_helpful', true);
             },
         ])->find($request->article_id);

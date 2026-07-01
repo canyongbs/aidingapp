@@ -35,6 +35,7 @@
 */
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 return new class () extends Migration {
@@ -42,7 +43,7 @@ return new class () extends Migration {
     {
         DB::table('engagement_deliverables')
             ->where('channel', 'sms')
-            ->chunkById(100, function ($deliverables) {
+            ->chunkById(100, function (Collection $deliverables) {
                 $engagementIds = $deliverables->pluck('engagement_id')->toArray();
                 $deliverableIds = $deliverables->pluck('id')->toArray();
 
