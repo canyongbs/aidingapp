@@ -34,40 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Requests\Tenants;
+namespace App\Settings;
 
-use App\Enums\TenantSubscriptionStatus;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum;
+use Spatie\LaravelSettings\Settings;
 
-class SyncTenantRequest extends FormRequest
+class TenantExpirationSettings extends Settings
 {
-    /**
-     * @return array<string, array<int, string|Enum>>
-     */
-    public function rules(): array
+    public string $period_2_banner_text = 'Your subscription has expired. Please contact us for more details.';
+
+    public static function repository(): ?string
     {
-        return [
-            'limits' => ['required', 'array'],
-            'limits.emails' => ['required', 'integer', 'min:0'],
-            'limits.resetDate' => ['required', 'string', 'date_format:m-d'],
-            'addons' => ['required', 'array'],
-            'addons.onlineForms' => ['required', 'boolean'],
-            'addons.serviceManagement' => ['required', 'boolean'],
-            'addons.knowledgeManagement' => ['required', 'boolean'],
-            'addons.realtimeChat' => ['required', 'boolean'],
-            'addons.mobileApps' => ['required', 'boolean'],
-            'addons.changeManagement' => ['required', 'boolean'],
-            'addons.assetManagement' => ['required', 'boolean'],
-            'addons.feedbackManagement' => ['required', 'boolean'],
-            'addons.contractManagement' => ['required', 'boolean'],
-            'addons.licenseManagement' => ['required', 'boolean'],
-            'addons.projectManagement' => ['required', 'boolean'],
-            'addons.serviceMonitoring' => ['required', 'boolean'],
-            'addons.advisoryManagement' => ['required', 'boolean'],
-            'subscriptionStatus' => ['required', Rule::enum(TenantSubscriptionStatus::class)],
-            'expirationBannerText' => ['nullable', 'string'],
-        ];
+        return 'landlord_database';
+    }
+
+    public static function group(): string
+    {
+        return 'tenant_expiration';
     }
 }

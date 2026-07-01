@@ -36,6 +36,7 @@
 
 namespace App\Models;
 
+use App\Enums\TenantSubscriptionStatus;
 use App\Multitenancy\DataTransferObjects\TenantConfig;
 use App\Settings\DisplaySettings;
 use Database\Factories\TenantFactory;
@@ -64,11 +65,13 @@ class Tenant extends SpatieTenant
         'domain',
         'config',
         'setup_complete',
+        'subscription_status',
     ];
 
     protected $casts = [
         'setup_complete' => 'boolean',
         'config' => TenantConfig::class . ':encrypted',
+        'subscription_status' => TenantSubscriptionStatus::class,
     ];
 
     public function getTimezone(): string
