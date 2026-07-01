@@ -39,3 +39,8 @@ app-modules/**/resources/js/dist/*
 **/psysh_history
 .pdepend/
 .phpmd.result-cache.php
+
+# Playwright
+/playwright-report/
+/test-results/
+/blob-report/
