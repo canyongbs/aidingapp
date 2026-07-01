@@ -132,3 +132,29 @@ li[data-group-label=''] > ul > .fi-sidebar-item > .fi-sidebar-item-button > .fi-
 .fi-datetime-description {
     @apply text-gray-500 dark:text-gray-400;
 }
+
+/*
+ * When the subscription-expired (Period 2) banner is present, push the sidebar
+ * and main content down by the banner's height so the sticky banner is not
+ * hidden behind the sidebar while scrolling. Mirrors the Advising App branding
+ * bar behaviour (Advising reuses its own `.branding-bar` rule for this).
+ */
+.fi-body:has(.subscription-expired-banner) {
+    &.fi-body-has-sidebar-collapsible-on-desktop,
+    &.fi-body-has-sidebar-fully-collapsible-on-desktop {
+        & .fi-main-ctn {
+            @apply min-h-[calc(100dvh-6.5rem)]!;
+        }
+    }
+
+    &.fi-body-has-top-navigation,
+    &:not(.fi-body-has-navigation) {
+        & .fi-main-ctn {
+            @apply min-h-[calc(100dvh-6.5rem)]!;
+        }
+    }
+
+    &.fi-body-has-topbar .fi-sidebar {
+        @apply lg:top-[6.5rem]! lg:h-[calc(100dvh-6.5rem)]!;
+    }
+}

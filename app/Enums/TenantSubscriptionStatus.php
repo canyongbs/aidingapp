@@ -34,17 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace App\Models;
+namespace App\Enums;
 
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Spatie\LaravelSettings\Models\SettingsProperty as BaseSettingsProperty;
-use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
-
-/**
- * @mixin IdeHelperLandlordSettingsProperty
- */
-class LandlordSettingsProperty extends BaseSettingsProperty
+enum TenantSubscriptionStatus: string
 {
-    use HasUuids;
-    use UsesLandlordConnection;
+    case Active = 'active';
+
+    case ExpiredPeriod1 = 'expired_period_1';
+
+    case ExpiredPeriod2 = 'expired_period_2';
+
+    case Expired = 'expired';
+
+    public function showsExpirationBanner(): bool
+    {
+        return $this === self::ExpiredPeriod2;
+    }
+
+    public function isInaccessible(): bool
+    {
+        return $this === self::Expired;
+    }
 }
