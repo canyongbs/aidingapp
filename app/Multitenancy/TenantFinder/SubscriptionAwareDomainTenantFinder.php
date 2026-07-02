@@ -36,7 +36,7 @@
 
 namespace App\Multitenancy\TenantFinder;
 
-use App\Enums\TenantSubscriptionStatus;
+use App\Enums\SubscriptionStatus;
 use Illuminate\Http\Request;
 use Spatie\Multitenancy\Contracts\IsTenant;
 use Spatie\Multitenancy\TenantFinder\DomainTenantFinder;
@@ -48,7 +48,7 @@ class SubscriptionAwareDomainTenantFinder extends DomainTenantFinder
         $host = $request->getHost();
 
         return app(IsTenant::class)::whereDomain($host)
-            ->where('subscription_status', '!=', TenantSubscriptionStatus::Expired->value)
+            ->where('subscription_status', '!=', SubscriptionStatus::Expired->value)
             ->first();
     }
 }
