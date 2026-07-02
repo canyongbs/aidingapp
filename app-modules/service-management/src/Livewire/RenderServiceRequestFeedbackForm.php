@@ -55,6 +55,7 @@ class RenderServiceRequestFeedbackForm extends Component implements HasForms, Ha
 
     public ServiceRequest $serviceRequest;
 
+    /** @var array<string, mixed>|null */
     public ?array $data = [];
 
     public function render(): View
