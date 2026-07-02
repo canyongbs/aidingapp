@@ -38,6 +38,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+// @phpstan-ignore Common.migrationMissingDownMethod
 class CreateKnowledgeBaseArticlesTable extends Migration
 {
     public function up(): void
@@ -47,7 +48,7 @@ class CreateKnowledgeBaseArticlesTable extends Migration
 
             $table->boolean('public');
             $table->string('title');
-            $table->json('article_details')->nullable();
+            $table->json('article_details')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration
             $table->longText('notes')->nullable();
             $table->uuid('quality_id')->nullable();
             $table->uuid('status_id')->nullable();

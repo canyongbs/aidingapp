@@ -48,7 +48,7 @@ return new class () extends Migration {
             $table->string('from');
             $table->longText('message')->nullable();
             $table->string('name')->nullable();
-            $table->json('function_call')->nullable();
+            $table->json('function_call')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration
 
             $table->timestamps();
             $table->softDeletes();

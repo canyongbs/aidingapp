@@ -53,7 +53,7 @@ return new class () extends Migration {
             $table->string('notification_class');
             $table->string('external_reference_id')->nullable()->unique();
             $table->string('external_status')->nullable();
-            $table->json('content')->nullable();
+            $table->json('content')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration
             $table->string('delivery_status')->default('processing');
             $table->longText('delivery_response')->nullable();
             $table->integer('quota_usage')->default(0);

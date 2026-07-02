@@ -38,6 +38,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+// @phpstan-ignore Common.migrationMissingDownMethod
 return new class () extends Migration {
     public function up(): void
     {
@@ -45,8 +46,8 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
 
             $table->foreignUuid('service_request_id')->constrained('service_requests');
-            $table->json('original_values');
-            $table->json('new_values');
+            $table->json('original_values'); // @phpstan-ignore Common.jsonColumnInMigration
+            $table->json('new_values'); // @phpstan-ignore Common.jsonColumnInMigration
 
             $table->timestamps();
             $table->softDeletes();

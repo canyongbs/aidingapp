@@ -37,6 +37,7 @@
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
 return new class () extends SettingsMigration {
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function up(): void
     {
         $this->migrator->add('portal.gdpr_privacy_policy', false);
@@ -47,6 +48,7 @@ return new class () extends SettingsMigration {
         $this->migrator->add('portal.gdpr_decline_value', 'decline');
     }
 
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function down(): void
     {
         $this->migrator->delete('portal.gdpr_privacy_policy');
