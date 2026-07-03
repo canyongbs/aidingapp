@@ -109,10 +109,7 @@ class KnowledgeBaseArticlesTable extends BaseWidget
                 TextColumn::make('title')
                     ->label('Article Title')
                     ->searchable(query: function (Builder $query, string $search): Builder {
-                        return $query->whereRaw(
-                            "search_vector @@ plainto_tsquery('english', ?)",
-                            [$search]
-                        );
+                        return $query->where('title', 'ilike', "%{$search}%");
                     })
                     ->url(fn (KnowledgeBaseItem $record): string => KnowledgeBaseItemResource::getUrl('view', ['record' => $record])),
                 TextColumn::make('managers.name')
