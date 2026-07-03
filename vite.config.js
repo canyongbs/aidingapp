@@ -45,7 +45,6 @@ export default defineConfig({
                 'resources/css/filament/admin/theme.css',
                 'app-modules/in-app-communication/resources/js/chat.js',
                 'app-modules/service-management/resources/js/serviceRequestTypeManager.js',
-                'app-modules/task/resources/js/kanban.js',
                 'app-modules/project/resources/js/kanban.js',
             ],
             assets: ['resources/images/**', 'resources/svg/**'],
