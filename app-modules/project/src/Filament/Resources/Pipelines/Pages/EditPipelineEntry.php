@@ -39,21 +39,29 @@ namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Filament\Tables\PipelineEntryAssignToTable;
+use AidingApp\Project\Filament\Tables\PipelineEntryRelatedToTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use Filament\Actions\Action;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 
@@ -146,9 +154,9 @@ class EditPipelineEntry extends Page
                         ->relationship('pipelineStage', 'name')
                         ->required()
                         ->options(fn () => $this->record->stages->pluck('name', 'id')),
-                    Textarea::make('name')
+                    TextInput::make('name')
                         ->maxLength(255)
-                        ->label('Description')
+                        ->label('Name')
                         ->string(),
                 ]),
                 MorphToSelect::make('organizable')
@@ -161,6 +169,38 @@ class EditPipelineEntry extends Page
                     ->searchable()
                     ->preload()
                     ->required(),
+                Textarea::make('description')
+                    ->maxLength(65535),
+                DateTimePicker::make('due')
+                    ->label('Due Date'),
+                ToggleButtons::make('assigned_to_type')
+                    ->label('Assigned To')
+                    ->options(['none' => 'None', 'user' => 'User'])
+                    ->inline()
+                    ->live()
+                    ->default('none')
+                    ->dehydrated(false),
+                TableSelect::make('assigned_to')
+                    ->hiddenLabel()
+                    ->relationship('assignedTo')
+                    ->tableConfiguration(PipelineEntryAssignToTable::class)
+                    ->visible(fn (Get $get) => $get('assigned_to_type') === 'user')
+                    ->required(fn (Get $get) => $get('assigned_to_type') === 'user')
+                    ->rules([Rule::exists('users', 'id')]),
+                ToggleButtons::make('related_to_type')
+                    ->label('Related To')
+                    ->options(['none' => 'None', 'contact' => 'Contact'])
+                    ->inline()
+                    ->live()
+                    ->default('none')
+                    ->dehydrated(false),
+                TableSelect::make('related_to')
+                    ->hiddenLabel()
+                    ->relationship('relatedTo')
+                    ->tableConfiguration(PipelineEntryRelatedToTable::class)
+                    ->visible(fn (Get $get) => $get('related_to_type') === 'contact')
+                    ->required(fn (Get $get) => $get('related_to_type') === 'contact')
+                    ->rules([Rule::exists('contacts', 'id')]),
             ])
             ->statePath('data')
             ->model($this->pipelineEntry);
@@ -183,6 +223,8 @@ class EditPipelineEntry extends Page
     public function fillForm(): void
     {
         $data = $this->pipelineEntry->attributesToArray();
+        $data['assigned_to_type'] = filled($this->pipelineEntry->assigned_to) ? 'user' : 'none';
+        $data['related_to_type'] = filled($this->pipelineEntry->organizable_id) ? 'contact' : 'none';
 
         $this->form->fill($data);
     }

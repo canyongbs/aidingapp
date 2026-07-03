@@ -34,47 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+namespace AidingApp\Project\Filament\Tables;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\PipelineStage;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
-/**
- * @extends Factory<PipelineEntry>
- */
-class PipelineEntryFactory extends Factory
+class PipelineEntryAssignToTable
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public static function configure(Table $table): Table
     {
-        return [
-            'name' => $this->faker->word(),
-            'pipeline_stage_id' => PipelineStage::factory(),
-            'organizable_type' => function () {
-                /** @var Contact $organizable */
-                $organizable = $this->faker->randomElement([new Contact()]);
-
-                return $organizable->getMorphClass();
-            },
-            'organizable_id' => function (array $attributes) {
-                /** @var class-string<Contact> $class */
-                $class = Relation::getMorphedModel($attributes['organizable_type']);
-
-                return $class::factory();
-            },
-            'description' => $this->faker->sentence(3),
-            'due' => $this->faker->dateTimeBetween('now', '+1 year'),
-            'assigned_to' => User::factory(),
-            'created_by' => User::factory(),
-            'concern_id' => Contact::factory(),
-        ];
+        return $table
+            // ->modifyQueryUsing(fn (Builder $query): Builder => $query->whereNull('sla_id'))
+            ->columns([
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('email')
+                    ->label('Email address'),
+                TextColumn::make('job_title'),
+                TextColumn::make('created_at')
+                    ->label('Created At')
+                    ->dateTime()
+                    ->sortable(),
+                TextColumn::make('updated_at')
+                    ->label('Updated At')
+                    ->dateTime()
+                    ->sortable(),
+            ])
+            ->filters([
+                SelectFilter::make('department')
+                    ->label('Department')
+                    ->relationship('department', 'name')
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
+            ])
+            ->defaultPaginationPageOption(5);
     }
 }

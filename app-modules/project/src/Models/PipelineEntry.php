@@ -37,7 +37,9 @@
 namespace AidingApp\Project\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Database\Factories\PipelineEntryFactory;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -63,6 +65,15 @@ class PipelineEntry extends Model implements Auditable
         'pipeline_stage_id',
         'organizable_id',
         'organizable_type',
+        'description',
+        'due',
+        'assigned_to',
+        'created_by',
+        'related_to',
+    ];
+
+    protected $casts = [
+        'due' => 'datetime',
     ];
 
     /**
@@ -79,5 +90,21 @@ class PipelineEntry extends Model implements Auditable
     public function organizable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function assignedTo(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
+    public function relatedTo(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class, 'related_to');
     }
 }

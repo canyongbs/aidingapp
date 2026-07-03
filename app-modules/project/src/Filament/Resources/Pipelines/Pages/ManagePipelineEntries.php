@@ -39,22 +39,30 @@ namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Filament\Tables\PipelineEntryAssignToTable;
+use AidingApp\Project\Filament\Tables\PipelineEntryRelatedToTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use BackedEnum;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TableSelect;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 
@@ -154,6 +162,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->slideOver()
                     ->schema([
                         TextInput::make('name')
                             ->required()
@@ -172,6 +181,38 @@ class ManagePipelineEntries extends ManageRelatedRecords
                             ->searchable()
                             ->preload()
                             ->required(),
+                        Textarea::make('description')
+                            ->maxLength(65535),
+                        DateTimePicker::make('due')
+                            ->label('Due Date'),
+                        ToggleButtons::make('assigned_to_type')
+                            ->label('Assigned To')
+                            ->options(['none' => 'None', 'user' => 'User'])
+                            ->inline()
+                            ->live()
+                            ->default('none')
+                            ->dehydrated(false),
+                        TableSelect::make('assigned_to')
+                            ->hiddenLabel()
+                            ->relationship('assignedTo')
+                            ->tableConfiguration(PipelineEntryAssignToTable::class)
+                            ->visible(fn (Get $get) => $get('assigned_to_type') === 'user')
+                            ->required(fn (Get $get) => $get('assigned_to_type') === 'user')
+                            ->rules([Rule::exists('users', 'id')]),
+                        ToggleButtons::make('related_to_type')
+                            ->label('Related To')
+                            ->options(['none' => 'None', 'contact' => 'Contact'])
+                            ->inline()
+                            ->live()
+                            ->default('none')
+                            ->dehydrated(false),
+                        TableSelect::make('related_to')
+                            ->hiddenLabel()
+                            ->relationship('relatedTo')
+                            ->tableConfiguration(PipelineEntryRelatedToTable::class)
+                            ->visible(fn (Get $get) => $get('related_to_type') === 'contact')
+                            ->required(fn (Get $get) => $get('related_to_type') === 'contact')
+                            ->rules([Rule::exists('contacts', 'id')]),
                     ]),
             ])
             ->defaultSort('created_at', 'desc');

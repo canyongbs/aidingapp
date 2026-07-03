@@ -153,6 +153,16 @@ class ViewPipelineEntry extends Page
                             ->label('Organization Type')
                             ->formatStateUsing(fn (string $state): string => ucfirst($state))
                             ->badge(),
+                        TextEntry::make('description')
+                            ->label('Description')
+                            ->extraAttributes(['class' => 'break-words']),
+                        TextEntry::make('due')
+                            ->label('Due Date')
+                            ->dateTime(),
+                        TextEntry::make('assignedTo.name')
+                            ->label('Assigned To'),
+                        TextEntry::make('relatedTo.full_name')
+                            ->label('Related To'),
                     ]),
             ]);
     }
