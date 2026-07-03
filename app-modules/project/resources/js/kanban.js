@@ -40,11 +40,11 @@ document.addEventListener('alpine:init', () => {
                 window.Sortable.create(kanbanList, {
                     group: 'kanban',
                     animation: 100,
+                    draggable: '[data-pipeline]',
                     forceFallback: true,
                     dragClass: 'drag-card',
                     ghostClass: 'ghost-card',
                     easing: 'cubic-bezier(0, 0.55, 0.45, 1)',
-                    filter: '.kanban-placeholder',
                     onAdd: async function (evt) {
                         try {
                             const result = await $wire.movedEntry(

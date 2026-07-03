@@ -66,7 +66,7 @@
                                     @endforeach
 
                                     <div
-                                        class="kanban-placeholder absolute flex h-20 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 py-2 font-semibold text-gray-500 hover:border-gray-300 dark:border-gray-800"
+                                        class="absolute flex h-20 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 py-2 font-semibold text-gray-500 hover:border-gray-300 dark:border-gray-800"
                                     >
                                         <div>Drag pipeline entry here</div>
                                     </div>
