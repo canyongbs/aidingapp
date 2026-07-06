@@ -24,4 +24,3 @@ created: 2026-07-06
 - In `app-modules/project/src/Filament/Resources/Pipelines/Pages/ViewPipelineEntry.php`: remove the `PipelineEntryFieldsFeature::active()` conditions from the four `->visible()` calls on the new infolist entries (`description`, `due`, `assignedTo.name`, related contact) — they should always be visible.
 
 - Delete the feature flag class: `app/Features/PipelineEntryFieldsFeature.php`
-
