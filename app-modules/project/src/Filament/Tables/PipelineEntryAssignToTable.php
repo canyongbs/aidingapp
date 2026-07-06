@@ -39,14 +39,12 @@ namespace AidingApp\Project\Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class PipelineEntryAssignToTable
 {
     public static function configure(Table $table): Table
     {
         return $table
-            // ->modifyQueryUsing(fn (Builder $query): Builder => $query->whereNull('sla_id'))
             ->columns([
                 TextColumn::make('name')
                     ->label('Name')

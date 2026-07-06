@@ -78,8 +78,10 @@ class EditPipelineEntry extends Page
 
     protected string $view = 'project::filament.pages.edit-pipeline-entry';
 
+    #[Locked]
     public Pipeline $record;
 
+    #[Locked]
     public PipelineEntry $pipelineEntry;
 
     /** @var array<string, mixed> $data */
@@ -210,6 +212,14 @@ class EditPipelineEntry extends Page
     {
         $data = $this->form->getState();
 
+        if (($this->data['assigned_to_type'] ?? 'none') === 'none') {
+            $data['assigned_to'] = null;
+        }
+
+        if (($this->data['related_to_type'] ?? 'none') === 'none') {
+            $data['related_to'] = null;
+        }
+
         $this->pipelineEntry->update($data);
 
         Notification::make()
@@ -224,7 +234,7 @@ class EditPipelineEntry extends Page
     {
         $data = $this->pipelineEntry->attributesToArray();
         $data['assigned_to_type'] = filled($this->pipelineEntry->assigned_to) ? 'user' : 'none';
-        $data['related_to_type'] = filled($this->pipelineEntry->organizable_id) ? 'contact' : 'none';
+        $data['related_to_type'] = filled($this->pipelineEntry->related_to) ? 'contact' : 'none';
 
         $this->form->fill($data);
     }

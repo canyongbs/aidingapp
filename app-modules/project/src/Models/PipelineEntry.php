@@ -39,7 +39,9 @@ namespace AidingApp\Project\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Database\Factories\PipelineEntryFactory;
+use AidingApp\Project\Observers\PipelineEntryObserver;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -50,6 +52,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 /**
  * @mixin IdeHelperPipelineEntry
  */
+#[ObservedBy([PipelineEntryObserver::class])]
 class PipelineEntry extends Model implements Auditable
 {
     /** @use HasFactory<PipelineEntryFactory> */

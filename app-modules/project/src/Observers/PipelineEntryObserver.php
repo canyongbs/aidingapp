@@ -38,6 +38,7 @@ namespace AidingApp\Project\Observers;
 
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Notifications\PipelineEntryAssignedToUserNotification;
+use App\Models\User;
 
 class PipelineEntryObserver
 {
@@ -50,8 +51,11 @@ class PipelineEntryObserver
 
     public function saved(PipelineEntry $pipelineEntry): void
     {
-        if ($pipelineEntry->wasChanged('assigned_to') && ! is_null($pipelineEntry->assigned_to)) {
-            $pipelineEntry->assignedTo->notify(new PipelineEntryAssignedToUserNotification($pipelineEntry));
+        if (filled($pipelineEntry->assigned_to) && ($pipelineEntry->wasChanged('assigned_to') || $pipelineEntry->wasRecentlyCreated)) {
+            /** @var User|null $user */
+            $user = $pipelineEntry->assignedTo;
+
+            $user?->notify(new PipelineEntryAssignedToUserNotification($pipelineEntry));
         }
     }
 }

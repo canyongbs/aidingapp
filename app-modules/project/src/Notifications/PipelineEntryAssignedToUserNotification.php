@@ -76,13 +76,13 @@ class PipelineEntryAssignedToUserNotification extends Notification implements Sh
      */
     public function toDatabase(object $notifiable): array
     {
-        $url = ManagePipelineEntries::getUrl(['record' => $this->pipelineEntry->pipeline, 'tableActionRecord' => $this->pipelineEntry, 'tableAction' => 'view']);
+        $url = ManagePipelineEntries::getUrl(['record' => $this->pipelineEntry->pipelineStage->pipeline_id, 'tableActionRecord' => $this->pipelineEntry, 'tableAction' => 'view']);
 
         $title = str($this->pipelineEntry->name)->limit();
 
         $message = filled($url)
-            ? "You have been assigned a new Pipeline Entry: <a href='{$url}' target='_blank' class='underline'>{$title}</a>"
-            : "You have been assigned a new Pipeline Entry: {$title}";
+          ? "You have been assigned a new Pipeline Entry: <a href='{$url}' target='_blank' class='underline'>{$title}</a>"
+          : "You have been assigned a new Pipeline Entry: {$title}";
 
         return FilamentNotification::make()
             ->success()
@@ -92,6 +92,6 @@ class PipelineEntryAssignedToUserNotification extends Notification implements Sh
 
     private function resolveNotificationSetting(User $notifiable): ?NotificationSetting
     {
-        return $this->pipelineEntry->createdBy->department?->division?->notificationSetting?->setting;
+        return $this->pipelineEntry->createdBy?->department?->division?->notificationSetting?->setting;
     }
 }

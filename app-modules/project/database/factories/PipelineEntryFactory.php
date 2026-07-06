@@ -74,7 +74,7 @@ class PipelineEntryFactory extends Factory
             'due' => $this->faker->dateTimeBetween('now', '+1 year'),
             'assigned_to' => User::factory(),
             'created_by' => User::factory(),
-            'concern_id' => Contact::factory(),
+            'related_to' => Contact::factory(),
         ];
     }
 }
