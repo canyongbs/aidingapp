@@ -43,6 +43,7 @@ use AidingApp\Project\Filament\Tables\PipelineEntryRelatedToTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
+use App\Features\PipelineEntryFieldsFeature;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -157,11 +158,14 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                     ->preload()
                     ->required(),
                 Textarea::make('description')
+                    ->visible(fn () => PipelineEntryFieldsFeature::active())
                     ->maxLength(65535),
                 DateTimePicker::make('due')
-                    ->label('Due Date'),
+                    ->label('Due Date')
+                    ->visible(fn () => PipelineEntryFieldsFeature::active()),
                 ToggleButtons::make('assigned_to_type')
                     ->label('Assigned To')
+                    ->visible(fn () => PipelineEntryFieldsFeature::active())
                     ->options(['none' => 'None', 'user' => 'User'])
                     ->inline()
                     ->live()
@@ -171,11 +175,12 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                     ->hiddenLabel()
                     ->relationship('assignedTo')
                     ->tableConfiguration(PipelineEntryAssignToTable::class)
-                    ->visible(fn (Get $get) => $get('assigned_to_type') === 'user')
-                    ->required(fn (Get $get) => $get('assigned_to_type') === 'user')
+                    ->visible(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('assigned_to_type') === 'user')
+                    ->required(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('assigned_to_type') === 'user')
                     ->rules([Rule::exists('users', 'id')]),
                 ToggleButtons::make('related_to_type')
                     ->label('Related To')
+                    ->visible(fn () => PipelineEntryFieldsFeature::active())
                     ->options(['none' => 'None', 'contact' => 'Contact'])
                     ->inline()
                     ->live()
@@ -185,21 +190,28 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                     ->hiddenLabel()
                     ->relationship('relatedTo')
                     ->tableConfiguration(PipelineEntryRelatedToTable::class)
-                    ->visible(fn (Get $get) => $get('related_to_type') === 'contact')
-                    ->required(fn (Get $get) => $get('related_to_type') === 'contact')
+                    ->visible(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('related_to_type') === 'contact')
+                    ->required(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('related_to_type') === 'contact')
                     ->rules([Rule::exists('contacts', 'id')]),
             ])
             ->action(function (array $data, array $arguments) {
-                $entry = new PipelineEntry([
+                $dataArray = [
                     'name' => $data['name'],
                     'organizable_type' => $data['organizable_type'],
                     'organizable_id' => $data['organizable_id'],
                     'pipeline_stage_id' => $arguments['stage'],
-                    'description' => $data['description'] ?? null,
-                    'due' => $data['due'] ?? null,
-                    'assigned_to' => $data['assigned_to'] ?? null,
-                    'related_to' => $data['related_to'] ?? null,
-                ]);
+                ];
+
+                if (PipelineEntryFieldsFeature::active()) {
+                    $dataArray = [
+                        ...$dataArray,
+                        'description' => $data['description'] ?? null,
+                        'due' => $data['due'] ?? null,
+                        'assigned_to' => $data['assigned_to'] ?? null,
+                        'related_to' => $data['related_to'] ?? null,
+                    ];
+                }
+                $entry = new PipelineEntry($dataArray);
 
                 $entry->saveOrFail();
 

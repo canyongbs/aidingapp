@@ -43,6 +43,7 @@ use AidingApp\Project\Filament\Tables\PipelineEntryAssignToTable;
 use AidingApp\Project\Filament\Tables\PipelineEntryRelatedToTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use App\Features\PipelineEntryFieldsFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\MorphToSelect;
@@ -158,7 +159,7 @@ class EditPipelineEntry extends Page
                         ->options(fn () => $this->record->stages->pluck('name', 'id')),
                     TextInput::make('name')
                         ->maxLength(255)
-                        ->label('Name')
+                        ->label(PipelineEntryFieldsFeature::active() ? 'Name' : 'Description')
                         ->string(),
                 ]),
                 MorphToSelect::make('organizable')
@@ -172,11 +173,14 @@ class EditPipelineEntry extends Page
                     ->preload()
                     ->required(),
                 Textarea::make('description')
+                    ->visible(fn () => PipelineEntryFieldsFeature::active())
                     ->maxLength(65535),
                 DateTimePicker::make('due')
+                    ->visible(fn () => PipelineEntryFieldsFeature::active())
                     ->label('Due Date'),
                 ToggleButtons::make('assigned_to_type')
                     ->label('Assigned To')
+                    ->visible(fn () => PipelineEntryFieldsFeature::active())
                     ->options(['none' => 'None', 'user' => 'User'])
                     ->inline()
                     ->live()
@@ -186,11 +190,12 @@ class EditPipelineEntry extends Page
                     ->hiddenLabel()
                     ->relationship('assignedTo')
                     ->tableConfiguration(PipelineEntryAssignToTable::class)
-                    ->visible(fn (Get $get) => $get('assigned_to_type') === 'user')
-                    ->required(fn (Get $get) => $get('assigned_to_type') === 'user')
+                    ->visible(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('assigned_to_type') === 'user')
+                    ->required(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('assigned_to_type') === 'user')
                     ->rules([Rule::exists('users', 'id')]),
                 ToggleButtons::make('related_to_type')
                     ->label('Related To')
+                    ->visible(fn () => PipelineEntryFieldsFeature::active())
                     ->options(['none' => 'None', 'contact' => 'Contact'])
                     ->inline()
                     ->live()
@@ -200,8 +205,8 @@ class EditPipelineEntry extends Page
                     ->hiddenLabel()
                     ->relationship('relatedTo')
                     ->tableConfiguration(PipelineEntryRelatedToTable::class)
-                    ->visible(fn (Get $get) => $get('related_to_type') === 'contact')
-                    ->required(fn (Get $get) => $get('related_to_type') === 'contact')
+                    ->visible(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('related_to_type') === 'contact')
+                    ->required(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('related_to_type') === 'contact')
                     ->rules([Rule::exists('contacts', 'id')]),
             ])
             ->statePath('data')
@@ -212,12 +217,14 @@ class EditPipelineEntry extends Page
     {
         $data = $this->form->getState();
 
-        if (($this->data['assigned_to_type'] ?? 'none') === 'none') {
-            $data['assigned_to'] = null;
-        }
+        if (PipelineEntryFieldsFeature::active()) {
+            if (($this->data['assigned_to_type'] ?? 'none') === 'none') {
+                $data['assigned_to'] = null;
+            }
 
-        if (($this->data['related_to_type'] ?? 'none') === 'none') {
-            $data['related_to'] = null;
+            if (($this->data['related_to_type'] ?? 'none') === 'none') {
+                $data['related_to'] = null;
+            }
         }
 
         $this->pipelineEntry->update($data);
@@ -233,8 +240,11 @@ class EditPipelineEntry extends Page
     public function fillForm(): void
     {
         $data = $this->pipelineEntry->attributesToArray();
-        $data['assigned_to_type'] = filled($this->pipelineEntry->assigned_to) ? 'user' : 'none';
-        $data['related_to_type'] = filled($this->pipelineEntry->related_to) ? 'contact' : 'none';
+
+        if (PipelineEntryFieldsFeature::active()) {
+            $data['assigned_to_type'] = filled($this->pipelineEntry->assigned_to) ? 'user' : 'none';
+            $data['related_to_type'] = filled($this->pipelineEntry->related_to) ? 'contact' : 'none';
+        }
 
         $this->form->fill($data);
     }

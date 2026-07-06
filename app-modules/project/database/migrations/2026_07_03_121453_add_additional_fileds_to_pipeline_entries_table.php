@@ -34,29 +34,40 @@
 </COPYRIGHT>
 */
 
+use App\Features\PipelineEntryFieldsFeature;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('pipeline_entries', function (Blueprint $table) {
-            $table->text('description')->nullable();
-            $table->timestamp('due')->nullable();
-            $table->foreignUuid('assigned_to')->nullable()->constrained('users');
-            $table->foreignUuid('created_by')->nullable()->constrained('users');
-            $table->string('related_to')->nullable();
+        DB::transaction(function () {
+            Schema::table('pipeline_entries', function (Blueprint $table) {
+                $table->text('description')->nullable();
+                $table->timestamp('due')->nullable();
+                $table->foreignUuid('assigned_to')->nullable()->constrained('users');
+                $table->foreignUuid('created_by')->nullable()->constrained('users');
+                $table->string('related_to')->nullable();
 
-            $table->index(['related_to']);
+                $table->index('related_to');
+            });
+
+            PipelineEntryFieldsFeature::activate();
         });
     }
 
     public function down(): void
     {
-        Schema::table('pipeline_entries', function (Blueprint $table) {
-            $table->dropColumn(['description', 'due', 'assigned_to', 'created_by', 'related_to']);
-            $table->dropIndex(['related_to']);
+        DB::transaction(function () {
+            PipelineEntryFieldsFeature::deactivate();
+
+            Schema::table('pipeline_entries', function (Blueprint $table) {
+                $table->dropIndex(['related_to']);
+
+                $table->dropColumn(['description', 'due', 'assigned_to', 'created_by', 'related_to']);
+            });
         });
     }
 };

@@ -43,6 +43,7 @@ use AidingApp\Project\Filament\Tables\PipelineEntryAssignToTable;
 use AidingApp\Project\Filament\Tables\PipelineEntryRelatedToTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use App\Features\PipelineEntryFieldsFeature;
 use BackedEnum;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -182,10 +183,13 @@ class ManagePipelineEntries extends ManageRelatedRecords
                             ->preload()
                             ->required(),
                         Textarea::make('description')
+                            ->visible(fn () => PipelineEntryFieldsFeature::active())
                             ->maxLength(65535),
                         DateTimePicker::make('due')
+                            ->visible(fn () => PipelineEntryFieldsFeature::active())
                             ->label('Due Date'),
                         ToggleButtons::make('assigned_to_type')
+                            ->visible(fn () => PipelineEntryFieldsFeature::active())
                             ->label('Assigned To')
                             ->options(['none' => 'None', 'user' => 'User'])
                             ->inline()
@@ -196,10 +200,11 @@ class ManagePipelineEntries extends ManageRelatedRecords
                             ->hiddenLabel()
                             ->relationship('assignedTo')
                             ->tableConfiguration(PipelineEntryAssignToTable::class)
-                            ->visible(fn (Get $get) => $get('assigned_to_type') === 'user')
-                            ->required(fn (Get $get) => $get('assigned_to_type') === 'user')
+                            ->visible(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('assigned_to_type') === 'user')
+                            ->required(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('assigned_to_type') === 'user')
                             ->rules([Rule::exists('users', 'id')]),
                         ToggleButtons::make('related_to_type')
+                            ->visible(fn () => PipelineEntryFieldsFeature::active())
                             ->label('Related To')
                             ->options(['none' => 'None', 'contact' => 'Contact'])
                             ->inline()
@@ -210,8 +215,8 @@ class ManagePipelineEntries extends ManageRelatedRecords
                             ->hiddenLabel()
                             ->relationship('relatedTo')
                             ->tableConfiguration(PipelineEntryRelatedToTable::class)
-                            ->visible(fn (Get $get) => $get('related_to_type') === 'contact')
-                            ->required(fn (Get $get) => $get('related_to_type') === 'contact')
+                            ->visible(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('related_to_type') === 'contact')
+                            ->required(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('related_to_type') === 'contact')
                             ->rules([Rule::exists('contacts', 'id')]),
                     ]),
             ])

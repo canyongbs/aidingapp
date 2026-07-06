@@ -38,20 +38,21 @@ namespace AidingApp\Project\Observers;
 
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Notifications\PipelineEntryAssignedToUserNotification;
+use App\Features\PipelineEntryFieldsFeature;
 use App\Models\User;
 
 class PipelineEntryObserver
 {
     public function saving(PipelineEntry $pipelineEntry): void
     {
-        if (is_null($pipelineEntry->created_by)) {
+        if (PipelineEntryFieldsFeature::active() && is_null($pipelineEntry->created_by)) {
             $pipelineEntry->created_by = auth()->id();
         }
     }
 
     public function saved(PipelineEntry $pipelineEntry): void
     {
-        if (filled($pipelineEntry->assigned_to) && ($pipelineEntry->wasChanged('assigned_to') || $pipelineEntry->wasRecentlyCreated)) {
+        if (PipelineEntryFieldsFeature::active() && filled($pipelineEntry->assigned_to) && ($pipelineEntry->wasChanged('assigned_to') || $pipelineEntry->wasRecentlyCreated)) {
             /** @var User|null $user */
             $user = $pipelineEntry->assignedTo;
 
