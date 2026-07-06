@@ -37,12 +37,14 @@
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
 return new class () extends SettingsMigration {
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function up(): void
     {
         $this->migrator->delete('portal.footer_color');
         $this->migrator->delete('portal.footer_copyright_statement');
     }
 
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function down(): void
     {
         $this->migrator->add('portal.footer_color');

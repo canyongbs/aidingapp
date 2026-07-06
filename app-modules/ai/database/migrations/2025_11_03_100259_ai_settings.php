@@ -38,6 +38,7 @@ use Illuminate\Support\Facades\DB;
 use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
+// @phpstan-ignore Common.migrationMissingDownMethod
 return new class () extends SettingsMigration {
     public function up(): void
     {

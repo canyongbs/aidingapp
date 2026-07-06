@@ -57,6 +57,7 @@ return new class () extends Migration {
         });
     }
 
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function down(): void
     {
         DB::statement('DROP INDEX IF EXISTS knowledge_base_statuses_name_unique');

@@ -40,6 +40,7 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateAuditsTable extends Migration
 {
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function up(): void
     {
         $connection = config('audit.drivers.database.connection', config('database.default'));
@@ -53,8 +54,8 @@ class CreateAuditsTable extends Migration
             $table->string('event');
             $table->string('auditable_type');
             $table->string('auditable_id');
-            $table->json('old_values')->nullable();
-            $table->json('new_values')->nullable();
+            $table->json('old_values')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration
+            $table->json('new_values')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration
             $table->text('url')->nullable();
             $table->ipAddress('ip_address')->nullable();
             $table->string('user_agent', 1023)->nullable();
@@ -65,6 +66,7 @@ class CreateAuditsTable extends Migration
         });
     }
 
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function down(): void
     {
         $connection = config('audit.drivers.database.connection', config('database.default'));

@@ -40,6 +40,7 @@ use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function up(): void
     {
         Schema::table('knowledge_base_articles', function (Blueprint $table) {
@@ -54,6 +55,7 @@ return new class () extends Migration {
         DB::statement('CREATE INDEX knowledge_base_articles_search_vector_idx ON knowledge_base_articles USING GIN(search_vector)');
     }
 
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function down(): void
     {
         DB::statement('DROP INDEX IF EXISTS knowledge_base_articles_search_vector_idx');

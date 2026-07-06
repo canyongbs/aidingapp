@@ -37,7 +37,9 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
+// @phpstan-ignore Common.migrationMissingDownMethod
 return new class () extends Migration {
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function up(): void
     {
         $mediaUuidMap = DB::table('media')

@@ -38,6 +38,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+// @phpstan-ignore Common.migrationMissingDownMethod
 return new class () extends Migration {
     public function up(): void
     {
@@ -48,7 +49,7 @@ return new class () extends Migration {
             $table->string('notification_class');
             $table->string('external_reference_id')->nullable()->unique();
             $table->string('external_status')->nullable();
-            $table->json('content')->nullable();
+            $table->json('content')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration
             $table->string('delivery_status')->default('processing');
             $table->longText('delivery_response')->nullable();
             $table->integer('quota_usage')->default(0);

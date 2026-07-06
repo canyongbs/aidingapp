@@ -37,6 +37,7 @@
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
 return new class () extends SettingsMigration {
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function up(): void
     {
         $this->migrator->deleteIfExists('ai.prompt_system_context');
@@ -46,6 +47,7 @@ return new class () extends SettingsMigration {
         $this->migrator->deleteIfExists('ai.temperature');
     }
 
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function down(): void
     {
         $this->migrator->add(
