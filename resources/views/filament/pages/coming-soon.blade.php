@@ -51,7 +51,7 @@
         </div>
 
         <div class="flex flex-col gap-2">
-            <h2 class="text-2xl font-bold tracking-tight text-gray-950 dark:text-white">Coming Soon</h2>
+            <h2 class="text-2xl font-bold tracking-tight text-gray-950 dark:text-white">Coming Soon!</h2>
             <p class="max-w-sm text-sm text-gray-500 dark:text-gray-400">
                 This report is currently under development and will be available in a future release.
             </p>
