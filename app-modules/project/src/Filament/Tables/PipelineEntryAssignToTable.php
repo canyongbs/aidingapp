@@ -36,6 +36,8 @@
 
 namespace AidingApp\Project\Filament\Tables;
 
+use App\Filament\Tables\Columns\IdColumn;
+use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -46,10 +48,15 @@ class PipelineEntryAssignToTable
     {
         return $table
             ->columns([
+                IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
+                    ->iconColor(fn (User $record) => $record->presenceStatus()->getColor())
+                    ->tooltip(fn (User $record) => $record->presenceStatus()->getLabel())
+                    ->extraAttributes(fn (User $record): array => ['aria-label' => $record->name . ' (' . $record->presenceStatus()->getLabel() . ')']),
                 TextColumn::make('email')
                     ->label('Email address'),
                 TextColumn::make('job_title'),

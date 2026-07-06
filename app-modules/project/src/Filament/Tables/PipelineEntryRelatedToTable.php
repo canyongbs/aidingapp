@@ -37,6 +37,7 @@
 namespace AidingApp\Project\Filament\Tables;
 
 use AidingApp\Contact\Models\Contact;
+use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -48,6 +49,7 @@ class PipelineEntryRelatedToTable
     {
         return $table
             ->columns([
+                IdColumn::make(),
                 TextColumn::make(Contact::displayNameKey())
                     ->label('Name')
                     ->searchable()
