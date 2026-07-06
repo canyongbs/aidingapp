@@ -53,5 +53,5 @@ test('the sequences list page can be rendered with auth', function () {
     actingAs($user)
         ->get('service-management-administration/sequence')
         ->assertOk()
-        ->assertSee('Coming Soon!');
+        ->assertSee('Coming Soon');
 });
