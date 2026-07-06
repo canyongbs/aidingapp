@@ -31,4 +31,30 @@
     
     </COPYRIGHT>
 --}}
-<x-filament-panels::page>Coming Soon!</x-filament-panels::page>
+<x-filament-panels::page>
+    <div class="flex min-h-[60vh] flex-col items-center justify-center gap-6 text-center">
+        <div class="flex h-24 w-24 items-center justify-center rounded-full bg-primary-100 dark:bg-primary-900/30">
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="1.5"
+                stroke="currentColor"
+                class="h-12 w-12 text-primary-600 dark:text-primary-400"
+            >
+                <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                />
+            </svg>
+        </div>
+
+        <div class="flex flex-col gap-2">
+            <h2 class="text-2xl font-bold tracking-tight text-gray-950 dark:text-white">Coming Soon</h2>
+            <p class="max-w-sm text-sm text-gray-500 dark:text-gray-400">
+                This report is currently under development and will be available in a future release.
+            </p>
+        </div>
+    </div>
+</x-filament-panels::page>

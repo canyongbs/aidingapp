@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,27 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace App\Enums;
+namespace AidingApp\Report\Filament\Pages;
 
-use Filament\Support\Contracts\HasLabel;
+use App\Enums\ReportLibraryNavigationGroup;
+use App\Filament\Clusters\ReportLibrary;
+use App\Models\User;
+use BackedEnum;
+use Filament\Pages\Dashboard;
+use UnitEnum;
 
-enum ReportLibraryNavigationGroup implements HasLabel
+class AiClarification extends Dashboard
 {
-    case ServiceDesk;
+    protected static ?string $cluster = ReportLibrary::class;
 
-    case ArtificialIntelligence;
+    protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::ArtificialIntelligence;
 
-    case Purchasing;
+    protected static ?string $navigationLabel = 'AI Clarification';
 
-    case Projects;
+    protected static ?string $title = 'AI Clarification';
 
-    public function getLabel(): string
+    protected static string $routePath = 'ai-clarification';
+
+    protected string $view = 'filament.pages.coming-soon';
+
+    protected static ?int $navigationSort = 82;
+
+    protected static string | BackedEnum | null $navigationIcon = '';
+
+    public static function canAccess(): bool
     {
-        return match ($this) {
-            self::ServiceDesk => 'Service Desk',
-            self::ArtificialIntelligence => 'Artificial Intelligence',
-            self::Purchasing => 'Purchasing',
-            self::Projects => 'Projects',
-        };
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user->can('report-library.view-any');
     }
 }
