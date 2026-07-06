@@ -67,7 +67,7 @@ class PipelineEntryAssignedToUserNotification extends Notification implements Sh
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
             ->subject('You have been assigned a new Pipeline Entry')
-            ->line('You have been assigned the task: ')
+            ->line('You have been assigned the pipeline entry: ')
             ->line("\"{$this->pipelineEntry->name}\"");
     }
 
