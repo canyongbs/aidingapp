@@ -39,6 +39,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function up(): void
     {
         Schema::dropIfExists('survey_field_submission');
@@ -49,6 +50,7 @@ return new class () extends Migration {
         Schema::dropIfExists('surveys');
     }
 
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function down(): void
     {
         Schema::create('surveys', function (Blueprint $table) {
@@ -57,13 +59,13 @@ return new class () extends Migration {
             $table->string('name')->unique();
             $table->text('description')->nullable();
             $table->boolean('embed_enabled')->default(false);
-            $table->json('allowed_domains')->nullable();
+            $table->json('allowed_domains')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration
             $table->string('primary_color')->nullable();
             $table->string('rounding')->nullable();
             $table->boolean('is_authenticated')->default(false);
             $table->boolean('is_wizard')->default(false);
             $table->boolean('recaptcha_enabled')->default(false);
-            $table->json('content')->nullable();
+            $table->json('content')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration
 
             $table->timestamps();
             $table->softDeletes();
@@ -73,7 +75,7 @@ return new class () extends Migration {
             $table->uuid('id')->primary();
 
             $table->text('label');
-            $table->json('content')->nullable();
+            $table->json('content')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration
             $table->foreignUuid('survey_id')->constrained('surveys')->cascadeOnDelete();
             $table->integer('sort');
 
@@ -87,7 +89,7 @@ return new class () extends Migration {
             $table->text('label');
             $table->text('type');
             $table->boolean('is_required');
-            $table->json('config');
+            $table->json('config'); // @phpstan-ignore Common.jsonColumnInMigration
 
             $table->foreignUuid('survey_id')->constrained('surveys')->cascadeOnDelete();
             $table->foreignUuid('step_id')->nullable()->constrained('survey_steps')->cascadeOnDelete();

@@ -39,12 +39,14 @@ use Illuminate\Support\Facades\Schema;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
 return new class () extends SettingsMigration {
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function up(): void
     {
         Schema::dropIfExists('twilio_conversation_user');
         Schema::dropIfExists('twilio_conversations');
     }
 
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function down(): void
     {
         Schema::create('twilio_conversations', function (Blueprint $table) {

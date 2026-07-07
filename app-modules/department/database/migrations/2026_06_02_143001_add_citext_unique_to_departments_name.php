@@ -59,6 +59,7 @@ return new class () extends Migration {
         });
     }
 
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function down(): void
     {
         DB::statement('DROP INDEX IF EXISTS departments_name_unique');

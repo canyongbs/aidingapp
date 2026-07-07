@@ -39,6 +39,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
 return new class () extends Migration {
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function up(): void
     {
         $closedStatusIds = DB::table('service_request_statuses')
@@ -63,6 +64,7 @@ return new class () extends Migration {
         }
     }
 
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function down(): void
     {
         $closedStatusIds = DB::table('service_request_statuses')

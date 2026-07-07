@@ -51,8 +51,8 @@ return new class () extends Migration {
 
             $table->string('name');
             $table->text('description')->nullable();
-            $table->json('filters')->nullable();
-            $table->json('columns');
+            $table->json('filters')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration
+            $table->json('columns'); // @phpstan-ignore Common.jsonColumnInMigration
             $table->string('model');
 
             $table->foreignUuid('user_id')->constrained('users');
