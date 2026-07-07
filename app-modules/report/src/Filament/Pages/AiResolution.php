@@ -34,27 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace App\Enums;
+namespace AidingApp\Report\Filament\Pages;
 
-use Filament\Support\Contracts\HasLabel;
+use App\Enums\ReportLibraryNavigationGroup;
+use App\Filament\Clusters\ReportLibrary;
+use App\Models\User;
+use BackedEnum;
+use Filament\Pages\Dashboard;
+use UnitEnum;
 
-enum ReportLibraryNavigationGroup implements HasLabel
+class AiResolution extends Dashboard
 {
-    case ServiceDesk;
+    protected static ?string $cluster = ReportLibrary::class;
 
-    case ArtificialIntelligence;
+    protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::ArtificialIntelligence;
 
-    case Purchasing;
+    protected static ?string $navigationLabel = 'AI Resolution';
 
-    case Projects;
+    protected static ?string $title = 'AI Resolution';
 
-    public function getLabel(): string
+    protected static string $routePath = 'ai-resolution';
+
+    protected string $view = 'filament.pages.coming-soon';
+
+    protected static ?int $navigationSort = 83;
+
+    protected static string | BackedEnum | null $navigationIcon = '';
+
+    public static function canAccess(): bool
     {
-        return match ($this) {
-            self::ServiceDesk => 'Service Desk',
-            self::ArtificialIntelligence => 'Artificial Intelligence',
-            self::Purchasing => 'Purchasing',
-            self::Projects => 'Projects',
-        };
+        /** @var User $user */
+        $user = auth()->user();
+
+        return $user->can('report-library.view-any');
     }
 }
