@@ -96,9 +96,9 @@ class KnowledgeBaseStats extends StatsOverviewReportWidget
             );
 
         return [
-            Stat::make('Total Articles', Number::abbreviate($totalArticles, maxPrecision: 2)),
-            Stat::make('Healthy Articles', Number::abbreviate($healthyArticles, maxPrecision: 2)),
-            Stat::make('Total Views', Number::abbreviate((int) $totalViews, maxPrecision: 2)),
+            Stat::make('Total Articles', Number::abbreviate($totalArticles)),
+            Stat::make('Healthy Articles', Number::abbreviate($healthyArticles)),
+            Stat::make('Total Views', Number::abbreviate((int) $totalViews)),
         ];
     }
 

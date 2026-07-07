@@ -92,19 +92,6 @@ class KnowledgeBaseArticlesByCategoryDonutChart extends ChartReportWidget
                 return $this->getArticlesByCategoryData();
             });
 
-        $chartColors = [
-            'rgb(59, 130, 246)',
-            'rgb(34, 197, 94)',
-            'rgb(249, 115, 22)',
-            'rgb(168, 85, 247)',
-            'rgb(236, 72, 153)',
-            'rgb(14, 165, 233)',
-            'rgb(245, 158, 11)',
-            'rgb(99, 102, 241)',
-            'rgb(20, 184, 166)',
-            'rgb(239, 68, 68)',
-        ];
-
         $filteredCategories = $articlesByCategory->filter(
             fn (KnowledgeBaseCategory $category): bool => $category->knowledge_base_items_count > 0
         )->values();
@@ -115,8 +102,8 @@ class KnowledgeBaseArticlesByCategoryDonutChart extends ChartReportWidget
                 [
                     'label' => 'Articles by Category',
                     'data' => $filteredCategories->pluck('knowledge_base_items_count'),
-                    'backgroundColor' => $filteredCategories->values()->map(
-                        fn ($item, int $index) => $chartColors[$index % count($chartColors)]
+                    'backgroundColor' => $filteredCategories->map(
+                        fn (): string => 'rgb(' . random_int(50, 230) . ', ' . random_int(50, 230) . ', ' . random_int(50, 230) . ')'
                     ),
                     'hoverOffset' => 4,
                 ],

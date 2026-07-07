@@ -46,13 +46,13 @@ it('returns correct articles over time data without filters', function () {
     KnowledgeBaseItem::factory()->count(2)->state([
         'status_id' => $status->id,
         'category_id' => $category->id,
-        'created_at' => now()->subMonths(2),
+        'created_at' => now()->subMonthsWithoutOverflow(2),
     ])->create();
 
     KnowledgeBaseItem::factory()->count(3)->state([
         'status_id' => $status->id,
         'category_id' => $category->id,
-        'created_at' => now()->subMonth(),
+        'created_at' => now()->subMonthsWithoutOverflow(1),
     ])->create();
 
     $widget = new KnowledgeBaseArticlesOverTimeBarChart();
@@ -73,13 +73,13 @@ it('filters articles over time by category', function () {
     KnowledgeBaseItem::factory()->count(2)->state([
         'status_id' => $status->id,
         'category_id' => $categoryA->id,
-        'created_at' => now()->subMonth(),
+        'created_at' => now()->subMonthsWithoutOverflow(1),
     ])->create();
 
     KnowledgeBaseItem::factory()->count(3)->state([
         'status_id' => $status->id,
         'category_id' => $categoryB->id,
-        'created_at' => now()->subMonth(),
+        'created_at' => now()->subMonthsWithoutOverflow(1),
     ])->create();
 
     $widget = new KnowledgeBaseArticlesOverTimeBarChart();

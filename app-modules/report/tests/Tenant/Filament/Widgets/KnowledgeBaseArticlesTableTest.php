@@ -127,5 +127,114 @@ it('filters records by status using the table-level status filter', function () 
     ])
         ->filterTable('status', $statusA->id)
         ->assertCanSeeTableRecords(collect([$publishedArticle]))
-        ->assertCanNotSeeTableRecords(collect([$draftArticle]));
+        ->assertCanNotSeeTableRecords(collect([$draftArticle]))
+        ->filterTable('status', $statusB->id)
+        ->assertCanSeeTableRecords(collect([$draftArticle]))
+        ->assertCanNotSeeTableRecords(collect([$publishedArticle]));
+});
+
+it('filters records by category using the table-level category filter', function () {
+    $status = KnowledgeBaseStatus::factory()->create();
+    $categoryA = KnowledgeBaseCategory::factory()->create();
+    $categoryB = KnowledgeBaseCategory::factory()->create();
+
+    $articleA = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $categoryA->id,
+    ])->create();
+
+    $articleB = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $categoryB->id,
+    ])->create();
+
+    livewire(KnowledgeBaseArticlesTable::class, [
+        'cacheTag' => 'test-kb-articles-table-category-filter',
+        'pageFilters' => [],
+    ])
+        ->filterTable('category', $categoryA->id)
+        ->assertCanSeeTableRecords(collect([$articleA]))
+        ->assertCanNotSeeTableRecords(collect([$articleB]))
+        ->filterTable('category', $categoryB->id)
+        ->assertCanSeeTableRecords(collect([$articleB]))
+        ->assertCanNotSeeTableRecords(collect([$articleA]));
+});
+
+it('filters records by public using the table-level public filter', function () {
+    $status = KnowledgeBaseStatus::factory()->create();
+    $category = KnowledgeBaseCategory::factory()->create();
+
+    $publicArticle = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'public' => true,
+    ])->create();
+
+    $privateArticle = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'public' => false,
+    ])->create();
+
+    livewire(KnowledgeBaseArticlesTable::class, [
+        'cacheTag' => 'test-kb-articles-table-public-filter',
+        'pageFilters' => [],
+    ])
+        ->filterTable('public', true)
+        ->assertCanSeeTableRecords(collect([$publicArticle]))
+        ->assertCanNotSeeTableRecords(collect([$privateArticle]))
+        ->filterTable('public', false)
+        ->assertCanSeeTableRecords(collect([$privateArticle]))
+        ->assertCanNotSeeTableRecords(collect([$publicArticle]));
+});
+
+it('filters records by created_at using the table-level created after filter', function () {
+    $status = KnowledgeBaseStatus::factory()->create();
+    $category = KnowledgeBaseCategory::factory()->create();
+
+    $recentArticle = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'created_at' => now(),
+    ])->create();
+
+    $oldArticle = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'created_at' => now()->subDays(10),
+    ])->create();
+
+    livewire(KnowledgeBaseArticlesTable::class, [
+        'cacheTag' => 'test-kb-articles-table-created-at-filter',
+        'pageFilters' => [],
+    ])
+        ->filterTable('created_at', ['created_after' => now()->subDays(5)->toDateString()])
+        ->assertCanSeeTableRecords(collect([$recentArticle]))
+        ->assertCanNotSeeTableRecords(collect([$oldArticle]));
+});
+
+it('filters records by updated_at using the table-level updated after filter', function () {
+    $status = KnowledgeBaseStatus::factory()->create();
+    $category = KnowledgeBaseCategory::factory()->create();
+
+    $recentlyUpdatedArticle = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'updated_at' => now(),
+    ])->create();
+
+    $staleArticle = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'created_at' => now()->subDays(10),
+        'updated_at' => now()->subDays(10),
+    ])->create();
+
+    livewire(KnowledgeBaseArticlesTable::class, [
+        'cacheTag' => 'test-kb-articles-table-updated-at-filter',
+        'pageFilters' => [],
+    ])
+        ->filterTable('updated_at', ['updated_after' => now()->subDays(5)->toDateString()])
+        ->assertCanSeeTableRecords(collect([$recentlyUpdatedArticle]))
+        ->assertCanNotSeeTableRecords(collect([$staleArticle]));
 });
