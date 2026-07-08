@@ -50,6 +50,7 @@ use Filament\Actions\Exports\Jobs\PrepareCsvExport;
 use Filament\Actions\Imports\Jobs\ImportCsv;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Cache\Factory as CacheFactory;
+use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Notifications\SendQueuedNotifications;
@@ -82,7 +83,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ImportCsv::class, ImportCsvOverride::class);
         $this->app->bind(PrepareCsvExport::class, PrepareCsvExportOverride::class);
 
-        $this->app->scoped(StartSession::class, function ($app) {
+        $this->app->scoped(StartSession::class, function (Application $app) {
             return new OverrideStartSession($app->make(SessionManager::class), function () use ($app) {
                 return $app->make(CacheFactory::class);
             });
