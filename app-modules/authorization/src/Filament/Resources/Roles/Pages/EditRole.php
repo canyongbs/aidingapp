@@ -40,7 +40,6 @@ use AidingApp\Authorization\Enums\PermissionDescription;
 use AidingApp\Authorization\Filament\Resources\Roles\RoleResource;
 use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Authorization\Models\Role;
-use App\Concerns\EditPageRedirection;
 use CanyonGBS\Common\Filament\Forms\Components\PermissionsMatrix;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
@@ -53,8 +52,6 @@ use Illuminate\Validation\Rules\Unique;
 
 class EditRole extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = RoleResource::class;
 
     public function form(Schema $schema): Schema

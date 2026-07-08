@@ -47,7 +47,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Concerns\EditPageRedirection;
 use CanyonGBS\Common\Filament\Support\HideDeletedExceptSelectedFromSelectOptions;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
@@ -67,8 +66,6 @@ use Illuminate\Support\Collection;
 
 class EditServiceRequest extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ServiceRequestResource::class;
 
     protected static ?string $navigationLabel = 'Edit';

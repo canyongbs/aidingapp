@@ -109,6 +109,7 @@ class AdminPanelProvider extends PanelProvider
                 return $themeSettings->is_favicon_active && $favicon ? $favicon->getTemporaryUrl(now()->addMinutes(5)) : asset('/images/default-favicon.png');
             })
             ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
+            ->resourceEditPageRedirect('view')
             ->maxContentWidth('full')
             ->navigationGroups(NavigationGroup::class)
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')

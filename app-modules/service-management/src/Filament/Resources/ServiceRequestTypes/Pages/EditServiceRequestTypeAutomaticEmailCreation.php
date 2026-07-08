@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Concerns\EditPageRedirection;
 use App\Models\Tenant;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Select;
@@ -56,8 +55,6 @@ use Illuminate\Support\Facades\Config;
 
 class EditServiceRequestTypeAutomaticEmailCreation extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ServiceRequestTypeResource::class;
 
     protected static ?string $navigationLabel = 'Email Creation';

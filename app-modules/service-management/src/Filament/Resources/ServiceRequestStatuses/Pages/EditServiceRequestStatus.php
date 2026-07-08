@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Concerns\EditPageRedirection;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -54,8 +53,6 @@ use Illuminate\Validation\Rules\Unique;
 
 class EditServiceRequestStatus extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ServiceRequestStatusResource::class;
 
     public function form(Schema $schema): Schema
