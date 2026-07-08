@@ -81,7 +81,7 @@ class KnowledgeBaseArticlesOverTimeBarChart extends BarChartReportWidget
 
         $articlesTotalPerMonth = $shouldBypassCache
             ? $this->getArticlesOverTimeData($categories)
-            : Cache::tags(["{$this->cacheTag}"])->remember('articles-over-time-bar-chart', now()->addHours(24), function (): array {
+            : Cache::tags(["{{$this->cacheTag}}"])->remember('articles-over-time-bar-chart', now()->addHours(24), function (): array {
                 return $this->getArticlesOverTimeData();
             });
 

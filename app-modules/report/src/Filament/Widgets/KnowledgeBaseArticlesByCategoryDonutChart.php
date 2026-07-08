@@ -88,7 +88,7 @@ class KnowledgeBaseArticlesByCategoryDonutChart extends ChartReportWidget
 
         $articlesByCategory = $shouldBypassCache
             ? $this->getArticlesByCategoryData($categories)
-            : Cache::tags(["{$this->cacheTag}"])->remember('articles-by-category-distribution', now()->addHours(24), function (): Collection {
+            : Cache::tags(["{{$this->cacheTag}}"])->remember('articles-by-category-distribution', now()->addHours(24), function (): Collection {
                 return $this->getArticlesByCategoryData();
             });
 

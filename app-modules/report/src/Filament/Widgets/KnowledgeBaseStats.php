@@ -73,7 +73,7 @@ class KnowledgeBaseStats extends StatsOverviewReportWidget
 
         $totalArticles = $shouldBypassCache
             ? KnowledgeBaseItem::query()->tap($applyFilters)->count()
-            : Cache::tags(["{$this->cacheTag}"])->remember(
+            : Cache::tags(["{{$this->cacheTag}}"])->remember(
                 'total-articles-count',
                 now()->addHours(24),
                 fn () => KnowledgeBaseItem::query()->count()
@@ -81,7 +81,7 @@ class KnowledgeBaseStats extends StatsOverviewReportWidget
 
         $healthyArticles = $shouldBypassCache
             ? $this->calculateHealthyArticles($applyFilters)
-            : Cache::tags(["{$this->cacheTag}"])->remember(
+            : Cache::tags(["{{$this->cacheTag}}"])->remember(
                 'healthy-articles-count',
                 now()->addHours(24),
                 fn () => $this->calculateHealthyArticles()
@@ -89,7 +89,7 @@ class KnowledgeBaseStats extends StatsOverviewReportWidget
 
         $totalViews = $shouldBypassCache
             ? KnowledgeBaseItem::query()->tap($applyFilters)->sum('portal_view_count')
-            : Cache::tags(["{$this->cacheTag}"])->remember(
+            : Cache::tags(["{{$this->cacheTag}}"])->remember(
                 'total-views-count',
                 now()->addHours(24),
                 fn () => KnowledgeBaseItem::query()->sum('portal_view_count')

@@ -89,7 +89,7 @@ class KnowledgeBaseConcernsByStatusDonutChart extends ChartReportWidget
 
         $concernsByStatus = $shouldBypassCache
             ? $this->getConcernsByStatusData($categories)
-            : Cache::tags(["{$this->cacheTag}"])->remember('concerns-by-status-distribution', now()->addHours(24), function (): Collection {
+            : Cache::tags(["{{$this->cacheTag}}"])->remember('concerns-by-status-distribution', now()->addHours(24), function (): Collection {
                 return $this->getConcernsByStatusData();
             });
 
