@@ -37,12 +37,15 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeCategoryFactory;
+use AidingApp\ServiceManagement\Models\Concerns\RestrictsVisibilityToContactTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeCategoryObserver;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -58,6 +61,7 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
     use SoftDeletes;
     use AuditableTrait;
     use HasRelationships;
+    use RestrictsVisibilityToContactTypes;
 
     /** @use HasFactory<ServiceRequestTypeCategoryFactory> */
     use HasFactory;
@@ -66,10 +70,12 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
         'name',
         'sort',
         'parent_id',
+        'is_visibility_restricted',
     ];
 
     protected $casts = [
         'sort' => 'integer',
+        'is_visibility_restricted' => 'boolean',
     ];
 
     /**
@@ -94,6 +100,26 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
     public function types(): HasMany
     {
         return $this->hasMany(ServiceRequestType::class, 'category_id', 'id')->orderBy('sort');
+    }
+
+    /**
+     * @return BelongsToMany<ContactType, $this, ServiceRequestTypeCategoryVisibilityContactType>
+     */
+    public function restrictedToContactTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            related: ContactType::class,
+            table: 'service_request_type_category_visibility_contact_types',
+            foreignPivotKey: 'service_request_type_category_id',
+            relatedPivotKey: 'contact_type_id',
+        )
+            ->using(ServiceRequestTypeCategoryVisibilityContactType::class)
+            ->withTimestamps();
+    }
+
+    public function visibilityRestrictionParent(): ?ServiceRequestTypeCategory
+    {
+        return $this->parent;
     }
 
     /**

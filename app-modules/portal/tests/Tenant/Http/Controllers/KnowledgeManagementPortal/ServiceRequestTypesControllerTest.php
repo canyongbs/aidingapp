@@ -34,10 +34,13 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 
 beforeEach(function () {
@@ -107,4 +110,89 @@ it('does not return archived service request types as part of a category', funct
 
     expect($categoryIds)->toContain($categoryWithActiveType->id)
         ->and($categoryIds)->not->toContain($categoryWithOnlyArchivedType->id);
+});
+
+it('hides visibility restricted top level types from guests', function () {
+    $visibleType = ServiceRequestType::factory()->create();
+
+    $restrictedType = ServiceRequestType::factory()->create(['is_visibility_restricted' => true]);
+    $restrictedType->restrictedToContactTypes()->attach(ContactType::factory()->create());
+
+    $response = getJson(route('api.portal.service-request-type.index'));
+
+    $response->assertOk();
+
+    $typeIds = collect($response->json('types'))->pluck('id');
+
+    expect($typeIds)->toContain($visibleType->id)
+        ->and($typeIds)->not->toContain($restrictedType->id);
+});
+
+it('hides visibility restricted types from contacts of a non-matching contact type', function () {
+    $allowedContactType = ContactType::factory()->create();
+    $otherContactType = ContactType::factory()->create();
+
+    $restrictedType = ServiceRequestType::factory()->create(['is_visibility_restricted' => true]);
+    $restrictedType->restrictedToContactTypes()->attach($allowedContactType);
+
+    $contact = Contact::factory()->create(['type_id' => $otherContactType->id]);
+
+    $response = actingAs($contact, 'contact')
+        ->getJson(route('api.portal.service-request-type.index'));
+
+    $response->assertOk();
+
+    $typeIds = collect($response->json('types'))->pluck('id');
+
+    expect($typeIds)->not->toContain($restrictedType->id);
+});
+
+it('shows visibility restricted types to contacts of a matching contact type', function () {
+    $allowedContactType = ContactType::factory()->create();
+
+    $restrictedType = ServiceRequestType::factory()->create(['is_visibility_restricted' => true]);
+    $restrictedType->restrictedToContactTypes()->attach($allowedContactType);
+
+    $contact = Contact::factory()->create(['type_id' => $allowedContactType->id]);
+
+    $response = actingAs($contact, 'contact')
+        ->getJson(route('api.portal.service-request-type.index'));
+
+    $response->assertOk();
+
+    $typeIds = collect($response->json('types'))->pluck('id');
+
+    expect($typeIds)->toContain($restrictedType->id);
+});
+
+it('hides the entire subtree of a visibility restricted area from non-matching contacts', function () {
+    $allowedContactType = ContactType::factory()->create();
+    $otherContactType = ContactType::factory()->create();
+
+    $restrictedCategory = ServiceRequestTypeCategory::factory()->create([
+        'parent_id' => null,
+        'is_visibility_restricted' => true,
+    ]);
+    $restrictedCategory->restrictedToContactTypes()->attach($allowedContactType);
+    ServiceRequestType::factory()->create(['category_id' => $restrictedCategory->id]);
+
+    $nonMatchingContact = Contact::factory()->create(['type_id' => $otherContactType->id]);
+
+    $hiddenResponse = actingAs($nonMatchingContact, 'contact')
+        ->getJson(route('api.portal.service-request-type.index'));
+
+    $hiddenResponse->assertOk();
+
+    expect(collect($hiddenResponse->json('categories'))->pluck('id'))
+        ->not->toContain($restrictedCategory->id);
+
+    $matchingContact = Contact::factory()->create(['type_id' => $allowedContactType->id]);
+
+    $visibleResponse = actingAs($matchingContact, 'contact')
+        ->getJson(route('api.portal.service-request-type.index'));
+
+    $visibleResponse->assertOk();
+
+    expect(collect($visibleResponse->json('categories'))->pluck('id'))
+        ->toContain($restrictedCategory->id);
 });

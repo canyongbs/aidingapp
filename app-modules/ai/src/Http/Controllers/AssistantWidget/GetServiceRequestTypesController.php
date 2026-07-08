@@ -42,6 +42,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -55,19 +56,36 @@ class GetServiceRequestTypesController extends Controller
 
         abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
 
-        $categories = ServiceRequestTypeCategory::query()->orderBy('sort')->get();
-        $types = ServiceRequestType::query()
+        $visibilityRestrictionsEnabled = ServiceRequestTypeVisibilityRestrictionsFeature::active();
+
+        $contactTypeId = $visibilityRestrictionsEnabled ? $contact->type_id : null;
+
+        $categoriesQuery = ServiceRequestTypeCategory::query()->orderBy('sort');
+
+        $typesQuery = ServiceRequestType::query()
             ->withoutArchived()
             ->with(['priorities' => fn ($query) => $query->orderByDesc('order')])
-            ->orderBy('sort')
-            ->get();
+            ->orderBy('sort');
+
+        if ($visibilityRestrictionsEnabled) {
+            $categoriesQuery->with('restrictedToContactTypes:id');
+            $typesQuery->with('restrictedToContactTypes:id');
+        }
+
+        $categories = $categoriesQuery->get();
+
+        $types = $typesQuery->get();
 
         $aiClarificationGlobalEnabled = app(AiClarificationSettings::class)->is_enabled;
         $aiResolutionGlobalEnabled = app(AiResolutionSettings::class)->is_enabled;
 
         $categoriesById = [];
+        $categoryAllowed = [];
 
         foreach ($categories as $category) {
+            $categoryAllowed[$category->id] = ! $visibilityRestrictionsEnabled
+                || $category->passesOwnVisibilityRestriction($contactTypeId);
+
             $categoriesById[$category->id] = [
                 'id' => $category->id,
                 'name' => $category->name,
@@ -81,6 +99,10 @@ class GetServiceRequestTypesController extends Controller
         $topLevelTypes = [];
 
         foreach ($types as $type) {
+            if ($visibilityRestrictionsEnabled && ! $type->passesOwnVisibilityRestriction($contactTypeId)) {
+                continue;
+            }
+
             $payload = [
                 'id' => $type->getKey(),
                 'name' => $type->name,
@@ -132,6 +154,23 @@ class GetServiceRequestTypesController extends Controller
         $sortRecursive($topLevelCategories);
 
         usort($topLevelTypes, fn (array $first, array $second) => ($first['sort'] ?? 0) <=> ($second['sort'] ?? 0));
+
+        // Remove categories the contact is not allowed to see, including their entire subtree.
+        $filterRestrictedCategories = function (array &$nodes) use (&$filterRestrictedCategories, $categoryAllowed): array {
+            return array_values(array_filter($nodes, function (array &$node) use (&$filterRestrictedCategories, $categoryAllowed): bool {
+                if (! ($categoryAllowed[$node['id']] ?? true)) {
+                    return false;
+                }
+
+                $node['children'] = $filterRestrictedCategories($node['children']);
+
+                return true;
+            }));
+        };
+
+        if ($visibilityRestrictionsEnabled) {
+            $topLevelCategories = $filterRestrictedCategories($topLevelCategories);
+        }
 
         $filterEmptyCategories = function (array &$nodes) use (&$filterEmptyCategories): array {
             return array_values(array_filter($nodes, function (array &$node) use (&$filterEmptyCategories): bool {

@@ -36,12 +36,18 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
 
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Checkbox;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -80,24 +86,40 @@ class ListServiceRequestTypes extends ListRecords
      */
     public function getHierarchicalData(): array
     {
+        $visibilityRestrictionsEnabled = ServiceRequestTypeVisibilityRestrictionsFeature::active();
+
+        $categoryVisibilityLoad = $visibilityRestrictionsEnabled ? ['restrictedToContactTypes:id'] : [];
+
+        $typeVisibilityLoad = $visibilityRestrictionsEnabled ? ['restrictedToContactTypes:id'] : [];
+
+        $loadTypes = fn ($typeQuery) => $typeQuery
+            ->withoutArchived()
+            ->orderBy('sort')
+            ->withCount('serviceRequests')
+            ->with($typeVisibilityLoad);
+
         $categories = ServiceRequestTypeCategory::query()
+            /** @phpstan-ignore argument.type */
             ->with([
+                ...$categoryVisibilityLoad,
                 /** @phpstan-ignore argument.type */
-                'children' => function (HasMany $query) {
+                'children' => function (HasMany $query) use ($categoryVisibilityLoad, $loadTypes) {
                     $query->orderBy('sort')
-                        ->with([/** @phpstan-ignore argument.type */
-                            'types' => fn ($typeQuery) => $typeQuery->withoutArchived()->orderBy('sort')->withCount('serviceRequests'),
-                            'children' => function (HasMany $childQuery) {
+                        ->with([
+                            ...$categoryVisibilityLoad,
+                            'types' => $loadTypes,
+                            'children' => function (HasMany $childQuery) use ($categoryVisibilityLoad, $loadTypes) {
                                 $childQuery->orderBy('sort')
-                                    ->with([/** @phpstan-ignore argument.type */
-                                        'types' => fn ($typeQuery) => $typeQuery->withoutArchived()->orderBy('sort')->withCount('serviceRequests'),
+                                    ->with([
+                                        ...$categoryVisibilityLoad,
+                                        'types' => $loadTypes,
                                     ])
                                     ->withCount('descendantServiceRequests');
                             },
                         ])
                         ->withCount('descendantServiceRequests');
                 },
-                'types' => fn ($query) => $query->withoutArchived()->orderBy('sort')->withCount('serviceRequests'),
+                'types' => $loadTypes,
             ])
             ->withCount('descendantServiceRequests')
             ->whereNull('parent_id')
@@ -109,12 +131,70 @@ class ListServiceRequestTypes extends ListRecords
             ->whereNull('category_id')
             ->orderBy('sort')
             ->withCount('serviceRequests')
+            ->with($typeVisibilityLoad)
             ->get();
 
         return [
-            'categories' => $this->formatCategories($categories),
-            'uncategorized_types' => $this->formatTypes($uncategorizedTypes),
+            'categories' => $this->formatCategories($categories, $visibilityRestrictionsEnabled),
+            'uncategorized_types' => $this->formatTypes($uncategorizedTypes, $visibilityRestrictionsEnabled),
         ];
+    }
+
+    public function manageVisibilityAction(): Action
+    {
+        return Action::make('manageVisibility')
+            ->modalHeading('Visibility Settings')
+            ->modalDescription('Restrict which contact types can view and submit this in the portal and assistant widget. Users of the admin panel are unaffected and can always submit service requests on behalf of anyone.')
+            ->slideOver()
+            ->authorize(fn (): bool => ServiceRequestTypeVisibilityRestrictionsFeature::active() && $this->canEdit())
+            ->fillForm(function (array $arguments): array {
+                $node = $this->resolveVisibilityNode($arguments);
+
+                return [
+                    'is_visibility_restricted' => (bool) $node->is_visibility_restricted,
+                    'contact_type_ids' => $node->restrictedToContactTypes()->pluck('contact_types.id')->all(),
+                ];
+            })
+            ->schema([
+                Checkbox::make('is_visibility_restricted')
+                    ->label('Restrict Visibility')
+                    ->live()
+                    ->helperText('When enabled, only the selected contact types can view and submit this in the portal and assistant widget.'),
+                ToggleButtons::make('contact_type_ids')
+                    ->label('Visible to contact types')
+                    ->multiple()
+                    ->inline()
+                    ->options(fn (): array => ContactType::query()->orderBy('name')->pluck('name', 'id')->all())
+                    ->visible(fn (Get $get): bool => (bool) $get('is_visibility_restricted'))
+                    ->required(fn (Get $get): bool => (bool) $get('is_visibility_restricted')),
+            ])
+            ->action(function (array $data, array $arguments): void {
+                $node = $this->resolveVisibilityNode($arguments);
+
+                $isRestricted = (bool) ($data['is_visibility_restricted'] ?? false);
+                $contactTypeIds = $isRestricted ? array_values($data['contact_type_ids'] ?? []) : [];
+
+                DB::transaction(function () use ($node, $isRestricted, $contactTypeIds) {
+                    $node->is_visibility_restricted = $isRestricted;
+                    $node->save();
+                    $node->restrictedToContactTypes()->sync($contactTypeIds);
+                });
+
+                unset($this->hierarchicalData);
+
+                $this->dispatch(
+                    'service-request-type-visibility-updated',
+                    nodeType: $arguments['nodeType'],
+                    nodeId: $arguments['nodeId'],
+                    isRestricted: $isRestricted,
+                    contactTypeIds: $contactTypeIds,
+                );
+
+                Notification::make()
+                    ->success()
+                    ->title('Visibility settings saved')
+                    ->send();
+            });
     }
 
     /**
@@ -268,6 +348,20 @@ class ListServiceRequestTypes extends ListRecords
     }
 
     /**
+     * @param array<string, mixed> $arguments
+     */
+    protected function resolveVisibilityNode(array $arguments): ServiceRequestType | ServiceRequestTypeCategory
+    {
+        $nodeId = $arguments['nodeId'] ?? null;
+
+        return match ($arguments['nodeType'] ?? null) {
+            'type' => ServiceRequestType::query()->findOrFail($nodeId),
+            'category' => ServiceRequestTypeCategory::query()->findOrFail($nodeId),
+            default => abort(404),
+        };
+    }
+
+    /**
      * @param array<int, string> $typeIds
      */
     protected function handleDeletedTypes(array $typeIds): void
@@ -377,18 +471,22 @@ class ListServiceRequestTypes extends ListRecords
      *
      * @return array<int, array<string, mixed>>
      */
-    protected function formatCategories(Collection $categories): array
+    protected function formatCategories(Collection $categories, bool $visibilityRestrictionsEnabled = false): array
     {
-        return $categories->map(function (ServiceRequestTypeCategory $category) {
+        return $categories->map(function (ServiceRequestTypeCategory $category) use ($visibilityRestrictionsEnabled) {
             return [
                 'id' => $category->id,
                 'name' => $category->name,
                 'type' => 'category',
                 'sort' => $category->sort,
                 'parent_id' => $category->parent_id,
-                'children' => $this->formatCategories($category->children),
-                'types' => $this->formatTypes($category->types),
+                'children' => $this->formatCategories($category->children, $visibilityRestrictionsEnabled),
+                'types' => $this->formatTypes($category->types, $visibilityRestrictionsEnabled),
                 'descendant_service_requests_count' => $category->descendant_service_requests_count ?? 0,
+                ...$visibilityRestrictionsEnabled ? [
+                    'is_visibility_restricted' => (bool) $category->is_visibility_restricted,
+                    'restricted_to_contact_type_ids' => $category->restrictedToContactTypes->pluck('id')->all(),
+                ] : [],
             ];
         })->toArray();
     }
@@ -398,9 +496,9 @@ class ListServiceRequestTypes extends ListRecords
      *
      * @return array<int, array<string, mixed>>
      */
-    protected function formatTypes(Collection $types): array
+    protected function formatTypes(Collection $types, bool $visibilityRestrictionsEnabled = false): array
     {
-        return $types->map(function (ServiceRequestType $type) {
+        return $types->map(function (ServiceRequestType $type) use ($visibilityRestrictionsEnabled) {
             return [
                 'id' => $type->id,
                 'name' => $type->name,
@@ -409,6 +507,10 @@ class ListServiceRequestTypes extends ListRecords
                 'category_id' => $type->category_id,
                 'service_requests_count' => $type->service_requests_count ?? 0,
                 'view_url' => ServiceRequestTypeResource::getUrl('view', ['record' => $type]),
+                ...$visibilityRestrictionsEnabled ? [
+                    'is_visibility_restricted' => (bool) $type->is_visibility_restricted,
+                    'restricted_to_contact_type_ids' => $type->restrictedToContactTypes->pluck('id')->all(),
+                ] : [],
             ];
         })->toArray();
     }

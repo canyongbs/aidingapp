@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ListServiceRequestTypes;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -342,4 +343,104 @@ it('updates names for categories and types', function () {
 
     expect($category->fresh()->name)->toBe('New Cat Name');
     expect($type->fresh()->name)->toBe('New Type Name');
+});
+
+it('restricts a service request type visibility via the manage visibility action', function () {
+    asSuperAdmin();
+
+    $type = ServiceRequestType::factory()->create();
+    $contactType = ContactType::factory()->create();
+
+    livewire(ListServiceRequestTypes::class)
+        ->callAction(
+            'manageVisibility',
+            data: [
+                'is_visibility_restricted' => true,
+                'contact_type_ids' => [$contactType->id],
+            ],
+            arguments: [
+                'nodeType' => 'type',
+                'nodeId' => $type->id,
+            ],
+        )
+        ->assertHasNoActionErrors();
+
+    $type->refresh();
+
+    expect($type->is_visibility_restricted)->toBeTrue()
+        ->and($type->restrictedToContactTypes->pluck('id')->all())->toBe([$contactType->id]);
+});
+
+it('restricts a service request area visibility via the manage visibility action', function () {
+    asSuperAdmin();
+
+    $category = ServiceRequestTypeCategory::factory()->create();
+    $contactType = ContactType::factory()->create();
+
+    livewire(ListServiceRequestTypes::class)
+        ->callAction(
+            'manageVisibility',
+            data: [
+                'is_visibility_restricted' => true,
+                'contact_type_ids' => [$contactType->id],
+            ],
+            arguments: [
+                'nodeType' => 'category',
+                'nodeId' => $category->id,
+            ],
+        )
+        ->assertHasNoActionErrors();
+
+    $category->refresh();
+
+    expect($category->is_visibility_restricted)->toBeTrue()
+        ->and($category->restrictedToContactTypes->pluck('id')->all())->toBe([$contactType->id]);
+});
+
+it('requires at least one contact type when restricting visibility', function () {
+    asSuperAdmin();
+
+    $type = ServiceRequestType::factory()->create();
+
+    livewire(ListServiceRequestTypes::class)
+        ->callAction(
+            'manageVisibility',
+            data: [
+                'is_visibility_restricted' => true,
+                'contact_type_ids' => [],
+            ],
+            arguments: [
+                'nodeType' => 'type',
+                'nodeId' => $type->id,
+            ],
+        )
+        ->assertHasActionErrors(['contact_type_ids']);
+
+    expect($type->fresh()->is_visibility_restricted)->toBeFalse();
+});
+
+it('clears a visibility restriction and detaches contact types', function () {
+    asSuperAdmin();
+
+    $contactType = ContactType::factory()->create();
+    $type = ServiceRequestType::factory()->create(['is_visibility_restricted' => true]);
+    $type->restrictedToContactTypes()->attach($contactType);
+
+    livewire(ListServiceRequestTypes::class)
+        ->callAction(
+            'manageVisibility',
+            data: [
+                'is_visibility_restricted' => false,
+            ],
+            arguments: [
+                'nodeType' => 'type',
+                'nodeId' => $type->id,
+            ],
+        )
+        ->assertHasNoActionErrors();
+
+    $type->refresh();
+
+    expect($type->is_visibility_restricted)->toBeFalse()
+        ->and($type->restrictedToContactTypes()->count())->toBe(0);
 });

@@ -53,6 +53,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
+use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
@@ -74,6 +75,10 @@ class StoreServiceRequestController extends Controller
         $contact = auth('contact')->user() ?? $request->user();
 
         abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
+
+        if (ServiceRequestTypeVisibilityRestrictionsFeature::active()) {
+            abort_unless($type->isVisibleToContactType($contact->type_id), Response::HTTP_NOT_FOUND);
+        }
 
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],

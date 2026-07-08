@@ -53,6 +53,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
+use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
@@ -73,6 +74,10 @@ class StoreServiceRequestController extends Controller
         $contact = auth('contact')->user();
 
         abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
+
+        if (ServiceRequestTypeVisibilityRestrictionsFeature::active()) {
+            abort_unless($type->isVisibleToContactType($contact->type_id), Response::HTTP_NOT_FOUND);
+        }
 
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
 
