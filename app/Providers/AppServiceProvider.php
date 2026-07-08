@@ -43,14 +43,18 @@ use App\Models\SystemUser;
 use App\Models\Tenant;
 use App\Overrides\Filament\Actions\Imports\Jobs\ImportCsvOverride;
 use App\Overrides\Filament\Actions\Imports\Jobs\PrepareCsvExportOverride;
+use App\Overrides\Laravel\StartSession as OverrideStartSession;
 use App\Settings\SettingsProperties\EmailSettingsProperty;
 use Exception;
 use Filament\Actions\Exports\Jobs\PrepareCsvExport;
 use Filament\Actions\Imports\Jobs\ImportCsv;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Cache\Factory as CacheFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Notifications\SendQueuedNotifications;
+use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Session\SessionManager;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
@@ -77,6 +81,12 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(ImportCsv::class, ImportCsvOverride::class);
         $this->app->bind(PrepareCsvExport::class, PrepareCsvExportOverride::class);
+
+        $this->app->scoped(StartSession::class, function ($app) {
+            return new OverrideStartSession($app->make(SessionManager::class), function () use ($app) {
+                return $app->make(CacheFactory::class);
+            });
+        });
 
         $this->app->extend(
             HtmlSanitizerConfig::class,
