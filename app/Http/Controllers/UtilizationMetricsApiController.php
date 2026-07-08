@@ -41,7 +41,6 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\Task\Models\Task;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Exception;
@@ -68,7 +67,6 @@ class UtilizationMetricsApiController extends Controller
                     'assets' => Asset::count(),
                     'changes' => ChangeRequest::count(),
                     'knowledge_base_articles' => KnowledgeBaseItem::count(),
-                    'tasks' => Task::count(),
                     'emails' => $currentQuotaUsageOfEmail . '/' . $licenseSettings->data->limits->emails,
                     'messages_reset' => $licenseSettings->data->limits->resetDate,
                 ],

@@ -34,7 +34,6 @@
 <script setup>
     import { ArrowRightEndOnRectangleIcon, ArrowRightStartOnRectangleIcon, PlusIcon } from '@heroicons/vue/20/solid';
     import {
-        ClipboardDocumentListIcon,
         CubeIcon,
         DocumentTextIcon,
         HomeIcon,
@@ -58,7 +57,6 @@
         hasServiceManagement,
         hasAssets,
         hasLicense,
-        hasTasks,
         isStatusEnabled,
         isAdvisoryEnabled,
         isAssetEnabled,
@@ -139,13 +137,6 @@
             icon: DocumentTextIcon,
             visible: computed(() => isLicenseEnabled.value && hasLicense.value && user.value !== null),
             command: () => router.push({ name: 'licenses' }),
-        },
-        {
-            label: 'Tasks',
-            routeName: 'tasks',
-            icon: ClipboardDocumentListIcon,
-            visible: computed(() => hasTasks.value && user.value !== null),
-            command: () => router.push({ name: 'tasks' }),
         },
     ]);
 

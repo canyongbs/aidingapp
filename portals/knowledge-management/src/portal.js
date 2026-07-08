@@ -126,11 +126,6 @@ customElements.define(
                         name: 'licenses',
                         component: () => import('./Pages/Licenses.vue'),
                     },
-                    {
-                        path: baseUrl + '/tasks',
-                        name: 'tasks',
-                        component: () => import('./Pages/ComingSoon.vue'),
-                    },
                 ],
             });
 

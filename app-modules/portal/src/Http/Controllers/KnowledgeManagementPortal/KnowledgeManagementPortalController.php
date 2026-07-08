@@ -85,7 +85,6 @@ class KnowledgeManagementPortalController extends Controller
             'asset_management_enabled' => $addons?->assetManagement,
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
             'license_management_enabled' => $addons?->licenseManagement,
-            'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,
             'authentication_url' => URL::to(
                 URL::signedRoute(
                     name: 'api.portal.request-authentication',

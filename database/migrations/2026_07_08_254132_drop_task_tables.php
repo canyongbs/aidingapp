@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,38 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Observers;
-
-use AidingApp\Task\Models\Task;
-use AidingApp\Task\Notifications\TaskAssignedToUserNotification;
-use App\Models\User;
+use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-class TaskObserver
-{
-    public function saving(Task $task): void
+return new class () extends Migration {
+    public function up(): void
     {
-        DB::beginTransaction();
-
-        if (is_null($task->created_by)) {
-            $user = auth()->user();
-
-            if ($user instanceof User) {
-                $task->created_by = $user->id;
-            }
-        }
-
-        if (is_null($task->assigned_to)) {
-            $task->assigned_to = auth()->id();
-        }
+        DB::transaction(function () {
+            Schema::dropIfExists('confidential_task_projects');
+            Schema::dropIfExists('confidential_task_teams');
+            Schema::dropIfExists('confidential_task_users');
+            Schema::dropIfExists('tasks');
+        });
     }
 
-    public function saved(Task $task): void
-    {
-        DB::commit();
-
-        if (! empty($task->assignedTo) && ($task->wasChanged('assigned_to') || ($task->wasRecentlyCreated))) {
-            $task->assignedTo->notify(new TaskAssignedToUserNotification($task));
-        }
-    }
-}
+    public function down(): void {}
+};
