@@ -42,6 +42,7 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use App\Features\PipelineEntryFieldsFeature;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -153,6 +154,20 @@ class ViewPipelineEntry extends Page
                             ->label('Organization Type')
                             ->formatStateUsing(fn (string $state): string => ucfirst($state))
                             ->badge(),
+                        TextEntry::make('description')
+                            ->visible(fn () => PipelineEntryFieldsFeature::active())
+                            ->label('Description')
+                            ->extraAttributes(['class' => 'break-words']),
+                        TextEntry::make('due')
+                            ->visible(fn () => PipelineEntryFieldsFeature::active())
+                            ->label('Due Date')
+                            ->dateTime(),
+                        TextEntry::make('assignedTo.name')
+                            ->visible(fn () => PipelineEntryFieldsFeature::active())
+                            ->label('Assigned To'),
+                        TextEntry::make('relatedTo.full_name')
+                            ->visible(fn () => PipelineEntryFieldsFeature::active())
+                            ->label('Related To'),
                     ]),
             ]);
     }

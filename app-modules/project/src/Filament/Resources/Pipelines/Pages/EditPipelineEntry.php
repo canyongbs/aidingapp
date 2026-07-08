@@ -36,23 +36,21 @@
 
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
-use AidingApp\Contact\Models\Contact;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use App\Features\PipelineEntryFieldsFeature;
 use Filament\Actions\Action;
-use Filament\Forms\Components\MorphToSelect;
-use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
@@ -70,8 +68,10 @@ class EditPipelineEntry extends Page
 
     protected string $view = 'project::filament.pages.edit-pipeline-entry';
 
+    #[Locked]
     public Pipeline $record;
 
+    #[Locked]
     public PipelineEntry $pipelineEntry;
 
     /** @var array<string, mixed> $data */
@@ -146,21 +146,12 @@ class EditPipelineEntry extends Page
                         ->relationship('pipelineStage', 'name')
                         ->required()
                         ->options(fn () => $this->record->stages->pluck('name', 'id')),
-                    Textarea::make('name')
+                    TextInput::make('name')
                         ->maxLength(255)
-                        ->label('Description')
+                        ->label(PipelineEntryFieldsFeature::active() ? 'Name' : 'Description')
                         ->string(),
                 ]),
-                MorphToSelect::make('organizable')
-                    ->types([
-                        Type::make(Contact::class)
-                            ->label('Contact')
-                            ->titleAttribute('full_name')
-                            ->modifyOptionsQueryUsing(fn (Builder $query) => $query->limit(50)),
-                    ])
-                    ->searchable()
-                    ->preload()
-                    ->required(),
+                ...PipelineEntryForm::components(),
             ])
             ->statePath('data')
             ->model($this->pipelineEntry);
@@ -169,6 +160,16 @@ class EditPipelineEntry extends Page
     public function save(): void
     {
         $data = $this->form->getState();
+
+        if (PipelineEntryFieldsFeature::active()) {
+            if (($this->data['assigned_to_type'] ?? 'none') === 'none') {
+                $data['assigned_to'] = null;
+            }
+
+            if (($this->data['related_to_type'] ?? 'none') === 'none') {
+                $data['related_to'] = null;
+            }
+        }
 
         $this->pipelineEntry->update($data);
 
@@ -183,6 +184,11 @@ class EditPipelineEntry extends Page
     public function fillForm(): void
     {
         $data = $this->pipelineEntry->attributesToArray();
+
+        if (PipelineEntryFieldsFeature::active()) {
+            $data['assigned_to_type'] = filled($this->pipelineEntry->assigned_to) ? 'user' : 'none';
+            $data['related_to_type'] = filled($this->pipelineEntry->related_to) ? 'contact' : 'none';
+        }
 
         $this->form->fill($data);
     }

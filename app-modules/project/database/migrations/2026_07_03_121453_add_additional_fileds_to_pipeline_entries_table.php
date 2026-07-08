@@ -34,47 +34,39 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+use App\Features\PipelineEntryFieldsFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\PipelineStage;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Database\Eloquent\Relations\Relation;
-
-/**
- * @extends Factory<PipelineEntry>
- */
-class PipelineEntryFactory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => $this->faker->word(),
-            'pipeline_stage_id' => PipelineStage::factory(),
-            'organizable_type' => function () {
-                /** @var Contact $organizable */
-                $organizable = $this->faker->randomElement([new Contact()]);
+        DB::transaction(function () {
+            Schema::table('pipeline_entries', function (Blueprint $table) {
+                $table->text('description')->nullable();
+                $table->timestamp('due')->nullable();
+                $table->foreignUuid('assigned_to')->nullable()->constrained('users')->nullOnDelete();
+                $table->foreignUuid('created_by')->nullable()->constrained('users')->nullOnDelete();
+                $table->foreignUuid('related_to')->nullable()->constrained('contacts')->nullOnDelete();
+            });
 
-                return $organizable->getMorphClass();
-            },
-            'organizable_id' => function (array $attributes) {
-                /** @var class-string<Contact> $class */
-                $class = Relation::getMorphedModel($attributes['organizable_type']);
-
-                return $class::factory();
-            },
-            'description' => $this->faker->sentence(3),
-            'due' => $this->faker->dateTimeBetween('now', '+1 year'),
-            'assigned_to' => User::factory(),
-            'created_by' => User::factory(),
-            'related_to' => Contact::factory(),
-        ];
+            PipelineEntryFieldsFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            PipelineEntryFieldsFeature::deactivate();
+
+            Schema::table('pipeline_entries', function (Blueprint $table) {
+                $table->dropForeign(['assigned_to']);
+                $table->dropForeign(['created_by']);
+                $table->dropForeign(['related_to']);
+                $table->dropColumn(['description', 'due', 'assigned_to', 'created_by', 'related_to']);
+            });
+        });
+    }
+};

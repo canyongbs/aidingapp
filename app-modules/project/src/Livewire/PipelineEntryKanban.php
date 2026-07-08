@@ -36,17 +36,16 @@
 
 namespace AidingApp\Project\Livewire;
 
-use AidingApp\Contact\Models\Contact;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
+use App\Features\PipelineEntryFieldsFeature;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\MorphToSelect;
-use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -115,7 +114,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
             return response()->json([
                 'success' => false,
-                'message' => 'Pipline could not be moved. Something went wrong, if this continues please contact support.',
+                'message' => 'Pipeline entry could not be moved. Something went wrong, if this continues please contact support.',
             ], ResponseAlias::HTTP_BAD_REQUEST);
         }
 
@@ -128,7 +127,8 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
     public function addEntryAction(): Action
     {
         return Action::make('addEntry')
-            ->make('Add pipeline entry')
+            ->slideOver()
+            ->label('Add pipeline entry')
             ->model(PipelineEntry::class)
             ->schema([
                 Grid::make()->schema([
@@ -137,24 +137,26 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                         ->required()
                         ->string(),
                 ]),
-                MorphToSelect::make('organizable')
-                    ->types([
-                        Type::make(Contact::class)
-                            ->label('Contact')
-                            ->titleAttribute('full_name')
-                            ->modifyOptionsQueryUsing(fn (Builder $query) => $query->limit(50)),
-                    ])
-                    ->searchable()
-                    ->preload()
-                    ->required(),
+                ...PipelineEntryForm::components(),
             ])
             ->action(function (array $data, array $arguments) {
-                $entry = new PipelineEntry([
+                $dataArray = [
                     'name' => $data['name'],
                     'organizable_type' => $data['organizable_type'],
                     'organizable_id' => $data['organizable_id'],
                     'pipeline_stage_id' => $arguments['stage'],
-                ]);
+                ];
+
+                if (PipelineEntryFieldsFeature::active()) {
+                    $dataArray = [
+                        ...$dataArray,
+                        'description' => $data['description'] ?? null,
+                        'due' => $data['due'] ?? null,
+                        'assigned_to' => $data['assigned_to'] ?? null,
+                        'related_to' => $data['related_to'] ?? null,
+                    ];
+                }
+                $entry = new PipelineEntry($dataArray);
 
                 $entry->saveOrFail();
 
