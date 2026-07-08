@@ -34,40 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Requests\Tenants;
+namespace App\Enums;
 
-use App\Enums\SubscriptionStatus;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum;
-
-class SyncTenantRequest extends FormRequest
+/**
+ * The full subscription lifecycle status synced from Olympus. The instance only
+ * acts on ExpiredPeriod2 (warning banner) and Expired (offline); the remaining
+ * cases are stored so future behaviour can key off them.
+ */
+enum SubscriptionStatus: string
 {
+    case Upcoming = 'upcoming';
+
+    case Active = 'active';
+
+    case Outstanding = 'outstanding';
+
+    case ExpiredPeriod1 = 'expired_period_1';
+
+    case ExpiredPeriod2 = 'expired_period_2';
+
+    case Expired = 'expired';
+
+    case NotApplicable = 'not_applicable';
+
     /**
-     * @return array<string, array<int, string|Enum>>
+     * Whether the expiration warning banner should be shown for this status.
      */
-    public function rules(): array
+    public function showsExpirationBanner(): bool
     {
-        return [
-            'limits' => ['required', 'array'],
-            'limits.emails' => ['required', 'integer', 'min:0'],
-            'limits.resetDate' => ['required', 'string', 'date_format:m-d'],
-            'addons' => ['required', 'array'],
-            'addons.onlineForms' => ['required', 'boolean'],
-            'addons.serviceManagement' => ['required', 'boolean'],
-            'addons.knowledgeManagement' => ['required', 'boolean'],
-            'addons.realtimeChat' => ['required', 'boolean'],
-            'addons.mobileApps' => ['required', 'boolean'],
-            'addons.changeManagement' => ['required', 'boolean'],
-            'addons.assetManagement' => ['required', 'boolean'],
-            'addons.feedbackManagement' => ['required', 'boolean'],
-            'addons.contractManagement' => ['required', 'boolean'],
-            'addons.licenseManagement' => ['required', 'boolean'],
-            'addons.projectManagement' => ['required', 'boolean'],
-            'addons.serviceMonitoring' => ['required', 'boolean'],
-            'addons.advisoryManagement' => ['required', 'boolean'],
-            'subscriptionStatus' => ['nullable', Rule::enum(SubscriptionStatus::class)],
-            'expirationBannerText' => ['nullable', 'string'],
-        ];
+        return $this === self::ExpiredPeriod2;
+    }
+
+    /**
+     * Whether the tenant should be fully inaccessible for this status.
+     */
+    public function isInaccessible(): bool
+    {
+        return $this === self::Expired;
     }
 }

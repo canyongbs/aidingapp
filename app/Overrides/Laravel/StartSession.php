@@ -34,40 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Requests\Tenants;
+namespace App\Overrides\Laravel;
 
-use App\Enums\SubscriptionStatus;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum;
+use Illuminate\Contracts\Session\Session;
+use Illuminate\Session\Middleware\StartSession as BaseStartSession;
+use Symfony\Component\HttpFoundation\Cookie;
+use Symfony\Component\HttpFoundation\Response;
 
-class SyncTenantRequest extends FormRequest
+class StartSession extends BaseStartSession
 {
-    /**
-     * @return array<string, array<int, string|Enum>>
-     */
-    public function rules(): array
+    protected function addCookieToResponse(Response $response, Session $session)
     {
-        return [
-            'limits' => ['required', 'array'],
-            'limits.emails' => ['required', 'integer', 'min:0'],
-            'limits.resetDate' => ['required', 'string', 'date_format:m-d'],
-            'addons' => ['required', 'array'],
-            'addons.onlineForms' => ['required', 'boolean'],
-            'addons.serviceManagement' => ['required', 'boolean'],
-            'addons.knowledgeManagement' => ['required', 'boolean'],
-            'addons.realtimeChat' => ['required', 'boolean'],
-            'addons.mobileApps' => ['required', 'boolean'],
-            'addons.changeManagement' => ['required', 'boolean'],
-            'addons.assetManagement' => ['required', 'boolean'],
-            'addons.feedbackManagement' => ['required', 'boolean'],
-            'addons.contractManagement' => ['required', 'boolean'],
-            'addons.licenseManagement' => ['required', 'boolean'],
-            'addons.projectManagement' => ['required', 'boolean'],
-            'addons.serviceMonitoring' => ['required', 'boolean'],
-            'addons.advisoryManagement' => ['required', 'boolean'],
-            'subscriptionStatus' => ['nullable', Rule::enum(SubscriptionStatus::class)],
-            'expirationBannerText' => ['nullable', 'string'],
-        ];
+        $config = app()->make('config')->get('session');
+
+        if ($this->sessionIsPersistent($config)) {
+            $response->headers->setCookie(new Cookie(
+                $session->getName(),
+                $session->getId(),
+                $this->getCookieExpirationDate(),
+                $config['path'],
+                $config['domain'],
+                $config['secure'] ?? false,
+                $config['http_only'] ?? true,
+                false,
+                $config['same_site'] ?? null,
+                $config['partitioned'] ?? false
+            ));
+        }
     }
 }

@@ -34,40 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Requests\Tenants;
+namespace App\Livewire;
 
-use App\Enums\SubscriptionStatus;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Enum;
+use App\Settings\TenantExpirationSettings;
+use Illuminate\Contracts\View\View;
+use Livewire\Component;
 
-class SyncTenantRequest extends FormRequest
+class SubscriptionExpiredBanner extends Component
 {
-    /**
-     * @return array<string, array<int, string|Enum>>
-     */
-    public function rules(): array
+    public string $bannerText;
+
+    public function mount(): void
     {
-        return [
-            'limits' => ['required', 'array'],
-            'limits.emails' => ['required', 'integer', 'min:0'],
-            'limits.resetDate' => ['required', 'string', 'date_format:m-d'],
-            'addons' => ['required', 'array'],
-            'addons.onlineForms' => ['required', 'boolean'],
-            'addons.serviceManagement' => ['required', 'boolean'],
-            'addons.knowledgeManagement' => ['required', 'boolean'],
-            'addons.realtimeChat' => ['required', 'boolean'],
-            'addons.mobileApps' => ['required', 'boolean'],
-            'addons.changeManagement' => ['required', 'boolean'],
-            'addons.assetManagement' => ['required', 'boolean'],
-            'addons.feedbackManagement' => ['required', 'boolean'],
-            'addons.contractManagement' => ['required', 'boolean'],
-            'addons.licenseManagement' => ['required', 'boolean'],
-            'addons.projectManagement' => ['required', 'boolean'],
-            'addons.serviceMonitoring' => ['required', 'boolean'],
-            'addons.advisoryManagement' => ['required', 'boolean'],
-            'subscriptionStatus' => ['nullable', Rule::enum(SubscriptionStatus::class)],
-            'expirationBannerText' => ['nullable', 'string'],
-        ];
+        $this->bannerText = app(TenantExpirationSettings::class)->period_2_banner_text;
+    }
+
+    public function render(): View
+    {
+        return view('filament.components.subscription-expired-banner');
     }
 }
