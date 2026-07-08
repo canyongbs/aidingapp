@@ -37,6 +37,7 @@
 namespace App\Multitenancy\TenantFinder;
 
 use App\Enums\SubscriptionStatus;
+use App\Features\SubscriptionExpirationFeature;
 use Illuminate\Http\Request;
 use Spatie\Multitenancy\Contracts\IsTenant;
 use Spatie\Multitenancy\TenantFinder\DomainTenantFinder;
@@ -45,6 +46,10 @@ class SubscriptionAwareDomainTenantFinder extends DomainTenantFinder
 {
     public function findForRequest(Request $request): ?IsTenant
     {
+        if (! SubscriptionExpirationFeature::active()) {
+            return parent::findForRequest($request);
+        }
+
         $host = $request->getHost();
 
         return app(IsTenant::class)::whereDomain($host)

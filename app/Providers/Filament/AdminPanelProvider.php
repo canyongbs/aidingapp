@@ -39,6 +39,7 @@ namespace App\Providers\Filament;
 use AidingApp\Authorization\Filament\Pages\Auth\Login;
 use AidingApp\Theme\Settings\ThemeSettings;
 use App\Enums\NavigationGroup;
+use App\Features\SubscriptionExpirationFeature;
 use App\Filament\Clusters\ProfileSettings;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ProductHealth;
@@ -178,6 +179,10 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::TOPBAR_AFTER,
                 function (): ?Htmlable {
+                    if (! SubscriptionExpirationFeature::active()) {
+                        return null;
+                    }
+
                     $tenant = Tenant::current();
 
                     if (! $tenant?->subscription_status?->showsExpirationBanner()) {
