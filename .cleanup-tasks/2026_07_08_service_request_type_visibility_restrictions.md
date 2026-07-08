@@ -28,4 +28,3 @@ by hand:
   — drop the `bool $visibilityRestrictionsEnabled` parameter from `formatCategories()` and
   `formatTypes()`, and simplify `getHierarchicalData()` so `restrictedToContactTypes` is always
   eager loaded and the visibility fields are always included in the payload.
-
