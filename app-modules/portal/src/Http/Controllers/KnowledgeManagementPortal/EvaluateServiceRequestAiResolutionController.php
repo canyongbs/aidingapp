@@ -43,6 +43,7 @@ use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use AidingApp\Portal\Actions\GenerateAiResolutionPrompt;
 use AidingApp\Portal\DataTransferObjects\AiResolutionEvaluation;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestTypeVisibilityRestrictions;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -56,6 +57,10 @@ class EvaluateServiceRequestAiResolutionController extends Controller
         $contact = auth('contact')->user();
 
         abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
+
+        if (ServiceRequestTypeVisibilityRestrictions::active()) {
+            abort_unless($type->isVisibleToContactType($contact->type_id), Response::HTTP_NOT_FOUND);
+        }
 
         $settings = app(AiResolutionSettings::class);
 

@@ -34,47 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
+namespace AidingApp\ServiceManagement\Models\Concerns;
 
-use AidingApp\Ai\Actions\GenerateAssistantServiceRequestFormKitSchema;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Actions\GenerateServiceRequestForm;
-use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeVisibilityRestrictions;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 
-class GetServiceRequestFormController extends Controller
+trait RestrictsVisibilityToContactTypes
 {
-    public function __invoke(Request $request, ServiceRequestType $type): JsonResponse
+    abstract public function visibilityRestrictionParent(): ?ServiceRequestTypeCategory;
+
+    public function isVisibleToContactType(?string $contactTypeId): bool
     {
-        $contact = auth('contact')->user() ?? $request->user();
+        $node = $this;
 
-        abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
+        while ($node !== null) {
+            if (! $node->passesOwnVisibilityRestriction($contactTypeId)) {
+                return false;
+            }
 
-        if (ServiceRequestTypeVisibilityRestrictions::active()) {
-            abort_unless($type->isVisibleToContactType($contact->type_id), Response::HTTP_NOT_FOUND);
+            $node = $node->visibilityRestrictionParent();
         }
 
-        $form = $type->form;
+        return true;
+    }
 
-        if (! $form) {
-            return response()->json([
-                'steps' => [],
-            ]);
+    public function passesOwnVisibilityRestriction(?string $contactTypeId): bool
+    {
+        if (! $this->is_visibility_restricted) {
+            return true;
         }
 
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-
-        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
-
-        $steps = app(GenerateAssistantServiceRequestFormKitSchema::class)($form);
-
-        return response()->json([
-            'steps' => $steps,
-        ]);
+        return $contactTypeId !== null
+            && $this->restrictedToContactTypes->contains('id', $contactTypeId);
     }
 }

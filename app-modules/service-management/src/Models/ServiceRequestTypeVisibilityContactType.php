@@ -34,47 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\Ai\Actions\GenerateAssistantServiceRequestFormKitSchema;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Actions\GenerateServiceRequestForm;
-use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeVisibilityRestrictions;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class GetServiceRequestFormController extends Controller
+/**
+ * @mixin IdeHelperServiceRequestTypeVisibilityContactType
+ */
+class ServiceRequestTypeVisibilityContactType extends Pivot
 {
-    public function __invoke(Request $request, ServiceRequestType $type): JsonResponse
-    {
-        $contact = auth('contact')->user() ?? $request->user();
-
-        abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
-
-        if (ServiceRequestTypeVisibilityRestrictions::active()) {
-            abort_unless($type->isVisibleToContactType($contact->type_id), Response::HTTP_NOT_FOUND);
-        }
-
-        $form = $type->form;
-
-        if (! $form) {
-            return response()->json([
-                'steps' => [],
-            ]);
-        }
-
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-
-        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
-
-        $steps = app(GenerateAssistantServiceRequestFormKitSchema::class)($form);
-
-        return response()->json([
-            'steps' => $steps,
-        ]);
-    }
+    use HasUuids;
 }

@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
@@ -53,6 +54,15 @@ beforeEach(function () {
 function authenticatedWidgetRequest(string $url): TestResponse
 {
     $contact = Contact::factory()->create();
+    $contact->createToken('assistant-widget-access-token');
+
+    actingAs($contact, 'contact');
+
+    return getJson($url, ['Origin' => config('app.url')]);
+}
+
+function widgetRequestAsContact(Contact $contact, string $url): TestResponse
+{
     $contact->createToken('assistant-widget-access-token');
 
     actingAs($contact, 'contact');
@@ -121,4 +131,72 @@ it('does not return archived service request types as part of a category', funct
 
     expect($categoryIds)->toContain($categoryWithActiveType->id)
         ->and($categoryIds)->not->toContain($categoryWithOnlyArchivedType->id);
+});
+
+it('hides visibility restricted top level types from widget contacts of a non-matching contact type', function () {
+    $allowedContactType = ContactType::factory()->create();
+    $otherContactType = ContactType::factory()->create();
+
+    $visibleType = ServiceRequestType::factory()->create();
+
+    $restrictedType = ServiceRequestType::factory()->create(['is_visibility_restricted' => true]);
+    $restrictedType->restrictedToContactTypes()->attach($allowedContactType);
+
+    $contact = Contact::factory()->create(['type_id' => $otherContactType->id]);
+
+    $response = widgetRequestAsContact($contact, route('widgets.assistant.api.service-request-types'));
+
+    $response->assertOk();
+
+    $typeIds = collect($response->json('types'))->pluck('id');
+
+    expect($typeIds)->toContain($visibleType->id)
+        ->and($typeIds)->not->toContain($restrictedType->id);
+});
+
+it('shows visibility restricted types to widget contacts of a matching contact type', function () {
+    $allowedContactType = ContactType::factory()->create();
+
+    $restrictedType = ServiceRequestType::factory()->create(['is_visibility_restricted' => true]);
+    $restrictedType->restrictedToContactTypes()->attach($allowedContactType);
+
+    $contact = Contact::factory()->create(['type_id' => $allowedContactType->id]);
+
+    $response = widgetRequestAsContact($contact, route('widgets.assistant.api.service-request-types'));
+
+    $response->assertOk();
+
+    $typeIds = collect($response->json('types'))->pluck('id');
+
+    expect($typeIds)->toContain($restrictedType->id);
+});
+
+it('hides the entire subtree of a visibility restricted area from non-matching widget contacts', function () {
+    $allowedContactType = ContactType::factory()->create();
+    $otherContactType = ContactType::factory()->create();
+
+    $restrictedCategory = ServiceRequestTypeCategory::factory()->create([
+        'parent_id' => null,
+        'is_visibility_restricted' => true,
+    ]);
+    $restrictedCategory->restrictedToContactTypes()->attach($allowedContactType);
+    ServiceRequestType::factory()->create(['category_id' => $restrictedCategory->id]);
+
+    $nonMatchingContact = Contact::factory()->create(['type_id' => $otherContactType->id]);
+
+    $hiddenResponse = widgetRequestAsContact($nonMatchingContact, route('widgets.assistant.api.service-request-types'));
+
+    $hiddenResponse->assertOk();
+
+    expect(collect($hiddenResponse->json('categories'))->pluck('id'))
+        ->not->toContain($restrictedCategory->id);
+
+    $matchingContact = Contact::factory()->create(['type_id' => $allowedContactType->id]);
+
+    $visibleResponse = widgetRequestAsContact($matchingContact, route('widgets.assistant.api.service-request-types'));
+
+    $visibleResponse->assertOk();
+
+    expect(collect($visibleResponse->json('categories'))->pluck('id'))
+        ->toContain($restrictedCategory->id);
 });
