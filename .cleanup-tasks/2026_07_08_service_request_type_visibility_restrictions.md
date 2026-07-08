@@ -5,15 +5,15 @@ created: 2026-07-08
 
 ## Feature Flags
 
-- App\Features\ServiceRequestTypeVisibilityRestrictions
+- App\Features\ServiceRequestTypeVisibilityRestrictionsFeature
 
 ## Temporary Migrations
 
 ## Additional Cleanup
 
-Once `ServiceRequestTypeVisibilityRestrictions` is active in production and the migration
+Once `ServiceRequestTypeVisibilityRestrictionsFeature` is active in production and the migration
 `app-modules/service-management/database/migrations/2026_07_07_154238_add_visibility_restriction_to_service_request_types.php`
-has run across all environments, grep for `ServiceRequestTypeVisibilityRestrictions` and remove the
+has run across all environments, grep for `ServiceRequestTypeVisibilityRestrictionsFeature` and remove the
 flag class, its migration `activate()`/`deactivate()` calls (the migration itself stays), the
 controller/page guards (keep the active-path code, delete the unrestricted fallback branches), and
 the blade flag check.

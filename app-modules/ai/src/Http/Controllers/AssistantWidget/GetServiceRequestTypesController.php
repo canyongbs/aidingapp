@@ -42,7 +42,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\ServiceRequestTypeVisibilityRestrictions;
+use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -56,7 +56,7 @@ class GetServiceRequestTypesController extends Controller
 
         abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
 
-        $visibilityRestrictionsEnabled = ServiceRequestTypeVisibilityRestrictions::active();
+        $visibilityRestrictionsEnabled = ServiceRequestTypeVisibilityRestrictionsFeature::active();
 
         $contactTypeId = $visibilityRestrictionsEnabled ? $contact->type_id : null;
 

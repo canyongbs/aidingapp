@@ -38,7 +38,7 @@ namespace App\Features;
 
 use App\Support\AbstractFeatureFlag;
 
-class ServiceRequestTypeVisibilityRestrictions extends AbstractFeatureFlag
+class ServiceRequestTypeVisibilityRestrictionsFeature extends AbstractFeatureFlag
 {
     public function resolve(mixed $scope): mixed
     {

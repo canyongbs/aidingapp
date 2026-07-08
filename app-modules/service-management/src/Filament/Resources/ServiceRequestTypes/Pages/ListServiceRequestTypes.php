@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\ServiceRequestTypeVisibilityRestrictions;
+use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ToggleButtons;
@@ -86,7 +86,7 @@ class ListServiceRequestTypes extends ListRecords
      */
     public function getHierarchicalData(): array
     {
-        $visibilityRestrictionsEnabled = ServiceRequestTypeVisibilityRestrictions::active();
+        $visibilityRestrictionsEnabled = ServiceRequestTypeVisibilityRestrictionsFeature::active();
 
         $categoryVisibilityLoad = $visibilityRestrictionsEnabled ? ['restrictedToContactTypes:id'] : [];
 
@@ -146,7 +146,7 @@ class ListServiceRequestTypes extends ListRecords
             ->modalHeading('Visibility Settings')
             ->modalDescription('Restrict which contact types can view and submit this in the portal and assistant widget. Users of the admin panel are unaffected and can always submit service requests on behalf of anyone.')
             ->slideOver()
-            ->authorize(fn (): bool => ServiceRequestTypeVisibilityRestrictions::active() && $this->canEdit())
+            ->authorize(fn (): bool => ServiceRequestTypeVisibilityRestrictionsFeature::active() && $this->canEdit())
             ->fillForm(function (array $arguments): array {
                 $node = $this->resolveVisibilityNode($arguments);
 

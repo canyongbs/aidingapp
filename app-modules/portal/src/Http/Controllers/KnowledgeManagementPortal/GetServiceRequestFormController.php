@@ -41,7 +41,7 @@ use AidingApp\Form\Actions\GenerateFormKitSchema;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeVisibilityRestrictions;
+use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 
@@ -49,7 +49,7 @@ class GetServiceRequestFormController extends Controller
 {
     public function __invoke(ServiceRequestType $type): JsonResponse
     {
-        if (ServiceRequestTypeVisibilityRestrictions::active()) {
+        if (ServiceRequestTypeVisibilityRestrictionsFeature::active()) {
             abort_unless($type->isVisibleToContactType(auth('contact')->user()?->type_id), 404);
         }
 

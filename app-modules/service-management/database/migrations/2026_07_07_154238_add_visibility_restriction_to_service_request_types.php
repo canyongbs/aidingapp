@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestTypeVisibilityRestrictions;
+use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -70,14 +70,14 @@ return new class () extends Migration {
                 $table->unique(['service_request_type_category_id', 'contact_type_id'], 'srtc_visibility_contact_type_unique');
             });
 
-            ServiceRequestTypeVisibilityRestrictions::activate();
+            ServiceRequestTypeVisibilityRestrictionsFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            ServiceRequestTypeVisibilityRestrictions::deactivate();
+            ServiceRequestTypeVisibilityRestrictionsFeature::deactivate();
 
             Schema::dropIfExists('service_request_type_category_visibility_contact_types');
             Schema::dropIfExists('service_request_type_visibility_contact_types');

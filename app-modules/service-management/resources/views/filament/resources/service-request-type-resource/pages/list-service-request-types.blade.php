@@ -43,7 +43,7 @@
                     originalTreeData: @js($this->hierarchicalData),
                     treeData: @js($this->hierarchicalData),
                     canEdit: @js($this->canEdit),
-                    visibilityRestrictionsEnabled: @js(\App\Features\ServiceRequestTypeVisibilityRestrictions::active()),
+                    visibilityRestrictionsEnabled: @js(\App\Features\ServiceRequestTypeVisibilityRestrictionsFeature::active()),
                 })"
         @service-request-type-visibility-updated.window="onVisibilityUpdated($event.detail)"
     >
