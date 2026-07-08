@@ -36,34 +36,23 @@
 
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
-use AidingApp\Contact\Models\Contact;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use AidingApp\Project\Filament\Tables\PipelineEntryAssignToTable;
-use AidingApp\Project\Filament\Tables\PipelineEntryRelatedToTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use App\Features\PipelineEntryFieldsFeature;
 use BackedEnum;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\MorphToSelect;
-use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TableSelect;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 
@@ -136,7 +125,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
                 TextColumn::make('name')
                     ->label('Name')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable(['pipeline_entries.name']),
                 TextColumn::make('pipelineStage.name')
                     ->label('Stage')
                     ->sortable(),
@@ -172,52 +161,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
                             ->label('Stage')
                             ->relationship('pipelineStage', 'name', fn (Builder $query) => $query->where('pipeline_id', $pipeline->id))
                             ->required(),
-                        MorphToSelect::make('organizable')
-                            ->types([
-                                Type::make(Contact::class)
-                                    ->label('Contact')
-                                    ->titleAttribute('full_name')
-                                    ->modifyOptionsQueryUsing(fn (Builder $query) => $query->limit(50)),
-                            ])
-                            ->searchable()
-                            ->preload()
-                            ->required(),
-                        Textarea::make('description')
-                            ->visible(fn () => PipelineEntryFieldsFeature::active())
-                            ->maxLength(65535),
-                        DateTimePicker::make('due')
-                            ->visible(fn () => PipelineEntryFieldsFeature::active())
-                            ->label('Due Date'),
-                        ToggleButtons::make('assigned_to_type')
-                            ->visible(fn () => PipelineEntryFieldsFeature::active())
-                            ->label('Assigned To')
-                            ->options(['none' => 'None', 'user' => 'User'])
-                            ->inline()
-                            ->live()
-                            ->default('none')
-                            ->dehydrated(false),
-                        TableSelect::make('assigned_to')
-                            ->hiddenLabel()
-                            ->relationship('assignedTo')
-                            ->tableConfiguration(PipelineEntryAssignToTable::class)
-                            ->visible(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('assigned_to_type') === 'user')
-                            ->required(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('assigned_to_type') === 'user')
-                            ->rules([Rule::exists('users', 'id')]),
-                        ToggleButtons::make('related_to_type')
-                            ->visible(fn () => PipelineEntryFieldsFeature::active())
-                            ->label('Related To')
-                            ->options(['none' => 'None', 'contact' => 'Contact'])
-                            ->inline()
-                            ->live()
-                            ->default('none')
-                            ->dehydrated(false),
-                        TableSelect::make('related_to')
-                            ->hiddenLabel()
-                            ->relationship('relatedTo')
-                            ->tableConfiguration(PipelineEntryRelatedToTable::class)
-                            ->visible(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('related_to_type') === 'contact')
-                            ->required(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('related_to_type') === 'contact')
-                            ->rules([Rule::exists('contacts', 'id')]),
+                        ...PipelineEntryForm::components(),
                     ]),
             ])
             ->defaultSort('created_at', 'desc');

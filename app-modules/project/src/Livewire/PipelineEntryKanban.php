@@ -36,10 +36,8 @@
 
 namespace AidingApp\Project\Livewire;
 
-use AidingApp\Contact\Models\Contact;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
-use AidingApp\Project\Filament\Tables\PipelineEntryAssignToTable;
-use AidingApp\Project\Filament\Tables\PipelineEntryRelatedToTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
@@ -48,23 +46,15 @@ use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\MorphToSelect;
-use Filament\Forms\Components\MorphToSelect\Type;
-use Filament\Forms\Components\TableSelect;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\ToggleButtons;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
-use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
@@ -124,7 +114,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
             return response()->json([
                 'success' => false,
-                'message' => 'Pipeline could not be moved. Something went wrong, if this continues please contact support.',
+                'message' => 'Pipeline entry could not be moved. Something went wrong, if this continues please contact support.',
             ], ResponseAlias::HTTP_BAD_REQUEST);
         }
 
@@ -147,52 +137,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                         ->required()
                         ->string(),
                 ]),
-                MorphToSelect::make('organizable')
-                    ->types([
-                        Type::make(Contact::class)
-                            ->label('Contact')
-                            ->titleAttribute('full_name')
-                            ->modifyOptionsQueryUsing(fn (Builder $query) => $query->limit(50)),
-                    ])
-                    ->searchable()
-                    ->preload()
-                    ->required(),
-                Textarea::make('description')
-                    ->visible(fn () => PipelineEntryFieldsFeature::active())
-                    ->maxLength(65535),
-                DateTimePicker::make('due')
-                    ->label('Due Date')
-                    ->visible(fn () => PipelineEntryFieldsFeature::active()),
-                ToggleButtons::make('assigned_to_type')
-                    ->label('Assigned To')
-                    ->visible(fn () => PipelineEntryFieldsFeature::active())
-                    ->options(['none' => 'None', 'user' => 'User'])
-                    ->inline()
-                    ->live()
-                    ->default('none')
-                    ->dehydrated(false),
-                TableSelect::make('assigned_to')
-                    ->hiddenLabel()
-                    ->relationship('assignedTo')
-                    ->tableConfiguration(PipelineEntryAssignToTable::class)
-                    ->visible(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('assigned_to_type') === 'user')
-                    ->required(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('assigned_to_type') === 'user')
-                    ->rules([Rule::exists('users', 'id')]),
-                ToggleButtons::make('related_to_type')
-                    ->label('Related To')
-                    ->visible(fn () => PipelineEntryFieldsFeature::active())
-                    ->options(['none' => 'None', 'contact' => 'Contact'])
-                    ->inline()
-                    ->live()
-                    ->default('none')
-                    ->dehydrated(false),
-                TableSelect::make('related_to')
-                    ->hiddenLabel()
-                    ->relationship('relatedTo')
-                    ->tableConfiguration(PipelineEntryRelatedToTable::class)
-                    ->visible(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('related_to_type') === 'contact')
-                    ->required(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('related_to_type') === 'contact')
-                    ->rules([Rule::exists('contacts', 'id')]),
+                ...PipelineEntryForm::components(),
             ])
             ->action(function (array $data, array $arguments) {
                 $dataArray = [

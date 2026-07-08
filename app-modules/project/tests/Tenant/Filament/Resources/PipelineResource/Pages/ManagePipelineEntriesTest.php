@@ -41,6 +41,7 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -399,4 +400,29 @@ it('validates related_to must be a valid contact id when contact toggle is selec
             'related_to' => (string) str()->uuid(),
         ])
         ->assertHasTableActionErrors(['related_to']);
+});
+
+it('can render create pipeline entry with proper permission', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    get(ManagePipelineEntries::getUrl([
+        'record' => $pipeline->getRouteKey(),
+    ]))
+        ->assertForbidden();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('pipeline.view-any');
+    $user->refresh();
+
+    livewire(ManagePipelineEntries::class, ['record' => $pipeline->getKey()])
+        ->assertActionVisible(TestAction::make('create')->table());
 });

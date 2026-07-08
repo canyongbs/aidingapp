@@ -42,8 +42,10 @@ use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Notifications\PipelineEntryAssignedToUserNotification;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Illuminate\Support\Facades\Notification;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
@@ -63,6 +65,26 @@ function baseKanbanEntryData(string $name = 'Test Entry'): array
         'organizable_id' => $contact->id,
     ];
 }
+
+it('can render create pipeline entry with proper permission', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('pipeline.view-any');
+    $user->refresh();
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->assertActionVisible(TestAction::make('addEntry')->table());
+});
 
 it('can create a pipeline entry via the kanban add entry action', function () {
     asSuperAdmin();

@@ -47,11 +47,9 @@ return new class () extends Migration {
             Schema::table('pipeline_entries', function (Blueprint $table) {
                 $table->text('description')->nullable();
                 $table->timestamp('due')->nullable();
-                $table->foreignUuid('assigned_to')->nullable()->constrained('users');
-                $table->foreignUuid('created_by')->nullable()->constrained('users');
-                $table->string('related_to')->nullable();
-
-                $table->index('related_to');
+                $table->foreignUuid('assigned_to')->nullable()->constrained('users')->nullOnDelete();
+                $table->foreignUuid('created_by')->nullable()->constrained('users')->nullOnDelete();
+                $table->foreignUuid('related_to')->nullable()->constrained('contacts')->nullOnDelete();
             });
 
             PipelineEntryFieldsFeature::activate();
@@ -64,8 +62,9 @@ return new class () extends Migration {
             PipelineEntryFieldsFeature::deactivate();
 
             Schema::table('pipeline_entries', function (Blueprint $table) {
-                $table->dropIndex(['related_to']);
-
+                $table->dropForeign(['assigned_to']);
+                $table->dropForeign(['created_by']);
+                $table->dropForeign(['related_to']);
                 $table->dropColumn(['description', 'due', 'assigned_to', 'created_by', 'related_to']);
             });
         });
