@@ -299,9 +299,11 @@ it('reorders types within a category', function () {
         ->call('saveChanges', $treeData)
         ->assertHasNoErrors();
 
-    expect($type3->fresh()->sort)->toBe(1);
-    expect($type1->fresh()->sort)->toBe(2);
-    expect($type2->fresh()->sort)->toBe(3);
+    $typesBySort = $category->fresh()->types->keyBy('id');
+
+    expect($typesBySort[$type3->id]->pivot->sort)->toBe(1);
+    expect($typesBySort[$type1->id]->pivot->sort)->toBe(2);
+    expect($typesBySort[$type2->id]->pivot->sort)->toBe(3);
 });
 
 it('updates names for categories and types', function () {

@@ -53,6 +53,7 @@ return new class () extends Migration {
                 $table->foreignUuid('service_request_type_category_id')
                     ->constrained('service_request_type_categories', indexName: 'srct_service_request_type_category_id_foreign')
                     ->cascadeOnDelete();
+                $table->unsignedInteger('sort')->default(0);
                 $table->timestamps();
 
                 $table->unique(
@@ -61,15 +62,17 @@ return new class () extends Migration {
                 );
             });
 
-            // Backfill the pivot from the existing single category assignment.
+            // Backfill the pivot from the existing single category assignment, preserving the
+            // type's existing order as the per-area sort value.
             DB::table('service_request_category_types')->insertUsing(
-                ['id', 'service_request_type_id', 'service_request_type_category_id', 'created_at', 'updated_at'],
+                ['id', 'service_request_type_id', 'service_request_type_category_id', 'sort', 'created_at', 'updated_at'],
                 DB::table('service_request_types')
                     ->whereNotNull('category_id')
                     ->select([
                         DB::raw('gen_random_uuid()'),
                         'id',
                         'category_id',
+                        'sort',
                         DB::raw('now()'),
                         DB::raw('now()'),
                     ]),

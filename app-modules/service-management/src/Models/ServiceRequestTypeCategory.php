@@ -108,9 +108,9 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
                 relatedPivotKey: 'service_request_type_id',
             )
                 ->using(ServiceRequestCategoryType::class)
-                ->withPivot('id')
+                ->withPivot('id', 'sort')
                 ->withTimestamps()
-                ->orderBy('service_request_types.sort');
+                ->orderByPivot('sort');
         }
 
         return $this->hasMany(ServiceRequestType::class, 'category_id', 'id')->orderBy('sort');

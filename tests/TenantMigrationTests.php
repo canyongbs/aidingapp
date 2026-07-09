@@ -77,7 +77,7 @@ describe('2026_07_09_123757_migrate_service_request_types_to_multiple_categories
                 // still present, and the feature flag is inactive, so the models write through the legacy column.
                 $category = ServiceRequestTypeCategory::factory()->create();
 
-                $typeWithCategory = ServiceRequestType::factory()->create(['category_id' => $category->id]);
+                $typeWithCategory = ServiceRequestType::factory()->create(['category_id' => $category->id, 'sort' => 7]);
 
                 $typeWithoutCategory = ServiceRequestType::factory()->create(['category_id' => null]);
 
@@ -94,6 +94,14 @@ describe('2026_07_09_123757_migrate_service_request_types_to_multiple_categories
                         ->where('service_request_type_category_id', $category->id)
                         ->exists()
                 )->toBeTrue();
+
+                // The per-area sort is backfilled from the legacy type sort.
+                expect(
+                    DB::table('service_request_category_types')
+                        ->where('service_request_type_id', $typeWithCategory->id)
+                        ->where('service_request_type_category_id', $category->id)
+                        ->value('sort')
+                )->toBe(7);
 
                 // The uncategorized type has no pivot row.
                 expect(
