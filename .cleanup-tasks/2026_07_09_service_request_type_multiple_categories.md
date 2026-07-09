@@ -44,9 +44,17 @@ The following are **not** discoverable by searching for the flag name:
   removed legacy path).
 - Remove `'category_id'` from the `$fillable` array on `ServiceRequestType` (the column no longer
   exists once the migration has run).
+- In the `list-service-request-types` Blade view the flag is passed to the Alpine component as the
+  `multipleCategoriesEnabled` prop. In `serviceRequestTypeManager.js` that prop gates the multi-area
+  UI: the "Add existing type" button, the existing-type `<select>` row, and the `canRemove`
+  ("Remove from this area") button state. On cleanup, drop the prop and the `this.multipleCategoriesEnabled`
+  guards so the multi-area behaviour is always on. (The JS itself never names the flag class.)
+- In `ViewServiceRequestType` the `service_request_areas` entry has a flag guard: keep the
+  `$record->categories` branch and delete the legacy `$record->category` branch.
 
 Everything else is a flag guard: grepping `ServiceRequestTypeMultipleCategoriesFeature` finds the
-branches in `ServiceRequestType::firstCategoryId()`/`visibilityRestrictionParent()`, the page's
-`syncTypeCategory()`, the `ServiceRequestTypeFactory::category()` state, the observer's `creating()`,
-the `WithCategoryAssignments` scope, and the uncategorized-types query. In each, delete the legacy
-`category_id` branch and keep the `categories()` pivot branch.
+branches in `ServiceRequestType::categoryIds()`/`visibilityRestrictionParents()`, the page's
+`syncTypeCategory()`/`assignTypeToCategory()`/`applyPendingTypePlacements()`/`resolveSaveTypeId()`/
+`deleteCategoryWithDescendants()`, the `ServiceRequestTypeFactory::category()` state, the observer's
+`creating()`, the `WithCategoryAssignments` scope, and the uncategorized-types query. In each, delete
+the legacy `category_id` branch and keep the `categories()` pivot branch.
