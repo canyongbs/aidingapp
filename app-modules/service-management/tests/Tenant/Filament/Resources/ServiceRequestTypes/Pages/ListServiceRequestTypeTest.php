@@ -444,3 +444,25 @@ it('clears a visibility restriction and detaches contact types', function () {
     expect($type->is_visibility_restricted)->toBeFalse()
         ->and($type->restrictedToContactTypes()->count())->toBe(0);
 });
+
+it('shows a type under every category it belongs to in the hierarchical data', function () {
+    asSuperAdmin();
+
+    $categoryA = ServiceRequestTypeCategory::factory()->create(['name' => 'Area A', 'sort' => 1]);
+    $categoryB = ServiceRequestTypeCategory::factory()->create(['name' => 'Area B', 'sort' => 2]);
+
+    $type = ServiceRequestType::factory()->create(['name' => 'Shared', 'sort' => 1]);
+    $type->categories()->attach([$categoryA->id, $categoryB->id]);
+
+    $data = livewire(ListServiceRequestTypes::class)->instance()->getHierarchicalData();
+
+    $categoryAData = collect($data['categories'])->firstWhere('id', $categoryA->id);
+    $categoryBData = collect($data['categories'])->firstWhere('id', $categoryB->id);
+
+    expect(collect($categoryAData['types'])->pluck('id'))->toContain($type->id)
+        ->and(collect($categoryBData['types'])->pluck('id'))->toContain($type->id);
+
+    // Each placement reports the category it is nested under.
+    expect(collect($categoryAData['types'])->firstWhere('id', $type->id)['category_id'])->toBe($categoryA->id)
+        ->and(collect($categoryBData['types'])->firstWhere('id', $type->id)['category_id'])->toBe($categoryB->id);
+});

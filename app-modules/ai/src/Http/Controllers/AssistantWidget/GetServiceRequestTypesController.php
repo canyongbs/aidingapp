@@ -39,12 +39,12 @@ namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Actions\BuildContactServiceRequestTypeTree;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
-use AidingApp\ServiceManagement\Models\Scopes\WithCategoryAssignments;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -61,56 +61,20 @@ class GetServiceRequestTypesController extends Controller
 
         $contactTypeId = $visibilityRestrictionsEnabled ? $contact->type_id : null;
 
-        $categoriesQuery = ServiceRequestTypeCategory::query()->orderBy('sort');
-
-        $typesQuery = ServiceRequestType::query()
-            ->withoutArchived()
-            ->with(['priorities' => fn ($query) => $query->orderByDesc('order')])
-            ->orderBy('sort')
-            ->tap(new WithCategoryAssignments());
-
-        if ($visibilityRestrictionsEnabled) {
-            $categoriesQuery->with('restrictedToContactTypes:id');
-            $typesQuery->with('restrictedToContactTypes:id');
-        }
-
-        $categories = $categoriesQuery->get();
-
-        $types = $typesQuery->get();
-
         $aiClarificationGlobalEnabled = app(AiClarificationSettings::class)->is_enabled;
         $aiResolutionGlobalEnabled = app(AiResolutionSettings::class)->is_enabled;
 
-        $categoriesById = [];
-        $categoryAllowed = [];
-
-        foreach ($categories as $category) {
-            $categoryAllowed[$category->id] = ! $visibilityRestrictionsEnabled
-                || $category->passesOwnVisibilityRestriction($contactTypeId);
-
-            $categoriesById[$category->id] = [
-                'id' => $category->id,
-                'name' => $category->name,
-                'sort' => $category->sort,
-                'parent_id' => $category->parent_id,
-                'children' => [],
-                'types' => [],
-            ];
-        }
-
-        $topLevelTypes = [];
-
-        foreach ($types as $type) {
-            if ($visibilityRestrictionsEnabled && ! $type->passesOwnVisibilityRestriction($contactTypeId)) {
-                continue;
-            }
-
-            $basePayload = [
+        $tree = app(BuildContactServiceRequestTypeTree::class)->execute(
+            contactTypeId: $contactTypeId,
+            visibilityRestrictionsEnabled: $visibilityRestrictionsEnabled,
+            prepareTypesQuery: fn (Builder $query) => $query->with(['priorities' => fn ($priorityQuery) => $priorityQuery->orderByDesc('order')]),
+            formatType: fn (ServiceRequestType $type, ?string $categoryId): array => [
                 'id' => $type->getKey(),
                 'name' => $type->name,
                 'description' => $type->description,
                 'icon' => $type->icon ? svg($type->icon, 'h-5 w-5')->toHtml() : null,
                 'sort' => $type->sort,
+                'category_id' => $categoryId,
                 'is_ai_clarification_enabled' => $aiClarificationGlobalEnabled && $type->is_ai_clarification_enabled,
                 'is_ai_resolution_enabled' => $aiResolutionGlobalEnabled && $type->is_ai_resolution_enabled,
                 'is_live_chat_enabled' => $type->is_live_chat_enabled,
@@ -119,82 +83,12 @@ class GetServiceRequestTypesController extends Controller
                     'name' => $priority->name,
                     'order' => $priority->order,
                 ])->values()->all(),
-            ];
-
-            $placedUnderCategory = false;
-
-            foreach ($type->categoryIds() as $categoryId) {
-                if (! isset($categoriesById[$categoryId])) {
-                    continue;
-                }
-
-                $categoriesById[$categoryId]['types'][] = $basePayload + ['category_id' => $categoryId];
-                $placedUnderCategory = true;
-            }
-
-            if (! $placedUnderCategory) {
-                $topLevelTypes[] = $basePayload + ['category_id' => null];
-            }
-        }
-
-        $topLevelCategories = [];
-
-        foreach ($categoriesById as $id => $category) {
-            if ($category['parent_id'] && isset($categoriesById[$category['parent_id']])) {
-                $categoriesById[$category['parent_id']]['children'][] = &$categoriesById[$id];
-            } else {
-                $topLevelCategories[] = &$categoriesById[$id];
-            }
-        }
-
-        $sortRecursive = function (array &$nodes) use (&$sortRecursive) {
-            usort($nodes, fn (array $first, array $second) => ($first['sort'] ?? 0) <=> ($second['sort'] ?? 0));
-
-            foreach ($nodes as &$node) {
-                if (! empty($node['types'])) {
-                    usort($node['types'], fn (array $first, array $second) => ($first['sort'] ?? 0) <=> ($second['sort'] ?? 0));
-                }
-
-                if (! empty($node['children'])) {
-                    $sortRecursive($node['children']);
-                }
-            }
-        };
-
-        $sortRecursive($topLevelCategories);
-
-        usort($topLevelTypes, fn (array $first, array $second) => ($first['sort'] ?? 0) <=> ($second['sort'] ?? 0));
-
-        // Remove categories the contact is not allowed to see, including their entire subtree.
-        $filterRestrictedCategories = function (array &$nodes) use (&$filterRestrictedCategories, $categoryAllowed): array {
-            return array_values(array_filter($nodes, function (array &$node) use (&$filterRestrictedCategories, $categoryAllowed): bool {
-                if (! ($categoryAllowed[$node['id']] ?? true)) {
-                    return false;
-                }
-
-                $node['children'] = $filterRestrictedCategories($node['children']);
-
-                return true;
-            }));
-        };
-
-        if ($visibilityRestrictionsEnabled) {
-            $topLevelCategories = $filterRestrictedCategories($topLevelCategories);
-        }
-
-        $filterEmptyCategories = function (array &$nodes) use (&$filterEmptyCategories): array {
-            return array_values(array_filter($nodes, function (array &$node) use (&$filterEmptyCategories): bool {
-                $node['children'] = $filterEmptyCategories($node['children']);
-
-                return ! empty($node['types']) || ! empty($node['children']);
-            }));
-        };
-
-        $topLevelCategories = $filterEmptyCategories($topLevelCategories);
+            ],
+        );
 
         return response()->json([
-            'categories' => $topLevelCategories,
-            'types' => $topLevelTypes,
+            'categories' => $tree['categories'],
+            'types' => $tree['types'],
             'upload_url' => route('widgets.assistant.api.service-request.upload-url'),
             'store_url_base' => route('widgets.assistant.api.service-request.store', ['type' => '__TYPE__']),
             'form_url_base' => route('widgets.assistant.api.service-request-form', ['type' => '__TYPE__']),
