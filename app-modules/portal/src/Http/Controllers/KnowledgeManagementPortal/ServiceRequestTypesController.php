@@ -91,21 +91,27 @@ class ServiceRequestTypesController extends Controller
                 continue;
             }
 
-            $categoryId = $type->firstCategoryId();
-
-            $payload = [
+            $basePayload = [
                 'id' => $type->getKey(),
                 'name' => $type->name,
                 'description' => $type->description,
                 'icon' => $type->icon ? svg($type->icon, 'h-6 w-6')->toHtml() : null,
                 'sort' => $type->sort,
-                'category_id' => $categoryId,
             ];
 
-            if ($categoryId && isset($catsById[$categoryId])) {
-                $catsById[$categoryId]['types'][] = $payload;
-            } else {
-                $topLevelTypes[] = $payload;
+            $placedUnderCategory = false;
+
+            foreach ($type->categoryIds() as $categoryId) {
+                if (! isset($catsById[$categoryId])) {
+                    continue;
+                }
+
+                $catsById[$categoryId]['types'][] = $basePayload + ['category_id' => $categoryId];
+                $placedUnderCategory = true;
+            }
+
+            if (! $placedUnderCategory) {
+                $topLevelTypes[] = $basePayload + ['category_id' => null];
             }
         }
 

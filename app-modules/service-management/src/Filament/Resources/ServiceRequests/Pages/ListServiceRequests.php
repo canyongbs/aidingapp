@@ -316,16 +316,37 @@ class ListServiceRequests extends ListRecords
         $types = ServiceRequestType::query()
             ->tap(new WithCategoryAssignments())
             ->orderBy('sort')
-            ->get()
-            ->groupBy(fn (ServiceRequestType $type): string => $type->firstCategoryId() ?? '');
+            ->get();
+
+        // A type can belong to many categories, so it appears under each of them (and once at the
+        // root if it belongs to none).
+        $typesByCategory = [];
+        $uncategorizedTypes = [];
+
+        foreach ($types as $type) {
+            $categoryIds = $type->categoryIds();
+
+            if ($categoryIds === []) {
+                $uncategorizedTypes[] = $type;
+
+                continue;
+            }
+
+            foreach ($categoryIds as $categoryId) {
+                $typesByCategory[$categoryId][] = $type;
+            }
+        }
+
+        /** @var Collection<int|string, Collection<int, ServiceRequestType>> $typesByCategory */
+        $typesByCategory = collect($typesByCategory)->map(fn (array $group): Collection => collect($group));
 
         $tree = collect($categories->get('', collect()))
-            ->map(fn (ServiceRequestTypeCategory $category) => static::buildCategoryNode($category, $categories, $types))
+            ->map(fn (ServiceRequestTypeCategory $category) => static::buildCategoryNode($category, $categories, $typesByCategory))
             ->filter(fn (array $node) => ! empty($node['children']))
             ->values()
             ->all();
 
-        $uncategorizedTypes = $types->get('', collect())
+        $uncategorizedTypes = collect($uncategorizedTypes)
             ->map(fn (ServiceRequestType $type) => [
                 'name' => $type->name,
                 'value' => $type->getKey(),

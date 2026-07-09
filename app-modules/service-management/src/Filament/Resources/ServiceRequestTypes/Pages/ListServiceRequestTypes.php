@@ -146,7 +146,7 @@ class ListServiceRequestTypes extends ListRecords
 
         return [
             'categories' => $this->formatCategories($categories, $visibilityRestrictionsEnabled),
-            'uncategorized_types' => $this->formatTypes($uncategorizedTypes, $visibilityRestrictionsEnabled),
+            'uncategorized_types' => $this->formatTypes($uncategorizedTypes, null, $visibilityRestrictionsEnabled),
         ];
     }
 
@@ -487,7 +487,7 @@ class ListServiceRequestTypes extends ListRecords
                 'sort' => $category->sort,
                 'parent_id' => $category->parent_id,
                 'children' => $this->formatCategories($category->children, $visibilityRestrictionsEnabled),
-                'types' => $this->formatTypes($category->types, $visibilityRestrictionsEnabled),
+                'types' => $this->formatTypes($category->types, $category->id, $visibilityRestrictionsEnabled),
                 'descendant_service_requests_count' => $category->descendant_service_requests_count ?? 0,
                 ...$visibilityRestrictionsEnabled ? [
                     'is_visibility_restricted' => (bool) $category->is_visibility_restricted,
@@ -502,15 +502,15 @@ class ListServiceRequestTypes extends ListRecords
      *
      * @return array<int, array<string, mixed>>
      */
-    protected function formatTypes(Collection $types, bool $visibilityRestrictionsEnabled = false): array
+    protected function formatTypes(Collection $types, ?string $contextCategoryId, bool $visibilityRestrictionsEnabled = false): array
     {
-        return $types->map(function (ServiceRequestType $type) use ($visibilityRestrictionsEnabled) {
+        return $types->map(function (ServiceRequestType $type) use ($contextCategoryId, $visibilityRestrictionsEnabled) {
             return [
                 'id' => $type->id,
                 'name' => $type->name,
                 'type' => 'type',
                 'sort' => $type->sort,
-                'category_id' => $type->firstCategoryId(),
+                'category_id' => $contextCategoryId,
                 'service_requests_count' => $type->service_requests_count ?? 0,
                 'view_url' => ServiceRequestTypeResource::getUrl('view', ['record' => $type]),
                 ...$visibilityRestrictionsEnabled ? [

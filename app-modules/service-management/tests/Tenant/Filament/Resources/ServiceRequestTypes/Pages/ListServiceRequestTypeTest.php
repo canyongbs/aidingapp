@@ -178,7 +178,7 @@ it('creates new category with a new type in one operation', function () {
 
     $type = ServiceRequestType::where('name', 'Brand New Type')->first();
     expect($type)->not->toBeNull();
-    expect($type->firstCategoryId())->toBe($category->id);
+    expect($type->categoryIds())->toBe([$category->id]);
 
     // New types should have 3 priorities created
     expect($type->priorities()->count())->toBe(3);

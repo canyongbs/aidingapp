@@ -290,30 +290,33 @@ class ServiceRequestType extends BaseModel implements Auditable
             ->withTimestamps();
     }
 
-    public function visibilityRestrictionParent(): ?ServiceRequestTypeCategory
+    /**
+     * @return iterable<ServiceRequestTypeCategory>
+     */
+    public function visibilityRestrictionParents(): iterable
     {
         if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
-            return $this->categories->first();
+            return $this->categories;
         }
 
-        return $this->category;
+        return $this->category !== null ? [$this->category] : [];
     }
 
     /**
-     * The id of the single category this type is filed under.
+     * The ids of every category this type is filed under.
+     *
+     * @return array<int, string>
      */
-    public function firstCategoryId(): ?string
+    public function categoryIds(): array
     {
         if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
-            $category = $this->categories->first();
-
-            return $category instanceof ServiceRequestTypeCategory ? (string) $category->getKey() : null;
+            return $this->categories->pluck('id')->all();
         }
 
         /** @var string|null $categoryId */
         $categoryId = $this->getAttribute('category_id');
 
-        return $categoryId;
+        return $categoryId !== null ? [$categoryId] : [];
     }
 
     protected function casts(): array

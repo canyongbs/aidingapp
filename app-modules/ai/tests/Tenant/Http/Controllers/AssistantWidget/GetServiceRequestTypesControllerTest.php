@@ -199,3 +199,23 @@ it('hides the entire subtree of a visibility restricted area from non-matching w
     expect(collect($visibleResponse->json('categories'))->pluck('id'))
         ->toContain($restrictedCategory->id);
 });
+
+it('lists a type under every category it belongs to', function () {
+    $categoryA = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+    $categoryB = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+
+    $type = ServiceRequestType::factory()->create();
+    $type->categories()->attach([$categoryA->id, $categoryB->id]);
+
+    $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
+
+    $response->assertOk();
+
+    $categories = collect($response->json('categories'));
+
+    $categoryAData = $categories->firstWhere('id', $categoryA->id);
+    $categoryBData = $categories->firstWhere('id', $categoryB->id);
+
+    expect(collect($categoryAData['types'])->pluck('id'))->toContain($type->id)
+        ->and(collect($categoryBData['types'])->pluck('id'))->toContain($type->id);
+});

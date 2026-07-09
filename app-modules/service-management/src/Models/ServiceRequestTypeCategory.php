@@ -131,9 +131,12 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
             ->withTimestamps();
     }
 
-    public function visibilityRestrictionParent(): ?ServiceRequestTypeCategory
+    /**
+     * @return iterable<ServiceRequestTypeCategory>
+     */
+    public function visibilityRestrictionParents(): iterable
     {
-        return $this->parent;
+        return $this->parent !== null ? [$this->parent] : [];
     }
 
     /**

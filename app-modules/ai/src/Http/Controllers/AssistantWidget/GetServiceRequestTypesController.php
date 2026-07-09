@@ -105,15 +105,12 @@ class GetServiceRequestTypesController extends Controller
                 continue;
             }
 
-            $categoryId = $type->firstCategoryId();
-
-            $payload = [
+            $basePayload = [
                 'id' => $type->getKey(),
                 'name' => $type->name,
                 'description' => $type->description,
                 'icon' => $type->icon ? svg($type->icon, 'h-5 w-5')->toHtml() : null,
                 'sort' => $type->sort,
-                'category_id' => $categoryId,
                 'is_ai_clarification_enabled' => $aiClarificationGlobalEnabled && $type->is_ai_clarification_enabled,
                 'is_ai_resolution_enabled' => $aiResolutionGlobalEnabled && $type->is_ai_resolution_enabled,
                 'is_live_chat_enabled' => $type->is_live_chat_enabled,
@@ -124,10 +121,19 @@ class GetServiceRequestTypesController extends Controller
                 ])->values()->all(),
             ];
 
-            if ($categoryId && isset($categoriesById[$categoryId])) {
-                $categoriesById[$categoryId]['types'][] = $payload;
-            } else {
-                $topLevelTypes[] = $payload;
+            $placedUnderCategory = false;
+
+            foreach ($type->categoryIds() as $categoryId) {
+                if (! isset($categoriesById[$categoryId])) {
+                    continue;
+                }
+
+                $categoriesById[$categoryId]['types'][] = $basePayload + ['category_id' => $categoryId];
+                $placedUnderCategory = true;
+            }
+
+            if (! $placedUnderCategory) {
+                $topLevelTypes[] = $basePayload + ['category_id' => null];
             }
         }
 

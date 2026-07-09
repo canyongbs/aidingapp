@@ -1170,3 +1170,22 @@ it('only shows the bulk delete action to a user with the service_request.delete 
     livewire(ListServiceRequests::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
+
+it('places a type under every category it belongs to in the type filter tree', function () {
+    ServiceRequestType::query()->delete();
+    ServiceRequestTypeCategory::query()->delete();
+
+    $categoryA = ServiceRequestTypeCategory::factory()->create(['name' => 'Area A', 'sort' => 1, 'parent_id' => null]);
+    $categoryB = ServiceRequestTypeCategory::factory()->create(['name' => 'Area B', 'sort' => 2, 'parent_id' => null]);
+
+    $type = ServiceRequestType::factory()->create(['name' => 'Shared Type', 'sort' => 1]);
+    $type->categories()->attach([$categoryA->id, $categoryB->id]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    $nodeA = collect($tree)->firstWhere('name', 'Area A');
+    $nodeB = collect($tree)->firstWhere('name', 'Area B');
+
+    expect(collect($nodeA['children'])->pluck('value'))->toContain($type->getKey())
+        ->and(collect($nodeB['children'])->pluck('value'))->toContain($type->getKey());
+});

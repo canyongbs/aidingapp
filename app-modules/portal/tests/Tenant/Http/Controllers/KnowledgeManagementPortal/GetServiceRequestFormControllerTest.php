@@ -89,3 +89,56 @@ it('blocks a type nested under a restricted area from a non-matching contact', f
         ->getJson(route('api.portal.service-request.create', ['type' => $type]))
         ->assertNotFound();
 });
+
+it('builds breadcrumbs for the category the contact navigated under', function () {
+    $categoryA = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+    $categoryB = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+
+    $type = ServiceRequestType::factory()->create();
+    $type->categories()->attach([$categoryA->id, $categoryB->id]);
+
+    $responseA = getJson(route('api.portal.service-request.create', ['type' => $type, 'category' => $categoryA->id]));
+    $responseA->assertOk();
+    expect($responseA->json('category.id'))->toBe($categoryA->id);
+
+    $responseB = getJson(route('api.portal.service-request.create', ['type' => $type, 'category' => $categoryB->id]));
+    $responseB->assertOk();
+    expect($responseB->json('category.id'))->toBe($categoryB->id);
+});
+
+it('builds a nested breadcrumb ancestor trail for the navigated category', function () {
+    $parent = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+    $child = ServiceRequestTypeCategory::factory()->create(['parent_id' => $parent->id]);
+
+    $type = ServiceRequestType::factory()->create();
+    $type->categories()->attach($child->id);
+
+    $response = getJson(route('api.portal.service-request.create', ['type' => $type, 'category' => $child->id]));
+
+    $response->assertOk();
+
+    expect($response->json('category.id'))->toBe($child->id)
+        ->and(collect($response->json('category.ancestors'))->pluck('id')->all())->toBe([$parent->id]);
+});
+
+it('allows loading the form when the type is reachable via any authorized category path', function () {
+    $allowedContactType = ContactType::factory()->create();
+    $otherContactType = ContactType::factory()->create();
+
+    $openCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+
+    $restrictedCategory = ServiceRequestTypeCategory::factory()->create([
+        'parent_id' => null,
+        'is_visibility_restricted' => true,
+    ]);
+    $restrictedCategory->restrictedToContactTypes()->attach($allowedContactType);
+
+    $type = ServiceRequestType::factory()->create();
+    $type->categories()->attach([$openCategory->id, $restrictedCategory->id]);
+
+    $contact = Contact::factory()->create(['type_id' => $otherContactType->id]);
+
+    actingAs($contact, 'contact')
+        ->getJson(route('api.portal.service-request.create', ['type' => $type]))
+        ->assertOk();
+});

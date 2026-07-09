@@ -119,9 +119,9 @@ it('saves new category and moves existing type into it in one operation', functi
     // After save, the type should be assigned to the new category
     $freshType = $type->fresh();
 
-    expect($freshType->firstCategoryId())->not->toBeNull();
+    expect($freshType->categoryIds())->not->toBeEmpty();
 
-    $newCategory = ServiceRequestTypeCategory::find($freshType->firstCategoryId());
+    $newCategory = ServiceRequestTypeCategory::find($freshType->categoryIds()[0]);
 
     expect($newCategory)->not->toBeNull();
     expect($newCategory->name)->toBe('New Cat');
@@ -166,5 +166,5 @@ it('moves type from one existing category to another existing category', functio
         ->call('saveChanges', $treeData)
         ->assertHasNoErrors();
 
-    expect($type->fresh()->firstCategoryId())->toBe($catB->id);
+    expect($type->fresh()->categoryIds())->toBe([$catB->id]);
 });

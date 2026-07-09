@@ -195,3 +195,58 @@ it('hides the entire subtree of a visibility restricted area from non-matching c
     expect(collect($visibleResponse->json('categories'))->pluck('id'))
         ->toContain($restrictedCategory->id);
 });
+
+it('lists a type under every category it belongs to', function () {
+    $categoryA = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+    $categoryB = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+
+    $type = ServiceRequestType::factory()->create();
+    $type->categories()->attach([$categoryA->id, $categoryB->id]);
+
+    $response = getJson(route('api.portal.service-request-type.index'));
+
+    $response->assertOk();
+
+    $categories = collect($response->json('categories'));
+
+    $categoryAData = $categories->firstWhere('id', $categoryA->id);
+    $categoryBData = $categories->firstWhere('id', $categoryB->id);
+
+    expect(collect($categoryAData['types'])->pluck('id'))->toContain($type->id)
+        ->and(collect($categoryBData['types'])->pluck('id'))->toContain($type->id);
+
+    // Each placement reports the category it is nested under.
+    expect(collect($categoryAData['types'])->firstWhere('id', $type->id)['category_id'])->toBe($categoryA->id)
+        ->and(collect($categoryBData['types'])->firstWhere('id', $type->id)['category_id'])->toBe($categoryB->id);
+});
+
+it('shows a type under an authorized category path and hides it under a restricted one', function () {
+    $allowedContactType = ContactType::factory()->create();
+    $otherContactType = ContactType::factory()->create();
+
+    $openCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+
+    $restrictedCategory = ServiceRequestTypeCategory::factory()->create([
+        'parent_id' => null,
+        'is_visibility_restricted' => true,
+    ]);
+    $restrictedCategory->restrictedToContactTypes()->attach($allowedContactType);
+
+    $type = ServiceRequestType::factory()->create();
+    $type->categories()->attach([$openCategory->id, $restrictedCategory->id]);
+
+    $contact = Contact::factory()->create(['type_id' => $otherContactType->id]);
+
+    $response = actingAs($contact, 'contact')->getJson(route('api.portal.service-request-type.index'));
+
+    $response->assertOk();
+
+    $categories = collect($response->json('categories'));
+
+    expect($categories->pluck('id'))->toContain($openCategory->id)
+        ->and($categories->pluck('id'))->not->toContain($restrictedCategory->id);
+
+    $openData = $categories->firstWhere('id', $openCategory->id);
+
+    expect(collect($openData['types'])->pluck('id'))->toContain($type->id);
+});
