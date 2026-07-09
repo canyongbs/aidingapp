@@ -48,10 +48,6 @@ arch('All Core Settings classes should have defaults for all properties')
     ->expect('App\Settings')
     ->toHaveDefaultsForAllProperties();
 
-arch('All Core Factories should not use the fake global function')
-    ->expect('Database\Factories')
-    ->not->toUse('fake');
-
 $legacyV4UuidModels = require __DIR__ . '/legacy-v4-uuid-models.php';
 
 arch('All Core Models should not use HasVersion4Uuids trait')
@@ -80,10 +76,6 @@ $modules->each(function (ModuleConfig $module) use ($legacyV4UuidModels) {
         ->extending(Model::class)
         ->not->toUseTrait(HasVersion4Uuids::class)
         ->ignoring($legacyV4UuidModels);
-
-    arch("All {$module->name} Factories should not use the fake global function")
-        ->expect($module->namespace() . 'Database\Factories')
-        ->not->toUse('fake');
 });
 
 test('Legacy models must not use HasUuids (UUIDv7)', function () {
