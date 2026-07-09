@@ -36,17 +36,30 @@
 
 namespace AidingApp\Report\Filament\Pages;
 
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use AidingApp\Report\Filament\Widgets\KnowledgeBaseArticlesByCategoryDonutChart;
+use AidingApp\Report\Filament\Widgets\KnowledgeBaseArticlesOverTimeBarChart;
+use AidingApp\Report\Filament\Widgets\KnowledgeBaseArticlesTable;
+use AidingApp\Report\Filament\Widgets\KnowledgeBaseConcernsByStatusDonutChart;
+use AidingApp\Report\Filament\Widgets\KnowledgeBaseStats;
+use AidingApp\Report\Filament\Widgets\RefreshWidget;
 use App\Enums\Feature;
 use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use BackedEnum;
+use Filament\Forms\Components\Select;
 use Filament\Pages\Dashboard;
+use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 class KnowledgeBase extends Dashboard
 {
+    use HasFiltersForm;
+
     protected static ?string $cluster = ReportLibrary::class;
 
     protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::ServiceDesk;
@@ -57,11 +70,13 @@ class KnowledgeBase extends Dashboard
 
     protected static string $routePath = 'knowledge-base';
 
-    protected string $view = 'filament.pages.coming-soon';
-
     protected static ?int $navigationSort = 30;
 
     protected static string | BackedEnum | null $navigationIcon = '';
+
+    protected string $cacheTag = 'report-knowledge-base';
+
+    protected string $view = 'report::filament.pages.report';
 
     public static function canAccess(): bool
     {
@@ -73,5 +88,53 @@ class KnowledgeBase extends Dashboard
         $user = auth()->user();
 
         return $user->can('report-library.view-any');
+    }
+
+    public function filtersForm(Schema $schema): Schema
+    {
+        return $schema->components([
+            Section::make('Filters')
+                ->schema([
+                    Select::make('categories')
+                        ->label('Category')
+                        ->options(
+                            KnowledgeBaseCategory::query()
+                                ->orderBy('name')
+                                ->pluck('name', 'id')
+                        )
+                        ->multiple()
+                        ->searchable()
+                        ->placeholder('All'),
+                ])
+                ->columns(1),
+        ]);
+    }
+
+    public function getWidgets(): array
+    {
+        return [
+            RefreshWidget::make(['cacheTag' => $this->cacheTag]),
+            KnowledgeBaseStats::make(['cacheTag' => $this->cacheTag]),
+            KnowledgeBaseConcernsByStatusDonutChart::make(['cacheTag' => $this->cacheTag]),
+            KnowledgeBaseArticlesByCategoryDonutChart::make(['cacheTag' => $this->cacheTag]),
+            KnowledgeBaseArticlesOverTimeBarChart::make(['cacheTag' => $this->cacheTag]),
+            KnowledgeBaseArticlesTable::make(['cacheTag' => $this->cacheTag]),
+        ];
+    }
+
+    public function getColumns(): int|array
+    {
+        return [
+            'sm' => 2,
+            'md' => 4,
+            'lg' => 4,
+        ];
+    }
+
+    public function getWidgetData(): array
+    {
+        return [
+            'pageFilters' => $this->filters,
+        ];
     }
 }

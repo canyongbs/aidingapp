@@ -34,47 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
+namespace App\Enums;
 
-use AidingApp\Ai\Actions\GenerateAssistantServiceRequestFormKitSchema;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Actions\GenerateServiceRequestForm;
-use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-
-class GetServiceRequestFormController extends Controller
+/**
+ * The full subscription lifecycle status synced from Olympus. The instance only
+ * acts on ExpiredPeriod2 (warning banner) and Expired (offline); the remaining
+ * cases are stored so future behaviour can key off them.
+ */
+enum SubscriptionStatus: string
 {
-    public function __invoke(Request $request, ServiceRequestType $type): JsonResponse
+    case Upcoming = 'upcoming';
+
+    case Active = 'active';
+
+    case Outstanding = 'outstanding';
+
+    case ExpiredPeriod1 = 'expired_period_1';
+
+    case ExpiredPeriod2 = 'expired_period_2';
+
+    case Expired = 'expired';
+
+    case NotApplicable = 'not_applicable';
+
+    /**
+     * Whether the expiration warning banner should be shown for this status.
+     */
+    public function showsExpirationBanner(): bool
     {
-        $contact = auth('contact')->user() ?? $request->user();
+        return $this === self::ExpiredPeriod2;
+    }
 
-        abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
-
-        if (ServiceRequestTypeVisibilityRestrictionsFeature::active()) {
-            abort_unless($type->isVisibleToContactType($contact->type_id), Response::HTTP_NOT_FOUND);
-        }
-
-        $form = $type->form;
-
-        if (! $form) {
-            return response()->json([
-                'steps' => [],
-            ]);
-        }
-
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-
-        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
-
-        $steps = app(GenerateAssistantServiceRequestFormKitSchema::class)($form);
-
-        return response()->json([
-            'steps' => $steps,
-        ]);
+    /**
+     * Whether the tenant should be fully inaccessible for this status.
+     */
+    public function isInaccessible(): bool
+    {
+        return $this === self::Expired;
     }
 }

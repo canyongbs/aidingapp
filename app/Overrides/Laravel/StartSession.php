@@ -34,47 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
+namespace App\Overrides\Laravel;
 
-use AidingApp\Ai\Actions\GenerateAssistantServiceRequestFormKitSchema;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Actions\GenerateServiceRequestForm;
-use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Contracts\Session\Session;
+use Illuminate\Session\Middleware\StartSession as BaseStartSession;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 
-class GetServiceRequestFormController extends Controller
+class StartSession extends BaseStartSession
 {
-    public function __invoke(Request $request, ServiceRequestType $type): JsonResponse
+    protected function addCookieToResponse(Response $response, Session $session)
     {
-        $contact = auth('contact')->user() ?? $request->user();
+        $config = app()->make('config')->get('session');
 
-        abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
-
-        if (ServiceRequestTypeVisibilityRestrictionsFeature::active()) {
-            abort_unless($type->isVisibleToContactType($contact->type_id), Response::HTTP_NOT_FOUND);
+        if ($this->sessionIsPersistent($config)) {
+            $response->headers->setCookie(new Cookie(
+                $session->getName(),
+                $session->getId(),
+                $this->getCookieExpirationDate(),
+                $config['path'],
+                $config['domain'],
+                $config['secure'] ?? false,
+                $config['http_only'] ?? true,
+                false,
+                $config['same_site'] ?? null,
+                $config['partitioned'] ?? false
+            ));
         }
-
-        $form = $type->form;
-
-        if (! $form) {
-            return response()->json([
-                'steps' => [],
-            ]);
-        }
-
-        $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-
-        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
-
-        $steps = app(GenerateAssistantServiceRequestFormKitSchema::class)($form);
-
-        return response()->json([
-            'steps' => $steps,
-        ]);
     }
 }

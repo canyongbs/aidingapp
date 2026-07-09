@@ -38,6 +38,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 
@@ -48,12 +49,30 @@ class ServiceRequestTypesController extends Controller
         // Load all categories and types and build a nested tree in PHP so the frontend can
         // render top-level categories/types and navigate into subcategories without
         // additional requests.
-        $categories = ServiceRequestTypeCategory::query()->orderBy('sort')->get();
-        $types = ServiceRequestType::query()->withoutArchived()->orderBy('sort')->get();
+        $visibilityRestrictionsEnabled = ServiceRequestTypeVisibilityRestrictionsFeature::active();
+
+        $contactTypeId = $visibilityRestrictionsEnabled ? auth('contact')->user()?->type_id : null;
+
+        $categoriesQuery = ServiceRequestTypeCategory::query()->orderBy('sort');
+
+        $typesQuery = ServiceRequestType::query()->withoutArchived()->orderBy('sort');
+
+        if ($visibilityRestrictionsEnabled) {
+            $categoriesQuery->with('restrictedToContactTypes:id');
+            $typesQuery->with('restrictedToContactTypes:id');
+        }
+
+        $categories = $categoriesQuery->get();
+
+        $types = $typesQuery->get();
 
         $catsById = [];
+        $categoryAllowed = [];
 
         foreach ($categories as $cat) {
+            $categoryAllowed[$cat->id] = ! $visibilityRestrictionsEnabled
+                || $cat->passesOwnVisibilityRestriction($contactTypeId);
+
             $catsById[$cat->id] = [
                 'id' => $cat->id,
                 'name' => $cat->name,
@@ -67,6 +86,10 @@ class ServiceRequestTypesController extends Controller
         $topLevelTypes = [];
 
         foreach ($types as $type) {
+            if ($visibilityRestrictionsEnabled && ! $type->passesOwnVisibilityRestriction($contactTypeId)) {
+                continue;
+            }
+
             $payload = [
                 'id' => $type->getKey(),
                 'name' => $type->name,
@@ -92,6 +115,23 @@ class ServiceRequestTypesController extends Controller
             } else {
                 $topLevelCategories[] = &$catsById[$id];
             }
+        }
+
+        // Remove categories the contact is not allowed to see, including their entire subtree.
+        $filterRestrictedCategories = function (array &$nodes) use (&$filterRestrictedCategories, $categoryAllowed): array {
+            return array_values(array_filter($nodes, function (array &$node) use (&$filterRestrictedCategories, $categoryAllowed): bool {
+                if (! ($categoryAllowed[$node['id']] ?? true)) {
+                    return false;
+                }
+
+                $node['children'] = $filterRestrictedCategories($node['children']);
+
+                return true;
+            }));
+        };
+
+        if ($visibilityRestrictionsEnabled) {
+            $topLevelCategories = $filterRestrictedCategories($topLevelCategories);
         }
 
         // Recursive sort for children and types using a closure to avoid function redeclaration

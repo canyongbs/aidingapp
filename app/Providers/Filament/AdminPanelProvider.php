@@ -39,6 +39,7 @@ namespace App\Providers\Filament;
 use AidingApp\Authorization\Filament\Pages\Auth\Login;
 use AidingApp\Theme\Settings\ThemeSettings;
 use App\Enums\NavigationGroup;
+use App\Features\SubscriptionExpirationFeature;
 use App\Filament\Clusters\ProfileSettings;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ProductHealth;
@@ -173,6 +174,22 @@ class AdminPanelProvider extends PanelProvider
                     });
 
                     return $showBanner ? new HtmlString(Blade::render('<livewire:sso-credentials-expiring-alert />')) : null;
+                },
+            )
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_AFTER,
+                function (): ?Htmlable {
+                    if (! SubscriptionExpirationFeature::active()) {
+                        return null;
+                    }
+
+                    $tenant = Tenant::current();
+
+                    if (! $tenant?->subscription_status?->showsExpirationBanner()) {
+                        return null;
+                    }
+
+                    return new HtmlString(Blade::render('<livewire:subscription-expired-banner />'));
                 },
             )
             ->globalSearchResourceOptIn();

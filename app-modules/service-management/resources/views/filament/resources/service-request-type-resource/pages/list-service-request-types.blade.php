@@ -43,7 +43,9 @@
                     originalTreeData: @js($this->hierarchicalData),
                     treeData: @js($this->hierarchicalData),
                     canEdit: @js($this->canEdit),
+                    visibilityRestrictionsEnabled: @js(\App\Features\ServiceRequestTypeVisibilityRestrictionsFeature::active()),
                 })"
+        @service-request-type-visibility-updated.window="onVisibilityUpdated($event.detail)"
     >
         {{-- Sticky Save Banner --}}
         <div
@@ -273,6 +275,8 @@
             </x-slot>
         </x-filament::modal>
     </div>
+
+    <x-filament-actions::modals />
 
     @assets
         @vite(['app-modules/service-management/resources/js/serviceRequestTypeManager.js'])

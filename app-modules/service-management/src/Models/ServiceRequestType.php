@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeFactory;
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
@@ -45,6 +46,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Models\Concerns\RestrictsVisibilityToContactTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
 use App\Models\BaseModel;
 use App\Models\User;
@@ -71,6 +73,7 @@ class ServiceRequestType extends BaseModel implements Auditable
     use SoftDeletes;
     use HasUuids;
     use AuditableTrait;
+    use RestrictsVisibilityToContactTypes;
 
     /** @use HasFactory<ServiceRequestTypeFactory> */
     use HasFactory;
@@ -97,6 +100,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_live_chat_enabled',
         'max_simultaneous_chats',
         'email_automatic_creation_contact_create_condition',
+        'is_visibility_restricted',
     ];
 
     public function serviceRequests(): HasManyThrough
@@ -254,6 +258,26 @@ class ServiceRequestType extends BaseModel implements Auditable
         return $this->belongsTo(ServiceRequestTypeCategory::class, 'category_id');
     }
 
+    /**
+     * @return BelongsToMany<ContactType, $this, ServiceRequestTypeVisibilityContactType>
+     */
+    public function restrictedToContactTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            related: ContactType::class,
+            table: 'service_request_type_visibility_contact_types',
+            foreignPivotKey: 'service_request_type_id',
+            relatedPivotKey: 'contact_type_id',
+        )
+            ->using(ServiceRequestTypeVisibilityContactType::class)
+            ->withTimestamps();
+    }
+
+    public function visibilityRestrictionParent(): ?ServiceRequestTypeCategory
+    {
+        return $this->category;
+    }
+
     protected function casts(): array
     {
         return [
@@ -271,6 +295,7 @@ class ServiceRequestType extends BaseModel implements Auditable
             'is_live_chat_enabled' => 'boolean',
             'max_simultaneous_chats' => 'integer',
             'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::class,
+            'is_visibility_restricted' => 'boolean',
         ];
     }
 
