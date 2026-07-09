@@ -49,8 +49,8 @@ it('loads hierarchical data', function () {
     $root = ServiceRequestTypeCategory::factory()->create(['name' => 'Root', 'sort' => 1]);
     $child = ServiceRequestTypeCategory::factory()->create(['name' => 'Child', 'sort' => 1, 'parent_id' => $root->id]);
 
-    $type1 = ServiceRequestType::factory()->create(['name' => 'Type 1', 'category_id' => $root->id, 'sort' => 1]);
-    $type2 = ServiceRequestType::factory()->create(['name' => 'Type 2', 'category_id' => $child->id, 'sort' => 1]);
+    $type1 = ServiceRequestType::factory()->category($root)->create(['name' => 'Type 1', 'sort' => 1]);
+    $type2 = ServiceRequestType::factory()->category($child)->create(['name' => 'Type 2', 'sort' => 1]);
 
     $component = livewire(ListServiceRequestTypes::class);
 
@@ -71,7 +71,7 @@ it('loads hierarchical data', function () {
 it('saves new category and moves existing type into it in one operation', function () {
     // Existing category and type
     $existingCategory = ServiceRequestTypeCategory::factory()->create(['name' => 'Existing', 'sort' => 1]);
-    $type = ServiceRequestType::factory()->create(['name' => 'Movable', 'category_id' => null, 'sort' => 1]);
+    $type = ServiceRequestType::factory()->create(['name' => 'Movable', 'sort' => 1]);
 
     // Prepare payload: create new category (temp) and move type into it
     $tempId = 'temp_1';
@@ -119,9 +119,9 @@ it('saves new category and moves existing type into it in one operation', functi
     // After save, the type should be assigned to the new category
     $freshType = $type->fresh();
 
-    expect($freshType->category_id)->not->toBeNull();
+    expect($freshType->firstCategoryId())->not->toBeNull();
 
-    $newCategory = ServiceRequestTypeCategory::find($freshType->category_id);
+    $newCategory = ServiceRequestTypeCategory::find($freshType->firstCategoryId());
 
     expect($newCategory)->not->toBeNull();
     expect($newCategory->name)->toBe('New Cat');
@@ -131,7 +131,7 @@ it('moves type from one existing category to another existing category', functio
     $catA = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
     $catB = ServiceRequestTypeCategory::factory()->create(['name' => 'B', 'sort' => 2]);
 
-    $type = ServiceRequestType::factory()->create(['name' => 'ToMove', 'category_id' => $catA->id, 'sort' => 1]);
+    $type = ServiceRequestType::factory()->category($catA)->create(['name' => 'ToMove', 'sort' => 1]);
 
     $treeData = [
         'categories' => [
@@ -166,5 +166,5 @@ it('moves type from one existing category to another existing category', functio
         ->call('saveChanges', $treeData)
         ->assertHasNoErrors();
 
-    expect($type->fresh()->category_id)->toBe($catB->id);
+    expect($type->fresh()->firstCategoryId())->toBe($catB->id);
 });

@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Observers;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -45,16 +46,30 @@ class ServiceRequestTypeObserver
 {
     public function creating(ServiceRequestType $serviceRequestType): void
     {
-        if ($serviceRequestType->sort === null) {
-            if ($serviceRequestType->category_id !== null) {
-                if (! Str::isUuid($serviceRequestType->category_id)) {
-                    throw new InvalidArgumentException('Category ID must be a valid UUID');
-                }
+        if ($serviceRequestType->sort !== null) {
+            return;
+        }
 
-                $serviceRequestType->sort = DB::raw("(select coalesce(max(sort), 0) + 1 from service_request_types where category_id = '{$serviceRequestType->category_id}')"); /** @phpstan-ignore assign.propertyType */
-            } else {
-                $serviceRequestType->sort = DB::raw('(select coalesce(max(sort), 0) + 1 from service_request_types where category_id is null)'); /** @phpstan-ignore assign.propertyType */
+        // When the multiple categories feature is active the `category_id` column no longer exists
+        // and category assignments are stored in a pivot after the model is persisted, so the sort
+        // value cannot be scoped to a category at this point.
+        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            $serviceRequestType->sort = DB::raw('(select coalesce(max(sort), 0) + 1 from service_request_types)'); /** @phpstan-ignore assign.propertyType */
+
+            return;
+        }
+
+        /** @var string|null $categoryId */
+        $categoryId = $serviceRequestType->getAttribute('category_id');
+
+        if ($categoryId !== null) {
+            if (! Str::isUuid($categoryId)) {
+                throw new InvalidArgumentException('Category ID must be a valid UUID');
             }
+
+            $serviceRequestType->sort = DB::raw("(select coalesce(max(sort), 0) + 1 from service_request_types where category_id = '{$categoryId}')"); /** @phpstan-ignore assign.propertyType */
+        } else {
+            $serviceRequestType->sort = DB::raw('(select coalesce(max(sort), 0) + 1 from service_request_types where category_id is null)'); /** @phpstan-ignore assign.propertyType */
         }
     }
 

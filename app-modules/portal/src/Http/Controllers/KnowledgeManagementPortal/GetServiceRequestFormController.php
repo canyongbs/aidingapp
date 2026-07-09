@@ -41,6 +41,7 @@ use AidingApp\Form\Actions\GenerateFormKitSchema;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -53,13 +54,19 @@ class GetServiceRequestFormController extends Controller
             abort_unless($type->isVisibleToContactType(auth('contact')->user()?->type_id), 404);
         }
 
-        $type->load('category');
+        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            $type->load('categories');
+            $serviceRequestCategory = $type->categories->first();
+        } else {
+            $type->load('category');
+            $serviceRequestCategory = $type->category;
+        }
 
         $category = null;
 
-        if ($type->category) {
+        if ($serviceRequestCategory) {
             $ancestors = [];
-            $currentCategory = $type->category;
+            $currentCategory = $serviceRequestCategory;
 
             while ($currentCategory->parent_id) {
                 if (! $currentCategory->relationLoaded('parent')) {
@@ -80,9 +87,9 @@ class GetServiceRequestFormController extends Controller
             $ancestors = array_reverse($ancestors);
 
             $category = [
-                'id' => $type->category->id,
-                'name' => $type->category->name,
-                'parent_id' => $type->category->parent_id,
+                'id' => $serviceRequestCategory->id,
+                'name' => $serviceRequestCategory->name,
+                'parent_id' => $serviceRequestCategory->parent_id,
                 'ancestors' => $ancestors,
             ];
         }

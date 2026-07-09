@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\AddServiceRequestUpdateBulkAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\ChangeServiceRequestStatusBulkAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\Scopes\WithCategoryAssignments;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -313,9 +314,10 @@ class ListServiceRequests extends ListRecords
             ->groupBy('parent_id');
 
         $types = ServiceRequestType::query()
+            ->tap(new WithCategoryAssignments())
             ->orderBy('sort')
             ->get()
-            ->groupBy('category_id');
+            ->groupBy(fn (ServiceRequestType $type): string => $type->firstCategoryId() ?? '');
 
         $tree = collect($categories->get('', collect()))
             ->map(fn (ServiceRequestTypeCategory $category) => static::buildCategoryNode($category, $categories, $types))

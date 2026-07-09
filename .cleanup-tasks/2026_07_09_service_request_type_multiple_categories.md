@@ -1,0 +1,52 @@
+---
+title: Service Request Type Multiple Categories Cleanup
+created: 2026-07-09
+---
+
+## Feature Flags
+
+- App\Features\ServiceRequestTypeMultipleCategoriesFeature
+
+## Temporary Migrations
+
+- None. The backfill and flag activation live inside the permanent migration
+  `2026_07_09_123757_migrate_service_request_types_to_multiple_categories` (see Additional Cleanup).
+
+## Additional Cleanup
+
+Once `ServiceRequestTypeMultipleCategoriesFeature` is active in production and the migration
+`2026_07_09_123757_migrate_service_request_types_to_multiple_categories` has run across all
+environments, grep for `ServiceRequestTypeMultipleCategoriesFeature` and remove the flag class and
+every guard, keeping the active (pivot-based) path and deleting the legacy `category_id` fallback
+branches.
+
+The migration `2026_07_09_123757_migrate_service_request_types_to_multiple_categories` is
+**permanent** and must **not** be deleted — it defines the `service_request_category_types` pivot
+schema and the removal of the legacy `category_id` column, which fresh installs still need.
+
+During cleanup, strip everything in it that only exists to bridge the transition, leaving a plain
+schema migration:
+
+- In `up()`: remove the `insertUsing(...)` backfill and the
+  `ServiceRequestTypeMultipleCategoriesFeature::activate()` call. Keep the
+  `Schema::create('service_request_category_types', ...)` and the `dropConstrainedForeignId('category_id')`.
+- In `down()`: remove the `ServiceRequestTypeMultipleCategoriesFeature::deactivate()` call and the
+  `DB::statement(...)` that restores `category_id` from the pivot. Keep the column re-add and the
+  pivot `dropIfExists`.
+
+The backfill is one-time data code: once the migration has run across every existing environment it
+only ever runs against an empty `service_request_types` table on fresh installs, so it is safe to
+remove.
+
+The following are **not** discoverable by searching for the flag name:
+
+- Delete the `category()` `belongsTo` relationship on `ServiceRequestType` (only referenced by the
+  removed legacy path).
+- Remove `'category_id'` from the `$fillable` array on `ServiceRequestType` (the column no longer
+  exists once the migration has run).
+
+Everything else is a flag guard: grepping `ServiceRequestTypeMultipleCategoriesFeature` finds the
+branches in `ServiceRequestType::firstCategoryId()`/`visibilityRestrictionParent()`, the page's
+`syncTypeCategory()`, the `ServiceRequestTypeFactory::category()` state, the observer's `creating()`,
+the `WithCategoryAssignments` scope, and the uncategorized-types query. In each, delete the legacy
+`category_id` branch and keep the `categories()` pivot branch.

@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\ServiceManagement\Models\Scopes\WithCategoryAssignments;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
@@ -55,7 +56,7 @@ class ServiceRequestTypesController extends Controller
 
         $categoriesQuery = ServiceRequestTypeCategory::query()->orderBy('sort');
 
-        $typesQuery = ServiceRequestType::query()->withoutArchived()->orderBy('sort');
+        $typesQuery = ServiceRequestType::query()->withoutArchived()->orderBy('sort')->tap(new WithCategoryAssignments());
 
         if ($visibilityRestrictionsEnabled) {
             $categoriesQuery->with('restrictedToContactTypes:id');
@@ -90,17 +91,19 @@ class ServiceRequestTypesController extends Controller
                 continue;
             }
 
+            $categoryId = $type->firstCategoryId();
+
             $payload = [
                 'id' => $type->getKey(),
                 'name' => $type->name,
                 'description' => $type->description,
                 'icon' => $type->icon ? svg($type->icon, 'h-6 w-6')->toHtml() : null,
                 'sort' => $type->sort,
-                'category_id' => $type->category_id,
+                'category_id' => $categoryId,
             ];
 
-            if ($type->category_id && isset($catsById[$type->category_id])) {
-                $catsById[$type->category_id]['types'][] = $payload;
+            if ($categoryId && isset($catsById[$categoryId])) {
+                $catsById[$categoryId]['types'][] = $payload;
             } else {
                 $topLevelTypes[] = $payload;
             }

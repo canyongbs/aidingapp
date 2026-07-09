@@ -48,6 +48,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\Concerns\RestrictsVisibilityToContactTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
+use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
@@ -259,6 +260,22 @@ class ServiceRequestType extends BaseModel implements Auditable
     }
 
     /**
+     * @return BelongsToMany<ServiceRequestTypeCategory, $this, covariant ServiceRequestCategoryType>
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            related: ServiceRequestTypeCategory::class,
+            table: 'service_request_category_types',
+            foreignPivotKey: 'service_request_type_id',
+            relatedPivotKey: 'service_request_type_category_id',
+        )
+            ->using(ServiceRequestCategoryType::class)
+            ->withPivot('id')
+            ->withTimestamps();
+    }
+
+    /**
      * @return BelongsToMany<ContactType, $this, ServiceRequestTypeVisibilityContactType>
      */
     public function restrictedToContactTypes(): BelongsToMany
@@ -275,7 +292,28 @@ class ServiceRequestType extends BaseModel implements Auditable
 
     public function visibilityRestrictionParent(): ?ServiceRequestTypeCategory
     {
+        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            return $this->categories->first();
+        }
+
         return $this->category;
+    }
+
+    /**
+     * The id of the single category this type is filed under.
+     */
+    public function firstCategoryId(): ?string
+    {
+        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            $category = $this->categories->first();
+
+            return $category instanceof ServiceRequestTypeCategory ? (string) $category->getKey() : null;
+        }
+
+        /** @var string|null $categoryId */
+        $categoryId = $this->getAttribute('category_id');
+
+        return $categoryId;
     }
 
     protected function casts(): array

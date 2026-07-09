@@ -51,7 +51,7 @@ beforeEach(function () {
 
 it('does not return categories that have no service request types', function () {
     $categoryWithType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
-    ServiceRequestType::factory()->create(['category_id' => $categoryWithType->id]);
+    ServiceRequestType::factory()->category($categoryWithType)->create();
 
     $emptyCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
 
@@ -68,7 +68,7 @@ it('does not return categories that have no service request types', function () 
 it('returns a category with a child category that has types', function () {
     $parentCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     $childCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => $parentCategory->id]);
-    ServiceRequestType::factory()->create(['category_id' => $childCategory->id]);
+    ServiceRequestType::factory()->category($childCategory)->create();
 
     $response = getJson(route('api.portal.service-request-type.index'));
 
@@ -94,13 +94,12 @@ it('does not return a parent category when all child categories are empty', func
 
 it('does not return archived service request types as part of a category', function () {
     $categoryWithOnlyArchivedType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
-    ServiceRequestType::factory()->create([
-        'category_id' => $categoryWithOnlyArchivedType->id,
+    ServiceRequestType::factory()->category($categoryWithOnlyArchivedType)->create([
         'archived_at' => now(),
     ]);
 
     $categoryWithActiveType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
-    ServiceRequestType::factory()->create(['category_id' => $categoryWithActiveType->id]);
+    ServiceRequestType::factory()->category($categoryWithActiveType)->create();
 
     $response = getJson(route('api.portal.service-request-type.index'));
 
@@ -174,7 +173,7 @@ it('hides the entire subtree of a visibility restricted area from non-matching c
         'is_visibility_restricted' => true,
     ]);
     $restrictedCategory->restrictedToContactTypes()->attach($allowedContactType);
-    ServiceRequestType::factory()->create(['category_id' => $restrictedCategory->id]);
+    ServiceRequestType::factory()->category($restrictedCategory)->create();
 
     $nonMatchingContact = Contact::factory()->create(['type_id' => $otherContactType->id]);
 

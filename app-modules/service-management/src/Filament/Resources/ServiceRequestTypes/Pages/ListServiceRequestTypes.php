@@ -39,8 +39,10 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Models\Scopes\WithCategoryAssignments;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
@@ -88,6 +90,8 @@ class ListServiceRequestTypes extends ListRecords
     {
         $visibilityRestrictionsEnabled = ServiceRequestTypeVisibilityRestrictionsFeature::active();
 
+        $multipleCategoriesEnabled = ServiceRequestTypeMultipleCategoriesFeature::active();
+
         $categoryVisibilityLoad = $visibilityRestrictionsEnabled ? ['restrictedToContactTypes:id'] : [];
 
         $typeVisibilityLoad = $visibilityRestrictionsEnabled ? ['restrictedToContactTypes:id'] : [];
@@ -96,7 +100,8 @@ class ListServiceRequestTypes extends ListRecords
             ->withoutArchived()
             ->orderBy('sort')
             ->withCount('serviceRequests')
-            ->with($typeVisibilityLoad);
+            ->with($typeVisibilityLoad)
+            ->tap(new WithCategoryAssignments());
 
         $categories = ServiceRequestTypeCategory::query()
             /** @phpstan-ignore argument.type */
@@ -128,10 +133,15 @@ class ListServiceRequestTypes extends ListRecords
 
         $uncategorizedTypes = ServiceRequestType::query()
             ->withoutArchived()
-            ->whereNull('category_id')
+            ->when(
+                $multipleCategoriesEnabled,
+                fn ($query) => $query->whereDoesntHave('categories'),
+                fn ($query) => $query->whereNull('category_id'),
+            )
             ->orderBy('sort')
             ->withCount('serviceRequests')
             ->with($typeVisibilityLoad)
+            ->tap(new WithCategoryAssignments())
             ->get();
 
         return [
@@ -255,11 +265,8 @@ class ListServiceRequestTypes extends ListRecords
 
                     $type = ServiceRequestType::create([
                         'name' => trim($newType['name']),
-                        'category_id' => $categoryId,
                         'sort' => $newType['sort'],
-                        ...[
-                            'default_category' => ServiceRequestCategory::Request,
-                        ],
+                        'default_category' => ServiceRequestCategory::Request,
                     ]);
 
                     $type->priorities()->createMany([
@@ -267,6 +274,8 @@ class ListServiceRequestTypes extends ListRecords
                         ['name' => 'Medium', 'order' => 2],
                         ['name' => 'Low', 'order' => 3],
                     ]);
+
+                    $this->syncTypeCategory($type, $categoryId);
                 }
             }
 
@@ -301,10 +310,7 @@ class ListServiceRequestTypes extends ListRecords
                 foreach ($treeData['uncategorized_types'] as $index => $type) {
                     // Update existing types (non-temp IDs)
                     if (! str_starts_with($type['id'], 'temp_')) {
-                        ServiceRequestType::where('id', $type['id'])->update([
-                            'category_id' => null,
-                            'sort' => $index + 1,
-                        ]);
+                        $this->assignTypeToCategory($type['id'], null, $index + 1);
                     }
                 }
             }
@@ -504,7 +510,7 @@ class ListServiceRequestTypes extends ListRecords
                 'name' => $type->name,
                 'type' => 'type',
                 'sort' => $type->sort,
-                'category_id' => $type->category_id,
+                'category_id' => $type->firstCategoryId(),
                 'service_requests_count' => $type->service_requests_count ?? 0,
                 'view_url' => ServiceRequestTypeResource::getUrl('view', ['record' => $type]),
                 ...$visibilityRestrictionsEnabled ? [
@@ -513,6 +519,40 @@ class ListServiceRequestTypes extends ListRecords
                 ] : [],
             ];
         })->toArray();
+    }
+
+    /**
+     * Assign a service request type to a single category and update its sort order.
+     */
+    protected function assignTypeToCategory(string $typeId, ?string $categoryId, int $sort): void
+    {
+        $type = ServiceRequestType::find($typeId);
+
+        if ($type === null) {
+            return;
+        }
+
+        $type->sort = $sort;
+        $type->save();
+
+        $this->syncTypeCategory($type, $categoryId);
+    }
+
+    /**
+     * Store the single category a type is filed under.
+     *
+     * When the multiple categories feature is active the assignment is stored in the `categories`
+     * pivot; otherwise the legacy `category_id` column is written.
+     */
+    protected function syncTypeCategory(ServiceRequestType $type, ?string $categoryId): void
+    {
+        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            $type->categories()->sync($categoryId !== null ? [$categoryId] : []);
+
+            return;
+        }
+
+        ServiceRequestType::whereKey($type->getKey())->update(['category_id' => $categoryId]);
     }
 
     /**
@@ -558,10 +598,7 @@ class ListServiceRequestTypes extends ListRecords
                 foreach ($category['types'] as $typeIndex => $type) {
                     // Update existing types (non-temp IDs)
                     if (! str_starts_with($type['id'], 'temp_')) {
-                        ServiceRequestType::where('id', $type['id'])->update([
-                            'category_id' => $categoryId,
-                            'sort' => $typeIndex + 1,
-                        ]);
+                        $this->assignTypeToCategory($type['id'], $categoryId, $typeIndex + 1);
                     }
                 }
             }

@@ -34,6 +34,9 @@
 </COPYRIGHT>
 */
 
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Console\Command\Command;
@@ -64,3 +67,47 @@ function columnNativeType(string $table, string $column): ?string
 //        );
 //    });
 //});
+
+describe('2026_07_09_123757_migrate_service_request_types_to_multiple_categories', function () {
+    it('backfills the category pivot from the legacy category_id column, activates the feature, and drops the column', function () {
+        isolatedMigration(
+            '2026_07_09_123757_migrate_service_request_types_to_multiple_categories',
+            function () {
+                // At this point the pivot table does not yet exist and the legacy `category_id` column is
+                // still present, and the feature flag is inactive, so the models write through the legacy column.
+                $category = ServiceRequestTypeCategory::factory()->create();
+
+                $typeWithCategory = ServiceRequestType::factory()->create(['category_id' => $category->id]);
+
+                $typeWithoutCategory = ServiceRequestType::factory()->create(['category_id' => null]);
+
+                $migrate = Artisan::call('migrate', [
+                    '--path' => 'app-modules/service-management/database/migrations/2026_07_09_123757_migrate_service_request_types_to_multiple_categories.php',
+                ]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                // The type that had a category is now linked through the pivot table.
+                expect(
+                    DB::table('service_request_category_types')
+                        ->where('service_request_type_id', $typeWithCategory->id)
+                        ->where('service_request_type_category_id', $category->id)
+                        ->exists()
+                )->toBeTrue();
+
+                // The uncategorized type has no pivot row.
+                expect(
+                    DB::table('service_request_category_types')
+                        ->where('service_request_type_id', $typeWithoutCategory->id)
+                        ->exists()
+                )->toBeFalse();
+
+                // The feature flag is activated as part of the migration.
+                expect(ServiceRequestTypeMultipleCategoriesFeature::active())->toBeTrue();
+
+                // The legacy single category column has been dropped.
+                expect(columnNativeType('service_request_types', 'category_id'))->toBeNull();
+            }
+        );
+    });
+});

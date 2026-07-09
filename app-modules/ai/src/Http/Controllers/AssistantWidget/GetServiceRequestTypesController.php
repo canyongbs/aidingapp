@@ -40,6 +40,7 @@ use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
+use AidingApp\ServiceManagement\Models\Scopes\WithCategoryAssignments;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
@@ -65,7 +66,8 @@ class GetServiceRequestTypesController extends Controller
         $typesQuery = ServiceRequestType::query()
             ->withoutArchived()
             ->with(['priorities' => fn ($query) => $query->orderByDesc('order')])
-            ->orderBy('sort');
+            ->orderBy('sort')
+            ->tap(new WithCategoryAssignments());
 
         if ($visibilityRestrictionsEnabled) {
             $categoriesQuery->with('restrictedToContactTypes:id');
@@ -103,13 +105,15 @@ class GetServiceRequestTypesController extends Controller
                 continue;
             }
 
+            $categoryId = $type->firstCategoryId();
+
             $payload = [
                 'id' => $type->getKey(),
                 'name' => $type->name,
                 'description' => $type->description,
                 'icon' => $type->icon ? svg($type->icon, 'h-5 w-5')->toHtml() : null,
                 'sort' => $type->sort,
-                'category_id' => $type->category_id,
+                'category_id' => $categoryId,
                 'is_ai_clarification_enabled' => $aiClarificationGlobalEnabled && $type->is_ai_clarification_enabled,
                 'is_ai_resolution_enabled' => $aiResolutionGlobalEnabled && $type->is_ai_resolution_enabled,
                 'is_live_chat_enabled' => $type->is_live_chat_enabled,
@@ -120,8 +124,8 @@ class GetServiceRequestTypesController extends Controller
                 ])->values()->all(),
             ];
 
-            if ($type->category_id && isset($categoriesById[$type->category_id])) {
-                $categoriesById[$type->category_id]['types'][] = $payload;
+            if ($categoryId && isset($categoriesById[$categoryId])) {
+                $categoriesById[$categoryId]['types'][] = $payload;
             } else {
                 $topLevelTypes[] = $payload;
             }
