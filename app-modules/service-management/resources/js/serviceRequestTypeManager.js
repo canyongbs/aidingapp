@@ -715,16 +715,19 @@ document.addEventListener('alpine:init', () => {
                 this.dragData.isDragging = true;
                 this.dragData.draggedElement = event.target;
 
-                if (event.target.dataset.categoryId) {
-                    this.dragData.draggedType = 'category';
-                    this.dragData.draggedId = event.target.dataset.categoryId;
-                    this.dragData.draggedSourceCategoryId = null;
-                } else if (event.target.dataset.typeId) {
+                // A type-item carries both `data-type-id` and `data-category-id` (its owning area),
+                // so the type id must be checked first; only category-items are identified purely by
+                // `data-category-id`.
+                if (event.target.dataset.typeId) {
                     this.dragData.draggedType = 'type';
                     this.dragData.draggedId = event.target.dataset.typeId;
 
                     const sourceContainer = event.target.closest('[data-sortable="types"]');
                     this.dragData.draggedSourceCategoryId = sourceContainer?.dataset.categoryId || null;
+                } else if (event.target.dataset.categoryId) {
+                    this.dragData.draggedType = 'category';
+                    this.dragData.draggedId = event.target.dataset.categoryId;
+                    this.dragData.draggedSourceCategoryId = null;
                 }
 
                 event.target.classList.add('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
