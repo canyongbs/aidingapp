@@ -247,6 +247,10 @@ it('orders types within a category by their per-area sort when reading the tree'
 it('stores the per-area sort for a newly created type', function () {
     $category = ServiceRequestTypeCategory::factory()->create(['name' => 'Area', 'sort' => 1]);
 
+    $first = ServiceRequestType::factory()->category($category)->create(['name' => 'First', 'sort' => 1]);
+    $second = ServiceRequestType::factory()->category($category)->create(['name' => 'Second', 'sort' => 2]);
+
+    // The new type sits third in the area, so its per-area sort is derived from that position.
     $treeData = multipleCategoriesTreeData([
         [
             'id' => $category->id,
@@ -256,6 +260,8 @@ it('stores the per-area sort for a newly created type', function () {
             'parent_id' => null,
             'children' => [],
             'types' => [
+                typeNode($first, $category, 1),
+                typeNode($second, $category, 2),
                 [
                     'id' => 'temp_1',
                     'name' => 'Brand New',
@@ -283,4 +289,64 @@ it('stores the per-area sort for a newly created type', function () {
 
     expect($type->categories->pluck('id')->all())->toBe([$category->id]);
     expect($type->categories->firstWhere('id', $category->id)->pivot->sort)->toBe(3);
+});
+
+it('creates a brand new type once and files it under every area it appears in', function () {
+    $catA = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
+    $catB = ServiceRequestTypeCategory::factory()->create(['name' => 'B', 'sort' => 2]);
+
+    $newTypeNode = fn (ServiceRequestTypeCategory $category, int $sort): array => [
+        'id' => 'temp_1',
+        'name' => 'Fresh',
+        'type' => 'type',
+        'sort' => $sort,
+        'category_id' => $category->id,
+    ];
+
+    $treeData = multipleCategoriesTreeData([
+        categoryNode($catA, [$newTypeNode($catA, 1)], 1),
+        categoryNode($catB, [$newTypeNode($catB, 1)], 2),
+    ]);
+    // The tree references the same temp id twice; new_types carries duplicate entries to prove the
+    // backend creates the type only once and applies both placements.
+    $treeData['new_types'] = [
+        ['temp_id' => 'temp_1', 'name' => 'Fresh', 'category_id' => $catA->id, 'sort' => 1],
+        ['temp_id' => 'temp_1', 'name' => 'Fresh', 'category_id' => $catB->id, 'sort' => 1],
+    ];
+
+    livewire(ListServiceRequestTypes::class)
+        ->call('saveChanges', $treeData)
+        ->assertHasNoErrors();
+
+    $types = ServiceRequestType::query()->where('name', 'Fresh')->get();
+
+    expect($types)->toHaveCount(1);
+    expect($types->first()->categories->pluck('id')->sort()->values()->all())
+        ->toBe(collect([$catA->id, $catB->id])->sort()->values()->all());
+});
+
+it('creates a brand new uncategorized type once with no memberships', function () {
+    $treeData = multipleCategoriesTreeData(
+        categories: [],
+        uncategorizedTypes: [
+            [
+                'id' => 'temp_1',
+                'name' => 'Loner',
+                'type' => 'type',
+                'sort' => 1,
+                'category_id' => null,
+            ],
+        ],
+    );
+    $treeData['new_types'] = [
+        ['temp_id' => 'temp_1', 'name' => 'Loner', 'category_id' => null, 'sort' => 1],
+    ];
+
+    livewire(ListServiceRequestTypes::class)
+        ->call('saveChanges', $treeData)
+        ->assertHasNoErrors();
+
+    $type = ServiceRequestType::query()->where('name', 'Loner')->firstOrFail();
+
+    expect($type->categories)->toBeEmpty();
 });

@@ -277,8 +277,17 @@ class ListServiceRequestTypes extends ListRecords
             }
 
             // Create new types
+            $newTypeIds = [];
+
             if (! empty($treeData['new_types'])) {
                 foreach ($treeData['new_types'] as $newType) {
+                    // A brand-new type may appear in several areas of the tree. It is only created
+                    // once here (keyed by its temp id); every placement is applied from the tree
+                    // walk below so it can sit under multiple categories.
+                    if (isset($newTypeIds[$newType['temp_id']])) {
+                        continue;
+                    }
+
                     $categoryId = null;
 
                     if (! empty($newType['category_id']) && $newType['category_id'] !== 'temp') {
@@ -298,7 +307,14 @@ class ListServiceRequestTypes extends ListRecords
                         ['name' => 'Low', 'order' => 3],
                     ]);
 
-                    $this->syncTypeCategory($type, $categoryId, (int) $newType['sort']);
+                    $newTypeIds[$newType['temp_id']] = $type->id;
+
+                    // Under the legacy single-category path the placement is written immediately.
+                    // Under the multiple categories path it is deferred to the aggregation pass so a
+                    // new type can be filed under several areas at once.
+                    if (! ServiceRequestTypeMultipleCategoriesFeature::active()) {
+                        $this->syncTypeCategory($type, $categoryId, (int) $newType['sort']);
+                    }
                 }
             }
 
@@ -326,14 +342,15 @@ class ListServiceRequestTypes extends ListRecords
             }
 
             // Update existing categories
-            $this->updateCategoriesRecursive($treeData['categories'] ?? [], null, $newCategoryIds);
+            $this->updateCategoriesRecursive($treeData['categories'] ?? [], null, $newCategoryIds, $newTypeIds);
 
             // Update uncategorized types
             if (! empty($treeData['uncategorized_types'])) {
                 foreach ($treeData['uncategorized_types'] as $index => $type) {
-                    // Update existing types (non-temp IDs)
-                    if (! str_starts_with($type['id'], 'temp_')) {
-                        $this->assignTypeToCategory($type['id'], null, $index + 1);
+                    $typeId = $this->resolveSaveTypeId($type['id'], $newTypeIds);
+
+                    if ($typeId !== null) {
+                        $this->assignTypeToCategory($typeId, null, $index + 1);
                     }
                 }
             }
@@ -556,6 +573,29 @@ class ListServiceRequestTypes extends ListRecords
     }
 
     /**
+     * Resolve the id to persist for a type node in the saved tree.
+     *
+     * Existing types return their own id. A brand-new type (temp id) is only placed through this
+     * path while the multiple categories feature is active — its temp id is mapped to the real id
+     * created earlier in the save. Under the legacy single-category path new types are placed at
+     * creation time, so they are skipped here (null).
+     *
+     * @param array<string, string> $newTypeIds
+     */
+    protected function resolveSaveTypeId(string $treeTypeId, array $newTypeIds): ?string
+    {
+        if (! str_starts_with($treeTypeId, 'temp_')) {
+            return $treeTypeId;
+        }
+
+        if (! ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            return null;
+        }
+
+        return $newTypeIds[$treeTypeId] ?? null;
+    }
+
+    /**
      * Record where a service request type sits in the tree and its sort order within that spot.
      *
      * While the multiple categories feature is active the placement is accumulated and applied in
@@ -663,8 +703,9 @@ class ListServiceRequestTypes extends ListRecords
     /**
      * @param array<int, array<string, mixed>> $categories
      * @param array<string, string> $newCategoryIds
+     * @param array<string, string> $newTypeIds
      */
-    protected function updateCategoriesRecursive(array $categories, ?string $parentId, array $newCategoryIds): void
+    protected function updateCategoriesRecursive(array $categories, ?string $parentId, array $newCategoryIds, array $newTypeIds = []): void
     {
         foreach ($categories as $index => $category) {
             $originalCategoryId = $category['id'];
@@ -701,16 +742,17 @@ class ListServiceRequestTypes extends ListRecords
             // Update types in this category
             if (! empty($category['types'])) {
                 foreach ($category['types'] as $typeIndex => $type) {
-                    // Update existing types (non-temp IDs)
-                    if (! str_starts_with($type['id'], 'temp_')) {
-                        $this->assignTypeToCategory($type['id'], $categoryId, $typeIndex + 1);
+                    $typeId = $this->resolveSaveTypeId($type['id'], $newTypeIds);
+
+                    if ($typeId !== null) {
+                        $this->assignTypeToCategory($typeId, $categoryId, $typeIndex + 1);
                     }
                 }
             }
 
             // Recursively update children
             if (! empty($category['children'])) {
-                $this->updateCategoriesRecursive($category['children'], $categoryId, $newCategoryIds);
+                $this->updateCategoriesRecursive($category['children'], $categoryId, $newCategoryIds, $newTypeIds);
             }
         }
     }
