@@ -148,7 +148,7 @@ document.addEventListener('alpine:init', () => {
 
                 const colorClasses = restricted
                     ? 'text-warning-600 hover:text-warning-800 dark:text-warning-500 dark:hover:text-warning-300 hover:bg-warning-50 dark:hover:bg-warning-600/20'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700';
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600';
 
                 const tooltip = restricted ? 'Visibility restricted — edit settings' : 'Manage visibility';
 
