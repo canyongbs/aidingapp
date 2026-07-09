@@ -43,7 +43,7 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::dropIfExists('confidential_task_projects');
-            Schema::dropIfExists('confidential_task_teams');
+            Schema::dropIfExists('confidential_task_departments');
             Schema::dropIfExists('confidential_task_users');
             Schema::dropIfExists('tasks');
         });
