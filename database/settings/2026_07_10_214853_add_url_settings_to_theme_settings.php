@@ -58,9 +58,9 @@ return new class () extends SettingsMigration {
 
     public function down(): void
     {
-      DB::transaction(function () {
-        $this->migrator->deleteIfExists('theme.changelog_url');
-        $this->migrator->deleteIfExists('theme.product_resource_hub_url');
-      });
+        DB::transaction(function () {
+            $this->migrator->deleteIfExists('theme.changelog_url');
+            $this->migrator->deleteIfExists('theme.product_resource_hub_url');
+        });
     }
 };
