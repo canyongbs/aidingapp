@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,15 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Pages;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
+use Illuminate\Support\Facades\DB;
 
-use Filament\Pages\Dashboard as BasePage;
+return new class () extends SettingsMigration {
+    public function up(): void
+    {
+        DB::transaction(function () {
+            try {
+                $this->migrator->add('theme.changelog_url');
+            } catch (SettingAlreadyExists $exception) {
+                // do nothing
+            }
 
-class Dashboard extends BasePage
-{
-    protected static ?string $navigationLabel = 'Home';
+            try {
+                $this->migrator->add('theme.product_resource_hub_url');
+            } catch (SettingAlreadyExists $exception) {
+                // do nothing
+            }
+        });
+    }
 
-    protected ?string $heading = '';
-
-    protected string $view = 'filament.pages.dashboard';
-}
+    public function down(): void
+    {
+        $this->migrator->deleteIfExists('theme.changelog_url');
+        $this->migrator->deleteIfExists('theme.product_resource_hub_url');
+    }
+};
