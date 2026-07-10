@@ -40,6 +40,7 @@ use AidingApp\Theme\Settings\ThemeSettings;
 use App\Enums\NavigationGroup;
 use App\Models\User;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Section;
@@ -116,6 +117,18 @@ class ManageBrandConfigurationSettings extends SettingsPage
                         Toggle::make('is_logo_active')
                             ->label('Active')
                             ->hidden(fn (Get $get): bool => blank($get('logo'))),
+                    ]),
+                Section::make('URLs')
+                    ->aside()
+                    ->schema([
+                        TextInput::make('changelog_url')
+                            ->label('Changelog URL')
+                            ->url()
+                            ->placeholder(ThemeSettings::DEFAULT_CHANGELOG_URL),
+                        TextInput::make('product_resource_hub_url')
+                            ->label('Product Resource Hub URL')
+                            ->url()
+                            ->placeholder(ThemeSettings::DEFAULT_PRODUCT_RESOURCE_HUB_URL),
                     ]),
             ]);
     }
