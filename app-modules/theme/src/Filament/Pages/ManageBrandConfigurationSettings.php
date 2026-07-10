@@ -118,13 +118,17 @@ class ManageBrandConfigurationSettings extends SettingsPage
                             ->label('Active')
                             ->hidden(fn (Get $get): bool => blank($get('logo'))),
                     ]),
-                Section::make('URLs')
+                Section::make('Changelog URL')
                     ->aside()
                     ->schema([
                         TextInput::make('changelog_url')
                             ->label('Changelog URL')
                             ->url()
                             ->placeholder(ThemeSettings::DEFAULT_CHANGELOG_URL),
+                    ]),
+                Section::make('Product Resource Hub URL')
+                    ->aside()
+                    ->schema([
                         TextInput::make('product_resource_hub_url')
                             ->label('Product Resource Hub URL')
                             ->url()
