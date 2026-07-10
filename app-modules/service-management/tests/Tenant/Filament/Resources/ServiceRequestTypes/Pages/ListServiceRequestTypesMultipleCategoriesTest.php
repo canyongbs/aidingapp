@@ -350,3 +350,86 @@ it('creates a brand new uncategorized type once with no memberships', function (
 
     expect($type->categories)->toBeEmpty();
 });
+
+it('rejects saving two brand new types that share a name across different areas', function () {
+    $catA = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
+    $catB = ServiceRequestTypeCategory::factory()->create(['name' => 'B', 'sort' => 2]);
+
+    $treeData = multipleCategoriesTreeData([
+        categoryNode($catA, [[
+            'id' => 'temp_1',
+            'name' => 'Duplicate',
+            'type' => 'type',
+            'sort' => 1,
+            'category_id' => $catA->id,
+        ]], 1),
+        categoryNode($catB, [[
+            'id' => 'temp_2',
+            'name' => 'Duplicate',
+            'type' => 'type',
+            'sort' => 1,
+            'category_id' => $catB->id,
+        ]], 2),
+    ]);
+    $treeData['new_types'] = [
+        ['temp_id' => 'temp_1', 'name' => 'Duplicate', 'category_id' => $catA->id, 'sort' => 1],
+        ['temp_id' => 'temp_2', 'name' => 'Duplicate', 'category_id' => $catB->id, 'sort' => 1],
+    ];
+
+    livewire(ListServiceRequestTypes::class)
+        ->call('saveChanges', $treeData)
+        ->assertReturned(false)
+        ->assertNotified('Unable to save changes');
+
+    expect(ServiceRequestType::query()->where('name', 'Duplicate')->count())->toBe(0);
+});
+
+it('rejects a brand new type whose name matches an existing type', function () {
+    $category = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
+
+    ServiceRequestType::factory()->create(['name' => 'Existing']);
+
+    $treeData = multipleCategoriesTreeData([
+        categoryNode($category, [[
+            'id' => 'temp_1',
+            'name' => 'Existing',
+            'type' => 'type',
+            'sort' => 1,
+            'category_id' => $category->id,
+        ]], 1),
+    ]);
+    $treeData['new_types'] = [
+        ['temp_id' => 'temp_1', 'name' => 'Existing', 'category_id' => $category->id, 'sort' => 1],
+    ];
+
+    livewire(ListServiceRequestTypes::class)
+        ->call('saveChanges', $treeData)
+        ->assertReturned(false)
+        ->assertNotified('Unable to save changes');
+
+    expect(ServiceRequestType::query()->where('name', 'Existing')->count())->toBe(1);
+});
+
+it('returns true and saves when there are no name collisions', function () {
+    $category = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
+
+    $treeData = multipleCategoriesTreeData([
+        categoryNode($category, [[
+            'id' => 'temp_1',
+            'name' => 'Unique Name',
+            'type' => 'type',
+            'sort' => 1,
+            'category_id' => $category->id,
+        ]], 1),
+    ]);
+    $treeData['new_types'] = [
+        ['temp_id' => 'temp_1', 'name' => 'Unique Name', 'category_id' => $category->id, 'sort' => 1],
+    ];
+
+    livewire(ListServiceRequestTypes::class)
+        ->call('saveChanges', $treeData)
+        ->assertReturned(true)
+        ->assertHasNoErrors();
+
+    expect(ServiceRequestType::query()->where('name', 'Unique Name')->count())->toBe(1);
+});

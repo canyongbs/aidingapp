@@ -58,6 +58,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
+use Throwable;
 
 /**
  * @property-read array<string, mixed> $hierarchicalData
@@ -228,10 +229,69 @@ class ListServiceRequestTypes extends ListRecords
     }
 
     /**
+     * Persist the tree changes, returning whether they were saved.
+     *
+     * Any failure is reported to the user through a notification and results in `false` rather than
+     * an exception bubbling to the client, so the front-end never gets stuck in a "saving" state and
+     * the user's unsaved work is preserved instead of being wiped by a reload.
+     *
      * @param array<string, mixed> $treeData
      */
+    public function saveChanges(array $treeData): bool
+    {
+        try {
+            $this->persistChanges($treeData);
+        } catch (ValidationException $exception) {
+            Notification::make()
+                ->danger()
+                ->title('Unable to save changes')
+                ->body(collect($exception->errors())->flatten()->first() ?? 'Please review your changes and try again.')
+                ->send();
+
+            return false;
+        } catch (Throwable $exception) {
+            report($exception);
+
+            Notification::make()
+                ->danger()
+                ->title('Unable to save changes')
+                ->body('An unexpected error occurred while saving your changes. Your work has not been lost — please try again.')
+                ->send();
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
     #[Renderless]
-    public function saveChanges(array $treeData): void
+    public function checkArchivedTypeName(string $name): ?array
+    {
+        $type = ServiceRequestType::query()
+            ->onlyArchived()
+            ->where('name', trim($name))
+            ->withCount('serviceRequests')
+            ->first();
+
+        if (! $type) {
+            return null;
+        }
+
+        return [
+            'id' => $type->id,
+            'name' => $type->name,
+            'service_requests_count' => $type->service_requests_count,
+            'view_url' => ServiceRequestTypeResource::getUrl('view', ['record' => $type]),
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $treeData
+     */
+    protected function persistChanges(array $treeData): void
     {
         Validator::validate(['treeData' => $treeData], [
             'treeData' => 'required|array',
@@ -247,6 +307,8 @@ class ListServiceRequestTypes extends ListRecords
             'treeData.archived_types' => 'array',
             'treeData.restore_types' => 'array',
         ]);
+
+        $this->assertNoDuplicateTypeNames($treeData);
 
         $this->assertMaxCategoryDepth($treeData['categories'] ?? []);
 
@@ -371,30 +433,6 @@ class ListServiceRequestTypes extends ListRecords
             ->success()
             ->title('Changes saved successfully')
             ->send();
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    #[Renderless]
-    public function checkArchivedTypeName(string $name): ?array
-    {
-        $type = ServiceRequestType::query()
-            ->onlyArchived()
-            ->where('name', trim($name))
-            ->withCount('serviceRequests')
-            ->first();
-
-        if (! $type) {
-            return null;
-        }
-
-        return [
-            'id' => $type->id,
-            'name' => $type->name,
-            'service_requests_count' => $type->service_requests_count,
-            'view_url' => ServiceRequestTypeResource::getUrl('view', ['record' => $type]),
-        ];
     }
 
     /**
@@ -774,6 +812,58 @@ class ListServiceRequestTypes extends ListRecords
             if (! empty($children)) {
                 $this->assertMaxCategoryDepth($children, $depth + 1);
             }
+        }
+    }
+
+    /**
+     * Guard against two types being saved with the same name within the same request.
+     *
+     * The per-row `unique` rule only compares each name against the database, so it cannot catch
+     * two brand-new types (or a new type and a rename) sharing a name in the same payload. Names
+     * must be unique across every area, so any collision here is rejected before writing.
+     *
+     * @param array<string, mixed> $treeData
+     */
+    protected function assertNoDuplicateTypeNames(array $treeData): void
+    {
+        $names = [];
+
+        // A brand-new type may be placed in several areas, appearing once per placement under the
+        // same temp id; count it a single time.
+        $seenTempIds = [];
+
+        foreach ($treeData['new_types'] ?? [] as $newType) {
+            $tempId = $newType['temp_id'] ?? null;
+
+            if ($tempId !== null && isset($seenTempIds[$tempId])) {
+                continue;
+            }
+
+            $seenTempIds[$tempId] = true;
+            $names[] = mb_strtolower(trim((string) ($newType['name'] ?? '')));
+        }
+
+        $seenIds = [];
+
+        foreach ($treeData['updated_types'] ?? [] as $updatedType) {
+            $id = $updatedType['id'] ?? null;
+
+            if ($id !== null && isset($seenIds[$id])) {
+                continue;
+            }
+
+            $seenIds[$id] = true;
+            $names[] = mb_strtolower(trim((string) ($updatedType['name'] ?? '')));
+        }
+
+        $names = array_filter($names, fn (string $name): bool => $name !== '');
+
+        $hasDuplicates = count($names) !== count(array_unique($names));
+
+        if ($hasDuplicates) {
+            throw ValidationException::withMessages([
+                'treeData.new_types' => 'The same name is already in use by another service request type. Please select a different name.',
+            ]);
         }
     }
 }

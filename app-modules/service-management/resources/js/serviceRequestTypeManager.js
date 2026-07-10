@@ -1613,7 +1613,13 @@ document.addEventListener('alpine:init', () => {
 
                 try {
                     const saveData = this.prepareSaveData();
-                    await this.$wire.saveChanges(saveData);
+                    const saved = await this.$wire.saveChanges(saveData);
+
+                    if (!saved) {
+                        // The server rejected the changes and has already told the user why. Keep
+                        // their unsaved work intact rather than reloading over the top of it.
+                        return;
+                    }
 
                     await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -1627,6 +1633,16 @@ document.addEventListener('alpine:init', () => {
                     this.render();
                 } catch (error) {
                     console.error('Save failed:', error);
+
+                    if (window.FilamentNotification) {
+                        new window.FilamentNotification()
+                            .title('Unable to save changes')
+                            .body(
+                                'An unexpected error occurred while saving your changes. Your work has not been lost — please try again.',
+                            )
+                            .danger()
+                            .send();
+                    }
                 } finally {
                     this.isSaving = false;
                 }
@@ -2007,6 +2023,11 @@ document.addEventListener('alpine:init', () => {
                     return;
                 }
 
+                if (this.activeTypeNameExists(name.trim())) {
+                    this.notifyDuplicateTypeName(name.trim());
+                    return;
+                }
+
                 this.isCheckingType = true;
 
                 try {
@@ -2096,6 +2117,57 @@ document.addEventListener('alpine:init', () => {
                     },
                     categoryId,
                 );
+            },
+
+            // Whether an active (not staged for deletion/archival) type already uses this name
+            // anywhere in the tree. Names must be unique across every area, so this powers the
+            // client-side guard that stops duplicates before they ever reach the server.
+            activeTypeNameExists(name, excludeTypeId = null) {
+                const target = (name || '').trim().toLowerCase();
+
+                if (!target) {
+                    return false;
+                }
+
+                const removedIds = new Set([...(this.deletedTypes || []), ...(this.archivedTypes || [])]);
+
+                const matches = (types) =>
+                    (types || []).some(
+                        (type) =>
+                            type.id !== excludeTypeId &&
+                            !removedIds.has(type.id) &&
+                            (type.name || '').trim().toLowerCase() === target,
+                    );
+
+                const walk = (categories) => {
+                    for (const category of categories || []) {
+                        if (matches(category.types)) {
+                            return true;
+                        }
+
+                        if (walk(category.children)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                };
+
+                return matches(this.treeData.uncategorized_types) || walk(this.treeData.categories);
+            },
+
+            notifyDuplicateTypeName(name) {
+                if (!window.FilamentNotification) {
+                    return;
+                }
+
+                new window.FilamentNotification()
+                    .title('Name already in use')
+                    .body(
+                        `The name ${name} is already in use by another service request type. Please select a different name.`,
+                    )
+                    .danger()
+                    .send();
             },
 
             addTypeToTree(type, categoryId) {
@@ -2407,6 +2479,11 @@ document.addEventListener('alpine:init', () => {
                 const newName = input?.value.trim();
 
                 if (!newName) {
+                    return;
+                }
+
+                if (this.activeTypeNameExists(newName, typeId)) {
+                    this.notifyDuplicateTypeName(newName);
                     return;
                 }
 
