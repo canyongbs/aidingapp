@@ -77,7 +77,6 @@ enum PermissionDescription: string
     case ServiceRequestPriority = 'This permission group enables the display and management of the Service Request Priority feature in the tertiary navigation group View Service Request. Permission options include create, view, update, and delete service request priorities.';
     case ServiceRequestUpdate = 'This permission group enables the display of the Service Request Update feature in the tertiary navigation group View Service Request. Permission options include create, view, update, and delete service request updates.';
     case SystemUser = 'This permission group enables the display and management of the Programmatic Users feature in the primary navigation group User Management. Permission options include create, view, update, and delete system users.';
-    case Task = 'This permission group enables the display and management of the Task feature in the primary navigation group Project Management. Permission options include create, view, update, and delete tasks.';
     case Department = 'This permission group enables the display and management of the Department feature in the primary navigation group User Management. Permission options include create, view, update, and delete departments.';
     case User = 'This permission group enables the display and management of the User feature in the primary navigation group User Management. Permission options include create, view, update, and delete users.';
 
