@@ -104,7 +104,7 @@ it('files a type under every category it appears in', function () {
     $catA = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
     $catB = ServiceRequestTypeCategory::factory()->create(['name' => 'B', 'sort' => 2]);
 
-    $type = ServiceRequestType::factory()->category($catA)->create(['name' => 'Shared', 'sort' => 1]);
+    $type = ServiceRequestType::factory()->hasAttached($catA, relationship: 'categories')->create(['name' => 'Shared', 'sort' => 1]);
 
     $treeData = multipleCategoriesTreeData([
         categoryNode($catA, [typeNode($type, $catA, 1)], 1),
@@ -123,8 +123,8 @@ it('stores a distinct per-area sort on each membership', function () {
     $catA = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
     $catB = ServiceRequestTypeCategory::factory()->create(['name' => 'B', 'sort' => 2]);
 
-    $shared = ServiceRequestType::factory()->category($catA)->create(['name' => 'Shared', 'sort' => 1]);
-    $other = ServiceRequestType::factory()->category($catB)->create(['name' => 'Other', 'sort' => 1]);
+    $shared = ServiceRequestType::factory()->hasAttached($catA, relationship: 'categories')->create(['name' => 'Shared', 'sort' => 1]);
+    $other = ServiceRequestType::factory()->hasAttached($catB, relationship: 'categories')->create(['name' => 'Other', 'sort' => 1]);
 
     // In A the shared type is first (sort 1); in B it sits after "Other" (sort 2).
     $treeData = multipleCategoriesTreeData([
@@ -251,8 +251,8 @@ it('orders types within a category by their per-area sort when reading the tree'
 it('stores the per-area sort for a newly created type', function () {
     $category = ServiceRequestTypeCategory::factory()->create(['name' => 'Area', 'sort' => 1]);
 
-    $first = ServiceRequestType::factory()->category($category)->create(['name' => 'First', 'sort' => 1]);
-    $second = ServiceRequestType::factory()->category($category)->create(['name' => 'Second', 'sort' => 2]);
+    $first = ServiceRequestType::factory()->hasAttached($category, relationship: 'categories')->create(['name' => 'First', 'sort' => 1]);
+    $second = ServiceRequestType::factory()->hasAttached($category, relationship: 'categories')->create(['name' => 'Second', 'sort' => 2]);
 
     // The new type sits third in the area, so its per-area sort is derived from that position.
     $treeData = multipleCategoriesTreeData([

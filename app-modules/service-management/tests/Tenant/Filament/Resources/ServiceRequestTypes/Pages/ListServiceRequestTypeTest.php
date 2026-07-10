@@ -99,8 +99,8 @@ it('loads hierarchical data', function () {
     $root = ServiceRequestTypeCategory::factory()->create(['name' => 'Root', 'sort' => 1]);
     $child = ServiceRequestTypeCategory::factory()->create(['name' => 'Child', 'sort' => 1, 'parent_id' => $root->id]);
 
-    $type1 = ServiceRequestType::factory()->category($root)->create(['name' => 'Type 1', 'sort' => 1]);
-    $type2 = ServiceRequestType::factory()->category($child)->create(['name' => 'Type 2', 'sort' => 1]);
+    $type1 = ServiceRequestType::factory()->hasAttached($root, relationship: 'categories')->create(['name' => 'Type 1', 'sort' => 1]);
+    $type2 = ServiceRequestType::factory()->hasAttached($child, relationship: 'categories')->create(['name' => 'Type 2', 'sort' => 1]);
 
     $component = livewire(ListServiceRequestTypes::class);
 
@@ -238,7 +238,7 @@ it('prevents deleting a category when descendant service requests exist', functi
     asSuperAdmin();
 
     $category = ServiceRequestTypeCategory::factory()->create(['name' => 'Parent Cat']);
-    $type = ServiceRequestType::factory()->category($category)->create();
+    $type = ServiceRequestType::factory()->hasAttached($category, relationship: 'categories')->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->id]);
     $serviceRequest = ServiceRequest::factory()->create(['priority_id' => $priority->id]);
 
@@ -265,9 +265,9 @@ it('reorders types within a category', function () {
 
     $category = ServiceRequestTypeCategory::factory()->create(['name' => 'Reorder Cat']);
 
-    $type1 = ServiceRequestType::factory()->category($category)->create(['name' => 'One', 'sort' => 1]);
-    $type2 = ServiceRequestType::factory()->category($category)->create(['name' => 'Two', 'sort' => 2]);
-    $type3 = ServiceRequestType::factory()->category($category)->create(['name' => 'Three', 'sort' => 3]);
+    $type1 = ServiceRequestType::factory()->hasAttached($category, relationship: 'categories')->create(['name' => 'One', 'sort' => 1]);
+    $type2 = ServiceRequestType::factory()->hasAttached($category, relationship: 'categories')->create(['name' => 'Two', 'sort' => 2]);
+    $type3 = ServiceRequestType::factory()->hasAttached($category, relationship: 'categories')->create(['name' => 'Three', 'sort' => 3]);
 
     // New order: Three, One, Two
     $treeData = [
@@ -310,7 +310,7 @@ it('updates names for categories and types', function () {
     asSuperAdmin();
 
     $category = ServiceRequestTypeCategory::factory()->create(['name' => 'Old Cat']);
-    $type = ServiceRequestType::factory()->category($category)->create(['name' => 'Old Type']);
+    $type = ServiceRequestType::factory()->hasAttached($category, relationship: 'categories')->create(['name' => 'Old Type']);
 
     $treeData = [
         'categories' => [

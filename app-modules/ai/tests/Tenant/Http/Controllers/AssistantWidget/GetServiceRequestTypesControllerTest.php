@@ -72,7 +72,7 @@ function widgetRequestAsContact(Contact $contact, string $url): TestResponse
 
 it('does not return categories that have no service request types', function () {
     $categoryWithType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
-    ServiceRequestType::factory()->category($categoryWithType)->create();
+    ServiceRequestType::factory()->hasAttached($categoryWithType, relationship: 'categories')->create();
 
     $emptyCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
 
@@ -89,7 +89,7 @@ it('does not return categories that have no service request types', function () 
 it('returns a parent category when a child category has types', function () {
     $parentCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     $childCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => $parentCategory->id]);
-    ServiceRequestType::factory()->category($childCategory)->create();
+    ServiceRequestType::factory()->hasAttached($childCategory, relationship: 'categories')->create();
 
     $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
 
@@ -115,12 +115,12 @@ it('does not return a parent category when all child categories are empty', func
 
 it('does not return archived service request types as part of a category', function () {
     $categoryWithOnlyArchivedType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
-    ServiceRequestType::factory()->category($categoryWithOnlyArchivedType)->create([
+    ServiceRequestType::factory()->hasAttached($categoryWithOnlyArchivedType, relationship: 'categories')->create([
         'archived_at' => now(),
     ]);
 
     $categoryWithActiveType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
-    ServiceRequestType::factory()->category($categoryWithActiveType)->create();
+    ServiceRequestType::factory()->hasAttached($categoryWithActiveType, relationship: 'categories')->create();
 
     $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
 
@@ -179,7 +179,7 @@ it('hides the entire subtree of a visibility restricted area from non-matching w
         'is_visibility_restricted' => true,
     ]);
     $restrictedCategory->restrictedToContactTypes()->attach($allowedContactType);
-    ServiceRequestType::factory()->category($restrictedCategory)->create();
+    ServiceRequestType::factory()->hasAttached($restrictedCategory, relationship: 'categories')->create();
 
     $nonMatchingContact = Contact::factory()->create(['type_id' => $otherContactType->id]);
 

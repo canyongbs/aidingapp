@@ -81,7 +81,7 @@ it('blocks a type nested under a restricted area from a non-matching contact', f
     ]);
     $restrictedArea->restrictedToContactTypes()->attach($allowedContactType);
 
-    $type = ServiceRequestType::factory()->category($restrictedArea)->create();
+    $type = ServiceRequestType::factory()->hasAttached($restrictedArea, relationship: 'categories')->create();
 
     $contact = Contact::factory()->create(['type_id' => $otherContactType->id]);
 

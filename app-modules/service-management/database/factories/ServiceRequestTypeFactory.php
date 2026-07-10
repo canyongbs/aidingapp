@@ -38,8 +38,6 @@ namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use BladeUI\Icons\Factory as BladeUIIconsFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\File;
@@ -57,27 +55,6 @@ class ServiceRequestTypeFactory extends Factory
             'icon' => $this->faker->optional()->randomElement($this->icons()),
             'default_category' => $this->faker->randomElement(ServiceRequestCategory::cases()),
         ];
-    }
-
-    /**
-     * File the type under a single category.
-     *
-     * When the multiple categories feature is active the assignment is stored in the `categories`
-     * pivot; otherwise the legacy `category_id` column is written.
-     */
-    public function category(ServiceRequestTypeCategory | string $category): static
-    {
-        $categoryId = $category instanceof ServiceRequestTypeCategory ? (string) $category->getKey() : $category;
-
-        return $this->afterCreating(function (ServiceRequestType $type) use ($categoryId): void {
-            if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
-                $type->categories()->attach($categoryId);
-
-                return;
-            }
-
-            ServiceRequestType::whereKey($type->getKey())->update(['category_id' => $categoryId]);
-        });
     }
 
     /**

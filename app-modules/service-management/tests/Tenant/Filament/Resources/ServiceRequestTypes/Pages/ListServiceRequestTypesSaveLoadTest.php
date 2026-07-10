@@ -49,8 +49,8 @@ it('loads hierarchical data', function () {
     $root = ServiceRequestTypeCategory::factory()->create(['name' => 'Root', 'sort' => 1]);
     $child = ServiceRequestTypeCategory::factory()->create(['name' => 'Child', 'sort' => 1, 'parent_id' => $root->id]);
 
-    $type1 = ServiceRequestType::factory()->category($root)->create(['name' => 'Type 1', 'sort' => 1]);
-    $type2 = ServiceRequestType::factory()->category($child)->create(['name' => 'Type 2', 'sort' => 1]);
+    $type1 = ServiceRequestType::factory()->hasAttached($root, relationship: 'categories')->create(['name' => 'Type 1', 'sort' => 1]);
+    $type2 = ServiceRequestType::factory()->hasAttached($child, relationship: 'categories')->create(['name' => 'Type 2', 'sort' => 1]);
 
     $component = livewire(ListServiceRequestTypes::class);
 
@@ -131,7 +131,7 @@ it('moves type from one existing category to another existing category', functio
     $catA = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
     $catB = ServiceRequestTypeCategory::factory()->create(['name' => 'B', 'sort' => 2]);
 
-    $type = ServiceRequestType::factory()->category($catA)->create(['name' => 'ToMove', 'sort' => 1]);
+    $type = ServiceRequestType::factory()->hasAttached($catA, relationship: 'categories')->create(['name' => 'ToMove', 'sort' => 1]);
 
     $treeData = [
         'categories' => [

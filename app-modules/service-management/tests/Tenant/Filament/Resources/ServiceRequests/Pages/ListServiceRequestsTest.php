@@ -979,17 +979,17 @@ it('builds type tree options with categories as groups and types as selectable i
         'parent_id' => null,
     ]);
 
-    $typeA1 = ServiceRequestType::factory()->category($categoryA)->create([
+    $typeA1 = ServiceRequestType::factory()->hasAttached($categoryA, relationship: 'categories')->create([
         'name' => 'Type A1',
         'sort' => 1,
     ]);
 
-    $typeA2 = ServiceRequestType::factory()->category($categoryA)->create([
+    $typeA2 = ServiceRequestType::factory()->hasAttached($categoryA, relationship: 'categories')->create([
         'name' => 'Type A2',
         'sort' => 2,
     ]);
 
-    $typeB1 = ServiceRequestType::factory()->category($categoryB)->create([
+    $typeB1 = ServiceRequestType::factory()->hasAttached($categoryB, relationship: 'categories')->create([
         'name' => 'Type B1',
         'sort' => 1,
     ]);
@@ -1031,12 +1031,12 @@ it('builds type tree options with nested categories maintaining sort order', fun
         'parent_id' => $parentCategory->getKey(),
     ]);
 
-    $parentType = ServiceRequestType::factory()->category($parentCategory)->create([
+    $parentType = ServiceRequestType::factory()->hasAttached($parentCategory, relationship: 'categories')->create([
         'name' => 'Parent Type',
         'sort' => 2,
     ]);
 
-    $childType = ServiceRequestType::factory()->category($childCategory)->create([
+    $childType = ServiceRequestType::factory()->hasAttached($childCategory, relationship: 'categories')->create([
         'name' => 'Child Type',
         'sort' => 1,
     ]);
@@ -1070,7 +1070,7 @@ it('builds type tree options with uncategorized types at root level', function (
         'parent_id' => null,
     ]);
 
-    ServiceRequestType::factory()->category($category)->create([
+    ServiceRequestType::factory()->hasAttached($category, relationship: 'categories')->create([
         'name' => 'Categorized Type',
         'sort' => 1,
     ]);
@@ -1110,7 +1110,7 @@ it('filters out empty categories from type tree options', function () {
         'parent_id' => null,
     ]);
 
-    ServiceRequestType::factory()->category($categoryWithTypes)->create([
+    ServiceRequestType::factory()->hasAttached($categoryWithTypes, relationship: 'categories')->create([
         'name' => 'Type A',
         'sort' => 1,
     ]);
@@ -1139,7 +1139,7 @@ it('filters out nested empty categories from type tree options', function () {
         'parent_id' => $parentCategory->getKey(),
     ]);
 
-    $type = ServiceRequestType::factory()->category($parentCategory)->create([
+    $type = ServiceRequestType::factory()->hasAttached($parentCategory, relationship: 'categories')->create([
         'name' => 'Direct Type',
         'sort' => 2,
     ]);
