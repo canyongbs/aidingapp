@@ -314,8 +314,9 @@ class ServiceRequestType extends BaseModel implements Auditable
             return $this->categories->pluck('id')->all();
         }
 
-        /** @var string|null $categoryId */
         $categoryId = $this->getAttribute('category_id');
+
+        assert(is_string($categoryId) || is_null($categoryId));
 
         return $categoryId !== null ? [$categoryId] : [];
     }
@@ -334,8 +335,9 @@ class ServiceRequestType extends BaseModel implements Auditable
             $map = [];
 
             foreach ($this->categories as $category) {
-                /** @var ServiceRequestCategoryType $pivot */
                 $pivot = $category->getRelationValue('pivot');
+
+                assert($pivot instanceof ServiceRequestCategoryType);
 
                 $map[$category->id] = (int) $pivot->getAttribute('sort');
             }
@@ -343,8 +345,9 @@ class ServiceRequestType extends BaseModel implements Auditable
             return $map;
         }
 
-        /** @var string|null $categoryId */
         $categoryId = $this->getAttribute('category_id');
+
+        assert(is_string($categoryId) || is_null($categoryId));
 
         return $categoryId !== null ? [$categoryId => (int) $this->getAttribute('sort')] : [];
     }

@@ -144,7 +144,7 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
      */
     public function descendantServiceRequests(): HasManyDeep
     {
-        // @phpstan-ignore return.type
+        // @phpstan-ignore return.type (hasManyDeepFromRelations() infers a generic PHPStan cannot match to HasManyDeep<ServiceRequest, $this>, because types() has a feature-flagged HasMany|BelongsToMany union return type.)
         return $this->hasManyDeepFromRelations(
             $this->types(),
             (new ServiceRequestType())->serviceRequests(),

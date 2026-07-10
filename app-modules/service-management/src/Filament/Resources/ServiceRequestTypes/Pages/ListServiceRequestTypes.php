@@ -626,8 +626,9 @@ class ListServiceRequestTypes extends ListRecords
     protected function resolveTypeSort(ServiceRequestType $type, ?string $contextCategoryId): int
     {
         if ($contextCategoryId !== null && ServiceRequestTypeMultipleCategoriesFeature::active()) {
-            /** @var ServiceRequestCategoryType|null $pivot */
             $pivot = $type->getRelationValue('pivot');
+
+            assert($pivot instanceof ServiceRequestCategoryType || is_null($pivot));
 
             if ($pivot !== null) {
                 return (int) $pivot->getAttribute('sort');

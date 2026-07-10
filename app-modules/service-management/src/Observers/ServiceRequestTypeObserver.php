@@ -54,22 +54,23 @@ class ServiceRequestTypeObserver
         // and category assignments are stored in a pivot after the model is persisted, so the sort
         // value cannot be scoped to a category at this point.
         if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
-            $serviceRequestType->sort = DB::raw('(select coalesce(max(sort), 0) + 1 from service_request_types)'); /** @phpstan-ignore assign.propertyType */
+            $serviceRequestType->sort = DB::raw('(select coalesce(max(sort), 0) + 1 from service_request_types)'); /** @phpstan-ignore assign.propertyType (Assigns a DB raw Expression so the next global sort value is computed atomically in SQL, which the property's int|null type does not allow.) */
 
             return;
         }
 
-        /** @var string|null $categoryId */
         $categoryId = $serviceRequestType->getAttribute('category_id');
+
+        assert(is_string($categoryId) || is_null($categoryId));
 
         if ($categoryId !== null) {
             if (! Str::isUuid($categoryId)) {
                 throw new InvalidArgumentException('Category ID must be a valid UUID');
             }
 
-            $serviceRequestType->sort = DB::raw("(select coalesce(max(sort), 0) + 1 from service_request_types where category_id = '{$categoryId}')"); /** @phpstan-ignore assign.propertyType */
+            $serviceRequestType->sort = DB::raw("(select coalesce(max(sort), 0) + 1 from service_request_types where category_id = '{$categoryId}')"); /** @phpstan-ignore assign.propertyType (Assigns a DB raw Expression so the next sort value scoped to this category is computed atomically in SQL, which the property's int|null type does not allow.) */
         } else {
-            $serviceRequestType->sort = DB::raw('(select coalesce(max(sort), 0) + 1 from service_request_types where category_id is null)'); /** @phpstan-ignore assign.propertyType */
+            $serviceRequestType->sort = DB::raw('(select coalesce(max(sort), 0) + 1 from service_request_types where category_id is null)'); /** @phpstan-ignore assign.propertyType (Assigns a DB raw Expression so the next sort value scoped to uncategorised types is computed atomically in SQL, which the property's int|null type does not allow.) */
         }
     }
 
