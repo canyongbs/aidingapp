@@ -219,3 +219,22 @@ it('lists a type under every category it belongs to', function () {
     expect(collect($categoryAData['types'])->pluck('id'))->toContain($type->id)
         ->and(collect($categoryBData['types'])->pluck('id'))->toContain($type->id);
 });
+
+it('orders types within a category by their per-area sort rather than the global sort', function () {
+    $category = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+
+    $first = ServiceRequestType::factory()->create(['name' => 'First', 'sort' => 1]);
+    $second = ServiceRequestType::factory()->create(['name' => 'Second', 'sort' => 2]);
+
+    // Per-area pivot sort reverses the global order.
+    $category->types()->attach($first->id, ['sort' => 2]);
+    $category->types()->attach($second->id, ['sort' => 1]);
+
+    $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
+
+    $response->assertOk();
+
+    $categoryData = collect($response->json('categories'))->firstWhere('id', $category->id);
+
+    expect(collect($categoryData['types'])->pluck('id')->all())->toBe([$second->id, $first->id]);
+});

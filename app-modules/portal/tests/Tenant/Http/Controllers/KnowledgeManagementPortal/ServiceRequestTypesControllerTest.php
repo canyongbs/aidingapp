@@ -250,3 +250,48 @@ it('shows a type under an authorized category path and hides it under a restrict
 
     expect(collect($openData['types'])->pluck('id'))->toContain($type->id);
 });
+
+it('orders types within a category by their per-area sort rather than the global sort', function () {
+    $category = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+
+    // Global sort would place $first before $second, but the per-area pivot sort reverses them.
+    $first = ServiceRequestType::factory()->create(['name' => 'First', 'sort' => 1]);
+    $second = ServiceRequestType::factory()->create(['name' => 'Second', 'sort' => 2]);
+
+    $category->types()->attach($first->id, ['sort' => 2]);
+    $category->types()->attach($second->id, ['sort' => 1]);
+
+    $response = getJson(route('api.portal.service-request-type.index'));
+
+    $response->assertOk();
+
+    $categoryData = collect($response->json('categories'))->firstWhere('id', $category->id);
+
+    expect(collect($categoryData['types'])->pluck('id')->all())->toBe([$second->id, $first->id]);
+});
+
+it('orders the same type differently in each area it belongs to', function () {
+    $categoryA = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+    $categoryB = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+
+    $shared = ServiceRequestType::factory()->create(['name' => 'Shared', 'sort' => 5]);
+    $other = ServiceRequestType::factory()->create(['name' => 'Other', 'sort' => 6]);
+
+    // Shared is first in A but last in B.
+    $categoryA->types()->attach($shared->id, ['sort' => 1]);
+    $categoryA->types()->attach($other->id, ['sort' => 2]);
+
+    $categoryB->types()->attach($other->id, ['sort' => 1]);
+    $categoryB->types()->attach($shared->id, ['sort' => 2]);
+
+    $response = getJson(route('api.portal.service-request-type.index'));
+
+    $response->assertOk();
+
+    $categories = collect($response->json('categories'));
+
+    expect(collect($categories->firstWhere('id', $categoryA->id)['types'])->pluck('id')->all())
+        ->toBe([$shared->id, $other->id])
+        ->and(collect($categories->firstWhere('id', $categoryB->id)['types'])->pluck('id')->all())
+        ->toBe([$other->id, $shared->id]);
+});

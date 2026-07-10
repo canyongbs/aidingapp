@@ -80,9 +80,24 @@ class GetServiceRequestFormController extends Controller
         if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
             $categoryId = $request->query('category');
 
-            $category = is_string($categoryId) && $categoryId !== ''
-                ? ServiceRequestTypeCategory::find($categoryId)
-                : null;
+            if (! is_string($categoryId) || $categoryId === '') {
+                return null;
+            }
+
+            // Only follow a category the type actually belongs to, so an arbitrary id in the query
+            // string cannot surface an unrelated category's name or ancestry.
+            /** @var ServiceRequestTypeCategory|null $category */
+            $category = $type->categories()->whereKey($categoryId)->first();
+
+            // Never expose a category the contact is not allowed to see, even if the type is
+            // reachable through another (visible) area.
+            if (
+                $category !== null
+                && ServiceRequestTypeVisibilityRestrictionsFeature::active()
+                && ! $category->isVisibleToContactType(auth('contact')->user()?->type_id)
+            ) {
+                return null;
+            }
         } else {
             $type->load('category');
 

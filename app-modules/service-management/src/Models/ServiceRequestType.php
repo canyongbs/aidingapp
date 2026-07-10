@@ -320,6 +320,35 @@ class ServiceRequestType extends BaseModel implements Auditable
         return $categoryId !== null ? [$categoryId] : [];
     }
 
+    /**
+     * The per-area sort of this type keyed by the id of every category it is filed under.
+     *
+     * While the multiple categories feature is active the sort comes from the pivot so a type can
+     * be ordered differently in each area; otherwise it falls back to the type's single global sort.
+     *
+     * @return array<string, int>
+     */
+    public function categorySortMap(): array
+    {
+        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            $map = [];
+
+            foreach ($this->categories as $category) {
+                /** @var ServiceRequestCategoryType $pivot */
+                $pivot = $category->getRelationValue('pivot');
+
+                $map[$category->id] = (int) $pivot->getAttribute('sort');
+            }
+
+            return $map;
+        }
+
+        /** @var string|null $categoryId */
+        $categoryId = $this->getAttribute('category_id');
+
+        return $categoryId !== null ? [$categoryId => (int) $this->getAttribute('sort')] : [];
+    }
+
     protected function casts(): array
     {
         return [

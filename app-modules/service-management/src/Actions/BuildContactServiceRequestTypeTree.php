@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\ServiceManagement\Models\Scopes\WithCategoryAssignments;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -68,7 +68,10 @@ class BuildContactServiceRequestTypeTree
         $typesQuery = ServiceRequestType::query()
             ->withoutArchived()
             ->orderBy('sort')
-            ->tap(new WithCategoryAssignments());
+            ->when(
+                ServiceRequestTypeMultipleCategoriesFeature::active(),
+                fn (Builder $query) => $query->with('categories:id'),
+            );
 
         if ($prepareTypesQuery !== null) {
             $prepareTypesQuery($typesQuery);
@@ -108,12 +111,17 @@ class BuildContactServiceRequestTypeTree
 
             $placedUnderCategory = false;
 
-            foreach ($type->categoryIds() as $categoryId) {
+            foreach ($type->categorySortMap() as $categoryId => $sort) {
                 if (! isset($categoriesById[$categoryId])) {
                     continue;
                 }
 
-                $categoriesById[$categoryId]['types'][] = $formatType($type, $categoryId);
+                // The per-area sort lives on the pivot, so each placement is ordered independently
+                // of the type's global sort and of its ordering under any other category.
+                $categoriesById[$categoryId]['types'][] = [
+                    ...$formatType($type, $categoryId),
+                    'sort' => $sort,
+                ];
                 $placedUnderCategory = true;
             }
 

@@ -53,8 +53,10 @@ The following are **not** discoverable by searching for the flag name:
   `$record->categories` branch and delete the legacy `$record->category` branch.
 
 Everything else is a flag guard: grepping `ServiceRequestTypeMultipleCategoriesFeature` finds the
-branches in `ServiceRequestType::categoryIds()`/`visibilityRestrictionParents()`, the page's
-`syncTypeCategory()`/`assignTypeToCategory()`/`applyPendingTypePlacements()`/`resolveSaveTypeId()`/
-`deleteCategoryWithDescendants()`, the `ServiceRequestTypeFactory::category()` state, the observer's
-`creating()`, the `WithCategoryAssignments` scope, and the uncategorized-types query. In each, delete
-the legacy `category_id` branch and keep the `categories()` pivot branch.
+branches in `ServiceRequestType::categoryIds()`/`categorySortMap()`/`visibilityRestrictionParents()`,
+the page's `syncTypeCategory()`/`assignTypeToCategory()`/`applyPendingTypePlacements()`/`resolveSaveTypeId()`/
+`resolveTypeSort()`/`deleteCategoryWithDescendants()`, the `ServiceRequestTypeFactory::category()` state,
+the observer's `creating()`, the inlined `->when(..., fn ($query) => $query->with('categories:id'))`
+eager loads (in `ListServiceRequestTypes`, `ListServiceRequests`, and `BuildContactServiceRequestTypeTree`),
+and the uncategorized-types query. In each, delete the legacy `category_id` branch and keep the
+`categories()` pivot branch.

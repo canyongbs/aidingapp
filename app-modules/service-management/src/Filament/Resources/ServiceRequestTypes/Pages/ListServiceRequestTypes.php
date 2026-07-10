@@ -39,7 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
-use AidingApp\ServiceManagement\Models\Scopes\WithCategoryAssignments;
+use AidingApp\ServiceManagement\Models\ServiceRequestCategoryType;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
@@ -122,7 +122,10 @@ class ListServiceRequestTypes extends ListRecords
             ->withoutArchived()
             ->withCount('serviceRequests')
             ->with($typeVisibilityLoad)
-            ->tap(new WithCategoryAssignments());
+            ->when(
+                $multipleCategoriesEnabled,
+                fn ($query) => $query->with('categories:id'),
+            );
 
         $categories = ServiceRequestTypeCategory::query()
             /** @phpstan-ignore argument.type */
@@ -162,7 +165,10 @@ class ListServiceRequestTypes extends ListRecords
             ->orderBy('sort')
             ->withCount('serviceRequests')
             ->with($typeVisibilityLoad)
-            ->tap(new WithCategoryAssignments())
+            ->when(
+                $multipleCategoriesEnabled,
+                fn ($query) => $query->with('categories:id'),
+            )
             ->get();
 
         return [
@@ -598,7 +604,7 @@ class ListServiceRequestTypes extends ListRecords
                 'id' => $type->id,
                 'name' => $type->name,
                 'type' => 'type',
-                'sort' => $type->sort,
+                'sort' => $this->resolveTypeSort($type, $contextCategoryId),
                 'category_id' => $contextCategoryId,
                 'service_requests_count' => $type->service_requests_count ?? 0,
                 'view_url' => ServiceRequestTypeResource::getUrl('view', ['record' => $type]),
@@ -608,6 +614,27 @@ class ListServiceRequestTypes extends ListRecords
                 ] : [],
             ];
         })->toArray();
+    }
+
+    /**
+     * Resolve the sort to emit for a type node.
+     *
+     * While the multiple categories feature is active a categorised type is ordered by its per-area
+     * pivot sort, so the same type can sit in a different position under each area. Uncategorised
+     * types (and the legacy single-category path) fall back to the type's global sort.
+     */
+    protected function resolveTypeSort(ServiceRequestType $type, ?string $contextCategoryId): int
+    {
+        if ($contextCategoryId !== null && ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            /** @var ServiceRequestCategoryType|null $pivot */
+            $pivot = $type->getRelationValue('pivot');
+
+            if ($pivot !== null) {
+                return (int) $pivot->getAttribute('sort');
+            }
+        }
+
+        return (int) $type->sort;
     }
 
     /**

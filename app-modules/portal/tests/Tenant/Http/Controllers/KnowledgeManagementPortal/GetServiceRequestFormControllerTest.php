@@ -142,3 +142,44 @@ it('allows loading the form when the type is reachable via any authorized catego
         ->getJson(route('api.portal.service-request.create', ['type' => $type]))
         ->assertOk();
 });
+
+it('does not build a breadcrumb for a category the type does not belong to', function () {
+    $ownCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+    $unrelatedCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+
+    $type = ServiceRequestType::factory()->create();
+    $type->categories()->attach($ownCategory->id);
+
+    $response = getJson(route('api.portal.service-request.create', ['type' => $type, 'category' => $unrelatedCategory->id]));
+
+    $response->assertOk();
+
+    expect($response->json('category'))->toBeNull();
+});
+
+it('does not build a breadcrumb for a category the contact is not allowed to see', function () {
+    $allowedContactType = ContactType::factory()->create();
+    $otherContactType = ContactType::factory()->create();
+
+    $openCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+
+    $restrictedCategory = ServiceRequestTypeCategory::factory()->create([
+        'parent_id' => null,
+        'is_visibility_restricted' => true,
+    ]);
+    $restrictedCategory->restrictedToContactTypes()->attach($allowedContactType);
+
+    $type = ServiceRequestType::factory()->create();
+    $type->categories()->attach([$openCategory->id, $restrictedCategory->id]);
+
+    $contact = Contact::factory()->create(['type_id' => $otherContactType->id]);
+
+    // The type is still reachable through the open area, so the form loads, but the restricted
+    // category must not be surfaced in the breadcrumb.
+    $response = actingAs($contact, 'contact')
+        ->getJson(route('api.portal.service-request.create', ['type' => $type, 'category' => $restrictedCategory->id]));
+
+    $response->assertOk();
+
+    expect($response->json('category'))->toBeNull();
+});
