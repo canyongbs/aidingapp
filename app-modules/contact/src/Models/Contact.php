@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Models;
 
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Audit\Overrides\BelongsToMany;
 use AidingApp\Contact\Database\Factories\ContactFactory;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Observers\ContactObserver;
@@ -52,6 +53,8 @@ use AidingApp\Notification\Models\Concerns\NotifiableViaSms;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectGuest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Task\Models\Task;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
@@ -279,6 +282,22 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public static function getLabel(): string
     {
         return 'contact';
+    }
+
+    /**
+     * @return BelongsToMany<Project, $this, ProjectGuest>
+     */
+    public function guestProjects(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(
+                Project::class,
+                'project_guests',
+                'guest_id',
+                'project_id',
+            )
+            ->wherePivot('guest_type', self::class)
+            ->withTimestamps();
     }
 
     protected function serializeDate(DateTimeInterface $date): string

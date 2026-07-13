@@ -37,7 +37,10 @@
 namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Audit\Overrides\BelongsToMany;
 use AidingApp\Contact\Database\Factories\OrganizationFactory;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectGuest;
 use App\Models\BaseModel;
 use App\Models\Media;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
@@ -126,5 +129,21 @@ class Organization extends BaseModel implements HasMedia, Auditable
     public function contacts(): HasMany
     {
         return $this->hasMany(Contact::class, 'organization_id');
+    }
+
+    /**
+     * @return BelongsToMany<Project, $this, ProjectGuest>
+     */
+    public function guestProjects(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(
+                Project::class,
+                'project_guests',
+                'guest_id',
+                'project_id',
+            )
+            ->wherePivot('guest_type', self::class)
+            ->withTimestamps();
     }
 }
