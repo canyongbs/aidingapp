@@ -50,7 +50,7 @@
     >
         {{-- Sticky Save Banner --}}
         <div
-            class="sticky top-20 z-50"
+            class="sticky top-20 z-30"
             style="display: none"
             x-show="hasUnsavedChanges && canEdit"
             x-transition:enter="transition ease-out duration-200"
