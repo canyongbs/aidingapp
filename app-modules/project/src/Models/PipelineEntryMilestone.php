@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,14 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\Project\Models;
 
-use App\Support\AbstractFeatureFlag;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class PipelineEntryFieldsFeature extends AbstractFeatureFlag
+class PipelineEntryMilestone extends Pivot
 {
-    public function resolve(mixed $scope): mixed
+    use HasUuids;
+
+    /**
+     * @return BelongsTo<PipelineEntry, $this>
+     */
+    public function pipelineEntry(): BelongsTo
     {
-        return false;
+        return $this->belongsTo(PipelineEntry::class, 'pipeline_entry_id', 'id', 'pipelineEntry');
+    }
+
+    /**
+     * @return BelongsTo<ProjectMilestone, $this>
+     */
+    public function projectMilestone(): BelongsTo
+    {
+        return $this->belongsTo(ProjectMilestone::class, 'project_milestone_id', 'id', 'projectMilestone');
     }
 }

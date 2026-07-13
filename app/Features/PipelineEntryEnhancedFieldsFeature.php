@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,34 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Observers;
+namespace App\Features;
 
-use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Notifications\PipelineEntryAssignedToUserNotification;
-use App\Features\PipelineEntryEnhancedFieldsFeature;
-use App\Models\User;
+use App\Support\AbstractFeatureFlag;
 
-class PipelineEntryObserver
+class PipelineEntryEnhancedFieldsFeature extends AbstractFeatureFlag
 {
-    public function saving(PipelineEntry $pipelineEntry): void
+    public function resolve(mixed $scope): mixed
     {
-        if (is_null($pipelineEntry->created_by)) {
-            $pipelineEntry->created_by = auth()->id();
-        }
-    }
-
-    public function saved(PipelineEntry $pipelineEntry): void
-    {
-        if (
-            PipelineEntryEnhancedFieldsFeature::active()
-            && filled($pipelineEntry->assigned_to_id)
-            && $pipelineEntry->assigned_to_type === (new User())->getMorphClass()
-            && ($pipelineEntry->wasChanged(['assigned_to_id', 'assigned_to_type']) || $pipelineEntry->wasRecentlyCreated)
-        ) {
-            /** @var User|null $user */
-            $user = $pipelineEntry->assignedTo;
-
-            $user?->notify(new PipelineEntryAssignedToUserNotification($pipelineEntry));
-        }
+        return false;
     }
 }

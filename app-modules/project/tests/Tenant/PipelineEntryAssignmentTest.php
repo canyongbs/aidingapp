@@ -60,7 +60,8 @@ it('sends notification to assigned user when pipeline entry is created with assi
 
     PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->id,
-        'assigned_to' => $user->id,
+        'assigned_to_type' => $user->getMorphClass(),
+        'assigned_to_id' => $user->id,
     ]);
 
     Notification::assertSentTo($user, PipelineEntryAssignedToUserNotification::class);
@@ -76,7 +77,8 @@ it('does not send notification when pipeline entry is created without assigned_t
 
     PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->id,
-        'assigned_to' => null,
+        'assigned_to_type' => null,
+        'assigned_to_id' => null,
     ]);
 
     Notification::assertNothingSent();
@@ -95,7 +97,8 @@ it('sends notification to newly assigned user when assigned_to changes', functio
 
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->id,
-        'assigned_to' => $originalUser->id,
+        'assigned_to_type' => $originalUser->getMorphClass(),
+        'assigned_to_id' => $originalUser->id,
     ]);
 
     Notification::assertSentTo($originalUser, PipelineEntryAssignedToUserNotification::class);
@@ -103,7 +106,10 @@ it('sends notification to newly assigned user when assigned_to changes', functio
 
     Notification::fake();
 
-    $entry->fresh()->update(['assigned_to' => $newUser->id]);
+    $entry->fresh()->update([
+        'assigned_to_type' => $newUser->getMorphClass(),
+        'assigned_to_id' => $newUser->id,
+    ]);
 
     Notification::assertSentTo($newUser, PipelineEntryAssignedToUserNotification::class);
     Notification::assertNotSentTo($originalUser, PipelineEntryAssignedToUserNotification::class);
@@ -119,7 +125,8 @@ it('does not send notification when a non-assignment field changes', function ()
 
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->id,
-        'assigned_to' => null,
+        'assigned_to_type' => null,
+        'assigned_to_id' => null,
     ]);
 
     $entry->fresh()->update(['description' => 'New description']);
@@ -139,14 +146,15 @@ it('does not send notification when assigned_to is unchanged on update', functio
 
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->id,
-        'assigned_to' => $user->id,
+        'assigned_to_type' => $user->getMorphClass(),
+        'assigned_to_id' => $user->id,
     ]);
 
     Notification::assertSentTo($user, PipelineEntryAssignedToUserNotification::class);
 
     Notification::fake();
 
-    $entry->fresh()->update(['assigned_to' => $user->id, 'name' => 'New name']);
+    $entry->fresh()->update(['assigned_to_id' => $user->id, 'name' => 'New name']);
 
     Notification::assertNotSentTo($user, PipelineEntryAssignedToUserNotification::class);
 });

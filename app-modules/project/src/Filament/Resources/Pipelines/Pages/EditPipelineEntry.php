@@ -41,7 +41,7 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use App\Features\PipelineEntryFieldsFeature;
+use App\Features\PipelineEntryEnhancedFieldsFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -148,10 +148,10 @@ class EditPipelineEntry extends Page
                         ->options(fn () => $this->record->stages->pluck('name', 'id')),
                     TextInput::make('name')
                         ->maxLength(255)
-                        ->label(PipelineEntryFieldsFeature::active() ? 'Name' : 'Description')
+                        ->label('Name')
                         ->string(),
                 ]),
-                ...PipelineEntryForm::components(),
+                ...PipelineEntryForm::components($this->record),
             ])
             ->statePath('data')
             ->model($this->pipelineEntry);
@@ -161,17 +161,18 @@ class EditPipelineEntry extends Page
     {
         $data = $this->form->getState();
 
-        if (PipelineEntryFieldsFeature::active()) {
-            if (($this->data['assigned_to_type'] ?? 'none') === 'none') {
-                $data['assigned_to'] = null;
-            }
-
-            if (($this->data['related_to_type'] ?? 'none') === 'none') {
-                $data['related_to'] = null;
-            }
-        }
+        $milestones = $data['milestones'] ?? [];
+        $assets = $data['assets'] ?? [];
+        $serviceRequests = $data['serviceRequests'] ?? [];
+        unset($data['milestones'], $data['assets'], $data['serviceRequests']);
 
         $this->pipelineEntry->update($data);
+
+        if (PipelineEntryEnhancedFieldsFeature::active()) {
+            $this->pipelineEntry->milestones()->sync($milestones);
+            $this->pipelineEntry->assets()->sync($assets);
+            $this->pipelineEntry->serviceRequests()->sync($serviceRequests);
+        }
 
         Notification::make()
             ->success()
@@ -185,9 +186,10 @@ class EditPipelineEntry extends Page
     {
         $data = $this->pipelineEntry->attributesToArray();
 
-        if (PipelineEntryFieldsFeature::active()) {
-            $data['assigned_to_type'] = filled($this->pipelineEntry->assigned_to) ? 'user' : 'none';
-            $data['related_to_type'] = filled($this->pipelineEntry->related_to) ? 'contact' : 'none';
+        if (PipelineEntryEnhancedFieldsFeature::active()) {
+            $data['milestones'] = $this->pipelineEntry->milestones->pluck('id')->toArray();
+            $data['assets'] = $this->pipelineEntry->assets->pluck('id')->toArray();
+            $data['serviceRequests'] = $this->pipelineEntry->serviceRequests->pluck('id')->toArray();
         }
 
         $this->form->fill($data);
