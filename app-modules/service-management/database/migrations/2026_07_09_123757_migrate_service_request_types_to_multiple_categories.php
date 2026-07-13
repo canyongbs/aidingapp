@@ -44,7 +44,6 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
-            // Create the pivot table that allows a service request type to belong to many categories.
             Schema::create('service_request_category_types', function (Blueprint $table) {
                 $table->uuid('id')->primary();
                 $table->foreignUuid('service_request_type_id')
@@ -62,8 +61,6 @@ return new class () extends Migration {
                 );
             });
 
-            // Backfill the pivot from the existing single category assignment, preserving the
-            // type's existing order as the per-area sort value.
             DB::table('service_request_category_types')->insertUsing(
                 ['id', 'service_request_type_id', 'service_request_type_category_id', 'sort', 'created_at', 'updated_at'],
                 DB::table('service_request_types')
@@ -78,13 +75,7 @@ return new class () extends Migration {
                     ]),
             );
 
-            // Activate the feature flag now that the pivot is populated.
             ServiceRequestTypeMultipleCategoriesFeature::activate();
-
-            // Drop the now-redundant single category column.
-            Schema::table('service_request_types', function (Blueprint $table) {
-                $table->dropConstrainedForeignId('category_id');
-            });
         });
     }
 
@@ -93,13 +84,6 @@ return new class () extends Migration {
         DB::transaction(function () {
             ServiceRequestTypeMultipleCategoriesFeature::deactivate();
 
-            Schema::table('service_request_types', function (Blueprint $table) {
-                $table->foreignUuid('category_id')
-                    ->nullable()
-                    ->constrained('service_request_type_categories');
-            });
-
-            // Restore the single category from the first pivot assignment.
             DB::statement(<<<'SQL'
                 update service_request_types
                 set category_id = (
@@ -108,6 +92,7 @@ return new class () extends Migration {
                     where service_request_category_types.service_request_type_id = service_request_types.id
                     limit 1
                 )
+                where category_id is null
                 SQL);
 
             Schema::dropIfExists('service_request_category_types');

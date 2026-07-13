@@ -69,7 +69,7 @@ function columnNativeType(string $table, string $column): ?string
 //});
 
 describe('2026_07_09_123757_migrate_service_request_types_to_multiple_categories', function () {
-    it('backfills the category pivot from the legacy category_id column, activates the feature, and drops the column', function () {
+    it('backfills the category pivot from the legacy category_id column, activates the feature, and keeps the column', function () {
         isolatedMigration(
             '2026_07_09_123757_migrate_service_request_types_to_multiple_categories',
             function () {
@@ -113,8 +113,8 @@ describe('2026_07_09_123757_migrate_service_request_types_to_multiple_categories
                 // The feature flag is activated as part of the migration.
                 expect(ServiceRequestTypeMultipleCategoriesFeature::active())->toBeTrue();
 
-                // The legacy single category column has been dropped.
-                expect(columnNativeType('service_request_types', 'category_id'))->toBeNull();
+                // The legacy single category column is intentionally kept as a rollback safety net.
+                expect(columnNativeType('service_request_types', 'category_id'))->not->toBeNull();
             }
         );
     });

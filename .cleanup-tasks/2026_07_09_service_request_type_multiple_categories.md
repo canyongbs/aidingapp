@@ -22,17 +22,24 @@ branches.
 
 The migration `2026_07_09_123757_migrate_service_request_types_to_multiple_categories` is
 **permanent** and must **not** be deleted — it defines the `service_request_category_types` pivot
-schema and the removal of the legacy `category_id` column, which fresh installs still need.
+schema, which fresh installs still need.
 
-During cleanup, strip everything in it that only exists to bridge the transition, leaving a plain
-schema migration:
+The legacy `category_id` column on `service_request_types` is deliberately **kept** by this migration
+as a rollback safety net; it is not dropped while the feature is bedding in. Once
+`ServiceRequestTypeMultipleCategoriesFeature` is proven in production, drop it with a **new** cleanup
+migration (editing this migration to add the drop would only affect fresh installs, not environments
+that already ran it):
+
+- `Schema::table('service_request_types', fn (Blueprint $table) => $table->dropConstrainedForeignId('category_id'));`
+
+During cleanup, also strip everything in this migration that only exists to bridge the transition,
+leaving a plain schema migration:
 
 - In `up()`: remove the `insertUsing(...)` backfill and the
   `ServiceRequestTypeMultipleCategoriesFeature::activate()` call. Keep the
-  `Schema::create('service_request_category_types', ...)` and the `dropConstrainedForeignId('category_id')`.
+  `Schema::create('service_request_category_types', ...)`.
 - In `down()`: remove the `ServiceRequestTypeMultipleCategoriesFeature::deactivate()` call and the
-  `DB::statement(...)` that restores `category_id` from the pivot. Keep the column re-add and the
-  pivot `dropIfExists`.
+  `DB::statement(...)` that restores `category_id` from the pivot. Keep the pivot `dropIfExists`.
 
 The backfill is one-time data code: once the migration has run across every existing environment it
 only ever runs against an empty `service_request_types` table on fresh installs, so it is safe to
