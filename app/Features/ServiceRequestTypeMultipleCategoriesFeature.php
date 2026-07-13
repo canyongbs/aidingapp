@@ -34,38 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Actions\BuildContactServiceRequestTypeTree;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
+use App\Support\AbstractFeatureFlag;
 
-class ServiceRequestTypesController extends Controller
+class ServiceRequestTypeMultipleCategoriesFeature extends AbstractFeatureFlag
 {
-    public function index(): JsonResponse
+    public function resolve(mixed $scope): mixed
     {
-        // Load all categories and types and build a nested tree in PHP so the frontend can
-        // render top-level categories/types and navigate into subcategories without
-        // additional requests.
-        $visibilityRestrictionsEnabled = ServiceRequestTypeVisibilityRestrictionsFeature::active();
-
-        $contactTypeId = $visibilityRestrictionsEnabled ? auth('contact')->user()?->type_id : null;
-
-        $tree = app(BuildContactServiceRequestTypeTree::class)->execute(
-            contactTypeId: $contactTypeId,
-            visibilityRestrictionsEnabled: $visibilityRestrictionsEnabled,
-            formatType: fn (ServiceRequestType $type, ?string $categoryId): array => [
-                'id' => $type->getKey(),
-                'name' => $type->name,
-                'description' => $type->description,
-                'icon' => $type->icon ? svg($type->icon, 'h-6 w-6')->toHtml() : null,
-                'sort' => $type->sort,
-                'category_id' => $categoryId,
-            ],
-        );
-
-        return response()->json($tree);
+        return false;
     }
 }

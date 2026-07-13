@@ -34,38 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\ServiceManagement\Actions\BuildContactServiceRequestTypeTree;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ServiceRequestTypesController extends Controller
+/**
+ * @mixin IdeHelperServiceRequestCategoryType
+ */
+class ServiceRequestCategoryType extends Pivot
 {
-    public function index(): JsonResponse
-    {
-        // Load all categories and types and build a nested tree in PHP so the frontend can
-        // render top-level categories/types and navigate into subcategories without
-        // additional requests.
-        $visibilityRestrictionsEnabled = ServiceRequestTypeVisibilityRestrictionsFeature::active();
+    use HasUuids;
 
-        $contactTypeId = $visibilityRestrictionsEnabled ? auth('contact')->user()?->type_id : null;
+    protected $table = 'service_request_category_types';
 
-        $tree = app(BuildContactServiceRequestTypeTree::class)->execute(
-            contactTypeId: $contactTypeId,
-            visibilityRestrictionsEnabled: $visibilityRestrictionsEnabled,
-            formatType: fn (ServiceRequestType $type, ?string $categoryId): array => [
-                'id' => $type->getKey(),
-                'name' => $type->name,
-                'description' => $type->description,
-                'icon' => $type->icon ? svg($type->icon, 'h-6 w-6')->toHtml() : null,
-                'sort' => $type->sort,
-                'category_id' => $categoryId,
-            ],
-        );
-
-        return response()->json($tree);
-    }
+    public $incrementing = false;
 }
