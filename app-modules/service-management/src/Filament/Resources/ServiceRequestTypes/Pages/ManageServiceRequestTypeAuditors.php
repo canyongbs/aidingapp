@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
-use App\Concerns\EditPageRedirection;
 use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\EditRecord;
@@ -46,8 +45,6 @@ use Filament\Schemas\Schema;
 
 class ManageServiceRequestTypeAuditors extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static ?string $title = 'Auditors';
 
     protected static ?string $breadcrumb = 'Auditors';

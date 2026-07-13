@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use AidingApp\Contact\Models\ContactType;
-use App\Concerns\EditPageRedirection;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -49,8 +48,6 @@ use Filament\Schemas\Schema;
 
 class EditContactType extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ContactTypeResource::class;
 
     public function form(Schema $schema): Schema

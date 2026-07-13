@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
 use AidingApp\Contact\Models\OrganizationType;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
@@ -49,8 +48,6 @@ use Filament\Schemas\Schema;
 
 class EditOrganizationType extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = OrganizationTypeResource::class;
 
     public function form(Schema $schema): Schema

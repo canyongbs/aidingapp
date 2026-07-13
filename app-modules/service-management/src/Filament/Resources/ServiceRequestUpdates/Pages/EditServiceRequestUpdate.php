@@ -39,14 +39,11 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\P
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditServiceRequestUpdate extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ServiceRequestUpdateResource::class;
 
     public function getSubNavigationParameters(): array
