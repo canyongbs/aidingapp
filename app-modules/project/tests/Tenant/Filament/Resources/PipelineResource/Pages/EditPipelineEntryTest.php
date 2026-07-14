@@ -151,7 +151,8 @@ it('can save pipeline entry with an assigned user', function () {
 
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->id,
-        'assigned_to' => null,
+        'assigned_to_type' => null,
+        'assigned_to_id' => null,
     ]);
 
     $user = User::factory()->create();
@@ -162,14 +163,49 @@ it('can save pipeline entry with an assigned user', function () {
     ])
         ->fillForm([
             'assigned_to_type' => 'user',
-            'assigned_to' => $user->id,
+            'assigned_to_id' => $user->id,
         ])
         ->call('save')
         ->assertHasNoFormErrors();
 
     assertDatabaseHas(PipelineEntry::class, [
         'id' => $entry->id,
-        'assigned_to' => $user->id,
+        'assigned_to_id' => $user->id,
+    ]);
+});
+
+it('can save pipeline entry with an assigned contact', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->id,
+        'assigned_to_type' => null,
+        'assigned_to_id' => null,
+    ]);
+
+    $contact = Contact::factory()->create();
+
+    livewire(EditPipelineEntry::class, [
+        'record' => $pipeline,
+        'pipelineEntry' => $entry,
+    ])
+        ->fillForm([
+            'assigned_to_type' => 'contact',
+            'assigned_to_id' => $contact->id,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(PipelineEntry::class, [
+        'id' => $entry->id,
+        'assigned_to_type' => 'contact',
+        'assigned_to_id' => $contact->id,
     ]);
 });
 
@@ -184,7 +220,8 @@ it('can clear the assigned user on a pipeline entry', function () {
 
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->id,
-        'assigned_to' => User::factory()->create()->id,
+        'assigned_to_type' => 'user',
+        'assigned_to_id' => User::factory()->create()->id,
     ]);
 
     livewire(EditPipelineEntry::class, [
@@ -192,19 +229,19 @@ it('can clear the assigned user on a pipeline entry', function () {
         'pipelineEntry' => $entry,
     ])
         ->fillForm([
-            'assigned_to_type' => 'none',
-            'assigned_to' => null,
+            'assigned_to_type' => null,
+            'assigned_to_id' => null,
         ])
         ->call('save')
         ->assertHasNoFormErrors();
 
     assertDatabaseHas(PipelineEntry::class, [
         'id' => $entry->id,
-        'assigned_to' => null,
+        'assigned_to_id' => null,
     ]);
 });
 
-it('can save pipeline entry with a related contact', function () {
+it('sets assigned_to_type to contact when entry has an assigned contact', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -213,31 +250,22 @@ it('can save pipeline entry with a related contact', function () {
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
+    $contact = Contact::factory()->create();
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->id,
-        'related_to' => null,
+        'assigned_to_type' => 'contact',
+        'assigned_to_id' => $contact->id,
     ]);
-
-    $contact = Contact::factory()->create();
 
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $entry,
     ])
-        ->fillForm([
-            'related_to_type' => 'contact',
-            'related_to' => $contact->id,
-        ])
-        ->call('save')
-        ->assertHasNoFormErrors();
-
-    assertDatabaseHas(PipelineEntry::class, [
-        'id' => $entry->id,
-        'related_to' => $contact->id,
-    ]);
+        ->assertFormFieldExists('assigned_to_type')
+        ->assertSet('data.assigned_to_type', 'contact');
 });
 
-it('sets assigned_to_type toggle to user when entry has an assigned user', function () {
+it('sets assigned_to_type to user when entry has an assigned user', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -249,7 +277,8 @@ it('sets assigned_to_type toggle to user when entry has an assigned user', funct
     $user = User::factory()->create();
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->id,
-        'assigned_to' => $user->id,
+        'assigned_to_type' => 'user',
+        'assigned_to_id' => $user->id,
     ]);
 
     livewire(EditPipelineEntry::class, [
@@ -260,7 +289,7 @@ it('sets assigned_to_type toggle to user when entry has an assigned user', funct
         ->assertSet('data.assigned_to_type', 'user');
 });
 
-it('sets assigned_to_type toggle to none when entry has no assigned user', function () {
+it('sets assigned_to_type to null when entry has no assigned user', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -271,55 +300,13 @@ it('sets assigned_to_type toggle to none when entry has no assigned user', funct
 
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->id,
-        'assigned_to' => null,
+        'assigned_to_type' => null,
+        'assigned_to_id' => null,
     ]);
 
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $entry,
     ])
-        ->assertSet('data.assigned_to_type', 'none');
-});
-
-it('sets related_to_type toggle to contact when entry has a related contact', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    $contact = Contact::factory()->create();
-    $entry = PipelineEntry::factory()->create([
-        'pipeline_stage_id' => $pipeline->stages->first()->id,
-        'related_to' => $contact->id,
-    ]);
-
-    livewire(EditPipelineEntry::class, [
-        'record' => $pipeline,
-        'pipelineEntry' => $entry,
-    ])
-        ->assertSet('data.related_to_type', 'contact');
-});
-
-it('sets related_to_type toggle to none when entry has no related contact', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    $entry = PipelineEntry::factory()->create([
-        'pipeline_stage_id' => $pipeline->stages->first()->id,
-        'related_to' => null,
-    ]);
-
-    livewire(EditPipelineEntry::class, [
-        'record' => $pipeline,
-        'pipelineEntry' => $entry,
-    ])
-        ->assertSet('data.related_to_type', 'none');
+        ->assertSet('data.assigned_to_type', null);
 });

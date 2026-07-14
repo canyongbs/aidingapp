@@ -149,13 +149,40 @@ it('can create a kanban entry with an assigned user', function () {
         ->callAction('addEntry', data: [
             ...baseKanbanEntryData('Assigned Kanban Entry'),
             'assigned_to_type' => 'user',
-            'assigned_to' => $user->id,
+            'assigned_to_id' => $user->id,
         ], arguments: ['stage' => $stage->id])
         ->assertHasNoActionErrors();
 
     assertDatabaseHas(PipelineEntry::class, [
         'name' => 'Assigned Kanban Entry',
-        'assigned_to' => $user->id,
+        'assigned_to_id' => $user->id,
+        'pipeline_stage_id' => $stage->id,
+    ]);
+});
+
+it('can create a kanban entry with an assigned contact', function () {
+    asSuperAdmin();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $stage = $pipeline->stages->first();
+    $contact = Contact::factory()->create();
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->callAction('addEntry', data: [
+            ...baseKanbanEntryData('Assigned Contact Kanban Entry'),
+            'assigned_to_type' => 'contact',
+            'assigned_to_id' => $contact->id,
+        ], arguments: ['stage' => $stage->id])
+        ->assertHasNoActionErrors();
+
+    assertDatabaseHas(PipelineEntry::class, [
+        'name' => 'Assigned Contact Kanban Entry',
+        'assigned_to_type' => 'contact',
+        'assigned_to_id' => $contact->id,
         'pipeline_stage_id' => $stage->id,
     ]);
 });
@@ -173,63 +200,14 @@ it('can create a kanban entry with no assigned user', function () {
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
             ...baseKanbanEntryData('Unassigned Kanban Entry'),
-            'assigned_to_type' => 'none',
+            'assigned_to_type' => null,
+            'assigned_to_id' => null,
         ], arguments: ['stage' => $stage->id])
         ->assertHasNoActionErrors();
 
     assertDatabaseHas(PipelineEntry::class, [
         'name' => 'Unassigned Kanban Entry',
-        'assigned_to' => null,
-        'pipeline_stage_id' => $stage->id,
-    ]);
-});
-
-it('can create a kanban entry with a related contact', function () {
-    asSuperAdmin();
-
-    $pipeline = Pipeline::factory()
-        ->for(Project::factory()->create())
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    $stage = $pipeline->stages->first();
-    $contact = Contact::factory()->create();
-
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
-        ->callAction('addEntry', data: [
-            ...baseKanbanEntryData('Related Kanban Entry'),
-            'related_to_type' => 'contact',
-            'related_to' => $contact->id,
-        ], arguments: ['stage' => $stage->id])
-        ->assertHasNoActionErrors();
-
-    assertDatabaseHas(PipelineEntry::class, [
-        'name' => 'Related Kanban Entry',
-        'related_to' => $contact->id,
-        'pipeline_stage_id' => $stage->id,
-    ]);
-});
-
-it('can create a kanban entry with no related contact', function () {
-    asSuperAdmin();
-
-    $pipeline = Pipeline::factory()
-        ->for(Project::factory()->create())
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    $stage = $pipeline->stages->first();
-
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
-        ->callAction('addEntry', data: [
-            ...baseKanbanEntryData('No Contact Kanban Entry'),
-            'related_to_type' => 'none',
-        ], arguments: ['stage' => $stage->id])
-        ->assertHasNoActionErrors();
-
-    assertDatabaseHas(PipelineEntry::class, [
-        'name' => 'No Contact Kanban Entry',
-        'related_to' => null,
+        'assigned_to_id' => null,
         'pipeline_stage_id' => $stage->id,
     ]);
 });
@@ -252,7 +230,7 @@ it('requires a name when creating a kanban entry', function () {
         ->assertHasActionErrors(['name' => 'required']);
 });
 
-it('validates assigned_to must be a valid user id in the kanban action', function () {
+it('validates assigned_to_id must be a valid user id in the kanban action', function () {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -266,12 +244,12 @@ it('validates assigned_to must be a valid user id in the kanban action', functio
         ->callAction('addEntry', data: [
             ...baseKanbanEntryData('Bad User'),
             'assigned_to_type' => 'user',
-            'assigned_to' => (string) str()->uuid(),
+            'assigned_to_id' => (string) str()->uuid(),
         ], arguments: ['stage' => $stage->id])
-        ->assertHasActionErrors(['assigned_to']);
+        ->assertHasActionErrors(['assigned_to_id']);
 });
 
-it('validates related_to must be a valid contact id in the kanban action', function () {
+it('validates assigned_to_id must be a valid contact id in the kanban action', function () {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -284,10 +262,10 @@ it('validates related_to must be a valid contact id in the kanban action', funct
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
             ...baseKanbanEntryData('Bad Contact'),
-            'related_to_type' => 'contact',
-            'related_to' => (string) str()->uuid(),
+            'assigned_to_type' => 'contact',
+            'assigned_to_id' => (string) str()->uuid(),
         ], arguments: ['stage' => $stage->id])
-        ->assertHasActionErrors(['related_to']);
+        ->assertHasActionErrors(['assigned_to_id']);
 });
 
 it('sends notification when creating a kanban entry with an assigned user', function () {
@@ -307,7 +285,7 @@ it('sends notification when creating a kanban entry with an assigned user', func
         ->callAction('addEntry', data: [
             ...baseKanbanEntryData('Notified Entry'),
             'assigned_to_type' => 'user',
-            'assigned_to' => $user->id,
+            'assigned_to_id' => $user->id,
         ], arguments: ['stage' => $stage->id])
         ->assertHasNoActionErrors();
 
@@ -329,7 +307,8 @@ it('does not send notification when creating a kanban entry with no assigned use
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
             ...baseKanbanEntryData('Silent Entry'),
-            'assigned_to_type' => 'none',
+            'assigned_to_type' => null,
+            'assigned_to_id' => null,
         ], arguments: ['stage' => $stage->id])
         ->assertHasNoActionErrors();
 
