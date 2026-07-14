@@ -54,6 +54,7 @@ it('creates a managed contact synchronized from the user', function () {
     $contact = app(ManagedContactService::class)->enable($user, $type->getKey());
 
     expect($contact->user_id)->toBe($user->getKey())
+        ->and($contact->title)->toBeNull()
         ->and($contact->first_name)->toBe('Jane')
         ->and($contact->last_name)->toBe('Doe')
         ->and($contact->full_name)->toBe('Jane Doe')
@@ -63,6 +64,19 @@ it('creates a managed contact synchronized from the user', function () {
         ->and($contact->mobile)->toBe('+1 555 333 4444')
         ->and($contact->type_id)->toBe($type->getKey())
         ->and($contact->isManaged())->toBeTrue();
+});
+
+it('parses the salutation from the user name into the contact title', function () {
+    $type = ContactType::factory()->create();
+
+    $user = User::factory()->create(['name' => 'Dr. Jane Doe']);
+
+    $contact = app(ManagedContactService::class)->enable($user, $type->getKey());
+
+    expect($contact->title)->toBe('Dr.')
+        ->and($contact->first_name)->toBe('Jane')
+        ->and($contact->last_name)->toBe('Doe')
+        ->and($contact->full_name)->toBe('Dr. Jane Doe');
 });
 
 it('handles a single word name by leaving the last name empty', function () {
@@ -85,7 +99,7 @@ it('synchronizes the managed contact when the user is updated', function () {
     app(ManagedContactService::class)->enable($user, $type->getKey());
 
     $user->update([
-        'name' => 'New Name',
+        'name' => 'Prof. New Name',
         'job_title' => 'Senior',
         'email' => 'new-email@example.com',
         'work_number' => '+1 555 999 8888',
@@ -94,7 +108,8 @@ it('synchronizes the managed contact when the user is updated', function () {
 
     $contact = $user->managedContact()->first();
 
-    expect($contact->full_name)->toBe('New Name')
+    expect($contact->full_name)->toBe('Prof. New Name')
+        ->and($contact->title)->toBe('Prof.')
         ->and($contact->first_name)->toBe('New')
         ->and($contact->last_name)->toBe('Name')
         ->and($contact->job_title)->toBe('Senior')
