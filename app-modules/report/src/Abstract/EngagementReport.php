@@ -36,6 +36,8 @@
 
 namespace AidingApp\Report\Abstract;
 
+use AidingApp\Report\Enums\ReportAccessKey;
+use App\Features\ReportingFeature;
 use App\Models\User;
 use Filament\Pages\Dashboard;
 
@@ -46,6 +48,10 @@ abstract class EngagementReport extends Dashboard
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->can('report-library.view-any');
+        if (! ReportingFeature::active()) {
+            return $user->can('reporting.view-any');
+        }
+
+        return ReportAccessKey::fromPageClass(static::class)?->userCanAccess($user) ?? false;
     }
 }

@@ -42,6 +42,8 @@ use AidingApp\Report\Filament\Widgets\RefreshWidget;
 use App\Enums\Feature;
 use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
+use AidingApp\Report\Enums\ReportAccessKey;
+use App\Features\ReportingFeature;
 use App\Models\User;
 use BackedEnum;
 use Filament\Pages\Dashboard;
@@ -75,7 +77,11 @@ class AssetManagement extends Dashboard
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->can('report-library.view-any');
+        if (! ReportingFeature::active()) {
+            return $user->can('reporting.view-any');
+        }
+
+        return ReportAccessKey::fromPageClass(static::class)?->userCanAccess($user) ?? false;
     }
 
     public function getWidgets(): array
