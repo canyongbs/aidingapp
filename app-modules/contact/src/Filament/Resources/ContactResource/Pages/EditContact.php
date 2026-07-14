@@ -61,16 +61,18 @@ class EditContact extends EditRecord
     // TODO: Automatically set from Filament
     protected static ?string $navigationLabel = 'Edit';
 
-    public function mount(int | string $record): void
+    /**
+     * @param  array<string, mixed>  $parameters
+     */
+    public static function canAccess(array $parameters = []): bool
     {
-        parent::mount($record);
+        $record = $parameters['record'] ?? null;
 
-        /** @var Contact $contact */
-        $contact = $this->getRecord();
-
-        if (ManagedContactFeature::active() && $contact->isManaged()) {
-            $this->redirect(ContactResource::getUrl('view', ['record' => $contact]));
+        if ($record instanceof Contact && ManagedContactFeature::active() && $record->isManaged()) {
+            return false;
         }
+
+        return parent::canAccess($parameters);
     }
 
     public function form(Schema $schema): Schema

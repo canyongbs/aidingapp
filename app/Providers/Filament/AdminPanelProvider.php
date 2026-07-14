@@ -74,6 +74,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
@@ -151,7 +152,7 @@ class AdminPanelProvider extends PanelProvider
             ->userMenuItems([
                 MenuItem::make()
                     ->label('Employee Self-Service')
-                    ->url(fn (): string => route('employee-self-service'))
+                    ->url(fn (): string => URL::temporarySignedRoute('employee-self-service', now()->addHour()))
                     ->icon('heroicon-s-arrow-top-right-on-square')
                     ->openUrlInNewTab()
                     ->visible(function (): bool {

@@ -84,14 +84,23 @@ it('synchronizes the managed contact when the user is updated', function () {
 
     app(ManagedContactService::class)->enable($user, $type->getKey());
 
-    $user->update(['name' => 'New Name', 'job_title' => 'Senior']);
+    $user->update([
+        'name' => 'New Name',
+        'job_title' => 'Senior',
+        'email' => 'new-email@example.com',
+        'work_number' => '+1 555 999 8888',
+        'mobile' => '+1 555 777 6666',
+    ]);
 
     $contact = $user->managedContact()->first();
 
     expect($contact->full_name)->toBe('New Name')
         ->and($contact->first_name)->toBe('New')
         ->and($contact->last_name)->toBe('Name')
-        ->and($contact->job_title)->toBe('Senior');
+        ->and($contact->job_title)->toBe('Senior')
+        ->and($contact->email)->toBe('new-email@example.com')
+        ->and($contact->phone)->toBe('+1 555 999 8888')
+        ->and($contact->mobile)->toBe('+1 555 777 6666');
 });
 
 it('links and overrides an existing contact with the same email instead of duplicating', function () {
@@ -102,6 +111,8 @@ it('links and overrides an existing contact with the same email instead of dupli
         'first_name' => 'Old',
     ]);
 
+    $originalTypeId = $existing->type_id;
+
     $user = User::factory()->create([
         'name' => 'New Person',
         'email' => 'match@example.com',
@@ -111,7 +122,9 @@ it('links and overrides an existing contact with the same email instead of dupli
 
     expect($contact->getKey())->toBe($existing->getKey())
         ->and($contact->user_id)->toBe($user->getKey())
-        ->and($contact->first_name)->toBe('New');
+        ->and($contact->first_name)->toBe('New')
+        ->and($contact->type_id)->toBe($type->getKey())
+        ->and($contact->type_id)->not->toBe($originalTypeId);
 
     expect(Contact::query()->where('email', 'match@example.com')->count())->toBe(1);
 });

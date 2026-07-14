@@ -161,16 +161,39 @@ class ListContacts extends ListRecords
                                 ->visible(fn (Get $get) => $get('field') === 'type_id'),
                         ])
                         ->action(function (Collection $records, array $data) {
-                            $records->each(
-                                fn (Contact $contact) => $contact
+                            $featureActive = ManagedContactFeature::active();
+
+                            $skippedCount = 0;
+                            $updatedCount = 0;
+
+                            foreach ($records as $contact) {
+                                assert($contact instanceof Contact);
+
+                                if ($featureActive && $contact->isManaged()) {
+                                    $skippedCount++;
+
+                                    continue;
+                                }
+
+                                $contact
                                     ->forceFill([$data['field'] => $data[$data['field']]])
-                                    ->save()
-                            );
+                                    ->save();
+
+                                $updatedCount++;
+                            }
 
                             Notification::make()
-                                ->title($records->count() . ' ' . str('Contact')->plural($records->count()) . ' Updated')
+                                ->title($updatedCount . ' ' . str('Contact')->plural($updatedCount) . ' Updated')
                                 ->success()
                                 ->send();
+
+                            if ($skippedCount > 0) {
+                                Notification::make()
+                                    ->title($skippedCount . ' managed ' . str('Contact')->plural($skippedCount) . ' skipped')
+                                    ->body('Managed contacts are synchronized from their linked user and cannot be edited.')
+                                    ->warning()
+                                    ->send();
+                            }
                         }),
                 ]),
             ]);

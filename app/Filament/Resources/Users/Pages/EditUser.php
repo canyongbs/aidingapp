@@ -52,6 +52,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -99,19 +100,22 @@ class EditUser extends EditRecord
                             ->numeric(),
                         PhoneInput::make('mobile')
                             ->nullable(),
-                        Toggle::make('is_managed_contact')
-                            ->label('Managed Contact')
-                            ->helperText('Creates a linked, read-only contact record for the self-service portal that stays in sync with this user.')
-                            ->live()
+                        Grid::make(2)
                             ->visible(fn (): bool => ManagedContactFeature::active())
+                            ->schema([
+                                Toggle::make('is_managed_contact')
+                                    ->label('Managed Contact')
+                                    ->helperText('Creates a linked, read-only contact record for the self-service portal that stays in sync with this user.')
+                                    ->live(),
+                                Select::make('managed_contact_type_id')
+                                    ->label('Contact Type')
+                                    ->options(fn (): array => ContactType::query()->pluck('name', 'id')->all())
+                                    ->searchable()
+                                    ->preload()
+                                    ->required(fn (Get $get): bool => (bool) $get('is_managed_contact'))
+                                    ->visible(fn (Get $get): bool => (bool) $get('is_managed_contact')),
+                            ])
                             ->columnSpanFull(),
-                        Select::make('managed_contact_type_id')
-                            ->label('Contact Type')
-                            ->options(fn (): array => ContactType::query()->pluck('name', 'id')->all())
-                            ->searchable()
-                            ->preload()
-                            ->required(fn (Get $get): bool => (bool) $get('is_managed_contact'))
-                            ->visible(fn (Get $get): bool => ManagedContactFeature::active() && (bool) $get('is_managed_contact')),
                         Toggle::make('is_external')
                             ->label('User can only log in via a social provider.')
                             ->columnSpanFull()
@@ -140,6 +144,10 @@ class EditUser extends EditRecord
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
+        if (! ManagedContactFeature::active()) {
+            return $data;
+        }
+
         /** @var User $user */
         $user = $this->getRecord();
 

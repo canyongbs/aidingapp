@@ -48,6 +48,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -96,14 +97,17 @@ class ViewUser extends ViewRecord
                             ->numeric(),
                         PhoneInput::make('mobile')
                             ->nullable(),
-                        Toggle::make('is_managed_contact')
-                            ->label('Managed Contact')
+                        Grid::make(2)
                             ->visible(fn (): bool => ManagedContactFeature::active())
+                            ->schema([
+                                Toggle::make('is_managed_contact')
+                                    ->label('Managed Contact'),
+                                Select::make('managed_contact_type_id')
+                                    ->label('Contact Type')
+                                    ->options(fn (): array => ContactType::query()->pluck('name', 'id')->all())
+                                    ->visible(fn (Get $get): bool => (bool) $get('is_managed_contact')),
+                            ])
                             ->columnSpanFull(),
-                        Select::make('managed_contact_type_id')
-                            ->label('Contact Type')
-                            ->options(fn (): array => ContactType::query()->pluck('name', 'id')->all())
-                            ->visible(fn (Get $get): bool => ManagedContactFeature::active() && (bool) $get('is_managed_contact')),
                         Toggle::make('is_external')
                             ->label('User can only log in via a social provider.')
                             ->columnSpanFull(),
@@ -133,6 +137,10 @@ class ViewUser extends ViewRecord
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
+        if (! ManagedContactFeature::active()) {
+            return $data;
+        }
+
         /** @var User $user */
         $user = $this->getRecord();
 

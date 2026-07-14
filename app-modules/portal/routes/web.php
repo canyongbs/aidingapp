@@ -50,7 +50,7 @@ Route::get('/portals/knowledge-management/{any?}', function (?string $any = null
 })->where('any', '.*');
 
 Route::get('/employee-self-service', EmployeeSelfServiceController::class)
-    ->middleware(['web', 'auth'])
+    ->middleware(['web', 'auth', 'signed'])
     ->name('employee-self-service');
 
 Route::prefix('portal')

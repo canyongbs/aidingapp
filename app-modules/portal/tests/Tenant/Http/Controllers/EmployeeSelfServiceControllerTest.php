@@ -39,8 +39,14 @@ use AidingApp\Contact\Services\ManagedContactService;
 use App\Features\ManagedContactFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\actingAs;
+
+function employeeSelfServiceUrl(): string
+{
+    return URL::temporarySignedRoute('employee-self-service', now()->addHour());
+}
 
 it('logs the managed contact into the portal and redirects', function () {
     $type = ContactType::factory()->create();
@@ -50,7 +56,7 @@ it('logs the managed contact into the portal and redirects', function () {
     $contact = app(ManagedContactService::class)->enable($user, $type->getKey());
 
     actingAs($user)
-        ->get(route('employee-self-service'))
+        ->get(employeeSelfServiceUrl())
         ->assertRedirect(route('portal.show'));
 
     expect(Auth::guard('contact')->id())->toBe($contact->getKey());
@@ -58,6 +64,18 @@ it('logs the managed contact into the portal and redirects', function () {
 
 it('forbids a user without a managed contact', function () {
     $user = User::factory()->create();
+
+    actingAs($user)
+        ->get(employeeSelfServiceUrl())
+        ->assertForbidden();
+});
+
+it('rejects an unsigned or tampered url', function () {
+    $type = ContactType::factory()->create();
+
+    $user = User::factory()->create();
+
+    app(ManagedContactService::class)->enable($user, $type->getKey());
 
     actingAs($user)
         ->get(route('employee-self-service'))
@@ -74,6 +92,6 @@ it('returns not found when the feature is inactive', function () {
     app(ManagedContactService::class)->enable($user, $type->getKey());
 
     actingAs($user)
-        ->get(route('employee-self-service'))
+        ->get(employeeSelfServiceUrl())
         ->assertNotFound();
 });

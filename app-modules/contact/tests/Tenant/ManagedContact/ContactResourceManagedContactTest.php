@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ListContacts;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Models\Contact;
@@ -95,14 +96,41 @@ it('shows the edit action on the view page of an unmanaged contact', function ()
         ->assertActionDoesNotExist('managed');
 });
 
-it('redirects away from the edit page of a managed contact', function () {
+it('forbids access to and hides the edit page of a managed contact', function () {
     $user = User::factory()->create()
         ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
 
     actingAs($user);
 
     $managed = makeManagedContact();
+    $unmanaged = Contact::factory()->create();
+
+    expect(EditContact::canAccess(['record' => $managed]))->toBeFalse()
+        ->and(EditContact::canAccess(['record' => $unmanaged]))->toBeTrue();
 
     get(ContactResource::getUrl('edit', ['record' => $managed]))
-        ->assertRedirect(ContactResource::getUrl('view', ['record' => $managed]));
+        ->assertForbidden();
+
+    get(ContactResource::getUrl('edit', ['record' => $unmanaged]))
+        ->assertSuccessful();
+});
+
+it('excludes managed contacts from the bulk update action', function () {
+    $user = User::factory()->create()
+        ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
+
+    actingAs($user);
+
+    $managed = makeManagedContact();
+    $unmanaged = Contact::factory()->create();
+
+    livewire(ListContacts::class)
+        ->callTableBulkAction('bulk_update', [$managed, $unmanaged], [
+            'field' => 'description',
+            'description' => 'bulk-updated-description',
+        ])
+        ->assertHasNoTableBulkActionErrors();
+
+    expect($unmanaged->refresh()->description)->toBe('bulk-updated-description')
+        ->and($managed->refresh()->description)->not->toBe('bulk-updated-description');
 });
