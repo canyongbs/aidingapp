@@ -50,7 +50,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Grid;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -131,12 +130,11 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
             ->label('Add pipeline entry')
             ->model(PipelineEntry::class)
             ->schema([
-                Grid::make()->schema([
-                    TextInput::make('name')
-                        ->maxLength(255)
-                        ->required()
-                        ->string(),
-                ]),
+                TextInput::make('name')
+                    ->maxLength(255)
+                    ->required()
+                    ->string()
+                    ->columnSpanFull(),
                 ...PipelineEntryForm::components($this->pipeline),
             ])
             ->action(function (array $data, array $arguments) {
