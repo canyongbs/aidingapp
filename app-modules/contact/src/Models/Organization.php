@@ -132,7 +132,7 @@ class Organization extends BaseModel implements HasMedia, Auditable
     }
 
     /**
-     * @return BelongsToMany<Project, $this, ProjectGuest>
+     * @return BelongsToMany<Project, $this,covariant ProjectGuest>
      */
     public function guestProjects(): BelongsToMany
     {

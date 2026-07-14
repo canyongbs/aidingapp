@@ -285,7 +285,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return BelongsToMany<Project, $this, ProjectGuest>
+     * @return BelongsToMany<Project, $this,covariant ProjectGuest>
      */
     public function guestProjects(): BelongsToMany
     {
