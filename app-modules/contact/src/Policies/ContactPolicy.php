@@ -37,6 +37,7 @@
 namespace AidingApp\Contact\Policies;
 
 use AidingApp\Contact\Models\Contact;
+use App\Features\ManagedContactFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -76,6 +77,10 @@ class ContactPolicy
 
     public function update(Authenticatable $authenticatable, Contact $contact): Response
     {
+        if (ManagedContactFeature::active() && $contact->isManaged()) {
+            return Response::deny('This is a managed contact synchronized from a user and cannot be edited.');
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['contact.*.update'],
             denyResponse: 'You do not have permission to update this contact.'

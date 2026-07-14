@@ -115,6 +115,17 @@ it('forbids access to and hides the edit page of a managed contact', function ()
         ->assertSuccessful();
 });
 
+it('denies the update ability for a managed contact via the policy', function () {
+    $user = User::factory()->create()
+        ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
+
+    $managed = makeManagedContact();
+    $unmanaged = Contact::factory()->create();
+
+    expect($user->can('update', $managed))->toBeFalse()
+        ->and($user->can('update', $unmanaged))->toBeTrue();
+});
+
 it('excludes managed contacts from the bulk update action', function () {
     $user = User::factory()->create()
         ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
