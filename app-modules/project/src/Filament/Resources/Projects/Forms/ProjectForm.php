@@ -113,7 +113,8 @@ class ProjectForm
     }
 
     /**
-     * @return array<int, mixed>
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
      */
     public static function mutateDataForSave(array $data): array
     {
