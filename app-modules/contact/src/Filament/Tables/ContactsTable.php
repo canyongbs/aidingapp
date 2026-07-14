@@ -107,8 +107,6 @@ class ContactsTable
                             ->icon('heroicon-m-phone'),
                         TextConstraint::make('address')
                             ->icon('heroicon-m-map-pin'),
-                        TextConstraint::make('address_2')
-                            ->icon('heroicon-m-map-pin'),
                         BooleanConstraint::make('sms_opt_out')
                             ->label('SMS Opt Out')
                             ->icon('heroicon-m-chat-bubble-bottom-center'),

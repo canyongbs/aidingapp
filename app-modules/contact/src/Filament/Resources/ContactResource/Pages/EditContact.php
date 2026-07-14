@@ -40,6 +40,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
+use App\Filament\Forms\Components\AddressInput;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Radio;
@@ -158,30 +159,7 @@ class EditContact extends EditRecord
                         PhoneInput::make('phone')
                             ->label('Other Phone')
                             ->string(),
-                        TextInput::make('address')
-                            ->label('Address')
-                            ->string()
-                            ->maxLength(255),
-                        TextInput::make('address_2')
-                            ->label('Address 2')
-                            ->string()
-                            ->maxLength(255),
-                        TextInput::make('address_3')
-                            ->label('Address 3')
-                            ->string()
-                            ->maxLength(255),
-                        TextInput::make('city')
-                            ->label('City')
-                            ->string()
-                            ->maxLength(255),
-                        TextInput::make('state')
-                            ->label('State')
-                            ->string()
-                            ->maxLength(255),
-                        TextInput::make('postal')
-                            ->label('Postal')
-                            ->string()
-                            ->maxLength(255),
+                        AddressInput::make(),
                     ])
                     ->columns(2),
                 Section::make('Classification')

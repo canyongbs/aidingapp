@@ -50,7 +50,6 @@ class ContactFactory extends Factory
     {
         $firstName = $this->faker->firstName();
         $lastName = $this->faker->lastName();
-        $address3 = $this->faker->optional()->words(asText: true);
 
         return [
             'type_id' => ContactType::factory(),
@@ -64,12 +63,7 @@ class ContactFactory extends Factory
             'sms_opt_out' => $this->faker->boolean(),
             'email_bounce' => $this->faker->boolean(),
             'phone' => $this->faker->e164PhoneNumber(),
-            'address' => $this->faker->streetAddress(),
-            'address_2' => $this->faker->secondaryAddress(),
-            'address_3' => $address3 ? str($address3)->headline()->toString() : null,
-            'city' => $this->faker->city(),
-            'state' => $this->faker->stateAbbr(),
-            'postal' => str($this->faker->postcode())->before('-')->toString(),
+            'address' => $this->faker->address(),
             'created_by_id' => User::factory(),
         ];
     }

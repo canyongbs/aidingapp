@@ -59,7 +59,6 @@ class EditContactRequestFactory extends RequestFactory
             'email_bounce' => intval($this->faker->boolean()),
             'phone' => $this->faker->e164PhoneNumber(),
             'address' => $this->faker->address(),
-            'address_2' => $this->faker->address(),
         ];
     }
 }
