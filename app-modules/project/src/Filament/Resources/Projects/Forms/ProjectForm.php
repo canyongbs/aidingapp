@@ -97,7 +97,7 @@ class ProjectForm
                 ->afterStateHydrated(function (Set $set, ?Project $record) {
                     if ($record && filled($record->target_completion_date)) {
                         $set('target_completion_date_type', 'set');
-                    }else{
+                    } else {
                         $set('target_completion_date_type', 'indefinite');
                     }
                 })
