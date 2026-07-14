@@ -101,7 +101,8 @@ class ViewUser extends ViewRecord
                             ->visible(fn (): bool => ManagedContactFeature::active())
                             ->schema([
                                 Toggle::make('is_managed_contact')
-                                    ->label('Managed Contact'),
+                                    ->label('Managed Contact')
+                                    ->helperText('Creates a linked, read-only contact record for the self-service portal that stays in sync with this user.'),
                                 Select::make('managed_contact_type_id')
                                     ->label('Contact Type')
                                     ->options(fn (): array => ContactType::query()->pluck('name', 'id')->all())
