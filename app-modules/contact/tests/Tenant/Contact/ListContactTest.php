@@ -75,7 +75,7 @@ test('ListContacts is gated with proper access control', function () {
 test('ListContacts can bulk update characteristics', function () {
     $user = User::factory()->create();
 
-    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.view-any', 'contact.*.update');
 
     actingAs($user);
 

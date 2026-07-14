@@ -47,6 +47,7 @@ use Filament\Actions\Testing\TestAction;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
 function makeManagedContact(): Contact
 {
@@ -126,7 +127,7 @@ it('denies the update ability for a managed contact via the policy', function ()
         ->and($user->can('update', $unmanaged))->toBeTrue();
 });
 
-it('excludes managed contacts from the bulk update action', function () {
+it('excludes managed contacts from the bulk update action via individual record authorization', function () {
     $user = User::factory()->create()
         ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
 
@@ -144,4 +145,20 @@ it('excludes managed contacts from the bulk update action', function () {
 
     expect($unmanaged->refresh()->description)->toBe('bulk-updated-description')
         ->and($managed->refresh()->description)->not->toBe('bulk-updated-description');
+});
+
+it('prevents super admins from bulk updating managed contacts', function () {
+    asSuperAdmin();
+
+    $managed = makeManagedContact();
+    $unmanaged = Contact::factory()->create();
+
+    livewire(ListContacts::class)
+        ->callTableBulkAction('bulk_update', [$managed, $unmanaged], [
+            'field' => 'description',
+            'description' => 'super-admin-bulk-description',
+        ]);
+
+    expect($unmanaged->refresh()->description)->toBe('super-admin-bulk-description')
+        ->and($managed->refresh()->description)->not->toBe('super-admin-bulk-description');
 });

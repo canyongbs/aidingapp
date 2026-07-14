@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Services;
 
 use AidingApp\Contact\Models\Contact;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
 class ManagedContactService
 {
@@ -56,8 +57,8 @@ class ManagedContactService
         }
 
         $contact->fill($this->mapUserAttributes($user));
-        $contact->type_id = $contactTypeId;
-        $contact->user_id = $user->getKey();
+        $contact->type()->associate($contactTypeId);
+        $contact->managedByUser()->associate($user);
         $contact->save();
 
         return $contact;
@@ -75,7 +76,7 @@ class ManagedContactService
             return;
         }
 
-        $contact->user_id = null;
+        $contact->managedByUser()->dissociate();
         $contact->save();
     }
 
@@ -110,7 +111,7 @@ class ManagedContactService
 
         return Contact::withTrashed()
             ->where('email', $user->email)
-            ->where(function ($query) use ($user) {
+            ->where(function (Builder $query) use ($user): void {
                 $query->whereNull('user_id')
                     ->orWhere('user_id', $user->getKey());
             })

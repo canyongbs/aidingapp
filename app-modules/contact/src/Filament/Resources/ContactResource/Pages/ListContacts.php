@@ -53,7 +53,6 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Enums\IconPosition;
@@ -126,6 +125,7 @@ class ListContacts extends ListRecords
                         ->authorizeIndividualRecords('delete'),
                     BulkAction::make('bulk_update')
                         ->icon('heroicon-o-pencil-square')
+                        ->authorizeIndividualRecords('update')
                         ->form([
                             Select::make('field')
                                 ->options([
@@ -160,17 +160,29 @@ class ListContacts extends ListRecords
                                 ->required()
                                 ->visible(fn (Get $get) => $get('field') === 'type_id'),
                         ])
-                        ->action(function (Collection $records, array $data) {
-                            $featureActive = ManagedContactFeature::active();
-
-                            $skippedCount = 0;
-                            $updatedCount = 0;
-
+                        ->action(function (BulkAction $action, Collection $records, array $data): void {
                             foreach ($records as $contact) {
                                 assert($contact instanceof Contact);
 
-                                if ($featureActive && $contact->isManaged()) {
-                                    $skippedCount++;
+                                if (ManagedContactFeature::active() && $contact->isManaged()) {
+                                    $action->reportBulkProcessingFailure(
+                                        'managed_contact',
+                                        message: function (int $failureCount, int $totalCount): string {
+                                            if ($failureCount === 1 && $totalCount === 1) {
+                                                return 'This contact is managed and synchronized from a user, so it cannot be edited.';
+                                            }
+
+                                            if ($failureCount === $totalCount) {
+                                                return 'All of the selected contacts are managed and cannot be edited.';
+                                            }
+
+                                            if ($failureCount === 1) {
+                                                return 'One of the selected contacts is managed and cannot be edited.';
+                                            }
+
+                                            return "{$failureCount} of the selected contacts are managed and cannot be edited.";
+                                        },
+                                    );
 
                                     continue;
                                 }
@@ -178,22 +190,15 @@ class ListContacts extends ListRecords
                                 $contact
                                     ->forceFill([$data['field'] => $data[$data['field']]])
                                     ->save();
-
-                                $updatedCount++;
+                            }
+                        })
+                        ->successNotificationTitle('Contacts updated')
+                        ->failureNotificationTitle(function (int $successCount, int $totalCount): string {
+                            if ($successCount) {
+                                return "{$successCount} of {$totalCount} contacts updated";
                             }
 
-                            Notification::make()
-                                ->title($updatedCount . ' ' . str('Contact')->plural($updatedCount) . ' Updated')
-                                ->success()
-                                ->send();
-
-                            if ($skippedCount > 0) {
-                                Notification::make()
-                                    ->title($skippedCount . ' managed ' . str('Contact')->plural($skippedCount) . ' skipped')
-                                    ->body('Managed contacts are synchronized from their linked user and cannot be edited.')
-                                    ->warning()
-                                    ->send();
-                            }
+                            return 'No contacts were updated';
                         }),
                 ]),
             ]);
