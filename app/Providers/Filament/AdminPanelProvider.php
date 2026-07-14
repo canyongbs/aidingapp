@@ -62,6 +62,7 @@ use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Enums\Width;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\Column;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\Support\Htmlable;
@@ -153,7 +154,7 @@ class AdminPanelProvider extends PanelProvider
                 MenuItem::make()
                     ->label('Employee Self-Service')
                     ->url(fn (): string => URL::temporarySignedRoute('employee-self-service', now()->addHour()))
-                    ->icon('heroicon-s-arrow-top-right-on-square')
+                    ->icon(Heroicon::ArrowTopRightOnSquare)
                     ->openUrlInNewTab()
                     ->visible(function (): bool {
                         $user = Auth::user();
