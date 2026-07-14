@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,61 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
-
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\PipelineStageFactory;
 use AidingApp\Project\Enums\PipelineStageClassification;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Features\PipelineStageClassificationFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-/**
- * @mixin IdeHelperPipelineStage
- */
-class PipelineStage extends BaseModel implements Auditable
-{
-    /** @use HasFactory<PipelineStageFactory> */
-    use HasFactory;
-
-    use AuditableTrait;
-    use HasUuids;
-    use HasUserSaveTracking;
-
-    protected $fillable = [
-        'name',
-        'pipeline_id',
-        'order',
-        'classification',
-    ];
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function casts(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'classification' => PipelineStageClassification::class,
-        ];
+        DB::transaction(function () {
+            Schema::table('pipeline_stages', function (Blueprint $table) {
+                $table->string('classification')
+                    ->initial(PipelineStageClassification::Planning->value)
+                    ->default(PipelineStageClassification::Planning->value);
+            });
+
+            PipelineStageClassificationFeature::activate();
+        });
     }
 
-    /**
-     * @return BelongsTo<Pipeline, $this>
-     */
-    public function pipeline(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(Pipeline::class);
-    }
+        DB::transaction(function () {
+            PipelineStageClassificationFeature::deactivate();
 
-    /**
-     * @return HasMany<PipelineEntry, $this>
-     */
-    public function pipelineEntries(): HasMany
-    {
-        return $this->hasMany(PipelineEntry::class);
+            Schema::table('pipeline_stages', function (Blueprint $table) {
+                $table->dropColumn('classification');
+            });
+        });
     }
-}
+};

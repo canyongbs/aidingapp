@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,30 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+namespace AidingApp\Project\Enums;
 
-use AidingApp\Project\Enums\PipelineStageClassification;
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineStage;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Filament\Support\Contracts\HasLabel;
 
-/**
- * @extends Factory<PipelineStage>
- */
-class PipelineStageFactory extends Factory
+enum PipelineStageClassification: string implements HasLabel
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    case Planning = 'planning';
+
+    case InProgress = 'in_progress';
+
+    case Complete = 'complete';
+
+    public function getLabel(): string
     {
-        return [
-            'name' => $this->faker->unique()->words(3, true),
-            'pipeline_id' => Pipeline::factory(),
-            'order' => $this->faker->numberBetween(1, 5),
-            'classification' => $this->faker->randomElement(PipelineStageClassification::cases()),
-        ];
+        return match ($this) {
+            self::Planning => 'Planning',
+            self::InProgress => 'In Progress',
+            self::Complete => 'Complete',
+        };
     }
 }

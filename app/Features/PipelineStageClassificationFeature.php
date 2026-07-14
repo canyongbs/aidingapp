@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,30 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+namespace App\Features;
 
-use AidingApp\Project\Enums\PipelineStageClassification;
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineStage;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @extends Factory<PipelineStage>
- */
-class PipelineStageFactory extends Factory
+class PipelineStageClassificationFeature extends AbstractFeatureFlag
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'name' => $this->faker->unique()->words(3, true),
-            'pipeline_id' => Pipeline::factory(),
-            'order' => $this->faker->numberBetween(1, 5),
-            'classification' => $this->faker->randomElement(PipelineStageClassification::cases()),
-        ];
+        return false;
     }
 }

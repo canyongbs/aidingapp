@@ -36,6 +36,7 @@
 
 namespace AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory;
 
+use AidingApp\Project\Enums\PipelineStageClassification;
 use Worksome\RequestFactories\RequestFactory;
 
 class EditPipelineRequestFactory extends RequestFactory
@@ -45,13 +46,10 @@ class EditPipelineRequestFactory extends RequestFactory
         return [
             'name' => fake()->words(3, true),
             'description' => fake()->sentence(),
-            'stages' => fn () => array_map(
-                fn ($stage) => ['name' => $stage],
-                [
-                    fake()->unique()->word(),
-                    fake()->unique()->word(),
-                ]
-            ),
+            'stages' => fn () => [
+                ['name' => fake()->unique()->word(), 'classification' => PipelineStageClassification::Planning->value],
+                ['name' => fake()->unique()->word(), 'classification' => PipelineStageClassification::InProgress->value],
+            ],
         ];
     }
 }
