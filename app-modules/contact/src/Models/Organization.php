@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Audit\Overrides\BelongsToMany;
 use AidingApp\Contact\Database\Factories\OrganizationFactory;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectGuest;
@@ -46,6 +45,7 @@ use App\Models\Media;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;

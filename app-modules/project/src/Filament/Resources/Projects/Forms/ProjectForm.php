@@ -114,7 +114,7 @@ class ProjectForm
 
     public static function mutateDataForSave(array $data): array
     {
-        if (! array_key_exists('target_completion_date', $data)) {
+        if (ProjectNewFieldsFeature::active() && ! array_key_exists('target_completion_date', $data)) {
             $data['target_completion_date'] = null;
         }
 

@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Models;
 
 use AidingApp\Alert\Models\Alert;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Audit\Overrides\BelongsToMany;
 use AidingApp\Contact\Database\Factories\ContactFactory;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Observers\ContactObserver;
@@ -68,6 +67,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
