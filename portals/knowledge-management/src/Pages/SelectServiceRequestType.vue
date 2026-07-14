@@ -321,6 +321,7 @@
                                                 :to="{
                                                     name: 'create-service-request-from-type',
                                                     params: { typeId: type.id },
+                                                    query: type.category_id ? { category: type.category_id } : {},
                                                 }"
                                             >
                                                 <span class="absolute inset-0" aria-hidden="true" />

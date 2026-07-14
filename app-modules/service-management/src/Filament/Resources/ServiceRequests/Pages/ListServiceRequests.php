@@ -49,6 +49,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
 use App\Models\User;
@@ -313,17 +314,42 @@ class ListServiceRequests extends ListRecords
             ->groupBy('parent_id');
 
         $types = ServiceRequestType::query()
+            ->when(
+                ServiceRequestTypeMultipleCategoriesFeature::active(),
+                fn (Builder $query) => $query->with('categories:id'),
+            )
             ->orderBy('sort')
-            ->get()
-            ->groupBy('category_id');
+            ->get();
+
+        // A type can belong to many categories, so it appears under each of them (and once at the
+        // root if it belongs to none).
+        $typesByCategory = [];
+        $uncategorizedTypes = [];
+
+        foreach ($types as $type) {
+            $categoryIds = $type->categoryIds();
+
+            if ($categoryIds === []) {
+                $uncategorizedTypes[] = $type;
+
+                continue;
+            }
+
+            foreach ($categoryIds as $categoryId) {
+                $typesByCategory[$categoryId][] = $type;
+            }
+        }
+
+        /** @var Collection<int|string, Collection<int, ServiceRequestType>> $typesByCategory */
+        $typesByCategory = collect($typesByCategory)->map(fn (array $group): Collection => collect($group));
 
         $tree = collect($categories->get('', collect()))
-            ->map(fn (ServiceRequestTypeCategory $category) => static::buildCategoryNode($category, $categories, $types))
+            ->map(fn (ServiceRequestTypeCategory $category) => static::buildCategoryNode($category, $categories, $typesByCategory))
             ->filter(fn (array $node) => ! empty($node['children']))
             ->values()
             ->all();
 
-        $uncategorizedTypes = $types->get('', collect())
+        $uncategorizedTypes = collect($uncategorizedTypes)
             ->map(fn (ServiceRequestType $type) => [
                 'name' => $type->name,
                 'value' => $type->getKey(),

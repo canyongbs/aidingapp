@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
+use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -67,8 +68,16 @@ class ViewServiceRequestType extends ViewRecord
                         TextEntry::make('icon')
                             ->state(fn (ServiceRequestType $record): string => str($record->icon)->after('heroicon-o-')->headline()->toString())
                             ->icon(fn (ServiceRequestType $record): string => $record->icon),
-                        TextEntry::make('category.name')
+                        TextEntry::make('service_request_areas')
                             ->label('Service Request Area')
+                            ->state(function (ServiceRequestType $record): array {
+                                if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+                                    return $record->categories->pluck('name')->all();
+                                }
+
+                                return $record->category !== null ? [$record->category->name] : [];
+                            })
+                            ->badge()
                             ->placeholder('None'),
                         TextEntry::make('default_category')
                             ->label('Default Category'),
