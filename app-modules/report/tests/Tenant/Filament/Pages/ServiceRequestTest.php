@@ -51,7 +51,7 @@ it('is gated with proper access control', function () {
     $settings->data->addons->serviceManagement = false;
     $settings->save();
 
-    $user = User::factory()->create();
+    $user = User::factory()->create(['timezone' => 'UTC']);
 
     actingAs($user);
 
@@ -67,7 +67,7 @@ it('is gated with proper access control', function () {
         'user_id' => $user->getKey(),
     ]);
 
-    get(ServiceRequests::getUrl())->assertSuccessful();
+    livewire(ServiceRequests::class)->assertOk();
 });
 
 it('grants access to a user belonging to a department that has been granted access', function () {
@@ -77,7 +77,7 @@ it('grants access to a user belonging to a department that has been granted acce
 
     $department = Department::factory()->create();
 
-    $user = User::factory()->create(['department_id' => $department->getKey()]);
+    $user = User::factory()->create(['timezone' => 'UTC', 'department_id' => $department->getKey()]);
 
     actingAs($user);
 
@@ -88,5 +88,5 @@ it('grants access to a user belonging to a department that has been granted acce
         'department_id' => $department->getKey(),
     ]);
 
-    get(ServiceRequests::getUrl())->assertSuccessful();
+    livewire(ServiceRequests::class)->assertOk();
 });

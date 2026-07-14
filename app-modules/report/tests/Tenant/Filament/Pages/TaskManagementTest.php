@@ -67,7 +67,7 @@ it('is gated with proper access control', function () {
         'user_id' => $user->getKey(),
     ]);
 
-    get(TaskManagement::getUrl())->assertSuccessful();
+    livewire(TaskManagement::class)->assertOk();
 });
 
 it('grants access to a user belonging to a department that has been granted access', function () {
@@ -88,5 +88,5 @@ it('grants access to a user belonging to a department that has been granted acce
         'department_id' => $department->getKey(),
     ]);
 
-    get(TaskManagement::getUrl())->assertSuccessful();
+    livewire(TaskManagement::class)->assertOk();
 });
