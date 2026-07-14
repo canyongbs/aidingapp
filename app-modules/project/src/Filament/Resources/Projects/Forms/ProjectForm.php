@@ -70,7 +70,7 @@ class ProjectForm
             IconSelect::make('icon')
                 ->required(fn (): bool => ProjectNewFieldsFeature::active())
                 ->visible(fn (): bool => ProjectNewFieldsFeature::active())
-                ->default('clipboard-document-list'),
+                ->default('heroicon-o-clipboard-document-list'),
             ColorSelect::make('color')
                 ->required(fn (): bool => ProjectNewFieldsFeature::active())
                 ->visible(fn (): bool => ProjectNewFieldsFeature::active())
