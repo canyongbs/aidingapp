@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Services;
 
 use AidingApp\Contact\Models\Contact;
 use App\Models\User;
+use CanyonGBS\Common\Parser\Parser;
 use Illuminate\Database\Eloquent\Builder;
 
 class ManagedContactService
@@ -123,28 +124,16 @@ class ManagedContactService
      */
     protected function mapUserAttributes(User $user): array
     {
-        [$firstName, $lastName] = $this->splitName($user->name);
+        $name = (new Parser())->parse(trim($user->name));
 
         return [
-            'first_name' => $firstName,
-            'last_name' => $lastName,
+            'first_name' => $name->getFirstname(),
+            'last_name' => $name->getLastname(),
             'full_name' => trim($user->name),
             'email' => $user->email,
             'job_title' => $user->job_title,
             'phone' => $user->work_number,
             'mobile' => $user->mobile,
         ];
-    }
-
-    /**
-     * @return array{0: string, 1: string}
-     */
-    protected function splitName(string $name): array
-    {
-        $name = trim($name);
-
-        $parts = explode(' ', $name, 2);
-
-        return [$parts[0], $parts[1] ?? ''];
     }
 }
