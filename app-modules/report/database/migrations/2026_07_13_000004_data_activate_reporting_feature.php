@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,27 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Report\Providers;
+use App\Features\ReportingFeature;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Report\Models\ReportDepartmentAccess;
-use AidingApp\Report\Models\ReportUserAccess;
-use AidingApp\Report\ReportPlugin;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
-
-class ReportServiceProvider extends ServiceProvider
-{
-    public function register()
+return new class () extends Migration {
+    public function up(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ReportPlugin()));
+        ReportingFeature::activate();
     }
 
-    public function boot()
+    public function down(): void
     {
-        Relation::morphMap([
-            'report_user_access' => ReportUserAccess::class,
-            'report_department_access' => ReportDepartmentAccess::class,
-        ]);
+        ReportingFeature::deactivate();
     }
-}
+};
