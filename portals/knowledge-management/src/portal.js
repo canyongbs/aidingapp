@@ -131,6 +131,11 @@ customElements.define(
                         name: 'tasks',
                         component: () => import('./Pages/ComingSoon.vue'),
                     },
+                    {
+                        path: baseUrl + '/projects',
+                        name: 'projects',
+                        component: () => import('./Pages/ComingSoon.vue'),
+                    },
                 ],
             });
 

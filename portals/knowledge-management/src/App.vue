@@ -114,6 +114,7 @@
     const hasAssets = ref(false);
     const hasLicense = ref(false);
     const hasTasks = ref(false);
+    const hasProjects = ref(false);
     const showLogin = ref(false);
 
     const portalPrimaryColor = ref('');
@@ -287,6 +288,7 @@
                     setHasAssets,
                     setHasLicense,
                     setHasTasks,
+                    setHasProjects,
                     setIsStatusEnabled,
                     setIsAdvisoryEnabled,
                     setIsAssetEnabled,
@@ -326,6 +328,10 @@
 
                 setHasTasks(response.data.has_tasks).then(() => {
                     hasTasks.value = response.data.has_tasks;
+                });
+
+                setHasProjects(response.data.has_projects).then(() => {
+                    hasProjects.value = response.data.has_projects;
                 });
 
                 setIsStatusEnabled(response.data.service_monitoring_enabled).then(() => {

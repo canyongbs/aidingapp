@@ -37,6 +37,7 @@
         ClipboardDocumentListIcon,
         CubeIcon,
         DocumentTextIcon,
+        FolderIcon,
         HomeIcon,
         ShieldExclamationIcon,
         SignalIcon,
@@ -59,6 +60,7 @@
         hasAssets,
         hasLicense,
         hasTasks,
+        hasProjects,
         isStatusEnabled,
         isAdvisoryEnabled,
         isAssetEnabled,
@@ -146,6 +148,13 @@
             icon: ClipboardDocumentListIcon,
             visible: computed(() => hasTasks.value && user.value !== null),
             command: () => router.push({ name: 'tasks' }),
+        },
+        {
+            label: 'Projects',
+            routeName: 'projects',
+            icon: FolderIcon,
+            visible: computed(() => hasProjects.value && user.value !== null),
+            command: () => router.push({ name: 'projects' }),
         },
     ]);
 
