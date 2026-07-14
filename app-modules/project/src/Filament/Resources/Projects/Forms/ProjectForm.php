@@ -112,6 +112,9 @@ class ProjectForm
         ];
     }
 
+    /**
+     * @return array<int, mixed>
+     */
     public static function mutateDataForSave(array $data): array
     {
         if (ProjectNewFieldsFeature::active() && ! array_key_exists('target_completion_date', $data)) {
