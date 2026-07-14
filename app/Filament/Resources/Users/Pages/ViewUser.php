@@ -142,8 +142,9 @@ class ViewUser extends ViewRecord
             return $data;
         }
 
-        /** @var User $user */
         $user = $this->getRecord();
+
+        assert($user instanceof User);
 
         $managedContact = $user->managedContact()->first();
 

@@ -148,8 +148,9 @@ class EditUser extends EditRecord
             return $data;
         }
 
-        /** @var User $user */
         $user = $this->getRecord();
+
+        assert($user instanceof User);
 
         $managedContact = $user->managedContact()->first();
 
@@ -180,8 +181,9 @@ class EditUser extends EditRecord
             return;
         }
 
-        /** @var User $user */
         $user = $this->getRecord();
+
+        assert($user instanceof User);
 
         if ($this->isManagedContact && filled($this->managedContactTypeId)) {
             app(ManagedContactService::class)->enable($user, $this->managedContactTypeId);

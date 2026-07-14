@@ -123,8 +123,9 @@ class ViewContact extends ViewRecord
 
     protected function getHeaderActions(): array
     {
-        /** @var Contact $contact */
         $contact = $this->getRecord();
+
+        assert($contact instanceof Contact);
 
         if (ManagedContactFeature::active() && $contact->isManaged()) {
             return [
