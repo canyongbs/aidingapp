@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -36,57 +36,43 @@
 
 use AidingApp\Department\Models\Department;
 use AidingApp\Report\Enums\ReportAccessKey;
-use AidingApp\Report\Filament\Pages\KnowledgeBase;
+use AidingApp\Report\Filament\Pages\AiClarification;
 use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
 use App\Models\User;
-use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->knowledgeManagement = false;
-    $settings->save();
-
     $user = User::factory()->create();
 
     actingAs($user);
 
-    livewire(KnowledgeBase::class)->assertForbidden();
-
-    $settings->data->addons->knowledgeManagement = true;
-    $settings->save();
-
-    livewire(KnowledgeBase::class)->assertForbidden();
+    livewire(AiClarification::class)->assertForbidden();
 
     ReportUserAccess::factory()->create([
-        'report_key' => ReportAccessKey::KnowledgeBase->value,
+        'report_key' => ReportAccessKey::AiClarification->value,
         'user_id' => $user->getKey(),
     ]);
 
-    get(KnowledgeBase::getUrl())->assertSuccessful();
+    get(AiClarification::getUrl())->assertSuccessful();
 });
 
 it('grants access to a user belonging to a department that has been granted access', function () {
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->knowledgeManagement = true;
-    $settings->save();
-
     $department = Department::factory()->create();
 
     $user = User::factory()->create(['department_id' => $department->getKey()]);
 
     actingAs($user);
 
-    livewire(KnowledgeBase::class)->assertForbidden();
+    livewire(AiClarification::class)->assertForbidden();
 
     ReportDepartmentAccess::factory()->create([
-        'report_key' => ReportAccessKey::KnowledgeBase->value,
+        'report_key' => ReportAccessKey::AiClarification->value,
         'department_id' => $department->getKey(),
     ]);
 
-    get(KnowledgeBase::getUrl())->assertSuccessful();
+    get(AiClarification::getUrl())->assertSuccessful();
 });

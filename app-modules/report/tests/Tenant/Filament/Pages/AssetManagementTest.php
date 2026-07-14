@@ -34,11 +34,16 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
+use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Filament\Pages\AssetManagement;
+use AidingApp\Report\Models\ReportDepartmentAccess;
+use AidingApp\Report\Models\ReportUserAccess;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
@@ -52,13 +57,36 @@ it('is gated with proper access control', function () {
 
     livewire(AssetManagement::class)->assertForbidden();
 
-    $user->givePermissionTo('report-library.view-any');
-    $user->refresh();
-
-    livewire(AssetManagement::class)->assertForbidden();
-
     $settings->data->addons->assetManagement = true;
     $settings->save();
 
-    livewire(AssetManagement::class)->assertOk();
+    livewire(AssetManagement::class)->assertForbidden();
+
+    ReportUserAccess::factory()->create([
+        'report_key' => ReportAccessKey::AssetManagement->value,
+        'user_id' => $user->getKey(),
+    ]);
+
+    get(AssetManagement::getUrl())->assertSuccessful();
+});
+
+it('grants access to a user belonging to a department that has been granted access', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->assetManagement = true;
+    $settings->save();
+
+    $department = Department::factory()->create();
+
+    $user = User::factory()->create(['department_id' => $department->getKey()]);
+
+    actingAs($user);
+
+    livewire(AssetManagement::class)->assertForbidden();
+
+    ReportDepartmentAccess::factory()->create([
+        'report_key' => ReportAccessKey::AssetManagement->value,
+        'department_id' => $department->getKey(),
+    ]);
+
+    get(AssetManagement::getUrl())->assertSuccessful();
 });

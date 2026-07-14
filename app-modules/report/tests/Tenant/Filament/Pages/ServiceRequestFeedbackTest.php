@@ -34,11 +34,16 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
+use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Filament\Pages\ServiceRequestFeedback;
+use AidingApp\Report\Models\ReportDepartmentAccess;
+use AidingApp\Report\Models\ReportUserAccess;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
@@ -53,11 +58,6 @@ it('is gated with proper access control', function () {
 
     livewire(ServiceRequestFeedback::class)->assertForbidden();
 
-    $user->givePermissionTo('report-library.view-any');
-    $user->refresh();
-
-    livewire(ServiceRequestFeedback::class)->assertForbidden();
-
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
@@ -66,5 +66,34 @@ it('is gated with proper access control', function () {
     $settings->data->addons->feedbackManagement = true;
     $settings->save();
 
-    livewire(ServiceRequestFeedback::class)->assertOk();
+    livewire(ServiceRequestFeedback::class)->assertForbidden();
+
+    ReportUserAccess::factory()->create([
+        'report_key' => ReportAccessKey::ServiceRequestFeedback->value,
+        'user_id' => $user->getKey(),
+    ]);
+
+    get(ServiceRequestFeedback::getUrl())->assertSuccessful();
+});
+
+it('grants access to a user belonging to a department that has been granted access', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->data->addons->feedbackManagement = true;
+    $settings->save();
+
+    $department = Department::factory()->create();
+
+    $user = User::factory()->create(['department_id' => $department->getKey()]);
+
+    actingAs($user);
+
+    livewire(ServiceRequestFeedback::class)->assertForbidden();
+
+    ReportDepartmentAccess::factory()->create([
+        'report_key' => ReportAccessKey::ServiceRequestFeedback->value,
+        'department_id' => $department->getKey(),
+    ]);
+
+    get(ServiceRequestFeedback::getUrl())->assertSuccessful();
 });
