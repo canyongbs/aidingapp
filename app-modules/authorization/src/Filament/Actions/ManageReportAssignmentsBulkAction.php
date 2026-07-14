@@ -48,6 +48,7 @@ use Filament\Notifications\Notification;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Throwable;
 
 class ManageReportAssignmentsBulkAction
@@ -80,7 +81,7 @@ class ManageReportAssignmentsBulkAction
                     )
                     ->getSearchResultsUsing(
                         fn (string $search): array => $usersQuery
-                            ->where(new Expression('lower(name)'), 'like', '%' . strtolower($search) . '%')
+                            ->where(new Expression('lower(name)'), 'like', '%' . Str::lower($search) . '%')
                             ->limit(50)
                             ->pluck('name', 'id')
                             ->all(),
@@ -103,7 +104,7 @@ class ManageReportAssignmentsBulkAction
                     )
                     ->getSearchResultsUsing(
                         fn (string $search): array => $departmentsQuery
-                            ->where(new Expression('lower(name)'), 'like', '%' . strtolower($search) . '%')
+                            ->where(new Expression('lower(name)'), 'like', '%' . Str::lower($search) . '%')
                             ->limit(50)
                             ->pluck('name', 'id')
                             ->all(),
