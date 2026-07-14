@@ -99,6 +99,8 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     use UsesTenantConnection;
     use HasApiTokens;
 
+    public const MANAGED_CONTACT_TOOLTIP = "This is a User's managed non-administrative account for the self-service portal. The information displayed is synchronized directly from the User record.";
+
     protected $fillable = [
         'first_name',
         'last_name',
@@ -121,6 +123,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'created_by_id',
         'title',
         'job_title',
+        'user_id',
     ];
 
     protected $casts = [
@@ -176,6 +179,19 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public function type(): BelongsTo
     {
         return $this->belongsTo(ContactType::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function managedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function isManaged(): bool
+    {
+        return ! is_null($this->user_id);
     }
 
     /**

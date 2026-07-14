@@ -41,6 +41,7 @@ use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
+use App\Features\ManagedContactFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -55,6 +56,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Support\Enums\IconPosition;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -73,7 +76,11 @@ class ListContacts extends ListRecords
                 TextColumn::make(Contact::displayNameKey())
                     ->label('Name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->icon(fn (Contact $record): ?Heroicon => ManagedContactFeature::active() && $record->isManaged() ? Heroicon::LockClosed : null)
+                    ->iconColor('gray')
+                    ->iconPosition(IconPosition::After)
+                    ->tooltip(fn (Contact $record): ?string => ManagedContactFeature::active() && $record->isManaged() ? Contact::MANAGED_CONTACT_TOOLTIP : null),
                 TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
@@ -109,7 +116,8 @@ class ListContacts extends ListRecords
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
+                EditAction::make()
+                    ->hidden(fn (Contact $record): bool => ManagedContactFeature::active() && $record->isManaged()),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

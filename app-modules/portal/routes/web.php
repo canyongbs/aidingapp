@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Portal\Http\Controllers\EmployeeSelfServiceController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRegisterController;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
@@ -47,6 +48,10 @@ Route::get('/portals/knowledge-management/{any?}', function (?string $any = null
 
     return redirect($url, 301);
 })->where('any', '.*');
+
+Route::get('/employee-self-service', EmployeeSelfServiceController::class)
+    ->middleware(['web', 'auth'])
+    ->name('employee-self-service');
 
 Route::prefix('portal')
     ->name('portal.')

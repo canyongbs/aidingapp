@@ -40,6 +40,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
+use App\Features\ManagedContactFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Radio;
@@ -59,6 +60,18 @@ class EditContact extends EditRecord
 
     // TODO: Automatically set from Filament
     protected static ?string $navigationLabel = 'Edit';
+
+    public function mount(int | string $record): void
+    {
+        parent::mount($record);
+
+        /** @var Contact $contact */
+        $contact = $this->getRecord();
+
+        if (ManagedContactFeature::active() && $contact->isManaged()) {
+            $this->redirect(ContactResource::getUrl('view', ['record' => $contact]));
+        }
+    }
 
     public function form(Schema $schema): Schema
     {

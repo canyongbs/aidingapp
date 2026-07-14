@@ -39,6 +39,7 @@ namespace App\Providers\Filament;
 use AidingApp\Authorization\Filament\Pages\Auth\Login;
 use AidingApp\Theme\Settings\ThemeSettings;
 use App\Enums\NavigationGroup;
+use App\Features\ManagedContactFeature;
 use App\Features\SubscriptionExpirationFeature;
 use App\Filament\Clusters\ProfileSettings;
 use App\Filament\Pages\Dashboard;
@@ -47,6 +48,7 @@ use App\Health\Checks\AzureCredentialsExpiringCheck;
 use App\Http\Middleware\TrackPresence;
 use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Tenant;
+use App\Models\User;
 use App\Multitenancy\Http\Middleware\NeedsTenant;
 use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
@@ -69,6 +71,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\HtmlString;
@@ -146,6 +149,18 @@ class AdminPanelProvider extends PanelProvider
                 FilamentFullCalendarPlugin::make(),
             ])
             ->userMenuItems([
+                MenuItem::make()
+                    ->label('Employee Self-Service')
+                    ->url(fn (): string => route('employee-self-service'))
+                    ->icon('heroicon-s-arrow-top-right-on-square')
+                    ->openUrlInNewTab()
+                    ->visible(function (): bool {
+                        $user = Auth::user();
+
+                        return ManagedContactFeature::active()
+                            && $user instanceof User
+                            && $user->managedContact()->exists();
+                    }),
                 MenuItem::make()
                     ->label('Profile Settings')
                     ->url(fn () => ProfileSettings::getUrl())

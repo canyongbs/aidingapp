@@ -38,12 +38,15 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use App\Features\ManagedContactFeature;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
 
 class ViewContact extends ViewRecord
 {
@@ -120,6 +123,20 @@ class ViewContact extends ViewRecord
 
     protected function getHeaderActions(): array
     {
+        /** @var Contact $contact */
+        $contact = $this->getRecord();
+
+        if (ManagedContactFeature::active() && $contact->isManaged()) {
+            return [
+                Action::make('managed')
+                    ->hiddenLabel()
+                    ->icon(Heroicon::LockClosed)
+                    ->color('gray')
+                    ->tooltip(Contact::MANAGED_CONTACT_TOOLTIP)
+                    ->disabled(),
+            ];
+        }
+
         return [
             EditAction::make(),
         ];
