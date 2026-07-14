@@ -37,31 +37,25 @@
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Actions\BulkUpdateContactsAction;
 use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
 use App\Features\ManagedContactFeature;
 use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 
 class ListContacts extends ListRecords
 {
