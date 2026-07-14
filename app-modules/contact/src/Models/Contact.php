@@ -99,8 +99,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     use UsesTenantConnection;
     use HasApiTokens;
 
-    public const MANAGED_CONTACT_TOOLTIP = "This is a User's managed non-administrative account for the self-service portal. The information displayed is synchronized directly from the User record.";
-
     protected $fillable = [
         'first_name',
         'last_name',

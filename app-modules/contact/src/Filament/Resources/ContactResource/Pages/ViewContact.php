@@ -132,7 +132,7 @@ class ViewContact extends ViewRecord
                     ->hiddenLabel()
                     ->icon(Heroicon::LockClosed)
                     ->color('gray')
-                    ->tooltip(Contact::MANAGED_CONTACT_TOOLTIP)
+                    ->tooltip('This is a User\'s managed non-administrative account for the self-service portal. The information displayed is synchronized directly from the User record.')
                     ->disabled(),
             ];
         }

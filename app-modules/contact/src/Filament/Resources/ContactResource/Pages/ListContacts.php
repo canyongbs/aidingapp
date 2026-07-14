@@ -80,7 +80,7 @@ class ListContacts extends ListRecords
                     ->icon(fn (Contact $record): ?Heroicon => ManagedContactFeature::active() && $record->isManaged() ? Heroicon::LockClosed : null)
                     ->iconColor('gray')
                     ->iconPosition(IconPosition::After)
-                    ->tooltip(fn (Contact $record): ?string => ManagedContactFeature::active() && $record->isManaged() ? Contact::MANAGED_CONTACT_TOOLTIP : null),
+                    ->tooltip(fn (Contact $record): ?string => ManagedContactFeature::active() && $record->isManaged() ? 'This is a User\'s managed non-administrative account for the self-service portal. The information displayed is synchronized directly from the User record.' : null),
                 TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
