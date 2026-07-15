@@ -35,12 +35,15 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\Project\Livewire\PipelineEntryKanban;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\Project\Notifications\PipelineEntryAssignedToUserNotification;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Support\Facades\Notification;
@@ -210,6 +213,37 @@ it('can create a kanban entry with no assigned user', function () {
         'assigned_to_id' => null,
         'pipeline_stage_id' => $stage->id,
     ]);
+});
+
+it('persists related milestones, assets, and service requests via the kanban add entry action', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $stage = $pipeline->stages->first();
+
+    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->id]);
+    $asset = Asset::factory()->create();
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->callAction('addEntry', data: [
+            ...baseKanbanEntryData('Related Kanban Entry'),
+            'milestones' => [$milestone->id],
+            'assets' => [$asset->id],
+            'serviceRequests' => [$serviceRequest->id],
+        ], arguments: ['stage' => $stage->id])
+        ->assertHasNoActionErrors();
+
+    $entry = PipelineEntry::where('name', 'Related Kanban Entry')->sole();
+
+    expect($entry->milestones->pluck('id')->all())->toBe([$milestone->id]);
+    expect($entry->assets->pluck('id')->all())->toBe([$asset->id]);
+    expect($entry->serviceRequests->pluck('id')->all())->toBe([$serviceRequest->id]);
 });
 
 it('requires a name when creating a kanban entry', function () {

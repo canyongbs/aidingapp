@@ -38,6 +38,7 @@ namespace AidingApp\Project\Filament\Resources\Pipelines\Forms;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Models\Pipeline;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\PipelineEntryEnhancedFieldsFeature;
 use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
@@ -47,6 +48,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class PipelineEntryForm
 {
@@ -104,6 +106,7 @@ class PipelineEntryForm
                 ->multiple()
                 ->searchable()
                 ->preload()
+                ->dehydrated()
                 ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active()),
             Select::make('assets')
                 ->label('Related Assets')
@@ -111,14 +114,26 @@ class PipelineEntryForm
                 ->multiple()
                 ->searchable()
                 ->preload()
+                ->dehydrated()
                 ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active()),
             Select::make('serviceRequests')
                 ->label('Related Service Requests')
-                ->relationship(name: 'serviceRequests', titleAttribute: 'title')
+                ->relationship(name: 'serviceRequests', titleAttribute: 'service_request_number')
+                ->getOptionLabelFromRecordUsing(fn (ServiceRequest $record): string => self::serviceRequestLabel($record))
                 ->multiple()
                 ->searchable()
                 ->preload()
+                ->dehydrated()
                 ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active()),
         ];
+    }
+
+    public static function serviceRequestLabel(ServiceRequest $serviceRequest): string
+    {
+        $title = filled($serviceRequest->title)
+            ? ' ' . Str::limit($serviceRequest->title, 40)
+            : '';
+
+        return "({$serviceRequest->service_request_number}){$title}";
     }
 }

@@ -45,8 +45,8 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::table('pipeline_entries', function (Blueprint $table) {
-                $table->string('assigned_to_type')->nullable()->after('due');
-                $table->uuid('assigned_to_id')->nullable()->after('assigned_to_type');
+                $table->string('assigned_to_type')->nullable();
+                $table->uuid('assigned_to_id')->nullable();
                 $table->index(['assigned_to_type', 'assigned_to_id']);
             });
 

@@ -38,10 +38,12 @@ namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\PipelineEntryEnhancedFieldsFeature;
 use App\Models\User;
 use BackedEnum;
@@ -195,9 +197,12 @@ class ViewPipelineEntry extends Page
                             ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active())
                             ->label('Related Assets')
                             ->badge(),
-                        TextEntry::make('serviceRequests.title')
+                        TextEntry::make('serviceRequests')
                             ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active())
                             ->label('Related Service Requests')
+                            ->state(fn (PipelineEntry $record): array => $record->serviceRequests
+                                ->map(fn (ServiceRequest $serviceRequest): string => PipelineEntryForm::serviceRequestLabel($serviceRequest))
+                                ->all())
                             ->badge(),
                     ]),
             ]);

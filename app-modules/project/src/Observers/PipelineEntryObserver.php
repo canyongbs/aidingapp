@@ -45,7 +45,7 @@ class PipelineEntryObserver
 {
     public function saving(PipelineEntry $pipelineEntry): void
     {
-        if (is_null($pipelineEntry->created_by)) {
+        if (blank($pipelineEntry->created_by)) {
             $pipelineEntry->created_by = auth()->id();
         }
     }
@@ -58,10 +58,11 @@ class PipelineEntryObserver
             && $pipelineEntry->assigned_to_type === (new User())->getMorphClass()
             && ($pipelineEntry->wasChanged(['assigned_to_id', 'assigned_to_type']) || $pipelineEntry->wasRecentlyCreated)
         ) {
-            /** @var User|null $user */
             $user = $pipelineEntry->assignedTo;
 
-            $user?->notify(new PipelineEntryAssignedToUserNotification($pipelineEntry));
+            if ($user instanceof User) {
+                $user->notify(new PipelineEntryAssignedToUserNotification($pipelineEntry));
+            }
         }
     }
 }

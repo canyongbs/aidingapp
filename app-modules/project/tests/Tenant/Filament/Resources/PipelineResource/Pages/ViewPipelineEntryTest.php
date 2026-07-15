@@ -41,6 +41,7 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -156,6 +157,62 @@ it('displays correct pipeline entry details', function () {
         ->assertSuccessful()
         ->assertSee('Test Entry Name')
         ->assertSee($contact->full_name);
+});
+
+it('displays related service requests as number with title', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $serviceRequest = ServiceRequest::factory()->create([
+        'title' => 'Unable to log in',
+    ]);
+
+    $pipelineEntry = PipelineEntry::factory()
+        ->create([
+            'pipeline_stage_id' => $pipeline->stages->first()->id,
+        ]);
+
+    $pipelineEntry->serviceRequests()->attach($serviceRequest);
+
+    livewire(ViewPipelineEntry::class, [
+        'record' => $pipeline,
+        'pipelineEntry' => $pipelineEntry,
+    ])
+        ->assertSuccessful()
+        ->assertSee("({$serviceRequest->service_request_number}) Unable to log in");
+});
+
+it('displays related service requests by number even when the title is null', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $serviceRequest = ServiceRequest::factory()->create([
+        'title' => null,
+    ]);
+
+    $pipelineEntry = PipelineEntry::factory()
+        ->create([
+            'pipeline_stage_id' => $pipeline->stages->first()->id,
+        ]);
+
+    $pipelineEntry->serviceRequests()->attach($serviceRequest);
+
+    livewire(ViewPipelineEntry::class, [
+        'record' => $pipeline,
+        'pipelineEntry' => $pipelineEntry,
+    ])
+        ->assertSuccessful()
+        ->assertSee("({$serviceRequest->service_request_number})");
 });
 
 it('can delete pipeline entry', function () {

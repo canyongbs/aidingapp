@@ -35,11 +35,14 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\Project\Filament\Resources\Pipelines\Pages\EditPipelineEntry;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -138,6 +141,42 @@ it('can save pipeline entry with updated description and due date', function () 
         'id' => $entry->id,
         'description' => 'Updated description.',
     ]);
+});
+
+it('persists related milestones, assets, and service requests on save', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->id,
+    ]);
+
+    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->id]);
+    $asset = Asset::factory()->create();
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    livewire(EditPipelineEntry::class, [
+        'record' => $pipeline,
+        'pipelineEntry' => $entry,
+    ])
+        ->fillForm([
+            'milestones' => [$milestone->id],
+            'assets' => [$asset->id],
+            'serviceRequests' => [$serviceRequest->id],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $entry->refresh();
+
+    expect($entry->milestones->pluck('id')->all())->toBe([$milestone->id]);
+    expect($entry->assets->pluck('id')->all())->toBe([$asset->id]);
+    expect($entry->serviceRequests->pluck('id')->all())->toBe([$serviceRequest->id]);
 });
 
 it('can save pipeline entry with an assigned user', function () {

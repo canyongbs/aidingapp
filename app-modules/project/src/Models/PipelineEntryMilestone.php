@@ -40,6 +40,9 @@ use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
+/**
+ * @mixin IdeHelperPipelineEntryMilestone
+ */
 class PipelineEntryMilestone extends Pivot
 {
     use HasUuids;

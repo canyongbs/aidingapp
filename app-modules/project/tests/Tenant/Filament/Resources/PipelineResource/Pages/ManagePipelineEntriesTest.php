@@ -266,7 +266,7 @@ it('can create pipeline entry with an assigned user', function () {
             'pipeline_stage_id' => $stage->id,
             'organizable_type' => (new Contact())->getMorphClass(),
             'organizable_id' => Contact::factory()->create()->id,
-            'assigned_to_type' => 'user',
+            'assigned_to_type' => (new User())->getMorphClass(),
             'assigned_to_id' => $user->id,
         ])
         ->assertHasNoTableActionErrors();
@@ -295,14 +295,14 @@ it('can create pipeline entry with an assigned contact', function () {
             'pipeline_stage_id' => $stage->id,
             'organizable_type' => (new Contact())->getMorphClass(),
             'organizable_id' => Contact::factory()->create()->id,
-            'assigned_to_type' => 'contact',
+            'assigned_to_type' => (new Contact())->getMorphClass(),
             'assigned_to_id' => $contact->id,
         ])
         ->assertHasNoTableActionErrors();
 
     assertDatabaseHas(PipelineEntry::class, [
         'name' => 'Contact Assigned Entry',
-        'assigned_to_type' => 'contact',
+        'assigned_to_type' => (new Contact())->getMorphClass(),
         'assigned_to_id' => $contact->id,
     ]);
 });
@@ -350,7 +350,7 @@ it('validates assigned_to_id must be a valid contact id when contact type is sel
             'pipeline_stage_id' => $pipeline->stages->first()->id,
             'organizable_type' => (new Contact())->getMorphClass(),
             'organizable_id' => Contact::factory()->create()->id,
-            'assigned_to_type' => 'contact',
+            'assigned_to_type' => (new Contact())->getMorphClass(),
             'assigned_to_id' => (string) str()->uuid(),
         ])
         ->assertHasTableActionErrors(['assigned_to_id']);
@@ -371,7 +371,7 @@ it('validates assigned_to_id must be a valid user id when user type is selected'
             'pipeline_stage_id' => $pipeline->stages->first()->id,
             'organizable_type' => (new Contact())->getMorphClass(),
             'organizable_id' => Contact::factory()->create()->id,
-            'assigned_to_type' => 'user',
+            'assigned_to_type' => (new User())->getMorphClass(),
             'assigned_to_id' => (string) str()->uuid(),
         ])
         ->assertHasTableActionErrors(['assigned_to_id']);
