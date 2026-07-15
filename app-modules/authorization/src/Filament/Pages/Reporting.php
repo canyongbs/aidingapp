@@ -175,16 +175,7 @@ class Reporting extends Page implements HasActions, HasForms, HasTable
             ->label('Manage')
             ->icon('heroicon-m-user-group')
             ->slideOver()
-            ->authorize(function (): bool {
-                /** @var User $user */
-                $user = auth()->user();
-
-                if (! ReportingFeature::active()) {
-                    return $user->can('report-library.view-any');
-                }
-
-                return $user->can('reporting.*.update');
-            })
+            ->authorize(fn (): bool => auth()->user()->can('reporting.*.update'))
             ->modalHeading(fn (array $record): string => "Manage Access: {$record['name']}")
             ->modalDescription('Grant access to this report by assigning individual users and/or departments.')
             ->fillForm(fn (array $record): array => [
