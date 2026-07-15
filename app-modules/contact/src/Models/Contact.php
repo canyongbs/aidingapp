@@ -67,7 +67,6 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphOne;
@@ -285,18 +284,19 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     }
 
     /**
-     * @return BelongsToMany<Project, $this,covariant ProjectGuest>
+     * @return MorphToMany<Project, $this, covariant ProjectGuest>
      */
-    public function guestProjects(): BelongsToMany
+    public function guestProjects(): MorphToMany
     {
         return $this
-            ->belongsToMany(
+            ->morphToMany(
                 Project::class,
+                'guest',
                 'project_guests',
                 'guest_id',
                 'project_id',
             )
-            ->wherePivot('guest_type', self::class)
+            ->using(ProjectGuest::class)
             ->withTimestamps();
     }
 

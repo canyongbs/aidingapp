@@ -74,7 +74,7 @@ class ProjectForm
             ColorSelect::make('color')
                 ->required(fn (): bool => ProjectNewFieldsFeature::active())
                 ->visible(fn (): bool => ProjectNewFieldsFeature::active())
-                ->rules(['required', Rule::in(array_map(fn ($color) => $color->value, Color::cases()))])
+                ->rules([Rule::in(array_map(fn ($color) => $color->value, Color::cases()))])
                 ->default('gray'),
             Select::make('department_id')
                 ->relationship('department', 'name')
@@ -108,7 +108,6 @@ class ProjectForm
                 }),
             DatePicker::make('target_completion_date')
                 ->hiddenLabel()
-
                 ->visible(fn (Get $get) => ProjectNewFieldsFeature::active() && $get('target_completion_date_type') === 'set')
                 ->nullable(),
         ];

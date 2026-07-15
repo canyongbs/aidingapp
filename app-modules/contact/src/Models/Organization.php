@@ -45,8 +45,8 @@ use App\Models\Media;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
@@ -132,18 +132,19 @@ class Organization extends BaseModel implements HasMedia, Auditable
     }
 
     /**
-     * @return BelongsToMany<Project, $this,covariant ProjectGuest>
+     * @return MorphToMany<Project, $this, covariant ProjectGuest>
      */
-    public function guestProjects(): BelongsToMany
+    public function guestProjects(): MorphToMany
     {
         return $this
-            ->belongsToMany(
+            ->morphToMany(
                 Project::class,
+                'guest',
                 'project_guests',
                 'guest_id',
                 'project_id',
             )
-            ->wherePivot('guest_type', self::class)
+            ->using(ProjectGuest::class)
             ->withTimestamps();
     }
 }
