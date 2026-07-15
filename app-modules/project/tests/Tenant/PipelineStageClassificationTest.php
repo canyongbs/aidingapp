@@ -34,55 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
-
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\PipelineStageFactory;
 use AidingApp\Project\Enums\PipelineStageClassification;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineStage;
+use AidingApp\Project\Models\Project;
 
-/**
- * @mixin IdeHelperPipelineStage
- */
-class PipelineStage extends BaseModel implements Auditable
-{
-    /** @use HasFactory<PipelineStageFactory> */
-    use HasFactory;
+use function Pest\Laravel\assertDatabaseHas;
+use function Tests\asSuperAdmin;
 
-    use AuditableTrait;
-    use HasUuids;
-    use HasUserSaveTracking;
+it('stores each classification value correctly', function () {
+    asSuperAdmin();
 
-    protected $fillable = [
-        'name',
-        'pipeline_id',
-        'order',
-        'classification',
-    ];
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
 
-    protected $casts = [
-        'classification' => PipelineStageClassification::class,
-    ];
+    foreach (PipelineStageClassification::cases() as $classification) {
+        $stage = PipelineStage::factory()->create([
+            'pipeline_id' => $pipeline->id,
+            'classification' => $classification,
+        ]);
 
-    /**
-     * @return BelongsTo<Pipeline, $this>
-     */
-    public function pipeline(): BelongsTo
-    {
-        return $this->belongsTo(Pipeline::class);
+        assertDatabaseHas('pipeline_stages', [
+            'id' => $stage->id,
+            'classification' => $classification->value,
+        ]);
     }
+});
 
-    /**
-     * @return HasMany<PipelineEntry, $this>
-     */
-    public function pipelineEntries(): HasMany
-    {
-        return $this->hasMany(PipelineEntry::class);
-    }
-}
+it('returns proper labels for each classification', function () {
+    expect(PipelineStageClassification::Planning->getLabel())->toBe('Planning');
+    expect(PipelineStageClassification::InProgress->getLabel())->toBe('In Progress');
+    expect(PipelineStageClassification::Complete->getLabel())->toBe('Complete');
+});

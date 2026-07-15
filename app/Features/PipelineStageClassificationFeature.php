@@ -34,55 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace App\Features;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\PipelineStageFactory;
-use AidingApp\Project\Enums\PipelineStageClassification;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperPipelineStage
- */
-class PipelineStage extends BaseModel implements Auditable
+class PipelineStageClassificationFeature extends AbstractFeatureFlag
 {
-    /** @use HasFactory<PipelineStageFactory> */
-    use HasFactory;
-
-    use AuditableTrait;
-    use HasUuids;
-    use HasUserSaveTracking;
-
-    protected $fillable = [
-        'name',
-        'pipeline_id',
-        'order',
-        'classification',
-    ];
-
-    protected $casts = [
-        'classification' => PipelineStageClassification::class,
-    ];
-
-    /**
-     * @return BelongsTo<Pipeline, $this>
-     */
-    public function pipeline(): BelongsTo
+    public function resolve(mixed $scope): mixed
     {
-        return $this->belongsTo(Pipeline::class);
-    }
-
-    /**
-     * @return HasMany<PipelineEntry, $this>
-     */
-    public function pipelineEntries(): HasMany
-    {
-        return $this->hasMany(PipelineEntry::class);
+        return false;
     }
 }

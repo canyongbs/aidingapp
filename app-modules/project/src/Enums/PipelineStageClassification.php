@@ -34,55 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\Project\Enums;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\PipelineStageFactory;
-use AidingApp\Project\Enums\PipelineStageClassification;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use OwenIt\Auditing\Contracts\Auditable;
+use Filament\Support\Contracts\HasLabel;
 
-/**
- * @mixin IdeHelperPipelineStage
- */
-class PipelineStage extends BaseModel implements Auditable
+enum PipelineStageClassification: string implements HasLabel
 {
-    /** @use HasFactory<PipelineStageFactory> */
-    use HasFactory;
+    case Planning = 'planning';
 
-    use AuditableTrait;
-    use HasUuids;
-    use HasUserSaveTracking;
+    case InProgress = 'in_progress';
 
-    protected $fillable = [
-        'name',
-        'pipeline_id',
-        'order',
-        'classification',
-    ];
+    case Complete = 'complete';
 
-    protected $casts = [
-        'classification' => PipelineStageClassification::class,
-    ];
-
-    /**
-     * @return BelongsTo<Pipeline, $this>
-     */
-    public function pipeline(): BelongsTo
+    public function getLabel(): string
     {
-        return $this->belongsTo(Pipeline::class);
-    }
-
-    /**
-     * @return HasMany<PipelineEntry, $this>
-     */
-    public function pipelineEntries(): HasMany
-    {
-        return $this->hasMany(PipelineEntry::class);
+        return match ($this) {
+            self::Planning => 'Planning',
+            self::InProgress => 'In Progress',
+            self::Complete => 'Complete',
+        };
     }
 }

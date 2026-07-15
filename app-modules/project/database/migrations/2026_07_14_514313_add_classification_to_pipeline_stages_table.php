@@ -34,55 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
-
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\PipelineStageFactory;
 use AidingApp\Project\Enums\PipelineStageClassification;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Features\PipelineStageClassificationFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-/**
- * @mixin IdeHelperPipelineStage
- */
-class PipelineStage extends BaseModel implements Auditable
-{
-    /** @use HasFactory<PipelineStageFactory> */
-    use HasFactory;
-
-    use AuditableTrait;
-    use HasUuids;
-    use HasUserSaveTracking;
-
-    protected $fillable = [
-        'name',
-        'pipeline_id',
-        'order',
-        'classification',
-    ];
-
-    protected $casts = [
-        'classification' => PipelineStageClassification::class,
-    ];
-
-    /**
-     * @return BelongsTo<Pipeline, $this>
-     */
-    public function pipeline(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(Pipeline::class);
+        DB::transaction(function () {
+            Schema::table('pipeline_stages', function (Blueprint $table) {
+                $table->string('classification')
+                    ->default(PipelineStageClassification::Planning->value);
+            });
+
+            PipelineStageClassificationFeature::activate();
+        });
     }
 
-    /**
-     * @return HasMany<PipelineEntry, $this>
-     */
-    public function pipelineEntries(): HasMany
+    public function down(): void
     {
-        return $this->hasMany(PipelineEntry::class);
+        DB::transaction(function () {
+            PipelineStageClassificationFeature::deactivate();
+
+            Schema::table('pipeline_stages', function (Blueprint $table) {
+                $table->dropColumn('classification');
+            });
+        });
     }
-}
+};
