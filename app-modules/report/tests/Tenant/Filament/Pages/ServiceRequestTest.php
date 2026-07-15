@@ -43,7 +43,6 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {

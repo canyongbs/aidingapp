@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -36,9 +36,9 @@
 
 namespace AidingApp\Report\Models;
 
+use AidingApp\Report\Database\Factories\ReportUserAccessFactory;
 use App\Models\BaseModel;
 use App\Models\User;
-use AidingApp\Report\Database\Factories\ReportUserAccessFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use OwenIt\Auditing\Auditable as AuditableTrait;
@@ -51,6 +51,7 @@ class ReportUserAccess extends BaseModel implements Auditable
 {
     /** @use HasFactory<ReportUserAccessFactory> */
     use HasFactory;
+
     use AuditableTrait;
 
     protected $fillable = [
