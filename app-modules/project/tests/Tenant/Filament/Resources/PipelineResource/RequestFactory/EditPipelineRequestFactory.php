@@ -46,10 +46,10 @@ class EditPipelineRequestFactory extends RequestFactory
         return [
             'name' => fake()->words(3, true),
             'description' => fake()->sentence(),
-            'stages' => fn () => [
-                ['name' => fake()->unique()->word(), 'classification' => PipelineStageClassification::Planning->value],
-                ['name' => fake()->unique()->word(), 'classification' => PipelineStageClassification::InProgress->value],
-            ],
+            'stages' => fn () => collect(PipelineStageClassification::cases())->map(fn ($classification) => [
+                'name' => $classification->getLabel(),
+                'classification' => $classification->value,
+            ]),
         ];
     }
 }

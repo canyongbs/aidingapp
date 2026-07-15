@@ -66,6 +66,10 @@ class PipelineStage extends BaseModel implements Auditable
         'classification',
     ];
 
+    protected $casts = [
+        'classification' => PipelineStageClassification::class,
+    ];
+
     /**
      * @return BelongsTo<Pipeline, $this>
      */
@@ -80,15 +84,5 @@ class PipelineStage extends BaseModel implements Auditable
     public function pipelineEntries(): HasMany
     {
         return $this->hasMany(PipelineEntry::class);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function casts(): array
-    {
-        return [
-            'classification' => PipelineStageClassification::class,
-        ];
     }
 }

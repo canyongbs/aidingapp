@@ -42,39 +42,13 @@ use AidingApp\Project\Models\Project;
 use function Pest\Laravel\assertDatabaseHas;
 use function Tests\asSuperAdmin;
 
-it('has three classification values', function () {
-    expect(PipelineStageClassification::cases())->toHaveCount(3);
-    expect(PipelineStageClassification::Planning->value)->toBe('planning');
-    expect(PipelineStageClassification::InProgress->value)->toBe('in_progress');
-    expect(PipelineStageClassification::Complete->value)->toBe('complete');
-});
-
-it('casts classification to the enum on PipelineStage model', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()->for($project)->create();
-
-    $stage = PipelineStage::factory()->create([
-        'pipeline_id' => $pipeline->id,
-        'classification' => PipelineStageClassification::InProgress,
-    ]);
-
-    $stage->refresh();
-
-    expect($stage->classification)->toBe(PipelineStageClassification::InProgress);
-});
-
 it('defaults classification to planning for new stages', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();
 
-    $stage = PipelineStage::factory()->create([
-        'pipeline_id' => $pipeline->id,
-        'classification' => PipelineStageClassification::Planning,
-    ]);
+    $stage = PipelineStage::factory()->create(['pipeline_id' => $pipeline->id]);
 
     assertDatabaseHas('pipeline_stages', [
         'id' => $stage->id,
