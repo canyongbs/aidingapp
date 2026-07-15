@@ -42,20 +42,6 @@ use AidingApp\Project\Models\Project;
 use function Pest\Laravel\assertDatabaseHas;
 use function Tests\asSuperAdmin;
 
-it('defaults classification to planning for new stages', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()->for($project)->create();
-
-    $stage = PipelineStage::factory()->create(['pipeline_id' => $pipeline->id]);
-
-    assertDatabaseHas('pipeline_stages', [
-        'id' => $stage->id,
-        'classification' => 'planning',
-    ]);
-});
-
 it('stores each classification value correctly', function () {
     asSuperAdmin();
 

@@ -41,6 +41,7 @@ use App\Models\User;
 use Filament\Forms\Components\Repeater;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
@@ -108,6 +109,31 @@ it('can create pipelines', function () {
     $createdPipeline = Pipeline::first();
     assertCount(1, Pipeline::all());
     expect($createdPipeline->stages)->toHaveCount(3);
+
+    $undoRepeaterFake();
+});
+
+it('defaults new pipeline stages to planning', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $superAdmin = User::factory()->create();
+    asSuperAdmin($superAdmin);
+
+    $pipelineData = [
+            'name' => 'Test',
+            'description' => 'This is a test pipeline',
+            'stages' => [['name' => 'Stage One']],
+        ];
+
+    livewire(CreatePipeline::class)
+        ->fillForm($pipelineData)
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas('pipeline_stages', [
+        'name' => 'Stage One',
+        'classification' => 'planning',
+    ]);
 
     $undoRepeaterFake();
 });
