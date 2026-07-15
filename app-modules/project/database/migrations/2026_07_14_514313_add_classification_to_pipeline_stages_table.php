@@ -47,7 +47,6 @@ return new class () extends Migration {
         DB::transaction(function () {
             Schema::table('pipeline_stages', function (Blueprint $table) {
                 $table->string('classification')
-                    ->initial(PipelineStageClassification::Planning->value)
                     ->default(PipelineStageClassification::Planning->value);
             });
 
