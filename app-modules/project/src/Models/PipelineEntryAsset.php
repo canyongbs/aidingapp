@@ -34,48 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+namespace AidingApp\Project\Models;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\PipelineStage;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Database\Eloquent\Relations\Relation;
+use AidingApp\InventoryManagement\Models\Asset;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
- * @extends Factory<PipelineEntry>
+ * @mixin IdeHelperPipelineEntryAsset
  */
-class PipelineEntryFactory extends Factory
+class PipelineEntryAsset extends Pivot
 {
+    use HasUuids;
+
     /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
+     * @return BelongsTo<PipelineEntry, $this>
      */
-    public function definition(): array
+    public function pipelineEntry(): BelongsTo
     {
-        return [
-            'name' => $this->faker->word(),
-            'pipeline_stage_id' => PipelineStage::factory(),
-            'organizable_type' => function () {
-                $organizable = $this->faker->randomElement([new Contact()]);
-                assert($organizable instanceof Contact);
+        return $this->belongsTo(PipelineEntry::class, 'pipeline_entry_id', 'id', 'pipelineEntry');
+    }
 
-                return $organizable->getMorphClass();
-            },
-            'organizable_id' => function (array $attributes) {
-                /** @var class-string<Contact> $class */
-                $class = Relation::getMorphedModel($attributes['organizable_type']);
-
-                return $class::factory();
-            },
-            'description' => $this->faker->sentence(3),
-            'due' => $this->faker->dateTimeBetween('now', '+1 year'),
-            'assigned_to_type' => (new User())->getMorphClass(),
-            'assigned_to_id' => User::factory(),
-            'created_by' => User::factory(),
-            'is_visible_to_guests' => true,
-        ];
+    /**
+     * @return BelongsTo<Asset, $this>
+     */
+    public function asset(): BelongsTo
+    {
+        return $this->belongsTo(Asset::class, 'asset_id', 'id', 'asset');
     }
 }

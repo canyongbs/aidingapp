@@ -37,18 +37,18 @@
 namespace AidingApp\Project\Filament\Resources\Pipelines\Forms;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Project\Filament\Tables\PipelineEntryAssignToTable;
-use AidingApp\Project\Filament\Tables\PipelineEntryRelatedToTable;
-use App\Features\PipelineEntryFieldsFeature;
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\PipelineEntryEnhancedFieldsFeature;
+use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\MorphToSelect;
 use Filament\Forms\Components\MorphToSelect\Type;
-use Filament\Forms\Components\TableSelect;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\ToggleButtons;
-use Filament\Schemas\Components\Utilities\Get;
+use Filament\Forms\Components\Toggle;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Str;
 
 class PipelineEntryForm
 {
@@ -57,7 +57,7 @@ class PipelineEntryForm
      *
      * @return array<int, mixed>
      */
-    public static function components(): array
+    public static function components(?Pipeline $pipeline = null): array
     {
         return [
             MorphToSelect::make('organizable')
@@ -71,41 +71,69 @@ class PipelineEntryForm
                 ->preload()
                 ->required(),
             Textarea::make('description')
-                ->visible(fn () => PipelineEntryFieldsFeature::active())
                 ->maxLength(65535),
             DateTimePicker::make('due')
-                ->label('Due Date')
-                ->visible(fn () => PipelineEntryFieldsFeature::active()),
-            ToggleButtons::make('assigned_to_type')
+                ->label('Due Date'),
+            MorphToSelect::make('assignedTo')
                 ->label('Assigned To')
-                ->visible(fn () => PipelineEntryFieldsFeature::active())
-                ->options(['none' => 'None', 'user' => 'User'])
-                ->inline()
-                ->live()
-                ->default('none')
-                ->dehydrated(false),
-            TableSelect::make('assigned_to')
-                ->hiddenLabel()
-                ->relationship('assignedTo')
-                ->tableConfiguration(PipelineEntryAssignToTable::class)
-                ->visible(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('assigned_to_type') === 'user')
-                ->required(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('assigned_to_type') === 'user')
-                ->rules([Rule::exists('users', 'id')]),
-            ToggleButtons::make('related_to_type')
-                ->label('Related To')
-                ->visible(fn () => PipelineEntryFieldsFeature::active())
-                ->options(['none' => 'None', 'contact' => 'Contact'])
-                ->inline()
-                ->live()
-                ->default('none')
-                ->dehydrated(false),
-            TableSelect::make('related_to')
-                ->hiddenLabel()
-                ->relationship('relatedTo')
-                ->tableConfiguration(PipelineEntryRelatedToTable::class)
-                ->visible(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('related_to_type') === 'contact')
-                ->required(fn (Get $get) => PipelineEntryFieldsFeature::active() && $get('related_to_type') === 'contact')
-                ->rules([Rule::exists('contacts', 'id')]),
+                ->types([
+                    Type::make(User::class)
+                        ->label('User')
+                        ->titleAttribute('name')
+                        ->modifyOptionsQueryUsing(fn (Builder $query) => $query->limit(50)),
+                    Type::make(Contact::class)
+                        ->label('Contact')
+                        ->titleAttribute('full_name')
+                        ->modifyOptionsQueryUsing(fn (Builder $query) => $query->limit(50)),
+                ])
+                ->searchable()
+                ->preload()
+                ->typeSelectToggleButtons()
+                ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active()),
+            Toggle::make('is_visible_to_guests')
+                ->label('Visible to Guest')
+                ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active())
+                ->default(true),
+            Select::make('milestones')
+                ->label('Related Milestones')
+                ->relationship(
+                    name: 'milestones',
+                    titleAttribute: 'title',
+                    modifyQueryUsing: $pipeline
+                        ? fn (Builder $query) => $query->where('project_id', $pipeline->project_id)
+                        : null,
+                )
+                ->multiple()
+                ->searchable()
+                ->preload()
+                ->dehydrated()
+                ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active()),
+            Select::make('assets')
+                ->label('Related Assets')
+                ->relationship(name: 'assets', titleAttribute: 'name')
+                ->multiple()
+                ->searchable()
+                ->preload()
+                ->dehydrated()
+                ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active()),
+            Select::make('serviceRequests')
+                ->label('Related Service Requests')
+                ->relationship(name: 'serviceRequests', titleAttribute: 'service_request_number')
+                ->getOptionLabelFromRecordUsing(fn (ServiceRequest $record): string => self::serviceRequestLabel($record))
+                ->multiple()
+                ->searchable()
+                ->preload()
+                ->dehydrated()
+                ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active()),
         ];
+    }
+
+    public static function serviceRequestLabel(ServiceRequest $serviceRequest): string
+    {
+        $title = filled($serviceRequest->title)
+            ? ' ' . Str::limit($serviceRequest->title, 40)
+            : '';
+
+        return "({$serviceRequest->service_request_number}){$title}";
     }
 }
