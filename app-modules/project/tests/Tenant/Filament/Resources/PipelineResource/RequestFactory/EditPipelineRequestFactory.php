@@ -49,7 +49,7 @@ class EditPipelineRequestFactory extends RequestFactory
             'stages' => fn () => collect(PipelineStageClassification::cases())->map(fn ($classification) => [
                 'name' => $classification->getLabel(),
                 'classification' => $classification->value,
-            ]),
+            ])->toArray(),
         ];
     }
 }
