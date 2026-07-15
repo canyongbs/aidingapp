@@ -134,7 +134,12 @@ class CreateContact extends CreateRecord
                     PhoneInput::make('phone')
                         ->label('Other Phone')
                         ->string(),
-                    AddressInput::make(),
+                    TextInput::make('address')
+                        ->label('Address')
+                        ->string(),
+                    TextInput::make('address_2')
+                        ->label('Address 2')
+                        ->string(),
                 ])->columns(2),
 
                 Section::make('Classification')->schema([

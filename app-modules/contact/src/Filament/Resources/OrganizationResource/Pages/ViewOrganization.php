@@ -93,6 +93,14 @@ class ViewOrganization extends ViewRecord
                     ->schema([
                         TextEntry::make('address')
                             ->label('Address'),
+                        TextEntry::make('city')
+                            ->label('City'),
+                        TextEntry::make('state')
+                            ->label('State'),
+                        TextEntry::make('postalcode')
+                            ->label('Postal Code'),
+                        TextEntry::make('country')
+                            ->label('Country'),
                     ])
                     ->columns(),
                 Section::make('Social Media Info')

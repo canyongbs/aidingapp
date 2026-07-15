@@ -108,7 +108,9 @@ class ContactImporter extends Importer
             ImportColumn::make('phone')
                 ->example('+1 (555) 555-5555'),
             ImportColumn::make('address')
-                ->example('123 Main St, Denver, CO 80202'),
+                ->example('123 Main St.'),
+                ImportColumn::make('address_2')
+                    ->example('Apt. 1'),
         ];
     }
 

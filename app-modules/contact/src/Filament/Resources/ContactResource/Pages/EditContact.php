@@ -159,7 +159,30 @@ class EditContact extends EditRecord
                         PhoneInput::make('phone')
                             ->label('Other Phone')
                             ->string(),
-                        AddressInput::make(),
+                        TextInput::make('address')
+                            ->label('Address')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('address_2')
+                            ->label('Address 2')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('address_3')
+                            ->label('Address 3')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('city')
+                            ->label('City')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('state')
+                            ->label('State')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('postal')
+                            ->label('Postal')
+                            ->string()
+                            ->maxLength(255),
                     ])
                     ->columns(2),
                 Section::make('Classification')

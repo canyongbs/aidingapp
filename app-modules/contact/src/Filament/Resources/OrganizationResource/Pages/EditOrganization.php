@@ -145,7 +145,25 @@ class EditOrganization extends EditRecord
                 Section::make('Address Info')
                     ->columns()
                     ->schema([
-                        AddressInput::make(),
+                        TextInput::make('address')
+                            ->label('Address')
+                            ->string(),
+                        TextInput::make('city')
+                            ->label('City')
+                            ->maxLength(255)
+                            ->string(),
+                        TextInput::make('state')
+                            ->label('State')
+                            ->maxLength(255)
+                            ->string(),
+                        TextInput::make('postalcode')
+                            ->label('Postal Code')
+                            ->maxLength(255)
+                            ->string(),
+                        TextInput::make('country')
+                            ->label('Country')
+                            ->maxLength(255)
+                            ->string(),
                     ]),
                 Section::make('Social Media Info')
                     ->columns()
