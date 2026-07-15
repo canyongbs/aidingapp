@@ -37,7 +37,6 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages;
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBaseStatusResource;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
@@ -47,8 +46,6 @@ use Illuminate\Validation\Rules\Unique;
 
 class EditKnowledgeBaseStatus extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = KnowledgeBaseStatusResource::class;
 
     public function form(Schema $schema): Schema

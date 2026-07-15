@@ -37,15 +37,12 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\AdvisoryUpdateResource;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditAdvisoryUpdate extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = AdvisoryUpdateResource::class;
 
     protected function getHeaderActions(): array

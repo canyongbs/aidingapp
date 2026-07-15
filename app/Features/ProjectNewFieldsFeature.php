@@ -34,21 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace App\Concerns;
+namespace App\Features;
 
-use Filament\Resources\Resource;
+use App\Support\AbstractFeatureFlag;
 
-trait EditPageRedirection
+class ProjectNewFieldsFeature extends AbstractFeatureFlag
 {
-    public function getRedirectUrl(): ?string
+    public function resolve(mixed $scope): mixed
     {
-        /** @var class-string<Resource> $resource */
-        $resource = $this->getResource();
-
-        if ($resource::hasPage('view')) {
-            return $resource::getUrl('view', ['record' => $this->record]);
-        }
-
-        return null;
+        return false;
     }
 }

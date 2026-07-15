@@ -39,6 +39,7 @@ export const useFeatureStore = defineStore('feature', () => {
     const hasAssets = ref(false);
     const hasLicense = ref(false);
     const hasTasks = ref(false);
+    const hasProjects = ref(false);
     const isStatusEnabled = ref(false);
     const isAdvisoryEnabled = ref(false);
     const isAssetEnabled = ref(false);
@@ -74,6 +75,14 @@ export const useFeatureStore = defineStore('feature', () => {
 
     async function getHasTasks() {
         return hasTasks.value;
+    }
+
+    async function setHasProjects(value) {
+        hasProjects.value = value;
+    }
+
+    async function getHasProjects() {
+        return hasProjects.value;
     }
 
     async function setIsStatusEnabled(value) {
@@ -121,6 +130,9 @@ export const useFeatureStore = defineStore('feature', () => {
         hasTasks,
         getHasTasks,
         setHasTasks,
+        hasProjects,
+        getHasProjects,
+        setHasProjects,
         isStatusEnabled,
         getIsStatusEnabled,
         setIsStatusEnabled,

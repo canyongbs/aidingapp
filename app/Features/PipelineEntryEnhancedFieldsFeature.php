@@ -38,7 +38,7 @@ namespace App\Features;
 
 use App\Support\AbstractFeatureFlag;
 
-class PipelineEntryFieldsFeature extends AbstractFeatureFlag
+class PipelineEntryEnhancedFieldsFeature extends AbstractFeatureFlag
 {
     public function resolve(mixed $scope): mixed
     {

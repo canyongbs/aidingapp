@@ -34,13 +34,15 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data(
         'serviceRequestTypeManager',
-        ({ originalTreeData, treeData, canEdit, visibilityRestrictionsEnabled }) => ({
+        ({ originalTreeData, treeData, canEdit, visibilityRestrictionsEnabled, multipleCategoriesEnabled }) => ({
             originalTreeData,
             treeData,
             canEdit,
             visibilityRestrictionsEnabled,
+            multipleCategoriesEnabled,
             categoryInputs: {},
             typeInputs: {},
+            existingTypeInputs: {},
             renamingCategories: {},
             renamingTypes: {},
             hasUnsavedChanges: false,
@@ -54,6 +56,7 @@ document.addEventListener('alpine:init', () => {
                 draggedElement: null,
                 draggedType: null, // 'category' or 'type'
                 draggedId: null,
+                draggedSourceCategoryId: null, // owning category of the dragged type placement
                 ghostElement: null,
                 currentDropTarget: null,
                 insertPosition: null, // 'before', 'after', or 'inside'
@@ -125,14 +128,14 @@ document.addEventListener('alpine:init', () => {
 
                 const restricted = !!node.is_visibility_restricted;
 
-                const eyeSlashIcon = `<svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l14.5 14.5a.75.75 0 1 0 1.06-1.06l-1.745-1.745a10.029 10.029 0 0 0 3.3-4.38 1.651 1.651 0 0 0 0-1.185A10.004 10.004 0 0 0 9.999 3a9.956 9.956 0 0 0-4.744 1.194L3.28 2.22ZM7.752 6.69l1.092 1.092a2.5 2.5 0 0 1 3.374 3.373l1.091 1.092a4 4 0 0 0-5.557-5.557Z" />
-                <path d="M10.748 13.93l2.523 2.523a9.987 9.987 0 0 1-3.27.547c-4.258 0-7.894-2.66-9.337-6.41a1.651 1.651 0 0 1 0-1.186A10.007 10.007 0 0 1 2.839 6.02L6.07 9.252a4 4 0 0 0 4.678 4.678Z" />
+                const eyeSlashIcon = `<svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                <path fill-rule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l10.5 10.5a.75.75 0 1 0 1.06-1.06l-1.322-1.323a7.012 7.012 0 0 0 2.16-3.11.87.87 0 0 0 0-.567A7.003 7.003 0 0 0 4.82 3.76l-1.54-1.54Zm3.196 3.195 1.135 1.136A1.502 1.502 0 0 1 9.45 8.389l1.136 1.135a3 3 0 0 0-4.109-4.109Z" clip-rule="evenodd" />
+                <path d="m7.812 10.994 1.816 1.816A7.003 7.003 0 0 1 1.38 8.28a.87.87 0 0 1 0-.566 6.985 6.985 0 0 1 1.113-2.039l2.513 2.513a3 3 0 0 0 2.806 2.806Z" />
             </svg>`;
 
-                const eyeIcon = `<svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
-                <path fill-rule="evenodd" d="M.664 10.59a1.651 1.651 0 0 1 0-1.186A10.004 10.004 0 0 1 10 3c4.257 0 7.893 2.66 9.336 6.41.147.381.146.804 0 1.186A10.004 10.004 0 0 1 10 17c-4.257 0-7.893-2.66-9.336-6.41ZM14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z" clip-rule="evenodd" />
+                const eyeIcon = `<svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+                <path fill-rule="evenodd" d="M1.38 8.28a.87.87 0 0 1 0-.566 7.003 7.003 0 0 1 13.238.006.87.87 0 0 1 0 .566A7.003 7.003 0 0 1 1.379 8.28ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" clip-rule="evenodd" />
             </svg>`;
 
                 if (!this.canEdit) {
@@ -145,7 +148,7 @@ document.addEventListener('alpine:init', () => {
 
                 const colorClasses = restricted
                     ? 'text-warning-600 hover:text-warning-800 dark:text-warning-500 dark:hover:text-warning-300 hover:bg-warning-50 dark:hover:bg-warning-600/20'
-                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700';
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600';
 
                 const tooltip = restricted ? 'Visibility restricted — edit settings' : 'Manage visibility';
 
@@ -251,7 +254,7 @@ document.addEventListener('alpine:init', () => {
 
                 if (this.treeData.uncategorized_types && this.treeData.uncategorized_types.length > 0) {
                     this.treeData.uncategorized_types.forEach((type) => {
-                        const html = this.renderType(type);
+                        const html = this.renderType(type, null);
                         const wrapper = document.createElement('div');
                         wrapper.innerHTML = html.trim();
                         const element = wrapper.firstElementChild;
@@ -262,13 +265,16 @@ document.addEventListener('alpine:init', () => {
                 }
             },
 
-            renderType(type) {
+            renderType(type, owningCategoryId = null) {
                 const requestCount = typeof type.service_requests_count === 'number' ? type.service_requests_count : 0;
-                const canDelete = requestCount === 0;
-                const canArchive = requestCount > 0;
-                const isRenaming = this.renamingTypes[type.id] || false;
+                const occurrences = this.countTypeOccurrences(type.id);
+                const canRemove = this.multipleCategoriesEnabled && occurrences > 1;
+                const canDelete = !canRemove && requestCount === 0;
+                const canArchive = !canRemove && requestCount > 0;
+                const placementKey = this.typePlacementKey(type.id, owningCategoryId);
+                const isRenaming = this.renamingTypes[placementKey] || false;
 
-                return `<div data-type-id="${type.id}" class="type-item ${this.canEdit ? 'draggable cursor-grab active:cursor-grabbing' : ''} flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-600 dark:bg-gray-800 transition-all duration-150 ease-out" ${this.canEdit ? 'draggable="true"' : ''}>
+                return `<div data-type-id="${type.id}" data-category-id="${owningCategoryId || ''}" class="type-item ${this.canEdit ? 'draggable cursor-grab active:cursor-grabbing' : ''} flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-600 dark:bg-gray-800 transition-all duration-150 ease-out" ${this.canEdit ? 'draggable="true"' : ''}>
                         ${
                             this.canEdit
                                 ? `<div class="p-1 -m-1 cursor-grab">
@@ -282,7 +288,7 @@ document.addEventListener('alpine:init', () => {
                             this.canEdit && isRenaming
                                 ? `
                                     <input
-                                        id="rename-type-${type.id}"
+                                        id="rename-type-${placementKey}"
                                         type="text"
                                         value="${this.escapeHtml(type.name)}"
                                         class="flex-1 h-5 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-primary-500 rounded px-2 py-0 focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -290,8 +296,8 @@ document.addEventListener('alpine:init', () => {
                                     <button
                                         type="button"
                                         class="text-success-600 hover:text-success-800 dark:hover:text-success-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        @click.stop="confirmTypeRename('${type.id}')"
-                                        id="confirm-rename-type-${type.id}"
+                                        @click.stop="confirmTypeRename('${type.id}', '${placementKey}')"
+                                        id="confirm-rename-type-${placementKey}"
                                     >
                                         <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -310,12 +316,21 @@ document.addEventListener('alpine:init', () => {
                         ${!isRenaming ? this.renderVisibilityControl(type, 'type') : ''}
                         ${
                             this.canEdit && !isRenaming
-                                ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" @click.stop="startTypeRename('${type.id}')" x-tooltip.raw="Rename">
+                                ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" @click.stop="startTypeRename('${type.id}', '${placementKey}')" x-tooltip.raw="Rename">
                                     <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                                         <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.262a1.75 1.75 0 0 0 0-2.474Z" />
                                         <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
                                     </svg>
                                 </button>`
+                                : ''
+                        }
+                        ${
+                            this.canEdit && canRemove && !isRenaming
+                                ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" @click.stop="removeTypePlacement('${type.id}', '${owningCategoryId || ''}')" x-tooltip.raw="Remove from this area">
+                                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm4-7a.75.75 0 0 0-.75-.75h-6.5a.75.75 0 0 0 0 1.5h6.5A.75.75 0 0 0 12 8Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>`
                                 : ''
                         }
                         ${
@@ -415,6 +430,19 @@ document.addEventListener('alpine:init', () => {
                                     : ''
                             }
                             ${
+                                this.canEdit &&
+                                this.multipleCategoriesEnabled &&
+                                !isRenaming &&
+                                this.collectPickableTypes(category.id).length > 0
+                                    ? `<button @click="showExistingTypeInput('${category.id}')" class="p-1.5 -m-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" x-tooltip.raw="Add existing type to area">
+                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M8.914 6.025a.75.75 0 0 1 1.06 0 3.5 3.5 0 0 1 0 4.95l-2 2a3.5 3.5 0 0 1-5.396-4.402.75.75 0 0 1 1.251.827 2 2 0 0 0 3.085 2.514l2-2a2 2 0 0 0 0-2.828.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                                <path fill-rule="evenodd" d="M7.086 9.975a.75.75 0 0 1-1.06 0 3.5 3.5 0 0 1 0-4.95l2-2a3.5 3.5 0 0 1 5.396 4.402.75.75 0 0 1-1.251-.827 2 2 0 0 0-3.085-2.514l-2 2a2 2 0 0 0 0 2.828.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>`
+                                    : ''
+                            }
+                            ${
                                 this.canEdit && canAddChildCategory && !isRenaming
                                     ? `
                                         <button @click="showCategoryInput('${category.id}')" class="p-1.5 -m-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" x-tooltip.raw="Add child area">
@@ -476,10 +504,33 @@ document.addEventListener('alpine:init', () => {
                         }
 
                         ${
+                            !isCollapsed &&
+                            this.canEdit &&
+                            this.multipleCategoriesEnabled &&
+                            (this.existingTypeInputs[category.id] || false)
+                                ? `
+                                    <div id="existing-type-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
+                                        <select id="existing-type-${category.id}" class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                            <option value="">Select an existing type…</option>
+                                            ${this.collectPickableTypes(category.id)
+                                                .map(
+                                                    (pickable) =>
+                                                        `<option value="${pickable.id}">${this.escapeHtml(pickable.name)}</option>`,
+                                                )
+                                                .join('')}
+                                        </select>
+                                        <button @click="addExistingTypeToCategory('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
+                                        <button @click="hideExistingTypeInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
+                                    </div>
+                                `
+                                : ''
+                        }
+
+                        ${
                             !isCollapsed && category.types && category.types.length > 0
                                 ? `
                                     <div data-sortable="types" data-category-id="${category.id}" class="mt-2 space-y-1 min-h-4 p-0.5 rounded transition-colors duration-150 ease-in-out" style="margin-left: ${indent + 24}px">
-                                        ${category.types.map((type) => this.renderType(type)).join('')}
+                                        ${category.types.map((type) => this.renderType(type, category.id)).join('')}
                                     </div>
                                 `
                                 : ''
@@ -667,12 +718,19 @@ document.addEventListener('alpine:init', () => {
                 this.dragData.isDragging = true;
                 this.dragData.draggedElement = event.target;
 
-                if (event.target.dataset.categoryId) {
-                    this.dragData.draggedType = 'category';
-                    this.dragData.draggedId = event.target.dataset.categoryId;
-                } else if (event.target.dataset.typeId) {
+                // A type-item carries both `data-type-id` and `data-category-id` (its owning area),
+                // so the type id must be checked first; only category-items are identified purely by
+                // `data-category-id`.
+                if (event.target.dataset.typeId) {
                     this.dragData.draggedType = 'type';
                     this.dragData.draggedId = event.target.dataset.typeId;
+
+                    const sourceContainer = event.target.closest('[data-sortable="types"]');
+                    this.dragData.draggedSourceCategoryId = sourceContainer?.dataset.categoryId || null;
+                } else if (event.target.dataset.categoryId) {
+                    this.dragData.draggedType = 'category';
+                    this.dragData.draggedId = event.target.dataset.categoryId;
+                    this.dragData.draggedSourceCategoryId = null;
                 }
 
                 event.target.classList.add('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
@@ -1106,6 +1164,16 @@ document.addEventListener('alpine:init', () => {
                         const draggedCat = draggedContainer.dataset.categoryId || null;
                         const targetCat = targetContainer.dataset.categoryId || null;
 
+                        // A type filed under a category cannot also be uncategorized, and a
+                        // multi-placement type cannot be moved to the uncategorized bucket at all.
+                        if (
+                            targetCat === null &&
+                            draggedCat !== null &&
+                            this.countTypeOccurrences(this.dragData.draggedId) > 1
+                        ) {
+                            return null;
+                        }
+
                         // Allow insert when both containers are same category OR when the target is uncategorized
                         if (draggedCat === targetCat || targetCat === null) {
                             const insertIndex = this.calculateInsertionPosition(targetContainer, event.clientY);
@@ -1130,6 +1198,15 @@ document.addEventListener('alpine:init', () => {
                         const sameContainer = draggedContainer === typeContainer;
                         const targetIsUncategorized = !typeContainer.dataset.categoryId;
 
+                        // Block moving a multi-placement type into the uncategorized bucket.
+                        if (
+                            targetIsUncategorized &&
+                            draggedCategoryId !== null &&
+                            this.countTypeOccurrences(this.dragData.draggedId) > 1
+                        ) {
+                            return null;
+                        }
+
                         if (sameContainer || targetIsUncategorized) {
                             const insertIndex = this.calculateInsertionPosition(typeContainer, event.clientY);
                             return {
@@ -1144,6 +1221,14 @@ document.addEventListener('alpine:init', () => {
                 }
 
                 if (categoryItem && this.dragData.draggedType === 'type') {
+                    // Moving a type onto a category files it there. Block it if that area already
+                    // contains the type (a type may not sit in the same area twice).
+                    const targetCategoryId = categoryItem.dataset.categoryId || null;
+
+                    if (this.categoryContainsType(targetCategoryId, this.dragData.draggedId)) {
+                        return null;
+                    }
+
                     return {
                         type: 'inside',
                         target: categoryItem,
@@ -1246,6 +1331,7 @@ document.addEventListener('alpine:init', () => {
 
             handleTypeDrop(target, position) {
                 const typeId = this.dragData.draggedId;
+                const sourceCategoryId = this.dragData.draggedSourceCategoryId || null;
                 let newCategoryId = null;
 
                 if (position.type === 'inside') {
@@ -1258,7 +1344,7 @@ document.addEventListener('alpine:init', () => {
                     delete this.collapsedCategories[newCategoryId];
                 }
 
-                this.updateTypeInTreeData(typeId, newCategoryId, position);
+                this.updateTypeInTreeData(typeId, sourceCategoryId, newCategoryId, position);
             },
 
             wouldExceedDepthLimit(targetElement, parentId = null) {
@@ -1302,8 +1388,8 @@ document.addEventListener('alpine:init', () => {
                 }
             },
 
-            updateTypeInTreeData(typeId, newCategoryId, position) {
-                const type = this.findAndRemoveType(typeId);
+            updateTypeInTreeData(typeId, sourceCategoryId, newCategoryId, position) {
+                const type = this.removeTypeFromSpecificLocation(typeId, sourceCategoryId);
                 if (!type) return;
 
                 type.category_id = newCategoryId;
@@ -1326,6 +1412,31 @@ document.addEventListener('alpine:init', () => {
                         this.treeData.uncategorized_types.push(type);
                     }
                 }
+            },
+
+            // Remove exactly the placement being dragged (identified by its owning category) rather
+            // than the first matching type, so a type filed under several areas moves the right node.
+            removeTypeFromSpecificLocation(typeId, categoryId) {
+                if (categoryId) {
+                    const category = this.findCategoryById(categoryId);
+                    if (category && category.types) {
+                        const index = category.types.findIndex((type) => type.id === typeId);
+                        if (index !== -1) {
+                            return category.types.splice(index, 1)[0];
+                        }
+                    }
+
+                    return null;
+                }
+
+                const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(
+                    (type) => type.id === typeId,
+                );
+                if (uncategorizedIndex !== -1) {
+                    return this.treeData.uncategorized_types.splice(uncategorizedIndex, 1)[0];
+                }
+
+                return null;
             },
 
             findCategoryParent(categoryId) {
@@ -1502,7 +1613,13 @@ document.addEventListener('alpine:init', () => {
 
                 try {
                     const saveData = this.prepareSaveData();
-                    await this.$wire.saveChanges(saveData);
+                    const saved = await this.$wire.saveChanges(saveData);
+
+                    if (!saved) {
+                        // The server rejected the changes and has already told the user why. Keep
+                        // their unsaved work intact rather than reloading over the top of it.
+                        return;
+                    }
 
                     await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -1516,6 +1633,16 @@ document.addEventListener('alpine:init', () => {
                     this.render();
                 } catch (error) {
                     console.error('Save failed:', error);
+
+                    if (window.FilamentNotification) {
+                        new window.FilamentNotification()
+                            .title('Unable to save changes')
+                            .body(
+                                'An unexpected error occurred while saving your changes. Your work has not been lost — please try again.',
+                            )
+                            .danger()
+                            .send();
+                    }
                 } finally {
                     this.isSaving = false;
                 }
@@ -1619,7 +1746,12 @@ document.addEventListener('alpine:init', () => {
                     if (category.types) {
                         category.types.forEach((type, typeIndex) => {
                             if (typeof type.id === 'string' && type.id.startsWith('temp_')) {
-                                // This is a new type
+                                // A brand-new type may appear in several areas; it is only recorded
+                                // once for creation and its placements come from the tree structure.
+                                if (newTypes.some((newType) => newType.temp_id === type.id)) {
+                                    return;
+                                }
+
                                 newTypes.push({
                                     temp_id: type.id,
                                     name: type.name,
@@ -1641,6 +1773,10 @@ document.addEventListener('alpine:init', () => {
                 if (this.treeData.uncategorized_types) {
                     this.treeData.uncategorized_types.forEach((type, index) => {
                         if (typeof type.id === 'string' && type.id.startsWith('temp_')) {
+                            if (newTypes.some((newType) => newType.temp_id === type.id)) {
+                                return;
+                            }
+
                             newTypes.push({
                                 temp_id: type.id,
                                 name: type.name,
@@ -1670,7 +1806,11 @@ document.addEventListener('alpine:init', () => {
                         category.types.forEach((type) => {
                             if (!(typeof type.id === 'string' && type.id.startsWith('temp_'))) {
                                 const originalType = this.findOriginalTypeById(type.id);
-                                if (originalType && originalType.name !== type.name) {
+                                if (
+                                    originalType &&
+                                    originalType.name !== type.name &&
+                                    !updatedTypes.some((updated) => updated.id === type.id)
+                                ) {
                                     updatedTypes.push({
                                         id: type.id,
                                         name: type.name,
@@ -1750,6 +1890,7 @@ document.addEventListener('alpine:init', () => {
                 this.hasUnsavedChanges = false;
                 this.categoryInputs = {};
                 this.typeInputs = {};
+                this.existingTypeInputs = {};
                 this.render();
             },
 
@@ -1882,6 +2023,11 @@ document.addEventListener('alpine:init', () => {
                     return;
                 }
 
+                if (this.activeTypeNameExists(name.trim())) {
+                    this.notifyDuplicateTypeName(name.trim());
+                    return;
+                }
+
                 this.isCheckingType = true;
 
                 try {
@@ -1971,6 +2117,57 @@ document.addEventListener('alpine:init', () => {
                     },
                     categoryId,
                 );
+            },
+
+            // Whether an active (not staged for deletion/archival) type already uses this name
+            // anywhere in the tree. Names must be unique across every area, so this powers the
+            // client-side guard that stops duplicates before they ever reach the server.
+            activeTypeNameExists(name, excludeTypeId = null) {
+                const target = (name || '').trim().toLowerCase();
+
+                if (!target) {
+                    return false;
+                }
+
+                const removedIds = new Set([...(this.deletedTypes || []), ...(this.archivedTypes || [])]);
+
+                const matches = (types) =>
+                    (types || []).some(
+                        (type) =>
+                            type.id !== excludeTypeId &&
+                            !removedIds.has(type.id) &&
+                            (type.name || '').trim().toLowerCase() === target,
+                    );
+
+                const walk = (categories) => {
+                    for (const category of categories || []) {
+                        if (matches(category.types)) {
+                            return true;
+                        }
+
+                        if (walk(category.children)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                };
+
+                return matches(this.treeData.uncategorized_types) || walk(this.treeData.categories);
+            },
+
+            notifyDuplicateTypeName(name) {
+                if (!window.FilamentNotification) {
+                    return;
+                }
+
+                new window.FilamentNotification()
+                    .title('Name already in use')
+                    .body(
+                        `The name ${name} is already in use by another service request type. Please select a different name.`,
+                    )
+                    .danger()
+                    .send();
             },
 
             addTypeToTree(type, categoryId) {
@@ -2073,6 +2270,160 @@ document.addEventListener('alpine:init', () => {
                 this.findAndRemoveType(typeId);
             },
 
+            typePlacementKey(typeId, owningCategoryId) {
+                return `${typeId}__${owningCategoryId || 'uncat'}`;
+            },
+
+            countTypeOccurrences(typeId) {
+                let count = 0;
+
+                const walk = (categories) => {
+                    for (const category of categories || []) {
+                        count += (category.types || []).filter((type) => type.id === typeId).length;
+                        walk(category.children);
+                    }
+                };
+
+                walk(this.treeData.categories);
+                count += (this.treeData.uncategorized_types || []).filter((type) => type.id === typeId).length;
+
+                return count;
+            },
+
+            categoryContainsType(categoryId, typeId) {
+                if (!categoryId) {
+                    return (this.treeData.uncategorized_types || []).some((type) => type.id === typeId);
+                }
+
+                const category = this.findCategoryById(categoryId);
+
+                return !!category && (category.types || []).some((type) => type.id === typeId);
+            },
+
+            // Every distinct type currently in the tree, minus those already filed under the given
+            // category, for the "add existing" picker. Works on live (unsaved) state so freshly
+            // created types can be added to further areas before saving.
+            collectPickableTypes(excludeCategoryId) {
+                const seen = new Map();
+
+                const consider = (type) => {
+                    if (!seen.has(type.id)) {
+                        seen.set(type.id, { id: type.id, name: type.name });
+                    }
+                };
+
+                const walk = (categories) => {
+                    for (const category of categories || []) {
+                        (category.types || []).forEach(consider);
+                        walk(category.children);
+                    }
+                };
+
+                walk(this.treeData.categories);
+                (this.treeData.uncategorized_types || []).forEach(consider);
+
+                const excludedCategory = excludeCategoryId ? this.findCategoryById(excludeCategoryId) : null;
+                const excluded = new Set((excludedCategory?.types || []).map((type) => type.id));
+
+                return [...seen.values()]
+                    .filter((type) => !excluded.has(type.id))
+                    .sort((a, b) => a.name.localeCompare(b.name));
+            },
+
+            removeTypePlacement(typeId, owningCategoryId) {
+                const categoryId = owningCategoryId || null;
+
+                if (categoryId) {
+                    const category = this.findCategoryById(categoryId);
+                    if (category && category.types) {
+                        const index = category.types.findIndex((type) => type.id === typeId);
+                        if (index !== -1) {
+                            category.types.splice(index, 1);
+                        }
+                    }
+                } else {
+                    const index = (this.treeData.uncategorized_types || []).findIndex((type) => type.id === typeId);
+                    if (index !== -1) {
+                        this.treeData.uncategorized_types.splice(index, 1);
+                    }
+                }
+
+                this.markAsChanged();
+                this.render();
+            },
+
+            showExistingTypeInput(categoryId) {
+                this.existingTypeInputs[categoryId] = true;
+                this.render();
+                setTimeout(() => {
+                    document.getElementById(`existing-type-${categoryId}`)?.focus();
+                }, 50);
+            },
+
+            hideExistingTypeInput(categoryId) {
+                this.existingTypeInputs[categoryId] = false;
+                this.render();
+            },
+
+            addExistingTypeToCategory(categoryId) {
+                const select = document.getElementById(`existing-type-${categoryId}`);
+                const typeId = select?.value;
+
+                if (!typeId) {
+                    return;
+                }
+
+                if (this.categoryContainsType(categoryId, typeId)) {
+                    this.hideExistingTypeInput(categoryId);
+                    return;
+                }
+
+                const source = this.findTypeById(typeId);
+
+                if (!source) {
+                    this.hideExistingTypeInput(categoryId);
+                    return;
+                }
+
+                // A type filed under any category can no longer be uncategorized, so drop it from the
+                // uncategorized bucket when it gains its first category placement.
+                const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(
+                    (type) => type.id === typeId,
+                );
+                if (uncategorizedIndex !== -1) {
+                    this.treeData.uncategorized_types.splice(uncategorizedIndex, 1);
+                }
+
+                const placement = {
+                    id: source.id,
+                    name: source.name,
+                    type: 'type',
+                    sort: 0,
+                    category_id: categoryId,
+                    service_requests_count: source.service_requests_count ?? 0,
+                    view_url: source.view_url ?? '',
+                };
+
+                if (this.visibilityRestrictionsEnabled) {
+                    placement.is_visibility_restricted = source.is_visibility_restricted ?? false;
+                    placement.restricted_to_contact_type_ids = source.restricted_to_contact_type_ids ?? [];
+                }
+
+                const category = this.findCategoryById(categoryId);
+                if (category) {
+                    category.types = category.types || [];
+                    category.types.push(placement);
+                }
+
+                if (this.collapsedCategories[categoryId]) {
+                    delete this.collapsedCategories[categoryId];
+                }
+
+                this.hideExistingTypeInput(categoryId);
+                this.markAsChanged();
+                this.render();
+            },
+
             stageTypeDeletion(typeId) {
                 this.deletedTypes = this.deletedTypes || [];
                 if (!this.deletedTypes.includes(typeId)) {
@@ -2095,12 +2446,12 @@ document.addEventListener('alpine:init', () => {
                 this.render();
             },
 
-            startTypeRename(typeId) {
-                this.renamingTypes[typeId] = true;
+            startTypeRename(typeId, placementKey) {
+                this.renamingTypes[placementKey] = true;
                 this.render();
                 setTimeout(() => {
-                    const input = document.getElementById(`rename-type-${typeId}`);
-                    const confirmBtn = document.getElementById(`confirm-rename-type-${typeId}`);
+                    const input = document.getElementById(`rename-type-${placementKey}`);
+                    const confirmBtn = document.getElementById(`confirm-rename-type-${placementKey}`);
 
                     if (input) {
                         input.focus();
@@ -2114,35 +2465,58 @@ document.addEventListener('alpine:init', () => {
 
                         input.addEventListener('keydown', (event) => {
                             if (event.key === 'Enter' && input.value.trim()) {
-                                this.confirmTypeRename(typeId);
+                                this.confirmTypeRename(typeId, placementKey);
                             } else if (event.key === 'Escape') {
-                                this.cancelTypeRename(typeId);
+                                this.cancelTypeRename(placementKey);
                             }
                         });
                     }
                 }, 50);
             },
 
-            confirmTypeRename(typeId) {
-                const input = document.getElementById(`rename-type-${typeId}`);
+            confirmTypeRename(typeId, placementKey) {
+                const input = document.getElementById(`rename-type-${placementKey}`);
                 const newName = input?.value.trim();
 
                 if (!newName) {
                     return;
                 }
 
-                const type = this.findTypeById(typeId);
-                if (type && type.name !== newName) {
-                    type.name = newName;
+                if (this.activeTypeNameExists(newName, typeId)) {
+                    this.notifyDuplicateTypeName(newName);
+                    return;
+                }
+
+                // Renaming is type-level, so update the name on every placement of this type.
+                let changed = false;
+
+                const applyName = (type) => {
+                    if (type.id === typeId && type.name !== newName) {
+                        type.name = newName;
+                        changed = true;
+                    }
+                };
+
+                const walk = (categories) => {
+                    for (const category of categories || []) {
+                        (category.types || []).forEach(applyName);
+                        walk(category.children);
+                    }
+                };
+
+                walk(this.treeData.categories);
+                (this.treeData.uncategorized_types || []).forEach(applyName);
+
+                if (changed) {
                     this.markAsChanged();
                 }
 
-                this.renamingTypes[typeId] = false;
+                delete this.renamingTypes[placementKey];
                 this.render();
             },
 
-            cancelTypeRename(typeId) {
-                this.renamingTypes[typeId] = false;
+            cancelTypeRename(placementKey) {
+                delete this.renamingTypes[placementKey];
                 this.render();
             },
 

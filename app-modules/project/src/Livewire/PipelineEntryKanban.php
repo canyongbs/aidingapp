@@ -41,7 +41,7 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
-use App\Features\PipelineEntryFieldsFeature;
+use App\Features\PipelineEntryEnhancedFieldsFeature;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -50,7 +50,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Grid;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -131,13 +130,12 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
             ->label('Add pipeline entry')
             ->model(PipelineEntry::class)
             ->schema([
-                Grid::make()->schema([
-                    TextInput::make('name')
-                        ->maxLength(255)
-                        ->required()
-                        ->string(),
-                ]),
-                ...PipelineEntryForm::components(),
+                TextInput::make('name')
+                    ->maxLength(255)
+                    ->required()
+                    ->string()
+                    ->columnSpanFull(),
+                ...PipelineEntryForm::components($this->pipeline),
             ])
             ->action(function (array $data, array $arguments) {
                 $dataArray = [
@@ -147,18 +145,30 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                     'pipeline_stage_id' => $arguments['stage'],
                 ];
 
-                if (PipelineEntryFieldsFeature::active()) {
+                $dataArray = [
+                    ...$dataArray,
+                    'description' => $data['description'] ?? null,
+                    'due' => $data['due'] ?? null,
+                ];
+
+                if (PipelineEntryEnhancedFieldsFeature::active()) {
                     $dataArray = [
                         ...$dataArray,
-                        'description' => $data['description'] ?? null,
-                        'due' => $data['due'] ?? null,
-                        'assigned_to' => $data['assigned_to'] ?? null,
-                        'related_to' => $data['related_to'] ?? null,
+                        'assigned_to_type' => $data['assigned_to_type'] ?? null,
+                        'assigned_to_id' => $data['assigned_to_id'] ?? null,
+                        'is_visible_to_guests' => $data['is_visible_to_guests'] ?? true,
                     ];
                 }
+
                 $entry = new PipelineEntry($dataArray);
 
                 $entry->saveOrFail();
+
+                if (PipelineEntryEnhancedFieldsFeature::active()) {
+                    $entry->milestones()->sync($data['milestones'] ?? []);
+                    $entry->assets()->sync($data['assets'] ?? []);
+                    $entry->serviceRequests()->sync($data['serviceRequests'] ?? []);
+                }
 
                 Notification::make()
                     ->success()

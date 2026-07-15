@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\P
 use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\ChangeRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
@@ -52,8 +51,6 @@ use Filament\Schemas\Schema;
 
 class EditChangeRequestStatus extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ChangeRequestStatusResource::class;
 
     public function form(Schema $schema): Schema

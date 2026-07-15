@@ -979,22 +979,19 @@ it('builds type tree options with categories as groups and types as selectable i
         'parent_id' => null,
     ]);
 
-    $typeA1 = ServiceRequestType::factory()->create([
+    $typeA1 = ServiceRequestType::factory()->hasAttached($categoryA, relationship: 'categories')->create([
         'name' => 'Type A1',
         'sort' => 1,
-        'category_id' => $categoryA->getKey(),
     ]);
 
-    $typeA2 = ServiceRequestType::factory()->create([
+    $typeA2 = ServiceRequestType::factory()->hasAttached($categoryA, relationship: 'categories')->create([
         'name' => 'Type A2',
         'sort' => 2,
-        'category_id' => $categoryA->getKey(),
     ]);
 
-    $typeB1 = ServiceRequestType::factory()->create([
+    $typeB1 = ServiceRequestType::factory()->hasAttached($categoryB, relationship: 'categories')->create([
         'name' => 'Type B1',
         'sort' => 1,
-        'category_id' => $categoryB->getKey(),
     ]);
 
     $tree = ListServiceRequests::buildTypeTreeOptions();
@@ -1034,16 +1031,14 @@ it('builds type tree options with nested categories maintaining sort order', fun
         'parent_id' => $parentCategory->getKey(),
     ]);
 
-    $parentType = ServiceRequestType::factory()->create([
+    $parentType = ServiceRequestType::factory()->hasAttached($parentCategory, relationship: 'categories')->create([
         'name' => 'Parent Type',
         'sort' => 2,
-        'category_id' => $parentCategory->getKey(),
     ]);
 
-    $childType = ServiceRequestType::factory()->create([
+    $childType = ServiceRequestType::factory()->hasAttached($childCategory, relationship: 'categories')->create([
         'name' => 'Child Type',
         'sort' => 1,
-        'category_id' => $childCategory->getKey(),
     ]);
 
     $tree = ListServiceRequests::buildTypeTreeOptions();
@@ -1075,16 +1070,14 @@ it('builds type tree options with uncategorized types at root level', function (
         'parent_id' => null,
     ]);
 
-    ServiceRequestType::factory()->create([
+    ServiceRequestType::factory()->hasAttached($category, relationship: 'categories')->create([
         'name' => 'Categorized Type',
         'sort' => 1,
-        'category_id' => $category->getKey(),
     ]);
 
     $uncategorizedType = ServiceRequestType::factory()->create([
         'name' => 'Uncategorized Type',
         'sort' => 1,
-        'category_id' => null,
     ]);
 
     $tree = ListServiceRequests::buildTypeTreeOptions();
@@ -1117,10 +1110,9 @@ it('filters out empty categories from type tree options', function () {
         'parent_id' => null,
     ]);
 
-    ServiceRequestType::factory()->create([
+    ServiceRequestType::factory()->hasAttached($categoryWithTypes, relationship: 'categories')->create([
         'name' => 'Type A',
         'sort' => 1,
-        'category_id' => $categoryWithTypes->getKey(),
     ]);
 
     $tree = ListServiceRequests::buildTypeTreeOptions();
@@ -1147,10 +1139,9 @@ it('filters out nested empty categories from type tree options', function () {
         'parent_id' => $parentCategory->getKey(),
     ]);
 
-    $type = ServiceRequestType::factory()->create([
+    $type = ServiceRequestType::factory()->hasAttached($parentCategory, relationship: 'categories')->create([
         'name' => 'Direct Type',
         'sort' => 2,
-        'category_id' => $parentCategory->getKey(),
     ]);
 
     $tree = ListServiceRequests::buildTypeTreeOptions();
@@ -1178,4 +1169,23 @@ it('only shows the bulk delete action to a user with the service_request.delete 
 
     livewire(ListServiceRequests::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+it('places a type under every category it belongs to in the type filter tree', function () {
+    ServiceRequestType::query()->delete();
+    ServiceRequestTypeCategory::query()->delete();
+
+    $categoryA = ServiceRequestTypeCategory::factory()->create(['name' => 'Area A', 'sort' => 1, 'parent_id' => null]);
+    $categoryB = ServiceRequestTypeCategory::factory()->create(['name' => 'Area B', 'sort' => 2, 'parent_id' => null]);
+
+    $type = ServiceRequestType::factory()->create(['name' => 'Shared Type', 'sort' => 1]);
+    $type->categories()->attach([$categoryA->id, $categoryB->id]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    $nodeA = collect($tree)->firstWhere('name', 'Area A');
+    $nodeB = collect($tree)->firstWhere('name', 'Area B');
+
+    expect(collect($nodeA['children'])->pluck('value'))->toContain($type->getKey())
+        ->and(collect($nodeB['children'])->pluck('value'))->toContain($type->getKey());
 });

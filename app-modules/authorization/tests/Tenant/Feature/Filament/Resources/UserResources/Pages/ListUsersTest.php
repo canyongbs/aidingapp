@@ -218,3 +218,27 @@ it('only shows the bulk delete action to a user with the user.delete permission'
     livewire(ListUsers::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
+
+it('can search users by name', function () {
+    asSuperAdmin();
+
+    $matchingUser = User::factory()->create(['name' => 'John Doe']);
+    $nonMatchingUser = User::factory()->create(['name' => 'Jane Smith']);
+
+    livewire(ListUsers::class)
+        ->searchTable('John Doe')
+        ->assertCanSeeTableRecords([$matchingUser])
+        ->assertCanNotSeeTableRecords([$nonMatchingUser]);
+});
+
+it('can search users by email', function () {
+    asSuperAdmin();
+
+    $matchingUser = User::factory()->create(['email' => 'searchable@example.com']);
+    $nonMatchingUser = User::factory()->create(['email' => 'other@example.com']);
+
+    livewire(ListUsers::class)
+        ->searchTable('searchable@example.com')
+        ->assertCanSeeTableRecords([$matchingUser])
+        ->assertCanNotSeeTableRecords([$nonMatchingUser]);
+});

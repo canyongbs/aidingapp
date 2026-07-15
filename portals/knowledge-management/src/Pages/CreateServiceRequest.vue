@@ -148,7 +148,9 @@
 
         const { get } = consumer();
 
-        get(props.apiUrl + '/service-request/create/' + route.params.typeId).then((response) => {
+        const categoryQuery = route.query.category ? '?category=' + route.query.category : '';
+
+        get(props.apiUrl + '/service-request/create/' + route.params.typeId + categoryQuery).then((response) => {
             loadingResults.value = false;
 
             schema.value = response.data.schema;

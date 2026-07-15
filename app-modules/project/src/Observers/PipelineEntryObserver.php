@@ -38,25 +38,31 @@ namespace AidingApp\Project\Observers;
 
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Notifications\PipelineEntryAssignedToUserNotification;
-use App\Features\PipelineEntryFieldsFeature;
+use App\Features\PipelineEntryEnhancedFieldsFeature;
 use App\Models\User;
 
 class PipelineEntryObserver
 {
     public function saving(PipelineEntry $pipelineEntry): void
     {
-        if (PipelineEntryFieldsFeature::active() && is_null($pipelineEntry->created_by)) {
+        if (blank($pipelineEntry->created_by)) {
             $pipelineEntry->created_by = auth()->id();
         }
     }
 
     public function saved(PipelineEntry $pipelineEntry): void
     {
-        if (PipelineEntryFieldsFeature::active() && filled($pipelineEntry->assigned_to) && ($pipelineEntry->wasChanged('assigned_to') || $pipelineEntry->wasRecentlyCreated)) {
-            /** @var User|null $user */
+        if (
+            PipelineEntryEnhancedFieldsFeature::active()
+            && filled($pipelineEntry->assigned_to_id)
+            && $pipelineEntry->assigned_to_type === (new User())->getMorphClass()
+            && ($pipelineEntry->wasChanged(['assigned_to_id', 'assigned_to_type']) || $pipelineEntry->wasRecentlyCreated)
+        ) {
             $user = $pipelineEntry->assignedTo;
 
-            $user?->notify(new PipelineEntryAssignedToUserNotification($pipelineEntry));
+            if ($user instanceof User) {
+                $user->notify(new PipelineEntryAssignedToUserNotification($pipelineEntry));
+            }
         }
     }
 }

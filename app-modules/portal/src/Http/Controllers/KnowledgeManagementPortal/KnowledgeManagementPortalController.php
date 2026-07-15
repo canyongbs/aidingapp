@@ -39,6 +39,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
+use AidingApp\Project\Models\PipelineEntry;
 use App\Http\Controllers\Controller;
 use App\Settings\LicenseSettings;
 use Filament\Support\Colors\Color;
@@ -86,6 +87,12 @@ class KnowledgeManagementPortalController extends Controller
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
             'license_management_enabled' => $addons?->licenseManagement,
             'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,
+            'has_projects' => auth()->guard('contact')->user()
+                ? PipelineEntry::query()
+                    ->where('organizable_type', auth()->guard('contact')->user()->getMorphClass())
+                    ->where('organizable_id', auth()->guard('contact')->user()->getKey())
+                    ->exists()
+                : false,
             'authentication_url' => URL::to(
                 URL::signedRoute(
                     name: 'api.portal.request-authentication',
