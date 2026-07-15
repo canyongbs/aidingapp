@@ -120,10 +120,10 @@ it('defaults new pipeline stages to planning', function () {
     asSuperAdmin($superAdmin);
 
     $pipelineData = [
-            'name' => 'Test',
-            'description' => 'This is a test pipeline',
-            'stages' => [['name' => 'Stage One']],
-        ];
+        'name' => 'Test',
+        'description' => 'This is a test pipeline',
+        'stages' => [['name' => 'Stage One']],
+    ];
 
     livewire(CreatePipeline::class)
         ->fillForm($pipelineData)
