@@ -77,149 +77,149 @@
     <LoginLayout :header-logo="headerLogo" :footer-logo="footerLogo" :app-name="appName">
         <Heading title="Login to Help Center" class="text-center" />
 
-                <FormKit type="form" @submit="handleSubmit" v-model="authentication" :actions="false">
-                    <div class="mt-8 flex flex-col gap-6">
-                        <div class="-mb-4">
-                            <FormKit
-                                type="email"
-                                label="Email address"
-                                name="email"
-                                validation="required|email"
-                                validation-visibility="submit"
-                                :disabled="authentication.isRequested || authentication.registrationAllowed"
-                            />
-                        </div>
+        <FormKit type="form" @submit="handleSubmit" v-model="authentication" :actions="false">
+            <div class="mt-8 flex flex-col gap-6">
+                <div class="-mb-4">
+                    <FormKit
+                        type="email"
+                        label="Email address"
+                        name="email"
+                        validation="required|email"
+                        validation-visibility="submit"
+                        :disabled="authentication.isRequested || authentication.registrationAllowed"
+                    />
+                </div>
 
-                        <div v-if="authentication.registrationAllowed" class="flex flex-col gap-6">
-                            <p class="text-sm text-gray-500">
-                                You are not registered yet. Please fill in the form below to register.
-                            </p>
+                <div v-if="authentication.registrationAllowed" class="flex flex-col gap-6">
+                    <p class="text-sm text-gray-500">
+                        You are not registered yet. Please fill in the form below to register.
+                    </p>
 
-                            <div class="-mb-4">
-                                <FormKit
-                                    type="text"
-                                    label="First Name*"
-                                    name="first_name"
-                                    validation="required|alpha|length:0,255"
-                                    validation-visibility="submit"
-                                />
-                            </div>
-
-                            <div class="-mb-4">
-                                <FormKit
-                                    type="text"
-                                    label="Last Name*"
-                                    name="last_name"
-                                    validation="required|alpha|length:0,255"
-                                    validation-visibility="submit"
-                                />
-                            </div>
-
-                            <div class="-mb-4">
-                                <FormKit
-                                    type="text"
-                                    label="Preferred Name"
-                                    name="preferred"
-                                    validation="alpha|length:0,255"
-                                    validation-visibility="submit"
-                                />
-                            </div>
-
-                            <div class="-mb-4">
-                                <FormKit
-                                    type="tel"
-                                    label="Mobile*"
-                                    name="mobile"
-                                    placeholder="xxx-xxx-xxxx"
-                                    validation="required|length:0,255"
-                                    validation-visibility="submit"
-                                />
-                            </div>
-
-                            <div class="-mb-4">
-                                <FormKit
-                                    type="tel"
-                                    label="Other Phone"
-                                    name="phone"
-                                    placeholder="xxx-xxx-xxxx"
-                                    validation="length:0,255"
-                                    validation-visibility="submit"
-                                />
-                            </div>
-
-                            <div class="-mb-4">
-                                <FormKit
-                                    type="select"
-                                    label="SMS Opt Out"
-                                    name="sms_opt_out"
-                                    :value="0"
-                                    :options="[
-                                        { value: false, label: 'No' },
-                                        { value: true, label: 'Yes' },
-                                    ]"
-                                    validation-visibility="submit"
-                                />
-                            </div>
-                        </div>
-
-                        <p v-if="authentication.requestedMessage" class="text-sm text-gray-500">
-                            {{ authentication.requestedMessage }}
-                        </p>
-
-                        <div v-if="authentication.isRequested" class="-mb-4">
-                            <FormKit
-                                type="otp"
-                                digits="6"
-                                label="Enter the code here"
-                                name="code"
-                                validation="required"
-                                validation-visibility="submit"
-                            />
-                        </div>
-
-                        <div class="flex flex-col gap-3">
-                            <button
-                                type="submit"
-                                :disabled="submitting"
-                                :class="[
-                                    'relative inline-grid w-full grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3.5 py-2.5 text-sm font-medium outline-none transition duration-75 bg-brand-600 text-white hover:bg-brand-500 focus-visible:ring-2 focus-visible:ring-brand-500/50',
-                                    submitting && 'cursor-wait opacity-70',
-                                ]"
-                            >
-                                <svg
-                                    v-if="submitting"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="size-5 animate-spin"
-                                >
-                                    <path
-                                        clip-rule="evenodd"
-                                        d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                                        fill-rule="evenodd"
-                                        fill="currentColor"
-                                        opacity="0.2"
-                                    />
-                                    <path
-                                        d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z"
-                                        fill="currentColor"
-                                    />
-                                </svg>
-                                <span>
-                                    {{ authentication.isRequested ? 'Sign in' : 'Send login code' }}
-                                </span>
-                            </button>
-
-                            <button
-                                v-if="!requiresAuthentication"
-                                type="button"
-                                class="inline-flex items-center justify-center gap-1.5 text-sm font-medium text-gray-700 outline-none hover:underline focus-visible:underline"
-                                @click="emit('cancel')"
-                            >
-                                Cancel
-                            </button>
-                        </div>
+                    <div class="-mb-4">
+                        <FormKit
+                            type="text"
+                            label="First Name*"
+                            name="first_name"
+                            validation="required|alpha|length:0,255"
+                            validation-visibility="submit"
+                        />
                     </div>
-                </FormKit>
+
+                    <div class="-mb-4">
+                        <FormKit
+                            type="text"
+                            label="Last Name*"
+                            name="last_name"
+                            validation="required|alpha|length:0,255"
+                            validation-visibility="submit"
+                        />
+                    </div>
+
+                    <div class="-mb-4">
+                        <FormKit
+                            type="text"
+                            label="Preferred Name"
+                            name="preferred"
+                            validation="alpha|length:0,255"
+                            validation-visibility="submit"
+                        />
+                    </div>
+
+                    <div class="-mb-4">
+                        <FormKit
+                            type="tel"
+                            label="Mobile*"
+                            name="mobile"
+                            placeholder="xxx-xxx-xxxx"
+                            validation="required|length:0,255"
+                            validation-visibility="submit"
+                        />
+                    </div>
+
+                    <div class="-mb-4">
+                        <FormKit
+                            type="tel"
+                            label="Other Phone"
+                            name="phone"
+                            placeholder="xxx-xxx-xxxx"
+                            validation="length:0,255"
+                            validation-visibility="submit"
+                        />
+                    </div>
+
+                    <div class="-mb-4">
+                        <FormKit
+                            type="select"
+                            label="SMS Opt Out"
+                            name="sms_opt_out"
+                            :value="0"
+                            :options="[
+                                { value: false, label: 'No' },
+                                { value: true, label: 'Yes' },
+                            ]"
+                            validation-visibility="submit"
+                        />
+                    </div>
+                </div>
+
+                <p v-if="authentication.requestedMessage" class="text-sm text-gray-500">
+                    {{ authentication.requestedMessage }}
+                </p>
+
+                <div v-if="authentication.isRequested" class="-mb-4">
+                    <FormKit
+                        type="otp"
+                        digits="6"
+                        label="Enter the code here"
+                        name="code"
+                        validation="required"
+                        validation-visibility="submit"
+                    />
+                </div>
+
+                <div class="flex flex-col gap-3">
+                    <button
+                        type="submit"
+                        :disabled="submitting"
+                        :class="[
+                            'relative inline-grid w-full grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3.5 py-2.5 text-sm font-medium outline-none transition duration-75 bg-brand-600 text-white hover:bg-brand-500 focus-visible:ring-2 focus-visible:ring-brand-500/50',
+                            submitting && 'cursor-wait opacity-70',
+                        ]"
+                    >
+                        <svg
+                            v-if="submitting"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="size-5 animate-spin"
+                        >
+                            <path
+                                clip-rule="evenodd"
+                                d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                                fill-rule="evenodd"
+                                fill="currentColor"
+                                opacity="0.2"
+                            />
+                            <path
+                                d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z"
+                                fill="currentColor"
+                            />
+                        </svg>
+                        <span>
+                            {{ authentication.isRequested ? 'Sign in' : 'Send login code' }}
+                        </span>
+                    </button>
+
+                    <button
+                        v-if="!requiresAuthentication"
+                        type="button"
+                        class="inline-flex items-center justify-center gap-1.5 text-sm font-medium text-gray-700 outline-none hover:underline focus-visible:underline"
+                        @click="emit('cancel')"
+                    >
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </FormKit>
     </LoginLayout>
 </template>

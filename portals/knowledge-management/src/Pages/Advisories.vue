@@ -32,13 +32,13 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import EmptyState from '@common/portal/EmptyState.vue';
+    import Page from '@common/portal/Page.vue';
     import { onMounted, ref } from 'vue';
     import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import LoadingSpinner from '../../../../resources/js/components/LoadingSpinner.vue';
-    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
-    import EmptyState from '@common/portal/EmptyState.vue';
-    import Page from '@common/portal/Page.vue';
     import { consumer } from '../Services/Consumer';
 
     const advisories = ref([]);

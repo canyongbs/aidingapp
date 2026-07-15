@@ -32,14 +32,14 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps } from 'vue';
-    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
-    import ResourceList from '@common/portal/ResourceList.vue';
-    import ResourceListItem from '@common/portal/ResourceListItem.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
+    import ResourceList from '@common/portal/ResourceList.vue';
+    import ResourceListItem from '@common/portal/ResourceListItem.vue';
+    import { defineProps } from 'vue';
+    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
 
     defineProps({
         categories: {

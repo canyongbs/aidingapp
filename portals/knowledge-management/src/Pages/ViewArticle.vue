@@ -32,12 +32,6 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ClockIcon, EyeIcon, PaperClipIcon } from '@heroicons/vue/20/solid';
-    import { HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/vue/24/solid';
-    import DOMPurify from 'dompurify';
-    import truncate from 'lodash/truncate';
-    import { computed, defineProps, ref, watch } from 'vue';
-    import { useRoute, useRouter } from 'vue-router';
     import BaseButton from '@common/BaseButton.vue';
     import AppLoading from '@common/portal/AppLoading.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
@@ -45,6 +39,12 @@
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
     import Tags from '@common/portal/Tags.vue';
+    import { ClockIcon, EyeIcon, PaperClipIcon } from '@heroicons/vue/20/solid';
+    import { HandThumbDownIcon, HandThumbUpIcon } from '@heroicons/vue/24/solid';
+    import DOMPurify from 'dompurify';
+    import truncate from 'lodash/truncate';
+    import { computed, defineProps, ref, watch } from 'vue';
+    import { useRoute, useRouter } from 'vue-router';
     import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();
