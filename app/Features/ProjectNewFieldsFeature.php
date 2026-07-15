@@ -34,32 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+namespace App\Features;
 
-use AidingApp\Department\Models\Department;
-use AidingApp\Project\Models\Project;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @extends Factory<Project>
- */
-class ProjectFactory extends Factory
+class ProjectNewFieldsFeature extends AbstractFeatureFlag
 {
-    /**
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'name' => str($this->faker->unique()->words(3, true))->title()->toString(),
-            'description' => $this->faker->sentence(),
-            'icon' => $this->faker->randomElement(['heroicon-o-clipboard-document-list', 'heroicon-o-folder', 'heroicon-o-pencil', 'heroicon-o-chart-bar']),
-            'color' => $this->faker->randomElement(Color::cases())->value,
-            'department_id' => Department::factory(),
-            'start_date' => $this->faker->date(),
-            'target_completion_date' => $this->faker->date(),
-        ];
+        return false;
     }
 }

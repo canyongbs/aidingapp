@@ -34,32 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Department\Models\Department;
-use AidingApp\Project\Models\Project;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<Project>
- */
-class ProjectFactory extends Factory
-{
-    /**
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => str($this->faker->unique()->words(3, true))->title()->toString(),
-            'description' => $this->faker->sentence(),
-            'icon' => $this->faker->randomElement(['heroicon-o-clipboard-document-list', 'heroicon-o-folder', 'heroicon-o-pencil', 'heroicon-o-chart-bar']),
-            'color' => $this->faker->randomElement(Color::cases())->value,
-            'department_id' => Department::factory(),
-            'start_date' => $this->faker->date(),
-            'target_completion_date' => $this->faker->date(),
-        ];
+        Schema::create('project_guests', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('project_id')->constrained('projects')->cascadeOnDelete();
+            $table->nullableUuidMorphs('guest');
+            $table->timestamps();
+
+            $table->unique(['project_id', 'guest_id', 'guest_type']);
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::dropIfExists('project_guests');
+    }
+};

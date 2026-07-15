@@ -34,32 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use AidingApp\Department\Models\Department;
-use AidingApp\Project\Models\Project;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\GuestContactsRelationManager;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\GuestOrganizationsRelationManager;
+use App\Features\ProjectNewFieldsFeature;
+use Filament\Resources\Pages\ManageRelatedRecords;
 
-/**
- * @extends Factory<Project>
- */
-class ProjectFactory extends Factory
+class ManageGuests extends ManageRelatedRecords
 {
-    /**
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected static string $resource = ProjectResource::class;
+
+    protected static string $relationship = 'guestContacts';
+
+    public static function getNavigationLabel(): string
+    {
+        return 'Guests';
+    }
+
+    public function getRelationManagers(): array
     {
         return [
-            'name' => str($this->faker->unique()->words(3, true))->title()->toString(),
-            'description' => $this->faker->sentence(),
-            'icon' => $this->faker->randomElement(['heroicon-o-clipboard-document-list', 'heroicon-o-folder', 'heroicon-o-pencil', 'heroicon-o-chart-bar']),
-            'color' => $this->faker->randomElement(Color::cases())->value,
-            'department_id' => Department::factory(),
-            'start_date' => $this->faker->date(),
-            'target_completion_date' => $this->faker->date(),
+            GuestContactsRelationManager::class,
+            GuestOrganizationsRelationManager::class,
         ];
+    }
+
+    public static function canAccess(array $arguments = []): bool
+    {
+        $user = auth()->user();
+
+        return ProjectNewFieldsFeature::active() && $user->can(['project.view-any', 'project.*.view']) && parent::canAccess($arguments);
     }
 }

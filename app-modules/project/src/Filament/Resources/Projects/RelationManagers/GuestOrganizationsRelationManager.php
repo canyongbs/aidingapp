@@ -34,32 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
 
-use AidingApp\Department\Models\Department;
-use AidingApp\Project\Models\Project;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-/**
- * @extends Factory<Project>
- */
-class ProjectFactory extends Factory
+class GuestOrganizationsRelationManager extends RelationManager
 {
-    /**
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected static string $relationship = 'guestOrganizations';
+
+    protected static ?string $title = 'Organizations';
+
+    public function table(Table $table): Table
     {
-        return [
-            'name' => str($this->faker->unique()->words(3, true))->title()->toString(),
-            'description' => $this->faker->sentence(),
-            'icon' => $this->faker->randomElement(['heroicon-o-clipboard-document-list', 'heroicon-o-folder', 'heroicon-o-pencil', 'heroicon-o-chart-bar']),
-            'color' => $this->faker->randomElement(Color::cases())->value,
-            'department_id' => Department::factory(),
-            'start_date' => $this->faker->date(),
-            'target_completion_date' => $this->faker->date(),
-        ];
+        return $table
+            ->recordTitleAttribute('name')
+            ->columns([
+                TextColumn::make('name'),
+            ])
+            ->headerActions([
+                AttachAction::make()
+                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord())),
+            ])
+            ->recordActions([
+                DetachAction::make()
+                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord())),
+            ])
+            ->toolbarActions([
+                DetachBulkAction::make()
+                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord())),
+            ])
+            ->inverseRelationship('guestProjects');
     }
 }

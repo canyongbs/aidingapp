@@ -34,32 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+use App\Features\ProjectNewFieldsFeature;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Department\Models\Department;
-use AidingApp\Project\Models\Project;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<Project>
- */
-class ProjectFactory extends Factory
-{
-    /**
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => str($this->faker->unique()->words(3, true))->title()->toString(),
-            'description' => $this->faker->sentence(),
-            'icon' => $this->faker->randomElement(['heroicon-o-clipboard-document-list', 'heroicon-o-folder', 'heroicon-o-pencil', 'heroicon-o-chart-bar']),
-            'color' => $this->faker->randomElement(Color::cases())->value,
-            'department_id' => Department::factory(),
-            'start_date' => $this->faker->date(),
-            'target_completion_date' => $this->faker->date(),
-        ];
+        ProjectNewFieldsFeature::activate();
     }
-}
+
+    public function down(): void
+    {
+        ProjectNewFieldsFeature::deactivate();
+    }
+};

@@ -34,32 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Department\Models\Department;
-use AidingApp\Project\Models\Project;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<Project>
- */
-class ProjectFactory extends Factory
-{
-    /**
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => str($this->faker->unique()->words(3, true))->title()->toString(),
-            'description' => $this->faker->sentence(),
-            'icon' => $this->faker->randomElement(['heroicon-o-clipboard-document-list', 'heroicon-o-folder', 'heroicon-o-pencil', 'heroicon-o-chart-bar']),
-            'color' => $this->faker->randomElement(Color::cases())->value,
-            'department_id' => Department::factory(),
-            'start_date' => $this->faker->date(),
-            'target_completion_date' => $this->faker->date(),
-        ];
+        Schema::table('projects', function (Blueprint $table) {
+            $table->string('icon')->nullable()->default('heroicon-o-clipboard-document-list');
+            $table->string('color')->nullable()->default('gray');
+            $table->foreignUuid('department_id')->nullable()->constrained('departments')->nullOnDelete();
+            $table->date('start_date')->nullable();
+            $table->date('target_completion_date')->nullable();
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('projects', function (Blueprint $table) {
+            $table->dropForeign(['department_id']);
+            $table->dropColumn(['icon', 'color', 'department_id', 'start_date', 'target_completion_date']);
+        });
+    }
+};
