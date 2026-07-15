@@ -34,50 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Report\Filament\Pages;
-
-use AidingApp\Report\Enums\ReportAccessKey;
-use App\Enums\Feature;
-use App\Enums\ReportLibraryNavigationGroup;
 use App\Features\ReportingFeature;
-use App\Filament\Clusters\ReportLibrary;
-use App\Models\User;
-use BackedEnum;
-use Filament\Pages\Dashboard;
-use Illuminate\Support\Facades\Gate;
-use UnitEnum;
+use Illuminate\Database\Migrations\Migration;
 
-class AdvisoryManagement extends Dashboard
-{
-    protected static ?string $cluster = ReportLibrary::class;
-
-    protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::ServiceDesk;
-
-    protected static ?string $navigationLabel = 'Advisories';
-
-    protected static ?string $title = 'Advisories';
-
-    protected static string $routePath = 'advisories';
-
-    protected string $view = 'filament.pages.coming-soon';
-
-    protected static ?int $navigationSort = 50;
-
-    protected static string | BackedEnum | null $navigationIcon = '';
-
-    public static function canAccess(): bool
+return new class () extends Migration {
+    public function up(): void
     {
-        if (! Gate::check(Feature::AdvisoryManagement->getGateName())) {
-            return false;
-        }
-
-        /** @var User $user */
-        $user = auth()->user();
-
-        if (! ReportingFeature::active()) {
-            return $user->can('report-library.view-any');
-        }
-
-        return ReportAccessKey::fromPageClass(static::class)?->userCanAccess($user) ?? false;
+        ReportingFeature::activate();
     }
-}
+
+    public function down(): void
+    {
+        ReportingFeature::deactivate();
+    }
+};

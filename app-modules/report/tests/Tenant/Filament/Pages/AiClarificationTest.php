@@ -36,57 +36,43 @@
 
 use AidingApp\Department\Models\Department;
 use AidingApp\Report\Enums\ReportAccessKey;
-use AidingApp\Report\Filament\Pages\AdvisoryManagement;
+use AidingApp\Report\Filament\Pages\AiClarification;
 use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
 use App\Models\User;
-use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->advisoryManagement = false;
-    $settings->save();
-
     $user = User::factory()->create();
 
     actingAs($user);
 
-    livewire(AdvisoryManagement::class)->assertForbidden();
-
-    $settings->data->addons->advisoryManagement = true;
-    $settings->save();
-
-    livewire(AdvisoryManagement::class)->assertForbidden();
+    livewire(AiClarification::class)->assertForbidden();
 
     ReportUserAccess::factory()->create([
-        'report_key' => ReportAccessKey::AdvisoryManagement->value,
+        'report_key' => ReportAccessKey::AiClarification->value,
         'user_id' => $user->getKey(),
     ]);
 
-    get(AdvisoryManagement::getUrl())->assertSuccessful();
+    get(AiClarification::getUrl())->assertSuccessful();
 });
 
 it('grants access to a user belonging to a department that has been granted access', function () {
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->advisoryManagement = true;
-    $settings->save();
-
     $department = Department::factory()->create();
 
     $user = User::factory()->create(['department_id' => $department->getKey()]);
 
     actingAs($user);
 
-    livewire(AdvisoryManagement::class)->assertForbidden();
+    livewire(AiClarification::class)->assertForbidden();
 
     ReportDepartmentAccess::factory()->create([
-        'report_key' => ReportAccessKey::AdvisoryManagement->value,
+        'report_key' => ReportAccessKey::AiClarification->value,
         'department_id' => $department->getKey(),
     ]);
 
-    get(AdvisoryManagement::getUrl())->assertSuccessful();
+    get(AiClarification::getUrl())->assertSuccessful();
 });

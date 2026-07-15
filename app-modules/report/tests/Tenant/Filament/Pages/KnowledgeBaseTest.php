@@ -34,7 +34,11 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
+use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Filament\Pages\KnowledgeBase;
+use AidingApp\Report\Models\ReportDepartmentAccess;
+use AidingApp\Report\Models\ReportUserAccess;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -46,19 +50,42 @@ it('is gated with proper access control', function () {
     $settings->data->addons->knowledgeManagement = false;
     $settings->save();
 
-    $user = User::factory()->create();
+    $user = User::factory()->create(['timezone' => 'UTC']);
 
     actingAs($user);
 
     livewire(KnowledgeBase::class)->assertForbidden();
 
-    $user->givePermissionTo('report-library.view-any');
-    $user->refresh();
+    $settings->data->addons->knowledgeManagement = true;
+    $settings->save();
 
     livewire(KnowledgeBase::class)->assertForbidden();
 
+    ReportUserAccess::factory()->create([
+        'report_key' => ReportAccessKey::KnowledgeBase->value,
+        'user_id' => $user->getKey(),
+    ]);
+
+    livewire(KnowledgeBase::class)->assertOk();
+});
+
+it('grants access to a user belonging to a department that has been granted access', function () {
+    $settings = app(LicenseSettings::class);
     $settings->data->addons->knowledgeManagement = true;
     $settings->save();
+
+    $department = Department::factory()->create();
+
+    $user = User::factory()->create(['timezone' => 'UTC', 'department_id' => $department->getKey()]);
+
+    actingAs($user);
+
+    livewire(KnowledgeBase::class)->assertForbidden();
+
+    ReportDepartmentAccess::factory()->create([
+        'report_key' => ReportAccessKey::KnowledgeBase->value,
+        'department_id' => $department->getKey(),
+    ]);
 
     livewire(KnowledgeBase::class)->assertOk();
 });

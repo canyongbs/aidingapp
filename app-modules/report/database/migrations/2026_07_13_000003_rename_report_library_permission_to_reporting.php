@@ -34,50 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Report\Filament\Pages;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Report\Enums\ReportAccessKey;
-use App\Enums\Feature;
-use App\Enums\ReportLibraryNavigationGroup;
-use App\Features\ReportingFeature;
-use App\Filament\Clusters\ReportLibrary;
-use App\Models\User;
-use BackedEnum;
-use Filament\Pages\Dashboard;
-use Illuminate\Support\Facades\Gate;
-use UnitEnum;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-class AdvisoryManagement extends Dashboard
-{
-    protected static ?string $cluster = ReportLibrary::class;
+    /** @var array<string> */
+    private array $guards = [
+        'web',
+        'api',
+    ];
 
-    protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::ServiceDesk;
+    /** @var array<string, string> */
+    private array $permissions = [
+        'reporting.*.update' => 'Reporting',
+    ];
 
-    protected static ?string $navigationLabel = 'Advisories';
-
-    protected static ?string $title = 'Advisories';
-
-    protected static string $routePath = 'advisories';
-
-    protected string $view = 'filament.pages.coming-soon';
-
-    protected static ?int $navigationSort = 50;
-
-    protected static string | BackedEnum | null $navigationIcon = '';
-
-    public static function canAccess(): bool
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
+    public function up(): void
     {
-        if (! Gate::check(Feature::AdvisoryManagement->getGateName())) {
-            return false;
-        }
-
-        /** @var User $user */
-        $user = auth()->user();
-
-        if (! ReportingFeature::active()) {
-            return $user->can('report-library.view-any');
-        }
-
-        return ReportAccessKey::fromPageClass(static::class)?->userCanAccess($user) ?? false;
+        $this->renamePermissionGroups(['Report Library' => 'Reporting']);
+        collect($this->guards)->each(function (string $guard): void {
+            $this->renamePermissions(['report-library.view-any' => 'reporting.view-any'], $guard);
+            $this->createPermissions($this->permissions, $guard);
+        });
     }
-}
+
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
+    public function down(): void
+    {
+        collect($this->guards)->each(function (string $guard): void {
+            $this->deletePermissions(array_keys($this->permissions), $guard);
+            $this->renamePermissions(['reporting.view-any' => 'report-library.view-any'], $guard);
+        });
+
+        $this->renamePermissionGroups(['Reporting' => 'Report Library']);
+    }
+};

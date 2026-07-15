@@ -36,6 +36,7 @@
 
 namespace AidingApp\Report\Filament\Pages;
 
+use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Filament\Widgets\RefreshWidget;
 use AidingApp\Report\Filament\Widgets\ServiceRequestCategoryDistributionDonutChart;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsOverTimeBarChart;
@@ -45,6 +46,7 @@ use AidingApp\Report\Filament\Widgets\ServiceRequestStatusDistributionDonutChart
 use AidingApp\Report\Filament\Widgets\ServiceRequestTypesTable;
 use App\Enums\Feature;
 use App\Enums\ReportLibraryNavigationGroup;
+use App\Features\ReportingFeature;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use BackedEnum;
@@ -88,7 +90,11 @@ class ServiceRequests extends Dashboard
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->can('report-library.view-any');
+        if (! ReportingFeature::active()) {
+            return $user->can('report-library.view-any');
+        }
+
+        return ReportAccessKey::fromPageClass(static::class)?->userCanAccess($user) ?? false;
     }
 
     public function filtersForm(Schema $schema): Schema

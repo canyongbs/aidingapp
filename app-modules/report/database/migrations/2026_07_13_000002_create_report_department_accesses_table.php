@@ -34,50 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Report\Filament\Pages;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Report\Enums\ReportAccessKey;
-use App\Enums\Feature;
-use App\Enums\ReportLibraryNavigationGroup;
-use App\Features\ReportingFeature;
-use App\Filament\Clusters\ReportLibrary;
-use App\Models\User;
-use BackedEnum;
-use Filament\Pages\Dashboard;
-use Illuminate\Support\Facades\Gate;
-use UnitEnum;
-
-class AdvisoryManagement extends Dashboard
-{
-    protected static ?string $cluster = ReportLibrary::class;
-
-    protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::ServiceDesk;
-
-    protected static ?string $navigationLabel = 'Advisories';
-
-    protected static ?string $title = 'Advisories';
-
-    protected static string $routePath = 'advisories';
-
-    protected string $view = 'filament.pages.coming-soon';
-
-    protected static ?int $navigationSort = 50;
-
-    protected static string | BackedEnum | null $navigationIcon = '';
-
-    public static function canAccess(): bool
+return new class () extends Migration {
+    public function up(): void
     {
-        if (! Gate::check(Feature::AdvisoryManagement->getGateName())) {
-            return false;
-        }
+        Schema::create('report_department_accesses', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('report_key');
+            $table->foreignUuid('department_id')->constrained('departments')->cascadeOnDelete();
+            $table->timestamps();
 
-        /** @var User $user */
-        $user = auth()->user();
-
-        if (! ReportingFeature::active()) {
-            return $user->can('report-library.view-any');
-        }
-
-        return ReportAccessKey::fromPageClass(static::class)?->userCanAccess($user) ?? false;
+            $table->unique(['report_key', 'department_id']);
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::dropIfExists('report_department_accesses');
+    }
+};
