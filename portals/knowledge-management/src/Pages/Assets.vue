@@ -36,9 +36,9 @@
     import AssetFilterTabs from '../Components/Assets/AssetFilterTabs.vue';
     import AssetStatCards from '../Components/Assets/AssetStatCards.vue';
     import AssetTable from '../Components/Assets/AssetTable.vue';
-    import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import Page from '../Components/Page.vue';
-    import PageCard from '../Components/PageCard.vue';
+    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import Page from '@common/portal/Page.vue';
+    import PageCard from '@common/portal/PageCard.vue';
     import { consumer } from '../Services/Consumer';
 
     const props = defineProps({

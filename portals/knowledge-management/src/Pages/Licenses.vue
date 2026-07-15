@@ -36,10 +36,10 @@
     import { Card } from 'primevue';
     import { onMounted, ref } from 'vue';
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';
-    import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import EmptyState from '../Components/EmptyState.vue';
-    import Page from '../Components/Page.vue';
-    import PageCard from '../Components/PageCard.vue';
+    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import EmptyState from '@common/portal/EmptyState.vue';
+    import Page from '@common/portal/Page.vue';
+    import PageCard from '@common/portal/PageCard.vue';
     import { consumer } from '../Services/Consumer';
 
     const productLicenses = ref({});

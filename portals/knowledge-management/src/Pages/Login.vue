@@ -32,10 +32,10 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import Heading from '@common/portal/Heading.vue';
+    import LoginLayout from '@common/portal/login/LoginLayout.vue';
     import { FormKit } from '@formkit/vue';
     import { ref } from 'vue';
-    import Footer from '../Components/Footer.vue';
-    import Heading from '../Components/Heading.vue';
 
     const authentication = defineModel('authentication', {
         type: Object,
@@ -55,6 +55,10 @@
             type: String,
             required: true,
         },
+        appName: {
+            type: String,
+            required: true,
+        },
     });
 
     const emit = defineEmits(['authenticate', 'cancel']);
@@ -70,16 +74,8 @@
 </script>
 
 <template>
-    <div class="flex min-h-screen w-full flex-col bg-gray-50 text-gray-950 antialiased">
-        <div
-            class="sticky top-0 z-10 flex justify-center items-center w-full border-b border-gray-200 flex-shrink-0 p-4 bg-gray-50"
-        >
-            <img :src="headerLogo" class="h-9 block" />
-        </div>
-
-        <main class="mx-auto flex flex-1 justify-center items-center w-full px-4 md:px-6 lg:px-8 max-w-screen-lg py-8">
-            <div class="w-full max-w-md">
-                <Heading title="Login to Help Center" class="text-center" />
+    <LoginLayout :header-logo="headerLogo" :footer-logo="footerLogo" :app-name="appName">
+        <Heading title="Login to Help Center" class="text-center" />
 
                 <FormKit type="form" @submit="handleSubmit" v-model="authentication" :actions="false">
                     <div class="mt-8 flex flex-col gap-6">
@@ -225,9 +221,5 @@
                         </div>
                     </div>
                 </FormKit>
-            </div>
-        </main>
-
-        <Footer :logo="footerLogo" />
-    </div>
+    </LoginLayout>
 </template>

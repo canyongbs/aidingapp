@@ -34,9 +34,9 @@
 <script setup>
     import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
     import { RouterView, useRoute, useRouter } from 'vue-router';
-    import AppLoading from './Components/AppLoading.vue';
-    import Footer from './Components/Footer.vue';
-    import Header from './Components/Header.vue';
+    import AppLoading from '@common/portal/AppLoading.vue';
+    import Footer from '@common/portal/Footer.vue';
+    import Header from '@common/portal/Header.vue';
     import axios from './Globals/Axios.js';
     import Login from './Pages/Login.vue';
     import { consumer } from './Services/Consumer.js';
@@ -634,6 +634,7 @@
                 :requires-authentication="requiresAuthentication"
                 :header-logo="headerLogo"
                 :footer-logo="footerLogo"
+                :app-name="appName"
                 @authenticate="authenticate"
                 @cancel="showLogin = false"
             />
@@ -661,7 +662,7 @@
                     />
                 </main>
 
-                <Footer :logo="footerLogo"></Footer>
+                <Footer :logo="footerLogo" :app-name="appName"></Footer>
             </div>
         </div>
     </div>

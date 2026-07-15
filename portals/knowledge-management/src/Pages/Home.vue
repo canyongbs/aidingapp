@@ -32,13 +32,13 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps, nextTick, onMounted, ref, watch } from 'vue';
+    import { computed, defineProps, nextTick, onMounted, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
-    import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import HelpCenter from '../Components/HelpCenter.vue';
-    import HeroSearch from '../Components/HeroSearch.vue';
-    import Page from '../Components/Page.vue';
-    import SearchResults from '../Components/SearchResults.vue';
+    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import HelpCenter from '@common/portal/home/HelpCenter.vue';
+    import HeroSearch from '@common/portal/HeroSearch.vue';
+    import Page from '@common/portal/Page.vue';
+    import SearchResults from '@common/portal/search/SearchResults.vue';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
@@ -66,6 +66,14 @@
             required: true,
         },
     });
+
+    const categoriesWithRoutes = computed(() =>
+        Object.values(props.categories).map((category) => ({
+            ...category,
+            key: category.slug,
+            to: { name: 'view-category', params: { categorySlug: category.slug } },
+        })),
+    );
 
     const searchQuery = ref('');
     const loadingResults = ref(false);
@@ -301,6 +309,6 @@
         >
         </SearchResults>
 
-        <HelpCenter v-else :categories="categories" :service-requests="serviceRequests"></HelpCenter>
+        <HelpCenter v-else :categories="categoriesWithRoutes"></HelpCenter>
     </Page>
 </template>
