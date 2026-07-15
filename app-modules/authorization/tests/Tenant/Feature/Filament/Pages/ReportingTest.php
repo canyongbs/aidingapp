@@ -70,7 +70,7 @@ it('can be accessed by a user with the reporting permission', function () {
     get(Reporting::getUrl())->assertSuccessful();
 });
 
-it('cannot be accessed when the ReportingFeature is not active', function () {
+it('cannot be accessed when the ReportingFeature is not active even with the reporting permission', function () {
     ReportingFeature::deactivate();
 
     $user = User::factory()->create();

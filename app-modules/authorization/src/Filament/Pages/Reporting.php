@@ -84,11 +84,10 @@ class Reporting extends Page implements HasActions, HasForms, HasTable
 
     public static function canAccess(): bool
     {
+        /** @var User $user */
         $user = auth()->user();
 
-        assert($user instanceof User);
-
-        return ReportingFeature::active() && $user->can('reporting.view-any');
+        return $user->can(ReportingFeature::active() ? 'reporting.view-any' : 'report-library.view-any');
     }
 
     /**
