@@ -36,7 +36,9 @@
 
 namespace App\Filament\Forms\Components;
 
+use App\DataTransferObjects\AutocompletedAddress;
 use App\Services\AwsGeoPlacesService;
+use DefStudio\SearchableInput\DTO\SearchResult;
 use DefStudio\SearchableInput\Forms\Components\SearchableInput;
 use Filament\Notifications\Notification;
 use Throwable;
@@ -53,11 +55,13 @@ class AddressInput
                 }
 
                 try {
-                    $results = app(AwsGeoPlacesService::class)->autocomplete($search);
+                    $results = app(AwsGeoPlacesService::class)->autocompleteComponents($search);
 
                     session()->forget('has_aws_geo_places_error_notification_sent');
 
-                    return $results;
+                    return collect($results)->map(function (AutocompletedAddress $addressDto) {
+                        return SearchResult::make($addressDto->label)->withData('data', $addressDto);
+                    })->toArray();
                 } catch (Throwable $exception) {
                     if (! session()->has('has_aws_geo_places_error_notification_sent')) {
                         Notification::make()
@@ -74,6 +78,6 @@ class AddressInput
                     return [];
                 }
             })
-            ->extraInputAttributes(['data-1p-ignore' => true, 'data-lpignore' => 'true', 'data-form-type' => 'other', 'data-bwignore' => true]);
+            ->extraInputAttributes(['data-1p-ignore' => 'true', 'data-lpignore' => 'true', 'data-form-type' => 'other', 'data-bwignore' => true]);
     }
 }
