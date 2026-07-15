@@ -392,10 +392,17 @@ it('bulk manage assignments action replaces users and departments when sync is e
 
     $existingUser = User::factory()->create();
     $newUser = User::factory()->create();
+    $existingDepartment = Department::factory()->create();
+    $newDepartment = Department::factory()->create();
 
     ReportUserAccess::factory()->create([
         'report_key' => ReportAccessKey::AiSupportAssistant->value,
         'user_id' => $existingUser->getKey(),
+    ]);
+
+    ReportDepartmentAccess::factory()->create([
+        'report_key' => ReportAccessKey::AiSupportAssistant->value,
+        'department_id' => $existingDepartment->getKey(),
     ]);
 
     actingAs($user);
@@ -403,7 +410,7 @@ it('bulk manage assignments action replaces users and departments when sync is e
     livewire(Reporting::class)
         ->callTableBulkAction('manageReportAssignments', [ReportAccessKey::AiSupportAssistant->value], [
             'users' => [$newUser->getKey()],
-            'departments' => [],
+            'departments' => [$newDepartment->getKey()],
             'sync' => true,
         ])
         ->assertNotified();
@@ -419,6 +426,20 @@ it('bulk manage assignments action replaces users and departments when sync is e
         ReportUserAccess::query()
             ->where('report_key', ReportAccessKey::AiSupportAssistant->value)
             ->where('user_id', $newUser->getKey())
+            ->exists()
+    )->toBeTrue();
+
+    expect(
+        ReportDepartmentAccess::query()
+            ->where('report_key', ReportAccessKey::AiSupportAssistant->value)
+            ->where('department_id', $existingDepartment->getKey())
+            ->exists()
+    )->toBeFalse();
+
+    expect(
+        ReportDepartmentAccess::query()
+            ->where('report_key', ReportAccessKey::AiSupportAssistant->value)
+            ->where('department_id', $newDepartment->getKey())
             ->exists()
     )->toBeTrue();
 });

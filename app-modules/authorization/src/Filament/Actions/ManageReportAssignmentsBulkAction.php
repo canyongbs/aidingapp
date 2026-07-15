@@ -39,6 +39,7 @@ namespace AidingApp\Authorization\Filament\Actions;
 use AidingApp\Department\Models\Department;
 use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
+use App\Features\ReportingFeature;
 use App\Models\Scopes\WithoutAnyAdmin;
 use App\Models\User;
 use Filament\Actions\BulkAction;
@@ -65,7 +66,16 @@ class ManageReportAssignmentsBulkAction
         return BulkAction::make('manageReportAssignments')
             ->icon('heroicon-s-user-group')
             ->label('Manage Assignments')
-            ->authorize(fn (): bool => auth()->user()->can('reporting.*.update'))
+            ->authorize(function (): bool {
+                /** @var User $user */
+                $user = auth()->user();
+
+                if (! ReportingFeature::active()) {
+                    return $user->can('report-library.view-any');
+                }
+
+                return $user->can('reporting.*.update');
+            })
             ->modalHeading(fn (Collection $records): string => 'Manage Assignments for ' . $records->count() . ' ' . str('Report')->plural($records->count()))
             ->modalDescription('Grant access to the selected reports by assigning individual users and/or departments.')
             ->form([

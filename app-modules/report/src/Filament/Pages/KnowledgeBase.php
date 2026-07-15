@@ -90,7 +90,7 @@ class KnowledgeBase extends Dashboard
         $user = auth()->user();
 
         if (! ReportingFeature::active()) {
-            return $user->can('reporting.view-any');
+            return $user->can('report-library.view-any');
         }
 
         return ReportAccessKey::fromPageClass(static::class)?->userCanAccess($user) ?? false;
