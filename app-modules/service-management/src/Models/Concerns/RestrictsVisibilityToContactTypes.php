@@ -40,21 +40,34 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 
 trait RestrictsVisibilityToContactTypes
 {
-    abstract public function visibilityRestrictionParent(): ?ServiceRequestTypeCategory;
+    /**
+     * The categories this node sits directly beneath in the visibility tree.
+     *
+     * A service request type can sit beneath many categories; a category sits beneath at most one
+     * parent. The node is considered usable if it passes its own restriction and at least one of
+     * these parents is itself visible (or it has no parents).
+     *
+     * @return iterable<ServiceRequestTypeCategory>
+     */
+    abstract public function visibilityRestrictionParents(): iterable;
 
     public function isVisibleToContactType(?string $contactTypeId): bool
     {
-        $node = $this;
-
-        while ($node !== null) {
-            if (! $node->passesOwnVisibilityRestriction($contactTypeId)) {
-                return false;
-            }
-
-            $node = $node->visibilityRestrictionParent();
+        if (! $this->passesOwnVisibilityRestriction($contactTypeId)) {
+            return false;
         }
 
-        return true;
+        $hasParent = false;
+
+        foreach ($this->visibilityRestrictionParents() as $parent) {
+            $hasParent = true;
+
+            if ($parent->isVisibleToContactType($contactTypeId)) {
+                return true;
+            }
+        }
+
+        return ! $hasParent;
     }
 
     public function passesOwnVisibilityRestriction(?string $contactTypeId): bool

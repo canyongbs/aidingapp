@@ -34,34 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\Pages;
+namespace App\Features;
 
-use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\MaintenanceProviderResource;
-use Filament\Actions\ViewAction;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
+use App\Support\AbstractFeatureFlag;
 
-class EditMaintenanceProvider extends EditRecord
+class ServiceRequestTypeMultipleCategoriesFeature extends AbstractFeatureFlag
 {
-    protected static string $resource = MaintenanceProviderResource::class;
-
-    public function form(Schema $schema): Schema
+    public function resolve(mixed $scope): mixed
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->autoFocus()
-                    ->string()
-                    ->maxLength(255)
-                    ->required(),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-        ];
+        return false;
     }
 }

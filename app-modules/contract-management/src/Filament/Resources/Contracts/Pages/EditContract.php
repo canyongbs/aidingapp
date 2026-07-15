@@ -39,7 +39,6 @@ namespace AidingApp\ContractManagement\Filament\Resources\Contracts\Pages;
 use AidingApp\ContractManagement\Filament\Resources\Contracts\ContractResource;
 use AidingApp\ContractManagement\Models\Contract;
 use AidingApp\ContractManagement\Models\ContractType;
-use App\Concerns\EditPageRedirection;
 use Cknow\Money\Money;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\DatePicker;
@@ -56,8 +55,6 @@ use Illuminate\Support\Str;
 
 class EditContract extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ContractResource::class;
 
     public function form(Schema $schema): Schema

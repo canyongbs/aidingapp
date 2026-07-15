@@ -34,21 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace App\Concerns;
+namespace AidingApp\ServiceManagement\Models;
 
-use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-trait EditPageRedirection
+/**
+ * @mixin IdeHelperServiceRequestCategoryType
+ */
+class ServiceRequestCategoryType extends Pivot
 {
-    public function getRedirectUrl(): ?string
-    {
-        /** @var class-string<Resource> $resource */
-        $resource = $this->getResource();
+    use HasUuids;
 
-        if ($resource::hasPage('view')) {
-            return $resource::getUrl('view', ['record' => $this->record]);
-        }
+    protected $table = 'service_request_category_types';
 
-        return null;
-    }
+    public $incrementing = false;
 }

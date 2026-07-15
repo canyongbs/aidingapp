@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeS
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use App\Concerns\EditPageRedirection;
 use App\Enums\ServiceManagementAdministrationNavigationGroup;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
@@ -60,8 +59,6 @@ use UnitEnum;
 /** @property-read ?ServiceRequestTypeEmailTemplate $template */
 class ServiceRequestTypeEmailTemplatePage extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ServiceRequestTypeResource::class;
 
     #[Locked]

@@ -37,15 +37,12 @@
 namespace AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages;
 
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 
 class EditEngagementFile extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = EngagementFileResource::class;
 
     protected function getHeaderActions(): array

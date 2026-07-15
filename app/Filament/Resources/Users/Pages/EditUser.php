@@ -36,7 +36,6 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
-use App\Concerns\EditPageRedirection;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -57,8 +56,6 @@ use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class EditUser extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = UserResource::class;
 
     public function form(Schema $schema): Schema

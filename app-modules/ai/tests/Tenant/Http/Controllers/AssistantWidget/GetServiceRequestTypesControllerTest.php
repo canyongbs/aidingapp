@@ -72,7 +72,7 @@ function widgetRequestAsContact(Contact $contact, string $url): TestResponse
 
 it('does not return categories that have no service request types', function () {
     $categoryWithType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
-    ServiceRequestType::factory()->create(['category_id' => $categoryWithType->id]);
+    ServiceRequestType::factory()->hasAttached($categoryWithType, relationship: 'categories')->create();
 
     $emptyCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
 
@@ -89,7 +89,7 @@ it('does not return categories that have no service request types', function () 
 it('returns a parent category when a child category has types', function () {
     $parentCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     $childCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => $parentCategory->id]);
-    ServiceRequestType::factory()->create(['category_id' => $childCategory->id]);
+    ServiceRequestType::factory()->hasAttached($childCategory, relationship: 'categories')->create();
 
     $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
 
@@ -115,13 +115,12 @@ it('does not return a parent category when all child categories are empty', func
 
 it('does not return archived service request types as part of a category', function () {
     $categoryWithOnlyArchivedType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
-    ServiceRequestType::factory()->create([
-        'category_id' => $categoryWithOnlyArchivedType->id,
+    ServiceRequestType::factory()->hasAttached($categoryWithOnlyArchivedType, relationship: 'categories')->create([
         'archived_at' => now(),
     ]);
 
     $categoryWithActiveType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
-    ServiceRequestType::factory()->create(['category_id' => $categoryWithActiveType->id]);
+    ServiceRequestType::factory()->hasAttached($categoryWithActiveType, relationship: 'categories')->create();
 
     $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
 
@@ -180,7 +179,7 @@ it('hides the entire subtree of a visibility restricted area from non-matching w
         'is_visibility_restricted' => true,
     ]);
     $restrictedCategory->restrictedToContactTypes()->attach($allowedContactType);
-    ServiceRequestType::factory()->create(['category_id' => $restrictedCategory->id]);
+    ServiceRequestType::factory()->hasAttached($restrictedCategory, relationship: 'categories')->create();
 
     $nonMatchingContact = Contact::factory()->create(['type_id' => $otherContactType->id]);
 
@@ -199,4 +198,43 @@ it('hides the entire subtree of a visibility restricted area from non-matching w
 
     expect(collect($visibleResponse->json('categories'))->pluck('id'))
         ->toContain($restrictedCategory->id);
+});
+
+it('lists a type under every category it belongs to', function () {
+    $categoryA = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+    $categoryB = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+
+    $type = ServiceRequestType::factory()->create();
+    $type->categories()->attach([$categoryA->id, $categoryB->id]);
+
+    $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
+
+    $response->assertOk();
+
+    $categories = collect($response->json('categories'));
+
+    $categoryAData = $categories->firstWhere('id', $categoryA->id);
+    $categoryBData = $categories->firstWhere('id', $categoryB->id);
+
+    expect(collect($categoryAData['types'])->pluck('id'))->toContain($type->id)
+        ->and(collect($categoryBData['types'])->pluck('id'))->toContain($type->id);
+});
+
+it('orders types within a category by their per-area sort rather than the global sort', function () {
+    $category = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
+
+    $first = ServiceRequestType::factory()->create(['name' => 'First', 'sort' => 1]);
+    $second = ServiceRequestType::factory()->create(['name' => 'Second', 'sort' => 2]);
+
+    // Per-area pivot sort reverses the global order.
+    $category->types()->attach($first->id, ['sort' => 2]);
+    $category->types()->attach($second->id, ['sort' => 1]);
+
+    $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
+
+    $response->assertOk();
+
+    $categoryData = collect($response->json('categories'))->firstWhere('id', $category->id);
+
+    expect(collect($categoryData['types'])->pluck('id')->all())->toBe([$second->id, $first->id]);
 });
