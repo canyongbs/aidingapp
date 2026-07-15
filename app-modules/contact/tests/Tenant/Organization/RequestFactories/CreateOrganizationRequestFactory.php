@@ -54,7 +54,7 @@ class CreateOrganizationRequestFactory extends RequestFactory
             'type_id' => OrganizationType::factory(),
             'description' => fake()->text(),
             'number_of_employees' => fake()->randomNumber(),
-            'address' => fake()->address(),'city' => fake()->city(),
+            'address' => fake()->address(), 'city' => fake()->city(),
             'state' => fake()->state(),
             'postalcode' => fake()->postcode(),
             'country' => fake()->country(),
