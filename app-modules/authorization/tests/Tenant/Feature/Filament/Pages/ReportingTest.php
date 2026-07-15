@@ -70,6 +70,18 @@ it('can be accessed by a user with the reporting permission', function () {
     get(Reporting::getUrl())->assertSuccessful();
 });
 
+it('cannot be accessed when the ReportingFeature is not active', function () {
+    ReportingFeature::deactivate();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('reporting.view-any');
+
+    actingAs($user);
+
+    get(Reporting::getUrl())->assertForbidden();
+});
+
 it('always lists reports that require no feature addon', function () {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = false;
