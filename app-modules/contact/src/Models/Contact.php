@@ -121,6 +121,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'created_by_id',
         'title',
         'job_title',
+        'user_id',
     ];
 
     protected $casts = [
@@ -176,6 +177,19 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public function type(): BelongsTo
     {
         return $this->belongsTo(ContactType::class);
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function managedByUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function isManaged(): bool
+    {
+        return ! is_null($this->user_id);
     }
 
     /**

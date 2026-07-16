@@ -36,6 +36,8 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use AidingApp\Contact\Models\ContactType;
+use App\Features\ManagedContactFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use App\Rules\EmailNotInUseOrSoftDeleted;
@@ -46,7 +48,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use STS\FilamentImpersonate\Actions\Impersonate;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -93,6 +97,18 @@ class ViewUser extends ViewRecord
                             ->numeric(),
                         PhoneInput::make('mobile')
                             ->nullable(),
+                        Grid::make(2)
+                            ->visible(fn (): bool => ManagedContactFeature::active())
+                            ->schema([
+                                Toggle::make('is_managed_contact')
+                                    ->label('Managed Contact')
+                                    ->helperText('Creates a linked, read-only contact record for the self-service portal that stays in sync with this user.'),
+                                Select::make('managed_contact_type_id')
+                                    ->label('Contact Type')
+                                    ->options(fn (): array => ContactType::query()->pluck('name', 'id')->all())
+                                    ->visible(fn (Get $get): bool => (bool) $get('is_managed_contact')),
+                            ])
+                            ->columnSpanFull(),
                         Toggle::make('is_external')
                             ->label('User can only log in via a social provider.')
                             ->columnSpanFull(),
@@ -113,6 +129,29 @@ class ViewUser extends ViewRecord
                     ])
                     ->hidden(fn (?User $record) => $record?->isAdmin() ?? false),
             ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        if (! ManagedContactFeature::active()) {
+            return $data;
+        }
+
+        $user = $this->getRecord();
+
+        assert($user instanceof User);
+
+        $managedContact = $user->managedContact()->first();
+
+        $data['is_managed_contact'] = ! is_null($managedContact);
+        $data['managed_contact_type_id'] = $managedContact?->type_id;
+
+        return $data;
     }
 
     protected function getHeaderActions(): array

@@ -39,6 +39,7 @@ namespace App\Providers\Filament;
 use AidingApp\Authorization\Filament\Pages\Auth\Login;
 use AidingApp\Theme\Settings\ThemeSettings;
 use App\Enums\NavigationGroup;
+use App\Features\ManagedContactFeature;
 use App\Features\SubscriptionExpirationFeature;
 use App\Filament\Clusters\ProfileSettings;
 use App\Filament\Pages\Dashboard;
@@ -47,6 +48,7 @@ use App\Health\Checks\AzureCredentialsExpiringCheck;
 use App\Http\Middleware\TrackPresence;
 use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Tenant;
+use App\Models\User;
 use App\Multitenancy\Http\Middleware\NeedsTenant;
 use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
@@ -60,6 +62,7 @@ use Filament\Navigation\MenuItem;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Enums\Width;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\Column;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\Support\Htmlable;
@@ -69,8 +72,10 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\HtmlString;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Saade\FilamentFullCalendar\FilamentFullCalendarPlugin;
@@ -146,6 +151,18 @@ class AdminPanelProvider extends PanelProvider
                 FilamentFullCalendarPlugin::make(),
             ])
             ->userMenuItems([
+                MenuItem::make()
+                    ->label('Employee Self-Service')
+                    ->url(fn (): string => URL::temporarySignedRoute('employee-self-service', now()->addHour()))
+                    ->icon(Heroicon::ArrowTopRightOnSquare)
+                    ->openUrlInNewTab()
+                    ->visible(function (): bool {
+                        $user = Auth::user();
+
+                        return ManagedContactFeature::active()
+                            && $user instanceof User
+                            && $user->managedContact()->exists();
+                    }),
                 MenuItem::make()
                     ->label('Profile Settings')
                     ->url(fn () => ProfileSettings::getUrl())

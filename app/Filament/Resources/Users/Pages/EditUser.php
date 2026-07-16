@@ -36,6 +36,9 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use AidingApp\Contact\Models\ContactType;
+use AidingApp\Contact\Services\ManagedContactService;
+use App\Features\ManagedContactFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -49,7 +52,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use STS\FilamentImpersonate\Actions\Impersonate;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -57,6 +62,10 @@ use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
+
+    protected bool $isManagedContact = false;
+
+    protected ?string $managedContactTypeId = null;
 
     public function form(Schema $schema): Schema
     {
@@ -91,6 +100,22 @@ class EditUser extends EditRecord
                             ->numeric(),
                         PhoneInput::make('mobile')
                             ->nullable(),
+                        Grid::make(2)
+                            ->visible(fn (): bool => ManagedContactFeature::active())
+                            ->schema([
+                                Toggle::make('is_managed_contact')
+                                    ->label('Managed Contact')
+                                    ->helperText('Creates a linked, read-only contact record for the self-service portal that stays in sync with this user.')
+                                    ->live(),
+                                Select::make('managed_contact_type_id')
+                                    ->label('Contact Type')
+                                    ->options(fn (): array => ContactType::query()->pluck('name', 'id')->all())
+                                    ->searchable()
+                                    ->preload()
+                                    ->required(fn (Get $get): bool => (bool) $get('is_managed_contact'))
+                                    ->visible(fn (Get $get): bool => (bool) $get('is_managed_contact')),
+                            ])
+                            ->columnSpanFull(),
                         Toggle::make('is_external')
                             ->label('User can only log in via a social provider.')
                             ->columnSpanFull()
@@ -110,6 +135,63 @@ class EditUser extends EditRecord
                     ])
                     ->hidden(fn (?User $record) => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
             ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        if (! ManagedContactFeature::active()) {
+            return $data;
+        }
+
+        $user = $this->getRecord();
+
+        assert($user instanceof User);
+
+        $managedContact = $user->managedContact()->first();
+
+        $data['is_managed_contact'] = ! is_null($managedContact);
+        $data['managed_contact_type_id'] = $managedContact?->type_id;
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $this->isManagedContact = (bool) ($data['is_managed_contact'] ?? false);
+        $this->managedContactTypeId = $data['managed_contact_type_id'] ?? null;
+
+        unset($data['is_managed_contact'], $data['managed_contact_type_id']);
+
+        return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        if (! ManagedContactFeature::active()) {
+            return;
+        }
+
+        $user = $this->getRecord();
+
+        assert($user instanceof User);
+
+        if ($this->isManagedContact && filled($this->managedContactTypeId)) {
+            app(ManagedContactService::class)->enable($user, $this->managedContactTypeId);
+
+            return;
+        }
+
+        app(ManagedContactService::class)->disable($user);
     }
 
     protected function getHeaderActions(): array

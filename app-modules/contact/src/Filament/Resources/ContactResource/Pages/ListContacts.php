@@ -37,29 +37,25 @@
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Actions\BulkUpdateContactsAction;
 use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
+use App\Features\ManagedContactFeature;
 use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Utilities\Get;
+use Filament\Support\Enums\IconPosition;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 
 class ListContacts extends ListRecords
 {
@@ -73,7 +69,11 @@ class ListContacts extends ListRecords
                 TextColumn::make(Contact::displayNameKey())
                     ->label('Name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->icon(fn (Contact $record): ?Heroicon => ManagedContactFeature::active() && $record->isManaged() ? Heroicon::LockClosed : null)
+                    ->iconColor('gray')
+                    ->iconPosition(IconPosition::After)
+                    ->tooltip(fn (Contact $record): ?string => ManagedContactFeature::active() && $record->isManaged() ? 'This is a User\'s managed non-administrative account for the self-service portal. The information displayed is synchronized directly from the User record.' : null),
                 TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
@@ -109,61 +109,15 @@ class ListContacts extends ListRecords
             ])
             ->recordActions([
                 ViewAction::make(),
-                EditAction::make(),
+                EditAction::make()
+                    ->hidden(fn (Contact $record): bool => ManagedContactFeature::active() && $record->isManaged()),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     BulkEngagementAction::make(context: 'contacts'),
                     DeleteBulkAction::make()
                         ->authorizeIndividualRecords('delete'),
-                    BulkAction::make('bulk_update')
-                        ->icon('heroicon-o-pencil-square')
-                        ->form([
-                            Select::make('field')
-                                ->options([
-                                    'description' => 'Description',
-                                    'email_bounce' => 'Email Bounce',
-                                    'sms_opt_out' => 'SMS Opt Out',
-                                    ('type_id') => 'Type',
-                                ])
-                                ->required()
-                                ->live(),
-                            Textarea::make('description')
-                                ->string()
-                                ->required()
-                                ->visible(fn (Get $get) => $get('field') === 'description'),
-                            Radio::make('email_bounce')
-                                ->label('Email Bounce')
-                                ->boolean()
-                                ->required()
-                                ->visible(fn (Get $get) => $get('field') === 'email_bounce'),
-                            Radio::make('sms_opt_out')
-                                ->label('SMS Opt Out')
-                                ->boolean()
-                                ->required()
-                                ->visible(fn (Get $get) => $get('field') === 'sms_opt_out'),
-                            Select::make('type_id')
-                                ->label('Type')
-                                ->relationship('type', 'name')
-                                ->exists(
-                                    table: (new ContactType())->getTable(),
-                                    column: (new ContactType())->getKeyName()
-                                )
-                                ->required()
-                                ->visible(fn (Get $get) => $get('field') === 'type_id'),
-                        ])
-                        ->action(function (Collection $records, array $data) {
-                            $records->each(
-                                fn (Contact $contact) => $contact
-                                    ->forceFill([$data['field'] => $data[$data['field']]])
-                                    ->save()
-                            );
-
-                            Notification::make()
-                                ->title($records->count() . ' ' . str('Contact')->plural($records->count()) . ' Updated')
-                                ->success()
-                                ->send();
-                        }),
+                    BulkUpdateContactsAction::make(),
                 ]),
             ]);
     }

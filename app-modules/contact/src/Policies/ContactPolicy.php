@@ -37,7 +37,9 @@
 namespace AidingApp\Contact\Policies;
 
 use AidingApp\Contact\Models\Contact;
+use App\Features\ManagedContactFeature;
 use App\Models\Authenticatable;
+use Filament\Support\Authorization\DenyResponse;
 use Illuminate\Auth\Access\Response;
 
 class ContactPolicy
@@ -76,6 +78,27 @@ class ContactPolicy
 
     public function update(Authenticatable $authenticatable, Contact $contact): Response
     {
+        if (ManagedContactFeature::active() && $contact->isManaged()) {
+            return DenyResponse::make(
+                'managed_contact',
+                message: function (int $failureCount, int $totalCount): string {
+                    if ($failureCount === 1 && $totalCount === 1) {
+                        return 'This contact is managed and synchronized from a user, so it cannot be edited.';
+                    }
+
+                    if ($failureCount === $totalCount) {
+                        return 'All of the selected contacts are managed and cannot be edited.';
+                    }
+
+                    if ($failureCount === 1) {
+                        return 'One of the selected contacts is managed and cannot be edited.';
+                    }
+
+                    return "{$failureCount} of the selected contacts are managed and cannot be edited.";
+                },
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['contact.*.update'],
             denyResponse: 'You do not have permission to update this contact.'
