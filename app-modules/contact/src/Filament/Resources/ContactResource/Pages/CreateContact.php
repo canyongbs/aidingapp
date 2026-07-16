@@ -149,11 +149,10 @@ class CreateContact extends CreateRecord
                                     $data = AutocompletedAddress::from($data);
                                 }
 
-                                $set('line_1', $data->line1);
+                                $set('address', $data->address);
                                 $set('city', $data->city);
                                 $set('state', $data->state);
                                 $set('postal', $data->postalCode);
-                                $set('country', $data->country);
                             } catch (Throwable $exception) {
                                 if (! session()->has('has_aws_geo_places_error_notification_sent')) {
                                     Notification::make()
@@ -212,5 +211,18 @@ class CreateContact extends CreateRecord
 
                 // TODO: Display this based on system configurable data format
             ]);
+    }
+
+    /**
+     * @param array<string, string> $data
+     * @return array<string, string>
+     */
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        $data['city'] = $this->data['city'] ?? null;
+        $data['state'] = $this->data['state'] ?? null;
+        $data['postal'] = $this->data['postal'] ?? null;
+
+        return $data;
     }
 }

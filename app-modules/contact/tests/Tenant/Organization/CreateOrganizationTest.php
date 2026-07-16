@@ -39,6 +39,7 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\CreateOrgani
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Organization\RequestFactories\CreateOrganizationRequestFactory;
+use App\DataTransferObjects\AutocompletedAddress;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
 

@@ -73,7 +73,7 @@ class AwsGeoPlacesService
                 $countryCode = $address['Country']['Code2'] ?? $address['Country']['Code3'] ?? '';
 
                 return new AutocompletedAddress(
-                    line1: trim(($address['AddressNumber'] ?? '') . ' ' . ($address['Street'] ?? '')),
+                    address: trim(($address['AddressNumber'] ?? '') . ' ' . ($address['Street'] ?? '')),
                     city: $this->resolveCity($address, $countryCode),
                     state: $this->resolveState($address),
                     postalCode: $address['PostalCode'] ?? '',
