@@ -215,6 +215,7 @@ class CreateContact extends CreateRecord
 
     /**
      * @param array<string, string> $data
+     *
      * @return array<string, string>
      */
     protected function mutateFormDataBeforeCreate(array $data): array

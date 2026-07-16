@@ -142,36 +142,36 @@ class CreateOrganization extends CreateRecord
                     ->columns()
                     ->schema([
                         AddressInput::make()
-                        ->columnSpanFull()
+                            ->columnSpanFull()
                         /** @phpstan-ignore argument.type */
-                        ->onItemSelected(function (Set $set, SearchResult $item) {
-                            try {
-                                $data = $item->get('data');
+                            ->onItemSelected(function (Set $set, SearchResult $item) {
+                                try {
+                                    $data = $item->get('data');
 
-                                if (! $data instanceof AutocompletedAddress) {
-                                    $data = AutocompletedAddress::from($data);
+                                    if (! $data instanceof AutocompletedAddress) {
+                                        $data = AutocompletedAddress::from($data);
+                                    }
+
+                                    $set('address', $data->address);
+                                    $set('city', $data->city);
+                                    $set('state', $data->state);
+                                    $set('postalcode', $data->postalCode);
+                                    $set('country', $data->country);
+                                } catch (Throwable $exception) {
+                                    if (! session()->has('has_aws_geo_places_error_notification_sent')) {
+                                        Notification::make()
+                                            ->title('Failed to fetch address suggestions')
+                                            ->body('An error occurred while fetching address suggestions. Please try again later.')
+                                            ->danger()
+                                            ->send();
+
+                                        session()->put('has_aws_geo_places_error_notification_sent', true);
+                                    }
+
+                                    report($exception);
                                 }
-
-                                $set('address', $data->address);
-                                $set('city', $data->city);
-                                $set('state', $data->state);
-                                $set('postalcode', $data->postalCode);
-                                $set('country', $data->country);
-                            } catch (Throwable $exception) {
-                                if (! session()->has('has_aws_geo_places_error_notification_sent')) {
-                                    Notification::make()
-                                        ->title('Failed to fetch address suggestions')
-                                        ->body('An error occurred while fetching address suggestions. Please try again later.')
-                                        ->danger()
-                                        ->send();
-
-                                    session()->put('has_aws_geo_places_error_notification_sent', true);
-                                }
-
-                                report($exception);
-                            }
-                        })
-                        ->saved(false),
+                            })
+                            ->saved(false),
                         TextInput::make('address')
                             ->label('Address')
                             ->string(),
