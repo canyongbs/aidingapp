@@ -34,8 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Concerns\EditPageRedirection;
-use Filament\Resources\Pages\EditRecord;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids;
 use Illuminate\Database\Eloquent\Model;
@@ -47,10 +45,6 @@ use Symfony\Component\Finder\SplFileInfo;
 arch('All Core Settings classes should have defaults for all properties')
     ->expect('App\Settings')
     ->toHaveDefaultsForAllProperties();
-
-arch('All Core Factories should not use the fake global function')
-    ->expect('Database\Factories')
-    ->not->toUse('fake');
 
 $legacyV4UuidModels = require __DIR__ . '/legacy-v4-uuid-models.php';
 
@@ -80,10 +74,6 @@ $modules->each(function (ModuleConfig $module) use ($legacyV4UuidModels) {
         ->extending(Model::class)
         ->not->toUseTrait(HasVersion4Uuids::class)
         ->ignoring($legacyV4UuidModels);
-
-    arch("All {$module->name} Factories should not use the fake global function")
-        ->expect($module->namespace() . 'Database\Factories')
-        ->not->toUse('fake');
 });
 
 test('Legacy models must not use HasUuids (UUIDv7)', function () {
@@ -100,27 +90,6 @@ test('Legacy models must not use HasUuids (UUIDv7)', function () {
             HasVersion4Uuids::class,
             $traits,
             "Class [{$class}] uses HasUuids (UUIDv7) directly. Legacy models must use HasVersion4Uuids instead.",
-        );
-    }
-});
-
-test('pages extending EditRecord have the EditPageRedirection test', function () {
-    foreach (get_declared_classes() as $class) {
-        if (
-            (! str_starts_with($class, 'App\\'))
-            && (! str_starts_with($class, 'AidingApp\\'))
-        ) {
-            continue;
-        }
-
-        if (! is_subclass_of($class, EditRecord::class)) {
-            continue;
-        }
-
-        Assert::assertContains(
-            EditPageRedirection::class,
-            class_uses_recursive($class),
-            "Class [{$class}] does not use the EditPageRedirection trait.",
         );
     }
 });

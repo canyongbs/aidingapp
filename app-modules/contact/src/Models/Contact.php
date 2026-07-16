@@ -52,6 +52,8 @@ use AidingApp\Notification\Models\Concerns\NotifiableViaSms;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectGuest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use AidingApp\Timeline\Models\Timeline;
@@ -270,6 +272,23 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public static function getLabel(): string
     {
         return 'contact';
+    }
+
+    /**
+     * @return MorphToMany<Project, $this, covariant ProjectGuest>
+     */
+    public function guestProjects(): MorphToMany
+    {
+        return $this
+            ->morphToMany(
+                Project::class,
+                'guest',
+                'project_guests',
+                'guest_id',
+                'project_id',
+            )
+            ->using(ProjectGuest::class)
+            ->withTimestamps();
     }
 
     protected function serializeDate(DateTimeInterface $date): string

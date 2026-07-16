@@ -36,16 +36,25 @@
 
 namespace AidingApp\Report\Providers;
 
+use AidingApp\Report\Models\ReportDepartmentAccess;
+use AidingApp\Report\Models\ReportUserAccess;
 use AidingApp\Report\ReportPlugin;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class ReportServiceProvider extends ServiceProvider
 {
     public function register()
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ReportPlugin()));
+        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ReportPlugin()));
     }
 
-    public function boot(): void {}
+    public function boot(): void
+    {
+        Relation::morphMap([
+            'report_user_access' => ReportUserAccess::class,
+            'report_department_access' => ReportDepartmentAccess::class,
+        ]);
+    }
 }

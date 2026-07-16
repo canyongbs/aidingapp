@@ -36,6 +36,7 @@
 
 namespace AidingApp\Project\Database\Factories;
 
+use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -56,6 +57,7 @@ class PipelineStageFactory extends Factory
             'name' => $this->faker->unique()->words(3, true),
             'pipeline_id' => Pipeline::factory(),
             'order' => $this->faker->numberBetween(1, 5),
+            'classification' => $this->faker->randomElement(PipelineStageClassification::cases()),
         ];
     }
 }

@@ -34,21 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace App\Concerns;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
 
-use Filament\Resources\Resource;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-trait EditPageRedirection
-{
-    public function getRedirectUrl(): ?string
+    /** @var array<string> */
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
+    /** @var array<string, string> */
+    private array $permissions = [
+        'reporting.*.update' => 'Reporting',
+    ];
+
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
+    public function up(): void
     {
-        /** @var class-string<Resource> $resource */
-        $resource = $this->getResource();
-
-        if ($resource::hasPage('view')) {
-            return $resource::getUrl('view', ['record' => $this->record]);
-        }
-
-        return null;
+        $this->renamePermissionGroups(['Report Library' => 'Reporting']);
+        collect($this->guards)->each(function (string $guard): void {
+            $this->renamePermissions(['report-library.view-any' => 'reporting.view-any'], $guard);
+            $this->createPermissions($this->permissions, $guard);
+        });
     }
-}
+
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
+    public function down(): void
+    {
+        collect($this->guards)->each(function (string $guard): void {
+            $this->deletePermissions(array_keys($this->permissions), $guard);
+            $this->renamePermissions(['reporting.view-any' => 'report-library.view-any'], $guard);
+        });
+
+        $this->renamePermissionGroups(['Reporting' => 'Report Library']);
+    }
+};

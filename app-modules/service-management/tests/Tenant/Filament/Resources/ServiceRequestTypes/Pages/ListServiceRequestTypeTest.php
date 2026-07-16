@@ -99,8 +99,8 @@ it('loads hierarchical data', function () {
     $root = ServiceRequestTypeCategory::factory()->create(['name' => 'Root', 'sort' => 1]);
     $child = ServiceRequestTypeCategory::factory()->create(['name' => 'Child', 'sort' => 1, 'parent_id' => $root->id]);
 
-    $type1 = ServiceRequestType::factory()->create(['name' => 'Type 1', 'category_id' => $root->id, 'sort' => 1]);
-    $type2 = ServiceRequestType::factory()->create(['name' => 'Type 2', 'category_id' => $child->id, 'sort' => 1]);
+    $type1 = ServiceRequestType::factory()->hasAttached($root, relationship: 'categories')->create(['name' => 'Type 1', 'sort' => 1]);
+    $type2 = ServiceRequestType::factory()->hasAttached($child, relationship: 'categories')->create(['name' => 'Type 2', 'sort' => 1]);
 
     $component = livewire(ListServiceRequestTypes::class);
 
@@ -178,7 +178,7 @@ it('creates new category with a new type in one operation', function () {
 
     $type = ServiceRequestType::where('name', 'Brand New Type')->first();
     expect($type)->not->toBeNull();
-    expect($type->category_id)->toBe($category->id);
+    expect($type->categoryIds())->toBe([$category->id]);
 
     // New types should have 3 priorities created
     expect($type->priorities()->count())->toBe(3);
@@ -238,7 +238,7 @@ it('prevents deleting a category when descendant service requests exist', functi
     asSuperAdmin();
 
     $category = ServiceRequestTypeCategory::factory()->create(['name' => 'Parent Cat']);
-    $type = ServiceRequestType::factory()->create(['category_id' => $category->id]);
+    $type = ServiceRequestType::factory()->hasAttached($category, relationship: 'categories')->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->id]);
     $serviceRequest = ServiceRequest::factory()->create(['priority_id' => $priority->id]);
 
@@ -265,9 +265,9 @@ it('reorders types within a category', function () {
 
     $category = ServiceRequestTypeCategory::factory()->create(['name' => 'Reorder Cat']);
 
-    $type1 = ServiceRequestType::factory()->create(['name' => 'One', 'category_id' => $category->id, 'sort' => 1]);
-    $type2 = ServiceRequestType::factory()->create(['name' => 'Two', 'category_id' => $category->id, 'sort' => 2]);
-    $type3 = ServiceRequestType::factory()->create(['name' => 'Three', 'category_id' => $category->id, 'sort' => 3]);
+    $type1 = ServiceRequestType::factory()->hasAttached($category, relationship: 'categories')->create(['name' => 'One', 'sort' => 1]);
+    $type2 = ServiceRequestType::factory()->hasAttached($category, relationship: 'categories')->create(['name' => 'Two', 'sort' => 2]);
+    $type3 = ServiceRequestType::factory()->hasAttached($category, relationship: 'categories')->create(['name' => 'Three', 'sort' => 3]);
 
     // New order: Three, One, Two
     $treeData = [
@@ -299,16 +299,18 @@ it('reorders types within a category', function () {
         ->call('saveChanges', $treeData)
         ->assertHasNoErrors();
 
-    expect($type3->fresh()->sort)->toBe(1);
-    expect($type1->fresh()->sort)->toBe(2);
-    expect($type2->fresh()->sort)->toBe(3);
+    $typesBySort = $category->fresh()->types->keyBy('id');
+
+    expect($typesBySort[$type3->id]->pivot->sort)->toBe(1);
+    expect($typesBySort[$type1->id]->pivot->sort)->toBe(2);
+    expect($typesBySort[$type2->id]->pivot->sort)->toBe(3);
 });
 
 it('updates names for categories and types', function () {
     asSuperAdmin();
 
     $category = ServiceRequestTypeCategory::factory()->create(['name' => 'Old Cat']);
-    $type = ServiceRequestType::factory()->create(['name' => 'Old Type', 'category_id' => $category->id]);
+    $type = ServiceRequestType::factory()->hasAttached($category, relationship: 'categories')->create(['name' => 'Old Type']);
 
     $treeData = [
         'categories' => [
@@ -443,4 +445,26 @@ it('clears a visibility restriction and detaches contact types', function () {
 
     expect($type->is_visibility_restricted)->toBeFalse()
         ->and($type->restrictedToContactTypes()->count())->toBe(0);
+});
+
+it('shows a type under every category it belongs to in the hierarchical data', function () {
+    asSuperAdmin();
+
+    $categoryA = ServiceRequestTypeCategory::factory()->create(['name' => 'Area A', 'sort' => 1]);
+    $categoryB = ServiceRequestTypeCategory::factory()->create(['name' => 'Area B', 'sort' => 2]);
+
+    $type = ServiceRequestType::factory()->create(['name' => 'Shared', 'sort' => 1]);
+    $type->categories()->attach([$categoryA->id, $categoryB->id]);
+
+    $data = livewire(ListServiceRequestTypes::class)->instance()->getHierarchicalData();
+
+    $categoryAData = collect($data['categories'])->firstWhere('id', $categoryA->id);
+    $categoryBData = collect($data['categories'])->firstWhere('id', $categoryB->id);
+
+    expect(collect($categoryAData['types'])->pluck('id'))->toContain($type->id)
+        ->and(collect($categoryBData['types'])->pluck('id'))->toContain($type->id);
+
+    // Each placement reports the category it is nested under.
+    expect(collect($categoryAData['types'])->firstWhere('id', $type->id)['category_id'])->toBe($categoryA->id)
+        ->and(collect($categoryBData['types'])->firstWhere('id', $type->id)['category_id'])->toBe($categoryB->id);
 });

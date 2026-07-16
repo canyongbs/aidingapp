@@ -34,14 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use App\Support\AbstractFeatureFlag;
-
-class PipelineEntryFieldsFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
+return new class () extends Migration {
+    public function up(): void
     {
-        return false;
+        Schema::create('report_department_accesses', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('report_key');
+            $table->foreignUuid('department_id')->constrained('departments')->cascadeOnDelete();
+            $table->timestamps();
+
+            $table->unique(['report_key', 'department_id']);
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::dropIfExists('report_department_accesses');
+    }
+};

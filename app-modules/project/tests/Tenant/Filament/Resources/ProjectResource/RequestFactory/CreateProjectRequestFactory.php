@@ -36,6 +36,8 @@
 
 namespace AidingApp\Project\Tests\Tenant\Filament\Resources\ProjectResource\RequestFactory;
 
+use AidingApp\Department\Models\Department;
+use CanyonGBS\Common\Enums\Color;
 use Worksome\RequestFactories\RequestFactory;
 
 class CreateProjectRequestFactory extends RequestFactory
@@ -45,6 +47,19 @@ class CreateProjectRequestFactory extends RequestFactory
         return [
             'name' => str($this->faker->unique()->words(3, true))->title()->toString(),
             'description' => $this->faker->paragraph(),
+            'icon' => 'heroicon-o-clipboard-document-list',
+            'color' => $this->faker->randomElement(Color::cases())->value,
+            'department_id' => Department::factory()->create()->getKey(),
+            'start_date' => $this->faker->date(),
+            'target_completion_date_type' => 'indefinite',
         ];
+    }
+
+    public function withTargetCompletionDate(): static
+    {
+        return $this->state([
+            'target_completion_date_type' => 'set',
+            'target_completion_date' => $this->faker->date(),
+        ]);
     }
 }

@@ -34,7 +34,11 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
+use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Filament\Pages\ServiceRequests;
+use AidingApp\Report\Models\ReportDepartmentAccess;
+use AidingApp\Report\Models\ReportUserAccess;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -46,19 +50,42 @@ it('is gated with proper access control', function () {
     $settings->data->addons->serviceManagement = false;
     $settings->save();
 
-    $user = User::factory()->create();
+    $user = User::factory()->create(['timezone' => 'UTC']);
 
     actingAs($user);
 
     livewire(ServiceRequests::class)->assertForbidden();
 
-    $user->givePermissionTo('report-library.view-any');
-    $user->refresh();
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
 
     livewire(ServiceRequests::class)->assertForbidden();
 
+    ReportUserAccess::factory()->create([
+        'report_key' => ReportAccessKey::ServiceRequests->value,
+        'user_id' => $user->getKey(),
+    ]);
+
+    livewire(ServiceRequests::class)->assertOk();
+});
+
+it('grants access to a user belonging to a department that has been granted access', function () {
+    $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
+
+    $department = Department::factory()->create();
+
+    $user = User::factory()->create(['timezone' => 'UTC', 'department_id' => $department->getKey()]);
+
+    actingAs($user);
+
+    livewire(ServiceRequests::class)->assertForbidden();
+
+    ReportDepartmentAccess::factory()->create([
+        'report_key' => ReportAccessKey::ServiceRequests->value,
+        'department_id' => $department->getKey(),
+    ]);
 
     livewire(ServiceRequests::class)->assertOk();
 });

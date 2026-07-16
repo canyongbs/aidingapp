@@ -266,14 +266,44 @@ it('can create pipeline entry with an assigned user', function () {
             'pipeline_stage_id' => $stage->id,
             'organizable_type' => (new Contact())->getMorphClass(),
             'organizable_id' => Contact::factory()->create()->id,
-            'assigned_to_type' => 'user',
-            'assigned_to' => $user->id,
+            'assigned_to_type' => (new User())->getMorphClass(),
+            'assigned_to_id' => $user->id,
         ])
         ->assertHasNoTableActionErrors();
 
     assertDatabaseHas(PipelineEntry::class, [
         'name' => 'Assigned Entry',
-        'assigned_to' => $user->id,
+        'assigned_to_id' => $user->id,
+    ]);
+});
+
+it('can create pipeline entry with an assigned contact', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $stage = $pipeline->stages->first();
+    $contact = Contact::factory()->create();
+
+    livewire(ManagePipelineEntries::class, ['record' => $pipeline->getKey()])
+        ->callTableAction('create', data: [
+            'name' => 'Contact Assigned Entry',
+            'pipeline_stage_id' => $stage->id,
+            'organizable_type' => (new Contact())->getMorphClass(),
+            'organizable_id' => Contact::factory()->create()->id,
+            'assigned_to_type' => (new Contact())->getMorphClass(),
+            'assigned_to_id' => $contact->id,
+        ])
+        ->assertHasNoTableActionErrors();
+
+    assertDatabaseHas(PipelineEntry::class, [
+        'name' => 'Contact Assigned Entry',
+        'assigned_to_type' => (new Contact())->getMorphClass(),
+        'assigned_to_id' => $contact->id,
     ]);
 });
 
@@ -294,94 +324,18 @@ it('can create pipeline entry with no assigned user', function () {
             'pipeline_stage_id' => $stage->id,
             'organizable_type' => (new Contact())->getMorphClass(),
             'organizable_id' => Contact::factory()->create()->id,
-            'assigned_to_type' => 'none',
+            'assigned_to_type' => null,
+            'assigned_to_id' => null,
         ])
         ->assertHasNoTableActionErrors();
 
     assertDatabaseHas(PipelineEntry::class, [
         'name' => 'Unassigned Entry',
-        'assigned_to' => null,
+        'assigned_to_id' => null,
     ]);
 });
 
-it('can create pipeline entry with a related contact', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    $stage = $pipeline->stages->first();
-    $contact = Contact::factory()->create();
-
-    livewire(ManagePipelineEntries::class, ['record' => $pipeline->getKey()])
-        ->callTableAction('create', data: [
-            'name' => 'Related Entry',
-            'pipeline_stage_id' => $stage->id,
-            'organizable_type' => (new Contact())->getMorphClass(),
-            'organizable_id' => Contact::factory()->create()->id,
-            'related_to_type' => 'contact',
-            'related_to' => $contact->id,
-        ])
-        ->assertHasNoTableActionErrors();
-
-    assertDatabaseHas(PipelineEntry::class, [
-        'name' => 'Related Entry',
-        'related_to' => $contact->id,
-    ]);
-});
-
-it('can create pipeline entry with no related contact', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    $stage = $pipeline->stages->first();
-
-    livewire(ManagePipelineEntries::class, ['record' => $pipeline->getKey()])
-        ->callTableAction('create', data: [
-            'name' => 'No Contact Entry',
-            'pipeline_stage_id' => $stage->id,
-            'organizable_type' => (new Contact())->getMorphClass(),
-            'organizable_id' => Contact::factory()->create()->id,
-            'related_to_type' => 'none',
-        ])
-        ->assertHasNoTableActionErrors();
-
-    assertDatabaseHas(PipelineEntry::class, [
-        'name' => 'No Contact Entry',
-        'related_to' => null,
-    ]);
-});
-
-it('validates assigned_to must be a valid user id when user toggle is selected', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    livewire(ManagePipelineEntries::class, ['record' => $pipeline->getKey()])
-        ->callTableAction('create', data: [
-            'name' => 'Bad User Entry',
-            'pipeline_stage_id' => $pipeline->stages->first()->id,
-            'organizable_type' => (new Contact())->getMorphClass(),
-            'organizable_id' => Contact::factory()->create()->id,
-            'assigned_to_type' => 'user',
-            'assigned_to' => (string) str()->uuid(),
-        ])
-        ->assertHasTableActionErrors(['assigned_to']);
-});
-
-it('validates related_to must be a valid contact id when contact toggle is selected', function () {
+it('validates assigned_to_id must be a valid contact id when contact type is selected', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -396,10 +350,31 @@ it('validates related_to must be a valid contact id when contact toggle is selec
             'pipeline_stage_id' => $pipeline->stages->first()->id,
             'organizable_type' => (new Contact())->getMorphClass(),
             'organizable_id' => Contact::factory()->create()->id,
-            'related_to_type' => 'contact',
-            'related_to' => (string) str()->uuid(),
+            'assigned_to_type' => (new Contact())->getMorphClass(),
+            'assigned_to_id' => (string) str()->uuid(),
         ])
-        ->assertHasTableActionErrors(['related_to']);
+        ->assertHasTableActionErrors(['assigned_to_id']);
+});
+
+it('validates assigned_to_id must be a valid user id when user type is selected', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(ManagePipelineEntries::class, ['record' => $pipeline->getKey()])
+        ->callTableAction('create', data: [
+            'name' => 'Bad User Entry',
+            'pipeline_stage_id' => $pipeline->stages->first()->id,
+            'organizable_type' => (new Contact())->getMorphClass(),
+            'organizable_id' => Contact::factory()->create()->id,
+            'assigned_to_type' => (new User())->getMorphClass(),
+            'assigned_to_id' => (string) str()->uuid(),
+        ])
+        ->assertHasTableActionErrors(['assigned_to_id']);
 });
 
 it('can render create pipeline entry with proper permission', function () {

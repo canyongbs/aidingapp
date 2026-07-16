@@ -37,7 +37,6 @@
 namespace AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages;
 
 use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
@@ -48,8 +47,6 @@ use Filament\Schemas\Schema;
 
 class EditEmailTemplate extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = EmailTemplateResource::class;
 
     public function form(Schema $schema): Schema

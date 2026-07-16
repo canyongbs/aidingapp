@@ -37,12 +37,9 @@
 namespace AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\Pages;
 
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\AssetCheckOutResource;
-use App\Concerns\EditPageRedirection;
 use Filament\Resources\Pages\EditRecord;
 
 class EditAssetCheckOut extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = AssetCheckOutResource::class;
 }

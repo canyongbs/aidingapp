@@ -34,49 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Tables;
+namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
 
-use App\Filament\Tables\Columns\IdColumn;
-use App\Models\User;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
-class PipelineEntryAssignToTable
+class GuestContactsRelationManager extends RelationManager
 {
-    public static function configure(Table $table): Table
+    protected static string $relationship = 'guestContacts';
+
+    protected static ?string $title = 'Contacts';
+
+    public function table(Table $table): Table
     {
         return $table
+            ->recordTitleAttribute('full_name')
             ->columns([
-                IdColumn::make(),
-                TextColumn::make('name')
-                    ->label('Name')
-                    ->searchable()
-                    ->sortable()
-                    ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
-                    ->iconColor(fn (User $record) => $record->presenceStatus()->getColor())
-                    ->tooltip(fn (User $record) => $record->presenceStatus()->getLabel())
-                    ->extraAttributes(fn (User $record): array => ['aria-label' => $record->name . ' (' . $record->presenceStatus()->getLabel() . ')']),
-                TextColumn::make('email')
-                    ->label('Email address'),
-                TextColumn::make('job_title'),
-                TextColumn::make('created_at')
-                    ->label('Created At')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('updated_at')
-                    ->label('Updated At')
-                    ->dateTime()
-                    ->sortable(),
+                TextColumn::make('full_name'),
             ])
-            ->filters([
-                SelectFilter::make('department')
-                    ->label('Department')
-                    ->relationship('department', 'name')
-                    ->multiple()
-                    ->searchable()
-                    ->preload(),
+            ->headerActions([
+                AttachAction::make()
+                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord())),
             ])
-            ->defaultPaginationPageOption(5);
+            ->recordActions([
+                DetachAction::make()
+                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord())),
+            ])
+            ->toolbarActions([
+                DetachBulkAction::make()
+                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord())),
+            ])
+            ->inverseRelationship('guestProjects');
     }
 }

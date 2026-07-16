@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\Pages;
 use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\AdvisoryStatusResource;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
@@ -50,8 +49,6 @@ use Illuminate\Support\Str;
 
 class EditAdvisoryStatus extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = AdvisoryStatusResource::class;
 
     public function form(Schema $schema): Schema

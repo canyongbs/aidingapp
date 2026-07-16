@@ -41,7 +41,6 @@ use AidingApp\Ai\Settings\AiResolutionSettings;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
 use App\Filament\Forms\Components\IconSelect;
 use CanyonGBS\Common\Filament\Actions\ArchiveAction;
@@ -63,8 +62,6 @@ use Illuminate\Validation\Rules\Unique;
 
 class EditServiceRequestType extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ServiceRequestTypeResource::class;
 
     protected static ?string $navigationLabel = 'Edit';

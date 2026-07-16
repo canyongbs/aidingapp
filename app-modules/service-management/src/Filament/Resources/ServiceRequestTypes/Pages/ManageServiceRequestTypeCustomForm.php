@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Concerns\EditPageRedirection;
 use App\Enums\Feature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
@@ -59,8 +58,6 @@ use Illuminate\Support\Facades\Gate;
 
 class ManageServiceRequestTypeCustomForm extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ServiceRequestTypeResource::class;
 
     protected static ?string $title = 'Custom Form';

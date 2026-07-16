@@ -36,6 +36,7 @@
     import {
         CubeIcon,
         DocumentTextIcon,
+        FolderIcon,
         HomeIcon,
         ShieldExclamationIcon,
         SignalIcon,
@@ -57,6 +58,7 @@
         hasServiceManagement,
         hasAssets,
         hasLicense,
+        hasProjects,
         isStatusEnabled,
         isAdvisoryEnabled,
         isAssetEnabled,
@@ -137,6 +139,13 @@
             icon: DocumentTextIcon,
             visible: computed(() => isLicenseEnabled.value && hasLicense.value && user.value !== null),
             command: () => router.push({ name: 'licenses' }),
+        },
+        {
+            label: 'Projects',
+            routeName: 'projects',
+            icon: FolderIcon,
+            visible: computed(() => hasProjects.value && user.value !== null),
+            command: () => router.push({ name: 'projects' }),
         },
     ]);
 

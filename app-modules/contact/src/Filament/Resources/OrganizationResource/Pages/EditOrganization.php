@@ -41,7 +41,6 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Repeater;
@@ -58,8 +57,6 @@ use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class EditOrganization extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = OrganizationResource::class;
 
     protected static ?string $navigationLabel = 'Edit';
