@@ -38,14 +38,18 @@ namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use App\Features\PipelineEntryFieldsFeature;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\PipelineEntryEnhancedFieldsFeature;
+use App\Models\User;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Section;
@@ -155,19 +159,51 @@ class ViewPipelineEntry extends Page
                             ->formatStateUsing(fn (string $state): string => ucfirst($state))
                             ->badge(),
                         TextEntry::make('description')
-                            ->visible(fn () => PipelineEntryFieldsFeature::active())
                             ->label('Description')
                             ->extraAttributes(['class' => 'break-words']),
                         TextEntry::make('due')
-                            ->visible(fn () => PipelineEntryFieldsFeature::active())
                             ->label('Due Date')
                             ->dateTime(),
-                        TextEntry::make('assignedTo.name')
-                            ->visible(fn () => PipelineEntryFieldsFeature::active())
-                            ->label('Assigned To'),
-                        TextEntry::make('relatedTo.full_name')
-                            ->visible(fn () => PipelineEntryFieldsFeature::active())
-                            ->label('Related To'),
+                        TextEntry::make('assignedTo')
+                            ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active())
+                            ->label('Assigned To')
+                            ->state(function (PipelineEntry $record): ?string {
+                                $assignee = $record->assignedTo;
+
+                                if (! $assignee) {
+                                    return null;
+                                }
+
+                                return match (true) {
+                                    $assignee instanceof User => $assignee->name,
+                                    $assignee instanceof Contact => $assignee->full_name,
+                                    default => null,
+                                };
+                            }),
+                        TextEntry::make('assigned_to_type')
+                            ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active() && filled($this->pipelineEntry->assigned_to_type))
+                            ->label('Assigned To Type')
+                            ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                            ->badge(),
+                        IconEntry::make('is_visible_to_guests')
+                            ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active())
+                            ->label('Visible to Guest')
+                            ->boolean(),
+                        TextEntry::make('milestones.title')
+                            ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active())
+                            ->label('Related Milestones')
+                            ->badge(),
+                        TextEntry::make('assets.name')
+                            ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active())
+                            ->label('Related Assets')
+                            ->badge(),
+                        TextEntry::make('serviceRequests')
+                            ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active())
+                            ->label('Related Service Requests')
+                            ->state(fn (PipelineEntry $record): array => $record->serviceRequests
+                                ->map(fn (ServiceRequest $serviceRequest): string => PipelineEntryForm::serviceRequestLabel($serviceRequest))
+                                ->all())
+                            ->badge(),
                     ]),
             ]);
     }

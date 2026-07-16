@@ -44,12 +44,13 @@
                     treeData: @js($this->hierarchicalData),
                     canEdit: @js($this->canEdit),
                     visibilityRestrictionsEnabled: @js(\App\Features\ServiceRequestTypeVisibilityRestrictionsFeature::active()),
+                    multipleCategoriesEnabled: @js(\App\Features\ServiceRequestTypeMultipleCategoriesFeature::active()),
                 })"
         @service-request-type-visibility-updated.window="onVisibilityUpdated($event.detail)"
     >
         {{-- Sticky Save Banner --}}
         <div
-            class="sticky top-20 z-50"
+            class="sticky top-20 z-30"
             style="display: none"
             x-show="hasUnsavedChanges && canEdit"
             x-transition:enter="transition ease-out duration-200"
@@ -107,7 +108,7 @@
                                 class="focus:border-primary-500 focus:ring-primary-500 block h-8 w-full rounded-lg border-gray-300 shadow-sm sm:text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
                                 id="new-category-name"
                                 type="text"
-                                placeholder="Name of new service request area"
+                                placeholder="Name of new area"
                             />
                         </div>
                         <div class="flex gap-2">

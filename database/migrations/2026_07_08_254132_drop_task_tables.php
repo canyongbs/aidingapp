@@ -42,6 +42,10 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
+            DB::table('audits')
+                ->where('auditable_type', 'task')
+                ->delete();
+
             Schema::dropIfExists('confidential_task_projects');
             Schema::dropIfExists('confidential_task_departments');
             Schema::dropIfExists('confidential_task_users');

@@ -161,7 +161,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
                             ->label('Stage')
                             ->relationship('pipelineStage', 'name', fn (Builder $query) => $query->where('pipeline_id', $pipeline->id))
                             ->required(),
-                        ...PipelineEntryForm::components(),
+                        ...PipelineEntryForm::components($pipeline),
                     ]),
             ])
             ->defaultSort('created_at', 'desc');

@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
-use App\Concerns\EditPageRedirection;
 use Filament\Forms\Components\ViewField;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
@@ -50,8 +49,6 @@ use Filament\Schemas\Schema;
 
 class EditServiceRequestTypeNotifications extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ServiceRequestTypeResource::class;
 
     protected static ?string $title = 'Notifications';

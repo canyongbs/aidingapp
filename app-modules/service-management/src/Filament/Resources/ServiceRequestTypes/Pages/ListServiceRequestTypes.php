@@ -39,8 +39,10 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestCategoryType;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
@@ -56,6 +58,7 @@ use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Renderless;
+use Throwable;
 
 /**
  * @property-read array<string, mixed> $hierarchicalData
@@ -65,6 +68,24 @@ class ListServiceRequestTypes extends ListRecords
     protected static string $resource = ServiceRequestTypeResource::class;
 
     protected string $view = 'service-management::filament.resources.service-request-type-resource.pages.list-service-request-types';
+
+    /**
+     * Category placements accumulated while walking the tree during a save, keyed by type id then
+     * category id, with the per-area sort as the value. Applied in bulk once the whole tree has been
+     * walked so a type filed under several categories keeps every membership instead of only the
+     * last one written. Only used while the multiple categories feature is active.
+     *
+     * @var array<string, array<string, int>>
+     */
+    protected array $pendingTypePlacements = [];
+
+    /**
+     * Desired `sort` values for types that end up uncategorised during a save, keyed by type id.
+     * Only used while the multiple categories feature is active.
+     *
+     * @var array<string, int>
+     */
+    protected array $pendingUncategorizedTypeSorts = [];
 
     #[Computed]
     public function canEdit(): bool
@@ -88,15 +109,23 @@ class ListServiceRequestTypes extends ListRecords
     {
         $visibilityRestrictionsEnabled = ServiceRequestTypeVisibilityRestrictionsFeature::active();
 
+        $multipleCategoriesEnabled = ServiceRequestTypeMultipleCategoriesFeature::active();
+
         $categoryVisibilityLoad = $visibilityRestrictionsEnabled ? ['restrictedToContactTypes:id'] : [];
 
         $typeVisibilityLoad = $visibilityRestrictionsEnabled ? ['restrictedToContactTypes:id'] : [];
 
+        // Ordering is handled by the `types` relationship itself (by `sort` under the legacy
+        // single-category path, by the pivot `sort` under the multiple categories path), so no
+        // explicit order is applied here to avoid an ambiguous `sort` column once the pivot exists.
         $loadTypes = fn ($typeQuery) => $typeQuery
             ->withoutArchived()
-            ->orderBy('sort')
             ->withCount('serviceRequests')
-            ->with($typeVisibilityLoad);
+            ->with($typeVisibilityLoad)
+            ->when(
+                $multipleCategoriesEnabled,
+                fn ($query) => $query->with('categories:id'),
+            );
 
         $categories = ServiceRequestTypeCategory::query()
             /** @phpstan-ignore argument.type */
@@ -128,15 +157,23 @@ class ListServiceRequestTypes extends ListRecords
 
         $uncategorizedTypes = ServiceRequestType::query()
             ->withoutArchived()
-            ->whereNull('category_id')
+            ->when(
+                $multipleCategoriesEnabled,
+                fn ($query) => $query->whereDoesntHave('categories'),
+                fn ($query) => $query->whereNull('category_id'),
+            )
             ->orderBy('sort')
             ->withCount('serviceRequests')
             ->with($typeVisibilityLoad)
+            ->when(
+                $multipleCategoriesEnabled,
+                fn ($query) => $query->with('categories:id'),
+            )
             ->get();
 
         return [
             'categories' => $this->formatCategories($categories, $visibilityRestrictionsEnabled),
-            'uncategorized_types' => $this->formatTypes($uncategorizedTypes, $visibilityRestrictionsEnabled),
+            'uncategorized_types' => $this->formatTypes($uncategorizedTypes, null, $visibilityRestrictionsEnabled),
         ];
     }
 
@@ -198,10 +235,69 @@ class ListServiceRequestTypes extends ListRecords
     }
 
     /**
+     * Persist the tree changes, returning whether they were saved.
+     *
+     * Any failure is reported to the user through a notification and results in `false` rather than
+     * an exception bubbling to the client, so the front-end never gets stuck in a "saving" state and
+     * the user's unsaved work is preserved instead of being wiped by a reload.
+     *
      * @param array<string, mixed> $treeData
      */
+    public function saveChanges(array $treeData): bool
+    {
+        try {
+            $this->persistChanges($treeData);
+        } catch (ValidationException $exception) {
+            Notification::make()
+                ->danger()
+                ->title('Unable to save changes')
+                ->body(collect($exception->errors())->flatten()->first() ?? 'Please review your changes and try again.')
+                ->send();
+
+            return false;
+        } catch (Throwable $exception) {
+            report($exception);
+
+            Notification::make()
+                ->danger()
+                ->title('Unable to save changes')
+                ->body('An unexpected error occurred while saving your changes. Your work has not been lost — please try again.')
+                ->send();
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
     #[Renderless]
-    public function saveChanges(array $treeData): void
+    public function checkArchivedTypeName(string $name): ?array
+    {
+        $type = ServiceRequestType::query()
+            ->onlyArchived()
+            ->where('name', trim($name))
+            ->withCount('serviceRequests')
+            ->first();
+
+        if (! $type) {
+            return null;
+        }
+
+        return [
+            'id' => $type->id,
+            'name' => $type->name,
+            'service_requests_count' => $type->service_requests_count,
+            'view_url' => ServiceRequestTypeResource::getUrl('view', ['record' => $type]),
+        ];
+    }
+
+    /**
+     * @param array<string, mixed> $treeData
+     */
+    protected function persistChanges(array $treeData): void
     {
         Validator::validate(['treeData' => $treeData], [
             'treeData' => 'required|array',
@@ -218,10 +314,15 @@ class ListServiceRequestTypes extends ListRecords
             'treeData.restore_types' => 'array',
         ]);
 
+        $this->assertNoDuplicateTypeNames($treeData);
+
         $this->assertMaxCategoryDepth($treeData['categories'] ?? []);
 
         DB::transaction(function () use ($treeData) {
             $newCategoryIds = [];
+
+            $this->pendingTypePlacements = [];
+            $this->pendingUncategorizedTypeSorts = [];
 
             $this->handleRestoredTypes($treeData['restore_types'] ?? []);
 
@@ -244,8 +345,17 @@ class ListServiceRequestTypes extends ListRecords
             }
 
             // Create new types
+            $newTypeIds = [];
+
             if (! empty($treeData['new_types'])) {
                 foreach ($treeData['new_types'] as $newType) {
+                    // A brand-new type may appear in several areas of the tree. It is only created
+                    // once here (keyed by its temp id); every placement is applied from the tree
+                    // walk below so it can sit under multiple categories.
+                    if (isset($newTypeIds[$newType['temp_id']])) {
+                        continue;
+                    }
+
                     $categoryId = null;
 
                     if (! empty($newType['category_id']) && $newType['category_id'] !== 'temp') {
@@ -255,11 +365,8 @@ class ListServiceRequestTypes extends ListRecords
 
                     $type = ServiceRequestType::create([
                         'name' => trim($newType['name']),
-                        'category_id' => $categoryId,
                         'sort' => $newType['sort'],
-                        ...[
-                            'default_category' => ServiceRequestCategory::Request,
-                        ],
+                        'default_category' => ServiceRequestCategory::Request,
                     ]);
 
                     $type->priorities()->createMany([
@@ -267,6 +374,15 @@ class ListServiceRequestTypes extends ListRecords
                         ['name' => 'Medium', 'order' => 2],
                         ['name' => 'Low', 'order' => 3],
                     ]);
+
+                    $newTypeIds[$newType['temp_id']] = $type->id;
+
+                    // Under the legacy single-category path the placement is written immediately.
+                    // Under the multiple categories path it is deferred to the aggregation pass so a
+                    // new type can be filed under several areas at once.
+                    if (! ServiceRequestTypeMultipleCategoriesFeature::active()) {
+                        $this->syncTypeCategory($type, $categoryId, (int) $newType['sort']);
+                    }
                 }
             }
 
@@ -294,20 +410,22 @@ class ListServiceRequestTypes extends ListRecords
             }
 
             // Update existing categories
-            $this->updateCategoriesRecursive($treeData['categories'] ?? [], null, $newCategoryIds);
+            $this->updateCategoriesRecursive($treeData['categories'] ?? [], null, $newCategoryIds, $newTypeIds);
 
             // Update uncategorized types
             if (! empty($treeData['uncategorized_types'])) {
                 foreach ($treeData['uncategorized_types'] as $index => $type) {
-                    // Update existing types (non-temp IDs)
-                    if (! str_starts_with($type['id'], 'temp_')) {
-                        ServiceRequestType::where('id', $type['id'])->update([
-                            'category_id' => null,
-                            'sort' => $index + 1,
-                        ]);
+                    $typeId = $this->resolveSaveTypeId($type['id'], $newTypeIds);
+
+                    if ($typeId !== null) {
+                        $this->assignTypeToCategory($typeId, null, $index + 1);
                     }
                 }
             }
+
+            // Apply the accumulated category placements in one pass so multi-category types keep
+            // every membership. No-op while the multiple categories feature is inactive.
+            $this->applyPendingTypePlacements();
 
             $this->handleDeletedTypes($treeData['deleted_types'] ?? []);
             $this->handleDeletedCategories($treeData['deleted_categories'] ?? []);
@@ -321,30 +439,6 @@ class ListServiceRequestTypes extends ListRecords
             ->success()
             ->title('Changes saved successfully')
             ->send();
-    }
-
-    /**
-     * @return array<string, mixed>|null
-     */
-    #[Renderless]
-    public function checkArchivedTypeName(string $name): ?array
-    {
-        $type = ServiceRequestType::query()
-            ->onlyArchived()
-            ->where('name', trim($name))
-            ->withCount('serviceRequests')
-            ->first();
-
-        if (! $type) {
-            return null;
-        }
-
-        return [
-            'id' => $type->id,
-            'name' => $type->name,
-            'service_requests_count' => $type->service_requests_count,
-            'view_url' => ServiceRequestTypeResource::getUrl('view', ['record' => $type]),
-        ];
     }
 
     /**
@@ -413,7 +507,14 @@ class ListServiceRequestTypes extends ListRecords
 
     protected function deleteCategoryWithDescendants(ServiceRequestTypeCategory $category): void
     {
-        $category->types()->delete();
+        // While the multiple categories feature is active `types()` is a many-to-many relationship,
+        // so the types are only detached from this category (they may live under others). Under the
+        // legacy single-category path each type belongs solely to this category and is deleted.
+        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            $category->types()->detach();
+        } else {
+            $category->types()->delete();
+        }
 
         foreach ($category->children as $child) {
             $this->deleteCategoryWithDescendants($child);
@@ -481,7 +582,7 @@ class ListServiceRequestTypes extends ListRecords
                 'sort' => $category->sort,
                 'parent_id' => $category->parent_id,
                 'children' => $this->formatCategories($category->children, $visibilityRestrictionsEnabled),
-                'types' => $this->formatTypes($category->types, $visibilityRestrictionsEnabled),
+                'types' => $this->formatTypes($category->types, $category->id, $visibilityRestrictionsEnabled),
                 'descendant_service_requests_count' => $category->descendant_service_requests_count ?? 0,
                 ...$visibilityRestrictionsEnabled ? [
                     'is_visibility_restricted' => (bool) $category->is_visibility_restricted,
@@ -496,15 +597,15 @@ class ListServiceRequestTypes extends ListRecords
      *
      * @return array<int, array<string, mixed>>
      */
-    protected function formatTypes(Collection $types, bool $visibilityRestrictionsEnabled = false): array
+    protected function formatTypes(Collection $types, ?string $contextCategoryId, bool $visibilityRestrictionsEnabled = false): array
     {
-        return $types->map(function (ServiceRequestType $type) use ($visibilityRestrictionsEnabled) {
+        return $types->map(function (ServiceRequestType $type) use ($contextCategoryId, $visibilityRestrictionsEnabled) {
             return [
                 'id' => $type->id,
                 'name' => $type->name,
                 'type' => 'type',
-                'sort' => $type->sort,
-                'category_id' => $type->category_id,
+                'sort' => $this->resolveTypeSort($type, $contextCategoryId),
+                'category_id' => $contextCategoryId,
                 'service_requests_count' => $type->service_requests_count ?? 0,
                 'view_url' => ServiceRequestTypeResource::getUrl('view', ['record' => $type]),
                 ...$visibilityRestrictionsEnabled ? [
@@ -516,10 +617,161 @@ class ListServiceRequestTypes extends ListRecords
     }
 
     /**
+     * Resolve the sort to emit for a type node.
+     *
+     * While the multiple categories feature is active a categorised type is ordered by its per-area
+     * pivot sort, so the same type can sit in a different position under each area. Uncategorised
+     * types (and the legacy single-category path) fall back to the type's global sort.
+     */
+    protected function resolveTypeSort(ServiceRequestType $type, ?string $contextCategoryId): int
+    {
+        if ($contextCategoryId !== null && ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            $pivot = $type->getRelationValue('pivot');
+
+            assert($pivot instanceof ServiceRequestCategoryType || is_null($pivot));
+
+            if ($pivot !== null) {
+                return (int) $pivot->getAttribute('sort');
+            }
+        }
+
+        return (int) $type->sort;
+    }
+
+    /**
+     * Resolve the id to persist for a type node in the saved tree.
+     *
+     * Existing types return their own id. A brand-new type (temp id) is only placed through this
+     * path while the multiple categories feature is active — its temp id is mapped to the real id
+     * created earlier in the save. Under the legacy single-category path new types are placed at
+     * creation time, so they are skipped here (null).
+     *
+     * @param array<string, string> $newTypeIds
+     */
+    protected function resolveSaveTypeId(string $treeTypeId, array $newTypeIds): ?string
+    {
+        if (! str_starts_with($treeTypeId, 'temp_')) {
+            return $treeTypeId;
+        }
+
+        if (! ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            return null;
+        }
+
+        return $newTypeIds[$treeTypeId] ?? null;
+    }
+
+    /**
+     * Record where a service request type sits in the tree and its sort order within that spot.
+     *
+     * While the multiple categories feature is active the placement is accumulated and applied in
+     * bulk by {@see applyPendingTypePlacements()} so a type filed under several categories keeps
+     * every membership. Otherwise the legacy single `category_id` column is written immediately.
+     */
+    protected function assignTypeToCategory(string $typeId, ?string $categoryId, int $sort): void
+    {
+        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            $this->pendingTypePlacements[$typeId] ??= [];
+
+            if ($categoryId !== null) {
+                $this->pendingTypePlacements[$typeId][$categoryId] = $sort;
+
+                return;
+            }
+
+            $this->pendingUncategorizedTypeSorts[$typeId] = $sort;
+
+            return;
+        }
+
+        $type = ServiceRequestType::find($typeId);
+
+        if ($type === null) {
+            return;
+        }
+
+        $type->sort = $sort;
+        $type->save();
+
+        $this->syncTypeCategory($type, $categoryId);
+    }
+
+    /**
+     * Apply every category placement accumulated during the tree walk in a single pass.
+     *
+     * Each type is synced to the full set of categories it appears under, deduplicated by category
+     * (the pivot's unique constraint is the backstop), with the per-area sort stored on the pivot.
+     * Types that end up without any category are detached and keep their global `sort`. No-op while
+     * the multiple categories feature is inactive.
+     */
+    protected function applyPendingTypePlacements(): void
+    {
+        if (! ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            return;
+        }
+
+        $typeIds = array_unique([
+            ...array_keys($this->pendingTypePlacements),
+            ...array_keys($this->pendingUncategorizedTypeSorts),
+        ]);
+
+        foreach ($typeIds as $typeId) {
+            $type = ServiceRequestType::find($typeId);
+
+            if ($type === null) {
+                continue;
+            }
+
+            $placements = $this->pendingTypePlacements[$typeId] ?? [];
+
+            if ($placements === []) {
+                $sort = $this->pendingUncategorizedTypeSorts[$typeId] ?? $type->sort;
+
+                if ($type->sort !== $sort) {
+                    $type->sort = $sort;
+                    $type->save();
+                }
+
+                $type->categories()->sync([]);
+
+                continue;
+            }
+
+            $syncData = [];
+
+            foreach ($placements as $categoryId => $sort) {
+                $syncData[$categoryId] = ['sort' => $sort];
+            }
+
+            $type->categories()->sync($syncData);
+        }
+    }
+
+    /**
+     * Store the single category a type is filed under (legacy new-type creation path).
+     *
+     * When the multiple categories feature is active the assignment is stored in the `categories`
+     * pivot with its per-area sort; otherwise the legacy `category_id` column is written.
+     */
+    protected function syncTypeCategory(ServiceRequestType $type, ?string $categoryId, ?int $sort = null): void
+    {
+        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            $type->categories()->sync(
+                $categoryId !== null ? [$categoryId => ['sort' => $sort ?? 0]] : [],
+            );
+
+            return;
+        }
+
+        ServiceRequestType::whereKey($type->getKey())->update(['category_id' => $categoryId]);
+    }
+
+    /**
      * @param array<int, array<string, mixed>> $categories
      * @param array<string, string> $newCategoryIds
+     * @param array<string, string> $newTypeIds
      */
-    protected function updateCategoriesRecursive(array $categories, ?string $parentId, array $newCategoryIds): void
+    protected function updateCategoriesRecursive(array $categories, ?string $parentId, array $newCategoryIds, array $newTypeIds = []): void
     {
         foreach ($categories as $index => $category) {
             $originalCategoryId = $category['id'];
@@ -556,19 +808,17 @@ class ListServiceRequestTypes extends ListRecords
             // Update types in this category
             if (! empty($category['types'])) {
                 foreach ($category['types'] as $typeIndex => $type) {
-                    // Update existing types (non-temp IDs)
-                    if (! str_starts_with($type['id'], 'temp_')) {
-                        ServiceRequestType::where('id', $type['id'])->update([
-                            'category_id' => $categoryId,
-                            'sort' => $typeIndex + 1,
-                        ]);
+                    $typeId = $this->resolveSaveTypeId($type['id'], $newTypeIds);
+
+                    if ($typeId !== null) {
+                        $this->assignTypeToCategory($typeId, $categoryId, $typeIndex + 1);
                     }
                 }
             }
 
             // Recursively update children
             if (! empty($category['children'])) {
-                $this->updateCategoriesRecursive($category['children'], $categoryId, $newCategoryIds);
+                $this->updateCategoriesRecursive($category['children'], $categoryId, $newCategoryIds, $newTypeIds);
             }
         }
     }
@@ -590,6 +840,58 @@ class ListServiceRequestTypes extends ListRecords
             if (! empty($children)) {
                 $this->assertMaxCategoryDepth($children, $depth + 1);
             }
+        }
+    }
+
+    /**
+     * Guard against two types being saved with the same name within the same request.
+     *
+     * The per-row `unique` rule only compares each name against the database, so it cannot catch
+     * two brand-new types (or a new type and a rename) sharing a name in the same payload. Names
+     * must be unique across every area, so any collision here is rejected before writing.
+     *
+     * @param array<string, mixed> $treeData
+     */
+    protected function assertNoDuplicateTypeNames(array $treeData): void
+    {
+        $names = [];
+
+        // A brand-new type may be placed in several areas, appearing once per placement under the
+        // same temp id; count it a single time.
+        $seenTempIds = [];
+
+        foreach ($treeData['new_types'] ?? [] as $newType) {
+            $tempId = $newType['temp_id'] ?? null;
+
+            if ($tempId !== null && isset($seenTempIds[$tempId])) {
+                continue;
+            }
+
+            $seenTempIds[$tempId] = true;
+            $names[] = mb_strtolower(trim((string) ($newType['name'] ?? '')));
+        }
+
+        $seenIds = [];
+
+        foreach ($treeData['updated_types'] ?? [] as $updatedType) {
+            $id = $updatedType['id'] ?? null;
+
+            if ($id !== null && isset($seenIds[$id])) {
+                continue;
+            }
+
+            $seenIds[$id] = true;
+            $names[] = mb_strtolower(trim((string) ($updatedType['name'] ?? '')));
+        }
+
+        $names = array_filter($names, fn (string $name): bool => $name !== '');
+
+        $hasDuplicates = count($names) !== count(array_unique($names));
+
+        if ($hasDuplicates) {
+            throw ValidationException::withMessages([
+                'treeData.new_types' => 'The same name is already in use by another service request type. Please select a different name.',
+            ]);
         }
     }
 }

@@ -69,12 +69,14 @@ class ListUsers extends ListRecords
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('name')
+                    ->searchable()
                     ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
                     ->iconColor(fn (User $record) => $record->presenceStatus()->getColor())
                     ->tooltip(fn (User $record) => $record->presenceStatus()->getLabel())
                     ->extraAttributes(fn (User $record): array => ['aria-label' => $record->name . ' (' . $record->presenceStatus()->getLabel() . ')']),
                 TextColumn::make('email')
-                    ->label('Email address'),
+                    ->label('Email address')
+                    ->searchable(),
                 TextColumn::make('job_title'),
                 TextColumn::make('created_at')
                     ->label('Created At')

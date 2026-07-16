@@ -40,7 +40,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Radio;
@@ -56,8 +55,6 @@ use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class EditContact extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ContactResource::class;
 
     // TODO: Automatically set from Filament

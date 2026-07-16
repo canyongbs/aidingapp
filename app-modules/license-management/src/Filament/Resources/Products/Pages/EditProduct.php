@@ -37,7 +37,6 @@
 namespace AidingApp\LicenseManagement\Filament\Resources\Products\Pages;
 
 use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Textarea;
@@ -47,8 +46,6 @@ use Filament\Schemas\Schema;
 
 class EditProduct extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ProductResource::class;
 
     protected static ?string $navigationLabel = 'Edit';

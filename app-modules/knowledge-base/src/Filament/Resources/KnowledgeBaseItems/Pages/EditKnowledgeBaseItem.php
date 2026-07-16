@@ -42,7 +42,6 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseI
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use App\Concerns\EditPageRedirection;
 use App\Filament\Forms\Components\UserSelect;
 use App\Filament\Pages\Concerns\BreadcrumbCharacterLimit;
 use App\Models\Scopes\TagsForClass;
@@ -69,7 +68,6 @@ use Livewire\Attributes\Url;
 class EditKnowledgeBaseItem extends EditRecord
 {
     use BreadcrumbCharacterLimit;
-    use EditPageRedirection;
 
     protected static string $resource = KnowledgeBaseItemResource::class;
 

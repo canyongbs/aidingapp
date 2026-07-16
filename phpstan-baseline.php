@@ -1344,18 +1344,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Rules/ServiceRequestTypeAssignmentsIndividualUserMustBeAManager.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeByNextDue" method on "AidingApp\\\\Task\\\\Models\\\\Task" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
-    'identifier' => 'Common.noLocalModelScope',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/task/src/Models/Task.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeOpen" method on "AidingApp\\\\Task\\\\Models\\\\Task" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
-    'identifier' => 'Common.noLocalModelScope',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/task/src/Models/Task.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Spatie\\\\Image\\\\Drivers\\\\ImageDriver\\:\\:keepOriginalImageFormat\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,

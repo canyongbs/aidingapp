@@ -34,39 +34,29 @@
 </COPYRIGHT>
 */
 
-use App\Features\PipelineEntryFieldsFeature;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('pipeline_entries', function (Blueprint $table) {
-                $table->text('description')->nullable();
-                $table->timestamp('due')->nullable();
-                $table->foreignUuid('assigned_to')->nullable()->constrained('users')->nullOnDelete();
-                $table->foreignUuid('created_by')->nullable()->constrained('users')->nullOnDelete();
-                $table->foreignUuid('related_to')->nullable()->constrained('contacts')->nullOnDelete();
-            });
-
-            PipelineEntryFieldsFeature::activate();
+        Schema::table('pipeline_entries', function (Blueprint $table) {
+            $table->text('description')->nullable();
+            $table->timestamp('due')->nullable();
+            $table->foreignUuid('assigned_to')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignUuid('related_to')->nullable()->constrained('contacts')->nullOnDelete();
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            PipelineEntryFieldsFeature::deactivate();
-
-            Schema::table('pipeline_entries', function (Blueprint $table) {
-                $table->dropForeign(['assigned_to']);
-                $table->dropForeign(['created_by']);
-                $table->dropForeign(['related_to']);
-                $table->dropColumn(['description', 'due', 'assigned_to', 'created_by', 'related_to']);
-            });
+        Schema::table('pipeline_entries', function (Blueprint $table) {
+            $table->dropForeign(['assigned_to']);
+            $table->dropForeign(['created_by']);
+            $table->dropForeign(['related_to']);
+            $table->dropColumn(['description', 'due', 'assigned_to', 'created_by', 'related_to']);
         });
     }
 };

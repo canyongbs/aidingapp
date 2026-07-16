@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Models\Advisory;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
@@ -50,8 +49,6 @@ use Illuminate\Support\Str;
 
 class EditAdvisory extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = AdvisoryResource::class;
 
     protected static ?string $navigationLabel = 'Edit';

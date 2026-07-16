@@ -36,12 +36,15 @@
 
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
+use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
+use App\Features\PipelineStageClassificationFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
@@ -70,6 +73,7 @@ class CreatePipeline extends CreateRecord
                 Repeater::make('stages')
                     ->table([
                         TableColumn::make('Stage Name'),
+                        ...(PipelineStageClassificationFeature::active() ? [TableColumn::make('Classification')] : []),
                     ])
                     ->relationship('stages')
                     ->schema([
@@ -77,7 +81,21 @@ class CreatePipeline extends CreateRecord
                             ->label('Stage')
                             ->distinct()
                             ->required(),
+                        Select::make('classification')
+                            ->label('Classification')
+                            ->options(PipelineStageClassification::class)
+                            ->enum(PipelineStageClassification::class)
+                            ->required()
+                            ->native()
+                            ->default(PipelineStageClassification::Planning->value)
+                            ->visible(fn () => PipelineStageClassificationFeature::active()),
                     ])
+                    ->default(
+                        collect(PipelineStageClassification::cases())->map(fn (PipelineStageClassification $case) => [
+                            'name' => $case->getLabel(),
+                            ...(PipelineStageClassificationFeature::active() ? ['classification' => $case->value] : []),
+                        ])->all()
+                    )
                     ->orderColumn('order')
                     ->reorderable()
                     ->columnSpanFull()
