@@ -66,6 +66,8 @@ use Filament\Support\Facades\FilamentView;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\View\View;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -213,6 +215,11 @@ class FilamentServiceProvider extends ServiceProvider
         FilamentView::registerRenderHook(
             'panels::footer',
             fn (): View => view('filament.footer'),
+        );
+
+        FilamentView::registerRenderHook(
+            'panels::body.end',
+            fn (): HtmlString => new HtmlString(Blade::render("@vite('resources/js/panel.js')")),
         );
 
         Select::configureUsing(function (Select $component) {

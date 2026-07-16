@@ -37,6 +37,7 @@ import PrimeVue from 'primevue/config';
 import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
 import { createRouter, createWebHistory } from 'vue-router';
 import VueSignaturePad from 'vue-signature-pad';
+import { codeBlocksDirective } from '../../../resources/js/utils/enhanceCodeBlocks.js';
 import App from './App.vue';
 import config from './formkit.config.js';
 import './portal.css';
@@ -145,6 +146,8 @@ customElements.define(
 
             // FormKit plugin
             app.use(plugin, defaultConfig(config));
+
+            app.directive('code-blocks', codeBlocksDirective);
 
             const inst = getCurrentInstance();
             Object.assign(inst.appContext, app._context);

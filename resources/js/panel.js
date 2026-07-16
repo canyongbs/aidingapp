@@ -31,34 +31,9 @@
 
 </COPYRIGHT>
 */
-import vue from '@vitejs/plugin-vue';
-import laravel, { refreshPaths } from 'laravel-vite-plugin';
-import { defineConfig } from 'vite';
 
-export default defineConfig({
-    plugins: [
-        vue(),
-        laravel({
-            input: [
-                'resources/css/app.css',
-                'resources/js/app.js',
-                'resources/js/panel.js',
-                'resources/css/filament/admin/theme.css',
-                'app-modules/in-app-communication/resources/js/chat.js',
-                'app-modules/service-management/resources/js/serviceRequestTypeManager.js',
-                'app-modules/project/resources/js/kanban.js',
-            ],
-            assets: ['resources/images/**', 'resources/svg/**'],
-            refresh: [
-                ...refreshPaths,
-                'app/Filament/**',
-                'app/Forms/Components/**',
-                'app/Livewire/**',
-                'app/Infolists/Components/**',
-                'app/Providers/Filament/**',
-                'app/Tables/Columns/**',
-                'portals/**',
-            ],
-        }),
-    ],
-});
+// Generic entry point loaded on every Filament panel page via a single render
+// hook (`panels::body.end`). Add future panel-wide behaviour by importing it
+// here rather than registering additional render hooks.
+
+import './richContentCodeBlocks';

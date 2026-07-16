@@ -33,6 +33,7 @@
 */
 @import '../../../../vendor/filament/filament/resources/css/theme.css';
 @import 'tippy.js/dist/tippy.css';
+@import '../../rich-content/code-blocks.css';
 
 @config '../../../../tailwind.config.js';
 
