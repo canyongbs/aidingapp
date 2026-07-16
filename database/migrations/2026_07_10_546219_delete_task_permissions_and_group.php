@@ -34,45 +34,56 @@
 </COPYRIGHT>
 */
 
+use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 return new class () extends Migration {
+    use CanModifyPermissions;
+
+    /**
+     * @var array<string, string>
+     */
+    private array $permissions = [
+        'task.import' => 'Task',
+        'task.view-any' => 'Task',
+        'task.create' => 'Task',
+        'task.*.view' => 'Task',
+        'task.*.update' => 'Task',
+        'task.*.delete' => 'Task',
+        'task.*.restore' => 'Task',
+        'task.*.force-delete' => 'Task',
+    ];
+
+    /**
+     * @var array<string>
+     */
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
     public function up(): void
     {
         DB::transaction(function () {
-            $groupId = DB::table('permission_groups')
-                ->where('name', 'Task')
-                ->value('id');
-
-            if ($groupId) {
-                DB::table('model_has_permissions')
-                    ->whereIn('permission_id', function (Builder $query) use ($groupId) {
-                        $query->select('id')
-                            ->from('permissions')
-                            ->where('group_id', $groupId);
-                    })
-                    ->delete();
-
-                DB::table('role_has_permissions')
-                    ->whereIn('permission_id', function (Builder $query) use ($groupId) {
-                        $query->select('id')
-                            ->from('permissions')
-                            ->where('group_id', $groupId);
-                    })
-                    ->delete();
-
-                DB::table('permissions')
-                    ->where('group_id', $groupId)
-                    ->delete();
-
-                DB::table('permission_groups')
-                    ->where('id', $groupId)
-                    ->delete();
-            }
+            collect($this->guards)
+                ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
         });
     }
 
-    public function down(): void {}
+    public function down(): void
+    {
+        DB::transaction(function () {
+            collect($this->guards)
+                ->each(function (string $guard) {
+                    $permissions = Arr::except($this->permissions, keys: DB::table('permissions')
+                        ->where('guard_name', $guard)
+                        ->pluck('name')
+                        ->all());
+
+                    $this->createPermissions($permissions, $guard);
+                });
+        });
+    }
 };
