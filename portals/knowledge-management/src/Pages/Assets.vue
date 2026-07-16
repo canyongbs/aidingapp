@@ -32,13 +32,13 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import Page from '@common/portal/Page.vue';
+    import PageCard from '@common/portal/PageCard.vue';
     import { computed, onMounted, ref, watch } from 'vue';
     import AssetFilterTabs from '../Components/Assets/AssetFilterTabs.vue';
     import AssetStatCards from '../Components/Assets/AssetStatCards.vue';
     import AssetTable from '../Components/Assets/AssetTable.vue';
-    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
-    import Page from '@common/portal/Page.vue';
-    import PageCard from '@common/portal/PageCard.vue';
     import { consumer } from '../Services/Consumer';
 
     const props = defineProps({

@@ -32,13 +32,13 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps, ref, watch } from 'vue';
-    import { useRoute } from 'vue-router';
-    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
     import AppLoading from '@common/portal/AppLoading.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
+    import { defineProps, ref, watch } from 'vue';
+    import { useRoute } from 'vue-router';
+    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
     import BaseDetailSection from '../Components/ui/BaseDetailSection.vue';
     import BaseList from '../Components/ui/BaseList.vue';
     import BaseTable from '../Components/ui/BaseTable.vue';

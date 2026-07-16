@@ -32,12 +32,12 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed, onMounted, ref } from 'vue';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
+    import { computed, onMounted, ref } from 'vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import ServiceMonitorCard from '../Components/ServiceMonitorCard.vue';
     import { consumer } from '../Services/Consumer.js';
 

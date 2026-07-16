@@ -32,12 +32,12 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed, defineProps, onMounted, ref, watch } from 'vue';
-    import { useRoute, useRouter } from 'vue-router';
     import AppLoading from '@common/portal/AppLoading.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
+    import { computed, defineProps, onMounted, ref, watch } from 'vue';
+    import { useRoute, useRouter } from 'vue-router';
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
 
