@@ -36,58 +36,41 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
+use AidingApp\Project\Filament\Resources\Projects\Pages\Concerns\HasProjectDashboardHeader;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\ColorEntry;
-use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 
 class ViewProject extends ViewRecord
 {
+    use HasProjectDashboardHeader;
+
     protected static string $resource = ProjectResource::class;
+
+    protected string $view = 'project::filament.resources.projects.view-project';
 
     protected static ?string $navigationLabel = 'View';
 
-    public function infolist(Schema $schema): Schema
+    /**
+     * @return array<int|string, string|null>
+     */
+    public function getBreadcrumbs(): array
     {
-        return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name'),
-                        TextEntry::make('description')
-                            ->label('Description')
-                            ->columnSpanFull(),
-                        TextEntry::make('icon')
-                            ->label('Icon')
-                            ->visible()
-                            ->state(fn (Project $record): string => (string) str($record->icon)->after('heroicon-o-')->headline())
-                            ->icon(fn (Project $record): string => $record->icon),
-                        ColorEntry::make('color')
-                            ->visible()
-                            ->label('Color'),
-                        TextEntry::make('department.name')
-                            ->visible()
-                            ->label('Department'),
-                        TextEntry::make('start_date')
-                            ->visible()
-                            ->date()
-                            ->label('Start Date'),
-                        TextEntry::make('target_completion_date')
-                            ->visible()
-                            ->date()
-                            ->label('Target Completion Date'),
-                    ]),
-            ]);
-    }
+        $resource = static::getResource();
+        /** @var Project $record */
+        $record = $this->getRecord();
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            EditAction::make(),
+        /** @var array<string, string> $breadcrumbs */
+        $breadcrumbs = [
+            $resource::getUrl() => $resource::getBreadcrumb(),
+            Str::limit($record->name, 16),
         ];
+
+        if (filled($cluster = static::getCluster())) {
+            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
+        }
+
+        return $breadcrumbs;
     }
 }

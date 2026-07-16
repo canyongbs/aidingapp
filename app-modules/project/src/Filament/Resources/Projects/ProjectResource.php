@@ -60,19 +60,20 @@ class ProjectResource extends Resource
 
     protected static ?int $navigationSort = 10;
 
-    public static function getRecordSubNavigation(Page $page): array
-    {
-        return $page->generateNavigationItems([
-            ViewProject::class,
-            EditProject::class,
-            ManageManagers::class,
-            ManageAuditors::class,
-            ManagePipelines::class,
-            ManageMilestones::class,
-            ManageFiles::class,
-            ManageGuests::class,
-        ]);
-    }
+    // public static function getRecordSubNavigation(Page $page): array
+    // {
+    //     return $page->generateNavigationItems([
+    //         ViewProject::class,
+    //         EditProject::class,
+    //         ManageTasks::class,
+    //         ManageManagers::class,
+    //         ManageAuditors::class,
+    //         ManageFiles::class,
+    //         ManagePipelines::class,
+    //         ManageMilestones::class,
+    //         ManageGuests::class,
+    //     ]);
+    // }
 
     public static function getPages(): array
     {
