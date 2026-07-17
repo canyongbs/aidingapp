@@ -32,14 +32,8 @@
     </COPYRIGHT>
 --}}
 @php
-    use AidingApp\Theme\Settings\ThemeSettings;
     use App\Filament\Widgets\Notifications;
     use App\Settings\DisplaySettings;
-
-    $themeSettings = app(ThemeSettings::class);
-
-    $themeChangelogUrl = ! empty($themeSettings->changelog_url) ? $themeSettings->changelog_url : ThemeSettings::DEFAULT_CHANGELOG_URL;
-    $productResourceHubUrl = ! empty($themeSettings->product_resource_hub_url) ? $themeSettings->product_resource_hub_url : ThemeSettings::DEFAULT_PRODUCT_RESOURCE_HUB_URL;
 
     $timezone = app(DisplaySettings::class)->getTimezone();
 @endphp
@@ -48,7 +42,7 @@
     <div class="grid-cols-1 @5xl:grid-cols-2 grid gap-6">
         <div
             class="@container col-span-full flex flex-col rounded-xl bg-black bg-cover bg-no-repeat p-6 shadow-sm ring-1 ring-white/10"
-            style="background-image: url('{{ asset('images/banner.png') }}')"
+            style="background-image: url('{{ Vite::asset('resources/images/dashboard-banner.png') }}')"
         >
             <div class="grid w-full gap-1 text-center md:text-start">
                 <p class="text-2xl font-bold text-white">Welcome,</p>
@@ -61,8 +55,8 @@
             </div>
         </div>
 
-        <x-version-card :theme-changelog-url="$themeChangelogUrl" />
-        <x-resource-portal-card :product-resource-hub-url="$productResourceHubUrl" />
+        <x-version-card theme-changelog-url="https://github.com/canyongbs/aidingapp/releases" />
+        <x-resource-portal-card product-resource-hub-url="https://canyongbs.aiding.app/portal" />
     </div>
 
     @livewire(Notifications::class)
