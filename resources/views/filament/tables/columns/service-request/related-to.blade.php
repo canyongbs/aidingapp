@@ -36,7 +36,7 @@
 
     $record = $getRecord();
 
-    $managers = $record->priority?->type?->managerUsers ?? collect();
+    $assignedUser = $record->assignedTo?->user;
 
     $respondent = $record->respondent;
     $customerName = $respondent?->{Contact::displayNameKey()};
@@ -46,10 +46,10 @@
 <div class="fi-ta-text grid w-full gap-y-1 text-sm text-gray-950 dark:text-white">
     <div class="flex flex-wrap items-center gap-x-2">
         <span class="font-medium">Manager:</span>
-        @if ($managers->isEmpty())
+        @if (! $assignedUser)
             <x-filament::badge color="gray">Unassigned</x-filament::badge>
         @else
-            <span>{{ $managers->pluck("name")->join(", ") }}</span>
+            <span>{{ $assignedUser->name }}</span>
         @endif
     </div>
 
