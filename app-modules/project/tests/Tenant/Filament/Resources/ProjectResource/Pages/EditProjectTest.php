@@ -39,7 +39,6 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\EditProject;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\ProjectResource\RequestFactory\EditProjectRequestFactory;
 use App\Models\User;
-use Olympus\Crm\Models\Contact;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseCount;
@@ -189,7 +188,7 @@ it('validates the inputs', function (EditProjectRequestFactory $data, array $err
 
     assertDatabaseMissing(
         Project::class,
-        $request
+        collect($request)->except('target_completion_date_type')->toArray()
     );
 })->with(
     [
@@ -216,6 +215,18 @@ it('validates the inputs', function (EditProjectRequestFactory $data, array $err
         'description max' => [
             EditProjectRequestFactory::new()->state(['description' => str()->random(65536)]),
             ['description' => 'max'],
+        ],
+        'icon required' => [
+            EditProjectRequestFactory::new()->state(['icon' => null]),
+            ['icon' => 'required'],
+        ],
+        'color required' => [
+            EditProjectRequestFactory::new()->state(['color' => null]),
+            ['color' => 'required'],
+        ],
+        'color invalid' => [
+            EditProjectRequestFactory::new()->state(['color' => 'not-a-color']),
+            ['color' => 'in'],
         ],
     ]
 );
@@ -247,6 +258,81 @@ it('can edit a record', function () {
         [
             'name' => $request['name'],
             'description' => $request['description'],
+            'icon' => $request['icon'],
+            'color' => $request['color'],
+            'department_id' => $request['department_id'],
+            'start_date' => $request['start_date'],
         ]
     );
+});
+
+it('can edit a record with target completion date', function () {
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.update');
+
+    actingAs($user);
+
+    $project = Project::factory()->for($user, 'createdBy')->create();
+
+    $request = EditProjectRequestFactory::new()->withTargetCompletionDate()->create();
+
+    livewire(EditProject::class, [
+        'record' => $project->getRouteKey(),
+    ])
+        ->fillForm($request)
+        ->call('save')
+        ->assertHasNoFormErrors()
+        ->assertHasNoErrors();
+
+    assertDatabaseHas(
+        Project::class,
+        [
+            'id' => $project->getKey(),
+            'target_completion_date' => $request['target_completion_date'],
+        ]
+    );
+});
+
+it('clears target_completion_date when switching to indefinite', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create([
+        'icon' => 'heroicon-o-clipboard-document-list',
+        'target_completion_date' => '2026-12-31',
+    ]);
+
+    livewire(EditProject::class, [
+        'record' => $project->getRouteKey(),
+    ])
+        ->assertFormSet([
+            'target_completion_date_type' => 'set',
+        ])
+        ->set('data.target_completion_date_type', 'indefinite')
+        ->set('data.target_completion_date', null)
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(
+        Project::class,
+        [
+            'id' => $project->getKey(),
+            'target_completion_date' => null,
+        ]
+    );
+});
+
+it('hydrates target_completion_date_type to set when record has target_completion_date', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create([
+        'target_completion_date' => '2026-12-31',
+    ]);
+
+    livewire(EditProject::class, [
+        'record' => $project->getRouteKey(),
+    ])
+        ->assertFormFieldExists('target_completion_date_type')
+        ->assertFormFieldExists('target_completion_date');
 });

@@ -38,7 +38,6 @@ namespace AidingApp\Department\Filament\Resources\Departments\Pages;
 
 use AidingApp\Department\Filament\Resources\Departments\DepartmentResource;
 use AidingApp\Division\Models\Division;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -49,8 +48,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class EditDepartment extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = DepartmentResource::class;
 
     public function form(Schema $schema): Schema

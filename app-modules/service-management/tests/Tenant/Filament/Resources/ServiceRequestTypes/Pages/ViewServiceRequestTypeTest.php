@@ -35,12 +35,15 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ViewServiceRequestType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewServiceRequestType page', function () {
@@ -59,6 +62,41 @@ test('The correct details are displayed on the ViewServiceRequestType page', fun
                 $serviceRequestType->name,
             ]
         );
+});
+
+test('The ViewServiceRequestType page lists every area the type belongs to', function () {
+    $areaA = ServiceRequestTypeCategory::factory()->create(['name' => 'Billing']);
+    $areaB = ServiceRequestTypeCategory::factory()->create(['name' => 'Housing']);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $serviceRequestType->categories()->sync([
+        $areaA->id => ['sort' => 1],
+        $areaB->id => ['sort' => 2],
+    ]);
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequestType::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->assertOk()
+        ->assertSchemaStateSet([
+            'service_request_areas' => ['Billing', 'Housing'],
+        ]);
+});
+
+test('The ViewServiceRequestType page shows a placeholder when the type has no area', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequestType::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->assertOk()
+        ->assertSchemaStateSet([
+            'service_request_areas' => null,
+        ]);
 });
 
 // Permission Tests

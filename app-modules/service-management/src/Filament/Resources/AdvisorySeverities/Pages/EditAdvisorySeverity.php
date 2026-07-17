@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Page
 
 use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\AdvisorySeverityResource;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use App\Concerns\EditPageRedirection;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -49,8 +48,6 @@ use Illuminate\Support\Str;
 
 class EditAdvisorySeverity extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = AdvisorySeverityResource::class;
 
     public function form(Schema $schema): Schema

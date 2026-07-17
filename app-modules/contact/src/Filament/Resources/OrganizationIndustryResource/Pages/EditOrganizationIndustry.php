@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Page
 
 use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource;
 use AidingApp\Contact\Models\OrganizationIndustry;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
@@ -49,8 +48,6 @@ use Filament\Schemas\Schema;
 
 class EditOrganizationIndustry extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = OrganizationIndustryResource::class;
 
     public function form(Schema $schema): Schema

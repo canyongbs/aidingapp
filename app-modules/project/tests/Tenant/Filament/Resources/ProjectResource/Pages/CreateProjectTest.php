@@ -110,6 +110,18 @@ it('validates the inputs', function (CreateProjectRequestFactory $data, array $e
             CreateProjectRequestFactory::new()->state(['description' => str()->random(65536)]),
             ['description' => 'max'],
         ],
+        'icon required' => [
+            CreateProjectRequestFactory::new()->state(['icon' => null]),
+            ['icon' => 'required'],
+        ],
+        'color required' => [
+            CreateProjectRequestFactory::new()->state(['color' => null]),
+            ['color' => 'required'],
+        ],
+        'color invalid' => [
+            CreateProjectRequestFactory::new()->state(['color' => 'not-a-color']),
+            ['color' => 'in'],
+        ],
     ]
 );
 
@@ -136,6 +148,57 @@ it('can create a record', function () {
         [
             'name' => $request['name'],
             'description' => $request['description'],
+            'icon' => $request['icon'],
+            'color' => $request['color'],
+            'department_id' => $request['department_id'],
+            'start_date' => $request['start_date'],
+            'target_completion_date' => null,
+        ]
+    );
+});
+
+it('can create a record with target completion date', function () {
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.create');
+
+    actingAs($user);
+
+    $request = CreateProjectRequestFactory::new()->withTargetCompletionDate()->create();
+
+    livewire(CreateProject::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertHasNoErrors();
+
+    assertDatabaseCount(Project::class, 1);
+
+    assertDatabaseHas(
+        Project::class,
+        [
+            'name' => $request['name'],
+            'target_completion_date' => $request['target_completion_date'],
+        ]
+    );
+});
+
+it('stores null target_completion_date when indefinite is selected', function () {
+    asSuperAdmin();
+
+    $request = CreateProjectRequestFactory::new()->create();
+
+    livewire(CreateProject::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(
+        Project::class,
+        [
+            'name' => $request['name'],
+            'target_completion_date' => null,
         ]
     );
 });

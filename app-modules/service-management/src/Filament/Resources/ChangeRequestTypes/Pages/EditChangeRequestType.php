@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Page
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
-use App\Concerns\EditPageRedirection;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -53,8 +52,6 @@ use Filament\Schemas\Schema;
 
 class EditChangeRequestType extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ChangeRequestTypeResource::class;
 
     public function form(Schema $schema): Schema

@@ -37,7 +37,6 @@
 namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\Pages;
 
 use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\MaintenanceProviderResource;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
@@ -45,8 +44,6 @@ use Filament\Schemas\Schema;
 
 class EditMaintenanceProvider extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = MaintenanceProviderResource::class;
 
     public function form(Schema $schema): Schema

@@ -37,7 +37,6 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\Pages;
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\KnowledgeBaseCategoryResource;
-use App\Concerns\EditPageRedirection;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -49,8 +48,6 @@ use Illuminate\Validation\Rules\Unique;
 
 class EditKnowledgeBaseCategory extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = KnowledgeBaseCategoryResource::class;
 
     public function form(Schema $schema): Schema
