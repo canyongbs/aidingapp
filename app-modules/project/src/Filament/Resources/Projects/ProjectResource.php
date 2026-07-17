@@ -45,7 +45,6 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ManageGuests;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageManagers;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageMilestones;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManagePipelines;
-use AidingApp\Project\Filament\Resources\Projects\Pages\ManageTasks;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Models\Project;
 use App\Enums\NavigationGroup;
@@ -66,12 +65,11 @@ class ProjectResource extends Resource
         return $page->generateNavigationItems([
             ViewProject::class,
             EditProject::class,
-            ManageTasks::class,
             ManageManagers::class,
             ManageAuditors::class,
-            ManageFiles::class,
             ManagePipelines::class,
             ManageMilestones::class,
+            ManageFiles::class,
             ManageGuests::class,
         ]);
     }
@@ -83,7 +81,6 @@ class ProjectResource extends Resource
             'create' => CreateProject::route('/create'),
             'view' => ViewProject::route('/{record}'),
             'edit' => EditProject::route('/{record}/edit'),
-            'manage-tasks' => ManageTasks::route('/{record}/tasks'),
             'manage-managers' => ManageManagers::route('/{record}/managers'),
             'manage-auditors' => ManageAuditors::route('/{record}/auditors'),
             'manage-files' => ManageFiles::route('/{record}/files'),

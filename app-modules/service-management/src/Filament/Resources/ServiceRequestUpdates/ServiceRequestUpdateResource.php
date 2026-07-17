@@ -67,6 +67,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\JoinClause;
 use Illuminate\Support\Facades\Gate;
 
 class ServiceRequestUpdateResource extends Resource
@@ -118,7 +119,7 @@ class ServiceRequestUpdateResource extends Resource
                     ->label('Related To')
                     ->sortable(query: function (Builder $query, string $direction, ServiceRequestUpdate $record): Builder {
                         return $query->join('service_requests', 'service_request_updates.service_request_id', '=', 'service_requests.id')
-                            ->join('contacts', function ($join) {
+                            ->join('contacts', function (JoinClause $join) {
                                 $join->on('service_requests.respondent_id', '=', 'contacts.id');
                             })
                             ->orderBy('full', $direction);

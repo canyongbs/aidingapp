@@ -55,7 +55,6 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectGuest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\Task\Models\Task;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use AidingApp\Timeline\Models\Timeline;
 use App\Models\Authenticatable;
@@ -207,14 +206,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         )
             ->using(EngagementFileEntities::class)
             ->withTimestamps();
-    }
-
-    /**
-     * @return HasMany<Task, $this>
-     */
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class, 'concern_id');
     }
 
     /**

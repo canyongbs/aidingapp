@@ -180,10 +180,6 @@ it('only lists a report when the required feature addon is enabled for the tenan
         fn (LicenseSettings $settings) => $settings->data->addons->projectManagement = true,
         ReportAccessKey::Projects,
     ],
-    ReportAccessKey::TaskManagement->value => [
-        fn (LicenseSettings $settings) => $settings->data->addons->projectManagement = true,
-        ReportAccessKey::TaskManagement,
-    ],
 ]);
 
 it('can search reports by name', function () {

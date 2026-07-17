@@ -43,7 +43,7 @@ class UploadsMediaCollection extends MediaCollection
 {
     protected ?int $maxNumberOfFiles;
 
-    protected ?int $maxFileSizeInMB;
+    protected ?int $maxFileSizeInMb;
 
     /**
      * @var array<string, array<string>>
@@ -93,11 +93,11 @@ class UploadsMediaCollection extends MediaCollection
         return $this->maxNumberOfFiles;
     }
 
-    public function maxFileSizeInMB(int $maxFileSizeInMB): static
+    public function maxFileSizeInMb(int $maxFileSizeInMb): static
     {
-        $this->maxFileSizeInMB = $maxFileSizeInMB;
+        $this->maxFileSizeInMb = $maxFileSizeInMb;
 
-        $this->accepts['size'] = fn (File $file) => $file->size <= $maxFileSizeInMB * 1000 * 1000;
+        $this->accepts['size'] = fn (File $file) => $file->size <= $maxFileSizeInMb * 1000 * 1000;
 
         $this->acceptsFile(
             fn (File $file) => collect($this->accepts)
@@ -107,9 +107,9 @@ class UploadsMediaCollection extends MediaCollection
         return $this;
     }
 
-    public function getMaxFileSizeInMB(): ?int
+    public function getMaxFileSizeInMb(): ?int
     {
-        return $this->maxFileSizeInMB;
+        return $this->maxFileSizeInMb;
     }
 
     /**

@@ -34,38 +34,56 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Observers;
-
-use AidingApp\Task\Models\Task;
-use AidingApp\Task\Notifications\TaskAssignedToUserNotification;
-use App\Models\User;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
-class TaskObserver
-{
-    public function saving(Task $task): void
+return new class () extends Migration {
+    use CanModifyPermissions;
+
+    /**
+     * @var array<string, string>
+     */
+    private array $permissions = [
+        'task.import' => 'Task',
+        'task.view-any' => 'Task',
+        'task.create' => 'Task',
+        'task.*.view' => 'Task',
+        'task.*.update' => 'Task',
+        'task.*.delete' => 'Task',
+        'task.*.restore' => 'Task',
+        'task.*.force-delete' => 'Task',
+    ];
+
+    /**
+     * @var array<string>
+     */
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
+    public function up(): void
     {
-        DB::beginTransaction();
-
-        if (is_null($task->created_by)) {
-            $user = auth()->user();
-
-            if ($user instanceof User) {
-                $task->created_by = $user->id;
-            }
-        }
-
-        if (is_null($task->assigned_to)) {
-            $task->assigned_to = auth()->id();
-        }
+        DB::transaction(function () {
+            collect($this->guards)
+                ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
+        });
     }
 
-    public function saved(Task $task): void
+    public function down(): void
     {
-        DB::commit();
+        DB::transaction(function () {
+            collect($this->guards)
+                ->each(function (string $guard) {
+                    $permissions = Arr::except($this->permissions, keys: DB::table('permissions')
+                        ->where('guard_name', $guard)
+                        ->pluck('name')
+                        ->all());
 
-        if (! empty($task->assignedTo) && ($task->wasChanged('assigned_to') || ($task->wasRecentlyCreated))) {
-            $task->assignedTo->notify(new TaskAssignedToUserNotification($task));
-        }
+                    $this->createPermissions($permissions, $guard);
+                });
+        });
     }
-}
+};

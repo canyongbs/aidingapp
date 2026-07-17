@@ -36,6 +36,7 @@
 
 use Filament\Forms\Components\RichEditor\RichContentRenderer;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
@@ -43,7 +44,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::table('knowledge_base_articles')->chunkById(100, function ($articles) {
+        DB::table('knowledge_base_articles')->chunkById(100, function (Collection $articles) {
             foreach ($articles as $article) {
                 if (! blank($article->article_details)) {
                     try {
@@ -52,8 +53,8 @@ return new class () extends Migration {
                         DB::table('knowledge_base_articles')
                             ->where('id', $article->id)
                             ->update(['article_details_fulltext' => $articleDetails]);
-                    } catch (Throwable $e) {
-                        report($e);
+                    } catch (Throwable $exception) {
+                        report($exception);
                     }
                 }
             }

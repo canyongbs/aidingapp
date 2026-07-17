@@ -34,50 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Task\Database\Seeders;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\Task\Models\Task;
-use App\Models\User;
-use Illuminate\Database\Seeder;
-
-class TaskSeeder extends Seeder
-{
-    public function run(): void
+return new class () extends Migration {
+    public function up(): void
     {
-        // Past due, Contact Concerned
-        Task::factory()
-            ->count(3)
-            ->assigned(User::first())
-            ->concerningContact()
-            ->pastDue()
-            ->create();
+        DB::transaction(function () {
+            DB::table('audits')
+                ->where('auditable_type', 'task')
+                ->delete();
 
-        // Due Later, Contact Concerned
-        Task::factory()
-            ->count(3)
-            ->assigned(User::first())
-            ->concerningContact()
-            ->dueLater()
-            ->create();
-
-        // Unassigned
-        Task::factory()
-            ->count(3)
-            ->concerningContact()
-            ->create();
-
-        // Unassigned, Past Due
-        Task::factory()
-            ->count(3)
-            ->concerningContact()
-            ->pastDue()
-            ->create();
-
-        // Randomly assigned
-        Task::factory()
-            ->count(10)
-            ->assigned()
-            ->concerningContact()
-            ->create();
+            Schema::dropIfExists('confidential_task_projects');
+            Schema::dropIfExists('confidential_task_departments');
+            Schema::dropIfExists('confidential_task_users');
+            Schema::dropIfExists('tasks');
+        });
     }
-}
+
+    public function down(): void {}
+};

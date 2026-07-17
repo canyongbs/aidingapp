@@ -43,8 +43,6 @@ use AidingApp\Department\Models\Department;
 use AidingApp\Project\Database\Factories\ProjectFactory;
 use AidingApp\Project\Models\Scopes\ProjectVisibilityScope;
 use AidingApp\Project\Observers\ProjectObserver;
-use AidingApp\Task\Enums\TaskStatus;
-use AidingApp\Task\Models\Task;
 use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Enums\Color;
@@ -104,22 +102,6 @@ class Project extends BaseModel implements Auditable
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class);
-    }
-
-    /**
-     * @return HasMany<Task, $this>
-     */
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class, 'project_id');
-    }
-
-    /**
-     * @return HasMany<Task, $this>
-     */
-    public function activeTasks(): HasMany
-    {
-        return $this->tasks()->whereIn('status', [TaskStatus::Pending, TaskStatus::InProgress]);
     }
 
     /**

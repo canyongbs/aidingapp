@@ -49,7 +49,6 @@ use AidingApp\Report\Filament\Pages\Projects;
 use AidingApp\Report\Filament\Pages\ServiceMonitoring;
 use AidingApp\Report\Filament\Pages\ServiceRequestFeedback;
 use AidingApp\Report\Filament\Pages\ServiceRequests;
-use AidingApp\Report\Filament\Pages\TaskManagement;
 use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
 use App\Enums\Feature;
@@ -62,7 +61,6 @@ enum ReportAccessKey: string
     case ServiceRequests = 'service-requests';
     case ServiceRequestFeedback = 'service-request-feedback';
     case Projects = 'projects';
-    case TaskManagement = 'task-management';
     case KnowledgeBase = 'knowledge-base';
     case AssetManagement = 'asset-management';
     case AdvisoryManagement = 'advisory-management';
@@ -83,7 +81,6 @@ enum ReportAccessKey: string
             self::ServiceRequests => ServiceRequests::class,
             self::ServiceRequestFeedback => ServiceRequestFeedback::class,
             self::Projects => Projects::class,
-            self::TaskManagement => TaskManagement::class,
             self::KnowledgeBase => KnowledgeBase::class,
             self::AssetManagement => AssetManagement::class,
             self::AdvisoryManagement => AdvisoryManagement::class,
@@ -103,7 +100,6 @@ enum ReportAccessKey: string
             self::ServiceRequests => 'Service Requests',
             self::ServiceRequestFeedback => 'Service Request Feedback',
             self::Projects => 'Projects',
-            self::TaskManagement => 'Task Management',
             self::KnowledgeBase => 'Knowledge Base',
             self::AssetManagement => 'Asset Management',
             self::AdvisoryManagement => 'Advisory Management',
@@ -130,8 +126,7 @@ enum ReportAccessKey: string
             self::ChangeManagement,
             self::ServiceMonitoring => 'Service Desk',
 
-            self::Projects,
-            self::TaskManagement => 'Projects',
+            self::Projects => 'Projects',
 
             self::AiSupportAssistant,
             self::AiClarification,
@@ -161,8 +156,7 @@ enum ReportAccessKey: string
 
             self::ServiceMonitoring => Gate::check(Feature::ServiceMonitoring->getGateName()),
 
-            self::Projects,
-            self::TaskManagement => Gate::check(Feature::ProjectManagement->getGateName()),
+            self::Projects => Gate::check(Feature::ProjectManagement->getGateName()),
 
             self::AiSupportAssistant,
             self::AiClarification,

@@ -48,18 +48,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/audit/src/Filament/Actions/AuditAttachAction.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Filament/Actions/AuditAttachAction.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$record of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/audit/src/Filament/Actions/AuditAttachAction.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method OwenIt\\\\Auditing\\\\Contracts\\\\Auditable\\:\\:auditDetach\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
@@ -136,12 +124,6 @@ $ignoreErrors[] = [
     'identifier' => 'match.alwaysTrue',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/authorization/src/Enums/SocialiteProvider.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\Authorization\\\\Filament\\\\Pages\\\\Auth\\\\SetPassword\\:\\:\\$data type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/authorization/src/Filament/Pages/Auth/SetPassword.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\:\\:api\\(\\)\\.$#',
@@ -280,12 +262,6 @@ $ignoreErrors[] = [
     'identifier' => 'argument.templateType',
     'count' => 2,
     'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Contact\\\\Filament\\\\Resources\\\\ContactResource\\\\Pages\\\\AssetManagement\\:\\:managers\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/AssetManagement.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Unsafe call to private method AidingApp\\\\Contact\\\\Filament\\\\Resources\\\\ContactResource\\\\Pages\\\\AssetManagement\\:\\:managers\\(\\) through static\\:\\:\\.$#',
@@ -432,12 +408,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/division/database/factories/DivisionFactory.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$deliverables of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/database/migrations/2025_01_13_153104_data_remove_sms_data_from_engagement.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method App\\\\Models\\\\Contracts\\\\Educatable\\:\\:notify\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
@@ -514,12 +484,6 @@ $ignoreErrors[] = [
     'identifier' => 'Common.noStrtolower',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/engagement/src/Jobs/ProcessSesS3InboundEmail.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$communications of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/engagement/src/Jobs/UnmatchedInboundCommunicationsJob.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:orderedEngagements\\(\\)\\.$#',
@@ -762,18 +726,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/knowledge-base/database/factories/KnowledgeBaseItemFactory.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$articles of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/database/migrations/2025_05_26_103749_data_migrate_article_details_to_article_details_fulltext_in_knowledge_base_articles.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Variable name "\\$e" is shorter than minimum length of 3 characters\\.$#',
-    'identifier' => 'MeliorStan.shortVariable',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/database/migrations/2025_05_26_103749_data_migrate_article_details_to_article_details_fulltext_in_knowledge_base_articles.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
     'identifier' => 'Common.noStrtolower',
     'count' => 1,
@@ -802,18 +754,6 @@ $ignoreErrors[] = [
     'identifier' => 'argument.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/license-management/database/migrations/2024_11_21_194048_data_seed_permissions_for_product_license_module.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$state of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/license-management/src/Filament/Resources/Products/Pages/ManageProductLicenses.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#3 \\$record of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/license-management/src/Filament/Resources/Products/Pages/ManageProductLicenses.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^PHPDoc type array of property AidingApp\\\\LicenseManagement\\\\Models\\\\ProductLicense\\:\\:\\$appends is not covariant with PHPDoc type list\\<string\\> of overridden property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$appends\\.$#',
@@ -954,12 +894,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/StoreKnowledgeBaseArticleVoteController.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$query of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/StoreKnowledgeBaseArticleVoteController.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Eloquent models must define a "\\$fillable" property\\. Add a "\\$fillable" property to this model or a parent model\\.$#',
     'identifier' => 'Common.modelMissingFillable',
     'count' => 1,
@@ -1050,12 +984,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$priority of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Actions\\\\ResolveUploadsMediaCollectionForServiceRequest\\:\\:__invoke\\(\\) should return AidingApp\\\\ServiceManagement\\\\Models\\\\MediaCollections\\\\UploadsMediaCollection\\|null but returns Spatie\\\\MediaLibrary\\\\MediaCollections\\\\MediaCollection\\|null\\.$#',
     'identifier' => 'return.type',
     'count' => 1,
@@ -1134,12 +1062,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/ServiceRequestTypeResource.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$join of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestUpdates/ServiceRequestUpdateResource.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$types of method Filament\\\\Forms\\\\Components\\\\BaseFileUpload\\:\\:acceptedFileTypes\\(\\) expects array\\<string\\>\\|Closure\\|Illuminate\\\\Contracts\\\\Support\\\\Arrayable, array\\<string, array\\<string\\>\\> given\\.$#',
     'identifier' => 'argument.type',
     'count' => 1,
@@ -1182,12 +1104,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Widgets/ServiceRequestMediaTable.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\ServiceManagement\\\\Livewire\\\\RenderServiceRequestFeedbackForm\\:\\:\\$data type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Livewire/RenderServiceRequestFeedbackForm.php',
-];
-$ignoreErrors[] = [
     'message' => '#^PHPDoc tag @return contains generic type AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany\\<App\\\\Models\\\\User, \\$this\\(AidingApp\\\\ServiceManagement\\\\Models\\\\ChangeRequestType\\)\\> but class AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany is not generic\\.$#',
     'identifier' => 'generics.notGeneric',
     'count' => 1,
@@ -1198,30 +1114,6 @@ $ignoreErrors[] = [
     'identifier' => 'trait.unused',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Models/Concerns/HasRelationBasedStateMachine.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method name "getMaxFileSizeInMB" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.methodNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/MediaCollections/UploadsMediaCollection.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method name "maxFileSizeInMB" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.methodNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/MediaCollections/UploadsMediaCollection.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter name "maxFileSizeInMB" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.parameterNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/MediaCollections/UploadsMediaCollection.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property name "maxFileSizeInMB" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.propertyNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/MediaCollections/UploadsMediaCollection.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Eloquent local scopes are not allowed\\. The "scopeOpen" method on "AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
@@ -1342,18 +1234,6 @@ $ignoreErrors[] = [
     'identifier' => 'MeliorStan.classNameNotPascalCase',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Rules/ServiceRequestTypeAssignmentsIndividualUserMustBeAManager.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeByNextDue" method on "AidingApp\\\\Task\\\\Models\\\\Task" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
-    'identifier' => 'Common.noLocalModelScope',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/task/src/Models/Task.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeOpen" method on "AidingApp\\\\Task\\\\Models\\\\Task" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
-    'identifier' => 'Common.noLocalModelScope',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/task/src/Models/Task.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Spatie\\\\Image\\\\Drivers\\\\ImageDriver\\:\\:keepOriginalImageFormat\\(\\)\\.$#',

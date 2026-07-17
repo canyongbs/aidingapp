@@ -32,18 +32,17 @@
     </COPYRIGHT>
 --}}
 <x-filament-panels::layout.base :livewire="$livewire">
-    <div class="fi-layout flex h-screen w-full flex-col lg:flex-row-reverse">
-        <div class="fi-main-ctn w-full flex flex-col h-full">
-            <div class="flex justify-center items-center w-full border-b border-gray-200 mb-4 flex-shrink-0 p-4">
-                <x-filament-panels::logo />
-            </div>
+    <div class="flex min-h-screen w-full flex-col bg-gray-50 dark:bg-gray-950">
+        <div class="flex w-full flex-shrink-0 items-center justify-center border-b border-gray-200 p-4 dark:border-gray-700">
+            <x-filament-panels::logo />
+        </div>
 
-            <main class="fi-main mx-auto flex-grow flex justify-center items-center w-full px-4 md:px-6 lg:px-8 max-w-screen-lg mb-4">
-                {{ $slot }}
-            </main>
-            <div class="mt-auto mb-4 lg:mb-4 inline-block w-full h-16">
-                {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::FOOTER, scopes: $livewire->getRenderHookScopes()) }}
-            </div>
+        <div class="mx-auto flex w-full max-w-screen-lg flex-1 items-center justify-center px-4 py-8 md:px-6 lg:px-8">
+            {{ $slot }}
+        </div>
+
+        <div class="flex w-full items-center justify-center py-4">
+            {{ \Filament\Support\Facades\FilamentView::renderHook(\Filament\View\PanelsRenderHook::FOOTER, scopes: $livewire->getRenderHookScopes()) }}
         </div>
     </div>
 </x-filament-panels::layout.base>

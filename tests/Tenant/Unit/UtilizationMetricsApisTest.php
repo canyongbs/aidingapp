@@ -39,7 +39,6 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\Task\Models\Task;
 use App\Models\User;
 use App\Multitenancy\Http\Middleware\CheckOlympusKey;
 use App\Settings\LicenseSettings;
@@ -131,23 +130,6 @@ it('checks the API returns knowledge base articles', function () {
     $response->assertStatus(200);
 
     expect($data['knowledge_base_articles'])->toBe($randomRecords);
-});
-
-it('checks the API returns tasks', function () {
-    $randomRecords = random_int(1, 10);
-
-    Task::factory()->count($randomRecords)->create();
-
-    $softDeleteTask = Task::factory()->create();
-    $softDeleteTask->delete();
-
-    $response = get('/api/utilization-metrics');
-
-    $data = $response->json('data');
-
-    $response->assertStatus(200);
-
-    expect($data['tasks'])->toBe($randomRecords);
 });
 
 it('checks the API returns emails sent', function () {

@@ -39,12 +39,15 @@ namespace AidingApp\Authorization\Filament\Pages\Auth;
 use AidingApp\Authorization\Settings\AzureSsoSettings;
 use AidingApp\Authorization\Settings\GoogleSsoSettings;
 use Filament\Actions\Action;
+use Filament\Support\Enums\Width;
 
 class Login extends \Filament\Auth\Pages\Login
 {
     protected string $view = 'authorization::login';
 
     protected static string $layout = 'filament-panels::components.layouts.login';
+
+    protected Width | string | null $maxWidth = Width::FourExtraLarge;
 
     /**
      * @return array<Action>
