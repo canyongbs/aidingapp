@@ -34,21 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace App\Features;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\MorphPivot;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperProjectGuest
- */
-class ProjectGuest extends MorphPivot
+class ManagedContactFeature extends AbstractFeatureFlag
 {
-    use HasUuids;
-
-    protected $fillable = [
-        'project_id',
-        'guest_id',
-        'guest_type',
-    ];
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
 }

@@ -34,21 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\Portal\Http\Controllers;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\MorphPivot;
+use App\Features\ManagedContactFeature;
+use App\Http\Controllers\Controller;
+use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
-/**
- * @mixin IdeHelperProjectGuest
- */
-class ProjectGuest extends MorphPivot
+class EmployeeSelfServiceController extends Controller
 {
-    use HasUuids;
+    public function __invoke(): RedirectResponse
+    {
+        abort_unless(ManagedContactFeature::active(), Response::HTTP_NOT_FOUND);
 
-    protected $fillable = [
-        'project_id',
-        'guest_id',
-        'guest_type',
-    ];
+        $user = Auth::user();
+
+        abort_unless($user instanceof User, Response::HTTP_FORBIDDEN);
+
+        $contact = $user->managedContact()->first();
+
+        abort_if(is_null($contact), Response::HTTP_FORBIDDEN);
+
+        Auth::guard('contact')->login($contact);
+
+        return redirect()->route('portal.show');
+    }
 }

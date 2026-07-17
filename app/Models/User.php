@@ -38,6 +38,7 @@ namespace App\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Authorization\Models\Role;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
@@ -60,6 +61,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserManager;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use App\Enums\PresenceStatus;
 use App\Filament\Resources\Users\UserResource;
+use App\Observers\UserObserver;
 use App\Settings\DisplaySettings;
 use App\Settings\PresenceSettings;
 use App\Support\HasAdvancedFilter;
@@ -69,12 +71,14 @@ use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
 use Filament\Panel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Lab404\Impersonate\Models\Impersonate;
@@ -88,6 +92,7 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
 /**
  * @mixin IdeHelperUser
  */
+#[ObservedBy([UserObserver::class])]
 class User extends Authenticatable implements HasLocalePreference, FilamentUser, Auditable, HasMedia, HasAvatar, CanBeNotified, HasFilamentResource
 {
     /** @use HasFactory<UserFactory> */
@@ -259,6 +264,14 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public function department(): BelongsTo
     {
         return $this->belongsTo(Department::class, 'department_id');
+    }
+
+    /**
+     * @return HasOne<Contact, $this>
+     */
+    public function managedContact(): HasOne
+    {
+        return $this->hasOne(Contact::class, 'user_id');
     }
 
     /**

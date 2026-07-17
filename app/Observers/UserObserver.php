@@ -34,21 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace App\Observers;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Relations\MorphPivot;
+use AidingApp\Contact\Services\ManagedContactService;
+use App\Features\ManagedContactFeature;
+use App\Models\User;
 
-/**
- * @mixin IdeHelperProjectGuest
- */
-class ProjectGuest extends MorphPivot
+class UserObserver
 {
-    use HasUuids;
+    public function __construct(
+        protected ManagedContactService $managedContactService,
+    ) {}
 
-    protected $fillable = [
-        'project_id',
-        'guest_id',
-        'guest_type',
-    ];
+    public function saved(User $user): void
+    {
+        if (! ManagedContactFeature::active()) {
+            return;
+        }
+
+        $this->managedContactService->sync($user);
+    }
+
+    public function deleted(User $user): void
+    {
+        if (! ManagedContactFeature::active()) {
+            return;
+        }
+
+        $this->managedContactService->disable($user);
+    }
 }
