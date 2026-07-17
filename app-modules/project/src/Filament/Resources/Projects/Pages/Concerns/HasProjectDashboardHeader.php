@@ -36,6 +36,7 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Pages\Concerns;
 
+use AidingApp\Project\Filament\Actions\ProjectManageAccessAction;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use Filament\Actions\Action;
@@ -64,12 +65,12 @@ trait HasProjectDashboardHeader
                 ->icon('heroicon-o-pencil')
                 ->outlined()
                 ->color('info'),
-            Action::make('manageAccess')
+            ProjectManageAccessAction::make('manage_access')
                 ->label('Manage Access')
                 ->icon('heroicon-o-user-group')
-                ->url(fn (): string => ProjectResource::getUrl('manage-managers', ['record' => $this->getRecord()]))
                 ->outlined()
-                ->color('info'),
+                ->color('info')
+                ->record($this->getRecord()),
             Action::make('settings')
                 ->label('Settings')
                 ->icon('heroicon-o-cog-6-tooth')

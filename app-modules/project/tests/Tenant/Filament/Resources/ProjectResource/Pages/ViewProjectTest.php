@@ -35,8 +35,13 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Project\Filament\Resources\Projects\Pages\ManageManagers;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\ManagerUsersRelationManager;
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectMilestonesWidget;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectMilestone;
 use App\Models\User;
 use Olympus\Crm\Models\Contact;
 
@@ -179,4 +184,75 @@ it('can view a record', function () {
         'record' => $project->getRouteKey(),
     ])
         ->assertHasNoErrors();
+});
+
+it('can render the project access widget and mount the manage access action', function () {
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+
+    livewire(ProjectAccessWidget::class, [
+        'record' => $project,
+    ])
+        ->assertActionExists('manageAccess')
+        ->mountAction('manageAccess')
+        ->assertHasNoErrors();
+});
+
+it('can attach a manager user through the centralized access relation manager', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $manager = User::factory()->create();
+
+    livewire(ManagerUsersRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageManagers::class,
+    ])
+        ->callTableAction('attach', data: [
+            'recordId' => $manager->getKey(),
+        ])
+        ->assertHasNoTableActionErrors();
+
+    expect($project->managerUsers()->whereKey($manager->getKey())->exists())->toBeTrue();
+});
+
+it('can list milestones in the project milestones widget', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $milestones = ProjectMilestone::factory()->count(3)->for($project)->create();
+
+    livewire(ProjectMilestonesWidget::class, [
+        'record' => $project,
+    ])
+        ->assertCanSeeTableRecords($milestones);
+});
+
+it('can create a milestone through the project milestones widget create action', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $milestone = ProjectMilestone::factory()->for($project)->make();
+
+    livewire(ProjectMilestonesWidget::class, [
+        'record' => $project,
+    ])
+        ->callAction('manageMilestoneCreate', data: [
+            'title' => $milestone->title,
+            'description' => $milestone->description,
+            'status_id' => $milestone->status_id,
+            'target_date' => $milestone->target_date,
+        ])
+        ->assertHasNoActionErrors();
+
+    expect($project->milestones()->where('title', $milestone->title)->exists())->toBeTrue();
 });
