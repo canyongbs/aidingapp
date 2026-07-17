@@ -81,7 +81,7 @@ class ListServiceRequests extends ListRecords
                 'latestInboundServiceRequestUpdate',
                 'latestOutboundServiceRequestUpdate',
                 'priority.sla',
-                'priority.type.managerUsers',
+                'assignedTo.user',
                 'respondent.organization',
                 'feedback',
                 'status',
