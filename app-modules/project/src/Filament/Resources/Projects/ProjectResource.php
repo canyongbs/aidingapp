@@ -67,9 +67,9 @@ class ProjectResource extends Resource
             EditProject::class,
             ManageManagers::class,
             ManageAuditors::class,
-            ManageFiles::class,
             ManagePipelines::class,
             ManageMilestones::class,
+            ManageFiles::class,
             ManageGuests::class,
         ]);
     }
