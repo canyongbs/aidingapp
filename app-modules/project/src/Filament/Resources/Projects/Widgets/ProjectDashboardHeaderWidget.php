@@ -34,49 +34,67 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\Pages\Concerns;
+namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
 use AidingApp\Project\Filament\Actions\ProjectManageAccessAction;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use Filament\Actions\Action;
-use Filament\Actions\EditAction;
-use Illuminate\Contracts\View\View;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
+use Filament\Schemas\Concerns\InteractsWithSchemas;
+use Filament\Schemas\Contracts\HasSchemas;
+use Filament\Widgets\Widget;
 
-trait HasProjectDashboardHeader
+class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSchemas
 {
-    public function getHeader(): ?View
-    {
-        $project = $this->getRecord();
-        assert($project instanceof Project);
+    use InteractsWithActions;
+    use InteractsWithSchemas;
 
-        return view('project::filament.resources.projects.view-project.header', [
-            'actions' => $this->getCachedHeaderActions(),
-            'breadcrumbs' => $this->getBreadcrumbs(),
-            'project' => $project,
-        ]);
+    public Project $record;
+
+    /**
+     * @var array<int|string, string|null>
+     */
+    public array $breadcrumbs = [];
+
+    protected int | string | array $columnSpan = 'full';
+
+    protected string $view = 'project::filament.resources.projects.widgets.project-dashboard-header-widget';
+
+    public function editProjectAction(): Action
+    {
+        return Action::make('editProject')
+            ->label('Edit Project')
+            ->icon('heroicon-o-pencil')
+            ->outlined()
+            ->color('info')
+            ->url(fn (): string => ProjectResource::getUrl('edit', ['record' => $this->record]));
     }
 
-    protected function getHeaderActions(): array
+    public function manageAccessAction(): Action
+    {
+        return ProjectManageAccessAction::make('manageAccess')
+            ->record($this->record);
+    }
+
+    public function settingsAction(): Action
+    {
+        return Action::make('settings')
+            ->label('Settings')
+            ->icon('heroicon-o-cog-6-tooth')
+            ->outlined()
+            ->color('info')
+            ->url(fn (): string => ProjectResource::getUrl('edit', ['record' => $this->record]));
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    protected function getViewData(): array
     {
         return [
-            EditAction::make()
-                ->label('Edit Project')
-                ->icon('heroicon-o-pencil')
-                ->outlined()
-                ->color('info'),
-            ProjectManageAccessAction::make('manage_access')
-                ->label('Manage Access')
-                ->icon('heroicon-o-user-group')
-                ->outlined()
-                ->color('info')
-                ->record($this->getRecord()),
-            Action::make('settings')
-                ->label('Settings')
-                ->icon('heroicon-o-cog-6-tooth')
-                ->url(fn (): string => ProjectResource::getUrl('edit', ['record' => $this->getRecord()]))
-                ->outlined()
-                ->color('info'),
+            'project' => $this->record,
         ];
     }
 }

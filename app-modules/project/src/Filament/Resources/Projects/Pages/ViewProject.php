@@ -36,7 +36,6 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use AidingApp\Project\Filament\Resources\Projects\Pages\Concerns\HasProjectDashboardHeader;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use Filament\Resources\Pages\ViewRecord;
@@ -44,11 +43,11 @@ use Illuminate\Support\Str;
 
 class ViewProject extends ViewRecord
 {
-    use HasProjectDashboardHeader;
-
     protected static string $resource = ProjectResource::class;
 
     protected string $view = 'project::filament.resources.projects.view-project';
+
+    protected static ?string $title = 'Project Dashboard';
 
     protected static ?string $navigationLabel = 'View';
 

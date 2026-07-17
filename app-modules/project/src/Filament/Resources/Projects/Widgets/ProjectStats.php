@@ -51,12 +51,12 @@ class ProjectStats extends BaseWidget
         return [
             Stat::make('files', $project->files()->count())
                 ->label('Files'),
-            Stat::make('tasks', $project->tasks()->count())
+            Stat::make('pipeline_tasks', $project->pipelines()->withCount('entries')->get()->sum('entries_count'))
                 ->label('Pipeline Tasks'),
             Stat::make('milestones', $project->milestones()->count())
                 ->label('Milestones'),
-            Stat::make('recent_activities', 0)
-                ->label('Recent Activities'),
+            // Stat::make('recent_activities', 0)
+            //     ->label('Recent Activities'),
         ];
     }
 }

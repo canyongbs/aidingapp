@@ -36,6 +36,7 @@
     use AidingApp\Project\Filament\Widgets\ProjectDashboardFilesWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectStats;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
+    use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectMilestonesWidget;
     use Filament\Facades\Filament;
 
@@ -53,6 +54,13 @@
 @endphp
 
 <x-filament-panels::page>
+    @livewire(
+        ProjectDashboardHeaderWidget::class,
+        [
+            'record' => $record,
+        ]
+    )
+
     @livewire(ProjectStats::class, ['record' => $record])
 
     <div class="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-2">
