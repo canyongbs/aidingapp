@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a04a5793f674cafd67f90a6e684833f3",
+    "content-hash": "2a562344fcd06ad31c00b1769cb5d243",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -1223,41 +1223,6 @@
                     "AidingApp\\ServiceManagement\\Tests\\": "tests/",
                     "AidingApp\\ServiceManagement\\Database\\Factories\\": "database/factories/",
                     "AidingApp\\ServiceManagement\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/aiding-app-task",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/task",
-                "reference": "a861b2ba3614cf8e0ea40fe39679d859fe181267"
-            },
-            "require": {
-                "filament/filament": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AidingApp\\Task\\Providers\\TaskServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AidingApp\\Task\\": "src/",
-                    "AidingApp\\Task\\Tests\\": "tests/",
-                    "AidingApp\\Task\\Database\\Factories\\": "database/factories/",
-                    "AidingApp\\Task\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [

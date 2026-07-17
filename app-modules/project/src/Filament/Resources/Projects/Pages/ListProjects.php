@@ -61,9 +61,6 @@ class ListProjects extends ListRecords
                     ->description(fn (Project $record): ?string => $record->description)
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('active_tasks_count')
-                    ->counts('activeTasks')
-                    ->label('Active Tasks'),
                 TextColumn::make('files_count')
                     ->counts('files')
                     ->label('Files'),

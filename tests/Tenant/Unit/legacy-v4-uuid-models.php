@@ -133,10 +133,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserManager;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\Sla;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
-use AidingApp\Task\Models\ConfidentialTaskDepartment;
-use AidingApp\Task\Models\ConfidentialTasksProjects;
-use AidingApp\Task\Models\ConfidentialTaskUser;
-use AidingApp\Task\Models\Task;
 use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Webhook\Models\InboundWebhook;
 use AidingApp\Webhook\Models\LandlordInboundWebhook;
@@ -255,10 +251,6 @@ return [
     ServiceRequestUpdate::class,
     Sla::class,
     TenantServiceRequestTypeDomain::class,
-    ConfidentialTaskDepartment::class,
-    ConfidentialTaskUser::class,
-    ConfidentialTasksProjects::class,
-    Task::class,
     Department::class,
     Timeline::class,
     InboundWebhook::class,

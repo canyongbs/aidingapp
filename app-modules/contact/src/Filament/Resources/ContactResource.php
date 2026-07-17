@@ -45,7 +45,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ListContacts;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactEngagement;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactFiles;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactTasks;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Models\Contact;
 use App\Enums\NavigationGroup;
@@ -78,7 +77,6 @@ class ContactResource extends Resource
             ManageContactFiles::class,
             ManageContactEngagement::class,
             ManageContactAlerts::class,
-            ManageContactTasks::class,
             ContactEngagementTimeline::class,
         ]);
     }
@@ -106,7 +104,6 @@ class ContactResource extends Resource
             'manage-alerts' => ManageContactAlerts::route('/{record}/concerns'),
             'manage-engagement' => ManageContactEngagement::route('/{record}/engagement'),
             'manage-files' => ManageContactFiles::route('/{record}/files'),
-            'manage-tasks' => ManageContactTasks::route('/{record}/tasks'),
             'view' => ViewContact::route('/{record}'),
             'timeline' => ContactEngagementTimeline::route('/{record}/timeline'),
             'service-management' => ContactServiceManagement::route('/{record}/service-management'),

@@ -111,7 +111,6 @@ class KnowledgeManagementPortalRegisterController extends Controller
             'license_management_enabled' => $addons?->licenseManagement,
             'has_assets' => $contact->assetCheckIns()->exists() || $contact->assetCheckOuts()->exists(),
             'has_license' => $contact->productLicenses()->exists(),
-            'has_tasks' => $contact->tasks()->exists(),
             'assistant_enabled' => $assistantEnabled,
             'assistant_widget_loader_url' => $assistantEnabled
                 ? url('widgets/assistant/' . json_decode(Storage::disk('public')->get('widgets/assistant/.vite/manifest.json'), true)['src/loader.js']['file'])
