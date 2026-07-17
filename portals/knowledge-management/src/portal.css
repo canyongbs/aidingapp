@@ -38,6 +38,7 @@
 @import './preflight-v3-compat.css' layer(base);
 @import 'tailwindcss-primeui';
 @import '../src/assets/primevue/tailwind.css' layer(components);
+@import '../../../resources/css/rich-content/code-blocks.css';
 
 @config '../tailwind.config.js';
 

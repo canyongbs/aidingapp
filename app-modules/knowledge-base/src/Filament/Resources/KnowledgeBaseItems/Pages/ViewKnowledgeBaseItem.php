@@ -96,7 +96,9 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                 TextEntry::make('article_details')
                                     ->columnSpanFull()
                                     ->hiddenLabel()
-                                    ->html(),
+                                    ->html()
+                                    ->prose()
+                                    ->extraAttributes(['class' => 'knowledge-base-article']),
                             ]),
                         'properties' => Tab::make('Properties')
                             ->schema([
