@@ -66,6 +66,7 @@ class SetPassword extends SimplePage
 
     protected string $view = 'authorization::set-password';
 
+    /** @var array<string, mixed>|null */
     public ?array $data = [];
 
     public function mount(): void

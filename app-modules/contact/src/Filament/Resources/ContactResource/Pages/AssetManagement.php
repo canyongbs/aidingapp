@@ -72,6 +72,9 @@ class AssetManagement extends ManageRelatedRecords
         return static::managers($this->getRecord());
     }
 
+    /**
+     * @return array<int, RelationGroup>
+     */
     private static function managers(?Model $record = null): array
     {
         return collect([

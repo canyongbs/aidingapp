@@ -38,12 +38,13 @@ namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\Form\Actions\GenerateFormKitSchema;
 use AidingApp\Form\Models\Submissible;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 
 class GenerateServiceRequestFormKitSchema extends GenerateFormKitSchema
 {
     public function __invoke(Submissible $submissible): array
     {
-        $priorities = $submissible->type->priorities->map(function ($priority) {
+        $priorities = $submissible->type->priorities->map(function (ServiceRequestPriority $priority) {
             return [
                 'label' => $priority->name,
                 'value' => $priority->id,

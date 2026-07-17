@@ -98,7 +98,7 @@ class GetServiceRequestTypesController extends Controller
             'conversation_eligibility_url_base' => route('widgets.assistant.api.service-request.conversation.eligibility', ['serviceRequest' => '__SR__']),
             'conversation_request_url_base' => route('widgets.assistant.api.service-request.conversation.request', ['serviceRequest' => '__SR__']),
             'accepted_mime_types' => ($uploadsCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)())->getMimes(),
-            'max_file_size_mb' => $uploadsCollection->getMaxFileSizeInMB(),
+            'max_file_size_mb' => $uploadsCollection->getMaxFileSizeInMb(),
             'max_files' => $uploadsCollection->getMaxNumberOfFiles(),
         ]);
     }

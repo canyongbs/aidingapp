@@ -37,6 +37,7 @@
 namespace AidingApp\LicenseManagement\Filament\Resources\Products\Pages;
 
 use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
+use AidingApp\LicenseManagement\Models\ProductLicense;
 use App\Filament\Infolists\Components\MaskedTextEntry;
 use App\Filament\Tables\Columns\MaskedTextColumn;
 use Filament\Actions\BulkActionGroup;
@@ -106,7 +107,7 @@ class ManageProductLicenses extends ManageRelatedRecords
                     Checkbox::make('license_does_not_expire')
                         ->label('License Does Not Expire')
                         ->live()
-                        ->afterStateHydrated(function (Set $set, $state, $record) {
+                        ->afterStateHydrated(function (Set $set, mixed $state, ?ProductLicense $record) {
                             if ($record && is_null($record->expiration_date)) {
                                 $set('license_does_not_expire', true);
                             }
