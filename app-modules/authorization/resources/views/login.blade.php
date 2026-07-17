@@ -57,7 +57,7 @@
     </div>
 
     <div class="flex w-full flex-col gap-6 lg:w-1/2">
-        <x-filament-panels::login-version-card />
-        <x-filament-panels::login-resource-portal-card />
+        <x-version-card theme-changelog-url="https://github.com/canyongbs/aidingapp/releases" />
+        <x-resource-portal-card product-resource-hub-url="https://canyongbs.aiding.app/portal" />
     </div>
 </div>

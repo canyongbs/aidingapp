@@ -86,7 +86,6 @@ class KnowledgeManagementPortalController extends Controller
             'asset_management_enabled' => $addons?->assetManagement,
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
             'license_management_enabled' => $addons?->licenseManagement,
-            'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,
             'has_projects' => auth()->guard('contact')->user()
                 ? PipelineEntry::query()
                     ->where('organizable_type', auth()->guard('contact')->user()->getMorphClass())

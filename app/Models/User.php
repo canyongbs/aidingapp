@@ -58,7 +58,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserAuditor;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserManager;
-use AidingApp\Task\Models\Task;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use App\Enums\PresenceStatus;
 use App\Filament\Resources\Users\UserResource;
@@ -252,14 +251,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public function pronouns(): BelongsTo
     {
         return $this->belongsTo(Pronouns::class);
-    }
-
-    /**
-     * @return HasMany<Task, $this>
-     */
-    public function assignedTasks(): HasMany
-    {
-        return $this->hasMany(Task::class, 'assigned_to');
     }
 
     public function preferredLocale()
