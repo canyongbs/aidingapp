@@ -36,6 +36,7 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
+use AidingApp\Department\Models\Department;
 use AidingApp\Project\Filament\Actions\ProjectManageAccessAction;
 use AidingApp\Project\Models\Project;
 use Filament\Actions\Action;
@@ -59,20 +60,26 @@ class ProjectAccessWidget extends Widget implements HasActions, HasSchemas
     #[Computed]
     public function getManagers(): Collection
     {
-        return $this->record->managerUsers;
+        return $this->record->managerUsers
+            ->concat($this->record->managerDepartments->flatMap(fn (Department $department): Collection => $department->users))
+            ->unique('id')
+            ->values();
     }
 
     #[Computed]
     public function getAuditors(): Collection
     {
-        return $this->record->auditorUsers;
+        return $this->record->auditorUsers
+            ->concat($this->record->auditorDepartments->flatMap(fn (Department $department): Collection => $department->users))
+            ->unique('id')
+            ->values();
     }
 
     #[Computed]
     public function getGuests(): Collection
     {
-        return $this->record->guestContacts;
-        // ->concat($this->record->guestOrganizations);
+        return $this->record->guestContacts
+            ->concat($this->record->guestOrganizations);
     }
 
     public function manageAccessAction(): Action

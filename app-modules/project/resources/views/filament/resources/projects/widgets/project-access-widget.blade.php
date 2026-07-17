@@ -74,11 +74,21 @@
                     Guests ({{ $this->getGuests()->count() }})
                 </p>
                 <div class="mt-2 flex flex-wrap gap-3">
-                    @foreach ($this->getGuests() as $contact)
+                    @foreach ($this->getGuests() as $item)
                         @php
-                            $initials = strtoupper(substr($contact->first_name ?? '', 0, 1) . substr($contact->last_name ?? '', 0, 1));
+                            $isContact = $item instanceof \AidingApp\Contact\Models\Contact;
+                            $name = $isContact ? $item->full_name : $item->name;
+                            $initials = $isContact
+                                ? strtoupper(substr($item->first_name ?? '', 0, 1) . substr($item->last_name ?? '', 0, 1))
+                                : strtoupper(
+                                    collect(explode(' ', trim($item->name ?? '')))
+                                        ->filter()
+                                        ->take(2)
+                                        ->map(fn (string $word): string => substr($word, 0, 1))
+                                        ->implode(''),
+                                );
                             $colors = ['bg-amber-500', 'bg-emerald-500', 'bg-violet-500', 'bg-rose-500', 'bg-cyan-500', 'bg-indigo-500'];
-                            $color = $colors[crc32($contact->getKey()) % count($colors)];
+                            $color = $colors[crc32($item->getKey()) % count($colors)];
                         @endphp
 
                         <div class="flex flex-col items-center gap-1">
@@ -88,7 +98,7 @@
                                 {{ $initials }}
                             </div>
                             <span class="max-w-15 truncate text-xs text-gray-600 dark:text-gray-400">
-                                {{ str($contact->first_name)->limit(8) }}
+                                {{ str($name)->limit(8) }}
                             </span>
                         </div>
                     @endforeach
