@@ -38,10 +38,9 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
 use AidingApp\Portal\Actions\GenerateServiceRequestQuestionsAiPrompt;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -55,6 +54,10 @@ class GenerateServiceRequestQuestionsController extends Controller
         $contact = auth('contact')->user();
 
         abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
+
+        if (ServiceRequestTypeVisibilityRestrictionsFeature::active()) {
+            abort_unless($type->isVisibleToContactType($contact->type_id), Response::HTTP_NOT_FOUND);
+        }
 
         if (! app(AiClarificationSettings::class)->is_enabled
           || ! $type->is_ai_clarification_enabled) {
@@ -74,7 +77,6 @@ class GenerateServiceRequestQuestionsController extends Controller
         $response = $aiService->complete(
             prompt: "Return each question on a new line, no need to number them. There should be {$questionsWord} in total, clarifying the service request based on the provided form data.",
             content: $prompt,
-            files: KnowledgeBaseItem::query()->tap(app(KnowledgeBasePortalAssistantItem::class))->get(['id'])->all(),
         );
 
         $questions = array_values(array_filter(array_map(trim(...), explode(PHP_EOL, $response))));

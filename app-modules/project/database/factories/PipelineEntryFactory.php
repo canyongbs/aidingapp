@@ -39,6 +39,7 @@ namespace AidingApp\Project\Database\Factories;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
 
@@ -58,8 +59,8 @@ class PipelineEntryFactory extends Factory
             'name' => $this->faker->word(),
             'pipeline_stage_id' => PipelineStage::factory(),
             'organizable_type' => function () {
-                /** @var Contact $organizable */
                 $organizable = $this->faker->randomElement([new Contact()]);
+                assert($organizable instanceof Contact);
 
                 return $organizable->getMorphClass();
             },
@@ -69,6 +70,12 @@ class PipelineEntryFactory extends Factory
 
                 return $class::factory();
             },
+            'description' => $this->faker->sentence(3),
+            'due' => $this->faker->dateTimeBetween('now', '+1 year'),
+            'assigned_to_type' => (new User())->getMorphClass(),
+            'assigned_to_id' => User::factory(),
+            'created_by' => User::factory(),
+            'is_visible_to_guests' => true,
         ];
     }
 }

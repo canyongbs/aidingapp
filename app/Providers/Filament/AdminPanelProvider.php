@@ -39,6 +39,7 @@ namespace App\Providers\Filament;
 use AidingApp\Authorization\Filament\Pages\Auth\Login;
 use AidingApp\Theme\Settings\ThemeSettings;
 use App\Enums\NavigationGroup;
+use App\Features\SubscriptionExpirationFeature;
 use App\Filament\Clusters\ProfileSettings;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ProductHealth;
@@ -109,6 +110,7 @@ class AdminPanelProvider extends PanelProvider
                 return $themeSettings->is_favicon_active && $favicon ? $favicon->getTemporaryUrl(now()->addMinutes(5)) : asset('/images/default-favicon.png');
             })
             ->readOnlyRelationManagersOnResourceViewPagesByDefault(false)
+            ->resourceEditPageRedirect('view')
             ->maxContentWidth('full')
             ->navigationGroups(NavigationGroup::class)
             ->discoverClusters(in: app_path('Filament/Clusters'), for: 'App\\Filament\\Clusters')
@@ -173,6 +175,22 @@ class AdminPanelProvider extends PanelProvider
                     });
 
                     return $showBanner ? new HtmlString(Blade::render('<livewire:sso-credentials-expiring-alert />')) : null;
+                },
+            )
+            ->renderHook(
+                PanelsRenderHook::TOPBAR_AFTER,
+                function (): ?Htmlable {
+                    if (! SubscriptionExpirationFeature::active()) {
+                        return null;
+                    }
+
+                    $tenant = Tenant::current();
+
+                    if (! $tenant?->subscription_status?->showsExpirationBanner()) {
+                        return null;
+                    }
+
+                    return new HtmlString(Blade::render('<livewire:subscription-expired-banner />'));
                 },
             )
             ->globalSearchResourceOptIn();

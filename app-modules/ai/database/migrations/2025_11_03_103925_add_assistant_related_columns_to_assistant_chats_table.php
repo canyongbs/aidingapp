@@ -39,6 +39,7 @@ use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function up(): void
     {
         Schema::table('assistant_chats', function (Blueprint $table) {
@@ -49,10 +50,11 @@ return new class () extends Migration {
         Schema::table('assistant_chat_messages', function (Blueprint $table) {
             $table->string('message_id')->nullable();
             $table->string('run_id')->nullable();
-            $table->json('file_ids')->nullable();
+            $table->json('file_ids')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration
         });
     }
 
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function down(): void
     {
         Schema::table('assistant_chats', function (Blueprint $table) {

@@ -54,7 +54,6 @@ use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestUpdateSeeder;
-use AidingApp\Task\Database\Seeders\TaskSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Notification;
 
@@ -80,7 +79,6 @@ class DatabaseSeeder extends Seeder
             ServiceRequestUpdateSeeder::class,
             ContactSeeder::class,
             KnowledgeBaseItemSeeder::class,
-            TaskSeeder::class,
             AlertSeeder::class,
             DepartmentSeeder::class,
 

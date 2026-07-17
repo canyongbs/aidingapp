@@ -37,17 +37,29 @@
 namespace AidingApp\Project\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\Project\Database\Factories\PipelineEntryFactory;
+use AidingApp\Project\Observers\PipelineEntryObserver;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
+ * @property string|null $assigned_to_type
+ * @property string|null $assigned_to_id
+ * @property string|null $created_by
+ * @property bool $is_visible_to_guests
+ *
  * @mixin IdeHelperPipelineEntry
  */
+#[ObservedBy([PipelineEntryObserver::class])]
 class PipelineEntry extends Model implements Auditable
 {
     /** @use HasFactory<PipelineEntryFactory> */
@@ -63,6 +75,17 @@ class PipelineEntry extends Model implements Auditable
         'pipeline_stage_id',
         'organizable_id',
         'organizable_type',
+        'description',
+        'due',
+        'assigned_to_id',
+        'assigned_to_type',
+        'created_by',
+        'is_visible_to_guests',
+    ];
+
+    protected $casts = [
+        'due' => 'datetime',
+        'is_visible_to_guests' => 'boolean',
     ];
 
     /**
@@ -79,5 +102,54 @@ class PipelineEntry extends Model implements Auditable
     public function organizable(): MorphTo
     {
         return $this->morphTo();
+    }
+
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function assignedTo(): MorphTo
+    {
+        return $this->morphTo('assigned_to', 'assigned_to_type', 'assigned_to_id');
+    }
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function createdBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    /**
+     * @return BelongsToMany<ProjectMilestone, $this, PipelineEntryMilestone>
+     */
+    public function milestones(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(ProjectMilestone::class, 'pipeline_entry_milestones', 'pipeline_entry_id', 'project_milestone_id')
+            ->using(PipelineEntryMilestone::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<Asset, $this, PipelineEntryAsset>
+     */
+    public function assets(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(Asset::class, 'pipeline_entry_assets', 'pipeline_entry_id', 'asset_id')
+            ->using(PipelineEntryAsset::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<ServiceRequest, $this, PipelineEntryServiceRequest>
+     */
+    public function serviceRequests(): BelongsToMany
+    {
+        return $this
+            ->belongsToMany(ServiceRequest::class, 'pipeline_entry_service_requests', 'pipeline_entry_id', 'service_request_id')
+            ->using(PipelineEntryServiceRequest::class)
+            ->withTimestamps();
     }
 }

@@ -312,8 +312,6 @@ return [
     'suffix' => 'Sufix',
     'tag' => 'Tag',
     'tags' => 'Tags',
-    'task_management' => 'Task management',
-    'tasks' => 'Tasks',
     'department-management' => 'Departments',
     'department-management-singular' => 'Department',
     'text' => 'Text',

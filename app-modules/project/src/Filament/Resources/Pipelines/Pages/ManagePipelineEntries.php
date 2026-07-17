@@ -36,7 +36,7 @@
 
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
-use AidingApp\Contact\Models\Contact;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
@@ -45,8 +45,6 @@ use BackedEnum;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\MorphToSelect;
-use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ManageRelatedRecords;
@@ -127,7 +125,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
                 TextColumn::make('name')
                     ->label('Name')
                     ->sortable()
-                    ->searchable(),
+                    ->searchable(['pipeline_entries.name']),
                 TextColumn::make('pipelineStage.name')
                     ->label('Stage')
                     ->sortable(),
@@ -154,6 +152,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
             ])
             ->headerActions([
                 CreateAction::make()
+                    ->slideOver()
                     ->schema([
                         TextInput::make('name')
                             ->required()
@@ -162,16 +161,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
                             ->label('Stage')
                             ->relationship('pipelineStage', 'name', fn (Builder $query) => $query->where('pipeline_id', $pipeline->id))
                             ->required(),
-                        MorphToSelect::make('organizable')
-                            ->types([
-                                Type::make(Contact::class)
-                                    ->label('Contact')
-                                    ->titleAttribute('full_name')
-                                    ->modifyOptionsQueryUsing(fn (Builder $query) => $query->limit(50)),
-                            ])
-                            ->searchable()
-                            ->preload()
-                            ->required(),
+                        ...PipelineEntryForm::components($pipeline),
                     ]),
             ])
             ->defaultSort('created_at', 'desc');

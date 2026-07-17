@@ -77,11 +77,6 @@
     </label>
 
     <label class="flex items-center">
-        <x-filament::input.checkbox wire:model.live="filterOpenTasks" />
-        <span class="ml-2">Open Tasks</span>
-    </label>
-
-    <label class="flex items-center">
         <x-filament::input.checkbox wire:model.live="filterOpenServiceRequests" />
         <span class="ml-2">Open Service Requests</span>
     </label>

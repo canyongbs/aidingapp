@@ -36,9 +36,8 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
+use AidingApp\Project\Filament\Resources\Projects\Forms\ProjectForm;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
 
@@ -49,16 +48,11 @@ class CreateProject extends CreateRecord
     public function form(Schema $schema): Schema
     {
         return $schema
-            ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->unique()
-                    ->string()
-                    ->maxLength(255),
-                Textarea::make('description')
-                    ->string()
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-            ]);
+            ->components(ProjectForm::components());
+    }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        return ProjectForm::mutateDataForSave($data);
     }
 }

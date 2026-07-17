@@ -41,45 +41,19 @@ use AidingApp\Form\Actions\GenerateFormKitSchema;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
+use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class GetServiceRequestFormController extends Controller
 {
-    public function __invoke(ServiceRequestType $type): JsonResponse
+    public function __invoke(Request $request, ServiceRequestType $type): JsonResponse
     {
-        $type->load('category');
-
-        $category = null;
-
-        if ($type->category) {
-            $ancestors = [];
-            $currentCategory = $type->category;
-
-            while ($currentCategory->parent_id) {
-                if (! $currentCategory->relationLoaded('parent')) {
-                    $currentCategory->load('parent');
-                }
-
-                $currentCategory = $currentCategory->parent;
-
-                if ($currentCategory) {
-                    $ancestors[] = [
-                        'id' => $currentCategory->id,
-                        'name' => $currentCategory->name,
-                        'parent_id' => $currentCategory->parent_id,
-                    ];
-                }
-            }
-
-            $ancestors = array_reverse($ancestors);
-
-            $category = [
-                'id' => $type->category->id,
-                'name' => $type->category->name,
-                'parent_id' => $type->category->parent_id,
-                'ancestors' => $ancestors,
-            ];
+        if (ServiceRequestTypeVisibilityRestrictionsFeature::active()) {
+            abort_unless($type->isVisibleToContactType(auth('contact')->user()?->type_id), 404);
         }
 
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
@@ -87,8 +61,77 @@ class GetServiceRequestFormController extends Controller
 
         return response()->json([
             'schema' => app(GenerateFormKitSchema::class)($form),
-            'category' => $category,
+            'category' => $this->breadcrumbCategory($request, $type),
             'number_of_clarifying_questions' => AiClarificationSettings::NUMBER_OF_QUESTIONS,
         ]);
+    }
+
+    /**
+     * Resolve the category to show in the breadcrumb trail.
+     *
+     * A type can belong to many categories, so when the feature is active the breadcrumb follows the
+     * category the contact navigated under (supplied by the frontend) rather than one derived from
+     * the type. This is display-only context and is not persisted with the submitted request.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function breadcrumbCategory(Request $request, ServiceRequestType $type): ?array
+    {
+        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            $categoryId = $request->query('category');
+
+            if (! is_string($categoryId) || $categoryId === '') {
+                return null;
+            }
+
+            // Only follow a category the type actually belongs to, so an arbitrary id in the query
+            // string cannot surface an unrelated category's name or ancestry.
+            /** @var ServiceRequestTypeCategory|null $category */
+            $category = $type->categories()->whereKey($categoryId)->first();
+
+            // Never expose a category the contact is not allowed to see, even if the type is
+            // reachable through another (visible) area.
+            if (
+                $category !== null
+                && ServiceRequestTypeVisibilityRestrictionsFeature::active()
+                && ! $category->isVisibleToContactType(auth('contact')->user()?->type_id)
+            ) {
+                return null;
+            }
+        } else {
+            $type->load('category');
+
+            $category = $type->category;
+        }
+
+        if ($category === null) {
+            return null;
+        }
+
+        $ancestors = [];
+        $currentCategory = $category;
+
+        while ($currentCategory->parent_id) {
+            if (! $currentCategory->relationLoaded('parent')) {
+                $currentCategory->load('parent');
+            }
+
+            $currentCategory = $currentCategory->parent;
+
+            if ($currentCategory) {
+                $ancestors[] = [
+                    'id' => $currentCategory->id,
+                    'name' => $currentCategory->name,
+                    'parent_id' => $currentCategory->parent_id,
+                ];
+            }
+        }
+
+        return [
+            'id' => $category->id,
+            'name' => $category->name,
+            'parent_id' => $category->parent_id,
+            'ancestors' => array_reverse($ancestors),
+        ];
     }
 }

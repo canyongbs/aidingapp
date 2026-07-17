@@ -32,135 +32,249 @@
 </COPYRIGHT>
 */
 document.addEventListener('alpine:init', () => {
-    Alpine.data('serviceRequestTypeManager', ({ originalTreeData, treeData, canEdit }) => ({
-        originalTreeData,
-        treeData,
-        canEdit,
-        categoryInputs: {},
-        typeInputs: {},
-        renamingCategories: {},
-        renamingTypes: {},
-        hasUnsavedChanges: false,
-        isSaving: false,
-        isCheckingType: false,
-        nextTempId: 1,
-        pendingRestore: null,
-        collapsedCategories: {},
-        dragData: {
-            isDragging: false,
-            draggedElement: null,
-            draggedType: null, // 'category' or 'type'
-            draggedId: null,
-            ghostElement: null,
-            currentDropTarget: null,
-            insertPosition: null, // 'before', 'after', or 'inside'
-        },
+    Alpine.data(
+        'serviceRequestTypeManager',
+        ({ originalTreeData, treeData, canEdit, visibilityRestrictionsEnabled, multipleCategoriesEnabled }) => ({
+            originalTreeData,
+            treeData,
+            canEdit,
+            visibilityRestrictionsEnabled,
+            multipleCategoriesEnabled,
+            categoryInputs: {},
+            typeInputs: {},
+            existingTypeInputs: {},
+            renamingCategories: {},
+            renamingTypes: {},
+            hasUnsavedChanges: false,
+            isSaving: false,
+            isCheckingType: false,
+            nextTempId: 1,
+            pendingRestore: null,
+            collapsedCategories: {},
+            dragData: {
+                isDragging: false,
+                draggedElement: null,
+                draggedType: null, // 'category' or 'type'
+                draggedId: null,
+                draggedSourceCategoryId: null, // owning category of the dragged type placement
+                ghostElement: null,
+                currentDropTarget: null,
+                insertPosition: null, // 'before', 'after', or 'inside'
+            },
 
-        init() {
-            this.deepCopyTreeData();
-            this.render();
-            this.attachEventListeners();
-            this.setupDragAndDrop();
-        },
-
-        deepCopyTreeData() {
-            // Make a deep copy of the original data so we can track changes
-            this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
-            this.deletedCategories = [];
-            this.deletedTypes = [];
-            this.archivedTypes = [];
-            this.pendingRestore = null;
-            this.renamingCategories = {};
-            this.renamingTypes = {};
-        },
-
-        markAsChanged() {
-            this.hasUnsavedChanges = true;
-        },
-
-        toggleCategory(categoryId) {
-            if (this.collapsedCategories[categoryId]) {
-                delete this.collapsedCategories[categoryId];
-            } else {
-                this.collapsedCategories[categoryId] = true;
-            }
-            this.render();
-        },
-
-        expandAll() {
-            this.collapsedCategories = {};
-            this.render();
-        },
-
-        collapseAll() {
-            const collectIds = (categories) => {
-                for (const category of categories || []) {
-                    this.collapsedCategories[category.id] = true;
-                    collectIds(category.children);
-                }
-            };
-            this.collapsedCategories = {};
-            collectIds(this.treeData.categories);
-            this.render();
-        },
-
-        render() {
-            this.renderCategories();
-            this.renderUncategorizedTypes();
-
-            // Only setup drag and drop if we're not currently dragging
-            // to avoid attaching duplicate event listeners during a drag operation
-            if (!this.dragData.isDragging) {
+            init() {
+                this.deepCopyTreeData();
+                this.render();
+                this.attachEventListeners();
                 this.setupDragAndDrop();
-            }
-        },
+            },
 
-        renderCategories() {
-            const container = document.getElementById('root-categories');
-            if (!container) return;
+            deepCopyTreeData() {
+                // Make a deep copy of the original data so we can track changes
+                this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
+                this.deletedCategories = [];
+                this.deletedTypes = [];
+                this.archivedTypes = [];
+                this.pendingRestore = null;
+                this.renamingCategories = {};
+                this.renamingTypes = {};
+            },
 
-            container.innerHTML = '';
+            markAsChanged() {
+                this.hasUnsavedChanges = true;
+            },
 
-            if (this.treeData.categories && this.treeData.categories.length > 0) {
-                this.treeData.categories.forEach((category) => {
-                    const html = this.renderCategoryRecursive(category, 0);
-                    const wrapper = document.createElement('div');
-                    wrapper.innerHTML = html.trim();
-                    const element = wrapper.firstElementChild;
-                    if (element) {
-                        container.appendChild(element);
+            toggleCategory(categoryId) {
+                if (this.collapsedCategories[categoryId]) {
+                    delete this.collapsedCategories[categoryId];
+                } else {
+                    this.collapsedCategories[categoryId] = true;
+                }
+                this.render();
+            },
+
+            expandAll() {
+                this.collapsedCategories = {};
+                this.render();
+            },
+
+            collapseAll() {
+                const collectIds = (categories) => {
+                    for (const category of categories || []) {
+                        this.collapsedCategories[category.id] = true;
+                        collectIds(category.children);
+                    }
+                };
+                this.collapsedCategories = {};
+                collectIds(this.treeData.categories);
+                this.render();
+            },
+
+            render() {
+                this.renderCategories();
+                this.renderUncategorizedTypes();
+
+                // Only setup drag and drop if we're not currently dragging
+                // to avoid attaching duplicate event listeners during a drag operation
+                if (!this.dragData.isDragging) {
+                    this.setupDragAndDrop();
+                }
+            },
+
+            renderVisibilityControl(node, nodeType) {
+                if (!this.visibilityRestrictionsEnabled) {
+                    return '';
+                }
+
+                const restricted = !!node.is_visibility_restricted;
+
+                const eyeSlashIcon = `<svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                <path fill-rule="evenodd" d="M3.28 2.22a.75.75 0 0 0-1.06 1.06l10.5 10.5a.75.75 0 1 0 1.06-1.06l-1.322-1.323a7.012 7.012 0 0 0 2.16-3.11.87.87 0 0 0 0-.567A7.003 7.003 0 0 0 4.82 3.76l-1.54-1.54Zm3.196 3.195 1.135 1.136A1.502 1.502 0 0 1 9.45 8.389l1.136 1.135a3 3 0 0 0-4.109-4.109Z" clip-rule="evenodd" />
+                <path d="m7.812 10.994 1.816 1.816A7.003 7.003 0 0 1 1.38 8.28a.87.87 0 0 1 0-.566 6.985 6.985 0 0 1 1.113-2.039l2.513 2.513a3 3 0 0 0 2.806 2.806Z" />
+            </svg>`;
+
+                const eyeIcon = `<svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z" />
+                <path fill-rule="evenodd" d="M1.38 8.28a.87.87 0 0 1 0-.566 7.003 7.003 0 0 1 13.238.006.87.87 0 0 1 0 .566A7.003 7.003 0 0 1 1.379 8.28ZM11 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" clip-rule="evenodd" />
+            </svg>`;
+
+                if (!this.canEdit) {
+                    if (!restricted) {
+                        return '';
+                    }
+
+                    return `<span class="text-warning-600 dark:text-warning-500" x-tooltip.raw="Visibility restricted to certain contact types">${eyeSlashIcon}</span>`;
+                }
+
+                const colorClasses = restricted
+                    ? 'text-warning-600 hover:text-warning-800 dark:text-warning-500 dark:hover:text-warning-300 hover:bg-warning-50 dark:hover:bg-warning-600/20'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600';
+
+                const tooltip = restricted ? 'Visibility restricted — edit settings' : 'Manage visibility';
+
+                return `<button type="button" class="p-1.5 -m-1 rounded ${colorClasses} transition-colors" @click.stop="$wire.mountAction('manageVisibility', { nodeType: '${nodeType}', nodeId: '${node.id}' })" x-tooltip.raw="${tooltip}">${restricted ? eyeSlashIcon : eyeIcon}</button>`;
+            },
+
+            onVisibilityUpdated(detail) {
+                if (!detail) {
+                    return;
+                }
+
+                const { nodeType, nodeId, isRestricted, contactTypeIds } = detail;
+
+                [this.treeData, this.originalTreeData].forEach((data) => {
+                    const node = this.findNode(data, nodeType, nodeId);
+
+                    if (node) {
+                        node.is_visibility_restricted = !!isRestricted;
+                        node.restricted_to_contact_type_ids = contactTypeIds || [];
                     }
                 });
-            }
-        },
 
-        renderUncategorizedTypes() {
-            const container = document.getElementById('uncategorized-types');
+                this.render();
+            },
 
-            if (!container) return;
+            findNode(data, nodeType, nodeId) {
+                if (!data) {
+                    return null;
+                }
 
-            container.innerHTML = '';
+                if (nodeType === 'type') {
+                    const uncategorized = (data.uncategorized_types || []).find((type) => type.id === nodeId);
 
-            if (this.treeData.uncategorized_types && this.treeData.uncategorized_types.length > 0) {
-                this.treeData.uncategorized_types.forEach((type) => {
-                    const html = this.renderType(type);
-                    const wrapper = document.createElement('div');
-                    wrapper.innerHTML = html.trim();
-                    const element = wrapper.firstElementChild;
-                    if (element) {
-                        container.appendChild(element);
+                    if (uncategorized) {
+                        return uncategorized;
                     }
-                });
-            }
-        },
 
-        renderType(type) {
-            const requestCount = typeof type.service_requests_count === 'number' ? type.service_requests_count : 0;
-            const canDelete = requestCount === 0;
-            const canArchive = requestCount > 0;
-            const isRenaming = this.renamingTypes[type.id] || false;
+                    const searchTypes = (categories) => {
+                        for (const category of categories || []) {
+                            const match = (category.types || []).find((type) => type.id === nodeId);
 
-            return `<div data-type-id="${type.id}" class="type-item ${this.canEdit ? 'draggable cursor-grab active:cursor-grabbing' : ''} flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-600 dark:bg-gray-800 transition-all duration-150 ease-out" ${this.canEdit ? 'draggable="true"' : ''}>
+                            if (match) {
+                                return match;
+                            }
+
+                            const nested = searchTypes(category.children);
+
+                            if (nested) {
+                                return nested;
+                            }
+                        }
+
+                        return null;
+                    };
+
+                    return searchTypes(data.categories);
+                }
+
+                const searchCategories = (categories) => {
+                    for (const category of categories || []) {
+                        if (category.id === nodeId) {
+                            return category;
+                        }
+
+                        const nested = searchCategories(category.children);
+
+                        if (nested) {
+                            return nested;
+                        }
+                    }
+
+                    return null;
+                };
+
+                return searchCategories(data.categories);
+            },
+
+            renderCategories() {
+                const container = document.getElementById('root-categories');
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                if (this.treeData.categories && this.treeData.categories.length > 0) {
+                    this.treeData.categories.forEach((category) => {
+                        const html = this.renderCategoryRecursive(category, 0);
+                        const wrapper = document.createElement('div');
+                        wrapper.innerHTML = html.trim();
+                        const element = wrapper.firstElementChild;
+                        if (element) {
+                            container.appendChild(element);
+                        }
+                    });
+                }
+            },
+
+            renderUncategorizedTypes() {
+                const container = document.getElementById('uncategorized-types');
+
+                if (!container) return;
+
+                container.innerHTML = '';
+
+                if (this.treeData.uncategorized_types && this.treeData.uncategorized_types.length > 0) {
+                    this.treeData.uncategorized_types.forEach((type) => {
+                        const html = this.renderType(type, null);
+                        const wrapper = document.createElement('div');
+                        wrapper.innerHTML = html.trim();
+                        const element = wrapper.firstElementChild;
+                        if (element) {
+                            container.appendChild(element);
+                        }
+                    });
+                }
+            },
+
+            renderType(type, owningCategoryId = null) {
+                const requestCount = typeof type.service_requests_count === 'number' ? type.service_requests_count : 0;
+                const occurrences = this.countTypeOccurrences(type.id);
+                const canRemove = this.multipleCategoriesEnabled && occurrences > 1;
+                const canDelete = !canRemove && requestCount === 0;
+                const canArchive = !canRemove && requestCount > 0;
+                const placementKey = this.typePlacementKey(type.id, owningCategoryId);
+                const isRenaming = this.renamingTypes[placementKey] || false;
+
+                return `<div data-type-id="${type.id}" data-category-id="${owningCategoryId || ''}" class="type-item ${this.canEdit ? 'draggable cursor-grab active:cursor-grabbing' : ''} flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-2 dark:border-gray-600 dark:bg-gray-800 transition-all duration-150 ease-out" ${this.canEdit ? 'draggable="true"' : ''}>
                         ${
                             this.canEdit
                                 ? `<div class="p-1 -m-1 cursor-grab">
@@ -174,7 +288,7 @@ document.addEventListener('alpine:init', () => {
                             this.canEdit && isRenaming
                                 ? `
                                     <input
-                                        id="rename-type-${type.id}"
+                                        id="rename-type-${placementKey}"
                                         type="text"
                                         value="${this.escapeHtml(type.name)}"
                                         class="flex-1 h-5 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-primary-500 rounded px-2 py-0 focus:outline-none focus:ring-2 focus:ring-primary-500"
@@ -182,8 +296,8 @@ document.addEventListener('alpine:init', () => {
                                     <button
                                         type="button"
                                         class="text-success-600 hover:text-success-800 dark:hover:text-success-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        @click.stop="confirmTypeRename('${type.id}')"
-                                        id="confirm-rename-type-${type.id}"
+                                        @click.stop="confirmTypeRename('${type.id}', '${placementKey}')"
+                                        id="confirm-rename-type-${placementKey}"
                                     >
                                         <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
@@ -199,14 +313,24 @@ document.addEventListener('alpine:init', () => {
                             `
                         }
                         <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:bg-gray-600 dark:text-gray-100" x-tooltip.raw="Number of service requests">${requestCount}</span>
+                        ${!isRenaming ? this.renderVisibilityControl(type, 'type') : ''}
                         ${
                             this.canEdit && !isRenaming
-                                ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" @click.stop="startTypeRename('${type.id}')" x-tooltip.raw="Rename">
+                                ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" @click.stop="startTypeRename('${type.id}', '${placementKey}')" x-tooltip.raw="Rename">
                                     <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                                         <path d="M13.488 2.513a1.75 1.75 0 0 0-2.475 0L6.75 6.774a2.75 2.75 0 0 0-.596.892l-.848 2.047a.75.75 0 0 0 .98.98l2.047-.848a2.75 2.75 0 0 0 .892-.596l4.261-4.262a1.75 1.75 0 0 0 0-2.474Z" />
                                         <path d="M4.75 3.5c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h6.5c.69 0 1.25-.56 1.25-1.25V9A.75.75 0 0 1 14 9v2.25A2.75 2.75 0 0 1 11.25 14h-6.5A2.75 2.75 0 0 1 2 11.25v-6.5A2.75 2.75 0 0 1 4.75 2H7a.75.75 0 0 1 0 1.5H4.75Z" />
                                     </svg>
                                 </button>`
+                                : ''
+                        }
+                        ${
+                            this.canEdit && canRemove && !isRenaming
+                                ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" @click.stop="removeTypePlacement('${type.id}', '${owningCategoryId || ''}')" x-tooltip.raw="Remove from this area">
+                                        <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M8 15A7 7 0 1 0 8 1a7 7 0 0 0 0 14Zm4-7a.75.75 0 0 0-.75-.75h-6.5a.75.75 0 0 0 0 1.5h6.5A.75.75 0 0 0 12 8Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>`
                                 : ''
                         }
                         ${
@@ -229,19 +353,20 @@ document.addEventListener('alpine:init', () => {
                                 : ''
                         }
                     </div>`;
-        },
+            },
 
-        renderCategoryRecursive(category, level) {
-            const indent = level * 24;
-            const showCategoryInput = this.categoryInputs[category.id] || false;
-            const showTypeInput = this.typeInputs[category.id] || false;
-            const canAddChildCategory = level < 1;
-            const isRenaming = this.renamingCategories[category.id] || false;
-            const isCollapsed = this.collapsedCategories[category.id] || false;
-            const hasChildren =
-                (category.types && category.types.length > 0) || (category.children && category.children.length > 0);
+            renderCategoryRecursive(category, level) {
+                const indent = level * 24;
+                const showCategoryInput = this.categoryInputs[category.id] || false;
+                const showTypeInput = this.typeInputs[category.id] || false;
+                const canAddChildCategory = level < 1;
+                const isRenaming = this.renamingCategories[category.id] || false;
+                const isCollapsed = this.collapsedCategories[category.id] || false;
+                const hasChildren =
+                    (category.types && category.types.length > 0) ||
+                    (category.children && category.children.length > 0);
 
-            return `<div class="category-wrapper" data-category-id="${category.id}">
+                return `<div class="category-wrapper" data-category-id="${category.id}">
                         <div class="category-item ${this.canEdit ? 'draggable cursor-grab active:cursor-grabbing' : ''} flex items-center gap-2 rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-600 dark:bg-gray-800 transition-all duration-150 ease-out hover:bg-gray-50 hover:-translate-y-px hover:shadow-lg dark:hover:bg-gray-600" style="margin-left: ${indent}px" ${this.canEdit ? 'draggable="true"' : ''} data-category-id="${category.id}">
                             ${
                                 this.canEdit
@@ -294,11 +419,25 @@ document.addEventListener('alpine:init', () => {
                                         <span class="flex-1 font-medium text-gray-900 dark:text-white">${this.escapeHtml(category.name)}</span>
                                 `
                             }
+                            ${!isRenaming ? this.renderVisibilityControl(category, 'category') : ''}
                             ${
                                 this.canEdit && !isRenaming
                                     ? `<button @click="showTypeInput('${category.id}')" class="p-1.5 -m-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" x-tooltip.raw="Add type in area">
                                             <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                                                 <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
+                                            </svg>
+                                        </button>`
+                                    : ''
+                            }
+                            ${
+                                this.canEdit &&
+                                this.multipleCategoriesEnabled &&
+                                !isRenaming &&
+                                this.collectPickableTypes(category.id).length > 0
+                                    ? `<button @click="showExistingTypeInput('${category.id}')" class="p-1.5 -m-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" x-tooltip.raw="Add existing type to area">
+                                            <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M8.914 6.025a.75.75 0 0 1 1.06 0 3.5 3.5 0 0 1 0 4.95l-2 2a3.5 3.5 0 0 1-5.396-4.402.75.75 0 0 1 1.251.827 2 2 0 0 0 3.085 2.514l2-2a2 2 0 0 0 0-2.828.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                                                <path fill-rule="evenodd" d="M7.086 9.975a.75.75 0 0 1-1.06 0 3.5 3.5 0 0 1 0-4.95l2-2a3.5 3.5 0 0 1 5.396 4.402.75.75 0 0 1-1.251-.827 2 2 0 0 0-3.085-2.514l-2 2a2 2 0 0 0 0 2.828.75.75 0 0 1 0 1.06Z" clip-rule="evenodd" />
                                             </svg>
                                         </button>`
                                     : ''
@@ -365,10 +504,33 @@ document.addEventListener('alpine:init', () => {
                         }
 
                         ${
+                            !isCollapsed &&
+                            this.canEdit &&
+                            this.multipleCategoriesEnabled &&
+                            (this.existingTypeInputs[category.id] || false)
+                                ? `
+                                    <div id="existing-type-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
+                                        <select id="existing-type-${category.id}" class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">
+                                            <option value="">Select an existing type…</option>
+                                            ${this.collectPickableTypes(category.id)
+                                                .map(
+                                                    (pickable) =>
+                                                        `<option value="${pickable.id}">${this.escapeHtml(pickable.name)}</option>`,
+                                                )
+                                                .join('')}
+                                        </select>
+                                        <button @click="addExistingTypeToCategory('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
+                                        <button @click="hideExistingTypeInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
+                                    </div>
+                                `
+                                : ''
+                        }
+
+                        ${
                             !isCollapsed && category.types && category.types.length > 0
                                 ? `
                                     <div data-sortable="types" data-category-id="${category.id}" class="mt-2 space-y-1 min-h-4 p-0.5 rounded transition-colors duration-150 ease-in-out" style="margin-left: ${indent + 24}px">
-                                        ${category.types.map((type) => this.renderType(type)).join('')}
+                                        ${category.types.map((type) => this.renderType(type, category.id)).join('')}
                                     </div>
                                 `
                                 : ''
@@ -384,321 +546,232 @@ document.addEventListener('alpine:init', () => {
                                 : ''
                         }
                     </div>`;
-        },
+            },
 
-        attachEventListeners() {
-            document.getElementById('show-category-btn')?.addEventListener('click', () => {
-                const showTypeBtn = document.getElementById('show-type-btn');
-                if (showTypeBtn) showTypeBtn.style.display = 'none';
-                document.getElementById('type-input-form').style.display = 'none';
-                if (document.getElementById('new-type-name')) document.getElementById('new-type-name').value = '';
+            attachEventListeners() {
+                document.getElementById('show-category-btn')?.addEventListener('click', () => {
+                    const showTypeBtn = document.getElementById('show-type-btn');
+                    if (showTypeBtn) showTypeBtn.style.display = 'none';
+                    document.getElementById('type-input-form').style.display = 'none';
+                    if (document.getElementById('new-type-name')) document.getElementById('new-type-name').value = '';
 
-                document.getElementById('show-category-btn').style.display = 'none';
-                document.getElementById('category-input-form').style.display = 'flex';
-                document.getElementById('new-category-name')?.focus();
-            });
+                    document.getElementById('show-category-btn').style.display = 'none';
+                    document.getElementById('category-input-form').style.display = 'flex';
+                    document.getElementById('new-category-name')?.focus();
+                });
 
-            document.getElementById('cancel-category-btn')?.addEventListener('click', () => {
-                document.getElementById('show-category-btn').style.display = 'block';
-                document.getElementById('category-input-form').style.display = 'none';
-                document.getElementById('new-category-name').value = '';
+                document.getElementById('cancel-category-btn')?.addEventListener('click', () => {
+                    document.getElementById('show-category-btn').style.display = 'block';
+                    document.getElementById('category-input-form').style.display = 'none';
+                    document.getElementById('new-category-name').value = '';
 
-                const showTypeBtn = document.getElementById('show-type-btn');
-                if (showTypeBtn) showTypeBtn.style.display = 'block';
-            });
+                    const showTypeBtn = document.getElementById('show-type-btn');
+                    if (showTypeBtn) showTypeBtn.style.display = 'block';
+                });
 
-            document.getElementById('create-category-btn')?.addEventListener('click', () => {
-                this.createCategory(null);
-
-                const showTypeBtn = document.getElementById('show-type-btn');
-                if (showTypeBtn) showTypeBtn.style.display = 'block';
-            });
-
-            document.getElementById('new-category-name')?.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter') {
+                document.getElementById('create-category-btn')?.addEventListener('click', () => {
                     this.createCategory(null);
 
                     const showTypeBtn = document.getElementById('show-type-btn');
                     if (showTypeBtn) showTypeBtn.style.display = 'block';
-                } else if (event.key === 'Escape') {
-                    document.getElementById('cancel-category-btn')?.click();
-                }
-            });
+                });
 
-            document.getElementById('show-type-btn')?.addEventListener('click', () => {
-                const showCategoryBtn = document.getElementById('show-category-btn');
-                if (showCategoryBtn) showCategoryBtn.style.display = 'none';
-                document.getElementById('category-input-form').style.display = 'none';
-                if (document.getElementById('new-category-name'))
-                    document.getElementById('new-category-name').value = '';
+                document.getElementById('new-category-name')?.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') {
+                        this.createCategory(null);
 
-                document.getElementById('show-type-btn').style.display = 'none';
-                document.getElementById('type-input-form').style.display = 'flex';
-                document.getElementById('new-type-name')?.focus();
-            });
+                        const showTypeBtn = document.getElementById('show-type-btn');
+                        if (showTypeBtn) showTypeBtn.style.display = 'block';
+                    } else if (event.key === 'Escape') {
+                        document.getElementById('cancel-category-btn')?.click();
+                    }
+                });
 
-            document.getElementById('cancel-type-btn')?.addEventListener('click', () => {
-                document.getElementById('show-type-btn').style.display = 'block';
-                document.getElementById('type-input-form').style.display = 'none';
-                document.getElementById('new-type-name').value = '';
+                document.getElementById('show-type-btn')?.addEventListener('click', () => {
+                    const showCategoryBtn = document.getElementById('show-category-btn');
+                    if (showCategoryBtn) showCategoryBtn.style.display = 'none';
+                    document.getElementById('category-input-form').style.display = 'none';
+                    if (document.getElementById('new-category-name'))
+                        document.getElementById('new-category-name').value = '';
 
-                const showCategoryBtn = document.getElementById('show-category-btn');
-                if (showCategoryBtn) showCategoryBtn.style.display = 'block';
-            });
+                    document.getElementById('show-type-btn').style.display = 'none';
+                    document.getElementById('type-input-form').style.display = 'flex';
+                    document.getElementById('new-type-name')?.focus();
+                });
 
-            document.getElementById('create-type-btn')?.addEventListener('click', () => {
-                this.createType(null);
+                document.getElementById('cancel-type-btn')?.addEventListener('click', () => {
+                    document.getElementById('show-type-btn').style.display = 'block';
+                    document.getElementById('type-input-form').style.display = 'none';
+                    document.getElementById('new-type-name').value = '';
 
-                const showCategoryBtn = document.getElementById('show-category-btn');
-                if (showCategoryBtn) showCategoryBtn.style.display = 'block';
-            });
+                    const showCategoryBtn = document.getElementById('show-category-btn');
+                    if (showCategoryBtn) showCategoryBtn.style.display = 'block';
+                });
 
-            document.getElementById('new-type-name')?.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter') {
+                document.getElementById('create-type-btn')?.addEventListener('click', () => {
                     this.createType(null);
 
                     const showCategoryBtn = document.getElementById('show-category-btn');
                     if (showCategoryBtn) showCategoryBtn.style.display = 'block';
-                } else if (event.key === 'Escape') {
-                    document.getElementById('cancel-type-btn')?.click();
-                }
-            });
+                });
 
-            document.getElementById('save-changes-btn')?.addEventListener('click', () => {
-                this.saveChanges();
-            });
+                document.getElementById('new-type-name')?.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') {
+                        this.createType(null);
 
-            document.getElementById('discard-changes-btn')?.addEventListener('click', () => {
-                this.discardChanges();
-            });
-        },
-
-        setupDragAndDrop() {
-            if (!this.canEdit) {
-                return;
-            }
-
-            setTimeout(() => {
-                const draggableElements = document.querySelectorAll('.draggable');
-
-                draggableElements.forEach((element) => {
-                    if (element._dragStartHandler) {
-                        element.removeEventListener('dragstart', element._dragStartHandler);
-                    }
-                    if (element._dragEndHandler) {
-                        element.removeEventListener('dragend', element._dragEndHandler);
-                    }
-
-                    element._dragStartHandler = this.handleDragStart.bind(this);
-                    element._dragEndHandler = this.handleDragEnd.bind(this);
-
-                    element.addEventListener('dragstart', element._dragStartHandler);
-                    element.addEventListener('dragend', element._dragEndHandler);
-
-                    if (!element.draggable) {
-                        element.draggable = true;
+                        const showCategoryBtn = document.getElementById('show-category-btn');
+                        if (showCategoryBtn) showCategoryBtn.style.display = 'block';
+                    } else if (event.key === 'Escape') {
+                        document.getElementById('cancel-type-btn')?.click();
                     }
                 });
 
-                document.querySelectorAll('.category-item, .type-item').forEach((element) => {
-                    if (element._dragOverHandler) {
-                        element.removeEventListener('dragover', element._dragOverHandler);
-                    }
-                    if (element._dropHandler) {
-                        element.removeEventListener('drop', element._dropHandler);
-                    }
-                    if (element._dragEnterHandler) {
-                        element.removeEventListener('dragenter', element._dragEnterHandler);
-                    }
-                    if (element._dragLeaveHandler) {
-                        element.removeEventListener('dragleave', element._dragLeaveHandler);
-                    }
-
-                    element._dragOverHandler = this.handleDragOver.bind(this);
-                    element._dropHandler = this.handleDrop.bind(this);
-                    element._dragEnterHandler = this.handleDragEnter.bind(this);
-                    element._dragLeaveHandler = this.handleDragLeave.bind(this);
-
-                    element.addEventListener('dragover', element._dragOverHandler);
-                    element.addEventListener('drop', element._dropHandler);
-                    element.addEventListener('dragenter', element._dragEnterHandler);
-                    element.addEventListener('dragleave', element._dragLeaveHandler);
+                document.getElementById('save-changes-btn')?.addEventListener('click', () => {
+                    this.saveChanges();
                 });
 
-                document.querySelectorAll('[data-sortable="types"]').forEach((container) => {
-                    if (container._dragOverHandler) {
-                        container.removeEventListener('dragover', container._dragOverHandler);
-                    }
-                    if (container._dropHandler) {
-                        container.removeEventListener('drop', container._dropHandler);
-                    }
-                    if (container._dragEnterHandler) {
-                        container.removeEventListener('dragenter', container._dragEnterHandler);
-                    }
-                    if (container._dragLeaveHandler) {
-                        container.removeEventListener('dragleave', container._dragLeaveHandler);
-                    }
-
-                    container._dragOverHandler = this.handleDragOver.bind(this);
-                    container._dropHandler = this.handleDrop.bind(this);
-                    container._dragEnterHandler = this.handleDragEnter.bind(this);
-                    container._dragLeaveHandler = this.handleDragLeave.bind(this);
-
-                    container.addEventListener('dragover', container._dragOverHandler);
-                    container.addEventListener('drop', container._dropHandler);
-                    container.addEventListener('dragenter', container._dragEnterHandler);
-                    container.addEventListener('dragleave', container._dragLeaveHandler);
+                document.getElementById('discard-changes-btn')?.addEventListener('click', () => {
+                    this.discardChanges();
                 });
-            }, 100);
-        },
+            },
 
-        handleDragStart(event) {
-            this.dragData.isDragging = true;
-            this.dragData.draggedElement = event.target;
-
-            if (event.target.dataset.categoryId) {
-                this.dragData.draggedType = 'category';
-                this.dragData.draggedId = event.target.dataset.categoryId;
-            } else if (event.target.dataset.typeId) {
-                this.dragData.draggedType = 'type';
-                this.dragData.draggedId = event.target.dataset.typeId;
-            }
-
-            event.target.classList.add('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
-
-            if (this.dragData.draggedType === 'category') {
-                const wrapper = event.target.closest('.category-wrapper');
-                if (wrapper) {
-                    wrapper.classList.add('ring-2', 'ring-primary-300', 'ring-opacity-50');
+            setupDragAndDrop() {
+                if (!this.canEdit) {
+                    return;
                 }
-            }
 
-            event.dataTransfer.effectAllowed = 'move';
-            event.dataTransfer.setData('text/plain', this.dragData.draggedId);
+                setTimeout(() => {
+                    const draggableElements = document.querySelectorAll('.draggable');
 
-            const dragImage = document.createElement('div');
-            dragImage.style.cssText = 'width: 1px; height: 1px; opacity: 0;';
-            document.body.appendChild(dragImage);
-            event.dataTransfer.setDragImage(dragImage, 0, 0);
-            setTimeout(() => document.body.removeChild(dragImage), 0);
+                    draggableElements.forEach((element) => {
+                        if (element._dragStartHandler) {
+                            element.removeEventListener('dragstart', element._dragStartHandler);
+                        }
+                        if (element._dragEndHandler) {
+                            element.removeEventListener('dragend', element._dragEndHandler);
+                        }
 
-            this.createDragGhost(event.target);
+                        element._dragStartHandler = this.handleDragStart.bind(this);
+                        element._dragEndHandler = this.handleDragEnd.bind(this);
 
-            document.addEventListener('dragover', this.updateGhostPosition.bind(this));
-        },
+                        element.addEventListener('dragstart', element._dragStartHandler);
+                        element.addEventListener('dragend', element._dragEndHandler);
 
-        handleDragEnd(event) {
-            this.dragData.isDragging = false;
+                        if (!element.draggable) {
+                            element.draggable = true;
+                        }
+                    });
 
-            event.target.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
+                    document.querySelectorAll('.category-item, .type-item').forEach((element) => {
+                        if (element._dragOverHandler) {
+                            element.removeEventListener('dragover', element._dragOverHandler);
+                        }
+                        if (element._dropHandler) {
+                            element.removeEventListener('drop', element._dropHandler);
+                        }
+                        if (element._dragEnterHandler) {
+                            element.removeEventListener('dragenter', element._dragEnterHandler);
+                        }
+                        if (element._dragLeaveHandler) {
+                            element.removeEventListener('dragleave', element._dragLeaveHandler);
+                        }
 
-            event.target.classList.remove('updating-order', 'opacity-70');
+                        element._dragOverHandler = this.handleDragOver.bind(this);
+                        element._dropHandler = this.handleDrop.bind(this);
+                        element._dragEnterHandler = this.handleDragEnter.bind(this);
+                        element._dragLeaveHandler = this.handleDragLeave.bind(this);
 
-            if (this.dragData.draggedType === 'category') {
-                const wrapper = event.target.closest('.category-wrapper');
-                if (wrapper) {
-                    wrapper.classList.remove('ring-2', 'ring-primary-300', 'ring-opacity-50');
+                        element.addEventListener('dragover', element._dragOverHandler);
+                        element.addEventListener('drop', element._dropHandler);
+                        element.addEventListener('dragenter', element._dragEnterHandler);
+                        element.addEventListener('dragleave', element._dragLeaveHandler);
+                    });
+
+                    document.querySelectorAll('[data-sortable="types"]').forEach((container) => {
+                        if (container._dragOverHandler) {
+                            container.removeEventListener('dragover', container._dragOverHandler);
+                        }
+                        if (container._dropHandler) {
+                            container.removeEventListener('drop', container._dropHandler);
+                        }
+                        if (container._dragEnterHandler) {
+                            container.removeEventListener('dragenter', container._dragEnterHandler);
+                        }
+                        if (container._dragLeaveHandler) {
+                            container.removeEventListener('dragleave', container._dragLeaveHandler);
+                        }
+
+                        container._dragOverHandler = this.handleDragOver.bind(this);
+                        container._dropHandler = this.handleDrop.bind(this);
+                        container._dragEnterHandler = this.handleDragEnter.bind(this);
+                        container._dragLeaveHandler = this.handleDragLeave.bind(this);
+
+                        container.addEventListener('dragover', container._dragOverHandler);
+                        container.addEventListener('drop', container._dropHandler);
+                        container.addEventListener('dragenter', container._dragEnterHandler);
+                        container.addEventListener('dragleave', container._dragLeaveHandler);
+                    });
+                }, 100);
+            },
+
+            handleDragStart(event) {
+                this.dragData.isDragging = true;
+                this.dragData.draggedElement = event.target;
+
+                // A type-item carries both `data-type-id` and `data-category-id` (its owning area),
+                // so the type id must be checked first; only category-items are identified purely by
+                // `data-category-id`.
+                if (event.target.dataset.typeId) {
+                    this.dragData.draggedType = 'type';
+                    this.dragData.draggedId = event.target.dataset.typeId;
+
+                    const sourceContainer = event.target.closest('[data-sortable="types"]');
+                    this.dragData.draggedSourceCategoryId = sourceContainer?.dataset.categoryId || null;
+                } else if (event.target.dataset.categoryId) {
+                    this.dragData.draggedType = 'category';
+                    this.dragData.draggedId = event.target.dataset.categoryId;
+                    this.dragData.draggedSourceCategoryId = null;
                 }
-            }
 
-            if (this.dragData.draggedElement && this.dragData.draggedElement !== event.target) {
-                this.dragData.draggedElement.classList.remove(
-                    'opacity-50',
-                    'rotate-1',
-                    'scale-105',
-                    'z-50',
-                    'shadow-2xl',
-                    'updating-order',
-                    'opacity-70',
-                );
+                event.target.classList.add('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
 
                 if (this.dragData.draggedType === 'category') {
-                    const wrapper = this.dragData.draggedElement.closest('.category-wrapper');
+                    const wrapper = event.target.closest('.category-wrapper');
+                    if (wrapper) {
+                        wrapper.classList.add('ring-2', 'ring-primary-300', 'ring-opacity-50');
+                    }
+                }
+
+                event.dataTransfer.effectAllowed = 'move';
+                event.dataTransfer.setData('text/plain', this.dragData.draggedId);
+
+                const dragImage = document.createElement('div');
+                dragImage.style.cssText = 'width: 1px; height: 1px; opacity: 0;';
+                document.body.appendChild(dragImage);
+                event.dataTransfer.setDragImage(dragImage, 0, 0);
+                setTimeout(() => document.body.removeChild(dragImage), 0);
+
+                this.createDragGhost(event.target);
+
+                document.addEventListener('dragover', this.updateGhostPosition.bind(this));
+            },
+
+            handleDragEnd(event) {
+                this.dragData.isDragging = false;
+
+                event.target.classList.remove('opacity-50', 'rotate-1', 'scale-105', 'z-50', 'shadow-2xl');
+
+                event.target.classList.remove('updating-order', 'opacity-70');
+
+                if (this.dragData.draggedType === 'category') {
+                    const wrapper = event.target.closest('.category-wrapper');
                     if (wrapper) {
                         wrapper.classList.remove('ring-2', 'ring-primary-300', 'ring-opacity-50');
                     }
                 }
-            }
 
-            this.cleanupDragVisuals();
-
-            if (this.dragData.ghostElement) {
-                this.dragData.ghostElement.remove();
-                this.dragData.ghostElement = null;
-            }
-
-            setTimeout(() => {
-                this.setupDragAndDrop();
-            }, 100);
-        },
-
-        handleDragOver(event) {
-            event.preventDefault();
-
-            if (!this.dragData.isDragging) {
-                return;
-            }
-
-            const dropPosition = this.determineDropPosition(event.currentTarget, event);
-
-            if (dropPosition) {
-                event.dataTransfer.dropEffect = 'move';
-            } else {
-                event.dataTransfer.dropEffect = 'none';
-            }
-
-            this.updateGhostPosition(event);
-
-            this.updateDropIndicators(event);
-        },
-
-        handleDragEnter(event) {
-            event.preventDefault();
-            if (!this.dragData.isDragging) return;
-
-            this.updateDropIndicators(event);
-        },
-
-        handleDragLeave(event) {
-            if (!event.currentTarget.contains(event.relatedTarget)) {
-                this.cleanupDropIndicators();
-            }
-        },
-
-        handleDrop(event) {
-            event.preventDefault();
-            event.stopPropagation(); // Prevent event from bubbling to parent elements
-
-            if (!this.dragData.isDragging) return;
-
-            const dropTarget = event.currentTarget;
-            const dropPosition = this.determineDropPosition(dropTarget, event);
-
-            if (!dropPosition) {
-                this.cleanupDragVisuals();
-                return;
-            }
-
-            this.performDrop(dropTarget, dropPosition);
-
-            this.cleanupDragVisuals();
-
-            if (this.dragData.draggedElement) {
-                this.dragData.draggedElement.classList.remove(
-                    'opacity-50',
-                    'rotate-1',
-                    'scale-105',
-                    'z-50',
-                    'shadow-2xl',
-                    'updating-order',
-                    'opacity-70',
-                );
-            }
-
-            if (this.dragData.draggedType === 'category' && this.dragData.draggedId) {
-                const categoryElement = document.querySelector(`[data-category-id="${this.dragData.draggedId}"]`);
-                if (categoryElement) {
-                    categoryElement.classList.remove(
+                if (this.dragData.draggedElement && this.dragData.draggedElement !== event.target) {
+                    this.dragData.draggedElement.classList.remove(
                         'opacity-50',
                         'rotate-1',
                         'scale-105',
@@ -708,63 +781,159 @@ document.addEventListener('alpine:init', () => {
                         'opacity-70',
                     );
 
-                    const wrapper = categoryElement.closest('.category-wrapper');
-                    if (wrapper) {
-                        wrapper.classList.remove('ring-2', 'ring-primary-300', 'ring-opacity-50');
-                    }
-                }
-            } else if (this.dragData.draggedType === 'type' && this.dragData.draggedId) {
-                const typeElement = document.querySelector(`[data-type-id="${this.dragData.draggedId}"]`);
-                if (typeElement) {
-                    typeElement.classList.remove(
-                        'opacity-50',
-                        'rotate-1',
-                        'scale-105',
-                        'z-50',
-                        'shadow-2xl',
-                        'updating-order',
-                        'opacity-70',
-                    );
-                }
-            }
-        },
-
-        createDragGhost(element) {
-            // Create a simplified ghost element
-            const ghost = document.createElement('div');
-            ghost.className = 'drag-ghost';
-
-            // Prefer the visible name text. Order: input (rename), anchor (type link), then a non-numeric span
-            let nameText = '';
-            const inputEl = element.querySelector('input');
-            const anchorEl = element.querySelector('a');
-
-            if (inputEl) {
-                nameText = inputEl.value || inputEl.textContent || '';
-            } else if (anchorEl) {
-                nameText = anchorEl.textContent || '';
-            } else {
-                const spans = element.querySelectorAll('span');
-                if (spans && spans.length > 0) {
-                    // Prefer the first non-numeric span (to avoid the request count like "0")
-                    let found = '';
-                    for (let i = 0; i < spans.length; i++) {
-                        const txt = (spans[i].textContent || '').trim();
-                        if (!txt) continue;
-                        if (!/^\d+$/.test(txt)) {
-                            found = txt;
-                            break;
+                    if (this.dragData.draggedType === 'category') {
+                        const wrapper = this.dragData.draggedElement.closest('.category-wrapper');
+                        if (wrapper) {
+                            wrapper.classList.remove('ring-2', 'ring-primary-300', 'ring-opacity-50');
                         }
                     }
-                    if (!found) {
-                        found = (spans[0].textContent || '').trim();
-                    }
-                    nameText = found;
                 }
-            }
 
-            ghost.textContent = nameText || 'Dragging...';
-            ghost.style.cssText = `
+                this.cleanupDragVisuals();
+
+                if (this.dragData.ghostElement) {
+                    this.dragData.ghostElement.remove();
+                    this.dragData.ghostElement = null;
+                }
+
+                setTimeout(() => {
+                    this.setupDragAndDrop();
+                }, 100);
+            },
+
+            handleDragOver(event) {
+                event.preventDefault();
+
+                if (!this.dragData.isDragging) {
+                    return;
+                }
+
+                const dropPosition = this.determineDropPosition(event.currentTarget, event);
+
+                if (dropPosition) {
+                    event.dataTransfer.dropEffect = 'move';
+                } else {
+                    event.dataTransfer.dropEffect = 'none';
+                }
+
+                this.updateGhostPosition(event);
+
+                this.updateDropIndicators(event);
+            },
+
+            handleDragEnter(event) {
+                event.preventDefault();
+                if (!this.dragData.isDragging) return;
+
+                this.updateDropIndicators(event);
+            },
+
+            handleDragLeave(event) {
+                if (!event.currentTarget.contains(event.relatedTarget)) {
+                    this.cleanupDropIndicators();
+                }
+            },
+
+            handleDrop(event) {
+                event.preventDefault();
+                event.stopPropagation(); // Prevent event from bubbling to parent elements
+
+                if (!this.dragData.isDragging) return;
+
+                const dropTarget = event.currentTarget;
+                const dropPosition = this.determineDropPosition(dropTarget, event);
+
+                if (!dropPosition) {
+                    this.cleanupDragVisuals();
+                    return;
+                }
+
+                this.performDrop(dropTarget, dropPosition);
+
+                this.cleanupDragVisuals();
+
+                if (this.dragData.draggedElement) {
+                    this.dragData.draggedElement.classList.remove(
+                        'opacity-50',
+                        'rotate-1',
+                        'scale-105',
+                        'z-50',
+                        'shadow-2xl',
+                        'updating-order',
+                        'opacity-70',
+                    );
+                }
+
+                if (this.dragData.draggedType === 'category' && this.dragData.draggedId) {
+                    const categoryElement = document.querySelector(`[data-category-id="${this.dragData.draggedId}"]`);
+                    if (categoryElement) {
+                        categoryElement.classList.remove(
+                            'opacity-50',
+                            'rotate-1',
+                            'scale-105',
+                            'z-50',
+                            'shadow-2xl',
+                            'updating-order',
+                            'opacity-70',
+                        );
+
+                        const wrapper = categoryElement.closest('.category-wrapper');
+                        if (wrapper) {
+                            wrapper.classList.remove('ring-2', 'ring-primary-300', 'ring-opacity-50');
+                        }
+                    }
+                } else if (this.dragData.draggedType === 'type' && this.dragData.draggedId) {
+                    const typeElement = document.querySelector(`[data-type-id="${this.dragData.draggedId}"]`);
+                    if (typeElement) {
+                        typeElement.classList.remove(
+                            'opacity-50',
+                            'rotate-1',
+                            'scale-105',
+                            'z-50',
+                            'shadow-2xl',
+                            'updating-order',
+                            'opacity-70',
+                        );
+                    }
+                }
+            },
+
+            createDragGhost(element) {
+                // Create a simplified ghost element
+                const ghost = document.createElement('div');
+                ghost.className = 'drag-ghost';
+
+                // Prefer the visible name text. Order: input (rename), anchor (type link), then a non-numeric span
+                let nameText = '';
+                const inputEl = element.querySelector('input');
+                const anchorEl = element.querySelector('a');
+
+                if (inputEl) {
+                    nameText = inputEl.value || inputEl.textContent || '';
+                } else if (anchorEl) {
+                    nameText = anchorEl.textContent || '';
+                } else {
+                    const spans = element.querySelectorAll('span');
+                    if (spans && spans.length > 0) {
+                        // Prefer the first non-numeric span (to avoid the request count like "0")
+                        let found = '';
+                        for (let i = 0; i < spans.length; i++) {
+                            const txt = (spans[i].textContent || '').trim();
+                            if (!txt) continue;
+                            if (!/^\d+$/.test(txt)) {
+                                found = txt;
+                                break;
+                            }
+                        }
+                        if (!found) {
+                            found = (spans[0].textContent || '').trim();
+                        }
+                        nameText = found;
+                    }
+                }
+
+                ghost.textContent = nameText || 'Dragging...';
+                ghost.style.cssText = `
                     position: fixed;
                     pointer-events: none;
                     z-index: 9999;
@@ -780,170 +949,196 @@ document.addEventListener('alpine:init', () => {
                     top: -9999px;
                 `;
 
-            document.body.appendChild(ghost);
-            this.dragData.ghostElement = ghost;
-        },
+                document.body.appendChild(ghost);
+                this.dragData.ghostElement = ghost;
+            },
 
-        updateGhostPosition(event) {
-            if (this.dragData.ghostElement) {
-                const x = event.clientX + 15;
-                const y = event.clientY - 10;
-                this.dragData.ghostElement.style.left = x + 'px';
-                this.dragData.ghostElement.style.top = y + 'px';
-            }
-        },
-
-        updateDropIndicators(event) {
-            this.cleanupDropIndicators();
-
-            const target = event.currentTarget;
-            const dropPosition = this.determineDropPosition(target, event);
-
-            if (!dropPosition) {
-                return;
-            }
-
-            if (dropPosition.type === 'inside') {
-                if (dropPosition.target.classList.contains('category-item')) {
-                    dropPosition.target.classList.add(
-                        'nest-target',
-                        'bg-primary-500/10',
-                        'border-primary-500/50',
-                        'border-2',
-                        'rounded-lg',
-                        'relative',
-                    );
+            updateGhostPosition(event) {
+                if (this.dragData.ghostElement) {
+                    const x = event.clientX + 15;
+                    const y = event.clientY - 10;
+                    this.dragData.ghostElement.style.left = x + 'px';
+                    this.dragData.ghostElement.style.top = y + 'px';
                 }
-            } else if (dropPosition.type === 'insert') {
-                this.showInsertionLine(dropPosition.container, dropPosition.insertIndex);
-            }
-        },
+            },
 
-        showInsertionLine(container, insertIndex) {
-            this.cleanupInsertionLines();
+            updateDropIndicators(event) {
+                this.cleanupDropIndicators();
 
-            let children = Array.from(container.children).filter(
-                (child) =>
-                    !child.classList.contains('insertion-line') &&
-                    (child.classList.contains('category-wrapper') ||
-                        child.classList.contains('category-item') ||
-                        child.classList.contains('type-item')),
-            );
+                const target = event.currentTarget;
+                const dropPosition = this.determineDropPosition(target, event);
 
-            const draggedElement = this.dragData.draggedElement;
-            if (draggedElement) {
-                children = children.filter((child) => {
-                    if (this.dragData.draggedType === 'type') {
-                        return child.dataset.typeId !== this.dragData.draggedId;
-                    }
-                    if (this.dragData.draggedType === 'category') {
-                        return child.dataset.categoryId !== this.dragData.draggedId;
-                    }
-                    return true;
-                });
-            }
-
-            let yPosition = 0;
-            const containerRect = container.getBoundingClientRect();
-
-            if (insertIndex === 0 && children.length > 0) {
-                const firstChildRect = children[0].getBoundingClientRect();
-                yPosition = firstChildRect.top - containerRect.top - 1;
-            } else if (insertIndex >= children.length && children.length > 0) {
-                const lastChildRect = children[children.length - 1].getBoundingClientRect();
-                yPosition = lastChildRect.bottom - containerRect.top + 1;
-            } else if (children.length > 0 && insertIndex > 0) {
-                const prevChildRect = children[insertIndex - 1].getBoundingClientRect();
-                const nextChildRect = children[insertIndex].getBoundingClientRect();
-                yPosition = prevChildRect.bottom - containerRect.top + (nextChildRect.top - prevChildRect.bottom) / 2;
-            } else {
-                yPosition = 10;
-            }
-
-            const line = document.createElement('div');
-            line.className = 'insertion-line drop-line';
-            line.style.top = yPosition + 'px';
-
-            container.appendChild(line);
-        },
-
-        cleanupInsertionLines() {
-            document.querySelectorAll('.insertion-line').forEach((line) => line.remove());
-        },
-
-        calculateInsertionPosition(container, mouseY) {
-            let children = Array.from(container.children).filter(
-                (child) =>
-                    !child.classList.contains('insertion-line') &&
-                    (child.classList.contains('category-wrapper') ||
-                        child.classList.contains('category-item') ||
-                        child.classList.contains('type-item')),
-            );
-
-            const draggedElement = this.dragData.draggedElement;
-            if (draggedElement) {
-                children = children.filter((child) => {
-                    if (this.dragData.draggedType === 'type') {
-                        const childId = String(child.dataset.typeId || '');
-                        const draggedId = String(this.dragData.draggedId || '');
-                        return childId !== draggedId;
-                    }
-                    if (this.dragData.draggedType === 'category') {
-                        const childId = String(child.dataset.categoryId || '');
-                        const draggedId = String(this.dragData.draggedId || '');
-                        return childId !== draggedId;
-                    }
-                    return true;
-                });
-            }
-
-            if (children.length === 0) {
-                return 0;
-            }
-
-            for (let index = 0; index < children.length; index++) {
-                const rect = children[index].getBoundingClientRect();
-                const childCenterY = rect.top + rect.height / 2;
-
-                if (mouseY < childCenterY) {
-                    return index;
+                if (!dropPosition) {
+                    return;
                 }
-            }
 
-            return children.length;
-        },
+                if (dropPosition.type === 'inside') {
+                    if (dropPosition.target.classList.contains('category-item')) {
+                        dropPosition.target.classList.add(
+                            'nest-target',
+                            'bg-primary-500/10',
+                            'border-primary-500/50',
+                            'border-2',
+                            'rounded-lg',
+                            'relative',
+                        );
+                    }
+                } else if (dropPosition.type === 'insert') {
+                    this.showInsertionLine(dropPosition.container, dropPosition.insertIndex);
+                }
+            },
 
-        determineDropPosition(target, event) {
-            const categoryItem = target.closest('.category-item');
-            const typeItem = target.closest('.type-item');
+            showInsertionLine(container, insertIndex) {
+                this.cleanupInsertionLines();
 
-            if (categoryItem && this.dragData.draggedType === 'category') {
-                const actualTarget = categoryItem;
-                const draggedLevel = this.getCategoryLevel(this.dragData.draggedElement);
-                const targetLevel = this.getCategoryLevel(actualTarget);
+                let children = Array.from(container.children).filter(
+                    (child) =>
+                        !child.classList.contains('insertion-line') &&
+                        (child.classList.contains('category-wrapper') ||
+                            child.classList.contains('category-item') ||
+                            child.classList.contains('type-item')),
+                );
 
-                const draggedParentContext = this.getCategoryParentContext(this.dragData.draggedElement);
-                const targetParentContext = this.getCategoryParentContext(actualTarget);
+                const draggedElement = this.dragData.draggedElement;
+                if (draggedElement) {
+                    children = children.filter((child) => {
+                        if (this.dragData.draggedType === 'type') {
+                            return child.dataset.typeId !== this.dragData.draggedId;
+                        }
+                        if (this.dragData.draggedType === 'category') {
+                            return child.dataset.categoryId !== this.dragData.draggedId;
+                        }
+                        return true;
+                    });
+                }
 
-                let allowInsertion = false;
+                let yPosition = 0;
+                const containerRect = container.getBoundingClientRect();
 
-                if (targetParentContext === 'root') {
-                    allowInsertion = true;
-                } else if (draggedLevel === targetLevel && draggedParentContext === targetParentContext) {
-                    allowInsertion = true;
-                } else if (draggedLevel === targetLevel) {
-                    allowInsertion = true;
+                if (insertIndex === 0 && children.length > 0) {
+                    const firstChildRect = children[0].getBoundingClientRect();
+                    yPosition = firstChildRect.top - containerRect.top - 1;
+                } else if (insertIndex >= children.length && children.length > 0) {
+                    const lastChildRect = children[children.length - 1].getBoundingClientRect();
+                    yPosition = lastChildRect.bottom - containerRect.top + 1;
+                } else if (children.length > 0 && insertIndex > 0) {
+                    const prevChildRect = children[insertIndex - 1].getBoundingClientRect();
+                    const nextChildRect = children[insertIndex].getBoundingClientRect();
+                    yPosition =
+                        prevChildRect.bottom - containerRect.top + (nextChildRect.top - prevChildRect.bottom) / 2;
                 } else {
+                    yPosition = 10;
                 }
 
-                if (allowInsertion) {
-                    const targetWrapper = actualTarget.closest('.category-wrapper');
-                    const container = targetWrapper.parentElement;
-                    const rect = actualTarget.getBoundingClientRect();
-                    const y = event.clientY - rect.top;
-                    const height = rect.height;
+                const line = document.createElement('div');
+                line.className = 'insertion-line drop-line';
+                line.style.top = yPosition + 'px';
 
-                    if (y > height * 0.3 && y < height * 0.7) {
+                container.appendChild(line);
+            },
+
+            cleanupInsertionLines() {
+                document.querySelectorAll('.insertion-line').forEach((line) => line.remove());
+            },
+
+            calculateInsertionPosition(container, mouseY) {
+                let children = Array.from(container.children).filter(
+                    (child) =>
+                        !child.classList.contains('insertion-line') &&
+                        (child.classList.contains('category-wrapper') ||
+                            child.classList.contains('category-item') ||
+                            child.classList.contains('type-item')),
+                );
+
+                const draggedElement = this.dragData.draggedElement;
+                if (draggedElement) {
+                    children = children.filter((child) => {
+                        if (this.dragData.draggedType === 'type') {
+                            const childId = String(child.dataset.typeId || '');
+                            const draggedId = String(this.dragData.draggedId || '');
+                            return childId !== draggedId;
+                        }
+                        if (this.dragData.draggedType === 'category') {
+                            const childId = String(child.dataset.categoryId || '');
+                            const draggedId = String(this.dragData.draggedId || '');
+                            return childId !== draggedId;
+                        }
+                        return true;
+                    });
+                }
+
+                if (children.length === 0) {
+                    return 0;
+                }
+
+                for (let index = 0; index < children.length; index++) {
+                    const rect = children[index].getBoundingClientRect();
+                    const childCenterY = rect.top + rect.height / 2;
+
+                    if (mouseY < childCenterY) {
+                        return index;
+                    }
+                }
+
+                return children.length;
+            },
+
+            determineDropPosition(target, event) {
+                const categoryItem = target.closest('.category-item');
+                const typeItem = target.closest('.type-item');
+
+                if (categoryItem && this.dragData.draggedType === 'category') {
+                    const actualTarget = categoryItem;
+                    const draggedLevel = this.getCategoryLevel(this.dragData.draggedElement);
+                    const targetLevel = this.getCategoryLevel(actualTarget);
+
+                    const draggedParentContext = this.getCategoryParentContext(this.dragData.draggedElement);
+                    const targetParentContext = this.getCategoryParentContext(actualTarget);
+
+                    let allowInsertion = false;
+
+                    if (targetParentContext === 'root') {
+                        allowInsertion = true;
+                    } else if (draggedLevel === targetLevel && draggedParentContext === targetParentContext) {
+                        allowInsertion = true;
+                    } else if (draggedLevel === targetLevel) {
+                        allowInsertion = true;
+                    } else {
+                    }
+
+                    if (allowInsertion) {
+                        const targetWrapper = actualTarget.closest('.category-wrapper');
+                        const container = targetWrapper.parentElement;
+                        const rect = actualTarget.getBoundingClientRect();
+                        const y = event.clientY - rect.top;
+                        const height = rect.height;
+
+                        if (y > height * 0.3 && y < height * 0.7) {
+                            const prospectiveParentId = actualTarget.dataset.categoryId;
+                            if (
+                                this.draggingCategoryWouldViolateDepth(this.dragData.draggedId, prospectiveParentId) ||
+                                this.wouldExceedDepthLimit(actualTarget)
+                            ) {
+                                return null;
+                            }
+
+                            return {
+                                type: 'inside',
+                                target: actualTarget,
+                            };
+                        } else {
+                            const insertIndex = this.calculateInsertionPosition(container, event.clientY);
+                            const parentId = container?.dataset?.parentId || null;
+                            if (this.wouldExceedDepthLimit(null, parentId)) {
+                                return null;
+                            }
+                            return {
+                                type: 'insert',
+                                container: container,
+                                insertIndex: insertIndex,
+                            };
+                        }
+                    } else {
                         const prospectiveParentId = actualTarget.dataset.categoryId;
                         if (
                             this.draggingCategoryWouldViolateDepth(this.dragData.draggedId, prospectiveParentId) ||
@@ -956,606 +1151,685 @@ document.addEventListener('alpine:init', () => {
                             type: 'inside',
                             target: actualTarget,
                         };
-                    } else {
-                        const insertIndex = this.calculateInsertionPosition(container, event.clientY);
-                        const parentId = container?.dataset?.parentId || null;
-                        if (this.wouldExceedDepthLimit(null, parentId)) {
+                    }
+                }
+
+                if (typeItem && this.dragData.draggedType === 'type') {
+                    const actualTarget = typeItem;
+                    const draggedContainer = this.dragData.draggedElement.closest('[data-sortable="types"]');
+                    const targetContainer = actualTarget.closest('[data-sortable="types"]');
+
+                    if (draggedContainer && targetContainer) {
+                        // Normalize category ids: undefined/empty -> null (uncategorized)
+                        const draggedCat = draggedContainer.dataset.categoryId || null;
+                        const targetCat = targetContainer.dataset.categoryId || null;
+
+                        // A type filed under a category cannot also be uncategorized, and a
+                        // multi-placement type cannot be moved to the uncategorized bucket at all.
+                        if (
+                            targetCat === null &&
+                            draggedCat !== null &&
+                            this.countTypeOccurrences(this.dragData.draggedId) > 1
+                        ) {
                             return null;
                         }
-                        return {
-                            type: 'insert',
-                            container: container,
-                            insertIndex: insertIndex,
-                        };
+
+                        // Allow insert when both containers are same category OR when the target is uncategorized
+                        if (draggedCat === targetCat || targetCat === null) {
+                            const insertIndex = this.calculateInsertionPosition(targetContainer, event.clientY);
+                            return {
+                                type: 'insert',
+                                container: targetContainer,
+                                insertIndex: insertIndex,
+                            };
+                        }
                     }
-                } else {
-                    const prospectiveParentId = actualTarget.dataset.categoryId;
-                    if (
-                        this.draggingCategoryWouldViolateDepth(this.dragData.draggedId, prospectiveParentId) ||
-                        this.wouldExceedDepthLimit(actualTarget)
-                    ) {
+
+                    return null;
+                }
+
+                if (this.dragData.draggedType === 'type') {
+                    const typeContainer = target.closest('[data-sortable="types"]');
+
+                    if (typeContainer) {
+                        const draggedContainer = this.dragData.draggedElement?.closest('[data-sortable="types"]');
+                        const containerCategoryId = typeContainer.dataset.categoryId || null;
+                        const draggedCategoryId = draggedContainer?.dataset?.categoryId || null;
+                        const sameContainer = draggedContainer === typeContainer;
+                        const targetIsUncategorized = !typeContainer.dataset.categoryId;
+
+                        // Block moving a multi-placement type into the uncategorized bucket.
+                        if (
+                            targetIsUncategorized &&
+                            draggedCategoryId !== null &&
+                            this.countTypeOccurrences(this.dragData.draggedId) > 1
+                        ) {
+                            return null;
+                        }
+
+                        if (sameContainer || targetIsUncategorized) {
+                            const insertIndex = this.calculateInsertionPosition(typeContainer, event.clientY);
+                            return {
+                                type: 'insert',
+                                container: typeContainer,
+                                insertIndex,
+                            };
+                        }
+
+                        return null;
+                    }
+                }
+
+                if (categoryItem && this.dragData.draggedType === 'type') {
+                    // Moving a type onto a category files it there. Block it if that area already
+                    // contains the type (a type may not sit in the same area twice).
+                    const targetCategoryId = categoryItem.dataset.categoryId || null;
+
+                    if (this.categoryContainsType(targetCategoryId, this.dragData.draggedId)) {
                         return null;
                     }
 
                     return {
                         type: 'inside',
-                        target: actualTarget,
+                        target: categoryItem,
                     };
                 }
-            }
 
-            if (typeItem && this.dragData.draggedType === 'type') {
-                const actualTarget = typeItem;
-                const draggedContainer = this.dragData.draggedElement.closest('[data-sortable="types"]');
-                const targetContainer = actualTarget.closest('[data-sortable="types"]');
+                return null; // Invalid drop
+            },
 
-                if (draggedContainer && targetContainer) {
-                    // Normalize category ids: undefined/empty -> null (uncategorized)
-                    const draggedCat = draggedContainer.dataset.categoryId || null;
-                    const targetCat = targetContainer.dataset.categoryId || null;
+            cleanupDropIndicators() {
+                this.cleanupInsertionLines();
+                document.querySelectorAll('.nest-target').forEach((target) => {
+                    target.classList.remove(
+                        'nest-target',
+                        'bg-primary-500/10',
+                        'border-primary-500/50',
+                        'border-2',
+                        'relative',
+                    );
+                });
+            },
 
-                    // Allow insert when both containers are same category OR when the target is uncategorized
-                    if (draggedCat === targetCat || targetCat === null) {
-                        const insertIndex = this.calculateInsertionPosition(targetContainer, event.clientY);
-                        return {
-                            type: 'insert',
-                            container: targetContainer,
-                            insertIndex: insertIndex,
-                        };
-                    }
+            cleanupDragVisuals() {
+                this.cleanupDropIndicators();
+                document.removeEventListener('dragover', this.updateGhostPosition);
+            },
+
+            getParentIdFromPosition(position) {
+                if (position.type === 'inside') {
+                    return position.target?.dataset?.categoryId || null;
+                }
+
+                if (position.type === 'insert') {
+                    const parentId = position.container?.dataset?.parentId;
+                    return parentId && parentId !== '' ? parentId : null;
                 }
 
                 return null;
-            }
+            },
 
-            if (this.dragData.draggedType === 'type') {
-                const typeContainer = target.closest('[data-sortable="types"]');
+            draggingCategoryWouldViolateDepth(categoryId, newParentId) {
+                if (!categoryId) {
+                    return false;
+                }
 
-                if (typeContainer) {
-                    const draggedContainer = this.dragData.draggedElement?.closest('[data-sortable="types"]');
-                    const containerCategoryId = typeContainer.dataset.categoryId || null;
-                    const draggedCategoryId = draggedContainer?.dataset?.categoryId || null;
-                    const sameContainer = draggedContainer === typeContainer;
-                    const targetIsUncategorized = !typeContainer.dataset.categoryId;
+                const movedCategory = this.findCategoryById(categoryId);
+                if (!movedCategory) {
+                    return false;
+                }
 
-                    if (sameContainer || targetIsUncategorized) {
-                        const insertIndex = this.calculateInsertionPosition(typeContainer, event.clientY);
-                        return {
-                            type: 'insert',
-                            container: typeContainer,
-                            insertIndex,
-                        };
+                const hasChildren = Array.isArray(movedCategory.children) && movedCategory.children.length > 0;
+
+                if (!hasChildren) {
+                    return false;
+                }
+
+                if (!newParentId) {
+                    return false;
+                }
+
+                const prospectiveParentElement = document.querySelector(`[data-category-id="${newParentId}"]`);
+                if (!prospectiveParentElement) {
+                    return false;
+                }
+
+                return this.getCategoryLevel(prospectiveParentElement) >= 0;
+            },
+
+            performDrop(target, position) {
+                if (this.dragData.draggedType === 'category') {
+                    const prospectiveParentId = this.getParentIdFromPosition(position);
+                    if (this.draggingCategoryWouldViolateDepth(this.dragData.draggedId, prospectiveParentId)) {
+                        return;
+                    }
+
+                    this.handleCategoryDrop(target, position);
+                } else if (this.dragData.draggedType === 'type') {
+                    this.handleTypeDrop(target, position);
+                }
+
+                this.markAsChanged();
+                this.render();
+            },
+
+            handleCategoryDrop(target, position) {
+                const categoryId = this.dragData.draggedId;
+                let newParentId = null;
+
+                if (position.type === 'inside') {
+                    newParentId = position.target.dataset.categoryId;
+                } else if (position.type === 'insert') {
+                    newParentId = position.container.dataset.parentId || null;
+                    if (newParentId === '') {
+                        newParentId = null;
+                    }
+                }
+
+                this.updateCategoryInTreeData(categoryId, newParentId, position);
+            },
+
+            handleTypeDrop(target, position) {
+                const typeId = this.dragData.draggedId;
+                const sourceCategoryId = this.dragData.draggedSourceCategoryId || null;
+                let newCategoryId = null;
+
+                if (position.type === 'inside') {
+                    newCategoryId = position.target.dataset.categoryId;
+                } else if (position.type === 'insert') {
+                    newCategoryId = position.container.dataset.categoryId || null;
+                }
+
+                if (newCategoryId && this.collapsedCategories[newCategoryId]) {
+                    delete this.collapsedCategories[newCategoryId];
+                }
+
+                this.updateTypeInTreeData(typeId, sourceCategoryId, newCategoryId, position);
+            },
+
+            wouldExceedDepthLimit(targetElement, parentId = null) {
+                if (targetElement) {
+                    return this.getCategoryLevel(targetElement) >= 1;
+                }
+
+                if (parentId) {
+                    const parentCategory = document.querySelector(`[data-category-id="${parentId}"]`);
+                    if (parentCategory) {
+                        return this.getCategoryLevel(parentCategory) >= 1;
+                    }
+                }
+
+                return false;
+            },
+
+            updateCategoryInTreeData(categoryId, newParentId, position) {
+                const category = this.findAndRemoveCategory(categoryId);
+                if (!category) return;
+
+                category.parent_id = newParentId;
+
+                if (newParentId) {
+                    const parentCategory = this.findCategoryById(newParentId);
+                    if (parentCategory) {
+                        parentCategory.children = parentCategory.children || [];
+                        if (position.type === 'inside') {
+                            parentCategory.children.push(category);
+                        } else {
+                            parentCategory.children.splice(position.insertIndex, 0, category);
+                        }
+                    }
+                } else {
+                    this.treeData.categories = this.treeData.categories || [];
+                    if (position.type === 'insert') {
+                        this.treeData.categories.splice(position.insertIndex, 0, category);
+                    } else {
+                        this.treeData.categories.push(category);
+                    }
+                }
+            },
+
+            updateTypeInTreeData(typeId, sourceCategoryId, newCategoryId, position) {
+                const type = this.removeTypeFromSpecificLocation(typeId, sourceCategoryId);
+                if (!type) return;
+
+                type.category_id = newCategoryId;
+
+                if (newCategoryId) {
+                    const category = this.findCategoryById(newCategoryId);
+                    if (category) {
+                        category.types = category.types || [];
+                        if (position.type === 'inside') {
+                            category.types.push(type);
+                        } else {
+                            category.types.splice(position.insertIndex, 0, type);
+                        }
+                    }
+                } else {
+                    this.treeData.uncategorized_types = this.treeData.uncategorized_types || [];
+                    if (position.type === 'insert') {
+                        this.treeData.uncategorized_types.splice(position.insertIndex, 0, type);
+                    } else {
+                        this.treeData.uncategorized_types.push(type);
+                    }
+                }
+            },
+
+            // Remove exactly the placement being dragged (identified by its owning category) rather
+            // than the first matching type, so a type filed under several areas moves the right node.
+            removeTypeFromSpecificLocation(typeId, categoryId) {
+                if (categoryId) {
+                    const category = this.findCategoryById(categoryId);
+                    if (category && category.types) {
+                        const index = category.types.findIndex((type) => type.id === typeId);
+                        if (index !== -1) {
+                            return category.types.splice(index, 1)[0];
+                        }
                     }
 
                     return null;
                 }
-            }
 
-            if (categoryItem && this.dragData.draggedType === 'type') {
-                return {
-                    type: 'inside',
-                    target: categoryItem,
-                };
-            }
-
-            return null; // Invalid drop
-        },
-
-        cleanupDropIndicators() {
-            this.cleanupInsertionLines();
-            document.querySelectorAll('.nest-target').forEach((target) => {
-                target.classList.remove(
-                    'nest-target',
-                    'bg-primary-500/10',
-                    'border-primary-500/50',
-                    'border-2',
-                    'relative',
+                const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(
+                    (type) => type.id === typeId,
                 );
-            });
-        },
-
-        cleanupDragVisuals() {
-            this.cleanupDropIndicators();
-            document.removeEventListener('dragover', this.updateGhostPosition);
-        },
-
-        getParentIdFromPosition(position) {
-            if (position.type === 'inside') {
-                return position.target?.dataset?.categoryId || null;
-            }
-
-            if (position.type === 'insert') {
-                const parentId = position.container?.dataset?.parentId;
-                return parentId && parentId !== '' ? parentId : null;
-            }
-
-            return null;
-        },
-
-        draggingCategoryWouldViolateDepth(categoryId, newParentId) {
-            if (!categoryId) {
-                return false;
-            }
-
-            const movedCategory = this.findCategoryById(categoryId);
-            if (!movedCategory) {
-                return false;
-            }
-
-            const hasChildren = Array.isArray(movedCategory.children) && movedCategory.children.length > 0;
-
-            if (!hasChildren) {
-                return false;
-            }
-
-            if (!newParentId) {
-                return false;
-            }
-
-            const prospectiveParentElement = document.querySelector(`[data-category-id="${newParentId}"]`);
-            if (!prospectiveParentElement) {
-                return false;
-            }
-
-            return this.getCategoryLevel(prospectiveParentElement) >= 0;
-        },
-
-        performDrop(target, position) {
-            if (this.dragData.draggedType === 'category') {
-                const prospectiveParentId = this.getParentIdFromPosition(position);
-                if (this.draggingCategoryWouldViolateDepth(this.dragData.draggedId, prospectiveParentId)) {
-                    return;
+                if (uncategorizedIndex !== -1) {
+                    return this.treeData.uncategorized_types.splice(uncategorizedIndex, 1)[0];
                 }
 
-                this.handleCategoryDrop(target, position);
-            } else if (this.dragData.draggedType === 'type') {
-                this.handleTypeDrop(target, position);
-            }
-
-            this.markAsChanged();
-            this.render();
-        },
-
-        handleCategoryDrop(target, position) {
-            const categoryId = this.dragData.draggedId;
-            let newParentId = null;
-
-            if (position.type === 'inside') {
-                newParentId = position.target.dataset.categoryId;
-            } else if (position.type === 'insert') {
-                newParentId = position.container.dataset.parentId || null;
-                if (newParentId === '') {
-                    newParentId = null;
-                }
-            }
-
-            this.updateCategoryInTreeData(categoryId, newParentId, position);
-        },
-
-        handleTypeDrop(target, position) {
-            const typeId = this.dragData.draggedId;
-            let newCategoryId = null;
-
-            if (position.type === 'inside') {
-                newCategoryId = position.target.dataset.categoryId;
-            } else if (position.type === 'insert') {
-                newCategoryId = position.container.dataset.categoryId || null;
-            }
-
-            if (newCategoryId && this.collapsedCategories[newCategoryId]) {
-                delete this.collapsedCategories[newCategoryId];
-            }
-
-            this.updateTypeInTreeData(typeId, newCategoryId, position);
-        },
-
-        wouldExceedDepthLimit(targetElement, parentId = null) {
-            if (targetElement) {
-                return this.getCategoryLevel(targetElement) >= 1;
-            }
-
-            if (parentId) {
-                const parentCategory = document.querySelector(`[data-category-id="${parentId}"]`);
-                if (parentCategory) {
-                    return this.getCategoryLevel(parentCategory) >= 1;
-                }
-            }
-
-            return false;
-        },
-
-        updateCategoryInTreeData(categoryId, newParentId, position) {
-            const category = this.findAndRemoveCategory(categoryId);
-            if (!category) return;
-
-            category.parent_id = newParentId;
-
-            if (newParentId) {
-                const parentCategory = this.findCategoryById(newParentId);
-                if (parentCategory) {
-                    parentCategory.children = parentCategory.children || [];
-                    if (position.type === 'inside') {
-                        parentCategory.children.push(category);
-                    } else {
-                        parentCategory.children.splice(position.insertIndex, 0, category);
-                    }
-                }
-            } else {
-                this.treeData.categories = this.treeData.categories || [];
-                if (position.type === 'insert') {
-                    this.treeData.categories.splice(position.insertIndex, 0, category);
-                } else {
-                    this.treeData.categories.push(category);
-                }
-            }
-        },
-
-        updateTypeInTreeData(typeId, newCategoryId, position) {
-            const type = this.findAndRemoveType(typeId);
-            if (!type) return;
-
-            type.category_id = newCategoryId;
-
-            if (newCategoryId) {
-                const category = this.findCategoryById(newCategoryId);
-                if (category) {
-                    category.types = category.types || [];
-                    if (position.type === 'inside') {
-                        category.types.push(type);
-                    } else {
-                        category.types.splice(position.insertIndex, 0, type);
-                    }
-                }
-            } else {
-                this.treeData.uncategorized_types = this.treeData.uncategorized_types || [];
-                if (position.type === 'insert') {
-                    this.treeData.uncategorized_types.splice(position.insertIndex, 0, type);
-                } else {
-                    this.treeData.uncategorized_types.push(type);
-                }
-            }
-        },
-
-        findCategoryParent(categoryId) {
-            const findParent = (categories, targetId, parentId = null) => {
-                for (const category of categories) {
-                    if (category.id === targetId) {
-                        return parentId;
-                    }
-                    if (category.children && category.children.length > 0) {
-                        const result = findParent(category.children, targetId, category.id);
-                        if (result !== undefined) return result;
-                    }
-                }
-                return undefined;
-            };
-
-            return findParent(this.treeData.categories || [], categoryId);
-        },
-
-        findTypeCategory(typeId) {
-            const findCategory = (categories) => {
-                for (const category of categories) {
-                    if (category.types && category.types.some((type) => type.id === typeId)) {
-                        return category.id;
-                    }
-                    if (category.children && category.children.length > 0) {
-                        const result = findCategory(category.children);
-                        if (result) return result;
-                    }
-                }
                 return null;
-            };
+            },
 
-            const categoryResult = findCategory(this.treeData.categories || []);
-            if (categoryResult) return categoryResult;
+            findCategoryParent(categoryId) {
+                const findParent = (categories, targetId, parentId = null) => {
+                    for (const category of categories) {
+                        if (category.id === targetId) {
+                            return parentId;
+                        }
+                        if (category.children && category.children.length > 0) {
+                            const result = findParent(category.children, targetId, category.id);
+                            if (result !== undefined) return result;
+                        }
+                    }
+                    return undefined;
+                };
 
-            if (
-                this.treeData.uncategorized_types &&
-                this.treeData.uncategorized_types.some((type) => type.id === typeId)
-            ) {
+                return findParent(this.treeData.categories || [], categoryId);
+            },
+
+            findTypeCategory(typeId) {
+                const findCategory = (categories) => {
+                    for (const category of categories) {
+                        if (category.types && category.types.some((type) => type.id === typeId)) {
+                            return category.id;
+                        }
+                        if (category.children && category.children.length > 0) {
+                            const result = findCategory(category.children);
+                            if (result) return result;
+                        }
+                    }
+                    return null;
+                };
+
+                const categoryResult = findCategory(this.treeData.categories || []);
+                if (categoryResult) return categoryResult;
+
+                if (
+                    this.treeData.uncategorized_types &&
+                    this.treeData.uncategorized_types.some((type) => type.id === typeId)
+                ) {
+                    return null;
+                }
+
                 return null;
-            }
+            },
 
-            return null;
-        },
+            getCategoryLevel(categoryElement) {
+                let level = 0;
+                let current = categoryElement.closest('.category-wrapper');
 
-        getCategoryLevel(categoryElement) {
-            let level = 0;
-            let current = categoryElement.closest('.category-wrapper');
+                while (current && current.parentElement) {
+                    const parent = current.parentElement.closest('[data-sortable="categories"]');
 
-            while (current && current.parentElement) {
-                const parent = current.parentElement.closest('[data-sortable="categories"]');
-
-                if (parent && parent.dataset.parentId) {
-                    level++;
-                    current = parent.closest('.category-wrapper');
-                } else {
-                    break;
+                    if (parent && parent.dataset.parentId) {
+                        level++;
+                        current = parent.closest('.category-wrapper');
+                    } else {
+                        break;
+                    }
                 }
-            }
 
-            return level;
-        },
+                return level;
+            },
 
-        getCategoryParentContext(categoryElement) {
-            const wrapper = categoryElement.closest('.category-wrapper');
-            if (!wrapper) {
-                return 'root';
-            }
-
-            const parentContainer = wrapper.parentElement.closest('[data-sortable="categories"]');
-            if (!parentContainer) {
-                return 'root';
-            }
-
-            const parentId = parentContainer.dataset.parentId;
-            return parentId && parentId !== 'null' && parentId !== '' ? parentId : 'root';
-        },
-
-        findCategoryById(categoryId, categories = null) {
-            if (!categories) {
-                categories = this.treeData.categories || [];
-            }
-
-            for (const category of categories) {
-                if (category.id === categoryId) {
-                    return category;
+            getCategoryParentContext(categoryElement) {
+                const wrapper = categoryElement.closest('.category-wrapper');
+                if (!wrapper) {
+                    return 'root';
                 }
-                if (category.children) {
-                    const found = this.findCategoryById(categoryId, category.children);
-                    if (found) return found;
+
+                const parentContainer = wrapper.parentElement.closest('[data-sortable="categories"]');
+                if (!parentContainer) {
+                    return 'root';
                 }
-            }
-            return null;
-        },
 
-        findTypeById(typeId) {
-            if (this.treeData.uncategorized_types) {
-                const type = this.treeData.uncategorized_types.find((type) => type.id === typeId);
-                if (type) return type;
-            }
+                const parentId = parentContainer.dataset.parentId;
+                return parentId && parentId !== 'null' && parentId !== '' ? parentId : 'root';
+            },
 
-            const findInCategories = (categories) => {
+            findCategoryById(categoryId, categories = null) {
+                if (!categories) {
+                    categories = this.treeData.categories || [];
+                }
+
                 for (const category of categories) {
-                    if (category.types) {
-                        const type = category.types.find((type) => type.id === typeId);
-                        if (type) return type;
+                    if (category.id === categoryId) {
+                        return category;
                     }
                     if (category.children) {
-                        const found = findInCategories(category.children);
+                        const found = this.findCategoryById(categoryId, category.children);
                         if (found) return found;
                     }
                 }
                 return null;
-            };
+            },
 
-            return findInCategories(this.treeData.categories || []);
-        },
-
-        findAndRemoveCategory(categoryId) {
-            const rootIndex = (this.treeData.categories || []).findIndex((category) => category.id === categoryId);
-            if (rootIndex !== -1) {
-                return this.treeData.categories.splice(rootIndex, 1)[0];
-            }
-
-            return this.findAndRemoveCategoryRecursive(categoryId, this.treeData.categories || []);
-        },
-
-        findAndRemoveCategoryRecursive(categoryId, categories) {
-            for (const category of categories) {
-                if (category.children) {
-                    const childIndex = category.children.findIndex((child) => child.id === categoryId);
-                    if (childIndex !== -1) {
-                        return category.children.splice(childIndex, 1)[0];
-                    }
-                    const found = this.findAndRemoveCategoryRecursive(categoryId, category.children);
-                    if (found) return found;
+            findTypeById(typeId) {
+                if (this.treeData.uncategorized_types) {
+                    const type = this.treeData.uncategorized_types.find((type) => type.id === typeId);
+                    if (type) return type;
                 }
-            }
-            return null;
-        },
 
-        findAndRemoveType(typeId) {
-            const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(
-                (type) => type.id === typeId,
-            );
-            if (uncategorizedIndex !== -1) {
-                return this.treeData.uncategorized_types.splice(uncategorizedIndex, 1)[0];
-            }
+                const findInCategories = (categories) => {
+                    for (const category of categories) {
+                        if (category.types) {
+                            const type = category.types.find((type) => type.id === typeId);
+                            if (type) return type;
+                        }
+                        if (category.children) {
+                            const found = findInCategories(category.children);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                };
 
-            return this.findAndRemoveTypeRecursive(typeId, this.treeData.categories || []);
-        },
+                return findInCategories(this.treeData.categories || []);
+            },
 
-        findAndRemoveTypeRecursive(typeId, categories) {
-            for (const category of categories) {
-                if (category.types) {
-                    const typeIndex = category.types.findIndex((type) => type.id === typeId);
-                    if (typeIndex !== -1) {
-                        return category.types.splice(typeIndex, 1)[0];
+            findAndRemoveCategory(categoryId) {
+                const rootIndex = (this.treeData.categories || []).findIndex((category) => category.id === categoryId);
+                if (rootIndex !== -1) {
+                    return this.treeData.categories.splice(rootIndex, 1)[0];
+                }
+
+                return this.findAndRemoveCategoryRecursive(categoryId, this.treeData.categories || []);
+            },
+
+            findAndRemoveCategoryRecursive(categoryId, categories) {
+                for (const category of categories) {
+                    if (category.children) {
+                        const childIndex = category.children.findIndex((child) => child.id === categoryId);
+                        if (childIndex !== -1) {
+                            return category.children.splice(childIndex, 1)[0];
+                        }
+                        const found = this.findAndRemoveCategoryRecursive(categoryId, category.children);
+                        if (found) return found;
                     }
                 }
-                if (category.children) {
-                    const found = this.findAndRemoveTypeRecursive(typeId, category.children);
-                    if (found) return found;
+                return null;
+            },
+
+            findAndRemoveType(typeId) {
+                const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(
+                    (type) => type.id === typeId,
+                );
+                if (uncategorizedIndex !== -1) {
+                    return this.treeData.uncategorized_types.splice(uncategorizedIndex, 1)[0];
                 }
-            }
-            return null;
-        },
 
-        async saveChanges() {
-            if (!this.hasUnsavedChanges || this.isSaving) return;
+                return this.findAndRemoveTypeRecursive(typeId, this.treeData.categories || []);
+            },
 
-            this.isSaving = true;
+            findAndRemoveTypeRecursive(typeId, categories) {
+                for (const category of categories) {
+                    if (category.types) {
+                        const typeIndex = category.types.findIndex((type) => type.id === typeId);
+                        if (typeIndex !== -1) {
+                            return category.types.splice(typeIndex, 1)[0];
+                        }
+                    }
+                    if (category.children) {
+                        const found = this.findAndRemoveTypeRecursive(typeId, category.children);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            },
 
-            try {
-                const saveData = this.prepareSaveData();
-                await this.$wire.saveChanges(saveData);
+            async saveChanges() {
+                if (!this.hasUnsavedChanges || this.isSaving) return;
 
-                await new Promise((resolve) => setTimeout(resolve, 100));
+                this.isSaving = true;
 
-                const freshData = await this.$wire.call('getHierarchicalData');
-                this.originalTreeData = freshData;
-                this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
-                this.deletedCategories = [];
-                this.deletedTypes = [];
-                this.archivedTypes = [];
-                this.hasUnsavedChanges = false;
-                this.render();
-            } catch (error) {
-                console.error('Save failed:', error);
-            } finally {
-                this.isSaving = false;
-            }
-        },
+                try {
+                    const saveData = this.prepareSaveData();
+                    const saved = await this.$wire.saveChanges(saveData);
 
-        prepareSaveData() {
-            const newCategories = [];
-            const newTypes = [];
-            const updatedCategories = [];
-            const updatedTypes = [];
+                    if (!saved) {
+                        // The server rejected the changes and has already told the user why. Keep
+                        // their unsaved work intact rather than reloading over the top of it.
+                        return;
+                    }
 
-            this.deletedCategories = this.deletedCategories || [];
-            this.deletedTypes = this.deletedTypes || [];
-            this.archivedTypes = this.archivedTypes || [];
+                    await new Promise((resolve) => setTimeout(resolve, 100));
 
-            this.updateSortOrders();
-            this.extractNewItems(this.treeData.categories || [], newCategories, newTypes, null);
-            this.extractNewItemsFromUncategorized(newTypes);
-            this.extractUpdatedItems(this.treeData.categories || [], updatedCategories, updatedTypes);
-            this.extractUpdatedItemsFromUncategorized(updatedTypes);
+                    const freshData = await this.$wire.call('getHierarchicalData');
+                    this.originalTreeData = freshData;
+                    this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
+                    this.deletedCategories = [];
+                    this.deletedTypes = [];
+                    this.archivedTypes = [];
+                    this.hasUnsavedChanges = false;
+                    this.render();
+                } catch (error) {
+                    console.error('Save failed:', error);
 
-            return {
-                categories: this.treeData.categories || [],
-                uncategorized_types: this.treeData.uncategorized_types || [],
-                new_categories: newCategories,
-                new_types: newTypes,
-                updated_categories: updatedCategories,
-                updated_types: updatedTypes,
-                deleted_categories: this.deletedCategories,
-                deleted_types: this.deletedTypes,
-                archived_types: this.archivedTypes,
-                restore_types: this.collectRestoreTypeIds(),
-            };
-        },
+                    if (window.FilamentNotification) {
+                        new window.FilamentNotification()
+                            .title('Unable to save changes')
+                            .body(
+                                'An unexpected error occurred while saving your changes. Your work has not been lost — please try again.',
+                            )
+                            .danger()
+                            .send();
+                    }
+                } finally {
+                    this.isSaving = false;
+                }
+            },
 
-        collectRestoreTypeIds() {
-            const ids = [];
-            const walkTypes = (types) => {
-                (types || []).forEach((type) => {
-                    if (type._restore) ids.push(type.id);
-                });
-            };
-            const walkCategories = (categories) => {
-                (categories || []).forEach((category) => {
-                    walkTypes(category.types);
-                    walkCategories(category.children);
-                });
-            };
-            walkTypes(this.treeData.uncategorized_types);
-            walkCategories(this.treeData.categories);
-            return ids;
-        },
+            prepareSaveData() {
+                const newCategories = [];
+                const newTypes = [];
+                const updatedCategories = [];
+                const updatedTypes = [];
 
-        updateSortOrders() {
-            if (this.treeData.categories) {
-                this.treeData.categories.forEach((category, index) => {
-                    category.sort = index + 1;
-                    category.parent_id = null;
-                    this.updateCategorySortOrders(category);
-                });
-            }
+                this.deletedCategories = this.deletedCategories || [];
+                this.deletedTypes = this.deletedTypes || [];
+                this.archivedTypes = this.archivedTypes || [];
 
-            if (this.treeData.uncategorized_types) {
-                this.treeData.uncategorized_types.forEach((type, index) => {
-                    type.sort = index + 1;
-                    type.category_id = null;
-                });
-            }
-        },
+                this.updateSortOrders();
+                this.extractNewItems(this.treeData.categories || [], newCategories, newTypes, null);
+                this.extractNewItemsFromUncategorized(newTypes);
+                this.extractUpdatedItems(this.treeData.categories || [], updatedCategories, updatedTypes);
+                this.extractUpdatedItemsFromUncategorized(updatedTypes);
 
-        updateCategorySortOrders(category) {
-            if (category.types) {
-                category.types.forEach((type, index) => {
-                    type.sort = index + 1;
-                    type.category_id = category.id;
-                });
-            }
+                return {
+                    categories: this.treeData.categories || [],
+                    uncategorized_types: this.treeData.uncategorized_types || [],
+                    new_categories: newCategories,
+                    new_types: newTypes,
+                    updated_categories: updatedCategories,
+                    updated_types: updatedTypes,
+                    deleted_categories: this.deletedCategories,
+                    deleted_types: this.deletedTypes,
+                    archived_types: this.archivedTypes,
+                    restore_types: this.collectRestoreTypeIds(),
+                };
+            },
 
-            if (category.children) {
-                category.children.forEach((child, index) => {
-                    child.sort = index + 1;
-                    child.parent_id = category.id;
-                    this.updateCategorySortOrders(child);
-                });
-            }
-        },
+            collectRestoreTypeIds() {
+                const ids = [];
+                const walkTypes = (types) => {
+                    (types || []).forEach((type) => {
+                        if (type._restore) ids.push(type.id);
+                    });
+                };
+                const walkCategories = (categories) => {
+                    (categories || []).forEach((category) => {
+                        walkTypes(category.types);
+                        walkCategories(category.children);
+                    });
+                };
+                walkTypes(this.treeData.uncategorized_types);
+                walkCategories(this.treeData.categories);
+                return ids;
+            },
 
-        extractNewItems(categories, newCategories, newTypes, parentId) {
-            categories.forEach((category, index) => {
-                if (typeof category.id === 'string' && category.id.startsWith('temp_')) {
-                    // This is a new category
-                    newCategories.push({
-                        temp_id: category.id,
-                        name: category.name,
-                        parent_id: parentId,
-                        sort: index + 1,
+            updateSortOrders() {
+                if (this.treeData.categories) {
+                    this.treeData.categories.forEach((category, index) => {
+                        category.sort = index + 1;
+                        category.parent_id = null;
+                        this.updateCategorySortOrders(category);
                     });
                 }
 
-                // Extract new types from this category
+                if (this.treeData.uncategorized_types) {
+                    this.treeData.uncategorized_types.forEach((type, index) => {
+                        type.sort = index + 1;
+                        type.category_id = null;
+                    });
+                }
+            },
+
+            updateCategorySortOrders(category) {
                 if (category.types) {
-                    category.types.forEach((type, typeIndex) => {
+                    category.types.forEach((type, index) => {
+                        type.sort = index + 1;
+                        type.category_id = category.id;
+                    });
+                }
+
+                if (category.children) {
+                    category.children.forEach((child, index) => {
+                        child.sort = index + 1;
+                        child.parent_id = category.id;
+                        this.updateCategorySortOrders(child);
+                    });
+                }
+            },
+
+            extractNewItems(categories, newCategories, newTypes, parentId) {
+                categories.forEach((category, index) => {
+                    if (typeof category.id === 'string' && category.id.startsWith('temp_')) {
+                        // This is a new category
+                        newCategories.push({
+                            temp_id: category.id,
+                            name: category.name,
+                            parent_id: parentId,
+                            sort: index + 1,
+                        });
+                    }
+
+                    // Extract new types from this category
+                    if (category.types) {
+                        category.types.forEach((type, typeIndex) => {
+                            if (typeof type.id === 'string' && type.id.startsWith('temp_')) {
+                                // A brand-new type may appear in several areas; it is only recorded
+                                // once for creation and its placements come from the tree structure.
+                                if (newTypes.some((newType) => newType.temp_id === type.id)) {
+                                    return;
+                                }
+
+                                newTypes.push({
+                                    temp_id: type.id,
+                                    name: type.name,
+                                    category_id: category.id,
+                                    sort: typeIndex + 1,
+                                });
+                            }
+                        });
+                    }
+
+                    // Recursively handle children
+                    if (category.children) {
+                        this.extractNewItems(category.children, newCategories, newTypes, category.id);
+                    }
+                });
+            },
+
+            extractNewItemsFromUncategorized(newTypes) {
+                if (this.treeData.uncategorized_types) {
+                    this.treeData.uncategorized_types.forEach((type, index) => {
                         if (typeof type.id === 'string' && type.id.startsWith('temp_')) {
-                            // This is a new type
+                            if (newTypes.some((newType) => newType.temp_id === type.id)) {
+                                return;
+                            }
+
                             newTypes.push({
                                 temp_id: type.id,
                                 name: type.name,
-                                category_id: category.id,
-                                sort: typeIndex + 1,
+                                category_id: null,
+                                sort: index + 1,
                             });
                         }
                     });
                 }
+            },
 
-                // Recursively handle children
-                if (category.children) {
-                    this.extractNewItems(category.children, newCategories, newTypes, category.id);
-                }
-            });
-        },
+            extractUpdatedItems(categories, updatedCategories, updatedTypes) {
+                categories.forEach((category) => {
+                    // Only check existing categories (not temp ones)
+                    if (!(typeof category.id === 'string' && category.id.startsWith('temp_'))) {
+                        const originalCategory = this.findOriginalCategoryById(category.id);
+                        if (originalCategory && originalCategory.name !== category.name) {
+                            updatedCategories.push({
+                                id: category.id,
+                                name: category.name,
+                            });
+                        }
+                    }
 
-        extractNewItemsFromUncategorized(newTypes) {
-            if (this.treeData.uncategorized_types) {
-                this.treeData.uncategorized_types.forEach((type, index) => {
-                    if (typeof type.id === 'string' && type.id.startsWith('temp_')) {
-                        newTypes.push({
-                            temp_id: type.id,
-                            name: type.name,
-                            category_id: null,
-                            sort: index + 1,
+                    // Check types in this category
+                    if (category.types) {
+                        category.types.forEach((type) => {
+                            if (!(typeof type.id === 'string' && type.id.startsWith('temp_'))) {
+                                const originalType = this.findOriginalTypeById(type.id);
+                                if (
+                                    originalType &&
+                                    originalType.name !== type.name &&
+                                    !updatedTypes.some((updated) => updated.id === type.id)
+                                ) {
+                                    updatedTypes.push({
+                                        id: type.id,
+                                        name: type.name,
+                                    });
+                                }
+                            }
                         });
+                    }
+
+                    // Recursively handle children
+                    if (category.children) {
+                        this.extractUpdatedItems(category.children, updatedCategories, updatedTypes);
                     }
                 });
-            }
-        },
+            },
 
-        extractUpdatedItems(categories, updatedCategories, updatedTypes) {
-            categories.forEach((category) => {
-                // Only check existing categories (not temp ones)
-                if (!(typeof category.id === 'string' && category.id.startsWith('temp_'))) {
-                    const originalCategory = this.findOriginalCategoryById(category.id);
-                    if (originalCategory && originalCategory.name !== category.name) {
-                        updatedCategories.push({
-                            id: category.id,
-                            name: category.name,
-                        });
-                    }
-                }
-
-                // Check types in this category
-                if (category.types) {
-                    category.types.forEach((type) => {
+            extractUpdatedItemsFromUncategorized(updatedTypes) {
+                if (this.treeData.uncategorized_types) {
+                    this.treeData.uncategorized_types.forEach((type) => {
                         if (!(typeof type.id === 'string' && type.id.startsWith('temp_'))) {
                             const originalType = this.findOriginalTypeById(type.id);
                             if (originalType && originalType.name !== type.name) {
@@ -1567,528 +1841,741 @@ document.addEventListener('alpine:init', () => {
                         }
                     });
                 }
+            },
 
-                // Recursively handle children
-                if (category.children) {
-                    this.extractUpdatedItems(category.children, updatedCategories, updatedTypes);
+            findOriginalCategoryById(categoryId, categories = null) {
+                if (!categories) {
+                    categories = this.originalTreeData.categories || [];
                 }
-            });
-        },
 
-        extractUpdatedItemsFromUncategorized(updatedTypes) {
-            if (this.treeData.uncategorized_types) {
-                this.treeData.uncategorized_types.forEach((type) => {
-                    if (!(typeof type.id === 'string' && type.id.startsWith('temp_'))) {
-                        const originalType = this.findOriginalTypeById(type.id);
-                        if (originalType && originalType.name !== type.name) {
-                            updatedTypes.push({
-                                id: type.id,
-                                name: type.name,
-                            });
-                        }
-                    }
-                });
-            }
-        },
-
-        findOriginalCategoryById(categoryId, categories = null) {
-            if (!categories) {
-                categories = this.originalTreeData.categories || [];
-            }
-
-            for (const category of categories) {
-                if (category.id === categoryId) {
-                    return category;
-                }
-                if (category.children) {
-                    const found = this.findOriginalCategoryById(categoryId, category.children);
-                    if (found) return found;
-                }
-            }
-            return null;
-        },
-
-        findOriginalTypeById(typeId) {
-            // Check uncategorized types first
-            if (this.originalTreeData.uncategorized_types) {
-                const type = this.originalTreeData.uncategorized_types.find((type) => type.id === typeId);
-                if (type) return type;
-            }
-
-            // Search in categories recursively
-            const findInCategories = (categories) => {
                 for (const category of categories) {
-                    if (category.types) {
-                        const type = category.types.find((type) => type.id === typeId);
-                        if (type) return type;
+                    if (category.id === categoryId) {
+                        return category;
                     }
                     if (category.children) {
-                        const found = findInCategories(category.children);
+                        const found = this.findOriginalCategoryById(categoryId, category.children);
                         if (found) return found;
                     }
                 }
                 return null;
-            };
+            },
 
-            return findInCategories(this.originalTreeData.categories || []);
-        },
-
-        discardChanges() {
-            this.deepCopyTreeData();
-            this.hasUnsavedChanges = false;
-            this.categoryInputs = {};
-            this.typeInputs = {};
-            this.render();
-        },
-
-        showCategoryInput(categoryId) {
-            this.categoryInputs[categoryId] = true;
-            this.render();
-            setTimeout(() => {
-                document.getElementById(`child-category-${categoryId}`)?.focus();
-                this.attachInputKeyHandlers(categoryId, 'category');
-            }, 50);
-        },
-
-        hideCategoryInput(categoryId) {
-            this.categoryInputs[categoryId] = false;
-            this.render();
-        },
-
-        showTypeInput(categoryId) {
-            this.typeInputs[categoryId] = true;
-            this.render();
-            setTimeout(() => {
-                document.getElementById(`child-type-${categoryId}`)?.focus();
-                this.attachInputKeyHandlers(categoryId, 'type');
-            }, 50);
-        },
-
-        hideTypeInput(categoryId) {
-            this.typeInputs[categoryId] = false;
-            this.render();
-        },
-
-        attachInputKeyHandlers(categoryId, inputType) {
-            const input = document.getElementById(`child-${inputType}-${categoryId}`);
-            if (!input) return;
-
-            input.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter') {
-                    if (inputType === 'category') {
-                        this.createCategory(categoryId);
-                    } else {
-                        this.createType(categoryId);
-                    }
-                } else if (event.key === 'Escape') {
-                    if (inputType === 'category') {
-                        this.hideCategoryInput(categoryId);
-                    } else {
-                        this.hideTypeInput(categoryId);
-                    }
+            findOriginalTypeById(typeId) {
+                // Check uncategorized types first
+                if (this.originalTreeData.uncategorized_types) {
+                    const type = this.originalTreeData.uncategorized_types.find((type) => type.id === typeId);
+                    if (type) return type;
                 }
-            });
-        },
 
-        createCategory(parentId) {
-            let name;
+                // Search in categories recursively
+                const findInCategories = (categories) => {
+                    for (const category of categories) {
+                        if (category.types) {
+                            const type = category.types.find((type) => type.id === typeId);
+                            if (type) return type;
+                        }
+                        if (category.children) {
+                            const found = findInCategories(category.children);
+                            if (found) return found;
+                        }
+                    }
+                    return null;
+                };
 
-            if (parentId) {
-                const parentElement = document.querySelector(`[data-category-id="${parentId}"]`);
-                if (parentElement && this.getCategoryLevel(parentElement) >= 1) {
+                return findInCategories(this.originalTreeData.categories || []);
+            },
+
+            discardChanges() {
+                this.deepCopyTreeData();
+                this.hasUnsavedChanges = false;
+                this.categoryInputs = {};
+                this.typeInputs = {};
+                this.existingTypeInputs = {};
+                this.render();
+            },
+
+            showCategoryInput(categoryId) {
+                this.categoryInputs[categoryId] = true;
+                this.render();
+                setTimeout(() => {
+                    document.getElementById(`child-category-${categoryId}`)?.focus();
+                    this.attachInputKeyHandlers(categoryId, 'category');
+                }, 50);
+            },
+
+            hideCategoryInput(categoryId) {
+                this.categoryInputs[categoryId] = false;
+                this.render();
+            },
+
+            showTypeInput(categoryId) {
+                this.typeInputs[categoryId] = true;
+                this.render();
+                setTimeout(() => {
+                    document.getElementById(`child-type-${categoryId}`)?.focus();
+                    this.attachInputKeyHandlers(categoryId, 'type');
+                }, 50);
+            },
+
+            hideTypeInput(categoryId) {
+                this.typeInputs[categoryId] = false;
+                this.render();
+            },
+
+            attachInputKeyHandlers(categoryId, inputType) {
+                const input = document.getElementById(`child-${inputType}-${categoryId}`);
+                if (!input) return;
+
+                input.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter') {
+                        if (inputType === 'category') {
+                            this.createCategory(categoryId);
+                        } else {
+                            this.createType(categoryId);
+                        }
+                    } else if (event.key === 'Escape') {
+                        if (inputType === 'category') {
+                            this.hideCategoryInput(categoryId);
+                        } else {
+                            this.hideTypeInput(categoryId);
+                        }
+                    }
+                });
+            },
+
+            createCategory(parentId) {
+                let name;
+
+                if (parentId) {
+                    const parentElement = document.querySelector(`[data-category-id="${parentId}"]`);
+                    if (parentElement && this.getCategoryLevel(parentElement) >= 1) {
+                        return;
+                    }
+
+                    const input = document.getElementById(`child-category-${parentId}`);
+                    name = input?.value;
+                } else {
+                    const input = document.getElementById('new-category-name');
+                    name = input?.value;
+                }
+
+                if (!name?.trim()) return;
+
+                // Create new category with temporary ID
+                const newCategory = {
+                    id: `temp_${this.nextTempId++}`,
+                    name: name.trim(),
+                    type: 'category',
+                    sort: 0,
+                    parent_id: parentId,
+                    children: [],
+                    types: [],
+                };
+
+                // Add to the appropriate location in tree data
+                if (parentId) {
+                    const parentCategory = this.findCategoryById(parentId);
+                    if (parentCategory) {
+                        if (!parentCategory.children) {
+                            parentCategory.children = [];
+                        }
+                        parentCategory.children.push(newCategory);
+                    }
+                } else {
+                    if (!this.treeData.categories) {
+                        this.treeData.categories = [];
+                    }
+                    this.treeData.categories.push(newCategory);
+                }
+
+                // Mark as changed and re-render
+                this.markAsChanged();
+
+                // Hide input and clear form
+                if (parentId) {
+                    this.hideCategoryInput(parentId);
+                } else {
+                    document.getElementById('show-category-btn').style.display = 'block';
+                    document.getElementById('category-input-form').style.display = 'none';
+                    document.getElementById('new-category-name').value = '';
+                }
+
+                this.render();
+            },
+
+            async createType(categoryId) {
+                let name;
+
+                if (categoryId) {
+                    const input = document.getElementById(`child-type-${categoryId}`);
+                    name = input?.value;
+                } else {
+                    const input = document.getElementById('new-type-name');
+                    name = input?.value;
+                }
+
+                if (!name?.trim()) return;
+
+                const locallyRemovedType = this.findLocallyRemovedTypeByName(name.trim());
+
+                if (locallyRemovedType) {
+                    this.undoLocalRemoval(locallyRemovedType, categoryId);
                     return;
                 }
 
-                const input = document.getElementById(`child-category-${parentId}`);
-                name = input?.value;
-            } else {
-                const input = document.getElementById('new-category-name');
-                name = input?.value;
-            }
+                if (this.activeTypeNameExists(name.trim())) {
+                    this.notifyDuplicateTypeName(name.trim());
+                    return;
+                }
 
-            if (!name?.trim()) return;
+                this.isCheckingType = true;
 
-            // Create new category with temporary ID
-            const newCategory = {
-                id: `temp_${this.nextTempId++}`,
-                name: name.trim(),
-                type: 'category',
-                sort: 0,
-                parent_id: parentId,
-                children: [],
-                types: [],
-            };
+                try {
+                    const archivedType = await this.$wire.checkArchivedTypeName(name.trim());
 
-            // Add to the appropriate location in tree data
-            if (parentId) {
-                const parentCategory = this.findCategoryById(parentId);
-                if (parentCategory) {
-                    if (!parentCategory.children) {
-                        parentCategory.children = [];
+                    if (archivedType) {
+                        this.pendingRestore = { archivedType, categoryId };
+                        window.dispatchEvent(
+                            new CustomEvent('open-modal', { detail: { id: 'archived-type-restore-modal' } }),
+                        );
+                        return;
                     }
-                    parentCategory.children.push(newCategory);
-                }
-            } else {
-                if (!this.treeData.categories) {
-                    this.treeData.categories = [];
-                }
-                this.treeData.categories.push(newCategory);
-            }
 
-            // Mark as changed and re-render
-            this.markAsChanged();
-
-            // Hide input and clear form
-            if (parentId) {
-                this.hideCategoryInput(parentId);
-            } else {
-                document.getElementById('show-category-btn').style.display = 'block';
-                document.getElementById('category-input-form').style.display = 'none';
-                document.getElementById('new-category-name').value = '';
-            }
-
-            this.render();
-        },
-
-        async createType(categoryId) {
-            let name;
-
-            if (categoryId) {
-                const input = document.getElementById(`child-type-${categoryId}`);
-                name = input?.value;
-            } else {
-                const input = document.getElementById('new-type-name');
-                name = input?.value;
-            }
-
-            if (!name?.trim()) return;
-
-            const locallyRemovedType = this.findLocallyRemovedTypeByName(name.trim());
-
-            if (locallyRemovedType) {
-                this.undoLocalRemoval(locallyRemovedType, categoryId);
-                return;
-            }
-
-            this.isCheckingType = true;
-
-            try {
-                const archivedType = await this.$wire.checkArchivedTypeName(name.trim());
-
-                if (archivedType) {
-                    this.pendingRestore = { archivedType, categoryId };
-                    window.dispatchEvent(
-                        new CustomEvent('open-modal', { detail: { id: 'archived-type-restore-modal' } }),
+                    this.addTypeToTree(
+                        {
+                            id: `temp_${this.nextTempId++}`,
+                            name: name.trim(),
+                            type: 'type',
+                            sort: 0,
+                            category_id: categoryId,
+                            service_requests_count: 0,
+                        },
+                        categoryId,
                     );
-                    return;
+                } finally {
+                    this.isCheckingType = false;
                 }
+            },
+
+            confirmRestore() {
+                if (!this.pendingRestore) return;
+
+                const { archivedType, categoryId } = this.pendingRestore;
+                this.pendingRestore = null;
 
                 this.addTypeToTree(
                     {
-                        id: `temp_${this.nextTempId++}`,
-                        name: name.trim(),
+                        id: archivedType.id,
+                        name: archivedType.name,
                         type: 'type',
                         sort: 0,
                         category_id: categoryId,
-                        service_requests_count: 0,
+                        service_requests_count: archivedType.service_requests_count,
+                        view_url: archivedType.view_url,
+                        _restore: true,
                     },
                     categoryId,
                 );
-            } finally {
-                this.isCheckingType = false;
-            }
-        },
+            },
 
-        confirmRestore() {
-            if (!this.pendingRestore) return;
+            findLocallyRemovedTypeByName(name) {
+                const removedIds = [...(this.deletedTypes || []), ...(this.archivedTypes || [])];
+                if (removedIds.length === 0) return null;
 
-            const { archivedType, categoryId } = this.pendingRestore;
-            this.pendingRestore = null;
-
-            this.addTypeToTree(
-                {
-                    id: archivedType.id,
-                    name: archivedType.name,
-                    type: 'type',
-                    sort: 0,
-                    category_id: categoryId,
-                    service_requests_count: archivedType.service_requests_count,
-                    view_url: archivedType.view_url,
-                    _restore: true,
-                },
-                categoryId,
-            );
-        },
-
-        findLocallyRemovedTypeByName(name) {
-            const removedIds = [...(this.deletedTypes || []), ...(this.archivedTypes || [])];
-            if (removedIds.length === 0) return null;
-
-            const findInTypes = (types) => {
-                return (types || []).find((type) => removedIds.includes(type.id) && type.name === name);
-            };
-            const findInCategories = (categories) => {
-                for (const category of categories || []) {
-                    const found = findInTypes(category.types);
-                    if (found) return found;
-                    const childResult = findInCategories(category.children);
-                    if (childResult) return childResult;
-                }
-                return null;
-            };
-
-            return (
-                findInTypes(this.originalTreeData.uncategorized_types) ||
-                findInCategories(this.originalTreeData.categories)
-            );
-        },
-
-        undoLocalRemoval(type, categoryId) {
-            this.deletedTypes = (this.deletedTypes || []).filter((id) => id !== type.id);
-            this.archivedTypes = (this.archivedTypes || []).filter((id) => id !== type.id);
-
-            this.addTypeToTree(
-                {
-                    id: type.id,
-                    name: type.name,
-                    type: 'type',
-                    sort: 0,
-                    category_id: categoryId,
-                    service_requests_count: type.service_requests_count ?? 0,
-                    view_url: type.view_url ?? '',
-                },
-                categoryId,
-            );
-        },
-
-        addTypeToTree(type, categoryId) {
-            if (categoryId) {
-                const category = this.findCategoryById(categoryId);
-                if (category) {
-                    if (!category.types) {
-                        category.types = [];
+                const findInTypes = (types) => {
+                    return (types || []).find((type) => removedIds.includes(type.id) && type.name === name);
+                };
+                const findInCategories = (categories) => {
+                    for (const category of categories || []) {
+                        const found = findInTypes(category.types);
+                        if (found) return found;
+                        const childResult = findInCategories(category.children);
+                        if (childResult) return childResult;
                     }
-                    category.types.push(type);
+                    return null;
+                };
+
+                return (
+                    findInTypes(this.originalTreeData.uncategorized_types) ||
+                    findInCategories(this.originalTreeData.categories)
+                );
+            },
+
+            undoLocalRemoval(type, categoryId) {
+                this.deletedTypes = (this.deletedTypes || []).filter((id) => id !== type.id);
+                this.archivedTypes = (this.archivedTypes || []).filter((id) => id !== type.id);
+
+                this.addTypeToTree(
+                    {
+                        id: type.id,
+                        name: type.name,
+                        type: 'type',
+                        sort: 0,
+                        category_id: categoryId,
+                        service_requests_count: type.service_requests_count ?? 0,
+                        view_url: type.view_url ?? '',
+                    },
+                    categoryId,
+                );
+            },
+
+            // Whether an active (not staged for deletion/archival) type already uses this name
+            // anywhere in the tree. Names must be unique across every area, so this powers the
+            // client-side guard that stops duplicates before they ever reach the server.
+            activeTypeNameExists(name, excludeTypeId = null) {
+                const target = (name || '').trim().toLowerCase();
+
+                if (!target) {
+                    return false;
                 }
-            } else {
-                if (!this.treeData.uncategorized_types) {
-                    this.treeData.uncategorized_types = [];
+
+                const removedIds = new Set([...(this.deletedTypes || []), ...(this.archivedTypes || [])]);
+
+                const matches = (types) =>
+                    (types || []).some(
+                        (type) =>
+                            type.id !== excludeTypeId &&
+                            !removedIds.has(type.id) &&
+                            (type.name || '').trim().toLowerCase() === target,
+                    );
+
+                const walk = (categories) => {
+                    for (const category of categories || []) {
+                        if (matches(category.types)) {
+                            return true;
+                        }
+
+                        if (walk(category.children)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                };
+
+                return matches(this.treeData.uncategorized_types) || walk(this.treeData.categories);
+            },
+
+            notifyDuplicateTypeName(name) {
+                if (!window.FilamentNotification) {
+                    return;
                 }
-                this.treeData.uncategorized_types.push(type);
-            }
 
-            this.markAsChanged();
+                new window.FilamentNotification()
+                    .title('Name already in use')
+                    .body(
+                        `The name ${name} is already in use by another service request type. Please select a different name.`,
+                    )
+                    .danger()
+                    .send();
+            },
 
-            if (categoryId) {
-                this.hideTypeInput(categoryId);
-            } else {
-                document.getElementById('show-type-btn').style.display = 'block';
-                document.getElementById('type-input-form').style.display = 'none';
-                document.getElementById('new-type-name').value = '';
-                const showCategoryBtn = document.getElementById('show-category-btn');
-                if (showCategoryBtn) showCategoryBtn.style.display = 'block';
-            }
+            addTypeToTree(type, categoryId) {
+                if (categoryId) {
+                    const category = this.findCategoryById(categoryId);
+                    if (category) {
+                        if (!category.types) {
+                            category.types = [];
+                        }
+                        category.types.push(type);
+                    }
+                } else {
+                    if (!this.treeData.uncategorized_types) {
+                        this.treeData.uncategorized_types = [];
+                    }
+                    this.treeData.uncategorized_types.push(type);
+                }
 
-            this.render();
-        },
+                this.markAsChanged();
 
-        stageCategoryDeletion(categoryId) {
-            this.deletedCategories = this.deletedCategories || [];
-            if (!this.deletedCategories.includes(categoryId)) {
-                this.deletedCategories.push(categoryId);
-            }
+                if (categoryId) {
+                    this.hideTypeInput(categoryId);
+                } else {
+                    document.getElementById('show-type-btn').style.display = 'block';
+                    document.getElementById('type-input-form').style.display = 'none';
+                    document.getElementById('new-type-name').value = '';
+                    const showCategoryBtn = document.getElementById('show-category-btn');
+                    if (showCategoryBtn) showCategoryBtn.style.display = 'block';
+                }
 
-            this.removeCategoryFromTree(categoryId);
-            this.markAsChanged();
-            this.render();
-        },
+                this.render();
+            },
 
-        removeCategoryFromTree(categoryId) {
-            const removedCategory = this.findAndRemoveCategory(categoryId);
-            if (!removedCategory) {
-                return;
-            }
-
-            const queue = [...(removedCategory.children || [])];
-
-            while (queue.length) {
-                const child = queue.shift();
+            stageCategoryDeletion(categoryId) {
                 this.deletedCategories = this.deletedCategories || [];
-                if (!this.deletedCategories.includes(child.id)) {
-                    this.deletedCategories.push(child.id);
+                if (!this.deletedCategories.includes(categoryId)) {
+                    this.deletedCategories.push(categoryId);
                 }
 
-                queue.push(...(child.children || []));
+                this.removeCategoryFromTree(categoryId);
+                this.markAsChanged();
+                this.render();
+            },
 
-                (child.types || []).forEach((type) => {
+            removeCategoryFromTree(categoryId) {
+                const removedCategory = this.findAndRemoveCategory(categoryId);
+                if (!removedCategory) {
+                    return;
+                }
+
+                const queue = [...(removedCategory.children || [])];
+
+                while (queue.length) {
+                    const child = queue.shift();
+                    this.deletedCategories = this.deletedCategories || [];
+                    if (!this.deletedCategories.includes(child.id)) {
+                        this.deletedCategories.push(child.id);
+                    }
+
+                    queue.push(...(child.children || []));
+
+                    (child.types || []).forEach((type) => {
+                        this.deletedTypes = this.deletedTypes || [];
+                        if (!this.deletedTypes.includes(type.id)) {
+                            this.deletedTypes.push(type.id);
+                        }
+                    });
+                }
+
+                (removedCategory.types || []).forEach((type) => {
                     this.deletedTypes = this.deletedTypes || [];
                     if (!this.deletedTypes.includes(type.id)) {
                         this.deletedTypes.push(type.id);
                     }
                 });
-            }
+            },
 
-            (removedCategory.types || []).forEach((type) => {
+            confirmDeleteCategory(categoryId) {
+                this.stageCategoryDeletion(categoryId);
+            },
+
+            canDeleteCategory(category) {
+                if (!category) {
+                    return false;
+                }
+
+                if ((category.descendant_service_requests_count ?? 0) > 0) {
+                    return false;
+                }
+
+                const typeHasRequests = (category.types || []).some((type) => (type.service_requests_count ?? 0) > 0);
+                if (typeHasRequests) {
+                    return false;
+                }
+
+                return (category.children || []).every((child) => this.canDeleteCategory(child));
+            },
+
+            removeTypeFromTree(typeId) {
+                this.findAndRemoveType(typeId);
+            },
+
+            typePlacementKey(typeId, owningCategoryId) {
+                return `${typeId}__${owningCategoryId || 'uncat'}`;
+            },
+
+            countTypeOccurrences(typeId) {
+                let count = 0;
+
+                const walk = (categories) => {
+                    for (const category of categories || []) {
+                        count += (category.types || []).filter((type) => type.id === typeId).length;
+                        walk(category.children);
+                    }
+                };
+
+                walk(this.treeData.categories);
+                count += (this.treeData.uncategorized_types || []).filter((type) => type.id === typeId).length;
+
+                return count;
+            },
+
+            categoryContainsType(categoryId, typeId) {
+                if (!categoryId) {
+                    return (this.treeData.uncategorized_types || []).some((type) => type.id === typeId);
+                }
+
+                const category = this.findCategoryById(categoryId);
+
+                return !!category && (category.types || []).some((type) => type.id === typeId);
+            },
+
+            // Every distinct type currently in the tree, minus those already filed under the given
+            // category, for the "add existing" picker. Works on live (unsaved) state so freshly
+            // created types can be added to further areas before saving.
+            collectPickableTypes(excludeCategoryId) {
+                const seen = new Map();
+
+                const consider = (type) => {
+                    if (!seen.has(type.id)) {
+                        seen.set(type.id, { id: type.id, name: type.name });
+                    }
+                };
+
+                const walk = (categories) => {
+                    for (const category of categories || []) {
+                        (category.types || []).forEach(consider);
+                        walk(category.children);
+                    }
+                };
+
+                walk(this.treeData.categories);
+                (this.treeData.uncategorized_types || []).forEach(consider);
+
+                const excludedCategory = excludeCategoryId ? this.findCategoryById(excludeCategoryId) : null;
+                const excluded = new Set((excludedCategory?.types || []).map((type) => type.id));
+
+                return [...seen.values()]
+                    .filter((type) => !excluded.has(type.id))
+                    .sort((a, b) => a.name.localeCompare(b.name));
+            },
+
+            removeTypePlacement(typeId, owningCategoryId) {
+                const categoryId = owningCategoryId || null;
+
+                if (categoryId) {
+                    const category = this.findCategoryById(categoryId);
+                    if (category && category.types) {
+                        const index = category.types.findIndex((type) => type.id === typeId);
+                        if (index !== -1) {
+                            category.types.splice(index, 1);
+                        }
+                    }
+                } else {
+                    const index = (this.treeData.uncategorized_types || []).findIndex((type) => type.id === typeId);
+                    if (index !== -1) {
+                        this.treeData.uncategorized_types.splice(index, 1);
+                    }
+                }
+
+                this.markAsChanged();
+                this.render();
+            },
+
+            showExistingTypeInput(categoryId) {
+                this.existingTypeInputs[categoryId] = true;
+                this.render();
+                setTimeout(() => {
+                    document.getElementById(`existing-type-${categoryId}`)?.focus();
+                }, 50);
+            },
+
+            hideExistingTypeInput(categoryId) {
+                this.existingTypeInputs[categoryId] = false;
+                this.render();
+            },
+
+            addExistingTypeToCategory(categoryId) {
+                const select = document.getElementById(`existing-type-${categoryId}`);
+                const typeId = select?.value;
+
+                if (!typeId) {
+                    return;
+                }
+
+                if (this.categoryContainsType(categoryId, typeId)) {
+                    this.hideExistingTypeInput(categoryId);
+                    return;
+                }
+
+                const source = this.findTypeById(typeId);
+
+                if (!source) {
+                    this.hideExistingTypeInput(categoryId);
+                    return;
+                }
+
+                // A type filed under any category can no longer be uncategorized, so drop it from the
+                // uncategorized bucket when it gains its first category placement.
+                const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(
+                    (type) => type.id === typeId,
+                );
+                if (uncategorizedIndex !== -1) {
+                    this.treeData.uncategorized_types.splice(uncategorizedIndex, 1);
+                }
+
+                const placement = {
+                    id: source.id,
+                    name: source.name,
+                    type: 'type',
+                    sort: 0,
+                    category_id: categoryId,
+                    service_requests_count: source.service_requests_count ?? 0,
+                    view_url: source.view_url ?? '',
+                };
+
+                if (this.visibilityRestrictionsEnabled) {
+                    placement.is_visibility_restricted = source.is_visibility_restricted ?? false;
+                    placement.restricted_to_contact_type_ids = source.restricted_to_contact_type_ids ?? [];
+                }
+
+                const category = this.findCategoryById(categoryId);
+                if (category) {
+                    category.types = category.types || [];
+                    category.types.push(placement);
+                }
+
+                if (this.collapsedCategories[categoryId]) {
+                    delete this.collapsedCategories[categoryId];
+                }
+
+                this.hideExistingTypeInput(categoryId);
+                this.markAsChanged();
+                this.render();
+            },
+
+            stageTypeDeletion(typeId) {
                 this.deletedTypes = this.deletedTypes || [];
-                if (!this.deletedTypes.includes(type.id)) {
-                    this.deletedTypes.push(type.id);
+                if (!this.deletedTypes.includes(typeId)) {
+                    this.deletedTypes.push(typeId);
                 }
-            });
-        },
 
-        confirmDeleteCategory(categoryId) {
-            this.stageCategoryDeletion(categoryId);
-        },
-
-        canDeleteCategory(category) {
-            if (!category) {
-                return false;
-            }
-
-            if ((category.descendant_service_requests_count ?? 0) > 0) {
-                return false;
-            }
-
-            const typeHasRequests = (category.types || []).some((type) => (type.service_requests_count ?? 0) > 0);
-            if (typeHasRequests) {
-                return false;
-            }
-
-            return (category.children || []).every((child) => this.canDeleteCategory(child));
-        },
-
-        removeTypeFromTree(typeId) {
-            this.findAndRemoveType(typeId);
-        },
-
-        stageTypeDeletion(typeId) {
-            this.deletedTypes = this.deletedTypes || [];
-            if (!this.deletedTypes.includes(typeId)) {
-                this.deletedTypes.push(typeId);
-            }
-
-            this.removeTypeFromTree(typeId);
-            this.markAsChanged();
-            this.render();
-        },
-
-        stageTypeArchive(typeId) {
-            this.archivedTypes = this.archivedTypes || [];
-            if (!this.archivedTypes.includes(typeId)) {
-                this.archivedTypes.push(typeId);
-            }
-
-            this.removeTypeFromTree(typeId);
-            this.markAsChanged();
-            this.render();
-        },
-
-        startTypeRename(typeId) {
-            this.renamingTypes[typeId] = true;
-            this.render();
-            setTimeout(() => {
-                const input = document.getElementById(`rename-type-${typeId}`);
-                const confirmBtn = document.getElementById(`confirm-rename-type-${typeId}`);
-
-                if (input) {
-                    input.focus();
-                    input.select();
-
-                    input.addEventListener('input', (event) => {
-                        if (confirmBtn) {
-                            confirmBtn.disabled = !event.target.value.trim();
-                        }
-                    });
-
-                    input.addEventListener('keydown', (event) => {
-                        if (event.key === 'Enter' && input.value.trim()) {
-                            this.confirmTypeRename(typeId);
-                        } else if (event.key === 'Escape') {
-                            this.cancelTypeRename(typeId);
-                        }
-                    });
-                }
-            }, 50);
-        },
-
-        confirmTypeRename(typeId) {
-            const input = document.getElementById(`rename-type-${typeId}`);
-            const newName = input?.value.trim();
-
-            if (!newName) {
-                return;
-            }
-
-            const type = this.findTypeById(typeId);
-            if (type && type.name !== newName) {
-                type.name = newName;
+                this.removeTypeFromTree(typeId);
                 this.markAsChanged();
-            }
+                this.render();
+            },
 
-            this.renamingTypes[typeId] = false;
-            this.render();
-        },
+            stageTypeArchive(typeId) {
+                this.archivedTypes = this.archivedTypes || [];
+                if (!this.archivedTypes.includes(typeId)) {
+                    this.archivedTypes.push(typeId);
+                }
 
-        cancelTypeRename(typeId) {
-            this.renamingTypes[typeId] = false;
-            this.render();
-        },
+                this.removeTypeFromTree(typeId);
+                this.markAsChanged();
+                this.render();
+            },
 
-        startCategoryRename(categoryId) {
-            this.renamingCategories[categoryId] = true;
-            this.render();
-            setTimeout(() => {
+            startTypeRename(typeId, placementKey) {
+                this.renamingTypes[placementKey] = true;
+                this.render();
+                setTimeout(() => {
+                    const input = document.getElementById(`rename-type-${placementKey}`);
+                    const confirmBtn = document.getElementById(`confirm-rename-type-${placementKey}`);
+
+                    if (input) {
+                        input.focus();
+                        input.select();
+
+                        input.addEventListener('input', (event) => {
+                            if (confirmBtn) {
+                                confirmBtn.disabled = !event.target.value.trim();
+                            }
+                        });
+
+                        input.addEventListener('keydown', (event) => {
+                            if (event.key === 'Enter' && input.value.trim()) {
+                                this.confirmTypeRename(typeId, placementKey);
+                            } else if (event.key === 'Escape') {
+                                this.cancelTypeRename(placementKey);
+                            }
+                        });
+                    }
+                }, 50);
+            },
+
+            confirmTypeRename(typeId, placementKey) {
+                const input = document.getElementById(`rename-type-${placementKey}`);
+                const newName = input?.value.trim();
+
+                if (!newName) {
+                    return;
+                }
+
+                if (this.activeTypeNameExists(newName, typeId)) {
+                    this.notifyDuplicateTypeName(newName);
+                    return;
+                }
+
+                // Renaming is type-level, so update the name on every placement of this type.
+                let changed = false;
+
+                const applyName = (type) => {
+                    if (type.id === typeId && type.name !== newName) {
+                        type.name = newName;
+                        changed = true;
+                    }
+                };
+
+                const walk = (categories) => {
+                    for (const category of categories || []) {
+                        (category.types || []).forEach(applyName);
+                        walk(category.children);
+                    }
+                };
+
+                walk(this.treeData.categories);
+                (this.treeData.uncategorized_types || []).forEach(applyName);
+
+                if (changed) {
+                    this.markAsChanged();
+                }
+
+                delete this.renamingTypes[placementKey];
+                this.render();
+            },
+
+            cancelTypeRename(placementKey) {
+                delete this.renamingTypes[placementKey];
+                this.render();
+            },
+
+            startCategoryRename(categoryId) {
+                this.renamingCategories[categoryId] = true;
+                this.render();
+                setTimeout(() => {
+                    const input = document.getElementById(`rename-category-${categoryId}`);
+                    const confirmBtn = document.getElementById(`confirm-rename-category-${categoryId}`);
+
+                    if (input) {
+                        input.focus();
+                        input.select();
+
+                        input.addEventListener('input', (event) => {
+                            if (confirmBtn) {
+                                confirmBtn.disabled = !event.target.value.trim();
+                            }
+                        });
+
+                        input.addEventListener('keydown', (event) => {
+                            if (event.key === 'Enter' && input.value.trim()) {
+                                this.confirmCategoryRename(categoryId);
+                            } else if (event.key === 'Escape') {
+                                this.cancelCategoryRename(categoryId);
+                            }
+                        });
+                    }
+                }, 50);
+            },
+
+            confirmCategoryRename(categoryId) {
                 const input = document.getElementById(`rename-category-${categoryId}`);
-                const confirmBtn = document.getElementById(`confirm-rename-category-${categoryId}`);
+                const newName = input?.value.trim();
 
-                if (input) {
-                    input.focus();
-                    input.select();
-
-                    input.addEventListener('input', (event) => {
-                        if (confirmBtn) {
-                            confirmBtn.disabled = !event.target.value.trim();
-                        }
-                    });
-
-                    input.addEventListener('keydown', (event) => {
-                        if (event.key === 'Enter' && input.value.trim()) {
-                            this.confirmCategoryRename(categoryId);
-                        } else if (event.key === 'Escape') {
-                            this.cancelCategoryRename(categoryId);
-                        }
-                    });
+                if (!newName) {
+                    return;
                 }
-            }, 50);
-        },
 
-        confirmCategoryRename(categoryId) {
-            const input = document.getElementById(`rename-category-${categoryId}`);
-            const newName = input?.value.trim();
+                const category = this.findCategoryById(categoryId);
+                if (category && category.name !== newName) {
+                    category.name = newName;
+                    this.markAsChanged();
+                }
 
-            if (!newName) {
-                return;
-            }
+                this.renamingCategories[categoryId] = false;
+                this.render();
+            },
 
-            const category = this.findCategoryById(categoryId);
-            if (category && category.name !== newName) {
-                category.name = newName;
-                this.markAsChanged();
-            }
+            cancelCategoryRename(categoryId) {
+                this.renamingCategories[categoryId] = false;
+                this.render();
+            },
 
-            this.renamingCategories[categoryId] = false;
-            this.render();
-        },
-
-        cancelCategoryRename(categoryId) {
-            this.renamingCategories[categoryId] = false;
-            this.render();
-        },
-
-        escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        },
-    }));
+            escapeHtml(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            },
+        }),
+    );
 });

@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -53,6 +54,10 @@ class GetServiceRequestFormController extends Controller
         $contact = auth('contact')->user() ?? $request->user();
 
         abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
+
+        if (ServiceRequestTypeVisibilityRestrictionsFeature::active()) {
+            abort_unless($type->isVisibleToContactType($contact->type_id), Response::HTTP_NOT_FOUND);
+        }
 
         $form = $type->form;
 

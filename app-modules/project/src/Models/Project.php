@@ -37,19 +37,21 @@
 namespace AidingApp\Project\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Department\Models\Department;
 use AidingApp\Project\Database\Factories\ProjectFactory;
 use AidingApp\Project\Models\Scopes\ProjectVisibilityScope;
 use AidingApp\Project\Observers\ProjectObserver;
-use AidingApp\Task\Enums\TaskStatus;
-use AidingApp\Task\Models\Task;
 use App\Models\BaseModel;
 use App\Models\User;
+use CanyonGBS\Common\Enums\Color;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
@@ -73,6 +75,17 @@ class Project extends BaseModel implements Auditable
     protected $fillable = [
         'name',
         'description',
+        'icon',
+        'color',
+        'department_id',
+        'start_date',
+        'target_completion_date',
+    ];
+
+    protected $casts = [
+        'start_date' => 'date',
+        'target_completion_date' => 'date',
+        'color' => Color::class,
     ];
 
     /**
@@ -84,19 +97,11 @@ class Project extends BaseModel implements Auditable
     }
 
     /**
-     * @return HasMany<Task, $this>
+     * @return BelongsTo<Department, $this>
      */
-    public function tasks(): HasMany
+    public function department(): BelongsTo
     {
-        return $this->hasMany(Task::class, 'project_id');
-    }
-
-    /**
-     * @return HasMany<Task, $this>
-     */
-    public function activeTasks(): HasMany
-    {
-        return $this->tasks()->whereIn('status', [TaskStatus::Pending, TaskStatus::InProgress]);
+        return $this->belongsTo(Department::class);
     }
 
     /**
@@ -175,5 +180,27 @@ class Project extends BaseModel implements Auditable
     public function pipelines(): HasMany
     {
         return $this->hasMany(Pipeline::class, 'project_id');
+    }
+
+    /**
+     * @return BelongsToMany<Contact, $this, ProjectGuest>
+     */
+    public function guestContacts(): BelongsToMany
+    {
+        return $this
+            ->morphedByMany(Contact::class, 'guest', 'project_guests', 'project_id', 'guest_id')
+            ->using(ProjectGuest::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<Organization, $this, ProjectGuest>
+     */
+    public function guestOrganizations(): BelongsToMany
+    {
+        return $this
+            ->morphedByMany(Organization::class, 'guest', 'project_guests', 'project_id', 'guest_id')
+            ->using(ProjectGuest::class)
+            ->withTimestamps();
     }
 }

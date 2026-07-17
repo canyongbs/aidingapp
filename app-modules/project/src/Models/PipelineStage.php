@@ -38,6 +38,7 @@ namespace AidingApp\Project\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Project\Database\Factories\PipelineStageFactory;
+use AidingApp\Project\Enums\PipelineStageClassification;
 use App\Models\BaseModel;
 use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
@@ -62,6 +63,11 @@ class PipelineStage extends BaseModel implements Auditable
         'name',
         'pipeline_id',
         'order',
+        'classification',
+    ];
+
+    protected $casts = [
+        'classification' => PipelineStageClassification::class,
     ];
 
     /**

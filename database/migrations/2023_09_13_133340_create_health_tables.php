@@ -39,7 +39,9 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Spatie\Health\ResultStores\EloquentHealthResultStore;
 
+// @phpstan-ignore Common.migrationMissingDownMethod
 return new class () extends Migration {
+    // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function up(): void
     {
         $tableName = EloquentHealthResultStore::getHistoryItemInstance()->getTable();
@@ -52,7 +54,7 @@ return new class () extends Migration {
             $table->string('status');
             $table->text('notification_message')->nullable();
             $table->string('short_summary')->nullable();
-            $table->json('meta');
+            $table->json('meta'); // @phpstan-ignore Common.jsonColumnInMigration
             $table->timestamp('ended_at');
             $table->uuid('batch');
 

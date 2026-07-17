@@ -36,14 +36,17 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
+use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
+use App\Features\PipelineStageClassificationFeature;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ManageRelatedRecords;
@@ -85,12 +88,21 @@ class ManagePipelines extends ManageRelatedRecords
                     ->relationship('stages')
                     ->table([
                         TableColumn::make('Stage Name'),
+                        ...(PipelineStageClassificationFeature::active() ? [TableColumn::make('Classification')] : []),
                     ])
                     ->schema([
                         TextInput::make('name')
                             ->label('Stage')
                             ->distinct()
                             ->required(),
+                        Select::make('classification')
+                            ->label('Classification')
+                            ->options(PipelineStageClassification::class)
+                            ->enum(PipelineStageClassification::class)
+                            ->required()
+                            ->native()
+                            ->default(PipelineStageClassification::Planning->value)
+                            ->visible(fn () => PipelineStageClassificationFeature::active()),
                     ])
                     ->orderColumn('order')
                     ->reorderable()

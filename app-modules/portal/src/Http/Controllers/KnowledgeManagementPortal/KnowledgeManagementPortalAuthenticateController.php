@@ -93,7 +93,6 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
             'license_management_enabled' => $addons?->licenseManagement,
             'has_assets' => auth()->guard('contact')->user()?->assetCheckIns()->exists() || auth()->guard('contact')->user()?->assetCheckOuts()->exists() ?: false,
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
-            'has_tasks' => auth()->guard('contact')->user()?->tasks()->exists() ?: false,
             'assistant_enabled' => $assistantEnabled,
             'assistant_widget_loader_url' => $assistantEnabled
                 ? url('widgets/assistant/' . json_decode(Storage::disk('public')->get('widgets/assistant/.vite/manifest.json'), true)['src/loader.js']['file'])

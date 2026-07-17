@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeFactory;
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
@@ -45,7 +46,9 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Models\Concerns\RestrictsVisibilityToContactTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
+use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
@@ -71,6 +74,7 @@ class ServiceRequestType extends BaseModel implements Auditable
     use SoftDeletes;
     use HasUuids;
     use AuditableTrait;
+    use RestrictsVisibilityToContactTypes;
 
     /** @use HasFactory<ServiceRequestTypeFactory> */
     use HasFactory;
@@ -97,6 +101,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'is_live_chat_enabled',
         'max_simultaneous_chats',
         'email_automatic_creation_contact_create_condition',
+        'is_visibility_restricted',
     ];
 
     public function serviceRequests(): HasManyThrough
@@ -254,6 +259,99 @@ class ServiceRequestType extends BaseModel implements Auditable
         return $this->belongsTo(ServiceRequestTypeCategory::class, 'category_id');
     }
 
+    /**
+     * @return BelongsToMany<ServiceRequestTypeCategory, $this, covariant ServiceRequestCategoryType>
+     */
+    public function categories(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            related: ServiceRequestTypeCategory::class,
+            table: 'service_request_category_types',
+            foreignPivotKey: 'service_request_type_id',
+            relatedPivotKey: 'service_request_type_category_id',
+        )
+            ->using(ServiceRequestCategoryType::class)
+            ->withPivot('id', 'sort')
+            ->withTimestamps()
+            ->orderByPivot('sort');
+    }
+
+    /**
+     * @return BelongsToMany<ContactType, $this, ServiceRequestTypeVisibilityContactType>
+     */
+    public function restrictedToContactTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            related: ContactType::class,
+            table: 'service_request_type_visibility_contact_types',
+            foreignPivotKey: 'service_request_type_id',
+            relatedPivotKey: 'contact_type_id',
+        )
+            ->using(ServiceRequestTypeVisibilityContactType::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return iterable<ServiceRequestTypeCategory>
+     */
+    public function visibilityRestrictionParents(): iterable
+    {
+        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            return $this->categories;
+        }
+
+        return $this->category !== null ? [$this->category] : [];
+    }
+
+    /**
+     * The ids of every category this type is filed under.
+     *
+     * @return array<int, string>
+     */
+    public function categoryIds(): array
+    {
+        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            return $this->categories->pluck('id')->all();
+        }
+
+        $categoryId = $this->getAttribute('category_id');
+
+        assert(is_string($categoryId) || is_null($categoryId));
+
+        return $categoryId !== null ? [$categoryId] : [];
+    }
+
+    /**
+     * The per-area sort of this type keyed by the id of every category it is filed under.
+     *
+     * While the multiple categories feature is active the sort comes from the pivot so a type can
+     * be ordered differently in each area; otherwise it falls back to the type's single global sort.
+     *
+     * @return array<string, int>
+     */
+    public function categorySortMap(): array
+    {
+        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            $map = [];
+
+            foreach ($this->categories as $category) {
+                $pivot = $category->getRelationValue('pivot');
+
+                assert($pivot instanceof ServiceRequestCategoryType);
+
+                $map[$category->id] = (int) $pivot->getAttribute('sort');
+            }
+
+            return $map;
+        }
+
+        $categoryId = $this->getAttribute('category_id');
+
+        assert(is_string($categoryId) || is_null($categoryId));
+
+        return $categoryId !== null ? [$categoryId => (int) $this->getAttribute('sort')] : [];
+    }
+
     protected function casts(): array
     {
         return [
@@ -271,6 +369,7 @@ class ServiceRequestType extends BaseModel implements Auditable
             'is_live_chat_enabled' => 'boolean',
             'max_simultaneous_chats' => 'integer',
             'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::class,
+            'is_visibility_restricted' => 'boolean',
         ];
     }
 

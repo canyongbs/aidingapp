@@ -312,8 +312,6 @@ return [
     'suffix' => 'Sufijo',
     'tag' => 'Etiqueta',
     'tags' => 'Etiquetas',
-    'task_management' => 'Administración de tareas',
-    'tasks' => 'Tareas',
     'department-management' => 'Departamentos',
     'department-management-singular' => 'Departamento',
     'text' => 'Texto',

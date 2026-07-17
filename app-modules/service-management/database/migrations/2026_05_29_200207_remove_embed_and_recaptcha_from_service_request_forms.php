@@ -64,7 +64,7 @@ return new class () extends Migration {
             Schema::table('service_request_forms', function (Blueprint $table) {
                 $table->string('name')->nullable();
                 $table->boolean('embed_enabled')->default(false);
-                $table->json('allowed_domains')->nullable();
+                $table->json('allowed_domains')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration
                 $table->boolean('recaptcha_enabled')->default(false);
                 $table->string('primary_color')->nullable();
                 $table->string('rounding')->nullable();

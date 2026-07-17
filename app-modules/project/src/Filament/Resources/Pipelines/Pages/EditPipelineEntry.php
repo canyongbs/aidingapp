@@ -36,23 +36,21 @@
 
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
-use AidingApp\Contact\Models\Contact;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use App\Features\PipelineEntryEnhancedFieldsFeature;
 use Filament\Actions\Action;
-use Filament\Forms\Components\MorphToSelect;
-use Filament\Forms\Components\MorphToSelect\Type;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
@@ -70,8 +68,10 @@ class EditPipelineEntry extends Page
 
     protected string $view = 'project::filament.pages.edit-pipeline-entry';
 
+    #[Locked]
     public Pipeline $record;
 
+    #[Locked]
     public PipelineEntry $pipelineEntry;
 
     /** @var array<string, mixed> $data */
@@ -146,21 +146,12 @@ class EditPipelineEntry extends Page
                         ->relationship('pipelineStage', 'name')
                         ->required()
                         ->options(fn () => $this->record->stages->pluck('name', 'id')),
-                    Textarea::make('name')
+                    TextInput::make('name')
                         ->maxLength(255)
-                        ->label('Description')
+                        ->label('Name')
                         ->string(),
                 ]),
-                MorphToSelect::make('organizable')
-                    ->types([
-                        Type::make(Contact::class)
-                            ->label('Contact')
-                            ->titleAttribute('full_name')
-                            ->modifyOptionsQueryUsing(fn (Builder $query) => $query->limit(50)),
-                    ])
-                    ->searchable()
-                    ->preload()
-                    ->required(),
+                ...PipelineEntryForm::components($this->record),
             ])
             ->statePath('data')
             ->model($this->pipelineEntry);
@@ -170,7 +161,18 @@ class EditPipelineEntry extends Page
     {
         $data = $this->form->getState();
 
+        $milestones = $data['milestones'] ?? [];
+        $assets = $data['assets'] ?? [];
+        $serviceRequests = $data['serviceRequests'] ?? [];
+        unset($data['milestones'], $data['assets'], $data['serviceRequests']);
+
         $this->pipelineEntry->update($data);
+
+        if (PipelineEntryEnhancedFieldsFeature::active()) {
+            $this->pipelineEntry->milestones()->sync($milestones);
+            $this->pipelineEntry->assets()->sync($assets);
+            $this->pipelineEntry->serviceRequests()->sync($serviceRequests);
+        }
 
         Notification::make()
             ->success()
@@ -183,6 +185,12 @@ class EditPipelineEntry extends Page
     public function fillForm(): void
     {
         $data = $this->pipelineEntry->attributesToArray();
+
+        if (PipelineEntryEnhancedFieldsFeature::active()) {
+            $data['milestones'] = $this->pipelineEntry->milestones->pluck('id')->toArray();
+            $data['assets'] = $this->pipelineEntry->assets->pluck('id')->toArray();
+            $data['serviceRequests'] = $this->pipelineEntry->serviceRequests->pluck('id')->toArray();
+        }
 
         $this->form->fill($data);
     }

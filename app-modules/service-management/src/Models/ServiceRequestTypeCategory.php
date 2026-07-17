@@ -37,12 +37,16 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeCategoryFactory;
+use AidingApp\ServiceManagement\Models\Concerns\RestrictsVisibilityToContactTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeCategoryObserver;
+use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
@@ -58,6 +62,7 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
     use SoftDeletes;
     use AuditableTrait;
     use HasRelationships;
+    use RestrictsVisibilityToContactTypes;
 
     /** @use HasFactory<ServiceRequestTypeCategoryFactory> */
     use HasFactory;
@@ -66,10 +71,12 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
         'name',
         'sort',
         'parent_id',
+        'is_visibility_restricted',
     ];
 
     protected $casts = [
         'sort' => 'integer',
+        'is_visibility_restricted' => 'boolean',
     ];
 
     /**
@@ -89,11 +96,47 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
     }
 
     /**
-     * @return HasMany<ServiceRequestType, $this>
+     * @return HasMany<ServiceRequestType, $this>|BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestCategoryType>
      */
-    public function types(): HasMany
+    public function types(): HasMany | BelongsToMany
     {
+        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
+            return $this->belongsToMany(
+                related: ServiceRequestType::class,
+                table: 'service_request_category_types',
+                foreignPivotKey: 'service_request_type_category_id',
+                relatedPivotKey: 'service_request_type_id',
+            )
+                ->using(ServiceRequestCategoryType::class)
+                ->withPivot('id', 'sort')
+                ->withTimestamps()
+                ->orderByPivot('sort');
+        }
+
         return $this->hasMany(ServiceRequestType::class, 'category_id', 'id')->orderBy('sort');
+    }
+
+    /**
+     * @return BelongsToMany<ContactType, $this, ServiceRequestTypeCategoryVisibilityContactType>
+     */
+    public function restrictedToContactTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            related: ContactType::class,
+            table: 'service_request_type_category_visibility_contact_types',
+            foreignPivotKey: 'service_request_type_category_id',
+            relatedPivotKey: 'contact_type_id',
+        )
+            ->using(ServiceRequestTypeCategoryVisibilityContactType::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return iterable<ServiceRequestTypeCategory>
+     */
+    public function visibilityRestrictionParents(): iterable
+    {
+        return $this->parent !== null ? [$this->parent] : [];
     }
 
     /**
@@ -101,22 +144,10 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
      */
     public function descendantServiceRequests(): HasManyDeep
     {
-        return $this->hasManyDeep(
-            ServiceRequest::class,
-            [
-                ServiceRequestType::class,
-                ServiceRequestPriority::class,
-            ],
-            [
-                'category_id',
-                'type_id',
-                'priority_id',
-            ],
-            [
-                'id',
-                'id',
-                'id',
-            ]
+        // @phpstan-ignore return.type (hasManyDeepFromRelations() infers a generic PHPStan cannot match to HasManyDeep<ServiceRequest, $this>, because types() has a feature-flagged HasMany|BelongsToMany union return type.)
+        return $this->hasManyDeepFromRelations(
+            $this->types(),
+            (new ServiceRequestType())->serviceRequests(),
         );
     }
 }

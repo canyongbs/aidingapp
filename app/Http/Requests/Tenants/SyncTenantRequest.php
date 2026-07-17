@@ -36,12 +36,15 @@
 
 namespace App\Http\Requests\Tenants;
 
+use App\Enums\SubscriptionStatus;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class SyncTenantRequest extends FormRequest
 {
     /**
-     * @return array<string, array<string>>
+     * @return array<string, array<int, string|Enum>>
      */
     public function rules(): array
     {
@@ -63,6 +66,8 @@ class SyncTenantRequest extends FormRequest
             'addons.projectManagement' => ['required', 'boolean'],
             'addons.serviceMonitoring' => ['required', 'boolean'],
             'addons.advisoryManagement' => ['required', 'boolean'],
+            'subscriptionStatus' => ['nullable', Rule::enum(SubscriptionStatus::class)],
+            'expirationBannerText' => ['nullable', 'string'],
         ];
     }
 }

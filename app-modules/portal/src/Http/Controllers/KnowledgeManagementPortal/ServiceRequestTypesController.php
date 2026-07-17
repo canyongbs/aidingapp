@@ -36,8 +36,9 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\ServiceManagement\Actions\BuildContactServiceRequestTypeTree;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 
@@ -48,92 +49,23 @@ class ServiceRequestTypesController extends Controller
         // Load all categories and types and build a nested tree in PHP so the frontend can
         // render top-level categories/types and navigate into subcategories without
         // additional requests.
-        $categories = ServiceRequestTypeCategory::query()->orderBy('sort')->get();
-        $types = ServiceRequestType::query()->withoutArchived()->orderBy('sort')->get();
+        $visibilityRestrictionsEnabled = ServiceRequestTypeVisibilityRestrictionsFeature::active();
 
-        $catsById = [];
+        $contactTypeId = $visibilityRestrictionsEnabled ? auth('contact')->user()?->type_id : null;
 
-        foreach ($categories as $cat) {
-            $catsById[$cat->id] = [
-                'id' => $cat->id,
-                'name' => $cat->name,
-                'sort' => $cat->sort,
-                'parent_id' => $cat->parent_id,
-                'children' => [],
-                'types' => [],
-            ];
-        }
-
-        $topLevelTypes = [];
-
-        foreach ($types as $type) {
-            $payload = [
+        $tree = app(BuildContactServiceRequestTypeTree::class)->execute(
+            contactTypeId: $contactTypeId,
+            visibilityRestrictionsEnabled: $visibilityRestrictionsEnabled,
+            formatType: fn (ServiceRequestType $type, ?string $categoryId): array => [
                 'id' => $type->getKey(),
                 'name' => $type->name,
                 'description' => $type->description,
                 'icon' => $type->icon ? svg($type->icon, 'h-6 w-6')->toHtml() : null,
                 'sort' => $type->sort,
-                'category_id' => $type->category_id,
-            ];
+                'category_id' => $categoryId,
+            ],
+        );
 
-            if ($type->category_id && isset($catsById[$type->category_id])) {
-                $catsById[$type->category_id]['types'][] = $payload;
-            } else {
-                $topLevelTypes[] = $payload;
-            }
-        }
-
-        // Attach children categories to their parents
-        $topLevelCategories = [];
-
-        foreach ($catsById as $id => $cat) {
-            if ($cat['parent_id'] && isset($catsById[$cat['parent_id']])) {
-                $catsById[$cat['parent_id']]['children'][] = &$catsById[$id];
-            } else {
-                $topLevelCategories[] = &$catsById[$id];
-            }
-        }
-
-        // Recursive sort for children and types using a closure to avoid function redeclaration
-        $sortRecursive = function (array &$nodes) use (&$sortRecursive) {
-            usort($nodes, function (array $left, array $right): int {
-                return ($left['sort'] ?? 0) <=> ($right['sort'] ?? 0);
-            });
-
-            foreach ($nodes as &$node) {
-                if (! empty($node['types'])) {
-                    usort($node['types'], function (array $left, array $right): int {
-                        return ($left['sort'] ?? 0) <=> ($right['sort'] ?? 0);
-                    });
-                }
-
-                if (! empty($node['children'])) {
-                    $sortRecursive($node['children']);
-                }
-            }
-        };
-
-        $sortRecursive($topLevelCategories);
-
-        // Also sort top-level types
-        usort($topLevelTypes, function (array $left, array $right): int {
-            return ($left['sort'] ?? 0) <=> ($right['sort'] ?? 0);
-        });
-
-        // Remove categories that have no types and no children with types (recursively)
-        $filterEmptyCategories = function (array &$nodes) use (&$filterEmptyCategories): array {
-            return array_values(array_filter($nodes, function (array &$node) use (&$filterEmptyCategories): bool {
-                $node['children'] = $filterEmptyCategories($node['children']);
-
-                return ! empty($node['types']) || ! empty($node['children']);
-            }));
-        };
-
-        $topLevelCategories = $filterEmptyCategories($topLevelCategories);
-
-        return response()->json([
-            'categories' => $topLevelCategories,
-            'types' => $topLevelTypes,
-        ]);
+        return response()->json($tree);
     }
 }

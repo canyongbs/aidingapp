@@ -42,6 +42,8 @@ enum ReportLibraryNavigationGroup implements HasLabel
 {
     case ServiceDesk;
 
+    case ArtificialIntelligence;
+
     case Purchasing;
 
     case Projects;
@@ -50,6 +52,7 @@ enum ReportLibraryNavigationGroup implements HasLabel
     {
         return match ($this) {
             self::ServiceDesk => 'Service Desk',
+            self::ArtificialIntelligence => 'Artificial Intelligence',
             self::Purchasing => 'Purchasing',
             self::Projects => 'Projects',
         };

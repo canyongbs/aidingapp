@@ -51,7 +51,7 @@ return new class () extends Migration {
 
             $table->string('name');
             $table->text('description')->nullable();
-            $table->json('content');
+            $table->json('content'); // @phpstan-ignore Common.jsonColumnInMigration
             $table->foreignUuid('user_id')->nullable()->constrained()->nullOnDelete();
 
             $table->timestamps();

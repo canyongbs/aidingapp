@@ -37,7 +37,10 @@
 namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Models\Project;
+use App\Features\ProjectNewFieldsFeature;
 use Filament\Actions\EditAction;
+use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
@@ -59,6 +62,25 @@ class ViewProject extends ViewRecord
                         TextEntry::make('description')
                             ->label('Description')
                             ->columnSpanFull(),
+                        TextEntry::make('icon')
+                            ->label('Icon')
+                            ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                            ->state(fn (Project $record): string => (string) str($record->icon)->after('heroicon-o-')->headline())
+                            ->icon(fn (Project $record): string => $record->icon),
+                        ColorEntry::make('color')
+                            ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                            ->label('Color'),
+                        TextEntry::make('department.name')
+                            ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                            ->label('Department'),
+                        TextEntry::make('start_date')
+                            ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                            ->date()
+                            ->label('Start Date'),
+                        TextEntry::make('target_completion_date')
+                            ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                            ->date()
+                            ->label('Target Completion Date'),
                     ]),
             ]);
     }

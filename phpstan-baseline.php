@@ -36,12 +36,17 @@
 
 $ignoreErrors = [];
 $ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeStatus" method on "AidingApp\\\\Alert\\\\Models\\\\Alert" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/alert/src/Models/Alert.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to an undefined method OwenIt\\\\Auditing\\\\Contracts\\\\Auditable\\:\\:auditAttach\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/audit/src/Filament/Actions/AuditAttachAction.php',
 ];
-
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method OwenIt\\\\Auditing\\\\Contracts\\\\Auditable\\:\\:auditDetach\\(\\)\\.$#',
     'identifier' => 'method.notFound',
@@ -133,6 +138,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/authorization/src/Filament/Resources/Roles/Pages/ListRoles.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
+    'identifier' => 'Common.noStrtolower',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/authorization/src/Http/Controllers/SocialiteController.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Laravel\\\\Socialite\\\\Contracts\\\\Provider\\|Mockery\\\\MockInterface\\:\\:setConfig\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 2,
@@ -161,6 +172,36 @@ $ignoreErrors[] = [
     'identifier' => 'method.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/authorization/src/Http/Responses/Auth/SocialiteLogoutResponse.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeApi" method on "AidingApp\\\\Authorization\\\\Models\\\\Permission" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/authorization/src/Models/Permission.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeWeb" method on "AidingApp\\\\Authorization\\\\Models\\\\Permission" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/authorization/src/Models/Permission.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeApi" method on "AidingApp\\\\Authorization\\\\Models\\\\Role" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/authorization/src/Models/Role.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeSuperAdmin" method on "AidingApp\\\\Authorization\\\\Models\\\\Role" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/authorization/src/Models/Role.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeWeb" method on "AidingApp\\\\Authorization\\\\Models\\\\Role" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/authorization/src/Models/Role.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$view of function view expects view\\-string\\|null, string given\\.$#',
@@ -223,58 +264,10 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Call to an undefined static method class\\-string\\<Filament\\\\Resources\\\\RelationManagers\\\\RelationManager\\>\\|Filament\\\\Resources\\\\RelationManagers\\\\RelationManagerConfiguration\\:\\:canViewForRecord\\(\\)\\.$#',
-    'identifier' => 'staticMethod.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/AssetManagement.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Contact\\\\Filament\\\\Resources\\\\ContactResource\\\\Pages\\\\AssetManagement\\:\\:filterRelationManagers\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/AssetManagement.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Contact\\\\Filament\\\\Resources\\\\ContactResource\\\\Pages\\\\AssetManagement\\:\\:filterRelationManagers\\(\\) has parameter \\$record with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/AssetManagement.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Contact\\\\Filament\\\\Resources\\\\ContactResource\\\\Pages\\\\AssetManagement\\:\\:filterRelationManagers\\(\\) has parameter \\$relationManager with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/AssetManagement.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Unsafe call to private method AidingApp\\\\Contact\\\\Filament\\\\Resources\\\\ContactResource\\\\Pages\\\\AssetManagement\\:\\:managers\\(\\) through static\\:\\:\\.$#',
     'identifier' => 'staticClassAccess.privateMethod',
     'count' => 2,
     'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/AssetManagement.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined static method class\\-string\\<Filament\\\\Resources\\\\RelationManagers\\\\RelationManager\\>\\|Filament\\\\Resources\\\\RelationManagers\\\\RelationManagerConfiguration\\:\\:canViewForRecord\\(\\)\\.$#',
-    'identifier' => 'staticMethod.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/ContactServiceManagement.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Contact\\\\Filament\\\\Resources\\\\ContactResource\\\\Pages\\\\ContactServiceManagement\\:\\:filterRelationManagers\\(\\) has no return type specified\\.$#',
-    'identifier' => 'missingType.return',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/ContactServiceManagement.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Contact\\\\Filament\\\\Resources\\\\ContactResource\\\\Pages\\\\ContactServiceManagement\\:\\:filterRelationManagers\\(\\) has parameter \\$record with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/ContactServiceManagement.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Contact\\\\Filament\\\\Resources\\\\ContactResource\\\\Pages\\\\ContactServiceManagement\\:\\:filterRelationManagers\\(\\) has parameter \\$relationManager with no type specified\\.$#',
-    'identifier' => 'missingType.parameter',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/ContactServiceManagement.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Contact\\\\Filament\\\\Resources\\\\ContactResource\\\\Pages\\\\ContactServiceManagement\\:\\:managers\\(\\) return type has no value type specified in iterable type array\\.$#',
@@ -487,8 +480,26 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/engagement/src/Jobs/DeliverEngagements.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
+    'identifier' => 'Common.noStrtolower',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Jobs/ProcessSesS3InboundEmail.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:orderedEngagements\\(\\)\\.$#',
     'identifier' => 'method.notFound',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Models/Engagement.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeIsNotPartOfABatch" method on "AidingApp\\\\Engagement\\\\Models\\\\Engagement" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Models/Engagement.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeSentToContact" method on "AidingApp\\\\Engagement\\\\Models\\\\Engagement" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/engagement/src/Models/Engagement.php',
 ];
@@ -507,6 +518,12 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:orderedEngagementResponses\\(\\)\\.$#',
     'identifier' => 'method.notFound',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Models/EngagementResponse.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeSentByContact" method on "AidingApp\\\\Engagement\\\\Models\\\\EngagementResponse" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/engagement/src/Models/EngagementResponse.php',
 ];
@@ -661,6 +678,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeWithoutReturned" method on "AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut\\:\\:checkedOutBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -703,10 +726,28 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/knowledge-base/database/factories/KnowledgeBaseItemFactory.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Access to an undefined property App\\\\Models\\\\Tag\\:\\:\\$pivot\\.$#',
-    'identifier' => 'property.notFound',
+    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
+    'identifier' => 'Common.noStrtolower',
     'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseItems/Pages/ListKnowledgeBaseItems.php',
+    'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseCategories/Pages/CreateKnowledgeBaseCategory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
+    'identifier' => 'Common.noStrtolower',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseCategories/Pages/EditKnowledgeBaseCategory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
+    'identifier' => 'Common.noStrtolower',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/knowledge-base/src/Filament/Resources/KnowledgeBaseCategories/RelationManagers/SubCategoriesRelationManager.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopePublic" method on "AidingApp\\\\KnowledgeBase\\\\Models\\\\KnowledgeBaseItem" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/knowledge-base/src/Models/KnowledgeBaseItem.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#2 \\$guardName of method Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/app\\-modules/license\\-management/database/migrations/2024_11_21_194048_data_seed_permissions_for_product_license_module\\.php\\:42\\:\\:deletePermissions\\(\\) expects string, array\\<string\\> given\\.$#',
@@ -793,6 +834,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/notification/src/Notifications/Messages/MailMessage.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
+    'identifier' => 'Common.noStrtolower',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Actions/FindOrganizationByEmailDomain.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Portal\\\\DataTransferObjects\\\\KnowledgeBaseArticleData\\:\\:__construct\\(\\) has parameter \\$tags with no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
@@ -847,6 +894,18 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/StoreKnowledgeBaseArticleVoteController.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Eloquent models must define a "\\$fillable" property\\. Add a "\\$fillable" property to this model or a parent model\\.$#',
+    'identifier' => 'Common.modelMissingFillable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Models/PortalAuthentication.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent models must define a "\\$fillable" property\\. Add a "\\$fillable" property to this model or a parent model\\.$#',
+    'identifier' => 'Common.modelMissingFillable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Models/PortalGuest.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Cannot access property \\$code on object\\|string\\.$#',
     'identifier' => 'property.nonObject',
     'count' => 1,
@@ -865,6 +924,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/portal/src/Settings/SettingsProperties/PortalSettingsProperty.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
+    'identifier' => 'Common.noStrtolower',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/report/src/Filament/Widgets/AssetsTable.php',
+];
+$ignoreErrors[] = [
     'message' => '#^If condition is always true\\.$#',
     'identifier' => 'if.alwaysTrue',
     'count' => 1,
@@ -881,6 +946,12 @@ $ignoreErrors[] = [
     'identifier' => 'deadCode.unreachable',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/report/src/Filament/Widgets/ServiceRequestsStats.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
+    'identifier' => 'Common.noStrtolower',
+    'count' => 2,
+    'path' => __DIR__ . '/app-modules/report/src/Filament/Widgets/ServiceRequestsTable.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^If condition is always false\\.$#',
@@ -967,172 +1038,16 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\Advisory\\:\\:\\$title\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/Advisories/Pages/EditAdvisory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\AdvisorySeverity\\:\\:\\$name\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/Advisories/Pages/ListAdvisories.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\AdvisoryStatus\\:\\:\\$classification\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/Advisories/Pages/ManageAdvisoryUpdate.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TGroupKey in call to method Illuminate\\\\Support\\\\Collection\\<int,AidingApp\\\\ServiceManagement\\\\Models\\\\AdvisoryStatus\\>\\:\\:groupBy\\(\\)$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/Advisories/Pages/ManageAdvisoryUpdate.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\Advisory\\:\\:\\$title\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/Advisories/Pages/ViewAdvisory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\AdvisorySeverity\\:\\:\\$name\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/Advisories/Pages/ViewAdvisory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\AdvisorySeverity\\:\\:\\$name\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/AdvisorySeverities/Pages/EditAdvisorySeverity.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\AdvisorySeverity\\:\\:\\$name\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/AdvisorySeverities/Pages/ViewAdvisorySeverity.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\AdvisoryStatus\\:\\:\\$name\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/AdvisoryStatuses/Pages/EditAdvisoryStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\AdvisoryStatus\\:\\:\\$name\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/AdvisoryStatuses/Pages/ViewAdvisoryStatus.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\:\\:withTrashed\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 2,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ChangeRequests/Pages/EditChangeRequest.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Filament\\\\Resources\\\\ServiceRequestForms\\\\Pages\\\\CreateServiceRequestForm\\:\\:saveFieldsFromComponents\\(\\) has parameter \\$components with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/CreateServiceRequestForm.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Filament\\\\Resources\\\\ServiceRequestForms\\\\Pages\\\\CreateServiceRequestForm\\:\\:saveFieldsFromComponents\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/CreateServiceRequestForm.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestForm\\:\\:\\$content \\(never\\) does not accept array\\.$#',
-    'identifier' => 'assign.propertyType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/CreateServiceRequestForm.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestForm\\:\\:\\$content \\(never\\) does not accept null\\.$#',
-    'identifier' => 'assign.propertyType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/CreateServiceRequestForm.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormField\\:\\:\\$is_required \\(never\\) does not accept mixed\\.$#',
-    'identifier' => 'assign.propertyType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/CreateServiceRequestForm.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormField\\:\\:\\$label \\(never\\) does not accept mixed\\.$#',
-    'identifier' => 'assign.propertyType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/CreateServiceRequestForm.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormField\\:\\:\\$type \\(never\\) does not accept mixed\\.$#',
-    'identifier' => 'assign.propertyType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/CreateServiceRequestForm.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Filament\\\\Resources\\\\ServiceRequestForms\\\\Pages\\\\EditServiceRequestForm\\:\\:saveFieldsFromComponents\\(\\) has parameter \\$components with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/EditServiceRequestForm.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Filament\\\\Resources\\\\ServiceRequestForms\\\\Pages\\\\EditServiceRequestForm\\:\\:saveFieldsFromComponents\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/EditServiceRequestForm.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestForm\\:\\:\\$content \\(never\\) does not accept array\\.$#',
-    'identifier' => 'assign.propertyType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/EditServiceRequestForm.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestForm\\:\\:\\$content \\(never\\) does not accept null\\.$#',
-    'identifier' => 'assign.propertyType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/EditServiceRequestForm.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormField\\:\\:\\$is_required \\(never\\) does not accept mixed\\.$#',
-    'identifier' => 'assign.propertyType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/EditServiceRequestForm.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormField\\:\\:\\$label \\(never\\) does not accept mixed\\.$#',
-    'identifier' => 'assign.propertyType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/EditServiceRequestForm.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormField\\:\\:\\$type \\(never\\) does not accept mixed\\.$#',
-    'identifier' => 'assign.propertyType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestForms/Pages/EditServiceRequestForm.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Dead catch \\- Illuminate\\\\Database\\\\QueryException is never thrown in the try block\\.$#',
     'identifier' => 'catch.neverThrown',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestStatuses/Pages/ListServiceRequestStatuses.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/Pages/EditServiceRequestTypeNotifications.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TValue in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/Pages/EditServiceRequestTypeNotifications.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$relations of method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestTypeCategory\\>\\:\\:with\\(\\) expects array\\<array\\|\\(Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\Relation\\<\\*, \\*, \\*\\>\\)\\: mixed\\)\\|string\\>\\|string, array\\{children\\: Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\)\\: void, types\\: Closure\\(mixed\\)\\: mixed\\} given\\.$#',
@@ -1147,22 +1062,16 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/ServiceRequestTypeResource.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\:\\:\\$default_category\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequests/Pages/CreateServiceRequest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\:\\:\\$default_category\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequests/Pages/EditServiceRequest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$types of method Filament\\\\Forms\\\\Components\\\\BaseFileUpload\\:\\:acceptedFileTypes\\(\\) expects array\\<string\\>\\|Closure\\|Illuminate\\\\Contracts\\\\Support\\\\Arrayable, array\\<string, array\\<string\\>\\> given\\.$#',
     'identifier' => 'argument.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequests/Pages/EditServiceRequest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
+    'identifier' => 'Common.noStrtolower',
+    'count' => 2,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequests/Pages/ListServiceRequests.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Unsafe call to private method AidingApp\\\\ServiceManagement\\\\Filament\\\\Resources\\\\ServiceRequests\\\\Pages\\\\ManageAssignments\\:\\:managers\\(\\) through static\\:\\:\\.$#',
@@ -1189,34 +1098,10 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequests/ServiceRequestResource.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @mixin contains unknown class AidingApp\\\\ServiceManagement\\\\Models\\\\IdeHelperAdvisory\\.$#',
-    'identifier' => 'class.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/Advisory.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\AdvisorySeverity\\:\\:\\$color\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/AdvisorySeverity.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @mixin contains unknown class AidingApp\\\\ServiceManagement\\\\Models\\\\IdeHelperAdvisorySeverity\\.$#',
-    'identifier' => 'class.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/AdvisorySeverity.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @mixin contains unknown class AidingApp\\\\ServiceManagement\\\\Models\\\\IdeHelperAdvisoryStatus\\.$#',
-    'identifier' => 'class.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/AdvisoryStatus.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @mixin contains unknown class AidingApp\\\\ServiceManagement\\\\Models\\\\IdeHelperAdvisoryUpdate\\.$#',
-    'identifier' => 'class.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Models/AdvisoryUpdate.php',
+    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
+    'identifier' => 'Common.noStrtolower',
+    'count' => 2,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Widgets/ServiceRequestMediaTable.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^PHPDoc tag @return contains generic type AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany\\<App\\\\Models\\\\User, \\$this\\(AidingApp\\\\ServiceManagement\\\\Models\\\\ChangeRequestType\\)\\> but class AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany is not generic\\.$#',
@@ -1231,8 +1116,8 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Models/Concerns/HasRelationBasedStateMachine.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Negated boolean expression is always true\\.$#',
-    'identifier' => 'booleanNot.alwaysTrue',
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeOpen" method on "AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequest.php',
 ];
@@ -1253,6 +1138,12 @@ $ignoreErrors[] = [
     'identifier' => 'method.childReturnType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestForm.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent models must define a "\\$fillable" property\\. Add a "\\$fillable" property to this model or a parent model\\.$#',
+    'identifier' => 'Common.modelMissingFillable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestFormAuthentication.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Return type \\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestForm, \\$this\\(AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormAuthentication\\)\\>\\) of method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormAuthentication\\:\\:submissible\\(\\) should be compatible with return type \\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<AidingApp\\\\Form\\\\Models\\\\Submissible, \\$this\\(AidingApp\\\\Form\\\\Models\\\\SubmissibleAuthentication\\)\\>\\) of method AidingApp\\\\Form\\\\Models\\\\SubmissibleAuthentication\\:\\:submissible\\(\\)$#',
@@ -1285,6 +1176,36 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestFormStep.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeCanceled" method on "AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormSubmission" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestFormSubmission.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeNotCanceled" method on "AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormSubmission" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestFormSubmission.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeNotSubmitted" method on "AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormSubmission" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestFormSubmission.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeRequested" method on "AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormSubmission" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestFormSubmission.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeSubmitted" method on "AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormSubmission" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestFormSubmission.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Return type \\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestForm, \\$this\\(AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormSubmission\\)\\>\\) of method AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestFormSubmission\\:\\:submissible\\(\\) should be compatible with return type \\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsTo\\<AidingApp\\\\Form\\\\Models\\\\Submissible, \\$this\\(AidingApp\\\\Form\\\\Models\\\\Submission\\)\\>\\) of method AidingApp\\\\Form\\\\Models\\\\Submission\\:\\:submissible\\(\\)$#',
     'identifier' => 'method.childReturnType',
     'count' => 1,
@@ -1301,18 +1222,6 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Models/ServiceRequestType.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestType\\:\\:\\$default_category\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Observers/ServiceRequestObserver.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\AdvisoryStatus\\:\\:\\$classification\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Policies/AdvisoryUpdatePolicy.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^PHPDoc tag @param for parameter \\$fail with type Illuminate\\\\Translation\\\\PotentiallyTranslatedString is incompatible with native type Closure\\.$#',
@@ -1339,6 +1248,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/timeline/src/Exceptions/ModelMustHaveATimeline.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeForEntity" method on "AidingApp\\\\Timeline\\\\Models\\\\Timeline" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/timeline/src/Models/Timeline.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to function is_array\\(\\) with string will always evaluate to false\\.$#',
     'identifier' => 'function.impossibleType',
     'count' => 1,
@@ -1355,6 +1270,18 @@ $ignoreErrors[] = [
     'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app/Casts/CurrencyCast.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
+    'identifier' => 'Common.noStrtolower',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Filament/Resources/Users/RelationManagers/RolesRelationManager.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
+    'identifier' => 'Common.noStrtolower',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Filament/Widgets/ListServiceRequestTableWidgets.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\:\\:\\$service_request_id\\.$#',
@@ -1411,6 +1338,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Filament/Widgets/ServiceRequestWidget.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
+    'identifier' => 'Common.noStrtolower',
+    'count' => 4,
+    'path' => __DIR__ . '/app/Http/Requests/Api/V1/Users/CreateUserRequest.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Method App\\\\Models\\\\Authenticatable\\:\\:roles\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany does not specify its types\\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \\(2\\-4 required\\)$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -1421,6 +1354,18 @@ $ignoreErrors[] = [
     'identifier' => 'argument.templateType',
     'count' => 1,
     'path' => __DIR__ . '/app/Models/Authenticatable.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
+    'identifier' => 'Common.noStrtolower',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Models/Scopes/EducatableSearch.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeAdvancedFilter" method on "App\\\\Support\\\\HasAdvancedFilter" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
+    'identifier' => 'Common.noLocalModelScope',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Support/HasAdvancedFilter.php',
 ];
 
 return ['parameters' => ['ignoreErrors' => $ignoreErrors]];

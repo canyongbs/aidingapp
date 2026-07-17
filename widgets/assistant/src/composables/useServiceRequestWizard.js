@@ -31,7 +31,9 @@
 
 </COPYRIGHT>
 */
+import axios from 'axios';
 import { computed, ref } from 'vue';
+import { getAuthHeaders } from '../utils/token.js';
 import { useServiceRequestSubmit } from './useServiceRequestSubmit.js';
 
 export function useServiceRequestWizard() {
@@ -59,6 +61,7 @@ export function useServiceRequestWizard() {
     const questionStepRefs = ref([]);
     const generatedQuestions = ref([]);
     const customStepRefs = ref([]);
+    const preloadedResolution = ref(null);
 
     function onTypeSelectContinue(data) {
         detailsData.value = data;
@@ -109,12 +112,41 @@ export function useServiceRequestWizard() {
         if (aiClarificationEnabled.value) {
             questionsAndAnswers.value = [];
             generatedQuestions.value = Array(numberOfClarifyingQuestions.value).fill(null);
+
+            if (aiResolutionEnabled.value) {
+                preloadAiResolution();
+            }
+
             step.value = 'question-1';
         } else if (aiResolutionEnabled.value) {
             step.value = 'ai-resolution';
         } else {
             doSubmit();
         }
+    }
+
+    function preloadAiResolution() {
+        const url = detailsData.value.rawData.evaluate_ai_resolution_url_base.replace(
+            '__TYPE__',
+            detailsData.value.type.id,
+        );
+
+        const data = formDataForAi.value;
+
+        preloadedResolution.value = axios
+            .post(
+                url,
+                {
+                    title: data.title,
+                    description: data.description,
+                    priority_id: data.priority_id,
+                    custom_fields: data.custom_fields,
+                    questions: {},
+                },
+                { headers: getAuthHeaders() },
+            )
+            .then((response) => response.data)
+            .catch(() => null);
     }
 
     function onQuestionNext(questionNumber) {
@@ -284,6 +316,7 @@ export function useServiceRequestWizard() {
         questionStepRefs,
         generatedQuestions,
         customStepRefs,
+        preloadedResolution,
         hasNextStep,
         formDataForAi,
         questionsPayload,

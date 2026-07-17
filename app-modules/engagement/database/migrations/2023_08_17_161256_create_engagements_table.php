@@ -38,6 +38,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+// @phpstan-ignore Common.migrationMissingDownMethod
 return new class () extends Migration {
     public function up(): void
     {
@@ -49,7 +50,7 @@ return new class () extends Migration {
             $table->string('recipient_id')->nullable();
             $table->string('recipient_type')->nullable();
             $table->string('subject')->nullable();
-            $table->json('body')->nullable();
+            $table->json('body')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration
             $table->boolean('scheduled')->default(true);
             $table->timestamp('deliver_at');
 

@@ -36,19 +36,15 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
+use AidingApp\Project\Filament\Resources\Projects\Forms\ProjectForm;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use App\Concerns\EditPageRedirection;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
 
 class EditProject extends EditRecord
 {
-    use EditPageRedirection;
-
     protected static string $resource = ProjectResource::class;
 
     protected static ?string $navigationLabel = 'Edit';
@@ -56,17 +52,12 @@ class EditProject extends EditRecord
     public function form(Schema $schema): Schema
     {
         return $schema
-            ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->string()
-                    ->unique(ignoreRecord: true)
-                    ->maxLength(255),
-                Textarea::make('description')
-                    ->string()
-                    ->maxLength(65535)
-                    ->columnSpanFull(),
-            ]);
+            ->components(ProjectForm::components(isEdit: true));
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        return ProjectForm::mutateDataForSave($data);
     }
 
     protected function getHeaderActions(): array
