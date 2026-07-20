@@ -35,56 +35,12 @@
 */
 
 use AidingApp\Contact\Models\ContactType;
-use App\Features\ManagedContactFeature;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
-use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Models\User;
 
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
-
-it('hides the managed contact fields when the feature is inactive', function () {
-    ManagedContactFeature::deactivate();
-
-    asSuperAdmin();
-
-    livewire(CreateUser::class)
-        ->assertFormFieldIsHidden('is_managed_contact')
-        ->assertFormFieldIsHidden('managed_contact_type_id');
-});
-
-it('renders the edit and view user pages when the feature is inactive', function () {
-    ManagedContactFeature::deactivate();
-
-    asSuperAdmin();
-
-    $user = User::factory()->create();
-
-    livewire(EditUser::class, ['record' => $user->getKey()])
-        ->assertSuccessful();
-
-    livewire(ViewUser::class, ['record' => $user->getKey()])
-        ->assertSuccessful();
-});
-
-it('does not create a managed contact when the feature is inactive', function () {
-    ManagedContactFeature::deactivate();
-
-    asSuperAdmin();
-
-    livewire(CreateUser::class)
-        ->fillForm([
-            'name' => 'Flag Off',
-            'email' => 'flagoff@example.com',
-        ])
-        ->call('create')
-        ->assertHasNoFormErrors();
-
-    $user = User::query()->where('email', 'flagoff@example.com')->first();
-
-    expect($user->managedContact()->exists())->toBeFalse();
-});
 
 it('creates a linked managed contact when the toggle is enabled', function () {
     asSuperAdmin();

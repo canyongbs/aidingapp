@@ -40,7 +40,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
-use App\Features\ManagedContactFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Radio;
@@ -68,7 +67,7 @@ class EditContact extends EditRecord
     {
         $record = $parameters['record'] ?? null;
 
-        if ($record instanceof Contact && ManagedContactFeature::active() && $record->isManaged()) {
+        if ($record instanceof Contact && $record->isManaged()) {
             return false;
         }
 

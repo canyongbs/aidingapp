@@ -37,7 +37,6 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use AidingApp\Contact\Models\ContactType;
-use App\Features\ManagedContactFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use App\Rules\EmailNotInUseOrSoftDeleted;
@@ -98,7 +97,6 @@ class ViewUser extends ViewRecord
                         PhoneInput::make('mobile')
                             ->nullable(),
                         Grid::make(2)
-                            ->visible(fn (): bool => ManagedContactFeature::active())
                             ->schema([
                                 Toggle::make('is_managed_contact')
                                     ->label('Managed Contact')
@@ -138,10 +136,6 @@ class ViewUser extends ViewRecord
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        if (! ManagedContactFeature::active()) {
-            return $data;
-        }
-
         $user = $this->getRecord();
 
         assert($user instanceof User);

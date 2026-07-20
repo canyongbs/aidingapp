@@ -36,7 +36,6 @@
 
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Services\ManagedContactService;
-use App\Features\ManagedContactFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\URL;
@@ -80,18 +79,4 @@ it('rejects an unsigned or tampered url', function () {
     actingAs($user)
         ->get(route('employee-self-service'))
         ->assertForbidden();
-});
-
-it('returns not found when the feature is inactive', function () {
-    ManagedContactFeature::deactivate();
-
-    $type = ContactType::factory()->create();
-
-    $user = User::factory()->create();
-
-    app(ManagedContactService::class)->enable($user, $type->getKey());
-
-    actingAs($user)
-        ->get(employeeSelfServiceUrl())
-        ->assertNotFound();
 });

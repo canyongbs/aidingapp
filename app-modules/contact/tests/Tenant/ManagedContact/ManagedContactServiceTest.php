@@ -37,7 +37,6 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Services\ManagedContactService;
-use App\Features\ManagedContactFeature;
 use App\Models\User;
 
 it('creates a managed contact synchronized from the user', function () {
@@ -197,18 +196,4 @@ it('unlinks the managed contact when the user is deleted', function () {
 
     expect($contact->fresh()->user_id)->toBeNull()
         ->and($contact->fresh()->trashed())->toBeFalse();
-});
-
-it('does not synchronize when the feature is inactive', function () {
-    $type = ContactType::factory()->create();
-
-    $user = User::factory()->create(['name' => 'Original Name']);
-
-    $contact = app(ManagedContactService::class)->enable($user, $type->getKey());
-
-    ManagedContactFeature::deactivate();
-
-    $user->update(['name' => 'Changed Name']);
-
-    expect($contact->fresh()->full_name)->toBe('Original Name');
 });

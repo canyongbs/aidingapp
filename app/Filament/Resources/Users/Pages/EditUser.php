@@ -38,7 +38,6 @@ namespace App\Filament\Resources\Users\Pages;
 
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Services\ManagedContactService;
-use App\Features\ManagedContactFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -101,7 +100,6 @@ class EditUser extends EditRecord
                         PhoneInput::make('mobile')
                             ->nullable(),
                         Grid::make(2)
-                            ->visible(fn (): bool => ManagedContactFeature::active())
                             ->schema([
                                 Toggle::make('is_managed_contact')
                                     ->label('Managed Contact')
@@ -144,10 +142,6 @@ class EditUser extends EditRecord
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        if (! ManagedContactFeature::active()) {
-            return $data;
-        }
-
         $user = $this->getRecord();
 
         assert($user instanceof User);
@@ -177,10 +171,6 @@ class EditUser extends EditRecord
 
     protected function afterSave(): void
     {
-        if (! ManagedContactFeature::active()) {
-            return;
-        }
-
         $user = $this->getRecord();
 
         assert($user instanceof User);
