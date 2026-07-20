@@ -45,6 +45,7 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
+use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Infolists\Components\IconEntry;
@@ -63,7 +64,7 @@ class ViewPipelineEntry extends Page
 
     protected static ?string $title = 'Pipeline Entry Details';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-eye';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-eye';
 
     protected string $view = 'project::filament.pages.view-pipeline-entry';
 
