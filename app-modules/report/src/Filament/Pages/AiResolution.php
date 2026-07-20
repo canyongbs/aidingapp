@@ -59,7 +59,7 @@ class AiResolution extends Dashboard
 
     protected string $view = 'filament.pages.coming-soon';
 
-    protected static ?int $navigationSort = 83;
+    protected static ?int $navigationSort = 73;
 
     protected static string | BackedEnum | null $navigationIcon = '';
 

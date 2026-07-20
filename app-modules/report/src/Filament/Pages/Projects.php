@@ -61,7 +61,7 @@ class Projects extends Dashboard
 
     protected string $view = 'filament.pages.coming-soon';
 
-    protected static ?int $navigationSort = 90;
+    protected static ?int $navigationSort = 100;
 
     protected static string | BackedEnum | null $navigationIcon = '';
 
