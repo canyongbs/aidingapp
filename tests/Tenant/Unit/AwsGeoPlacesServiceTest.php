@@ -42,8 +42,8 @@ use Mockery\MockInterface;
 it('maps US addresses using Country.Code2 and Region.Code', function () {
     /** @phpstan-ignore method.notFound */
     $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
-        /** @phpstan-ignore method.notFound */
         $mock->shouldReceive('autocomplete')
+            /** @phpstan-ignore method.notFound */
             ->once()
             ->andReturn(new Result([
                 'ResultItems' => [
@@ -85,8 +85,8 @@ it('maps US addresses using Country.Code2 and Region.Code', function () {
 it('maps Canadian addresses using Region.Code for province', function () {
     /** @phpstan-ignore method.notFound */
     $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
-        /** @phpstan-ignore method.notFound */
         $mock->shouldReceive('autocomplete')
+            /** @phpstan-ignore method.notFound */
             ->once()
             ->andReturn(new Result([
                 'ResultItems' => [
@@ -126,8 +126,8 @@ it('maps Canadian addresses using Region.Code for province', function () {
 it('falls back to District for city when Locality is absent in Canadian addresses', function () {
     /** @phpstan-ignore method.notFound */
     $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
-        /** @phpstan-ignore method.notFound */
         $mock->shouldReceive('autocomplete')
+            /** @phpstan-ignore method.notFound */
             ->once()
             ->andReturn(new Result([
                 'ResultItems' => [
@@ -165,8 +165,8 @@ it('falls back to District for city when Locality is absent in Canadian addresse
 it('maps Mexican addresses with SubRegion fallback for city', function () {
     /** @phpstan-ignore method.notFound */
     $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
-        /** @phpstan-ignore method.notFound */
         $mock->shouldReceive('autocomplete')
+            /** @phpstan-ignore method.notFound */
             ->once()
             ->andReturn(new Result([
                 'ResultItems' => [
@@ -206,8 +206,8 @@ it('maps Mexican addresses with SubRegion fallback for city', function () {
 it('maps UK addresses with District fallback for city', function () {
     /** @phpstan-ignore method.notFound */
     $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
-        /** @phpstan-ignore method.notFound */
         $mock->shouldReceive('autocomplete')
+            /** @phpstan-ignore method.notFound */
             ->once()
             ->andReturn(new Result([
                 'ResultItems' => [
@@ -245,8 +245,8 @@ it('maps UK addresses with District fallback for city', function () {
 it('falls back to Code3 when Code2 is absent', function () {
     /** @phpstan-ignore method.notFound */
     $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
-        /** @phpstan-ignore method.notFound */
         $mock->shouldReceive('autocomplete')
+            /** @phpstan-ignore method.notFound */
             ->once()
             ->andReturn(new Result([
                 'ResultItems' => [
@@ -281,8 +281,8 @@ it('falls back to Code3 when Code2 is absent', function () {
 it('falls back to Region.Name when Region.Code is absent', function () {
     /** @phpstan-ignore method.notFound */
     $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
-        /** @phpstan-ignore method.notFound */
         $mock->shouldReceive('autocomplete')
+            /** @phpstan-ignore method.notFound */
             ->once()
             ->andReturn(new Result([
                 'ResultItems' => [
@@ -316,8 +316,8 @@ it('falls back to Region.Name when Region.Code is absent', function () {
 it('returns empty strings when address fields are missing', function () {
     /** @phpstan-ignore method.notFound */
     $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
-        /** @phpstan-ignore method.notFound */
         $mock->shouldReceive('autocomplete')
+            /** @phpstan-ignore method.notFound */
             ->once()
             ->andReturn(new Result([
                 'ResultItems' => [
