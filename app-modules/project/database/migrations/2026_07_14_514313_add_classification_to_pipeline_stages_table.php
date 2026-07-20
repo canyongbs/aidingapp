@@ -35,33 +35,23 @@
 */
 
 use AidingApp\Project\Enums\PipelineStageClassification;
-use App\Features\PipelineStageClassificationFeature;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('pipeline_stages', function (Blueprint $table) {
-                $table->string('classification')
-                    ->default(PipelineStageClassification::Planning->value);
-            });
-
-            PipelineStageClassificationFeature::activate();
+        Schema::table('pipeline_stages', function (Blueprint $table) {
+            $table->string('classification')
+                ->default(PipelineStageClassification::Planning->value);
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            PipelineStageClassificationFeature::deactivate();
-
-            Schema::table('pipeline_stages', function (Blueprint $table) {
-                $table->dropColumn('classification');
-            });
+        Schema::table('pipeline_stages', function (Blueprint $table) {
+            $table->dropColumn('classification');
         });
     }
 };

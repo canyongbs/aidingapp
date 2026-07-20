@@ -39,7 +39,6 @@ namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
-use App\Features\PipelineStageClassificationFeature;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
@@ -65,8 +64,7 @@ class ViewPipeline extends ViewRecord
                             ->label('Stage'),
                         TextEntry::make('classification')
                             ->label('Classification')
-                            ->badge()
-                            ->visible(fn () => PipelineStageClassificationFeature::active()),
+                            ->badge(),
                     ])
                     ->label('Other stages')
                     ->columns(2),
