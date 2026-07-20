@@ -41,7 +41,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Actions\BulkUpdateConta
 use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
-use App\Features\ManagedContactFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -70,10 +69,10 @@ class ListContacts extends ListRecords
                     ->label('Name')
                     ->searchable()
                     ->sortable()
-                    ->icon(fn (Contact $record): ?Heroicon => ManagedContactFeature::active() && $record->isManaged() ? Heroicon::LockClosed : null)
+                    ->icon(fn (Contact $record): ?Heroicon => $record->isManaged() ? Heroicon::LockClosed : null)
                     ->iconColor('gray')
                     ->iconPosition(IconPosition::After)
-                    ->tooltip(fn (Contact $record): ?string => ManagedContactFeature::active() && $record->isManaged() ? 'This is a User\'s managed non-administrative account for the self-service portal. The information displayed is synchronized directly from the User record.' : null),
+                    ->tooltip(fn (Contact $record): ?string => $record->isManaged() ? 'This is a User\'s managed non-administrative account for the self-service portal. The information displayed is synchronized directly from the User record.' : null),
                 TextColumn::make('email')
                     ->label('Email')
                     ->searchable()
@@ -110,7 +109,7 @@ class ListContacts extends ListRecords
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make()
-                    ->hidden(fn (Contact $record): bool => ManagedContactFeature::active() && $record->isManaged()),
+                    ->hidden(fn (Contact $record): bool => $record->isManaged()),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

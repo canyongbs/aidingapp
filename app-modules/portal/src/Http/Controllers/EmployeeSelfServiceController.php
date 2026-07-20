@@ -36,7 +36,6 @@
 
 namespace AidingApp\Portal\Http\Controllers;
 
-use App\Features\ManagedContactFeature;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -47,8 +46,6 @@ class EmployeeSelfServiceController extends Controller
 {
     public function __invoke(): RedirectResponse
     {
-        abort_unless(ManagedContactFeature::active(), Response::HTTP_NOT_FOUND);
-
         $user = Auth::user();
 
         abort_unless($user instanceof User, Response::HTTP_FORBIDDEN);

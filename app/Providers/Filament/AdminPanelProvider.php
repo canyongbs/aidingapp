@@ -39,7 +39,6 @@ namespace App\Providers\Filament;
 use AidingApp\Authorization\Filament\Pages\Auth\Login;
 use AidingApp\Theme\Settings\ThemeSettings;
 use App\Enums\NavigationGroup;
-use App\Features\ManagedContactFeature;
 use App\Features\SubscriptionExpirationFeature;
 use App\Filament\Clusters\ProfileSettings;
 use App\Filament\Pages\Dashboard;
@@ -159,8 +158,7 @@ class AdminPanelProvider extends PanelProvider
                     ->visible(function (): bool {
                         $user = Auth::user();
 
-                        return ManagedContactFeature::active()
-                            && $user instanceof User
+                        return $user instanceof User
                             && $user->managedContact()->exists();
                     }),
                 MenuItem::make()

@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Actions;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
-use App\Features\ManagedContactFeature;
 use Filament\Actions\BulkAction;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
@@ -91,7 +90,7 @@ class BulkUpdateContactsAction
                 foreach ($records as $contact) {
                     assert($contact instanceof Contact);
 
-                    if (ManagedContactFeature::active() && $contact->isManaged()) {
+                    if ($contact->isManaged()) {
                         $action->reportBulkProcessingFailure(
                             'managed_contact',
                             message: function (int $failureCount, int $totalCount): string {

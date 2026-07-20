@@ -38,7 +38,6 @@ namespace App\Filament\Resources\Users\Pages;
 
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Services\ManagedContactService;
-use App\Features\ManagedContactFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -94,7 +93,6 @@ class CreateUser extends CreateRecord
                         PhoneInput::make('mobile')
                             ->nullable(),
                         Grid::make(2)
-                            ->visible(fn (): bool => ManagedContactFeature::active())
                             ->schema([
                                 Toggle::make('is_managed_contact')
                                     ->label('Managed Contact')
@@ -149,7 +147,7 @@ class CreateUser extends CreateRecord
         /** @var User $user */
         $user = $this->getRecord();
 
-        if (ManagedContactFeature::active() && $this->isManagedContact && filled($this->managedContactTypeId)) {
+        if ($this->isManagedContact && filled($this->managedContactTypeId)) {
             app(ManagedContactService::class)->enable($user, $this->managedContactTypeId);
         }
 
