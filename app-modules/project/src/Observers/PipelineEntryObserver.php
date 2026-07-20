@@ -38,7 +38,6 @@ namespace AidingApp\Project\Observers;
 
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Notifications\PipelineEntryAssignedToUserNotification;
-use App\Features\PipelineEntryEnhancedFieldsFeature;
 use App\Models\User;
 
 class PipelineEntryObserver
@@ -53,8 +52,7 @@ class PipelineEntryObserver
     public function saved(PipelineEntry $pipelineEntry): void
     {
         if (
-            PipelineEntryEnhancedFieldsFeature::active()
-            && filled($pipelineEntry->assigned_to_id)
+        filled($pipelineEntry->assigned_to_id)
             && $pipelineEntry->assigned_to_type === (new User())->getMorphClass()
             && ($pipelineEntry->wasChanged(['assigned_to_id', 'assigned_to_type']) || $pipelineEntry->wasRecentlyCreated)
         ) {

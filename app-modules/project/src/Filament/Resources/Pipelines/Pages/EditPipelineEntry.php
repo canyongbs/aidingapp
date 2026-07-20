@@ -41,7 +41,6 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use App\Features\PipelineEntryEnhancedFieldsFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -168,11 +167,9 @@ class EditPipelineEntry extends Page
 
         $this->pipelineEntry->update($data);
 
-        if (PipelineEntryEnhancedFieldsFeature::active()) {
-            $this->pipelineEntry->milestones()->sync($milestones);
-            $this->pipelineEntry->assets()->sync($assets);
-            $this->pipelineEntry->serviceRequests()->sync($serviceRequests);
-        }
+        $this->pipelineEntry->milestones()->sync($milestones);
+        $this->pipelineEntry->assets()->sync($assets);
+        $this->pipelineEntry->serviceRequests()->sync($serviceRequests);
 
         Notification::make()
             ->success()
@@ -186,11 +183,9 @@ class EditPipelineEntry extends Page
     {
         $data = $this->pipelineEntry->attributesToArray();
 
-        if (PipelineEntryEnhancedFieldsFeature::active()) {
-            $data['milestones'] = $this->pipelineEntry->milestones->pluck('id')->toArray();
-            $data['assets'] = $this->pipelineEntry->assets->pluck('id')->toArray();
-            $data['serviceRequests'] = $this->pipelineEntry->serviceRequests->pluck('id')->toArray();
-        }
+        $data['milestones'] = $this->pipelineEntry->milestones->pluck('id')->toArray();
+        $data['assets'] = $this->pipelineEntry->assets->pluck('id')->toArray();
+        $data['serviceRequests'] = $this->pipelineEntry->serviceRequests->pluck('id')->toArray();
 
         $this->form->fill($data);
     }

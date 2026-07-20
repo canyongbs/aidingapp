@@ -44,9 +44,7 @@ use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\PipelineEntryEnhancedFieldsFeature;
 use App\Models\User;
-use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Infolists\Components\IconEntry;
@@ -65,7 +63,7 @@ class ViewPipelineEntry extends Page
 
     protected static ?string $title = 'Pipeline Entry Details';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-eye';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-eye';
 
     protected string $view = 'project::filament.pages.view-pipeline-entry';
 
@@ -165,7 +163,6 @@ class ViewPipelineEntry extends Page
                             ->label('Due Date')
                             ->dateTime(),
                         TextEntry::make('assignedTo')
-                            ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active())
                             ->label('Assigned To')
                             ->state(function (PipelineEntry $record): ?string {
                                 $assignee = $record->assignedTo;
@@ -181,24 +178,20 @@ class ViewPipelineEntry extends Page
                                 };
                             }),
                         TextEntry::make('assigned_to_type')
-                            ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active() && filled($this->pipelineEntry->assigned_to_type))
+                            ->visible(fn () => filled($this->pipelineEntry->assigned_to_type))
                             ->label('Assigned To Type')
                             ->formatStateUsing(fn (string $state): string => ucfirst($state))
                             ->badge(),
                         IconEntry::make('is_visible_to_guests')
-                            ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active())
                             ->label('Visible to Guest')
                             ->boolean(),
                         TextEntry::make('milestones.title')
-                            ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active())
                             ->label('Related Milestones')
                             ->badge(),
                         TextEntry::make('assets.name')
-                            ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active())
                             ->label('Related Assets')
                             ->badge(),
                         TextEntry::make('serviceRequests')
-                            ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active())
                             ->label('Related Service Requests')
                             ->state(fn (PipelineEntry $record): array => $record->serviceRequests
                                 ->map(fn (ServiceRequest $serviceRequest): string => PipelineEntryForm::serviceRequestLabel($serviceRequest))

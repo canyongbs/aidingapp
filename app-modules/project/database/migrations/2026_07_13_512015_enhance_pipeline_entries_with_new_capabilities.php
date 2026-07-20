@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\PipelineEntryEnhancedFieldsFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -91,16 +90,12 @@ return new class () extends Migration {
                 $table->foreignUuid('service_request_id')->constrained()->cascadeOnDelete();
                 $table->timestamps();
             });
-
-            PipelineEntryEnhancedFieldsFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            PipelineEntryEnhancedFieldsFeature::deactivate();
-
             Schema::dropIfExists('pipeline_entry_service_requests');
             Schema::dropIfExists('pipeline_entry_assets');
             Schema::dropIfExists('pipeline_entry_milestones');

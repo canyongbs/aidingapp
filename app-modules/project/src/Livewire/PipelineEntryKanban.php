@@ -41,7 +41,6 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
-use App\Features\PipelineEntryEnhancedFieldsFeature;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -149,26 +148,18 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                     ...$dataArray,
                     'description' => $data['description'] ?? null,
                     'due' => $data['due'] ?? null,
+                    'assigned_to_type' => $data['assigned_to_type'] ?? null,
+                    'assigned_to_id' => $data['assigned_to_id'] ?? null,
+                    'is_visible_to_guests' => $data['is_visible_to_guests'] ?? true,
                 ];
-
-                if (PipelineEntryEnhancedFieldsFeature::active()) {
-                    $dataArray = [
-                        ...$dataArray,
-                        'assigned_to_type' => $data['assigned_to_type'] ?? null,
-                        'assigned_to_id' => $data['assigned_to_id'] ?? null,
-                        'is_visible_to_guests' => $data['is_visible_to_guests'] ?? true,
-                    ];
-                }
 
                 $entry = new PipelineEntry($dataArray);
 
                 $entry->saveOrFail();
 
-                if (PipelineEntryEnhancedFieldsFeature::active()) {
-                    $entry->milestones()->sync($data['milestones'] ?? []);
-                    $entry->assets()->sync($data['assets'] ?? []);
-                    $entry->serviceRequests()->sync($data['serviceRequests'] ?? []);
-                }
+                $entry->milestones()->sync($data['milestones'] ?? []);
+                $entry->assets()->sync($data['assets'] ?? []);
+                $entry->serviceRequests()->sync($data['serviceRequests'] ?? []);
 
                 Notification::make()
                     ->success()

@@ -39,7 +39,6 @@ namespace AidingApp\Project\Filament\Resources\Pipelines\Forms;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\PipelineEntryEnhancedFieldsFeature;
 use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\MorphToSelect;
@@ -88,11 +87,9 @@ class PipelineEntryForm
                 ])
                 ->searchable()
                 ->preload()
-                ->typeSelectToggleButtons()
-                ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active()),
+                ->typeSelectToggleButtons(),
             Toggle::make('is_visible_to_guests')
                 ->label('Visible to Guest')
-                ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active())
                 ->default(true),
             Select::make('milestones')
                 ->label('Related Milestones')
@@ -106,16 +103,14 @@ class PipelineEntryForm
                 ->multiple()
                 ->searchable()
                 ->preload()
-                ->dehydrated()
-                ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active()),
+                ->dehydrated(),
             Select::make('assets')
                 ->label('Related Assets')
                 ->relationship(name: 'assets', titleAttribute: 'name')
                 ->multiple()
                 ->searchable()
                 ->preload()
-                ->dehydrated()
-                ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active()),
+                ->dehydrated(),
             Select::make('serviceRequests')
                 ->label('Related Service Requests')
                 ->relationship(name: 'serviceRequests', titleAttribute: 'service_request_number')
@@ -123,8 +118,7 @@ class PipelineEntryForm
                 ->multiple()
                 ->searchable()
                 ->preload()
-                ->dehydrated()
-                ->visible(fn () => PipelineEntryEnhancedFieldsFeature::active()),
+                ->dehydrated(),
         ];
     }
 
