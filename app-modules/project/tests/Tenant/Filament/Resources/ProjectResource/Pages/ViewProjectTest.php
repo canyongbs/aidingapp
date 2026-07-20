@@ -34,16 +34,21 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageManagers;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\ManagerUsersRelationManager;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectMilestonesWidget;
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Models\User;
-use Olympus\Crm\Models\Contact;
+use Filament\Forms\Components\Repeater;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -255,4 +260,184 @@ it('can create a milestone through the project milestones widget create action',
         ->assertHasNoActionErrors();
 
     expect($project->milestones()->where('title', $milestone->title)->exists())->toBeTrue();
+});
+
+it('auto-selects the first pipeline on mount in the project work pipeline widget', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertSet('selectedPipelineId', $pipeline->getKey());
+});
+
+it('only shows pipeline entries that belong to the selected pipeline', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipelineA = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $pipelineB = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entriesA = PipelineEntry::factory()->count(2)->create([
+        'pipeline_stage_id' => $pipelineA->stages->first()->getKey(),
+    ]);
+
+    $entriesB = PipelineEntry::factory()->count(2)->create([
+        'pipeline_stage_id' => $pipelineB->stages->first()->getKey(),
+    ]);
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->callAction('selectPipeline', data: ['pipeline_id' => $pipelineA->getKey()])
+        ->assertCanSeeTableRecords($entriesA)
+        ->assertCanNotSeeTableRecords($entriesB)
+        ->callAction('selectPipeline', data: ['pipeline_id' => $pipelineB->getKey()])
+        ->assertCanSeeTableRecords($entriesB)
+        ->assertCanNotSeeTableRecords($entriesA);
+});
+
+it('can switch the selected pipeline through the select pipeline action', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $pipelineB = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertActionExists('selectPipeline')
+        ->callAction('selectPipeline', data: [
+            'pipeline_id' => $pipelineB->getKey(),
+        ])
+        ->assertHasNoActionErrors()
+        ->assertSet('selectedPipelineId', $pipelineB->getKey());
+});
+
+it('rejects selecting a pipeline that belongs to another project', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $otherProject = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $foreignPipeline = Pipeline::factory()
+        ->for($otherProject)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->callAction('selectPipeline', data: [
+            'pipeline_id' => $foreignPipeline->getKey(),
+        ])
+        ->assertNotified('Invalid pipeline selection')
+        ->assertSet('selectedPipelineId', $pipeline->getKey());
+});
+
+it('can create a pipeline through the create pipeline action', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertActionExists('createPipeline')
+        ->callAction('createPipeline', data: [
+            'name' => 'Delivery Pipeline',
+            'description' => 'Tracks delivery work.',
+            'stages' => [
+                ['name' => 'Planning'],
+                ['name' => 'In Progress'],
+                ['name' => 'Complete'],
+            ],
+        ])
+        ->assertHasNoActionErrors()
+        ->assertSet('selectedPipelineId', fn (?string $state): bool => filled($state));
+
+    $pipeline = Pipeline::query()->where('name', 'Delivery Pipeline')->first();
+
+    expect($pipeline)->not->toBeNull();
+    expect($pipeline->project_id)->toBe($project->getKey());
+    expect($pipeline->stages)->toHaveCount(3);
+
+    $undoRepeaterFake();
+});
+
+it('can create a pipeline entry through the widget header create action', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $stage = $pipeline->stages->first();
+
+    $contact = Contact::factory()->create();
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->callTableAction('createEntry', data: [
+            'name' => 'Kickoff Task',
+            'pipeline_stage_id' => $stage->getKey(),
+            'organizable_type' => $contact->getMorphClass(),
+            'organizable_id' => $contact->getKey(),
+        ])
+        ->assertHasNoTableActionErrors();
+
+    expect(
+        PipelineEntry::query()
+            ->where('name', 'Kickoff Task')
+            ->where('pipeline_stage_id', $stage->getKey())
+            ->exists()
+    )->toBeTrue();
+});
+
+it('shows the empty state when the project has no pipelines', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertSet('selectedPipelineId', null)
+        ->assertActionExists('createPipeline')
+        ->assertSee('No pipeline selected');
 });

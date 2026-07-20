@@ -38,6 +38,7 @@
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectMilestonesWidget;
+    use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
     use Filament\Facades\Filament;
 
     $record = $this->getRecord();
@@ -83,7 +84,7 @@
     </div>
 
     {{-- Pipeline Widget --}}
-    {{-- @livewire(ProjectWorkPipelineWidget::class, ['record' => $record]) --}}
+    @livewire(ProjectWorkPipelineWidget::class, ['record' => $record])
 
     {{-- Files Widget --}}
     {{-- @livewire(ProjectDashboardFilesWidget::class, ['record' => $record]) --}}
