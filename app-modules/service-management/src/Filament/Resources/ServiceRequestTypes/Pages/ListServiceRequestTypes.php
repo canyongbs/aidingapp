@@ -127,6 +127,7 @@ class ListServiceRequestTypes extends ListRecords
                 /** @phpstan-ignore argument.type */
                 'children' => function (HasMany $query) use ($loadTypes) {
                     $query->orderBy('sort')
+                        // @phpstan-ignore argument.type
                         ->with([
                             'restrictedToContactTypes:id',
                             'types' => $loadTypes,
