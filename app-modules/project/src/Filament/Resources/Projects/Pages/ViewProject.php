@@ -38,7 +38,6 @@ namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
-use App\Features\ProjectNewFieldsFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -64,21 +63,21 @@ class ViewProject extends ViewRecord
                             ->columnSpanFull(),
                         TextEntry::make('icon')
                             ->label('Icon')
-                            ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                            ->visible()
                             ->state(fn (Project $record): string => (string) str($record->icon)->after('heroicon-o-')->headline())
                             ->icon(fn (Project $record): string => $record->icon),
                         ColorEntry::make('color')
-                            ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                            ->visible()
                             ->label('Color'),
                         TextEntry::make('department.name')
-                            ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                            ->visible()
                             ->label('Department'),
                         TextEntry::make('start_date')
-                            ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                            ->visible()
                             ->date()
                             ->label('Start Date'),
                         TextEntry::make('target_completion_date')
-                            ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                            ->visible()
                             ->date()
                             ->label('Target Completion Date'),
                     ]),
