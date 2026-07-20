@@ -52,7 +52,6 @@ class ServiceRequestTypesController extends Controller
 
         $tree = app(BuildContactServiceRequestTypeTree::class)->execute(
             contactTypeId: $contactTypeId,
-            visibilityRestrictionsEnabled: true,
             formatType: fn (ServiceRequestType $type, ?string $categoryId): array => [
                 'id' => $type->getKey(),
                 'name' => $type->name,

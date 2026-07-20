@@ -63,7 +63,6 @@ class GetServiceRequestTypesController extends Controller
 
         $tree = app(BuildContactServiceRequestTypeTree::class)->execute(
             contactTypeId: $contactTypeId,
-            visibilityRestrictionsEnabled: true,
             prepareTypesQuery: fn (Builder $query) => $query->with(['priorities' => fn ($priorityQuery) => $priorityQuery->orderByDesc('order')]),
             formatType: fn (ServiceRequestType $type, ?string $categoryId): array => [
                 'id' => $type->getKey(),
