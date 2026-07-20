@@ -47,7 +47,7 @@ class AddressInput
 {
     public static function make(): SearchableInput
     {
-        return SearchableInput::make('autocomplete_address')
+        return SearchableInput::make('address')
             ->label('Address')
             ->searchUsing(function (string $search) {
                 if (strlen($search) < 3) {

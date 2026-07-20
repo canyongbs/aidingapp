@@ -164,7 +164,6 @@ class EditContact extends EditRecord
                             ->label('Other Phone')
                             ->string(),
                         AddressInput::make()
-                            ->columnSpanFull()
                         /** @phpstan-ignore argument.type */
                             ->onItemSelected(function (Set $set, SearchResult $item) {
                                 try {
@@ -191,12 +190,7 @@ class EditContact extends EditRecord
 
                                     report($exception);
                                 }
-                            })
-                            ->saved(false),
-                        TextInput::make('address')
-                            ->label('Address')
-                            ->string()
-                            ->maxLength(255),
+                            }),
                         TextInput::make('address_2')
                             ->label('Address 2')
                             ->string()

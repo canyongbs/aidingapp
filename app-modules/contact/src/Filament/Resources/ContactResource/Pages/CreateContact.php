@@ -139,7 +139,6 @@ class CreateContact extends CreateRecord
                         ->label('Other Phone')
                         ->string(),
                     AddressInput::make()
-                        ->columnSpanFull()
                         /** @phpstan-ignore argument.type */
                         ->onItemSelected(function (Set $set, SearchResult $item) {
                             try {
@@ -166,14 +165,26 @@ class CreateContact extends CreateRecord
 
                                 report($exception);
                             }
-                        })
-                        ->saved(false),
-                    TextInput::make('address')
-                        ->label('Address')
-                        ->string(),
+                        }),
                     TextInput::make('address_2')
                         ->label('Address 2')
                         ->string(),
+                    TextInput::make('address_3')
+                        ->label('Address 3')
+                        ->string()
+                        ->maxLength(255),
+                    TextInput::make('city')
+                        ->label('City')
+                        ->string()
+                        ->maxLength(255),
+                    TextInput::make('state')
+                        ->label('State')
+                        ->string()
+                        ->maxLength(255),
+                    TextInput::make('postal')
+                        ->label('Postal')
+                        ->string()
+                        ->maxLength(255),
                 ])->columns(2),
 
                 Section::make('Classification')->schema([
@@ -211,19 +222,5 @@ class CreateContact extends CreateRecord
 
                 // TODO: Display this based on system configurable data format
             ]);
-    }
-
-    /**
-     * @param array<string, string> $data
-     *
-     * @return array<string, string>
-     */
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        $data['city'] = $this->data['city'] ?? null;
-        $data['state'] = $this->data['state'] ?? null;
-        $data['postal'] = $this->data['postal'] ?? null;
-
-        return $data;
     }
 }

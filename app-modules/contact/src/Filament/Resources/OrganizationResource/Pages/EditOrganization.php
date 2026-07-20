@@ -151,7 +151,6 @@ class EditOrganization extends EditRecord
                     ->columns()
                     ->schema([
                         AddressInput::make()
-                            ->columnSpanFull()
                         /** @phpstan-ignore argument.type */
                             ->onItemSelected(function (Set $set, SearchResult $item) {
                                 try {
@@ -179,11 +178,7 @@ class EditOrganization extends EditRecord
 
                                     report($exception);
                                 }
-                            })
-                            ->saved(false),
-                        TextInput::make('address')
-                            ->label('Address')
-                            ->string(),
+                            }),
                         TextInput::make('city')
                             ->label('City')
                             ->maxLength(255)
