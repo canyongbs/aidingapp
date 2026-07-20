@@ -39,7 +39,6 @@ use AidingApp\Department\Models\Department;
 use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
-use App\Features\ReportingFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -47,10 +46,6 @@ use Filament\Actions\Testing\TestAction;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
-
-beforeEach(function () {
-    ReportingFeature::activate();
-});
 
 it('cannot be accessed by a user without the reporting permission', function () {
     $user = User::factory()->create();
@@ -68,18 +63,6 @@ it('can be accessed by a user with the reporting permission', function () {
     actingAs($user);
 
     get(Reporting::getUrl())->assertSuccessful();
-});
-
-it('cannot be accessed when the ReportingFeature is not active even with the reporting permission', function () {
-    ReportingFeature::deactivate();
-
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('reporting.view-any');
-
-    actingAs($user);
-
-    get(Reporting::getUrl())->assertForbidden();
 });
 
 it('always lists reports that require no feature addon', function () {
