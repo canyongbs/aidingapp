@@ -42,7 +42,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\BuildContactServiceRequestTypeTree;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -57,16 +56,14 @@ class GetServiceRequestTypesController extends Controller
 
         abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
 
-        $visibilityRestrictionsEnabled = ServiceRequestTypeVisibilityRestrictionsFeature::active();
-
-        $contactTypeId = $visibilityRestrictionsEnabled ? $contact->type_id : null;
+        $contactTypeId = $contact->type_id;
 
         $aiClarificationGlobalEnabled = app(AiClarificationSettings::class)->is_enabled;
         $aiResolutionGlobalEnabled = app(AiResolutionSettings::class)->is_enabled;
 
         $tree = app(BuildContactServiceRequestTypeTree::class)->execute(
             contactTypeId: $contactTypeId,
-            visibilityRestrictionsEnabled: $visibilityRestrictionsEnabled,
+            visibilityRestrictionsEnabled: true,
             prepareTypesQuery: fn (Builder $query) => $query->with(['priorities' => fn ($priorityQuery) => $priorityQuery->orderByDesc('order')]),
             formatType: fn (ServiceRequestType $type, ?string $categoryId): array => [
                 'id' => $type->getKey(),

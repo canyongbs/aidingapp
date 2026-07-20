@@ -34,11 +34,10 @@
 document.addEventListener('alpine:init', () => {
     Alpine.data(
         'serviceRequestTypeManager',
-        ({ originalTreeData, treeData, canEdit, visibilityRestrictionsEnabled, multipleCategoriesEnabled }) => ({
+        ({ originalTreeData, treeData, canEdit, multipleCategoriesEnabled }) => ({
             originalTreeData,
             treeData,
             canEdit,
-            visibilityRestrictionsEnabled,
             multipleCategoriesEnabled,
             categoryInputs: {},
             typeInputs: {},
@@ -122,10 +121,6 @@ document.addEventListener('alpine:init', () => {
             },
 
             renderVisibilityControl(node, nodeType) {
-                if (!this.visibilityRestrictionsEnabled) {
-                    return '';
-                }
-
                 const restricted = !!node.is_visibility_restricted;
 
                 const eyeSlashIcon = `<svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
@@ -2402,12 +2397,9 @@ document.addEventListener('alpine:init', () => {
                     category_id: categoryId,
                     service_requests_count: source.service_requests_count ?? 0,
                     view_url: source.view_url ?? '',
+                    is_visibility_restricted: source.is_visibility_restricted ?? false,
+                    restricted_to_contact_type_ids: source.restricted_to_contact_type_ids ?? [],
                 };
-
-                if (this.visibilityRestrictionsEnabled) {
-                    placement.is_visibility_restricted = source.is_visibility_restricted ?? false;
-                    placement.restricted_to_contact_type_ids = source.restricted_to_contact_type_ids ?? [];
-                }
 
                 const category = this.findCategoryById(categoryId);
                 if (category) {
