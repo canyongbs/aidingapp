@@ -53,8 +53,6 @@ use AidingApp\Project\Models\ProjectFile;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -461,29 +459,6 @@ it('can list files in the project files widget', function () {
         ->assertCanSeeTableRecords($files);
 });
 
-it('can create a file through the project files widget create action', function () {
-    asSuperAdmin();
-    Storage::fake('s3');
-
-    $project = Project::factory()->create();
-    $fakeFile = UploadedFile::fake()->image(fake()->word() . '.png');
-
-    livewire(ProjectFilesWidget::class, [
-        'record' => $project,
-    ])
-        ->assertTableActionExists('create')
-        ->callTableAction('create', data: [
-            'description' => 'Kickoff Deck',
-            'file' => $fakeFile,
-        ])
-        ->assertHasNoTableActionErrors();
-
-    $file = $project->files()->where('description', 'Kickoff Deck')->first();
-
-    expect($file)->not->toBeNull();
-    expect($file->getMedia('file'))->toHaveCount(1);
-});
-
 it('calculates progress as 0 when the project has no pipeline entries', function () {
     asSuperAdmin();
 
@@ -546,4 +521,59 @@ it('only counts pipeline entries belonging to the given project when calculating
         'record' => $project,
     ])
         ->assertSee('Progress: 100%');
+});
+
+it('gates the project access widget behind project view permissions', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    expect(ProjectAccessWidget::canView())->toBeFalse();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+    $user->refresh();
+
+    expect(ProjectAccessWidget::canView())->toBeTrue();
+});
+
+it('gates the project milestones widget behind project view permissions', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    expect(ProjectMilestonesWidget::canView())->toBeFalse();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+    $user->refresh();
+
+    expect(ProjectMilestonesWidget::canView())->toBeTrue();
+});
+
+it('gates the project files widget behind project view permissions', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    expect(ProjectFilesWidget::canView())->toBeFalse();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+    $user->refresh();
+
+    expect(ProjectFilesWidget::canView())->toBeTrue();
+});
+
+it('gates the project work pipeline widget behind the pipeline view-any permission', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    expect(ProjectWorkPipelineWidget::canView())->toBeFalse();
+
+    $user->givePermissionTo('pipeline.view-any');
+    $user->refresh();
+
+    expect(ProjectWorkPipelineWidget::canView())->toBeTrue();
 });

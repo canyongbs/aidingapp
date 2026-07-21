@@ -296,8 +296,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                     collect(PipelineStageClassification::cases())->map(fn (PipelineStageClassification $case): array => [
                         'name' => $case->getLabel(),
                         'classification' => $case->value,
-                    ])
-                )->all()
+                    ])->all()
+                )
                 ->reorderable()
                 ->columnSpanFull()
                 ->label('Pipeline Stages')
