@@ -204,11 +204,6 @@ class Project extends BaseModel implements Auditable
             ->withTimestamps();
     }
 
-    public function guests(): BelongsToMany
-    {
-        return $this->guestContacts()->union($this->guestOrganizations());
-    }
-
     public function getGradient(): array
     {
         $gradientColors = [

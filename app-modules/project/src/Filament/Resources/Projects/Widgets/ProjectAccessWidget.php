@@ -36,9 +36,12 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Department\Models\Department;
 use AidingApp\Project\Filament\Actions\ProjectManageAccessAction;
 use AidingApp\Project\Models\Project;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
@@ -64,6 +67,9 @@ class ProjectAccessWidget extends Widget implements HasActions, HasSchemas
         return $user->can(['project.view-any', 'project.*.view']);
     }
 
+    /**
+     * @return Collection<int, User>
+     */
     #[Computed]
     public function getManagers(): Collection
     {
@@ -73,6 +79,9 @@ class ProjectAccessWidget extends Widget implements HasActions, HasSchemas
             ->values();
     }
 
+    /**
+     * @return Collection<int, User>
+     */
     #[Computed]
     public function getAuditors(): Collection
     {
@@ -82,11 +91,17 @@ class ProjectAccessWidget extends Widget implements HasActions, HasSchemas
             ->values();
     }
 
+    /**
+     * @return Collection<int, Contact | Organization>
+     */
     #[Computed]
     public function getGuests(): Collection
     {
-        return $this->record->guestContacts
+        /** @var Collection<int, Contact | Organization> $guests */
+        $guests = $this->record->guestContacts
             ->concat($this->record->guestOrganizations);
+
+        return $guests;
     }
 
     public function manageAccessAction(): Action
