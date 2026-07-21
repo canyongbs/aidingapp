@@ -42,7 +42,6 @@ use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
-use App\Features\PipelineStageClassificationFeature;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
@@ -278,7 +277,7 @@ class ProjectWorkPipelineWidget extends TableWidget
             Repeater::make('stages')
                 ->table([
                     TableColumn::make('Stage Name'),
-                    ...(PipelineStageClassificationFeature::active() ? [TableColumn::make('Classification')] : []),
+                    TableColumn::make('Classification'),
                 ])
                 ->schema([
                     TextInput::make('name')
@@ -291,15 +290,14 @@ class ProjectWorkPipelineWidget extends TableWidget
                         ->enum(PipelineStageClassification::class)
                         ->required()
                         ->native()
-                        ->default(PipelineStageClassification::Planning->value)
-                        ->visible(fn () => PipelineStageClassificationFeature::active()),
+                        ->default(PipelineStageClassification::Planning->value),
                 ])
                 ->default(
                     collect(PipelineStageClassification::cases())->map(fn (PipelineStageClassification $case): array => [
                         'name' => $case->getLabel(),
-                        ...(PipelineStageClassificationFeature::active() ? ['classification' => $case->value] : []),
-                    ])->all()
-                )
+                        'classification' => $case->value,
+                    ])
+                )->all()
                 ->reorderable()
                 ->columnSpanFull()
                 ->label('Pipeline Stages')
