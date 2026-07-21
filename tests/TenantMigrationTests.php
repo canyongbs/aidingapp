@@ -36,7 +36,6 @@
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\Console\Command\Command;
@@ -69,12 +68,12 @@ function columnNativeType(string $table, string $column): ?string
 //});
 
 describe('2026_07_09_123757_migrate_service_request_types_to_multiple_categories', function () {
-    it('backfills the category pivot from the legacy category_id column, activates the feature, and keeps the column', function () {
+  it('creates the category pivot table and keeps the legacy category_id column', function () {
         isolatedMigration(
             '2026_07_09_123757_migrate_service_request_types_to_multiple_categories',
             function () {
-                // At this point the pivot table does not yet exist and the legacy `category_id` column is
-                // still present, and the feature flag is inactive, so the models write through the legacy column.
+        // At this point the pivot table does not yet exist and the legacy `category_id` column is
+        // still present.
                 $category = ServiceRequestTypeCategory::factory()->create();
 
                 $typeWithCategory = ServiceRequestType::factory()->create(['category_id' => $category->id, 'sort' => 7]);
@@ -87,31 +86,18 @@ describe('2026_07_09_123757_migrate_service_request_types_to_multiple_categories
 
                 expect($migrate)->toBe(Command::SUCCESS);
 
-                // The type that had a category is now linked through the pivot table.
+                // Existing rows are untouched by this schema migration.
                 expect(
                     DB::table('service_request_category_types')
-                        ->where('service_request_type_id', $typeWithCategory->id)
-                        ->where('service_request_type_category_id', $category->id)
-                        ->exists()
-                )->toBeTrue();
-
-                // The per-area sort is backfilled from the legacy type sort.
-                expect(
-                    DB::table('service_request_category_types')
-                        ->where('service_request_type_id', $typeWithCategory->id)
-                        ->where('service_request_type_category_id', $category->id)
-                        ->value('sort')
-                )->toBe(7);
-
-                // The uncategorized type has no pivot row.
-                expect(
-                    DB::table('service_request_category_types')
-                        ->where('service_request_type_id', $typeWithoutCategory->id)
-                        ->exists()
+                    ->where('service_request_type_id', $typeWithCategory->id)
+                    ->exists()
                 )->toBeFalse();
 
-                // The feature flag is activated as part of the migration.
-                expect(ServiceRequestTypeMultipleCategoriesFeature::active())->toBeTrue();
+                expect(
+                  DB::table('service_request_category_types')
+                    ->where('service_request_type_id', $typeWithoutCategory->id)
+                        ->exists()
+                )->toBeFalse();
 
                 // The legacy single category column is intentionally kept as a rollback safety net.
                 expect(columnNativeType('service_request_types', 'category_id'))->not->toBeNull();

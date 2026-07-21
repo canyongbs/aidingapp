@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
-use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -70,13 +69,7 @@ class ViewServiceRequestType extends ViewRecord
                             ->icon(fn (ServiceRequestType $record): string => $record->icon),
                         TextEntry::make('service_request_areas')
                             ->label('Service Request Area')
-                            ->state(function (ServiceRequestType $record): array {
-                                if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
-                                    return $record->categories->pluck('name')->all();
-                                }
-
-                                return $record->category !== null ? [$record->category->name] : [];
-                            })
+                            ->state(fn (ServiceRequestType $record): array => $record->categories->pluck('name')->all())
                             ->badge()
                             ->placeholder('None'),
                         TextEntry::make('default_category')

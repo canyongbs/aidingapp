@@ -32,11 +32,10 @@
 </COPYRIGHT>
 */
 document.addEventListener('alpine:init', () => {
-    Alpine.data('serviceRequestTypeManager', ({ originalTreeData, treeData, canEdit, multipleCategoriesEnabled }) => ({
+    Alpine.data('serviceRequestTypeManager', ({ originalTreeData, treeData, canEdit }) => ({
         originalTreeData,
         treeData,
         canEdit,
-        multipleCategoriesEnabled,
         categoryInputs: {},
         typeInputs: {},
         existingTypeInputs: {},
@@ -261,7 +260,7 @@ document.addEventListener('alpine:init', () => {
         renderType(type, owningCategoryId = null) {
             const requestCount = typeof type.service_requests_count === 'number' ? type.service_requests_count : 0;
             const occurrences = this.countTypeOccurrences(type.id);
-            const canRemove = this.multipleCategoriesEnabled && occurrences > 1;
+            const canRemove = occurrences > 1;
             const canDelete = !canRemove && requestCount === 0;
             const canArchive = !canRemove && requestCount > 0;
             const placementKey = this.typePlacementKey(type.id, owningCategoryId);
@@ -422,10 +421,7 @@ document.addEventListener('alpine:init', () => {
                                     : ''
                             }
                             ${
-                                this.canEdit &&
-                                this.multipleCategoriesEnabled &&
-                                !isRenaming &&
-                                this.collectPickableTypes(category.id).length > 0
+                                this.canEdit && !isRenaming && this.collectPickableTypes(category.id).length > 0
                                     ? `<button @click="showExistingTypeInput('${category.id}')" class="p-1.5 -m-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" x-tooltip.raw="Add existing type to area">
                                             <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                                                 <path fill-rule="evenodd" d="M8.914 6.025a.75.75 0 0 1 1.06 0 3.5 3.5 0 0 1 0 4.95l-2 2a3.5 3.5 0 0 1-5.396-4.402.75.75 0 0 1 1.251.827 2 2 0 0 0 3.085 2.514l2-2a2 2 0 0 0 0-2.828.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
@@ -496,10 +492,7 @@ document.addEventListener('alpine:init', () => {
                         }
 
                         ${
-                            !isCollapsed &&
-                            this.canEdit &&
-                            this.multipleCategoriesEnabled &&
-                            (this.existingTypeInputs[category.id] || false)
+                            !isCollapsed && this.canEdit && (this.existingTypeInputs[category.id] || false)
                                 ? `
                                     <div id="existing-type-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
                                         <select id="existing-type-${category.id}" class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white">

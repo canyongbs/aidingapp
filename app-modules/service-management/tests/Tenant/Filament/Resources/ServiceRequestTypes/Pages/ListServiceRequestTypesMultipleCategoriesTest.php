@@ -37,7 +37,6 @@
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ListServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
@@ -96,8 +95,6 @@ function typeNode(ServiceRequestType $type, ServiceRequestTypeCategory $category
 
 beforeEach(function () {
     asSuperAdmin();
-
-    expect(ServiceRequestTypeMultipleCategoriesFeature::active())->toBeTrue();
 });
 
 it('files a type under every category it appears in', function () {

@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRe
 use AidingApp\ServiceManagement\Models\ServiceRequestCategoryType;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ToggleButtons;
@@ -72,7 +71,7 @@ class ListServiceRequestTypes extends ListRecords
      * Category placements accumulated while walking the tree during a save, keyed by type id then
      * category id, with the per-area sort as the value. Applied in bulk once the whole tree has been
      * walked so a type filed under several categories keeps every membership instead of only the
-     * last one written. Only used while the multiple categories feature is active.
+     * last one written.
      *
      * @var array<string, array<string, int>>
      */
@@ -80,7 +79,6 @@ class ListServiceRequestTypes extends ListRecords
 
     /**
      * Desired `sort` values for types that end up uncategorised during a save, keyed by type id.
-     * Only used while the multiple categories feature is active.
      *
      * @var array<string, int>
      */
@@ -106,19 +104,13 @@ class ListServiceRequestTypes extends ListRecords
      */
     public function getHierarchicalData(): array
     {
-        $multipleCategoriesEnabled = ServiceRequestTypeMultipleCategoriesFeature::active();
-
-        // Ordering is handled by the `types` relationship itself (by `sort` under the legacy
-        // single-category path, by the pivot `sort` under the multiple categories path), so no
+        // Ordering is handled by the `types` relationship itself through the pivot `sort`, so no
         // explicit order is applied here to avoid an ambiguous `sort` column once the pivot exists.
         $loadTypes = fn ($typeQuery) => $typeQuery
             ->withoutArchived()
             ->withCount('serviceRequests')
             ->with('restrictedToContactTypes:id')
-            ->when(
-                $multipleCategoriesEnabled,
-                fn ($query) => $query->with('categories:id'),
-            );
+            ->with('categories:id');
 
         $categories = ServiceRequestTypeCategory::query()
             /** @phpstan-ignore argument.type */
@@ -151,18 +143,11 @@ class ListServiceRequestTypes extends ListRecords
 
         $uncategorizedTypes = ServiceRequestType::query()
             ->withoutArchived()
-            ->when(
-                $multipleCategoriesEnabled,
-                fn ($query) => $query->whereDoesntHave('categories'),
-                fn ($query) => $query->whereNull('category_id'),
-            )
+            ->whereDoesntHave('categories')
             ->orderBy('sort')
             ->withCount('serviceRequests')
             ->with('restrictedToContactTypes:id')
-            ->when(
-                $multipleCategoriesEnabled,
-                fn ($query) => $query->with('categories:id'),
-            )
+            ->with('categories:id')
             ->get();
 
         return [
@@ -350,13 +335,6 @@ class ListServiceRequestTypes extends ListRecords
                         continue;
                     }
 
-                    $categoryId = null;
-
-                    if (! empty($newType['category_id']) && $newType['category_id'] !== 'temp') {
-                        $categoryId = $newCategoryIds[$newType['category_id']]
-                            ?? $newType['category_id']; // Could be UUID
-                    }
-
                     $type = ServiceRequestType::create([
                         'name' => trim($newType['name']),
                         'sort' => $newType['sort'],
@@ -370,13 +348,6 @@ class ListServiceRequestTypes extends ListRecords
                     ]);
 
                     $newTypeIds[$newType['temp_id']] = $type->id;
-
-                    // Under the legacy single-category path the placement is written immediately.
-                    // Under the multiple categories path it is deferred to the aggregation pass so a
-                    // new type can be filed under several areas at once.
-                    if (! ServiceRequestTypeMultipleCategoriesFeature::active()) {
-                        $this->syncTypeCategory($type, $categoryId, (int) $newType['sort']);
-                    }
                 }
             }
 
@@ -418,7 +389,7 @@ class ListServiceRequestTypes extends ListRecords
             }
 
             // Apply the accumulated category placements in one pass so multi-category types keep
-            // every membership. No-op while the multiple categories feature is inactive.
+            // every membership.
             $this->applyPendingTypePlacements();
 
             $this->handleDeletedTypes($treeData['deleted_types'] ?? []);
@@ -501,14 +472,9 @@ class ListServiceRequestTypes extends ListRecords
 
     protected function deleteCategoryWithDescendants(ServiceRequestTypeCategory $category): void
     {
-        // While the multiple categories feature is active `types()` is a many-to-many relationship,
-        // so the types are only detached from this category (they may live under others). Under the
-        // legacy single-category path each type belongs solely to this category and is deleted.
-        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
-            $category->types()->detach();
-        } else {
-            $category->types()->delete();
-        }
+        // `types()` is a many-to-many relationship, so types are only detached from this category
+        // (they may live under others).
+        $category->types()->detach();
 
         foreach ($category->children as $child) {
             $this->deleteCategoryWithDescendants($child);
@@ -609,13 +575,12 @@ class ListServiceRequestTypes extends ListRecords
     /**
      * Resolve the sort to emit for a type node.
      *
-     * While the multiple categories feature is active a categorised type is ordered by its per-area
-     * pivot sort, so the same type can sit in a different position under each area. Uncategorised
-     * types (and the legacy single-category path) fall back to the type's global sort.
+     * A categorised type is ordered by its per-area pivot sort, so the same type can sit in a
+     * different position under each area. Uncategorised types fall back to the type's global sort.
      */
     protected function resolveTypeSort(ServiceRequestType $type, ?string $contextCategoryId): int
     {
-        if ($contextCategoryId !== null && ServiceRequestTypeMultipleCategoriesFeature::active()) {
+        if ($contextCategoryId !== null) {
             $pivot = $type->getRelationValue('pivot');
 
             assert($pivot instanceof ServiceRequestCategoryType || is_null($pivot));
@@ -631,10 +596,8 @@ class ListServiceRequestTypes extends ListRecords
     /**
      * Resolve the id to persist for a type node in the saved tree.
      *
-     * Existing types return their own id. A brand-new type (temp id) is only placed through this
-     * path while the multiple categories feature is active — its temp id is mapped to the real id
-     * created earlier in the save. Under the legacy single-category path new types are placed at
-     * creation time, so they are skipped here (null).
+        * Existing types return their own id. A brand-new type (temp id) is mapped to the real id
+        * created earlier in the save.
      *
      * @param array<string, string> $newTypeIds
      */
@@ -644,46 +607,26 @@ class ListServiceRequestTypes extends ListRecords
             return $treeTypeId;
         }
 
-        if (! ServiceRequestTypeMultipleCategoriesFeature::active()) {
-            return null;
-        }
-
         return $newTypeIds[$treeTypeId] ?? null;
     }
 
     /**
      * Record where a service request type sits in the tree and its sort order within that spot.
      *
-     * While the multiple categories feature is active the placement is accumulated and applied in
-     * bulk by {@see applyPendingTypePlacements()} so a type filed under several categories keeps
-     * every membership. Otherwise the legacy single `category_id` column is written immediately.
+     * Placement is accumulated and applied in bulk by {@see applyPendingTypePlacements()} so a type
+     * filed under several categories keeps every membership.
      */
     protected function assignTypeToCategory(string $typeId, ?string $categoryId, int $sort): void
     {
-        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
-            $this->pendingTypePlacements[$typeId] ??= [];
+        $this->pendingTypePlacements[$typeId] ??= [];
 
-            if ($categoryId !== null) {
-                $this->pendingTypePlacements[$typeId][$categoryId] = $sort;
-
-                return;
-            }
-
-            $this->pendingUncategorizedTypeSorts[$typeId] = $sort;
+        if ($categoryId !== null) {
+            $this->pendingTypePlacements[$typeId][$categoryId] = $sort;
 
             return;
         }
 
-        $type = ServiceRequestType::find($typeId);
-
-        if ($type === null) {
-            return;
-        }
-
-        $type->sort = $sort;
-        $type->save();
-
-        $this->syncTypeCategory($type, $categoryId);
+        $this->pendingUncategorizedTypeSorts[$typeId] = $sort;
     }
 
     /**
@@ -691,15 +634,10 @@ class ListServiceRequestTypes extends ListRecords
      *
      * Each type is synced to the full set of categories it appears under, deduplicated by category
      * (the pivot's unique constraint is the backstop), with the per-area sort stored on the pivot.
-     * Types that end up without any category are detached and keep their global `sort`. No-op while
-     * the multiple categories feature is inactive.
+     * Types that end up without any category are detached and keep their global `sort`.
      */
     protected function applyPendingTypePlacements(): void
     {
-        if (! ServiceRequestTypeMultipleCategoriesFeature::active()) {
-            return;
-        }
-
         $typeIds = array_unique([
             ...array_keys($this->pendingTypePlacements),
             ...array_keys($this->pendingUncategorizedTypeSorts),
@@ -738,25 +676,6 @@ class ListServiceRequestTypes extends ListRecords
     }
 
     /**
-     * Store the single category a type is filed under (legacy new-type creation path).
-     *
-     * When the multiple categories feature is active the assignment is stored in the `categories`
-     * pivot with its per-area sort; otherwise the legacy `category_id` column is written.
-     */
-    protected function syncTypeCategory(ServiceRequestType $type, ?string $categoryId, ?int $sort = null): void
-    {
-        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
-            $type->categories()->sync(
-                $categoryId !== null ? [$categoryId => ['sort' => $sort ?? 0]] : [],
-            );
-
-            return;
-        }
-
-        ServiceRequestType::whereKey($type->getKey())->update(['category_id' => $categoryId]);
-    }
-
-    /**
      * @param array<int, array<string, mixed>> $categories
      * @param array<string, string> $newCategoryIds
      * @param array<string, string> $newTypeIds
@@ -773,8 +692,8 @@ class ListServiceRequestTypes extends ListRecords
             }
 
             // If this is a new category that hasn't been created yet (no mapping), skip it.
-            // Otherwise (mapping exists) fall through and update the created category so
-            // moved types get their category_id updated and parent/sort can be set.
+            // Otherwise (mapping exists) fall through and update the created category so moved
+            // types can be assigned to the right area and parent/sort can be set.
             if (str_starts_with($originalCategoryId, 'temp_') && ! isset($newCategoryIds[$originalCategoryId])) {
                 // For truly new-but-not-yet-created categories we can't do anything here.
                 // Still attempt to recurse into children using the (unknown) category id would be wrong,

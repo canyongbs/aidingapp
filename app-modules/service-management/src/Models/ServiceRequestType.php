@@ -48,7 +48,6 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\Concerns\RestrictsVisibilityToContactTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
-use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
@@ -95,7 +94,6 @@ class ServiceRequestType extends BaseModel implements Auditable
         'email_automatic_creation_bcc',
         'is_reminders_enabled',
         'sort',
-        'category_id',
         'is_ai_clarification_enabled',
         'is_ai_resolution_enabled',
         'is_live_chat_enabled',
@@ -252,14 +250,6 @@ class ServiceRequestType extends BaseModel implements Auditable
     }
 
     /**
-     * @return BelongsTo<ServiceRequestTypeCategory, $this>
-     */
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(ServiceRequestTypeCategory::class, 'category_id');
-    }
-
-    /**
      * @return BelongsToMany<ServiceRequestTypeCategory, $this, covariant ServiceRequestCategoryType>
      */
     public function categories(): BelongsToMany
@@ -296,11 +286,7 @@ class ServiceRequestType extends BaseModel implements Auditable
      */
     public function visibilityRestrictionParents(): iterable
     {
-        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
-            return $this->categories;
-        }
-
-        return $this->category !== null ? [$this->category] : [];
+        return $this->categories;
     }
 
     /**
@@ -310,46 +296,29 @@ class ServiceRequestType extends BaseModel implements Auditable
      */
     public function categoryIds(): array
     {
-        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
-            return $this->categories->pluck('id')->all();
-        }
-
-        $categoryId = $this->getAttribute('category_id');
-
-        assert(is_string($categoryId) || is_null($categoryId));
-
-        return $categoryId !== null ? [$categoryId] : [];
+        return $this->categories->pluck('id')->all();
     }
 
     /**
      * The per-area sort of this type keyed by the id of every category it is filed under.
      *
-     * While the multiple categories feature is active the sort comes from the pivot so a type can
-     * be ordered differently in each area; otherwise it falls back to the type's single global sort.
+     * The sort comes from the pivot so a type can be ordered differently in each area.
      *
      * @return array<string, int>
      */
     public function categorySortMap(): array
     {
-        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
-            $map = [];
+        $map = [];
 
-            foreach ($this->categories as $category) {
-                $pivot = $category->getRelationValue('pivot');
+        foreach ($this->categories as $category) {
+            $pivot = $category->getRelationValue('pivot');
 
-                assert($pivot instanceof ServiceRequestCategoryType);
+            assert($pivot instanceof ServiceRequestCategoryType);
 
-                $map[$category->id] = (int) $pivot->getAttribute('sort');
-            }
-
-            return $map;
+            $map[$category->id] = (int) $pivot->getAttribute('sort');
         }
 
-        $categoryId = $this->getAttribute('category_id');
-
-        assert(is_string($categoryId) || is_null($categoryId));
-
-        return $categoryId !== null ? [$categoryId => (int) $this->getAttribute('sort')] : [];
+        return $map;
     }
 
     protected function casts(): array

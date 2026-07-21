@@ -41,7 +41,6 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeCategoryFactory;
 use AidingApp\ServiceManagement\Models\Concerns\RestrictsVisibilityToContactTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeCategoryObserver;
-use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -96,24 +95,20 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
     }
 
     /**
-     * @return HasMany<ServiceRequestType, $this>|BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestCategoryType>
+     * @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestCategoryType>
      */
-    public function types(): HasMany | BelongsToMany
+    public function types(): BelongsToMany
     {
-        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
-            return $this->belongsToMany(
-                related: ServiceRequestType::class,
-                table: 'service_request_category_types',
-                foreignPivotKey: 'service_request_type_category_id',
-                relatedPivotKey: 'service_request_type_id',
-            )
-                ->using(ServiceRequestCategoryType::class)
-                ->withPivot('id', 'sort')
-                ->withTimestamps()
-                ->orderByPivot('sort');
-        }
-
-        return $this->hasMany(ServiceRequestType::class, 'category_id', 'id')->orderBy('sort');
+        return $this->belongsToMany(
+            related: ServiceRequestType::class,
+            table: 'service_request_category_types',
+            foreignPivotKey: 'service_request_type_category_id',
+            relatedPivotKey: 'service_request_type_id',
+        )
+            ->using(ServiceRequestCategoryType::class)
+            ->withPivot('id', 'sort')
+            ->withTimestamps()
+            ->orderByPivot('sort');
     }
 
     /**
@@ -144,7 +139,7 @@ class ServiceRequestTypeCategory extends BaseModel implements Auditable
      */
     public function descendantServiceRequests(): HasManyDeep
     {
-        // @phpstan-ignore return.type (hasManyDeepFromRelations() infers a generic PHPStan cannot match to HasManyDeep<ServiceRequest, $this>, because types() has a feature-flagged HasMany|BelongsToMany union return type.)
+        // @phpstan-ignore return.type (hasManyDeepFromRelations() infers a generic PHPStan cannot match to HasManyDeep<ServiceRequest, $this>.)
         return $this->hasManyDeepFromRelations(
             $this->types(),
             (new ServiceRequestType())->serviceRequests(),

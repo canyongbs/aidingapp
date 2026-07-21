@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -67,10 +66,7 @@ class BuildContactServiceRequestTypeTree
         $typesQuery = ServiceRequestType::query()
             ->withoutArchived()
             ->orderBy('sort')
-            ->when(
-                ServiceRequestTypeMultipleCategoriesFeature::active(),
-                fn (Builder $query) => $query->with('categories:id'),
-            );
+            ->with('categories:id');
 
         if ($prepareTypesQuery !== null) {
             $prepareTypesQuery($typesQuery);
