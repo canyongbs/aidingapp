@@ -40,7 +40,6 @@ use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
-use App\Features\PipelineStageClassificationFeature;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -88,7 +87,7 @@ class ManagePipelines extends ManageRelatedRecords
                     ->relationship('stages')
                     ->table([
                         TableColumn::make('Stage Name'),
-                        ...(PipelineStageClassificationFeature::active() ? [TableColumn::make('Classification')] : []),
+                        TableColumn::make('Classification'),
                     ])
                     ->schema([
                         TextInput::make('name')
@@ -101,8 +100,7 @@ class ManagePipelines extends ManageRelatedRecords
                             ->enum(PipelineStageClassification::class)
                             ->required()
                             ->native()
-                            ->default(PipelineStageClassification::Planning->value)
-                            ->visible(fn () => PipelineStageClassificationFeature::active()),
+                            ->default(PipelineStageClassification::Planning->value),
                     ])
                     ->orderColumn('order')
                     ->reorderable()

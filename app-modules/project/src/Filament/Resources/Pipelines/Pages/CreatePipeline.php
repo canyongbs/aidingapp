@@ -40,7 +40,6 @@ use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
-use App\Features\PipelineStageClassificationFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
@@ -73,7 +72,7 @@ class CreatePipeline extends CreateRecord
                 Repeater::make('stages')
                     ->table([
                         TableColumn::make('Stage Name'),
-                        ...(PipelineStageClassificationFeature::active() ? [TableColumn::make('Classification')] : []),
+                        TableColumn::make('Classification'),
                     ])
                     ->relationship('stages')
                     ->schema([
@@ -87,13 +86,12 @@ class CreatePipeline extends CreateRecord
                             ->enum(PipelineStageClassification::class)
                             ->required()
                             ->native()
-                            ->default(PipelineStageClassification::Planning->value)
-                            ->visible(fn () => PipelineStageClassificationFeature::active()),
+                            ->default(PipelineStageClassification::Planning->value),
                     ])
                     ->default(
                         collect(PipelineStageClassification::cases())->map(fn (PipelineStageClassification $case) => [
                             'name' => $case->getLabel(),
-                            ...(PipelineStageClassificationFeature::active() ? ['classification' => $case->value] : []),
+                            'classification' => $case->value,
                         ])->all()
                     )
                     ->orderColumn('order')
