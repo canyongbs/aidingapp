@@ -38,7 +38,6 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\ServiceManagement\Actions\BuildContactServiceRequestTypeTree;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 
@@ -49,13 +48,10 @@ class ServiceRequestTypesController extends Controller
         // Load all categories and types and build a nested tree in PHP so the frontend can
         // render top-level categories/types and navigate into subcategories without
         // additional requests.
-        $visibilityRestrictionsEnabled = ServiceRequestTypeVisibilityRestrictionsFeature::active();
-
-        $contactTypeId = $visibilityRestrictionsEnabled ? auth('contact')->user()?->type_id : null;
+        $contactTypeId = auth('contact')->user()?->type_id;
 
         $tree = app(BuildContactServiceRequestTypeTree::class)->execute(
             contactTypeId: $contactTypeId,
-            visibilityRestrictionsEnabled: $visibilityRestrictionsEnabled,
             formatType: fn (ServiceRequestType $type, ?string $categoryId): array => [
                 'id' => $type->getKey(),
                 'name' => $type->name,
