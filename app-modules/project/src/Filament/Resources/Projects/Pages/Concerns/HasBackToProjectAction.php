@@ -34,40 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\Pages;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages\Concerns;
 
-use AidingApp\Project\Filament\Resources\Projects\Forms\ProjectForm;
-use AidingApp\Project\Filament\Resources\Projects\Pages\Concerns\HasBackToProjectAction;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
+use AidingApp\Project\Models\Project;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 
-class EditProject extends EditRecord
+trait HasBackToProjectAction
 {
-    use HasBackToProjectAction;
-
-    protected static string $resource = ProjectResource::class;
-
-    protected static ?string $navigationLabel = 'Edit';
-
-    public function form(Schema $schema): Schema
+    public function getSubheading(): string | Htmlable | null
     {
-        return $schema
-            ->components(ProjectForm::components(isEdit: true));
-    }
+        /** @var Project $project */
+        $project = $this->getRecord();
 
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        return ProjectForm::mutateDataForSave($data);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-            DeleteAction::make(),
-        ];
+        return new HtmlString(
+            view('project::filament.pages.back-to-project', [
+                'url' => ProjectResource::getUrl('view', ['record' => $project]),
+            ])->render(),
+        );
     }
 }

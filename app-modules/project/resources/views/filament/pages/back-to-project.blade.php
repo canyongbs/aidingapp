@@ -31,15 +31,6 @@
     
     </COPYRIGHT>
 --}}
-@php
-    use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-@endphp
-
 <div class="mt-5">
-    <x-filament::link
-        :href="ProjectResource::getUrl('view', ['record' => $this->getOwnerRecord()])"
-        icon="heroicon-m-arrow-left"
-    >
-        Back to Project
-    </x-filament::link>
+    <x-filament::link :href="$url" icon="heroicon-m-arrow-left">Back to Project</x-filament::link>
 </div>

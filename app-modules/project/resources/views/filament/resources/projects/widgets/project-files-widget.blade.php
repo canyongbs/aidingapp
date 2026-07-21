@@ -32,15 +32,6 @@
     </COPYRIGHT>
 --}}
 <x-filament-widgets::widget>
-    {{--
-        <x-slot name="heading">Files</x-slot>
-        <x-slot name="afterHeader">
-        <x-filament::button color="gray" wire:click="mountAction('manageFileCreate')">
-        Add File
-        </x-filament::button>
-        </x-slot>
-    --}}
-
     {{ $this->table }}
     <x-filament-actions::modals />
 </x-filament-widgets::widget>
