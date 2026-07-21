@@ -43,7 +43,7 @@
     use AidingApp\Project\Filament\Resources\Projects\RelationManagers\GuestOrganizationsRelationManager;
 @endphp
 
-<div x-data="{ tab: 'managers' }" class="max-h-96 space-y-6">
+<div x-data="{ tab: 'managers' }" class="space-y-6">
     <div class="flex justify-center">
         <x-filament::tabs class>
             <x-filament::tabs.item
