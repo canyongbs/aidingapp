@@ -230,6 +230,6 @@ class Project extends BaseModel implements Auditable
             'rose' => ['from' => '#fda4af', 'to' => '#be123c'],
         ];
 
-        return $gradientColors[$this->color->value ?? 'blue'] ?? $gradientColors['blue'];
+        return $gradientColors[$this->color->value ?? 'blue'];
     }
 }
