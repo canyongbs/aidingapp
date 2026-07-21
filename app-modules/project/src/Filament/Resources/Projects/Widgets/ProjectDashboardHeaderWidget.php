@@ -56,11 +56,6 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
 
     public Project $record;
 
-    /**
-     * @var array<int|string, string|null>
-     */
-    public array $breadcrumbs = [];
-
     protected int | string | array $columnSpan = 'full';
 
     protected string $view = 'project::filament.resources.projects.widgets.project-dashboard-header-widget';
@@ -79,16 +74,6 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
     {
         return ProjectManageAccessAction::make('manageAccess')
             ->record($this->record);
-    }
-
-    public function settingsAction(): Action
-    {
-        return Action::make('settings')
-            ->label('Settings')
-            ->icon('heroicon-o-cog-6-tooth')
-            ->outlined()
-            ->color('info')
-            ->url(fn (): string => ProjectResource::getUrl('edit', ['record' => $this->record]));
     }
 
     /**

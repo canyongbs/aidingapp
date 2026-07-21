@@ -64,7 +64,6 @@
                     <div class="flex shrink-0 items-center gap-2">
                         {{ $this->editProjectAction }}
                         {{ $this->manageAccessAction }}
-                        {{-- {{ $this->settingsAction }} --}}
                     </div>
                 </div>
 

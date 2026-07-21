@@ -42,16 +42,6 @@
     use Filament\Facades\Filament;
 
     $record = $this->getRecord();
-    $managers = $record->managerUsers;
-    $auditors = $record->auditorUsers;
-    $guests = $record->guestContacts;
-    $filesCount = $record->files()->count();
-    $pipelineTasksCount = $record
-        ->pipelines()
-        ->withCount('entries')
-        ->get()
-        ->sum('entries_count');
-    $milestonesCount = $record->milestones()->count();
 @endphp
 
 <x-filament-panels::page>

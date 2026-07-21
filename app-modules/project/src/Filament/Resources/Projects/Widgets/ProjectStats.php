@@ -55,8 +55,6 @@ class ProjectStats extends BaseWidget
                 ->label('Pipeline Tasks'),
             Stat::make('milestones', $project->milestones()->count())
                 ->label('Milestones'),
-            // Stat::make('recent_activities', 0)
-            //     ->label('Recent Activities'),
         ];
     }
 }
