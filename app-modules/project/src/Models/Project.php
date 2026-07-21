@@ -204,6 +204,9 @@ class Project extends BaseModel implements Auditable
             ->withTimestamps();
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     public function getGradient(): array
     {
         $gradientColors = [

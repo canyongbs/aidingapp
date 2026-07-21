@@ -75,7 +75,7 @@ class ProjectFilesWidget extends TableWidget
                 IdColumn::make(),
                 TextColumn::make('description'),
                 IconColumn::make('media')
-                    ->tooltip(fn (ProjectFile $record) => match ($record->getMedia('file')?->first()?->mime_type) {
+                    ->tooltip(fn (ProjectFile $record) => match ($record->getMedia('file')->first()?->mime_type) {
                         default => 'File',
                         'image/png' => 'Image (.png)',
                         'image/jpeg' => 'Image (.jpeg)',
@@ -128,7 +128,7 @@ class ProjectFilesWidget extends TableWidget
                 Action::make('download')
                     ->icon('heroicon-o-arrow-down-on-square')
                     ->color('info')
-                    ->visible(fn (ProjectFile $record): bool => filled($record->getMedia('file')?->first()?->getPathRelativeToRoot()))
+                    ->visible(fn (ProjectFile $record): bool => filled($record->getMedia('file')->first()?->getPathRelativeToRoot()))
                     ->action(
                         fn (ProjectFile $record) => Storage::disk('s3')
                             ->download(
