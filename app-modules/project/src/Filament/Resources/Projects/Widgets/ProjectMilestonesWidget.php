@@ -61,6 +61,13 @@ class ProjectMilestonesWidget extends TableWidget
 
     protected string $view = 'project::filament.resources.projects.widgets.project-milestones-widget';
 
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+
+        return $user->can(['project.view-any', 'project.*.view']);
+    }
+
     public function table(Table $table): Table
     {
         return $table

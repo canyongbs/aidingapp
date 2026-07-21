@@ -57,6 +57,13 @@ class ProjectAccessWidget extends Widget implements HasActions, HasSchemas
 
     protected string $view = 'project::filament.resources.projects.widgets.project-access-widget';
 
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+
+        return $user->can(['project.view-any', 'project.*.view']);
+    }
+
     #[Computed]
     public function getManagers(): Collection
     {

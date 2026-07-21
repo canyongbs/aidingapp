@@ -65,27 +65,36 @@
     @livewire(ProjectStats::class, ['record' => $record])
 
     <div class="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-2">
-        @livewire(
-            ProjectAccessWidget::class,
-            [
-                'record' => $this->getRecord(),
-                'resource' => ProjectResource::class,
-            ]
-        )
-        <div class="h-full">
+        @if (ProjectAccessWidget::canView())
             @livewire(
-                ProjectMilestonesWidget::class,
+                ProjectAccessWidget::class,
                 [
                     'record' => $this->getRecord(),
                     'resource' => ProjectResource::class,
                 ]
             )
+        @endif
+
+        <div class="h-full">
+            @if (ProjectMilestonesWidget::canView())
+                @livewire(
+                    ProjectMilestonesWidget::class,
+                    [
+                        'record' => $this->getRecord(),
+                        'resource' => ProjectResource::class,
+                    ]
+                )
+            @endif
         </div>
     </div>
 
     {{-- Pipeline Widget --}}
-    @livewire(ProjectWorkPipelineWidget::class, ['record' => $record])
+    @if (ProjectWorkPipelineWidget::canView())
+        @livewire(ProjectWorkPipelineWidget::class, ['record' => $record])
+    @endif
 
     {{-- Files Widget --}}
-    @livewire(ProjectFilesWidget::class, ['record' => $record])
+    @if (ProjectFilesWidget::canView())
+        @livewire(ProjectFilesWidget::class, ['record' => $record])
+    @endif
 </x-filament-panels::page>

@@ -50,9 +50,12 @@ use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Schemas\Schema;
+use Filament\Support\Facades\FilamentView;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Filament\View\PanelsRenderHook;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Storage;
 
 class ManageFiles extends ManageRelatedRecords
@@ -60,6 +63,15 @@ class ManageFiles extends ManageRelatedRecords
     protected static string $resource = ProjectResource::class;
 
     protected static string $relationship = 'files';
+
+    public function boot(): void
+    {
+        FilamentView::registerRenderHook(
+            PanelsRenderHook::PAGE_HEADER_HEADING_AFTER,
+            fn (): View => view('project::filament.pages.manage-files-back-to-project'),
+            scopes: static::class,
+        );
+    }
 
     public static function getNavigationLabel(): string
     {

@@ -41,10 +41,6 @@ use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectFile;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\Action;
-use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Components\Component;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -59,6 +55,13 @@ class ProjectFilesWidget extends TableWidget
     protected int | string | array $columnSpan = 'full';
 
     protected string $view = 'project::filament.resources.projects.widgets.project-files-widget';
+
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+
+        return $user->can(['project.view-any', 'project.*.view']);
+    }
 
     public function table(Table $table): Table
     {
@@ -145,50 +148,5 @@ class ProjectFilesWidget extends TableWidget
                     ->color('gray')
                     ->url(fn (): string => ProjectResource::getUrl('manage-files', ['record' => $this->record]), true),
             ]);
-    }
-
-    /**
-     * @return array<int, Component>
-     */
-    protected function formSchema(): array
-    {
-        return [
-            TextInput::make('description')
-                ->required()
-                ->maxLength(255),
-            DatePicker::make('retention_date')
-                ->label('Retention Date')
-                ->hintIcon('heroicon-m-question-mark-circle', tooltip: 'The file will be deleted automatically after this date. If left blank, the file will be kept indefinitely.')
-                ->closeOnDateSelection()
-                ->minDate(now()->addDay()),
-            SpatieMediaLibraryFileUpload::make('file')
-                ->visibility('private')
-                ->label('File')
-                ->placeholder('Drag & Drop your file or Browse')
-                ->disk('s3')
-                ->collection('file')
-                ->required()
-                ->acceptedFileTypes([
-                    'image/png',
-                    'image/jpeg',
-                    'image/gif',
-                    'application/pdf',
-                    'application/msword',
-                    'text/csv',
-                    'application/vnd.ms-excel',
-                    'application/msexcel',
-                    'application/ms-excel',
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    'application/vnd.ms-powerpoint',
-                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                    'text/plain',
-                    'audio/mpeg',
-                    'video/mp4',
-                    'application/x-zip-compressed',
-                    'application/zip',
-                    'application/x-zip',
-                ]),
-        ];
     }
 }
