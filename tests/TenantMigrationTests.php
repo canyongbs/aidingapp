@@ -68,12 +68,12 @@ function columnNativeType(string $table, string $column): ?string
 //});
 
 describe('2026_07_09_123757_migrate_service_request_types_to_multiple_categories', function () {
-  it('creates the category pivot table and keeps the legacy category_id column', function () {
+    it('creates the category pivot table and keeps the legacy category_id column', function () {
         isolatedMigration(
             '2026_07_09_123757_migrate_service_request_types_to_multiple_categories',
             function () {
-        // At this point the pivot table does not yet exist and the legacy `category_id` column is
-        // still present.
+                // At this point the pivot table does not yet exist and the legacy `category_id` column is
+                // still present.
                 $category = ServiceRequestTypeCategory::factory()->create();
 
                 $typeWithCategory = ServiceRequestType::factory()->create(['category_id' => $category->id, 'sort' => 7]);
@@ -89,13 +89,13 @@ describe('2026_07_09_123757_migrate_service_request_types_to_multiple_categories
                 // Existing rows are untouched by this schema migration.
                 expect(
                     DB::table('service_request_category_types')
-                    ->where('service_request_type_id', $typeWithCategory->id)
-                    ->exists()
+                        ->where('service_request_type_id', $typeWithCategory->id)
+                        ->exists()
                 )->toBeFalse();
 
                 expect(
-                  DB::table('service_request_category_types')
-                    ->where('service_request_type_id', $typeWithoutCategory->id)
+                    DB::table('service_request_category_types')
+                        ->where('service_request_type_id', $typeWithoutCategory->id)
                         ->exists()
                 )->toBeFalse();
 
