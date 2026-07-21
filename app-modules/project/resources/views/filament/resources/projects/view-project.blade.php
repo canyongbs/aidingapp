@@ -33,7 +33,7 @@
 --}}
 @php
     use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-    use AidingApp\Project\Filament\Widgets\ProjectDashboardFilesWidget;
+    use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectFilesWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectStats;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
@@ -87,5 +87,5 @@
     @livewire(ProjectWorkPipelineWidget::class, ['record' => $record])
 
     {{-- Files Widget --}}
-    {{-- @livewire(ProjectDashboardFilesWidget::class, ['record' => $record]) --}}
+    @livewire(ProjectFilesWidget::class, ['record' => $record])
 </x-filament-panels::page>

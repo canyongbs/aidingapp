@@ -36,19 +36,25 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageManagers;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\ManagerUsersRelationManager;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectFilesWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectMilestonesWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectFile;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -440,4 +446,104 @@ it('shows the empty state when the project has no pipelines', function () {
         ->assertSet('selectedPipelineId', null)
         ->assertActionExists('createPipeline')
         ->assertSee('No pipeline selected');
+});
+
+it('can list files in the project files widget', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $files = ProjectFile::factory()->count(3)->for($project)->create();
+
+    livewire(ProjectFilesWidget::class, [
+        'record' => $project,
+    ])
+        ->assertCanSeeTableRecords($files);
+});
+
+it('can create a file through the project files widget create action', function () {
+    asSuperAdmin();
+    Storage::fake('s3');
+
+    $project = Project::factory()->create();
+    $fakeFile = UploadedFile::fake()->image(fake()->word() . '.png');
+
+    livewire(ProjectFilesWidget::class, [
+        'record' => $project,
+    ])
+        ->assertTableActionExists('create')
+        ->callTableAction('create', data: [
+            'description' => 'Kickoff Deck',
+            'file' => $fakeFile,
+        ])
+        ->assertHasNoTableActionErrors();
+
+    $file = $project->files()->where('description', 'Kickoff Deck')->first();
+
+    expect($file)->not->toBeNull();
+    expect($file->getMedia('file'))->toHaveCount(1);
+});
+
+it('calculates progress as 0 when the project has no pipeline entries', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(2), 'stages')
+        ->create();
+
+    livewire(ProjectDashboardHeaderWidget::class, [
+        'record' => $project,
+    ])
+        ->assertSee('Progress: 0%');
+});
+
+it('calculates progress as the percentage of pipeline entries with a complete stage classification', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()->for($project)->create();
+
+    $planningStage = PipelineStage::factory()->for($pipeline)->create([
+        'classification' => PipelineStageClassification::Planning,
+    ]);
+
+    $completeStage = PipelineStage::factory()->for($pipeline)->create([
+        'classification' => PipelineStageClassification::Complete,
+    ]);
+
+    PipelineEntry::factory()->count(3)->create(['pipeline_stage_id' => $planningStage->getKey()]);
+    PipelineEntry::factory()->count(1)->create(['pipeline_stage_id' => $completeStage->getKey()]);
+
+    livewire(ProjectDashboardHeaderWidget::class, [
+        'record' => $project,
+    ])
+        ->assertSee('Progress: 25%');
+});
+
+it('only counts pipeline entries belonging to the given project when calculating progress', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $otherProject = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()->for($project)->create();
+    $completeStage = PipelineStage::factory()->for($pipeline)->create([
+        'classification' => PipelineStageClassification::Complete,
+    ]);
+    PipelineEntry::factory()->count(1)->create(['pipeline_stage_id' => $completeStage->getKey()]);
+
+    $otherPipeline = Pipeline::factory()->for($otherProject)->create();
+    $otherPlanningStage = PipelineStage::factory()->for($otherPipeline)->create([
+        'classification' => PipelineStageClassification::Planning,
+    ]);
+    PipelineEntry::factory()->count(5)->create(['pipeline_stage_id' => $otherPlanningStage->getKey()]);
+
+    livewire(ProjectDashboardHeaderWidget::class, [
+        'record' => $project,
+    ])
+        ->assertSee('Progress: 100%');
 });

@@ -36,8 +36,10 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
+use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Actions\ProjectManageAccessAction;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -45,6 +47,7 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Widgets\Widget;
+use Illuminate\Database\Eloquent\Builder;
 
 class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSchemas
 {
@@ -89,12 +92,42 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
     }
 
     /**
+     * Progress is the percentage of the project's pipeline entries whose
+     * stage classification is "Complete", out of all pipeline entries
+     * across every pipeline belonging to the project.
+     */
+    public function getProgressData(): int
+    {
+        $entries = PipelineEntry::query()
+            ->whereHas(
+                'pipelineStage.pipeline',
+                fn (Builder $query) => $query->where('project_id', $this->record->getKey()),
+            );
+
+        $totalEntriesCount = $entries->clone()->count();
+
+        if ($totalEntriesCount === 0) {
+            return 0;
+        }
+
+        $completeEntriesCount = $entries->clone()
+            ->whereHas(
+                'pipelineStage',
+                fn (Builder $query) => $query->where('classification', PipelineStageClassification::Complete->value),
+            )
+            ->count();
+
+        return (int) round(($completeEntriesCount / $totalEntriesCount) * 100);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     protected function getViewData(): array
     {
         return [
             'project' => $this->record,
+            'progress' => $this->getProgressData(),
         ];
     }
 }

@@ -88,34 +88,33 @@
                         <span>Target Go-Live: {{ $project->target_completion_date?->format('M j, Y') ?? 'N/A' }}</span>
                     </div>
 
-                    {{--
-                        <div class="flex items-center gap-1.5 border-l border-gray-200 px-5 dark:border-gray-700">
+                    <div class="flex items-center gap-1.5 border-l border-gray-200 px-5 dark:border-gray-700">
                         <svg class="h-4 w-4" viewBox="0 0 20 20">
-                        <circle
-                        cx="10"
-                        cy="10"
-                        r="8"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        class="text-indigo-200 dark:text-gray-700"
-                        />
-                        <circle
-                        cx="10"
-                        cy="10"
-                        r="8"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                        stroke-dasharray="{{ 2 * 3.14159 * 8 }}"
-                        stroke-dashoffset="{{ 2 * 3.14159 * 8 * (1 - $progress / 100) }}"
-                        transform="rotate(-90 10 10)"
-                        class="text-primary-600"
-                        />
+                            <circle
+                                cx="10"
+                                cy="10"
+                                r="8"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="5"
+                                class="text-gray-200 dark:text-gray-700"
+                            />
+                            <circle
+                                cx="10"
+                                cy="10"
+                                r="8"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="5"
+                                stroke-linecap="round"
+                                stroke-dasharray="{{ 2 * 3.14159 * 8 }}"
+                                stroke-dashoffset="{{ 2 * 3.14159 * 8 * (1 - $progress / 100) }}"
+                                transform="rotate(-90 10 10)"
+                                class="text-blue-600 dark:text-blue-500"
+                            />
                         </svg>
                         <span>Progress: {{ $progress }}%</span>
-                        </div>
-                    --}}
+                    </div>
                 </div>
             </div>
         </div>
