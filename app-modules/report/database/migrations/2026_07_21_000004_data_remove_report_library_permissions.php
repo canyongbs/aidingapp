@@ -34,11 +34,21 @@
 </COPYRIGHT>
 */
 
+use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 return new class () extends Migration {
+    use CanModifyPermissions;
+
+    /**
+     * @var array<string, string>
+     */
+    private array $permissions = [
+        'report-library.view-any' => 'Report Library',
+    ];
+
     /**
      * @var array<string>
      */
@@ -50,45 +60,23 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function (): void {
-            DB::table('permissions')
-                ->where('name', 'report-library.view-any')
-                ->whereIn('guard_name', $this->guards)
-                ->delete();
-
-            DB::table('permission_groups')
-                ->leftJoin('permissions', 'permission_groups.id', '=', 'permissions.group_id')
-                ->where('permission_groups.name', 'Report Library')
-                ->whereNull('permissions.id')
-                ->delete();
+            collect($this->guards)
+                ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            $groupId = DB::table('permission_groups')
-                ->where('name', 'Report Library')
-                ->value('id');
+            collect($this->guards)
+                ->each(function (string $guard): void {
+                    $permissions = Arr::except($this->permissions, keys: DB::table('permissions')
+                        ->where('guard_name', $guard)
+                        ->pluck('name')
+                        ->all());
 
-            if (blank($groupId)) {
-                $groupId = (string) Str::orderedUuid();
-
-                DB::table('permission_groups')->insert([
-                    'id' => $groupId,
-                    'name' => 'Report Library',
-                    'created_at' => now(),
-                ]);
-            }
-
-            collect($this->guards)->each(function (string $guard) use ($groupId): void {
-                DB::table('permissions')->insertOrIgnore([
-                    'id' => (string) Str::orderedUuid(),
-                    'group_id' => $groupId,
-                    'guard_name' => $guard,
-                    'name' => 'report-library.view-any',
-                    'created_at' => now(),
-                ]);
-            });
+                    $this->createPermissions($permissions, $guard);
+                });
         });
     }
 };
