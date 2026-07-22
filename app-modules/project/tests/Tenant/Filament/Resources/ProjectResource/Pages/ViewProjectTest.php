@@ -44,6 +44,7 @@ use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectFilesWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectMilestonesWidget;
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectStatsWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
@@ -59,7 +60,19 @@ use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-it('cannot render without proper permission.', function () {
+function loginAsUserWithProjectViewPermissions(): User
+{
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+
+    actingAs($user);
+
+    return $user;
+}
+
+it('cannot render without proper permission', function () {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -72,15 +85,8 @@ it('cannot render without proper permission.', function () {
         ->assertForbidden();
 });
 
-it('can render with proper permission.', function () {
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-
-    $user->refresh();
-
-    actingAs($user);
+it('can render with proper permission', function () {
+    loginAsUserWithProjectViewPermissions();
 
     $project = Project::factory()->create();
 
@@ -90,7 +96,7 @@ it('can render with proper permission.', function () {
         ->assertSuccessful();
 });
 
-it('can render if logged in user is a superadmin, the creator, a manager, or an auditor of the project.', function () {
+it('can render if logged in user is a superadmin, the creator, a manager, or an auditor of the project', function () {
     $user = User::factory()->create();
     $secondUser = User::factory()->create();
 
@@ -180,12 +186,7 @@ it('can render if logged in user is a superadmin, the creator, a manager, or an 
 });
 
 it('can view a record', function () {
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-
-    actingAs($user);
+    loginAsUserWithProjectViewPermissions();
 
     $project = Project::factory()->create();
 
@@ -196,12 +197,7 @@ it('can view a record', function () {
 });
 
 it('can render the project access widget and mount the manage access action', function () {
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-
-    actingAs($user);
+    loginAsUserWithProjectViewPermissions();
 
     $project = Project::factory()->create();
 
@@ -255,13 +251,13 @@ it('can create a milestone through the project milestones widget create action',
     livewire(ProjectMilestonesWidget::class, [
         'record' => $project,
     ])
-        ->callAction('manageMilestoneCreate', data: [
+        ->callTableAction('createMilestone', data: [
             'title' => $milestone->title,
             'description' => $milestone->description,
             'status_id' => $milestone->status_id,
             'target_date' => $milestone->target_date,
         ])
-        ->assertHasNoActionErrors();
+        ->assertHasNoTableActionErrors();
 
     expect($project->milestones()->where('title', $milestone->title)->exists())->toBeTrue();
 });
@@ -563,6 +559,20 @@ it('gates the project files widget behind project view permissions', function ()
     $user->refresh();
 
     expect(ProjectFilesWidget::canView())->toBeTrue();
+});
+
+it('gates the project stats widget behind project view permissions', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    expect(ProjectStatsWidget::canView())->toBeFalse();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+    $user->refresh();
+
+    expect(ProjectStatsWidget::canView())->toBeTrue();
 });
 
 it('gates the project work pipeline widget behind the pipeline view-any permission', function () {

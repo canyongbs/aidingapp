@@ -47,9 +47,11 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Attributes\Locked;
 
 class ProjectFilesWidget extends TableWidget
 {
+    #[Locked]
     public Project $record;
 
     protected int | string | array $columnSpan = 'full';
@@ -60,7 +62,7 @@ class ProjectFilesWidget extends TableWidget
     {
         $user = auth()->user();
 
-        return $user->can(['project.view-any', 'project.*.view']);
+        return $user->can('viewAny', Project::class);
     }
 
     public function table(Table $table): Table
@@ -94,7 +96,7 @@ class ProjectFilesWidget extends TableWidget
                         'video/mp4' => 'MP4',
                         'application/zip' => 'Zip File',
                     })
-                    ->icon(fn ($state) => match ($state->mime_type) {
+                    ->icon(fn (ProjectFile $record) => match ($record->getMedia('file')->first()?->mime_type) {
                         default => 'heroicon-o-paper-clip',
                         'image/png' => 'heroicon-o-photo',
                         'image/jpeg' => 'heroicon-o-camera',
@@ -140,10 +142,8 @@ class ProjectFilesWidget extends TableWidget
                     ),
             ])
             ->headerActions([
-                Action::make('manage_files')
+                Action::make('manageFiles')
                     ->label('Manage')
-                    ->modalHeading('Manage Files')
-                    ->slideOver()
                     ->authorize('create', $this->record)
                     ->color('gray')
                     ->url(fn (): string => ProjectResource::getUrl('manage-files', ['record' => $this->record]), true),

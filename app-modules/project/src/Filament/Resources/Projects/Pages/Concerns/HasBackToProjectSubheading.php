@@ -34,27 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages\Concerns;
 
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
-use Filament\Widgets\StatsOverviewWidget as BaseWidget;
-use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
 
-class ProjectStats extends BaseWidget
+trait HasBackToProjectSubheading
 {
-    public Project $record;
-
-    protected function getStats(): array
+    public function getSubheading(): string | Htmlable | null
     {
-        $project = $this->record;
+        /** @var Project $project */
+        $project = $this->getRecord();
 
-        return [
-            Stat::make('files', $project->files()->count())
-                ->label('Files'),
-            Stat::make('pipeline_tasks', $project->pipelines()->withCount('entries')->get()->sum('entries_count'))
-                ->label('Pipeline Tasks'),
-            Stat::make('milestones', $project->milestones()->count())
-                ->label('Milestones'),
-        ];
+        return new HtmlString(
+            view('project::filament.pages.back-to-project', [
+                'url' => ProjectResource::getUrl('view', ['record' => $project]),
+            ])->render(),
+        );
     }
 }

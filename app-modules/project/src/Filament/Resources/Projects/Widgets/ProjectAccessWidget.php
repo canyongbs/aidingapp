@@ -50,12 +50,14 @@ use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
+use Livewire\Attributes\Locked;
 
 class ProjectAccessWidget extends Widget implements HasActions, HasSchemas
 {
     use InteractsWithActions;
     use InteractsWithSchemas;
 
+    #[Locked]
     public Project $record;
 
     protected string $view = 'project::filament.resources.projects.widgets.project-access-widget';
@@ -64,14 +66,14 @@ class ProjectAccessWidget extends Widget implements HasActions, HasSchemas
     {
         $user = auth()->user();
 
-        return $user->can(['project.view-any', 'project.*.view']);
+        return $user->can('viewAny', Project::class);
     }
 
     /**
      * @return Collection<int, User>
      */
     #[Computed]
-    public function getManagers(): Collection
+    public function managers(): Collection
     {
         return $this->record->managerUsers
             ->concat($this->record->managerDepartments->flatMap(fn (Department $department): Collection => $department->users))
@@ -83,7 +85,7 @@ class ProjectAccessWidget extends Widget implements HasActions, HasSchemas
      * @return Collection<int, User>
      */
     #[Computed]
-    public function getAuditors(): Collection
+    public function auditors(): Collection
     {
         return $this->record->auditorUsers
             ->concat($this->record->auditorDepartments->flatMap(fn (Department $department): Collection => $department->users))
@@ -95,7 +97,7 @@ class ProjectAccessWidget extends Widget implements HasActions, HasSchemas
      * @return Collection<int, Contact | Organization>
      */
     #[Computed]
-    public function getGuests(): Collection
+    public function guests(): Collection
     {
         /** @var Collection<int, Contact | Organization> $guests */
         $guests = $this->record->guestContacts
@@ -106,7 +108,7 @@ class ProjectAccessWidget extends Widget implements HasActions, HasSchemas
 
     public function manageAccessAction(): Action
     {
-        return ProjectManageAccessAction::make('manage_access')
+        return ProjectManageAccessAction::make('manageAccess')
             ->record($this->record);
     }
 }

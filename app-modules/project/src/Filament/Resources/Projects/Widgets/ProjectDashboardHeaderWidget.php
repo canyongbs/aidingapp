@@ -48,12 +48,14 @@ use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 
 class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSchemas
 {
     use InteractsWithActions;
     use InteractsWithSchemas;
 
+    #[Locked]
     public Project $record;
 
     protected int | string | array $columnSpan = 'full';
@@ -76,12 +78,7 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
             ->record($this->record);
     }
 
-    /**
-     * Progress is the percentage of the project's pipeline entries whose
-     * stage classification is "Complete", out of all pipeline entries
-     * across every pipeline belonging to the project.
-     */
-    public function getProgressData(): int
+    public function getProgress(): int
     {
         $entries = PipelineEntry::query()
             ->whereHas(
@@ -112,7 +109,7 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
     {
         return [
             'project' => $this->record,
-            'progress' => $this->getProgressData(),
+            'progress' => $this->getProgress(),
         ];
     }
 }

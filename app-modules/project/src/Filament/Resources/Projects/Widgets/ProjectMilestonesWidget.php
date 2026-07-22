@@ -52,9 +52,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 
 class ProjectMilestonesWidget extends TableWidget
 {
+    #[Locked]
     public Project $record;
 
     protected int | string | array $columnSpan = 'full';
@@ -65,7 +67,7 @@ class ProjectMilestonesWidget extends TableWidget
     {
         $user = auth()->user();
 
-        return $user->can(['project.view-any', 'project.*.view']);
+        return $user->can('viewAny', Project::class);
     }
 
     public function table(Table $table): Table
@@ -73,7 +75,7 @@ class ProjectMilestonesWidget extends TableWidget
         return $table
             ->query(fn (): Builder => $this->record->milestones()->getQuery())
             ->recordTitleAttribute('title')
-            ->heading(null)
+            ->heading('Project Milestones')
             ->paginated([5, 10, 25])
             ->defaultPaginationPageOption(5)
             ->columns([
@@ -97,6 +99,21 @@ class ProjectMilestonesWidget extends TableWidget
                     ->default('N/A')
                     ->label('Created By'),
             ])
+            ->headerActions([
+                Action::make('createMilestone')
+                    ->label('New Milestone')
+                    ->slideOver()
+                    ->schema($this->formSchema())
+                    ->authorize('create', $this->record)
+                    ->action(function (array $data): void {
+                        $this->record->milestones()->create($data);
+
+                        Notification::make()
+                            ->success()
+                            ->title('Milestone created')
+                            ->send();
+                    }),
+            ])
             ->recordActions([
                 EditAction::make()
                     ->slideOver()
@@ -105,23 +122,6 @@ class ProjectMilestonesWidget extends TableWidget
                 DeleteAction::make()
                     ->authorize('update', $this->record),
             ]);
-    }
-
-    public function manageMilestoneCreateAction(): Action
-    {
-        return Action::make('manageMilestoneCreate')
-            ->label('Create Milestone')
-            ->slideOver()
-            ->schema($this->formSchema())
-            ->authorize('create', $this->record)
-            ->action(function (array $data): void {
-                $this->record->milestones()->create($data);
-
-                Notification::make()
-                    ->success()
-                    ->title('Milestone created')
-                    ->send();
-            });
     }
 
     /**

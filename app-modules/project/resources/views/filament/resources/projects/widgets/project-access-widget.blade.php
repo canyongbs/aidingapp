@@ -43,15 +43,15 @@
             <x-filament::button color="gray" wire:click="mountAction('manageAccess')">Manage</x-filament::button>
         </x-slot>
 
-        <div class="h-96 divide-y divide-gray-200 overflow-y-auto dark:divide-gray-700">
+        <div class="divide-y divide-gray-200 dark:divide-gray-700">
             {{-- Managers (avatars) --}}
             <div class="py-4 first:pt-0">
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Managers ({{ $this->getManagers()->count() }})
+                    Managers ({{ $this->managers->count() }})
                 </p>
                 <div class="mt-2 flex flex-wrap gap-3">
-                    @foreach ($this->getManagers() as $user)
-                        <x-project::avatar-component :user="$user" />
+                    @foreach ($this->managers as $user)
+                        <x-project::avatar :user="$user" />
                     @endforeach
                 </div>
             </div>
@@ -59,11 +59,11 @@
             {{-- Auditors (avatars) --}}
             <div class="py-4">
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Auditors ({{ $this->getAuditors()->count() }})
+                    Auditors ({{ $this->auditors->count() }})
                 </p>
                 <div class="mt-2 flex flex-wrap gap-3">
-                    @foreach ($this->getAuditors() as $user)
-                        <x-project::avatar-component :user="$user" />
+                    @foreach ($this->auditors as $user)
+                        <x-project::avatar :user="$user" />
                     @endforeach
                 </div>
             </div>
@@ -71,10 +71,10 @@
             {{-- Guests (initials - contacts) --}}
             <div class="py-4">
                 <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Guests ({{ $this->getGuests()->count() }})
+                    Guests ({{ $this->guests->count() }})
                 </p>
                 <div class="mt-2 flex flex-wrap gap-3">
-                    @foreach ($this->getGuests() as $item)
+                    @foreach ($this->guests as $item)
                         @php
                             $isContact = $item instanceof \AidingApp\Contact\Models\Contact;
                             $name = $isContact ? $item->full_name : $item->name;

@@ -36,7 +36,7 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use AidingApp\Project\Filament\Resources\Projects\Pages\Concerns\HasBackToProjectAction;
+use AidingApp\Project\Filament\Resources\Projects\Pages\Concerns\HasBackToProjectSubheading;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\ProjectFile;
 use App\Filament\Tables\Columns\IdColumn;
@@ -58,7 +58,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ManageFiles extends ManageRelatedRecords
 {
-    use HasBackToProjectAction;
+    use HasBackToProjectSubheading;
 
     protected static string $resource = ProjectResource::class;
 
@@ -146,7 +146,7 @@ class ManageFiles extends ManageRelatedRecords
                         'video/mp4' => 'MP4',
                         'application/zip' => 'Zip File'
                     })
-                    ->icon(fn ($state) => match ($state->mime_type) {
+                    ->icon(fn (ProjectFile $record) => match ($record->getMedia('file')->first()?->mime_type) {
                         default => 'heroicon-o-paper-clip',
                         'image/png' => 'heroicon-o-photo',
                         'image/jpeg' => 'heroicon-o-camera',

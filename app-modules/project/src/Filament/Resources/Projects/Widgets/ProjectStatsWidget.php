@@ -34,24 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\Pages\Concerns;
+namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
-use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
-use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\HtmlString;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
 
-trait HasBackToProjectAction
+class ProjectStatsWidget extends BaseWidget
 {
-    public function getSubheading(): string | Htmlable | null
-    {
-        /** @var Project $project */
-        $project = $this->getRecord();
+    #[Locked]
+    public Project $record;
 
-        return new HtmlString(
-            view('project::filament.pages.back-to-project', [
-                'url' => ProjectResource::getUrl('view', ['record' => $project]),
-            ])->render(),
-        );
+    public static function canView(): bool
+    {
+        $user = auth()->user();
+
+        return $user->can('viewAny', Project::class);
+    }
+
+    protected function getStats(): array
+    {
+        $project = $this->record;
+
+        return [
+            Stat::make('files', $project->files()->count())
+                ->label('Files'),
+            Stat::make('pipeline_tasks', PipelineEntry::query()
+                ->whereHas(
+                    'pipelineStage.pipeline',
+                    fn (Builder $query) => $query->where('project_id', $project->getKey()),
+                )
+                ->count())
+                ->label('Pipeline Tasks'),
+            Stat::make('milestones', $project->milestones()->count())
+                ->label('Milestones'),
+        ];
     }
 }

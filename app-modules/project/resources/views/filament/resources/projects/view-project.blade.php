@@ -32,14 +32,14 @@
     </COPYRIGHT>
 --}}
 @php
-    use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectFilesWidget;
-    use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectStats;
+    use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectStatsWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectMilestonesWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
-    use Filament\Facades\Filament;
+    use AidingApp\Project\Models\ProjectFile;
+    use AidingApp\Project\Models\ProjectMilestone;
 
     $record = $this->getRecord();
 @endphp
@@ -52,26 +52,26 @@
         ]
     )
 
-    @livewire(ProjectStats::class, ['record' => $record])
+    @if (ProjectStatsWidget::canView())
+        @livewire(ProjectStatsWidget::class, ['record' => $record])
+    @endif
 
     <div class="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-2">
         @if (ProjectAccessWidget::canView())
             @livewire(
                 ProjectAccessWidget::class,
                 [
-                    'record' => $this->getRecord(),
-                    'resource' => ProjectResource::class,
+                    'record' => $record,
                 ]
             )
         @endif
 
         <div class="h-full">
-            @if (ProjectMilestonesWidget::canView())
+            @if (auth()->user()?->can('viewAny', [ProjectMilestone::class, $record]))
                 @livewire(
                     ProjectMilestonesWidget::class,
                     [
-                        'record' => $this->getRecord(),
-                        'resource' => ProjectResource::class,
+                        'record' => $record,
                     ]
                 )
             @endif
@@ -84,7 +84,7 @@
     @endif
 
     {{-- Files Widget --}}
-    @if (ProjectFilesWidget::canView())
+    @if (auth()->user()?->can('viewAny', [ProjectFile::class, $record]))
         @livewire(ProjectFilesWidget::class, ['record' => $record])
     @endif
 </x-filament-panels::page>
