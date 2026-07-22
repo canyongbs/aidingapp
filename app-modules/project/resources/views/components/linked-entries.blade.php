@@ -36,22 +36,16 @@
     'items' => [],
 ])
 
-<div class="flex flex-wrap items-center gap-1">
+<div class="flex flex-wrap items-center gap-1 px-3 py-4">
     @forelse ($items as $item)
         @if ($item['url'] ?? null)
-            <a
-                href="{{ $item['url'] }}"
-                target="_blank"
-                class="fi-badge inline-flex items-center rounded-md px-2 py-1 text-xs font-medium bg-primary-50 text-primary-700 hover:bg-primary-100 dark:bg-primary-500/10 dark:text-primary-400 dark:hover:bg-primary-500/20"
-            >
+            <x-filament::badge tag="a" :href="$item['url']" target="_blank">
                 {{ $item['label'] }}
-            </a>
+            </x-filament::badge>
         @else
-            <span
-                class="fi-badge inline-flex items-center rounded-md bg-gray-100 px-2 py-1 text-xs font-medium text-gray-600 dark:bg-gray-700 dark:text-gray-300"
-            >
+            <x-filament::badge color="gray">
                 {{ $item['label'] }}
-            </span>
+            </x-filament::badge>
         @endif
     @empty
         <span class="text-sm text-gray-400 dark:text-gray-500">&mdash;</span>

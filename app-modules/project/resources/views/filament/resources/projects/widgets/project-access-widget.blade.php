@@ -97,7 +97,7 @@
                             >
                                 {{ $initials }}
                             </div>
-                            <span class="max-w-15 truncate text-xs text-gray-600 dark:text-gray-400">
+                            <span class="max-w-16 truncate text-xs text-gray-600 dark:text-gray-400">
                                 {{ str($name)->limit(8) }}
                             </span>
                         </div>

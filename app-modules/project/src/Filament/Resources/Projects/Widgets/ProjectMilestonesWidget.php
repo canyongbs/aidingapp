@@ -96,8 +96,8 @@ class ProjectMilestonesWidget extends TableWidget
                     ->label('Created')
                     ->dateTime(),
                 TextColumn::make('createdBy.name')
-                    ->default('N/A')
-                    ->label('Created By'),
+                    ->label('Created By')
+                    ->placeholder('N/A'),
             ])
             ->headerActions([
                 Action::make('createMilestone')

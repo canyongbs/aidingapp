@@ -139,7 +139,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->placeholder('N/A')
                     ->sortable(),
                 TextColumn::make('createdBy.name')
-                    ->label('Creator')
+                    ->label('Created By')
                     ->placeholder('N/A'),
             ])
             ->defaultGroup(

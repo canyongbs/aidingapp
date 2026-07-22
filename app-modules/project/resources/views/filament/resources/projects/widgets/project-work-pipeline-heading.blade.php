@@ -36,24 +36,24 @@
 
     @if ($pipeline)
         <div class="flex items-center gap-1">
-            <button
-                type="button"
+            <x-filament::link
+                tag="button"
                 wire:click="mountAction('selectPipeline')"
-                class="inline-flex items-center gap-1 text-sm font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400"
+                icon="heroicon-m-chevron-down"
+                icon-position="after"
+                size="sm"
             >
-                <span>{{ $pipeline->name }}</span>
+                {{ $pipeline->name }}
+            </x-filament::link>
 
-                @svg('heroicon-m-chevron-down', 'h-4 w-4')
-            </button>
-
-            <button
-                type="button"
+            <x-filament::icon-button
+                icon="heroicon-m-plus"
                 wire:click="mountAction('createPipeline')"
-                title="Create new pipeline"
-                class="inline-flex items-center justify-center rounded-md p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-500 dark:hover:bg-white/5 dark:hover:text-gray-300"
-            >
-                @svg('heroicon-m-plus', 'h-4 w-4')
-            </button>
+                label="Create new pipeline"
+                tooltip="Create new pipeline"
+                color="gray"
+                size="sm"
+            />
         </div>
     @endif
 </div>

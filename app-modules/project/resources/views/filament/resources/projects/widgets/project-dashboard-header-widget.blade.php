@@ -44,7 +44,7 @@
                 class="ml-4 my-4 flex w-24 shrink-0 items-center justify-center rounded-lg"
                 style="background: linear-gradient(to bottom, {{ $gradient['from'] }}, {{ $gradient['to'] }})"
             >
-                @svg($project->icon ?? 'heroicon-o-clipboard-document-list', 'h-15 w-15 text-white')
+                @svg($project->icon ?? 'heroicon-o-clipboard-document-list', 'h-14 w-14 text-white')
             </div>
 
             <div class="flex-1 p-6">
@@ -70,25 +70,25 @@
                 <div class="mt-5 border-t border-gray-200 dark:border-gray-700"></div>
 
                 <div
-                    class="mt-4 grid grid-cols-4 divide-x divide-gray-200 text-sm text-gray-500 dark:divide-gray-700 dark:text-gray-400"
+                    class="mt-4 grid grid-cols-1 gap-x-5 gap-y-3 text-sm text-gray-500 sm:grid-cols-2 lg:grid-cols-4 dark:text-gray-400"
                 >
-                    <div class="flex items-center gap-1.5 pr-5">
-                        @svg('heroicon-m-building-office', 'h-4 w-4')
+                    <div class="flex items-center gap-1.5">
+                        @svg('heroicon-m-building-office', 'h-4 w-4 shrink-0')
                         <span>Department: {{ $project->department?->name ?? 'N/A' }}</span>
                     </div>
 
-                    <div class="flex items-center gap-1.5 border-l border-gray-200 px-5 dark:border-gray-700">
-                        @svg('heroicon-m-calendar', 'h-4 w-4')
+                    <div class="flex items-center gap-1.5">
+                        @svg('heroicon-m-calendar', 'h-4 w-4 shrink-0')
                         <span>Start Date: {{ $project->start_date?->format('M j, Y') ?? 'N/A' }}</span>
                     </div>
 
-                    <div class="flex items-center gap-1.5 border-l border-gray-200 px-5 dark:border-gray-700">
-                        @svg('heroicon-m-flag', 'h-4 w-4')
+                    <div class="flex items-center gap-1.5">
+                        @svg('heroicon-m-flag', 'h-4 w-4 shrink-0')
                         <span>Target Go-Live: {{ $project->target_completion_date?->format('M j, Y') ?? 'N/A' }}</span>
                     </div>
 
-                    <div class="flex items-center gap-1.5 border-l border-gray-200 px-5 dark:border-gray-700">
-                        <svg class="h-4 w-4" viewBox="0 0 20 20">
+                    <div class="flex items-center gap-1.5">
+                        <svg class="h-4 w-4 shrink-0" viewBox="0 0 20 20">
                             <circle
                                 cx="10"
                                 cy="10"
@@ -109,7 +109,7 @@
                                 stroke-dasharray="{{ 2 * 3.14159 * 8 }}"
                                 stroke-dashoffset="{{ 2 * 3.14159 * 8 * (1 - $progress / 100) }}"
                                 transform="rotate(-90 10 10)"
-                                class="text-blue-600 dark:text-blue-500"
+                                class="text-primary-600 dark:text-primary-500"
                             />
                         </svg>
                         <span>Progress: {{ $progress }}%</span>

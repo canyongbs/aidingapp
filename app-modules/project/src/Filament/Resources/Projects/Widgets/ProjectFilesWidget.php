@@ -116,15 +116,15 @@ class ProjectFilesWidget extends TableWidget
                         'application/zip' => 'heroicon-o-archive-box',
                     }),
                 TextColumn::make('created_at')
-                    ->label('Date Created')
+                    ->label('Created')
                     ->dateTime(),
                 TextColumn::make('retention_date')
                     ->label('Retention Date')
                     ->placeholder('N/A')
                     ->dateTime(),
                 TextColumn::make('createdBy.name')
-                    ->default('N/A')
-                    ->label('Created By'),
+                    ->label('Created By')
+                    ->placeholder('N/A'),
             ])
             ->recordActions([
                 Action::make('download')
