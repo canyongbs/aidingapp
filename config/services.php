@@ -57,6 +57,12 @@ return [
         'ses_s3_key_id' => env('AWS_KMS_SES_S3_KEY_ID'),
     ],
 
+    'aws_geo_places' => [
+        'key' => env('AWS_GEO_PLACES_ACCESS_KEY_ID'),
+        'secret' => env('AWS_GEO_PLACES_SECRET_ACCESS_KEY'),
+        'region' => env('AWS_GEO_PLACES_REGION', 'us-west-2'),
+    ],
+
     'azure' => [
         'client_id' => env('AZURE_CLIENT_ID'),
         'client_secret' => env('AZURE_CLIENT_SECRET'),

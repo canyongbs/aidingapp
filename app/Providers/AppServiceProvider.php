@@ -45,6 +45,7 @@ use App\Overrides\Filament\Actions\Imports\Jobs\ImportCsvOverride;
 use App\Overrides\Filament\Actions\Imports\Jobs\PrepareCsvExportOverride;
 use App\Overrides\Laravel\StartSession as OverrideStartSession;
 use App\Settings\SettingsProperties\EmailSettingsProperty;
+use Aws\GeoPlaces\GeoPlacesClient;
 use Exception;
 use Filament\Actions\Exports\Jobs\PrepareCsvExport;
 use Filament\Actions\Imports\Jobs\ImportCsv;
@@ -79,6 +80,15 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         PluginRegistry::register(ModularLivewirePlugin::class);
+
+        $this->app->scoped(GeoPlacesClient::class, fn (): GeoPlacesClient => new GeoPlacesClient([
+            'version' => '2020-11-19',
+            'region' => config('services.aws_geo_places.region'),
+            'credentials' => [
+                'key' => config('services.aws_geo_places.key'),
+                'secret' => config('services.aws_geo_places.secret'),
+            ],
+        ]));
 
         $this->app->bind(ImportCsv::class, ImportCsvOverride::class);
         $this->app->bind(PrepareCsvExport::class, PrepareCsvExportOverride::class);

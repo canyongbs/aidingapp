@@ -52,6 +52,7 @@
         "composer/composer": "^2.7",
         "dedoc/scramble": "^0.13.23",
         "defectivecode/laravel-sqs-extended": "^1.1.0",
+        "defstudio/filament-searchable-input": "^4.0",
         "fakerphp/faker": "^1.23",
         "filament/filament": "^4.12",
         "filament/spatie-laravel-media-library-plugin": "^4.12",

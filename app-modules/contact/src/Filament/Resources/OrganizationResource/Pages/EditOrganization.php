@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
+use App\Filament\Forms\Components\AddressInput;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Repeater;
@@ -144,9 +145,13 @@ class EditOrganization extends EditRecord
                 Section::make('Address Info')
                     ->columns()
                     ->schema([
-                        TextInput::make('address')
-                            ->label('Address')
-                            ->string(),
+                        AddressInput::make([
+                            'address' => 'address',
+                            'city' => 'city',
+                            'state' => 'state',
+                            'postalcode' => 'postalCode',
+                            'country' => 'country',
+                        ]),
                         TextInput::make('city')
                             ->label('City')
                             ->maxLength(255)

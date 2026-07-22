@@ -34,35 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Tests\Tenant\Contact\RequestFactories;
+namespace App\DataTransferObjects;
 
-use AidingApp\Contact\Models\ContactType;
-use App\Models\User;
-use Worksome\RequestFactories\RequestFactory;
+use Spatie\LaravelData\Data;
 
-class CreateContactRequestFactory extends RequestFactory
+class AutocompletedAddress extends Data
 {
-    public function definition(): array
-    {
-        return [
-            'type_id' => ContactType::factory()->create()->id,
-            'first_name' => $this->faker->firstName(),
-            'last_name' => $this->faker->lastName(),
-            'full_name' => fn (array $attributes): string => "{$attributes['first_name']} {$attributes['last_name']}",
-            'preferred' => $this->faker->firstName(),
-            'description' => $this->faker->paragraph(),
-            'email' => $this->faker->email(),
-            'mobile' => $this->faker->e164PhoneNumber(),
-            'sms_opt_out' => intval($this->faker->boolean()),
-            'email_bounce' => intval($this->faker->boolean()),
-            'phone' => $this->faker->e164PhoneNumber(),
-            'address' => $this->faker->streetAddress(),
-            'address_2' => $this->faker->secondaryAddress(),
-            'address_3' => $this->faker->secondaryAddress(),
-            'city' => $this->faker->city(),
-            'state' => $this->faker->stateAbbr(),
-            'postal' => $this->faker->postcode(),
-            'created_by_id' => User::factory()->create()->id,
-        ];
-    }
+    public function __construct(
+        public string $address,
+        public string $city,
+        public string $state,
+        public string $postalCode,
+        public string $country,
+        public string $label,
+    ) {}
 }
