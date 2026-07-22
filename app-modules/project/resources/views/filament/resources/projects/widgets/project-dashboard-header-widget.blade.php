@@ -37,7 +37,7 @@
 
     $color = $project->color?->value;
     $palettes = Color::all();
-    $palette = FilamentColor::getColor($color ?? 'blue') ?? $palettes[$color ?? 'blue'] ?? $palettes['blue'];
+    $palette = FilamentColor::getColor($color ?? 'blue') ?? ($palettes[$color ?? 'blue'] ?? $palettes['blue']);
 
     $gradient = [
         'from' => $palette[400],
