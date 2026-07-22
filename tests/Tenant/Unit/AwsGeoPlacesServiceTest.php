@@ -37,6 +37,7 @@
 use App\Services\AwsGeoPlacesService;
 use Aws\GeoPlaces\GeoPlacesClient;
 use Aws\Result;
+use Illuminate\Support\Facades\Exceptions;
 use Mockery\MockInterface;
 
 it('maps US addresses using Country.Code2 and Region.Code', function () {
@@ -343,4 +344,22 @@ it('returns empty strings when address fields are missing', function () {
     expect($results[0]->postalCode)->toBe('');
     expect($results[0]->country)->toBe('US');
     expect($results[0]->label)->toBe('Sparse Address');
+});
+
+it('reports the failure and returns no results when the client throws', function () {
+    Exceptions::fake();
+
+    /** @phpstan-ignore method.notFound */
+    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
+        $mock->shouldReceive('autocomplete')
+            /** @phpstan-ignore method.notFound */
+            ->once()
+            ->andThrow(new Exception('AWS GeoPlaces is unavailable'));
+    });
+
+    $service = new AwsGeoPlacesService($client);
+
+    expect($service->autocompleteComponents('123 Main'))->toBe([]);
+
+    Exceptions::assertReported(fn (Exception $exception): bool => $exception->getMessage() === 'AWS GeoPlaces autocomplete failed');
 });

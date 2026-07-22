@@ -43,14 +43,11 @@ class EditContactRequestFactory extends RequestFactory
 {
     public function definition(): array
     {
-        $firstName = $this->faker->firstName();
-        $lastName = $this->faker->lastName();
-
         return [
             'type_id' => ContactType::factory()->create()->id,
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'full_name' => "{$firstName} {$lastName}",
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'full_name' => fn (array $attributes): string => "{$attributes['first_name']} {$attributes['last_name']}",
             'preferred' => $this->faker->firstName(),
             'description' => $this->faker->paragraph(),
             'email' => $this->faker->email(),
@@ -58,8 +55,12 @@ class EditContactRequestFactory extends RequestFactory
             'sms_opt_out' => intval($this->faker->boolean()),
             'email_bounce' => intval($this->faker->boolean()),
             'phone' => $this->faker->e164PhoneNumber(),
-            'address' => $this->faker->address(),
-            'address_2' => $this->faker->address(),
+            'address' => $this->faker->streetAddress(),
+            'address_2' => $this->faker->secondaryAddress(),
+            'address_3' => $this->faker->secondaryAddress(),
+            'city' => $this->faker->city(),
+            'state' => $this->faker->stateAbbr(),
+            'postal' => $this->faker->postcode(),
         ];
     }
 }

@@ -40,22 +40,18 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
-use App\DataTransferObjects\AutocompletedAddress;
 use App\Filament\Forms\Components\AddressInput;
-use DefStudio\SearchableInput\DTO\SearchResult;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Throwable;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class EditContact extends EditRecord
@@ -163,34 +159,12 @@ class EditContact extends EditRecord
                         PhoneInput::make('phone')
                             ->label('Other Phone')
                             ->string(),
-                        AddressInput::make()
-                        /** @phpstan-ignore argument.type */
-                            ->onItemSelected(function (Set $set, SearchResult $item) {
-                                try {
-                                    $data = $item->get('data');
-
-                                    if (! $data instanceof AutocompletedAddress) {
-                                        $data = AutocompletedAddress::from($data);
-                                    }
-
-                                    $set('address', $data->address);
-                                    $set('city', $data->city);
-                                    $set('state', $data->state);
-                                    $set('postal', $data->postalCode);
-                                } catch (Throwable $exception) {
-                                    if (! session()->has('has_aws_geo_places_error_notification_sent')) {
-                                        Notification::make()
-                                            ->title('Failed to fetch address suggestions')
-                                            ->body('An error occurred while fetching address suggestions. Please try again later.')
-                                            ->danger()
-                                            ->send();
-
-                                        session()->put('has_aws_geo_places_error_notification_sent', true);
-                                    }
-
-                                    report($exception);
-                                }
-                            }),
+                        AddressInput::make([
+                            'address' => 'address',
+                            'city' => 'city',
+                            'state' => 'state',
+                            'postal' => 'postalCode',
+                        ]),
                         TextInput::make('address_2')
                             ->label('Address 2')
                             ->string()

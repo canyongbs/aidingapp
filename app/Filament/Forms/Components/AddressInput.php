@@ -41,14 +41,20 @@ use App\Services\AwsGeoPlacesService;
 use DefStudio\SearchableInput\DTO\SearchResult;
 use DefStudio\SearchableInput\Forms\Components\SearchableInput;
 use Filament\Notifications\Notification;
+use Filament\Schemas\Components\Utilities\Set;
 use Throwable;
 
 class AddressInput
 {
-    public static function make(): SearchableInput
+    /**
+     * @param array<string, string> $fields
+     */
+    public static function make(array $fields = []): SearchableInput
     {
         return SearchableInput::make('address')
             ->label('Address')
+            ->string()
+            ->maxLength(255)
             ->searchUsing(function (string $search) {
                 if (strlen($search) < 3) {
                     return [];
@@ -63,21 +69,42 @@ class AddressInput
                         return SearchResult::make($addressDto->label)->withData('data', $addressDto);
                     })->toArray();
                 } catch (Throwable $exception) {
-                    if (! session()->has('has_aws_geo_places_error_notification_sent')) {
-                        Notification::make()
-                            ->title('Failed to fetch address suggestions')
-                            ->body('An error occurred while fetching address suggestions. Please try again later.')
-                            ->danger()
-                            ->send();
-
-                        session()->put('has_aws_geo_places_error_notification_sent', true);
-                    }
-
-                    report($exception);
+                    self::reportFailure($exception);
 
                     return [];
                 }
             })
+            /** @phpstan-ignore argument.type */
+            ->onItemSelected(function (Set $set, SearchResult $item) use ($fields) {
+                try {
+                    $data = $item->get('data');
+
+                    if (! $data instanceof AutocompletedAddress) {
+                        $data = AutocompletedAddress::from($data);
+                    }
+
+                    foreach ($fields as $field => $property) {
+                        $set($field, $data->{$property});
+                    }
+                } catch (Throwable $exception) {
+                    self::reportFailure($exception);
+                }
+            })
             ->extraInputAttributes(['data-1p-ignore' => 'true', 'data-lpignore' => 'true', 'data-form-type' => 'other', 'data-bwignore' => true]);
+    }
+
+    private static function reportFailure(Throwable $exception): void
+    {
+        if (! session()->has('has_aws_geo_places_error_notification_sent')) {
+            Notification::make()
+                ->title('Failed to fetch address suggestions')
+                ->body('An error occurred while fetching address suggestions. Please try again later.')
+                ->danger()
+                ->send();
+
+            session()->put('has_aws_geo_places_error_notification_sent', true);
+        }
+
+        report($exception);
     }
 }
