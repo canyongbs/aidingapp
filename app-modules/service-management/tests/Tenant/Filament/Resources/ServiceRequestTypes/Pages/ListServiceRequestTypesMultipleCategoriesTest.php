@@ -297,7 +297,6 @@ it('creates a brand new type once and files it under every area it appears in', 
         'name' => 'Fresh',
         'type' => 'type',
         'sort' => $sort,
-        'category_id' => $category->id,
     ];
 
     $treeData = multipleCategoriesTreeData([
@@ -307,8 +306,8 @@ it('creates a brand new type once and files it under every area it appears in', 
     // The tree references the same temp id twice; new_types carries duplicate entries to prove the
     // backend creates the type only once and applies both placements.
     $treeData['new_types'] = [
-        ['temp_id' => 'temp_1', 'name' => 'Fresh', 'category_id' => $catA->id, 'sort' => 1],
-        ['temp_id' => 'temp_1', 'name' => 'Fresh', 'category_id' => $catB->id, 'sort' => 1],
+        ['temp_id' => 'temp_1', 'name' => 'Fresh', 'sort' => 1],
+        ['temp_id' => 'temp_1', 'name' => 'Fresh', 'sort' => 1],
     ];
 
     livewire(ListServiceRequestTypes::class)
@@ -331,12 +330,11 @@ it('creates a brand new uncategorized type once with no memberships', function (
                 'name' => 'Loner',
                 'type' => 'type',
                 'sort' => 1,
-                'category_id' => null,
             ],
         ],
     );
     $treeData['new_types'] = [
-        ['temp_id' => 'temp_1', 'name' => 'Loner', 'category_id' => null, 'sort' => 1],
+        ['temp_id' => 'temp_1', 'name' => 'Loner', 'sort' => 1],
     ];
 
     livewire(ListServiceRequestTypes::class)
@@ -358,19 +356,17 @@ it('rejects saving two brand new types that share a name across different areas'
             'name' => 'Duplicate',
             'type' => 'type',
             'sort' => 1,
-            'category_id' => $catA->id,
         ]], 1),
         categoryNode($catB, [[
             'id' => 'temp_2',
             'name' => 'Duplicate',
             'type' => 'type',
             'sort' => 1,
-            'category_id' => $catB->id,
         ]], 2),
     ]);
     $treeData['new_types'] = [
-        ['temp_id' => 'temp_1', 'name' => 'Duplicate', 'category_id' => $catA->id, 'sort' => 1],
-        ['temp_id' => 'temp_2', 'name' => 'Duplicate', 'category_id' => $catB->id, 'sort' => 1],
+        ['temp_id' => 'temp_1', 'name' => 'Duplicate', 'sort' => 1],
+        ['temp_id' => 'temp_2', 'name' => 'Duplicate', 'sort' => 1],
     ];
 
     livewire(ListServiceRequestTypes::class)
@@ -392,11 +388,10 @@ it('rejects a brand new type whose name matches an existing type', function () {
             'name' => 'Existing',
             'type' => 'type',
             'sort' => 1,
-            'category_id' => $category->id,
         ]], 1),
     ]);
     $treeData['new_types'] = [
-        ['temp_id' => 'temp_1', 'name' => 'Existing', 'category_id' => $category->id, 'sort' => 1],
+        ['temp_id' => 'temp_1', 'name' => 'Existing', 'sort' => 1],
     ];
 
     livewire(ListServiceRequestTypes::class)
@@ -416,11 +411,10 @@ it('returns true and saves when there are no name collisions', function () {
             'name' => 'Unique Name',
             'type' => 'type',
             'sort' => 1,
-            'category_id' => $category->id,
         ]], 1),
     ]);
     $treeData['new_types'] = [
-        ['temp_id' => 'temp_1', 'name' => 'Unique Name', 'category_id' => $category->id, 'sort' => 1],
+        ['temp_id' => 'temp_1', 'name' => 'Unique Name', 'sort' => 1],
     ];
 
     livewire(ListServiceRequestTypes::class)
