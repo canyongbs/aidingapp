@@ -49,7 +49,9 @@
             </div>
 
             <div class="flex-1 p-6">
-                <div class="flex flex-col gap-4 sm:flex-row sm:justify-between {{ $project->description ? 'sm:items-start' : 'sm:items-center' }}">
+                <div
+                    class="flex flex-col gap-4 sm:flex-row sm:justify-between {{ $project->description ? 'sm:items-start' : 'sm:items-center' }}"
+                >
                     <div class="flex-1">
                         <h2 class="text-xl font-bold text-gray-950 dark:text-white">
                             {{ $project->name }}
