@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceR
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
-use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -52,9 +51,7 @@ class GetServiceRequestFormController extends Controller
 {
     public function __invoke(Request $request, ServiceRequestType $type): JsonResponse
     {
-        if (ServiceRequestTypeVisibilityRestrictionsFeature::active()) {
-            abort_unless($type->isVisibleToContactType(auth('contact')->user()?->type_id), 404);
-        }
+        abort_unless($type->isVisibleToContactType(auth('contact')->user()?->type_id), 404);
 
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
         $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
@@ -93,7 +90,6 @@ class GetServiceRequestFormController extends Controller
             // reachable through another (visible) area.
             if (
                 $category !== null
-                && ServiceRequestTypeVisibilityRestrictionsFeature::active()
                 && ! $category->isVisibleToContactType(auth('contact')->user()?->type_id)
             ) {
                 return null;

@@ -37,7 +37,6 @@
 namespace App\Observers;
 
 use AidingApp\Contact\Services\ManagedContactService;
-use App\Features\ManagedContactFeature;
 use App\Models\User;
 
 class UserObserver
@@ -48,19 +47,11 @@ class UserObserver
 
     public function saved(User $user): void
     {
-        if (! ManagedContactFeature::active()) {
-            return;
-        }
-
         $this->managedContactService->sync($user);
     }
 
     public function deleted(User $user): void
     {
-        if (! ManagedContactFeature::active()) {
-            return;
-        }
-
         $this->managedContactService->disable($user);
     }
 }

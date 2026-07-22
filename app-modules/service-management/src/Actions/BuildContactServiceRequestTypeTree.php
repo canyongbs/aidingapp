@@ -59,7 +59,6 @@ class BuildContactServiceRequestTypeTree
      */
     public function execute(
         ?string $contactTypeId,
-        bool $visibilityRestrictionsEnabled,
         Closure $formatType,
         ?Closure $prepareTypesQuery = null,
     ): array {
@@ -77,10 +76,8 @@ class BuildContactServiceRequestTypeTree
             $prepareTypesQuery($typesQuery);
         }
 
-        if ($visibilityRestrictionsEnabled) {
-            $categoriesQuery->with('restrictedToContactTypes:id');
-            $typesQuery->with('restrictedToContactTypes:id');
-        }
+        $categoriesQuery->with('restrictedToContactTypes:id');
+        $typesQuery->with('restrictedToContactTypes:id');
 
         $categories = $categoriesQuery->get();
         $types = $typesQuery->get();
@@ -89,8 +86,7 @@ class BuildContactServiceRequestTypeTree
         $categoryAllowed = [];
 
         foreach ($categories as $category) {
-            $categoryAllowed[$category->id] = ! $visibilityRestrictionsEnabled
-                || $category->passesOwnVisibilityRestriction($contactTypeId);
+            $categoryAllowed[$category->id] = $category->passesOwnVisibilityRestriction($contactTypeId);
 
             $categoriesById[$category->id] = [
                 'id' => $category->id,
@@ -105,7 +101,7 @@ class BuildContactServiceRequestTypeTree
         $topLevelTypes = [];
 
         foreach ($types as $type) {
-            if ($visibilityRestrictionsEnabled && ! $type->passesOwnVisibilityRestriction($contactTypeId)) {
+            if (! $type->passesOwnVisibilityRestriction($contactTypeId)) {
                 continue;
             }
 
@@ -153,9 +149,7 @@ class BuildContactServiceRequestTypeTree
             }));
         };
 
-        if ($visibilityRestrictionsEnabled) {
-            $topLevelCategories = $filterRestrictedCategories($topLevelCategories);
-        }
+        $topLevelCategories = $filterRestrictedCategories($topLevelCategories);
 
         $sortRecursive = function (array &$nodes) use (&$sortRecursive): void {
             usort($nodes, fn (array $left, array $right): int => ($left['sort'] ?? 0) <=> ($right['sort'] ?? 0));

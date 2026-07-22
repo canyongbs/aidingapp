@@ -59,7 +59,7 @@ class AiSupportAssistant extends Dashboard
 
     protected string $view = 'filament.pages.coming-soon';
 
-    protected static ?int $navigationSort = 81;
+    protected static ?int $navigationSort = 71;
 
     protected static string | BackedEnum | null $navigationIcon = '';
 

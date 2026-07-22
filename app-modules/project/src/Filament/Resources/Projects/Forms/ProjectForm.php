@@ -37,7 +37,6 @@
 namespace AidingApp\Project\Filament\Resources\Projects\Forms;
 
 use AidingApp\Project\Models\Project;
-use App\Features\ProjectNewFieldsFeature;
 use App\Filament\Forms\Components\IconSelect;
 use CanyonGBS\Common\Enums\Color;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
@@ -68,26 +67,26 @@ class ProjectForm
                 ->maxLength(65535)
                 ->columnSpanFull(),
             IconSelect::make('icon')
-                ->required(fn (): bool => ProjectNewFieldsFeature::active())
-                ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                ->required()
+                ->visible()
                 ->default('heroicon-o-clipboard-document-list'),
             ColorSelect::make('color')
-                ->required(fn (): bool => ProjectNewFieldsFeature::active())
-                ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                ->required()
+                ->visible()
                 ->rules([Rule::in(array_map(fn ($color) => $color->value, Color::cases()))])
                 ->default('gray'),
             Select::make('department_id')
                 ->relationship('department', 'name')
                 ->preload()
-                ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                ->visible()
                 ->searchable()
                 ->nullable(),
             DatePicker::make('start_date')
-                ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                ->visible()
                 ->nullable(),
             ToggleButtons::make('target_completion_date_type')
                 ->label('Target Completion Date')
-                ->visible(fn (): bool => ProjectNewFieldsFeature::active())
+                ->visible()
                 ->options(['indefinite' => 'Indefinite', 'set' => 'Set'])
                 ->default('indefinite')
                 ->live()
@@ -108,7 +107,7 @@ class ProjectForm
                 }),
             DatePicker::make('target_completion_date')
                 ->hiddenLabel()
-                ->visible(fn (Get $get) => ProjectNewFieldsFeature::active() && $get('target_completion_date_type') === 'set')
+                ->visible(fn (Get $get) => $get('target_completion_date_type') === 'set')
                 ->nullable(),
         ];
     }
@@ -120,7 +119,7 @@ class ProjectForm
      */
     public static function mutateDataForSave(array $data): array
     {
-        if (ProjectNewFieldsFeature::active() && ! array_key_exists('target_completion_date', $data)) {
+        if (! array_key_exists('target_completion_date', $data)) {
             $data['target_completion_date'] = null;
         }
 

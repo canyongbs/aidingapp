@@ -34,17 +34,18 @@
 </COPYRIGHT>
 */
 
-use App\Features\ProjectNewFieldsFeature;
-use Illuminate\Database\Migrations\Migration;
+namespace App\DataTransferObjects;
 
-return new class () extends Migration {
-    public function up(): void
-    {
-        ProjectNewFieldsFeature::activate();
-    }
+use Spatie\LaravelData\Data;
 
-    public function down(): void
-    {
-        ProjectNewFieldsFeature::deactivate();
-    }
-};
+class AutocompletedAddress extends Data
+{
+    public function __construct(
+        public string $address,
+        public string $city,
+        public string $state,
+        public string $postalCode,
+        public string $country,
+        public string $label,
+    ) {}
+}

@@ -40,6 +40,7 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
+use App\Filament\Forms\Components\AddressInput;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
@@ -135,9 +136,13 @@ class CreateOrganization extends CreateRecord
                 Section::make('Address Info')
                     ->columns()
                     ->schema([
-                        TextInput::make('address')
-                            ->label('Address')
-                            ->string(),
+                        AddressInput::make([
+                            'address' => 'address',
+                            'city' => 'city',
+                            'state' => 'state',
+                            'postalcode' => 'postalCode',
+                            'country' => 'country',
+                        ]),
                         TextInput::make('city')
                             ->label('City')
                             ->maxLength(255)

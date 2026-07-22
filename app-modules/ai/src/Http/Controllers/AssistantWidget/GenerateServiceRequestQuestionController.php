@@ -41,7 +41,6 @@ use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\ServiceRequestTypeVisibilityRestrictionsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -55,9 +54,7 @@ class GenerateServiceRequestQuestionController extends Controller
 
         abort_if(! ($contact instanceof Contact), Response::HTTP_UNAUTHORIZED);
 
-        if (ServiceRequestTypeVisibilityRestrictionsFeature::active()) {
-            abort_unless($type->isVisibleToContactType($contact->type_id), Response::HTTP_NOT_FOUND);
-        }
+        abort_unless($type->isVisibleToContactType($contact->type_id), Response::HTTP_NOT_FOUND);
 
         if (! app(AiClarificationSettings::class)->is_enabled
             || ! $type->is_ai_clarification_enabled) {

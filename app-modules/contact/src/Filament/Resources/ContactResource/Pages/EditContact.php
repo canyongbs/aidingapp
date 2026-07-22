@@ -40,7 +40,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
-use App\Features\ManagedContactFeature;
+use App\Filament\Forms\Components\AddressInput;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Radio;
@@ -68,7 +68,7 @@ class EditContact extends EditRecord
     {
         $record = $parameters['record'] ?? null;
 
-        if ($record instanceof Contact && ManagedContactFeature::active() && $record->isManaged()) {
+        if ($record instanceof Contact && $record->isManaged()) {
             return false;
         }
 
@@ -159,10 +159,12 @@ class EditContact extends EditRecord
                         PhoneInput::make('phone')
                             ->label('Other Phone')
                             ->string(),
-                        TextInput::make('address')
-                            ->label('Address')
-                            ->string()
-                            ->maxLength(255),
+                        AddressInput::make([
+                            'address' => 'address',
+                            'city' => 'city',
+                            'state' => 'state',
+                            'postal' => 'postalCode',
+                        ]),
                         TextInput::make('address_2')
                             ->label('Address 2')
                             ->string()

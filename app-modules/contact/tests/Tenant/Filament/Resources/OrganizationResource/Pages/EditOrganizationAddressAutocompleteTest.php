@@ -33,15 +33,45 @@
 
 </COPYRIGHT>
 */
+use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\EditOrganization;
+use AidingApp\Contact\Models\Organization;
+use App\DataTransferObjects\AutocompletedAddress;
+use App\Models\User;
 
-namespace App\Features;
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
-use App\Support\AbstractFeatureFlag;
+it('populates the address fields when a suggestion is selected', function () {
+    actingAs(
+        User::factory()
+            ->create()
+            ->givePermissionTo('organization.view-any', 'organization.*.update')
+    );
 
-class ManagedContactFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
-    }
-}
+    $organization = Organization::factory()->create();
+
+    $address = new AutocompletedAddress(
+        address: '123 Main St',
+        city: 'Austin',
+        state: 'TX',
+        postalCode: '78701',
+        country: 'US',
+        label: '123 Main St, Austin, TX, 78701, US',
+    );
+
+    livewire(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->call('callSchemaComponentMethod', 'form.address', 'reactOnItemSelectedFromJs', [[
+            'value' => $address->label,
+            'label' => $address->label,
+            'data' => ['data' => json_decode(json_encode($address), true)],
+        ]])
+        ->assertSchemaStateSet([
+            'address' => '123 Main St',
+            'city' => 'Austin',
+            'state' => 'TX',
+            'postalcode' => '78701',
+            'country' => 'US',
+        ]);
+});
